@@ -1,26 +1,33 @@
-FROM php:8.4-fpm-alpine
+FROM php:8.3-apache
 
 # Install system dependencies
-RUN apk add --no-cache \
+RUN apt-get update && apt-get install -y \
     git \
     curl \
     unzip \
     libzip-dev \
     libicu-dev \
     libpng-dev \
-    libjpeg-turbo-dev \
-    freetype-dev \
-    oniguruma-dev \
-    nginx \
-    supervisor \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    libjpeg-dev \
+    libfreetype-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install PHP extensions
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install pdo_mysql bcmath intl gd zip opcache
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Install Node.js 20
-RUN apk add --no-cache nodejs npm
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs
+
+# Enable Apache modules
+RUN a2enmod rewrite headers
+
+# Configure Apache
+COPY .docker/apache/000-default.conf /etc/apache2/sites-available/000-default.conf
 
 # Configure PHP
 COPY .docker/php/php.ini /usr/local/etc/php/conf.d/custom.ini
@@ -45,21 +52,10 @@ RUN cp -n .env.production .env || true
 # Build assets
 RUN npm run build
 
-# Nginx config
-COPY .docker/nginx/nginx.conf /etc/nginx/nginx.conf
-COPY .docker/nginx/default.conf /etc/nginx/conf.d/default.conf
-
-# Copy entrypoint and supervisor configs
+# Copy entrypoint script
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
-COPY docker/supervisord.conf /etc/supervisord.conf
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # Set permissions
 RUN mkdir -p /var/www/html/storage /var/www/html/bootstrap/cache && \
     chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-
-EXPOSE 80
-CMD ["/usr/local/bin/entrypoint.sh"]`
-
-EXPOSE 80
-CMD ["/usr/local/bin/entrypoint.sh"]
