@@ -1,0 +1,145 @@
+<?php
+
+use App\Http\Controllers\OrganizationController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\StripeWebhookController;
+use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
+
+Route::get('/', function () {
+    return Inertia::render('Welcome', [
+        'canLogin' => Route::has('login'),
+        'canRegister' => Route::has('register'),
+        'laravelVersion' => Application::VERSION,
+        'phpVersion' => PHP_VERSION,
+    ]);
+});
+
+// Stripe webhook (must be outside auth/csrf middleware)
+Route::post('stripe/webhook', [StripeWebhookController::class, 'handleWebhook']);
+
+Route::middleware('auth', 'has.organization')->group(function () {
+    Route::get('organization/create', [OrganizationController::class, 'create'])
+        ->name('organization.create');
+    Route::post('organization', [OrganizationController::class, 'store'])
+        ->name('organization.store');
+});
+
+Route::middleware(['auth', 'verified', 'organization'])->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, '__invoke'])
+        ->name('dashboard');
+
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::get('/organization/{organization}', [OrganizationController::class, 'show'])
+        ->name('organization.show');
+    Route::get('/organization/{organization}/edit', [OrganizationController::class, 'edit'])
+        ->name('organization.edit');
+    Route::patch('/organization/{organization}', [OrganizationController::class, 'update'])
+        ->name('organization.update');
+
+    // Cars CRUD
+    Route::get('/cars', [\App\Http\Controllers\CarController::class, 'index'])->name('cars.index');
+    Route::get('/cars/create', [\App\Http\Controllers\CarController::class, 'create'])->name('cars.create');
+    Route::post('/cars', [\App\Http\Controllers\CarController::class, 'store'])
+        ->middleware('plan.limit:cars')
+        ->name('cars.store');
+    Route::post('/cars/import', [\App\Http\Controllers\CarController::class, 'import'])->name('cars.import');
+    Route::post('/cars/scrape-url', [\App\Http\Controllers\CarController::class, 'scrapeUrl'])
+        ->middleware('throttle:30,1')
+        ->name('cars.scrape-url');
+    Route::get('/cars/{car}', [\App\Http\Controllers\CarController::class, 'show'])->name('cars.show');
+    Route::get('/cars/{car}/edit', [\App\Http\Controllers\CarController::class, 'edit'])->name('cars.edit');
+    Route::patch('/cars/{car}', [\App\Http\Controllers\CarController::class, 'update'])->name('cars.update');
+    Route::delete('/cars/{car}', [\App\Http\Controllers\CarController::class, 'destroy'])->name('cars.destroy');
+
+    // Car Photos
+    Route::post('/cars/{car}/photos', [\App\Http\Controllers\CarPhotoController::class, 'store'])->name('cars.photos.store');
+    Route::delete('/cars/{car}/photos/{photo}', [\App\Http\Controllers\CarPhotoController::class, 'destroy'])->name('cars.photos.destroy');
+    Route::post('/cars/{car}/photos/reorder', [\App\Http\Controllers\CarPhotoController::class, 'reorder'])->name('cars.photos.reorder');
+
+    // Car Documents
+    Route::post('/cars/{car}/documents', [\App\Http\Controllers\CarDocumentController::class, 'store'])->name('cars.documents.store');
+    Route::get('/cars/{car}/documents/{document}', [\App\Http\Controllers\CarDocumentController::class, 'show'])->name('cars.documents.show');
+    Route::delete('/cars/{car}/documents/{document}', [\App\Http\Controllers\CarDocumentController::class, 'destroy'])->name('cars.documents.destroy');
+
+    // Car Checklist (toggle complete)
+    Route::post('/cars/{car}/checklists/{checklist}/toggle', [\App\Http\Controllers\CarChecklistController::class, 'toggle'])
+        ->name('cars.checklists.toggle');
+
+    // AI Car Verification
+    Route::get('/cars/{car}/verify', [\App\Http\Controllers\CarVerificationController::class, 'show'])->name('cars.verify.show');
+    Route::post('/cars/{car}/verify', [\App\Http\Controllers\CarVerificationController::class, 'verify'])->name('cars.verify');
+    Route::post('/cars/{car}/verify-sync', [\App\Http\Controllers\CarVerificationController::class, 'verifySync'])->name('cars.verify-sync');
+    Route::post('/cars/{car}/verify/apply', [\App\Http\Controllers\CarVerificationController::class, 'apply'])->name('cars.verify.apply');
+    Route::post('/cars/{car}/verify/discard', [\App\Http\Controllers\CarVerificationController::class, 'discard'])->name('cars.verify.discard');
+
+    // Car Kanban
+    Route::get('/cars-kanban', [\App\Http\Controllers\CarKanbanController::class, 'index'])->name('cars.kanban');
+    Route::post('/cars-kanban/{car}/move', [\App\Http\Controllers\CarKanbanController::class, 'move'])->name('cars.kanban.move');
+
+    // Cars Map
+    Route::get('/cars-map', [\App\Http\Controllers\CarMapController::class, 'index'])->name('cars.map');
+
+    // Finance
+    Route::get('/finance', [\App\Http\Controllers\FinanceController::class, 'index'])->name('finance.index');
+
+    // Trip Planner
+    Route::get('/trips', [\App\Http\Controllers\TripPlannerController::class, 'index'])->name('trips.index');
+
+    // Clients CRUD
+    Route::get('/clients', [\App\Http\Controllers\ClientController::class, 'index'])->name('clients.index');
+    Route::get('/clients/create', [\App\Http\Controllers\ClientController::class, 'create'])->name('clients.create');
+    Route::post('/clients', [\App\Http\Controllers\ClientController::class, 'store'])
+        ->middleware('plan.limit:clients')
+        ->name('clients.store');
+    Route::get('/clients/{client}', [\App\Http\Controllers\ClientController::class, 'show'])->name('clients.show');
+    Route::get('/clients/{client}/edit', [\App\Http\Controllers\ClientController::class, 'edit'])->name('clients.edit');
+    Route::patch('/clients/{client}', [\App\Http\Controllers\ClientController::class, 'update'])->name('clients.update');
+    Route::delete('/clients/{client}', [\App\Http\Controllers\ClientController::class, 'destroy'])->name('clients.destroy');
+
+    // Contacts CRUD
+    Route::get('/contacts', [\App\Http\Controllers\ContactController::class, 'index'])->name('contacts.index');
+    Route::get('/contacts/create', [\App\Http\Controllers\ContactController::class, 'create'])->name('contacts.create');
+    Route::post('/contacts', [\App\Http\Controllers\ContactController::class, 'store'])
+        ->middleware('plan.limit:contacts')
+        ->name('contacts.store');
+    Route::get('/contacts/{contact}', [\App\Http\Controllers\ContactController::class, 'show'])->name('contacts.show');
+    Route::get('/contacts/{contact}/edit', [\App\Http\Controllers\ContactController::class, 'edit'])->name('contacts.edit');
+    Route::patch('/contacts/{contact}', [\App\Http\Controllers\ContactController::class, 'update'])->name('contacts.update');
+    Route::delete('/contacts/{contact}', [\App\Http\Controllers\ContactController::class, 'destroy'])->name('contacts.destroy');
+
+    // Client Contact Logs
+    Route::get('/clients/{client}/contact-logs', [\App\Http\Controllers\ClientContactLogController::class, 'index'])->name('clients.contact-logs.index');
+    Route::post('/clients/{client}/contact-logs', [\App\Http\Controllers\ClientContactLogController::class, 'store'])->name('clients.contact-logs.store');
+    Route::delete('/clients/{client}/contact-logs/{log}', [\App\Http\Controllers\ClientContactLogController::class, 'destroy'])->name('clients.contact-logs.destroy');
+
+    // Alerts
+    Route::get('/alerts', [\App\Http\Controllers\AlertController::class, 'index'])->name('alerts.index');
+    Route::get('/alerts/{alert}', [\App\Http\Controllers\AlertController::class, 'show'])->name('alerts.show');
+    Route::patch('/alerts/{alert}/mark-resolved', [\App\Http\Controllers\AlertController::class, 'markResolved'])->name('alerts.mark-resolved');
+    Route::delete('/alerts/{alert}', [\App\Http\Controllers\AlertController::class, 'destroy'])->name('alerts.destroy');
+
+    // Message Templates
+    Route::get('/message-templates', [\App\Http\Controllers\MessageTemplateController::class, 'index'])->name('message-templates.index');
+    Route::get('/message-templates/{messageTemplate}', [\App\Http\Controllers\MessageTemplateController::class, 'show'])->name('message-templates.show');
+
+    // Subscriptions
+    Route::get('/subscriptions', [\App\Http\Controllers\SubscriptionController::class, 'index'])->name('subscriptions.index');
+    Route::get('/subscriptions/{plan}', [\App\Http\Controllers\SubscriptionController::class, 'show'])->name('subscriptions.show');
+    Route::post('/subscriptions/{plan}/create', [\App\Http\Controllers\SubscriptionController::class, 'create'])->name('subscriptions.create');
+    Route::post('/subscriptions/{plan}/swap', [\App\Http\Controllers\SubscriptionController::class, 'swap'])->name('subscriptions.swap');
+    Route::post('/subscriptions/cancel', [\App\Http\Controllers\SubscriptionController::class, 'cancel'])->name('subscriptions.cancel');
+    Route::post('/subscriptions/resume', [\App\Http\Controllers\SubscriptionController::class, 'resume'])->name('subscriptions.resume');
+
+    // Billing
+    Route::get('/billing', [\App\Http\Controllers\BillingController::class, 'index'])->name('billing.index');
+    Route::get('/billing/{invoiceId}', [\App\Http\Controllers\BillingController::class, 'show'])->name('billing.show');
+    Route::get('/billing/{invoiceId}/download', [\App\Http\Controllers\BillingController::class, 'download'])->name('billing.download');
+    Route::get('/billing/portal/redirect', [\App\Http\Controllers\BillingController::class, 'portal'])->name('billing.portal');
+});
+
+require __DIR__.'/auth.php';

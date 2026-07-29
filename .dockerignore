@@ -1,0 +1,11 @@
+/node_modules
+/vendor
+/.env
+/.git
+/storage
+/public/build
+.DS_Store
+*.log
+.gitignore
+README.md
+docker-compose.yml

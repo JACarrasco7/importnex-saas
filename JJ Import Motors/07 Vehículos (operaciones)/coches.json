@@ -1,0 +1,93 @@
+[
+  {
+    "id": "460263575",
+    "marca": "Opel",
+    "modelo": "Astra OPC",
+    "version": "2.0 Turbo OPC (3p)",
+    "anio": "07/2016",
+    "km": 98000,
+    "combustible": "Gasolina",
+    "cambio": "Manual",
+    "cv": 280,
+    "cilindrada": "1.998 cc",
+    "co2": 185,
+    "consumo": "7,8 l/100km",
+    "propietarios": 2,
+    "puertas": "2/3",
+    "plazas": 5,
+    "norma": "Euro 6",
+    "color": "Negro Carbon Flash",
+    "itv": "ITV alemana (HU) nueva",
+    "precioCoche": 13999,
+    "precioNuevo": 31000,
+    "baseImpManual": 0,
+    "boeConfirmado": false,
+    "transporte": 1200,
+    "itvImp": 150,
+    "coc": 400,
+    "tasas": 100,
+    "honorarios": 1500,
+    "senal": 500,
+    "vin": "",
+    "ivaEscenario": "margen",
+    "vendedor": "Rami Automobile (profesional)",
+    "ciudad": "25451 Quickborn (Hamburgo)",
+    "lat": 53.728,
+    "lng": 9.903,
+    "estado": "Valorando",
+    "enlace": "https://www.mobile.de/es/vehículos/detalles.html?id=460263575",
+    "fotos": [
+      "https://img.classistatic.de/api/v1/mo-prod/images/42/421bf03e-a01b-466e-b0ef-cbc30bb2de2c?rule=mo-1024",
+      "https://img.classistatic.de/api/v1/mo-prod/images/6f/6f725e33-e5b4-4e4c-b76a-6af348e98f56?rule=mo-1024",
+      "https://img.classistatic.de/api/v1/mo-prod/images/4d/4da3f422-ad68-4fd2-b3b2-611733990763?rule=mo-1024",
+      "https://img.classistatic.de/api/v1/mo-prod/images/7e/7e12f191-f98a-4dc5-834f-10097632cfdc?rule=mo-1024",
+      "https://img.classistatic.de/api/v1/mo-prod/images/8f/8f8144bc-ab96-427f-b47d-9b59c2f7ed22?rule=mo-1024",
+      "https://img.classistatic.de/api/v1/mo-prod/images/cf/cfc566b7-5083-473f-9a0a-cf36d0b1ffa0?rule=mo-1024",
+      "https://img.classistatic.de/api/v1/mo-prod/images/2c/2c7ab4d3-17ae-427d-acca-2ac5dd42e9f7?rule=mo-1024",
+      "https://img.classistatic.de/api/v1/mo-prod/images/66/66b68e2e-6e9d-468e-854a-0e72f4bd8351?rule=mo-1024"
+    ],
+    "semaforo": "green",
+    "recomendacion": "Interesante. Al corregir el IEDMT real (≈575 €, mucho menor de lo estimado) el total baja a ~17.900 €, por debajo del mercado español. GO si el peritaje confirma el estado (es un OPC) y el CO₂ del COC.",
+    "descripcion": "Opel Astra OPC 2.0 Turbo (280 CV), la versión más deportiva del Astra, importado de Alemania. 2 propietarios, ITV (HU) nueva, Euro 6.",
+    "equipamiento": [
+      "Navegación IntelliLink",
+      "Llantas 20\" OPC",
+      "Diseño OPC",
+      "Asientos OPC Performance",
+      "Chasis FlexRide",
+      "LED",
+      "Cámara trasera",
+      "Clima bizona"
+    ],
+    "valoracion": "Con el IEDMT real (base = valor original depreciado ~19% por 10 años → ~575 €), el total todo incluido queda en ~17.900 €, por debajo del mercado español (17.990–20.000 €). Buena oportunidad si el estado acompaña.",
+    "consejos": [
+      "Turbo: vigilar (98.000 km)",
+      "Cadena de distribución 2.0T GM",
+      "Consumo de aceite: pedir historial",
+      "Carbonilla (inyección directa)",
+      "Embrague/frenos por uso deportivo"
+    ],
+    "banderasRojas": [
+      "Verificar uso en circuito",
+      "Confirmar CO₂ del COC (afecta IEDMT)",
+      "Pedir historial de 2 propietarios"
+    ],
+    "comparables": [
+      {
+        "t": "Astra OPC 2013 coches.net",
+        "p": "14.500 €",
+        "u": ""
+      },
+      {
+        "t": "Astra OPC 280cv 2013",
+        "p": "17.990 €",
+        "u": ""
+      },
+      {
+        "t": "Astra OPC 2014, 86.500 km",
+        "p": "20.000 €",
+        "u": ""
+      }
+    ]
+  }
+]

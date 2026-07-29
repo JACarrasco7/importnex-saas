@@ -1,0 +1,157 @@
+{
+  "_meta": {
+    "schema_version": 1,
+    "generado_el": "2026-07-29T12:00:00+02:00",
+    "origen": "chat-ia",
+    "coche_id": "ejemplo-opel-astra-2019"
+  },
+  "vehiculo": {
+    "marca": "Opel",
+    "modelo": "Astra",
+    "version": "1.5 CDTi Business Elegance",
+    "anio": 2019,
+    "km": 84500,
+    "combustible": "Diésel",
+    "cambio": "Manual",
+    "traccion": "Delantera",
+    "puertas": 5,
+    "plazas": 5,
+    "potencia_cv": 122,
+    "co2_gkm": 109,
+    "co2_confirmado": false,
+    "vin": null,
+    "color_exterior": "Gris grafito",
+    "color_interior": "Negro",
+    "propietarios": 1,
+    "equipamiento": [
+      "Navegador",
+      "Cámara trasera",
+      "Faros LED",
+      "Climatizador bizona",
+      "Apple CarPlay"
+    ],
+    "garantia": "Sin garantía de fábrica restante",
+    "accidentes_declarados": "El vendedor declara el vehículo libre de accidentes",
+    "historial_mantenimiento": "Libro de revisiones completo en servicio oficial"
+  },
+  "anuncio": {
+    "portal": "mobile.de",
+    "url": "https://www.mobile.de/EJEMPLO-no-es-un-anuncio-real",
+    "pais_origen": "Alemania",
+    "ciudad": "Múnich",
+    "precio_publicado": 12900,
+    "moneda": "EUR",
+    "vendedor_tipo": "Profesional",
+    "vendedor_nombre": "Autohaus Beispiel GmbH",
+    "fecha_captura": "2026-07-29",
+    "fotos": [],
+    "descripcion_original": "Texto original del anuncio en alemán.",
+    "descripcion_traducida": "Traducción al español de la descripción original."
+  },
+  "investigacion": {
+    "problemas_comunes": {
+      "hallazgo": "EJEMPLO. En este motor se documentan casos de obstrucción del filtro de partículas en uso mayoritariamente urbano. Conviene comprobar en la prueba que no hay avisos de regeneración pendientes.",
+      "fuente": "https://ejemplo-foro-propietarios.example",
+      "valoracion": "desfavorable",
+      "fecha": "29/07/2026"
+    },
+    "recalls": {
+      "hallazgo": "EJEMPLO. No se han encontrado campañas de revisión abiertas para este modelo y año. Se comprobó y salió limpio: no es un hueco sin mirar.",
+      "fuente": "https://ejemplo-base-recalls.example",
+      "valoracion": "favorable",
+      "fecha": "29/07/2026"
+    },
+    "precio_mercado": {
+      "hallazgo": "EJEMPLO. En España, unidades equiparables se mueven entre 15.400 y 17.200 €, con media en torno a 16.250 €.",
+      "fuente": "https://ejemplo-portal.example",
+      "valoracion": "favorable",
+      "fecha": "29/07/2026"
+    },
+    "fiabilidad": {
+      "hallazgo": "EJEMPLO. Valoración media alta entre propietarios; mecánica considerada robusta salvo el punto del filtro de partículas ya señalado.",
+      "fuente": "https://ejemplo-prensa-motor.example",
+      "valoracion": "favorable",
+      "fecha": "29/07/2026"
+    },
+    "homologacion": {
+      "hallazgo": "EJEMPLO. Esta versión se comercializó oficialmente en España, así que la matriculación debería ser el trámite ordinario, sin homologación individual.",
+      "fuente": "https://ejemplo-dgt.example",
+      "valoracion": "favorable",
+      "fecha": "29/07/2026"
+    },
+    "etiqueta_ambiental": {
+      "hallazgo": "EJEMPLO. Le correspondería etiqueta C, que permite circular por las zonas de bajas emisiones de Madrid y Barcelona con las condiciones vigentes.",
+      "fuente": "https://ejemplo-dgt-distintivos.example",
+      "valoracion": "neutro",
+      "fecha": "29/07/2026"
+    },
+    "seguro": {
+      "hallazgo": "EJEMPLO. Orientativo para conductor con antigüedad y sin partes: entre 350 y 500 € a terceros ampliado, y entre 600 y 850 € a todo riesgo con franquicia.",
+      "fuente": "https://ejemplo-comparador.example",
+      "valoracion": "neutro",
+      "fecha": "29/07/2026"
+    },
+    "piezas": {
+      "hallazgo": "EJEMPLO. Marca muy extendida en España: recambios y talleres accesibles, sin sobrecoste reseñable frente a un coche comprado aquí.",
+      "fuente": "https://ejemplo-recambios.example",
+      "valoracion": "favorable",
+      "fecha": "29/07/2026"
+    },
+    "otros": {
+      "hallazgo": "EJEMPLO. Un solo propietario y kilometraje por debajo de la media para el año.",
+      "fuente": "",
+      "valoracion": "favorable",
+      "fecha": "29/07/2026"
+    }
+  },
+  "balance": {
+    "a_favor": [
+      {"texto": "Kilometraje bajo para el año", "peso": "alto"},
+      {"texto": "Historial de mantenimiento completo en oficial", "peso": "alto"},
+      {"texto": "Un único propietario", "peso": "medio"},
+      {"texto": "Equipamiento por encima de la media de la gama", "peso": "medio"}
+    ],
+    "en_contra": [
+      {"texto": "Riesgo conocido de filtro de partículas si se usa en ciudad", "peso": "alto"},
+      {"texto": "Sin garantía de fábrica restante", "peso": "medio"},
+      {"texto": "CO2 sin confirmar con el COC", "peso": "bajo"}
+    ]
+  },
+  "veredicto": {
+    "recomendacion": "Comprar si baja de precio",
+    "confianza": "media",
+    "razonamiento": "EJEMPLO ilustrativo del formato, no es una valoración real.",
+    "que_cambiaria": "Confirmar el CO2 con el COC puede mover el impuesto.",
+    "fecha": "29/07/2026"
+  },
+  "costes": {
+    "precio_coche": 12900,
+    "transporte": 1200,
+    "itv_matriculacion": 95,
+    "tasa_dgt": 20.61,
+    "iedmt_estimado": 0,
+    "gestoria": 0,
+    "otros": 0,
+    "coste_total": 14215.61,
+    "honorarios": 1500,
+    "precio_cliente": 15715.61,
+    "iedmt_es_estimacion": true
+  },
+  "mercado": {
+    "comparables": [
+      {"titulo": "EJEMPLO Opel Astra 1.5 CDTi 2019", "precio": 16400, "km": 79000, "url": "https://ejemplo.example/1", "pais": "España"},
+      {"titulo": "EJEMPLO Opel Astra 1.5 CDTi 2019", "precio": 15400, "km": 96000, "url": "https://ejemplo.example/2", "pais": "España"},
+      {"titulo": "EJEMPLO Opel Astra 1.5 CDTi 2020", "precio": 17200, "km": 71000, "url": "https://ejemplo.example/3", "pais": "España"}
+    ],
+    "precio_medio": 16333.33,
+    "precio_min": 15400,
+    "precio_max": 17200,
+    "ahorro_estimado": 617.72,
+    "semaforo": "green"
+  },
+  "avisos": [
+    "Este archivo es un EJEMPLO para probar la importación: los datos no corresponden a un coche real.",
+    "El CO2 no está confirmado con el COC, así que la cifra del impuesto de matriculación puede variar.",
+    "El impuesto de matriculación es siempre una estimación: Hacienda lo calcula sobre sus tablas oficiales de valor de mercado, no sobre el precio pagado."
+  ]
+}

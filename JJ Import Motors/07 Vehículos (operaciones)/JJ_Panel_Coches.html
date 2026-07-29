@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JJ Import Motors — Panel</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+:root{--navy:#1A306D;--grey:#38393D;--silver:#BEC0C3;--light:#EEF1F5}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,Helvetica,sans-serif;color:var(--grey);background:#f4f6f9}
+.top{background:var(--navy);color:#fff;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.top h1{font-size:18px}
+.tbtns{display:flex;gap:8px;flex-wrap:wrap}
+.tbtn{background:#2b437c;color:#fff;border:1px solid #3d5590;border-radius:8px;padding:8px 12px;font-size:13px;font-weight:bold;cursor:pointer}
+.tbtn.add{background:#25a75b;border-color:#25a75b}.tbtn.calc{background:#E0802E;border-color:#E0802E}.tbtn:hover{filter:brightness(1.1)}
+.wrap{max-width:1200px;margin:0 auto;padding:16px 22px}
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.stat{background:#fff;border:1px solid #e6eaf1;border-radius:20px;padding:5px 12px;font-size:12px;font-weight:bold;color:var(--navy);display:flex;gap:6px;align-items:center}
+.stat i{width:9px;height:9px;border-radius:50%}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.controls input,.controls select{padding:9px 12px;border:1px solid #cfd6e0;border-radius:8px;font-size:14px;font-family:inherit}
+.controls input{flex:1;min-width:180px}
+#map{height:300px;border-radius:14px;margin-bottom:20px;border:1px solid #e2e6ee;z-index:1}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:18px}
+.card{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(26,48,109,.08);display:flex;flex-direction:column}
+.cardhead{position:relative;cursor:pointer;background:#dbe1ea}
+.ph{height:190px;background:#dbe1ea center/cover no-repeat}
+.nfotos{position:absolute;right:8px;bottom:8px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;padding:3px 9px;border-radius:20px}
+.badge{position:absolute;left:8px;top:8px;color:#fff;font-size:11px;font-weight:bold;padding:4px 10px;border-radius:20px}
+.card .b{padding:14px;display:flex;flex-direction:column;gap:7px;flex:1}
+.card h3{color:var(--navy);font-size:18px}
+.spec{color:#6b7280;font-size:13px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.sem{display:inline-flex;align-items:center;gap:6px;font-weight:bold;font-size:12px;padding:4px 10px;border-radius:20px}
+.dot{width:9px;height:9px;border-radius:50%}
+.g{background:#e3f4ea;color:#12673a}.g .dot{background:#1e9e5a}
+.a{background:#fdf3dd;color:#946200}.a .dot{background:#E0A32E}
+.r{background:#fbe4e0;color:#8f2417}.r .dot{background:#D0402E}
+.pricebox{background:var(--navy);color:#fff;border-radius:8px;padding:8px 12px;text-align:center;font-weight:bold}
+.pricebox small{display:block;font-weight:normal;font-size:11px;color:#c9d2e8}
+.estsel{width:100%;padding:8px;border-radius:8px;border:1px solid #cfd6e0;font-weight:bold;font-family:inherit;font-size:13px;cursor:pointer}
+.btns{display:flex;gap:8px}
+.btn{flex:1;background:var(--light);border:none;border-radius:8px;padding:9px;cursor:pointer;font-weight:bold;color:var(--navy);font-size:13px}
+.btn:hover{background:#e3e8f0}.btn.pri{background:var(--navy);color:#fff}
+.modal{display:none;position:fixed;inset:0;background:rgba(20,28,55,.75);z-index:1000;padding:14px;overflow:auto}
+.modal.open{display:block}
+.sheet{max-width:980px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden}
+.sheet.sm{max-width:560px}
+.mhead{background:var(--navy);color:#fff;padding:12px 18px;display:flex;justify-content:space-between;align-items:center}
+.mhead h2{font-size:17px}.x{cursor:pointer;font-size:26px;line-height:1}
+.tabs{display:flex;gap:2px;background:#eef1f5;overflow-x:auto}
+.tab{padding:11px 14px;font-size:13px;font-weight:bold;color:#6b7280;cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent}
+.tab.on{color:var(--navy);background:#fff;border-bottom-color:var(--navy)}
+.pane{display:none;padding:18px}.pane.on{display:block}
+.gbig{height:400px;background:#111 center/contain no-repeat;border-radius:8px}
+.gthumbs{display:flex;gap:6px;padding:8px 0;overflow-x:auto}
+.gthumbs img{height:52px;width:74px;object-fit:cover;border-radius:5px;cursor:pointer;opacity:.6;border:2px solid transparent}
+.gthumbs img.on{opacity:1;border-color:var(--navy)}
+h4{color:var(--navy);font-size:13px;text-transform:uppercase;letter-spacing:.4px;margin:14px 0 6px;border-bottom:1px solid #eef1f5;padding-bottom:4px}
+h4:first-child{margin-top:0}
+.kv{display:flex;justify-content:space-between;font-size:13.5px;padding:4px 0;border-bottom:1px dashed #eef1f5}
+.kv b{color:var(--navy)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:22px}@media(max-width:720px){.two{grid-template-columns:1fr}.gbig{height:250px}}
+.pill{display:inline-block;background:var(--light);border-radius:20px;padding:3px 9px;font-size:11px;margin:2px 3px 2px 0;color:var(--navy)}
+ul.li{margin:4px 0 4px 18px;font-size:13.5px}ul.li li{margin-bottom:3px}
+details{background:#fafbfd;border:1px solid #e6eaf1;border-radius:10px;margin-bottom:8px}
+summary{padding:10px 12px;font-weight:bold;color:var(--navy);cursor:pointer;font-size:13.5px;display:flex;justify-content:space-between}
+.dcont{padding:4px 14px 12px}
+.chk{display:flex;align-items:center;gap:9px;padding:6px 0;border-bottom:1px solid #f2f4f8;font-size:13.5px}
+.chk input{width:18px;height:18px}
+.calc{background:var(--light);border-radius:10px;padding:14px}
+.l{display:flex;justify-content:space-between;align-items:center;font-size:13.5px;padding:4px 0}
+.l input{width:120px;padding:5px;border:1px solid #cfd6e0;border-radius:6px;text-align:right;font-family:inherit}
+.big{background:var(--navy);color:#fff;border-radius:8px;padding:11px;text-align:center;font-size:18px;font-weight:bold;margin-top:8px}
+.prof{background:#e3f4ea;color:#12673a;border-radius:8px;padding:8px;text-align:center;font-weight:bold;margin-top:6px}
+.hr{border-top:1px solid #d9dfe8;margin:6px 0;padding-top:6px}
+.small{font-size:11.5px;color:#8a93a3;margin-top:6px}
+.crow{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px dashed #eef1f5;font-size:13px}
+.crow select,.crow input{padding:5px;border:1px solid #cfd6e0;border-radius:6px;font-family:inherit;font-size:12.5px}
+.res{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:640px){.res{grid-template-columns:1fr}}
+.rcard{background:#fafbfd;border:1px solid #e6eaf1;border-radius:12px;padding:14px}
+.rcard .n{font-size:22px;font-weight:bold;color:var(--navy)}
+.bar{height:8px;background:#e6eaf1;border-radius:6px;overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:#1e9e5a}
+.msgbox{background:#f8fafc;border:1px solid #e6eaf1;border-radius:10px;padding:12px;margin-bottom:12px}
+.msgbox .h{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.msgbox .h b{color:var(--navy);font-size:13px}
+.langtabs{display:flex;gap:4px}.lt{padding:3px 9px;border-radius:6px;font-size:11px;font-weight:bold;cursor:pointer;background:#eef1f5;color:#6b7280}.lt.on{background:var(--navy);color:#fff}
+.msgtext{font-size:13px;white-space:pre-wrap;background:#fff;border:1px solid #eef1f5;border-radius:8px;padding:10px;line-height:1.5}
+.copy{background:var(--navy);color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:12px;font-weight:bold;cursor:pointer}
+.mcta{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;border-top:1px solid #eef1f5;padding-top:14px}
+.mcta a{background:var(--navy);color:#fff;text-decoration:none;font-weight:bold;padding:10px 15px;border-radius:8px;font-size:13.5px}
+.note{background:#fff8e6;border:1px solid #f0dca0;border-radius:10px;padding:9px 14px;font-size:12.5px;margin-bottom:14px;color:#7a5c00}
+.catlbl{font-weight:bold;color:var(--navy);margin:14px 0 6px;font-size:13px}
+.tag{display:inline-block;font-size:10.5px;font-weight:bold;padding:2px 8px;border-radius:20px;margin-left:6px;vertical-align:middle}
+.tag-ok{background:#e3f4ea;color:#12673a}.tag-warn{background:#fdf3dd;color:#946200}
+.docrow{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#fafbfd;border:1px solid #e6eaf1;border-radius:8px;margin-bottom:6px;font-size:12.5px}
+.docrow b{color:var(--navy);min-width:60px}
+.docrow a{color:var(--navy)}
+.docrow .rm{margin-left:auto;background:none;border:none;color:#b23b2c;font-weight:bold;cursor:pointer;font-size:12px}
+.upl{display:inline-block;background:var(--light);border:1px dashed #b9c2d6;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:bold;color:var(--navy);cursor:pointer}
+.upl input{display:none}
+.suglink{background:none;border:none;color:var(--navy);font-weight:bold;text-decoration:underline;cursor:pointer;font-size:12px;padding:0}
+.kanban{display:flex;gap:12px;overflow-x:auto;padding-bottom:10px}
+.kcol{background:#e9edf4;border-radius:12px;padding:10px;min-width:230px;flex:0 0 230px}
+.kcol h4{margin:0 0 8px;border:0;padding:0;display:flex;justify-content:space-between}
+.kcard{background:#fff;border-radius:10px;padding:10px;margin-bottom:8px;box-shadow:0 1px 4px rgba(26,48,109,.1);cursor:pointer;font-size:12.5px}
+.kcard b{display:block;color:var(--navy);font-size:13px;margin-bottom:3px}
+.kcard .kp{font-weight:bold;color:var(--navy);margin-top:4px}
+</style>
+</head>
+<body>
+<div class="top">
+  <h1>JJ Import Motors — Panel</h1>
+  <div class="tbtns">
+    <button class="tbtn add" onclick="nuevoEnlace()">🤖 Nuevo (enlace)</button>
+    <button class="tbtn calc" onclick="openCalc()">🧮 Calculadora</button>
+    <button class="tbtn" onclick="openMsgLib()">💬 Mensajes</button>
+    <button class="tbtn" style="background:#0d9488;border-color:#0d9488" onclick="openFinanzas()">💰 Finanzas</button>
+    <button class="tbtn" style="background:#6d4bd0;border-color:#6d4bd0" onclick="openDatos()">🔄 Compartir / Backup</button>
+  </div>
+</div>
+<div class="wrap">
+  <div class="note">💡 Ábrelo en tu <b>navegador</b> (no en la vista previa) para ver fotos y mapa. Añadir coches se hace por enlace (yo lo evalúo). Tus cambios (estado, checklists, números) se guardan en este navegador.</div>
+  <div class="stats" id="stats"></div>
+  <div class="controls">
+    <input id="q" placeholder="Buscar marca, modelo...">
+    <select id="festado"><option value="">Todos los estados</option></select>
+    <select id="orden"><option value="reciente">Más reciente</option><option value="precioAsc">Precio ↑</option><option value="precioDesc">Precio ↓</option><option value="kmAsc">Km ↑</option></select>
+    <button class="tbtn" id="btnVista" style="background:#2b437c" onclick="toggleVista()">🗂 Vista Kanban</button>
+  </div>
+  <div id="map"></div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<div class="modal" id="modal"><div class="sheet">
+  <div class="mhead"><h2 id="mtitle"></h2><span class="x" onclick="closeModal('modal')">&times;</span></div>
+  <div class="tabs" id="tabs"></div><div id="panes"></div>
+</div></div>
+
+<div class="modal" id="lib"><div class="sheet">
+  <div class="mhead"><h2>Plantillas de mensajes (ES / EN / DE)</h2><span class="x" onclick="closeModal('lib')">&times;</span></div>
+  <div style="padding:18px" id="libbody"></div>
+</div></div>
+
+<div class="modal" id="cmodal"><div class="sheet sm">
+  <div class="mhead"><h2>🧮 Calculadora rápida de importación</h2><span class="x" onclick="closeModal('cmodal')">&times;</span></div>
+  <div style="padding:18px" id="cbody"></div>
+</div></div>
+
+<div class="modal" id="finmodal"><div class="sheet">
+  <div class="mhead"><h2>💰 Finanzas de la empresa</h2><span class="x" onclick="closeModal('finmodal')">&times;</span></div>
+  <div style="padding:18px" id="finbody"></div>
+</div></div>
+
+<div class="modal" id="datosmodal"><div class="sheet sm">
+  <div class="mhead"><h2>🔄 Compartir / Backup de datos</h2><span class="x" onclick="closeModal('datosmodal')">&times;</span></div>
+  <div style="padding:18px" id="datosbody"></div>
+</div></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/pdfjs-dist@3.11.174/legacy/build/pdf.min.js"></script>
+<script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="https://unpkg.com/chart.js@4.4.4/dist/chart.umd.js"></script>
+<script>
+const ESTADOS=["Localizado","Valorando","Ofrecido","Reservado","Comprado","En tránsito","En trámites","Entregado","Descartado"];
+const ECOLOR={"Localizado":"#8895a7","Valorando":"#2f6fd6","Ofrecido":"#7c5cd0","Reservado":"#E0802E","Comprado":"#0d9488","En tránsito":"#E0A32E","En trámites":"#c2691c","Entregado":"#1e9e5a","Descartado":"#b23b2c"};
+const MINSP={
+"Exterior — carrocería y pintura":["Capó: alineación y estado","Techo: sin abolladuras ni granizo","Aleta delantera izq.: espesor de pintura (espesímetro) y alineación","Aleta delantera der.: espesor de pintura (espesímetro) y alineación","Puerta del. izq.: espesor de pintura y alineación","Puerta tras. izq.: espesor de pintura y alineación","Puerta del. der.: espesor de pintura y alineación","Puerta tras. der.: espesor de pintura y alineación","Maletero/portón: espesor de pintura, alineación y junta de goma","Parachoques delantero: grapas/anclajes intactos, sin fisuras","Parachoques trasero: grapas/anclajes intactos, sin fisuras","Faros y ópticas: sin condensación, todas las luces funcionan","Retrovisores: cristal sin fisuras, plegado eléctrico OK","Comparar espesores entre paneles (detectar repintados = posible accidente)"],
+"Neumáticos y llantas":["Delantero izq.: profundidad de dibujo y fecha DOT","Delantero der.: profundidad de dibujo y fecha DOT","Trasero izq.: profundidad de dibujo y fecha DOT","Trasero der.: profundidad de dibujo y fecha DOT","Rueda de repuesto / kit antipinchazos presente y en buen estado","Las 4 marcas y modelos coinciden (o anotar por qué no)","Llantas: sin golpes ni fisuras, tuercas completas","Presión de los 4 neumáticos correcta"],
+"Lunas y cristales":["Parabrisas: código de fecha grabado, sin fisuras ni impactos","Luna trasera: fecha de fabricación coherente con el año del coche, resistencias intactas","Ventanilla delantera izq.: fecha de fabricación y estado","Ventanilla delantera der.: fecha de fabricación y estado","Ventanilla trasera izq.: fecha de fabricación y estado","Ventanilla trasera der.: fecha de fabricación y estado","Techo solar/panorámico (si tiene): estanqueidad y mecanismo","Todas las fechas de cristales coinciden entre sí (una distinta puede indicar cambio por accidente)"],
+"Óxido, bajos y estructura":["Bajos delanteros: sin óxido ni golpes","Bajos traseros: sin óxido ni golpes","Pasos de rueda (los 4): sin óxido perforante","Marcos de las 4 puertas: sin óxido","Umbrales: sin óxido ni deformación","Canal de agua del techo: sin óxido","Suelo del maletero: sin óxido ni humedad","Puntos de anclaje del gato: intactos","Escape: sin fugas ni óxido perforante","Soldaduras/chasis: sin señales de reparación estructural"],
+"Interior":["Tapicería asientos: sin manchas, quemaduras ni roturas","Volante y pomo de cambio: desgaste coherente con los km","Pedales: desgaste coherente con los km","Techo interior (guarnecido): sin manchas de humedad","Moqueta/suelo: sin humedad ni olores","Airbags: testigo apagado, sin señales de despliegue/reparación","Cinturones: funcionan bien, sin deshilachados","Climatizador: frío y calor reales en todas las salidas","Elevalunas y espejos eléctricos: todos funcionan","Pantalla/infoentretenimiento: enciende, sin píxeles muertos","Maletero: suelo, forros y rueda de repuesto/kit","Olores: sin humedad, tabaco ni combustible"],
+"Motor y mecánica":["Arranque en frío: sin ruidos/humos/testigos","Ralentí estable","Nivel y estado del aceite (color, olor, nivel)","Nivel y estado del refrigerante (sin aceite mezclado)","Fugas de aceite (culata, cárter, tapa de válvulas)","Fugas de refrigerante o dirección asistida","Correa de accesorios/distribución: estado y ruido","Turbo: sin holgura en el eje, sin humo azul/negro al acelerar","Batería 12V: fecha de fabricación y estado de carga","Soportes de motor: sin holguras","Frenos: discos y pastillas, sin vibración al frenar","Suspensión: sin ruidos en badenes, sin fugas en amortiguadores","Embrague: recorrido y agarre correctos (si manual)","Cambio automático: cambios suaves, sin tirones (si automático)","EGR/DPF (diésel): sin síntomas de obstrucción"],
+"Diagnosis OBD (Launch/escáner)":["Códigos de error actuales (todas las ECUs)","Códigos de error en memoria / borrados recientemente","Kilometraje en las distintas ECUs coincide con el cuadro (anti-manipulación)","Datos en vivo: temperatura motor, RPM ralentí, sondas O2","Test de actuadores (si aplica)","Versión de software de la ECU / actualizaciones pendientes","Estado de batería auxiliar / de tracción (híbridos-eléctricos)","Autonomía real vs. indicada (híbridos-eléctricos)"],
+"Prueba y verificación":["Prueba en carretera (ciudad y carretera)","VIN coincide (chasis, parabrisas, papeles, etiqueta puerta)","Kilometraje coherente con el desgaste general","Libro de mantenimiento (Scheckheft) revisado","Recalls pendientes (por VIN)","Fotos de todos los defectos encontrados","Segunda llave y manual del propietario presentes"]};
+const MDOC={"Compra (Alemania)":["Contrato compraventa (Kaufvertrag)","COC (Certificado de Conformidad)","Fahrzeugbrief / Fahrzeugschein","Justificante de pago al vendedor","Historial de mantenimiento (Scheckheft) revisado","Facturas de mantenimiento/reparaciones revisadas"],
+"Cliente":["Contrato de encargo firmado","Señal recibida","DNI/NIF del cliente"],
+"Trámites (España)":["ITV de importación favorable","Ficha técnica española","IEDMT liquidado (mod. 576)","IVTM (impuesto de circulación)","Permiso de circulación a nombre del cliente"]};
+const CRONO=["1. Valoración y OK cliente","2. Contrato + señal","3. Negociación vendedor","4. Peritaje","5. Compra / pago","6. Transporte a España","7. ITV de importación","8. IEDMT / tasas","9. Matriculación DGT","10. Preparación y entrega","11. Reseña / postventa"];
+const CONTACTOS=["Cliente","Vendedor (Alemania)","Transportista","Gestoría","Perito / mecánico","Taller ITV"];
+const MSGS=[
+ {cat:"Vendedor (DE)",sit:"Primer contacto",es:"Hola, estoy interesado en su [MODELO]. ¿Sigue disponible? ¿Podría confirmarme el estado, el libro de mantenimiento y si tiene algún defecto? Gracias.",en:"Hello, I'm interested in your [MODELO]. Is it still available? Could you confirm its condition, service history and any faults? Thank you.",de:"Guten Tag, ich interessiere mich für Ihren [MODELO]. Ist er noch verfügbar? Könnten Sie mir Zustand, Scheckheft und eventuelle Mängel bestätigen? Vielen Dank."},
+ {cat:"Vendedor (DE)",sit:"Pedir COC, historial e IVA",es:"¿Dispone del certificado COC? ¿El IVA es deducible? ¿Me puede enviar el libro de mantenimiento completo? Gracias.",en:"Do you have the COC certificate? Is the VAT deductible? Could you send the full service history? Thank you.",de:"Sind die COC-Papiere vorhanden? Ist die MwSt. ausweisbar? Könnten Sie mir das vollständige Scheckheft senden? Vielen Dank."},
+ {cat:"Vendedor (DE)",sit:"Pedir más fotos/vídeo",es:"¿Podría enviarme más fotos (bajos, motor, ruedas) y un vídeo corto del arranque en frío? Gracias.",en:"Could you send more photos (underbody, engine, tyres) and a short cold-start video? Thanks.",de:"Könnten Sie mir mehr Fotos (Unterboden, Motor, Reifen) und ein kurzes Kaltstart-Video senden? Danke."},
+ {cat:"Vendedor (DE)",sit:"Reservar / cita",es:"Me interesa. ¿Sería posible reservarlo con una señal y acordar una cita para verlo? ¿Qué día le viene bien?",en:"I'm interested. Could I reserve it with a deposit and arrange a viewing? Which day suits you?",de:"Ich habe Interesse. Wäre eine Reservierung mit Anzahlung und ein Besichtigungstermin möglich? Welcher Tag passt Ihnen?"},
+ {cat:"Vendedor (DE)",sit:"Negociar precio",es:"Gracias por la info. Estoy muy interesado; ¿habría margen en el precio para un pago rápido y transporte por mi cuenta?",en:"Thanks for the info. I'm very interested; is there any room on the price for a quick payment and transport at my expense?",de:"Danke für die Infos. Ich bin sehr interessiert; gäbe es beim Preis Spielraum bei schneller Zahlung und Selbstabholung/Transport?"},
+ {cat:"Transportista",sit:"Pedir presupuesto",es:"Necesito transportar un coche desde [CIUDAD] (Alemania) hasta [DESTINO] (España). ¿Precio y plazo aproximados? Gracias.",en:"I need to ship a car from [CIUDAD] (Germany) to [DESTINO] (Spain). Approx. price and time? Thanks.",de:"Ich muss ein Fahrzeug von [CIUDAD] (Deutschland) nach [DESTINO] (Spanien) transportieren. Ungefährer Preis und Dauer? Danke."},
+ {cat:"Cliente (ES)",sit:"Envío de candidato",es:"Hola [CLIENTE], te paso un coche que encaja: [MODELO], [ANIO], [KM]. Precio TODO INCLUIDO, matriculado en España: [TOTAL]. Te adjunto fotos y ficha. ¿Lo vemos?",en:"Hi [CLIENTE], here's a car that fits: [MODELO], [ANIO], [KM]. ALL-IN price, registered in Spain: [TOTAL]. Photos and details attached. Shall we talk?",de:"Hallo [CLIENTE], hier ein passendes Fahrzeug: [MODELO], [ANIO], [KM]. All-inclusive-Preis, in Spanien zugelassen: [TOTAL]. Fotos und Details anbei."},
+ {cat:"Cliente (ES)",sit:"Presupuesto todo incluido",es:"Hola [CLIENTE], presupuesto todo incluido del [MODELO]: [TOTAL] (coche + importación + trámites + mi servicio), entregado y matriculado. Con una señal arrancamos. ¿Adelante?",en:"Hi [CLIENTE], all-in quote for the [MODELO]: [TOTAL] (car + import + paperwork + my service), delivered and registered. A deposit gets us started. Shall we go ahead?",de:"Hallo [CLIENTE], All-inclusive-Angebot für den [MODELO]: [TOTAL] (Fahrzeug + Import + Formalitäten + Service), geliefert und zugelassen."},
+ {cat:"Cliente (ES)",sit:"Seguimiento (sin respuesta)",es:"Hola [CLIENTE], ¿pudiste ver la info del [MODELO]? Cualquier duda me dices y te ayudo a decidir. Sin compromiso.",en:"Hi [CLIENTE], did you get a chance to review the [MODELO]? Any questions, I'm here to help you decide. No pressure.",de:"Hallo [CLIENTE], konnten Sie sich den [MODELO] ansehen? Bei Fragen helfe ich Ihnen gerne weiter. Ganz unverbindlich."},
+ {cat:"Cliente (ES)",sit:"Entrega + reseña",es:"Hola [CLIENTE], ¡tu [MODELO] está listo y matriculado! Todo en regla. Si has quedado contento, ¿me dejarías una reseña en Google? ¡Gracias por confiar en JJ Import Motors!",en:"Hi [CLIENTE], your [MODELO] is ready and registered! All in order. If you're happy, would you leave a Google review? Thanks for trusting JJ Import Motors!",de:"Hallo [CLIENTE], Ihr [MODELO] ist fertig und zugelassen! Alles in Ordnung. Über eine Google-Bewertung würde ich mich sehr freuen. Danke!"},
+ {cat:"Respuesta rápida",sit:"“¿Por qué importado?”",es:"En Alemania hay más oferta, mejor equipada y muy cuidada. Yo me encargo de todo (peritaje, transporte, ITV, impuestos y matrícula) y te lo entrego a tu nombre, listo. Precio cerrado, sin sorpresas.",en:"Germany has more choice, better-equipped and well-kept cars. I handle everything (inspection, transport, ITV, taxes and registration) and deliver it in your name, ready to drive. Fixed price, no surprises.",de:"In Deutschland gibt es mehr Auswahl, besser ausgestattet und gepflegt. Ich kümmere mich um alles (Prüfung, Transport, TÜV, Steuern, Zulassung) und liefere es fahrbereit auf Ihren Namen. Festpreis, keine Überraschungen."},
+ {cat:"Respuesta rápida",sit:"“¿Es fiable? ¿Garantía?”",es:"Reviso el coche con peritaje antes de comprarlo; si no está bien, no se compra. Va con documentación completa y COC. Te explico el estado real con fotos y te acompaño en todo el proceso.",en:"I inspect the car before buying; if it's not right, we don't buy it. It comes with full documentation and COC. I show you the real condition with photos and guide you through the whole process.",de:"Ich prüfe das Fahrzeug vor dem Kauf; stimmt etwas nicht, wird nicht gekauft. Vollständige Unterlagen und COC. Ich zeige den echten Zustand mit Fotos und begleite Sie durch den gesamten Ablauf."},
+ {cat:"Respuesta rápida",sit:"“Me parece caro”",es:"Te entiendo. Ten en cuenta que el precio es TODO INCLUIDO y matriculado a tu nombre: coche + transporte + ITV + impuestos + gestión. Sin sorpresas ni tiempo perdido. Aun así, dime tu presupuesto y busco opciones que encajen.",en:"I understand. Remember the price is ALL-IN and registered in your name: car + transport + ITV + taxes + management. No surprises, no wasted time. Still, tell me your budget and I'll find options that fit.",de:"Verständlich. Beachten Sie: Der Preis ist ALL-INCLUSIVE und auf Ihren Namen zugelassen: Fahrzeug + Transport + TÜV + Steuern + Abwicklung. Keine Überraschungen. Nennen Sie mir Ihr Budget und ich suche passende Optionen."}
+];
+
+const SEED=[{
+  id:"460263575",marca:"Opel",modelo:"Astra OPC",version:"2.0 Turbo OPC (3p)",anio:"07/2016",km:98000,combustible:"Gasolina",cambio:"Manual",cv:280,cilindrada:"1.998 cc",co2:185,consumo:"7,8 l/100km",propietarios:2,puertas:"2/3",plazas:5,norma:"Euro 6",color:"Negro Carbon Flash",itv:"ITV alemana (HU) nueva",
+  precioCoche:13999,precioNuevo:31000,baseImpManual:0,transporte:1200,itvImp:150,coc:400,tasas:100,honorarios:1500,senal:500,vin:"",ivaEscenario:"margen",
+  vendedor:"Rami Automobile (profesional)",ciudad:"25451 Quickborn (Hamburgo)",lat:53.728,lng:9.903,estado:"Valorando",
+  enlace:"https://www.mobile.de/es/vehículos/detalles.html?id=460263575",
+  fotos:["https://img.classistatic.de/api/v1/mo-prod/images/42/421bf03e-a01b-466e-b0ef-cbc30bb2de2c?rule=mo-1024","https://img.classistatic.de/api/v1/mo-prod/images/6f/6f725e33-e5b4-4e4c-b76a-6af348e98f56?rule=mo-1024","https://img.classistatic.de/api/v1/mo-prod/images/4d/4da3f422-ad68-4fd2-b3b2-611733990763?rule=mo-1024","https://img.classistatic.de/api/v1/mo-prod/images/7e/7e12f191-f98a-4dc5-834f-10097632cfdc?rule=mo-1024","https://img.classistatic.de/api/v1/mo-prod/images/8f/8f8144bc-ab96-427f-b47d-9b59c2f7ed22?rule=mo-1024","https://img.classistatic.de/api/v1/mo-prod/images/cf/cfc566b7-5083-473f-9a0a-cf36d0b1ffa0?rule=mo-1024","https://img.classistatic.de/api/v1/mo-prod/images/2c/2c7ab4d3-17ae-427d-acca-2ac5dd42e9f7?rule=mo-1024","https://img.classistatic.de/api/v1/mo-prod/images/66/66b68e2e-6e9d-468e-854a-0e72f4bd8351?rule=mo-1024"],
+  semaforo:"green",recomendacion:"Interesante. Al corregir el IEDMT real (≈575 €, mucho menor de lo estimado) el total baja a ~17.900 €, por debajo del mercado español. GO si el peritaje confirma el estado (es un OPC) y el CO₂ del COC.",
+  descripcion:"Opel Astra OPC 2.0 Turbo (280 CV), la versión más deportiva del Astra, importado de Alemania. 2 propietarios, ITV (HU) nueva, Euro 6.",
+  equipamiento:["Navegación IntelliLink","Llantas 20\" OPC","Diseño OPC","Asientos OPC Performance","Chasis FlexRide","LED","Cámara trasera","Clima bizona"],
+  valoracion:"Con el IEDMT real (base = valor original depreciado ~19% por 10 años → ~575 €), el total todo incluido queda en ~17.900 €, por debajo del mercado español (17.990–20.000 €). Buena oportunidad si el estado acompaña.",
+  consejos:["Turbo: vigilar (98.000 km)","Cadena de distribución 2.0T GM","Consumo de aceite: pedir historial","Carbonilla (inyección directa)","Embrague/frenos por uso deportivo"],
+  banderasRojas:["Verificar uso en circuito","Confirmar CO₂ del COC (afecta IEDMT)","Pedir historial de 2 propietarios"],
+  comparables:[{t:"Astra OPC 2013 coches.net",p:"14.500 €"},{t:"Astra OPC 280cv 2013",p:"17.990 €"},{t:"Astra OPC 2014, 86.500 km",p:"20.000 €"}]
+}];
+const COCHES = JSON.parse(localStorage.getItem('jj_coches')||'null') || SEED;
+let STATE = JSON.parse(localStorage.getItem('jj_state')||'{}');
+function st(id){if(!STATE[id])STATE[id]={};return STATE[id];}
+function saveState(){localStorage.setItem('jj_state',JSON.stringify(STATE));}
+function saveCoches(){localStorage.setItem('jj_coches',JSON.stringify(COCHES));}
+
+// ---- cálculo IEDMT real (depreciación por antigüedad) ----
+function iedmtPct(co2){co2=+co2;if(!co2)return 0;if(co2<120)return 0;if(co2<160)return 4.75;if(co2<200)return 9.75;return 14.75;}
+function antiguedad(a){const m=String(a||'').match(/(\d{1,2})\/(\d{4})|(\d{4})/);if(!m)return null;const y=+(m[2]||m[3]),mo=+(m[1]||1);const now=new Date();return Math.max(0,(now.getFullYear()+(now.getMonth()+1)/12)-(y+mo/12));}
+function depreCoef(a){if(a==null)return 1;const t=[[1,1],[2,.84],[3,.67],[4,.56],[5,.47],[6,.39],[7,.34],[8,.28],[9,.24],[10,.19],[11,.17],[12,.13]];for(const[l,c]of t)if(a<=l)return c;return .10;}
+function honTramo(p){p=+p||0;if(p<=15000)return 1500;if(p<=30000)return 2250;return Math.max(2500,Math.round(p*0.09));}
+function baseImp(c){if(+c.baseImpManual)return +c.baseImpManual;const pn=+c.precioNuevo||0;if(!pn)return +c.precioCoche||0;return Math.round(pn*depreCoef(antiguedad(c.anio)));}
+function calcCar(c){const base=baseImp(c);const pct=iedmtPct(c.co2);const iedmt=Math.round(base*pct/100);const hon=+c.honorarios||honTramo(+c.precioCoche);const imp=(+c.transporte||0)+(+c.itvImp||0)+(+c.coc||0)+(+c.tasas||0)+iedmt;const total=(+c.precioCoche||0)+imp+hon;const senal=+c.senal||0;const antig=antiguedad(c.anio);return{base,iedmt,hon,imp,total,pct,senal,resto:total-senal,antig,coef:depreCoef(antig)};}
+
+// ---- semáforo automático por margen real (vs. comparables) ----
+function parsePrecio(s){const m=String(s||'').replace(/\./g,'').match(/(\d+)/);return m?+m[1]:null;}
+function comparablesAvg(c){const vals=(c.comparables||[]).map(x=>parsePrecio(x.p)).filter(Boolean);if(!vals.length)return null;return vals.reduce((a,b)=>a+b,0)/vals.length;}
+function semaforoAuto(c){const t=calcCar(c);const avg=comparablesAvg(c);if(avg==null)return c.semaforo||'amber';const r=t.total/avg;if(r<=0.92)return'green';if(r<=1.05)return'amber';return'red';}
+
+// ---- transporte estimado por distancia (Alemania → destino) ----
+const DESTINO={lat:40.4168,lng:-3.7038,label:'Madrid (destino aprox. — ajustable por operación)'};
+function distKm(lat1,lng1,lat2,lng2){if(lat1==null||lng1==null||lat2==null||lng2==null)return null;const R=6371,toRad=x=>x*Math.PI/180;const dLat=toRad(lat2-lat1),dLng=toRad(lng2-lng1);const a=Math.sin(dLat/2)**2+Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLng/2)**2;return Math.round(R*2*Math.asin(Math.sqrt(a)));}
+function transporteSugerido(c){const km=distKm(c.lat,c.lng,DESTINO.lat,DESTINO.lng);if(km==null)return null;return{km,precio:Math.round(300+km*0.35)};}
+
+// ---- lectura de documentos (Teil 1 / Teil 2 / COC) y auto-detección ----
+if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://unpkg.com/pdfjs-dist@3.11.174/legacy/build/pdf.worker.min.js';
+async function extractPdfText(dataUrl){
+  try{
+    if(!window.pdfjsLib)return'';
+    const bstr=atob(dataUrl.split(',')[1]);const bytes=new Uint8Array(bstr.length);
+    for(let i=0;i<bstr.length;i++)bytes[i]=bstr.charCodeAt(i);
+    const doc=await pdfjsLib.getDocument({data:bytes}).promise;let text='';
+    for(let p=1;p<=Math.min(doc.numPages,5);p++){const page=await doc.getPage(p);const content=await page.getTextContent();text+=content.items.map(it=>it.str).join(' ')+'\n';}
+    return text;
+  }catch(e){console.warn('No se pudo leer el PDF (¿es una foto escaneada?)',e);return'';}
+}
+function parseCO2(text){const m=text.match(/CO2[^\d]{0,20}(\d{2,3})\s*g/i)||text.match(/(\d{2,3})\s*g\s*\/\s*km/i);return m?+m[1]:null;}
+function parseFechaMatriculacion(text){const m=text.match(/\b(\d{2})[.\/](\d{2})[.\/](\d{4})\b/);return m?`${m[2]}/${m[3]}`:null;}
+function parseVIN(text){const m=text.match(/\b([A-HJ-NPR-Z0-9]{17})\b/);return m?m[1]:null;}
+function allFechas(text){const re=/\b(\d{2})[.\/](\d{2})[.\/](\d{4})\b/g;const out=[];let m;while((m=re.exec(text))){const d=+m[1],mo=+m[2],y=+m[3];if(mo>=1&&mo<=12&&d>=1&&d<=31&&y>1980&&y<2100){out.push({str:`${String(d).padStart(2,'0')}/${String(mo).padStart(2,'0')}/${y}`,date:new Date(y,mo-1,d)});}}return out;}
+function parseUltimaFecha(text){const fs=allFechas(text);if(!fs.length)return null;fs.sort((a,b)=>b.date-a.date);return fs[0].str;}
+function parsePrimeraFecha(text){const fs=allFechas(text);return fs.length?fs[0].str:null;}
+function parseImporte(text){const ms=[...text.matchAll(/(\d{1,3}(?:\.\d{3})*,\d{2})\s*€/g)].map(m=>parseFloat(m[1].replace(/\./g,'').replace(',','.'))).filter(n=>!isNaN(n));return ms.length?Math.max(...ms):null;}
+const DOC_SLOTS=[["teil1","Teil 1 (Zulassungsbescheinigung I)"],["teil2","Teil 2 (Zulassungsbescheinigung II)"],["coc","COC (Certificado de Conformidad)"],["scheckheft","Historial de mantenimiento (Scheckheft)"]];
+function docsOf(id){const s=st(id);if(!s.docs)s.docs={};return s.docs;}
+function refreshDocViews(){[0,1,2,4].forEach(j=>{const p=$('pane'+j);if(p)p.innerHTML=paneHTML(j);});if((cur.fotos||[]).length)setImg(0);}
+function onDocFile(slot,input){
+  const f=input.files[0];if(!f)return;
+  if(f.size>6*1024*1024){alert('Archivo demasiado pesado para guardar en el navegador (máx. ~6MB). Súbelo directamente a la carpeta del coche en Drive.');input.value='';return;}
+  const reader=new FileReader();
+  reader.onload=async function(e){
+    const dataUrl=e.target.result;const docs=docsOf(cur.id);
+    docs[slot]={name:f.name,data:dataUrl,fecha:new Date().toISOString().slice(0,10)};saveState();
+    if(f.type==='application/pdf'){
+      const text=await extractPdfText(dataUrl);
+      if(slot==='coc'){const co2=parseCO2(text);if(co2){cur.co2=co2;docs.coc.detectado='CO₂ '+co2+' g/km';saveCoches();}}
+      if(slot==='teil1'){const fm=parseFechaMatriculacion(text);if(fm){cur.anio=fm;docs.teil1.detectado='Matriculación '+fm;saveCoches();}}
+      if(slot==='teil2'){const vin=parseVIN(text);if(vin){cur.vin=vin;docs.teil2.detectado='VIN '+vin;saveCoches();}}
+      if(slot==='scheckheft'){docs.scheckheft.texto=text.slice(0,2500);const uf=parseUltimaFecha(text);docs.scheckheft.detectado=uf?('Última fecha detectada: '+uf):('Leído — '+text.length+' caracteres');saveCoches();}
+    }
+    saveState();render();refreshDocViews();
+  };
+  reader.readAsDataURL(f);
+}
+function onDocOtro(input){
+  const f=input.files[0];if(!f)return;
+  if(f.size>6*1024*1024){alert('Archivo demasiado pesado (máx. ~6MB). Súbelo a Drive directamente.');input.value='';return;}
+  const reader=new FileReader();
+  reader.onload=function(e){const docs=docsOf(cur.id);if(!docs.otros)docs.otros=[];docs.otros.push({name:f.name,data:e.target.result,fecha:new Date().toISOString().slice(0,10)});saveState();refreshDocViews();};
+  reader.readAsDataURL(f);
+}
+function onFactura(input){
+  const f=input.files[0];if(!f)return;
+  if(f.size>6*1024*1024){alert('Archivo demasiado pesado (máx. ~6MB). Súbelo a Drive directamente.');input.value='';return;}
+  const reader=new FileReader();
+  reader.onload=async function(e){
+    const dataUrl=e.target.result;const docs=docsOf(cur.id);if(!docs.facturas)docs.facturas=[];
+    const item={name:f.name,data:dataUrl,fecha:new Date().toISOString().slice(0,10)};
+    if(f.type==='application/pdf'){
+      const text=await extractPdfText(dataUrl);
+      const fd=parseUltimaFecha(text)||parsePrimeraFecha(text);const imp=parseImporte(text);
+      if(fd)item.fechaDoc=fd;if(imp!=null)item.importe=imp;item.texto=text.slice(0,1500);
+    }
+    docs.facturas.push(item);saveState();refreshDocViews();
+  };
+  reader.readAsDataURL(f);
+}
+function rmDoc(key,idx){const docs=docsOf(cur.id);if(idx==null)delete docs[key];else docs[key].splice(idx,1);saveState();refreshDocViews();}
+
+// ---- fotos y vídeos que manda el cliente ----
+function mediaOf(id){const s=st(id);if(!s.media)s.media={};if(!s.media.fotos)s.media.fotos=[];if(!s.media.videos)s.media.videos=[];return s.media;}
+function refreshMediaView(){const p=$('pane7');if(p)p.innerHTML=paneHTML(7);}
+function onClienteFoto(input){
+  const files=[...input.files];if(!files.length)return;
+  const m=mediaOf(cur.id);let pending=files.length;
+  files.forEach(f=>{
+    if(f.size>8*1024*1024){alert(`"${f.name}" pesa demasiado para guardarla aquí (máx. ~8MB). Súbela directamente a la carpeta del coche en Drive.`);pending--;return;}
+    const reader=new FileReader();
+    reader.onload=e=>{m.fotos.push({name:f.name,data:e.target.result,fecha:new Date().toISOString().slice(0,10)});saveState();pending--;if(pending<=0)refreshMediaView();};
+    reader.readAsDataURL(f);
+  });
+  if(pending<=0)refreshMediaView();
+}
+function onClienteVideo(input){
+  const files=[...input.files];if(!files.length)return;
+  const m=mediaOf(cur.id);let pending=files.length;
+  files.forEach(f=>{
+    if(f.size>15*1024*1024){alert(`"${f.name}" es un vídeo pesado (${(f.size/1024/1024).toFixed(1)}MB). Los vídeos grandes no caben en el navegador: súbelo a la carpeta del coche en Drive y usa "Añadir enlace de vídeo" para dejar la referencia aquí.`);pending--;return;}
+    const reader=new FileReader();
+    reader.onload=e=>{m.videos.push({name:f.name,data:e.target.result,fecha:new Date().toISOString().slice(0,10)});saveState();pending--;if(pending<=0)refreshMediaView();};
+    reader.readAsDataURL(f);
+  });
+  if(pending<=0)refreshMediaView();
+}
+function addVideoLink(){
+  const url=prompt('Pega el enlace del vídeo (Drive, WeTransfer, WhatsApp...):');if(!url)return;
+  const nombre=prompt('Nombre/descripción del vídeo (opcional):','Vídeo del cliente')||'Vídeo del cliente';
+  const m=mediaOf(cur.id);m.videos.push({name:nombre,link:url,fecha:new Date().toISOString().slice(0,10)});saveState();refreshMediaView();
+}
+function rmMedia(tipo,idx){const m=mediaOf(cur.id);m[tipo].splice(idx,1);saveState();refreshMediaView();}
+function clientMediaHTML(){const m=mediaOf(cur.id);
+  const fotos=m.fotos.map((f,k)=>`<div style="position:relative;display:inline-block;margin:4px"><img src="${f.data}" style="width:110px;height:80px;object-fit:cover;border-radius:8px;border:1px solid #e6eaf1"><button class="rm" style="position:absolute;top:-2px;right:-2px;background:#fff;border-radius:50%;width:22px;height:22px;box-shadow:0 1px 4px rgba(0,0,0,.3)" onclick="rmMedia('fotos',${k})">×</button></div>`).join('');
+  const videos=m.videos.map((v,k)=>`<div class="docrow" style="flex-wrap:wrap">${v.data?`<video src="${v.data}" controls style="height:70px;border-radius:6px"></video>`:'<span style="font-size:18px">🎬</span>'}<span>${esc(v.name)}</span>${v.link?`<a href="${esc(v.link)}" target="_blank">Abrir enlace ↗</a>`:''}<button class="rm" onclick="rmMedia('videos',${k})">quitar</button></div>`).join('');
+  return `<h4>Fotos del cliente</h4>
+    <div class="small" style="margin-bottom:8px">Fotos que te manda el cliente durante o después de la entrega (defectos, estado del coche, reclamaciones...). Se quedan centralizadas aquí, en la ficha del coche.</div>
+    <div style="margin-bottom:10px">${fotos||'<span class="small">Sin fotos todavía.</span>'}</div>
+    <label class="upl">+ Añadir fotos<input type="file" accept="image/*" multiple onchange="onClienteFoto(this)"></label>
+    <h4 style="margin-top:20px">Vídeos del cliente</h4>
+    <div class="small" style="margin-bottom:8px">Vídeos cortos (máx. ~15MB) se guardan directamente aquí. Para vídeos pesados, súbelos a la carpeta del coche en Drive y añade el enlace con el segundo botón.</div>
+    ${videos}
+    <div style="margin-top:6px"><label class="upl">+ Añadir vídeo (archivo)<input type="file" accept="video/*" multiple onchange="onClienteVideo(this)"></label>
+    <button class="upl" style="margin-left:8px" onclick="addVideoLink()">+ Añadir enlace de vídeo</button></div>
+    <div class="small" style="margin-top:12px">Todo esto vive en este navegador (localStorage). Usa el botón "📦 Descargar todo en ZIP" de la pestaña Documentación para llevarlo rápido a la carpeta del coche en Drive.</div>`;}
+
+// ---- exportar todos los adjuntos del coche en un ZIP (para subir a Drive) ----
+async function descargarZip(){
+  if(!window.JSZip){alert('La herramienta de ZIP aún está cargando, prueba de nuevo en unos segundos.');return;}
+  const zip=new JSZip();
+  const addB64=(folder,name,dataUrl)=>{if(!dataUrl||!dataUrl.includes(','))return;const base64=dataUrl.split(',')[1];zip.folder(folder).file(name||('archivo_'+Date.now()),base64,{base64:true});};
+  const docs=docsOf(cur.id);
+  DOC_SLOTS.forEach(([slot])=>{const d=docs[slot];if(d)addB64('documentos',d.name,d.data);});
+  (docs.facturas||[]).forEach(d=>addB64('facturas',d.name,d.data));
+  (docs.otros||[]).forEach(d=>addB64('otros',d.name,d.data));
+  const m=mediaOf(cur.id);
+  (m.fotos||[]).forEach(d=>addB64('fotos_cliente',d.name,d.data));
+  (m.videos||[]).forEach(d=>{if(d.data)addB64('videos_cliente',d.name,d.data);});
+  const blob=await zip.generateAsync({type:'blob'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=`${(cur.marca+'_'+cur.modelo+'_documentos').replace(/\s+/g,'_')}.zip`;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),2000);
+}
+function useSugerencia(){const s=transporteSugerido(cur);if(s){const el=$('ci_tr');if(el){el.value=s.precio;recalc();}}}
+function refreshPane2(){const el=$('pane2');if(el)el.innerHTML=paneHTML(2);recalc();updateIvaNote();}
+function toggleBOE(){cur.boeConfirmado=!cur.boeConfirmado;saveCoches();refreshPane2();}
+function consultarHistorialVIN(){if(!cur.vin){alert('Este coche todavía no tiene VIN (sube el Teil 2 en Documentación o escríbelo a mano).');return;}window.open('https://www.autodna.com/vin-decoder/'+encodeURIComponent(cur.vin),'_blank');}
+function setCompUrl(k){const c=cur;if(!c.comparables)c.comparables=[];const cur_u=(c.comparables[k]&&c.comparables[k].u)||'';const url=prompt('Enlace del comparable (anuncio real en coches.net, Wallapop, AutoScout24...):',cur_u);if(url==null)return;c.comparables[k].u=url;saveCoches();refreshPane2();}
+function addComparable(){const c=cur;if(!c.comparables)c.comparables=[];const t=prompt('Título/descripción del comparable (ej. "Astra OPC 2015, 90.000 km"):');if(!t)return;const p=prompt('Precio (ej. 18.500 €):');if(!p)return;const u=prompt('Enlace del anuncio (opcional):','')||'';c.comparables.push({t,p,u});saveCoches();refreshPane2();}
+function updateIvaNote(){const notas={margen:"Caso habitual: coche usado a particular o con Differenzbesteuerung (§25a UStG). El IVA ya está pagado en origen, no se desglosa ni se deduce, y no se vuelve a pagar en España. Solo se liquida el IEDMT.",deducible:"El vendedor factura con IVA alemán desglosado y deducible (venta profesional con IVA general). No cambia el IEDMT, pero afecta a si el cliente puede deducirse el IVA si es empresa.",b2b:"Compra B2B con NIF-IVA intracomunitario: se factura sin IVA alemán y se autoliquida como adquisición intracomunitaria en España (modelo 303). Circuito fiscal distinto — confirmar con gestor."};const el=$('ci_ivanote');if(el)el.textContent=notas[cur.ivaEscenario||'margen'];}
+function diasEnFase(c){const h=(st(c.id).hist||[]);if(!h.length)return null;const last=h[h.length-1];const d0=new Date(last.f+'T00:00:00'),d1=new Date();return Math.max(0,Math.round((d1-d0)/86400000));}
+
+const fmt=n=>Number(Math.round(n)||0).toLocaleString('es-ES')+" €";
+const fmtkm=n=>typeof n==='number'?n.toLocaleString('es-ES')+" km":(n||'—');
+const proxied=u=>u?("https://images.weserv.nl/?url="+encodeURIComponent(u.replace(/^https?:\/\//,''))+"&output=jpg&w=1200"):u;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const semCls=s=>({green:'g',amber:'a',red:'r'}[s]||'a');const semLbl=s=>({green:'Chollo',amber:'En precio',red:'Cara'}[s]||'En precio');
+function sem(c){const s=semaforoAuto(c);return `<span class="sem ${semCls(s)}"><span class="dot"></span>${semLbl(s)}</span>`;}
+function estadoOf(c){return (st(c.id).estado)||c.estado;}
+
+let map,markers=[];
+function initMap(list){if(!map){map=L.map('map').setView([50,9],5);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'© OpenStreetMap'}).addTo(map);}
+  markers.forEach(m=>map.removeLayer(m));markers=[];let pts=[];
+  list.forEach(c=>{if(c.lat&&c.lng){let t=calcCar(c);markers.push(L.marker([c.lat,c.lng]).addTo(map).bindPopup(`<b>${c.marca} ${c.modelo}</b><br>${fmt(t.total)} todo incl.<br>${c.ciudad||''}`));pts.push([c.lat,c.lng]);}});
+  if(pts.length)map.fitBounds(pts,{padding:[40,40],maxZoom:7});}
+function renderStats(){let ct={};COCHES.forEach(c=>{let e=estadoOf(c);ct[e]=(ct[e]||0)+1;});$('stats').innerHTML=Object.keys(ct).map(e=>`<span class="stat"><i style="background:${ECOLOR[e]||'#999'}"></i>${e}: ${ct[e]}</span>`).join('');}
+
+let vistaKanban = localStorage.getItem('jj_vista')==='kanban';
+function toggleVista(){vistaKanban=!vistaKanban;localStorage.setItem('jj_vista',vistaKanban?'kanban':'lista');$('btnVista').textContent=vistaKanban?'📋 Vista Lista':'🗂 Vista Kanban';render();}
+function render(){
+  let list=COCHES.filter(c=>{let t=(c.marca+' '+c.modelo+' '+(c.version||'')).toLowerCase();return t.includes($('q').value.toLowerCase())&&(!$('festado').value||estadoOf(c)===$('festado').value);});
+  let o=$('orden').value;
+  if(o==='precioAsc')list.sort((a,b)=>calcCar(a).total-calcCar(b).total);
+  if(o==='precioDesc')list.sort((a,b)=>calcCar(b).total-calcCar(a).total);
+  if(o==='kmAsc')list.sort((a,b)=>(+a.km||9e9)-(+b.km||9e9));
+  if($('btnVista'))$('btnVista').textContent=vistaKanban?'📋 Vista Lista':'🗂 Vista Kanban';
+  if(vistaKanban){
+    $('grid').className='kanban';
+    $('grid').innerHTML=ESTADOS.map(e=>{const col=list.filter(c=>estadoOf(c)===e);return `<div class="kcol"><h4>${esc(e)}<span class="small">${col.length}</span></h4>${col.map(c=>{let t=calcCar(c);let i=COCHES.indexOf(c);return `<div class="kcard" onclick="openCar(${i})"><b>${esc(c.marca)} ${esc(c.modelo)}</b>${esc(c.version||'')} · ${c.anio||'—'} · ${fmtkm(c.km)}<div class="kp">${fmt(t.total)}</div></div>`;}).join('')||'<div class="small">Sin coches</div>'}</div>`;}).join('');
+  }else{
+    $('grid').className='grid';
+    $('grid').innerHTML=list.map(c=>{let t=calcCar(c);let e=estadoOf(c);let i=COCHES.indexOf(c);return `
+      <div class="card"><div class="cardhead" onclick="openCar(${i})">
+        <span class="badge" style="background:${ECOLOR[e]||'#999'}">${e}</span>
+        <div class="ph" style="background-image:url('${proxied((c.fotos||[])[0])}')"></div>
+        ${(c.fotos||[]).length?`<span class="nfotos">📷 ${c.fotos.length} fotos</span>`:''}</div>
+        <div class="b"><div class="row"><h3>${esc(c.marca)} ${esc(c.modelo)}</h3>${sem(c)}</div>
+        <div class="spec">${esc(c.version||'')} · ${c.anio||'—'} · ${fmtkm(c.km)} · ${c.cv||'?'} CV · ${esc(c.cambio||'')}</div>
+        <div class="row"><span class="spec">📍 ${esc(c.ciudad||'—')}</span><span class="spec">Anuncio: ${fmt(c.precioCoche)}</span></div>
+        <div class="pricebox">${fmt(t.total)}<small>todo incluido y matriculado</small></div>
+        <select class="estsel" style="color:${ECOLOR[e]}" onchange="setEstado(${i},this.value)">${ESTADOS.map(s=>`<option ${s===e?'selected':''}>${s}</option>`).join('')}</select>
+        <div class="btns"><button class="btn pri" onclick="openCar(${i})">Abrir ficha ▸</button></div></div></div>`;}).join('');
+  }
+  renderStats();initMap(list);document.querySelector('.top h1').textContent=`JJ Import Motors — ${COCHES.length} coche(s)`;}
+function setEstado(i,v){const s=st(COCHES[i].id);s.estado=v;if(!s.hist)s.hist=[];s.hist.push({e:v,f:new Date().toISOString().slice(0,10)});saveState();render();}
+
+// ===== ficha por pestañas =====
+let cur,curI;
+const TABS=["Resumen","Vehículo","Números","Inspección","Documentación","Cronograma","Contactos","Fotos/Vídeos cliente"];
+function openCar(i){cur=COCHES[i];curI=i;$('mtitle').textContent=`${cur.marca} ${cur.modelo} · ${cur.anio||''}`;
+  $('tabs').innerHTML=TABS.map((t,j)=>`<div class="tab ${j===0?'on':''}" onclick="showTab(${j})">${t}</div>`).join('');
+  $('panes').innerHTML=TABS.map((t,j)=>`<div class="pane ${j===0?'on':''}" id="pane${j}">${paneHTML(j)}</div>`).join('');
+  $('modal').classList.add('open');}
+function showTab(j){[...document.querySelectorAll('.tab')].forEach((t,k)=>t.classList.toggle('on',k===j));[...document.querySelectorAll('.pane')].forEach((p,k)=>p.classList.toggle('on',k===j));if(j===1&&(cur.fotos||[]).length)setImg(0);if(j===2){recalc();updateIvaNote();}}
+function chkProgress(key,groups){const s=st(cur.id)[key]||{};let done=0,tot=0;Object.keys(groups).forEach(m=>groups[m].forEach((_,k)=>{tot++;if(s[m+'#'+k])done++;}));return{done,tot};}
+function nextCrono(){const cr=st(cur.id).crono||{};for(let k=0;k<CRONO.length;k++){if(!cr[k]||cr[k].e!=='Hecho')return CRONO[k];}return 'Todo hecho ✓';}
+function paneHTML(j){const c=cur,t=calcCar(c);
+ if(j===0){const pi=chkProgress('insp',MINSP),pd=chkProgress('doc',MDOC);const e=estadoOf(c);const dias=diasEnFase(c);const hist=(st(c.id).hist||[]).slice().reverse();return `
+   <div class="res">
+     <div class="rcard"><div class="small">PRECIO TODO INCLUIDO</div><div class="n">${fmt(t.total)}</div><div>${sem(c)}</div></div>
+     <div class="rcard"><div class="small">TU INGRESO (servicio)</div><div class="n" style="color:#12673a">${fmt(t.hon)}</div><div class="small">Precio anuncio: ${fmt(c.precioCoche)}</div></div>
+     <div class="rcard"><div class="small">ESTADO</div><div class="n" style="font-size:17px;color:${ECOLOR[e]}">${e}</div><div class="small">Próx.: ${nextCrono()}${dias!=null?' · '+dias+' día(s) en esta fase':''}</div></div>
+     <div class="rcard"><div class="small">CHECKLISTS</div><div style="font-size:13px;margin-top:4px">Inspección ${pi.done}/${pi.tot}<div class="bar"><i style="width:${pi.tot?pi.done/pi.tot*100:0}%"></i></div></div><div style="font-size:13px;margin-top:6px">Documentación ${pd.done}/${pd.tot}<div class="bar"><i style="width:${pd.tot?pd.done/pd.tot*100:0}%"></i></div></div></div>
+   </div>
+   <h4>Recomendación</h4><p style="font-size:13.5px">${esc(c.recomendacion||c.valoracion||'')}</p>
+   <h4>Banderas rojas</h4><ul class="li">${(c.banderasRojas||[]).map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
+   <div class="two" style="margin-top:8px"><div><h4>Resumen rápido</h4>${[['Año',c.anio],['Km',fmtkm(c.km)],['Motor',c.cv+' CV'],['CO₂',c.co2+' g/km'],['VIN',c.vin||'— (sube Teil 2)'],['Ubicación',c.ciudad]].map(x=>`<div class="kv"><span>${x[0]}</span><b>${esc(x[1])}</b></div>`).join('')}</div>
+   <div><h4>Desglose de precio</h4>${[['Coche',fmt(c.precioCoche)],['Importación (transp+ITV+COC+tasas)',fmt(t.imp-t.iedmt)],['IEDMT ('+t.pct+'%)',fmt(t.iedmt)],['Servicio',fmt(t.hon)],['TOTAL',fmt(t.total)]].map(x=>`<div class="kv"><span>${x[0]}</span><b>${x[1]}</b></div>`).join('')}</div></div>
+   <h4>Historial de estados</h4><ul class="li">${hist.length?hist.map(h=>`<li>${h.f} — ${esc(h.e)}</li>`).join(''):'<li>Sin cambios registrados aún (se irá llenando según muevas el estado)</li>'}</ul>`;}
+ if(j===1){return `<div class="gbig" id="gbig"></div><div class="gthumbs" id="gthumbs">${(c.fotos||[]).map((f,k)=>`<img src="${proxied(f)}" class="${k===0?'on':''}" onclick="setImg(${k})">`).join('')||'<span style="color:#888">Sin fotos</span>'}</div>
+   <div class="two"><div><h4>Datos del vehículo</h4>${[['Marca/modelo',c.marca+' '+c.modelo],['Versión',c.version],['Año',c.anio],['Km',fmtkm(c.km)],['Motor',c.cv+' CV · '+(c.cilindrada||'')],['Combustible',c.combustible],['Cambio',c.cambio],['CO₂',c.co2+' g/km'],['Consumo',c.consumo],['Propietarios',c.propietarios],['Color',c.color],['Puertas/plazas',(c.puertas||'')+' / '+(c.plazas||'')],['ITV',c.itv],['Norma',c.norma]].map(x=>`<div class="kv"><span>${x[0]}</span><b>${esc(x[1]!=null?x[1]:'—')}</b></div>`).join('')}
+   <div class="kv"><span>VIN (bastidor)</span><span style="display:flex;gap:6px;align-items:center"><input value="${esc(c.vin||'')}" placeholder="se autodetecta al subir Teil 2 en Documentación" oninput="cur.vin=this.value;saveCoches();" style="border:1px solid #cfd6e0;border-radius:6px;padding:2px 6px;text-align:right;font-family:inherit;width:190px;font-size:13px">${c.vin?`<button class="suglink" style="font-size:11px" onclick="consultarHistorialVIN()">🔍 historial</button>`:''}</span></div>
+   <h4>Equipamiento</h4><div>${(c.equipamiento||[]).map(e=>`<span class="pill">${esc(e)}</span>`).join('')}</div></div>
+   <div><h4>Descripción</h4><p style="font-size:13.5px">${esc(c.descripcion)}</p><h4>Consejos (peritaje)</h4><ul class="li">${(c.consejos||[]).map(x=>`<li>${esc(x)}</li>`).join('')}</ul><h4>Vendedor</h4><div class="kv"><span>${esc(c.vendedor)}</span></div><div class="kv"><span>${esc(c.ciudad)}</span></div></div></div>
+   <div class="mcta"><a href="${c.enlace}" target="_blank">Abrir anuncio ↗</a></div>`;}
+ if(j===2){const docs=docsOf(c.id);const co2ok=docs.coc&&docs.coc.detectado;const fmok=docs.teil1&&docs.teil1.detectado;const sug=transporteSugerido(c);const avg=comparablesAvg(c);return `<h4>Números — coste de la operación</h4><div class="calc">
+    <div class="l"><span>Precio del coche (anuncio)</span><input type="number" id="ci_pc" value="${+c.precioCoche||0}" oninput="recalc()"></div>
+    <div class="hr"></div>
+    <div class="l"><span>Precio nuevo del modelo (lista) ${c.boeConfirmado?'<span class="tag tag-ok">✓ valor BOE confirmado</span>':'<span class="tag tag-warn">estimado, pendiente BOE</span>'} <button class="suglink" style="font-size:11px" onclick="toggleBOE()">${c.boeConfirmado?'marcar como estimado':'marcar como confirmado por BOE'}</button></span><input type="number" id="ci_pn" value="${+c.precioNuevo||0}" oninput="recalc()"></div>
+    <div class="l"><span>Antigüedad → coef. depreciación ${fmok?'<span class="tag tag-ok">✓ Teil 1</span>':'<span class="tag tag-warn">sin confirmar</span>'}</span><b id="ci_dep"></b></div>
+    <div class="l"><span>Base imponible IEDMT</span><b id="ci_base"></b></div>
+    <div class="l"><span>Base manual (opcional, sobrescribe)</span><input type="number" id="ci_bm" value="${+c.baseImpManual||0}" oninput="recalc()"></div>
+    <div class="l"><span>CO₂ (g/km) ${co2ok?'<span class="tag tag-ok">✓ COC</span>':'<span class="tag tag-warn">pendiente COC</span>'}</span><input type="number" id="ci_co2" value="${+c.co2||0}" oninput="recalc()"></div>
+    <div class="l"><span>IEDMT (<span id="ci_pct"></span>% por CO₂)</span><b id="ci_iedmt"></b></div>
+    <div class="hr"></div>
+    <div class="l"><span>Transporte ${sug?`<button class="suglink" onclick="useSugerencia()">usar sugerencia: ${fmt(sug.precio)} (${sug.km} km a ${DESTINO.label})</button>`:''}</span><input type="number" id="ci_tr" value="${+c.transporte||0}" oninput="recalc()"></div>
+    <div class="l"><span>ITV importación</span><input type="number" id="ci_itv" value="${+c.itvImp||0}" oninput="recalc()"></div>
+    <div class="l"><span>Gestión + COC</span><input type="number" id="ci_coc" value="${+c.coc||0}" oninput="recalc()"></div>
+    <div class="l"><span>Tasas DGT</span><input type="number" id="ci_tas" value="${+c.tasas||0}" oninput="recalc()"></div>
+    <div class="l"><span>Honorarios del servicio</span><input type="number" id="ci_hon" value="${+c.honorarios||honTramo(+c.precioCoche)}" oninput="recalc()"></div>
+    <div class="big" id="ci_total"></div>
+    <div class="hr"></div>
+    <div class="l"><span>Señal del cliente</span><input type="number" id="ci_sen" value="${+c.senal||0}" oninput="recalc()"></div>
+    <div class="l"><span>Resto a pagar</span><b id="ci_resto"></b></div>
+    <div class="prof" id="ci_prof"></div>
+    <div class="hr"></div>
+    <div class="l"><span>Escenario de IVA del coche</span><select id="ci_iva" onchange="cur.ivaEscenario=this.value;saveCoches();updateIvaNote();">
+      <option value="margen" ${(c.ivaEscenario||'margen')==='margen'?'selected':''}>Margen / particular (habitual)</option>
+      <option value="deducible" ${c.ivaEscenario==='deducible'?'selected':''}>Con IVA deducible (factura)</option>
+      <option value="b2b" ${c.ivaEscenario==='b2b'?'selected':''}>B2B intracomunitario (NIF)</option>
+    </select></div>
+    <div class="small" id="ci_ivanote"></div>
+   </div>
+   <h4>Comparables de mercado (España)</h4><ul class="li">${(c.comparables||[]).map((x,k)=>`<li>${x.u?`<a href="${esc(x.u)}" target="_blank">${esc(x.t)}</a>`:esc(x.t)}: <b>${esc(x.p)}</b> <button class="suglink" style="font-size:11px" onclick="setCompUrl(${k})">${x.u?'editar enlace':'+ añadir enlace'}</button></li>`).join('')}</ul>
+   <button class="upl" style="font-size:12px;margin-top:4px" onclick="addComparable()">+ Añadir comparable</button>
+   ${avg!=null?`<div class="small">Media de comparables: <b>${fmt(avg)}</b> — semáforo calculado automáticamente sobre esta media (${sem(c)}).</div>`:'<div class="small">Añade comparables con precio para que el semáforo se calcule automáticamente.</div>'}
+   <div class="small">IEDMT peninsular por CO₂ (0/4,75/9,75/14,75 %). Base = precio nuevo del modelo × coef. de depreciación por antigüedad (tabla oficial 100 %→10 %). Estimación fiel; la cuota exacta la fija Hacienda con la tabla BOE del modelo y el CO₂ del COC. Sube los documentos en la pestaña Documentación para confirmar CO₂ y antigüedad automáticamente.</div>`;}
+ if(j===3)return moduleHTML('insp',MINSP,'Inspección / peritaje');
+ if(j===4)return moduleHTML('doc',MDOC,'Documentación')+docsHTML();
+ if(j===5){const cr=st(c.id).crono||{};return `<h4>Cronograma logístico</h4>${CRONO.map((f,k)=>`<div class="crow"><span>${esc(f)}</span><span><input type="date" value="${(cr[k]&&cr[k].f)||''}" onchange="setCrono(${k},'f',this.value)"> <select onchange="setCrono(${k},'e',this.value)">${['Pendiente','En curso','Hecho'].map(o=>`<option ${((cr[k]&&cr[k].e)||'Pendiente')===o?'selected':''}>${o}</option>`).join('')}</select></span></div>`).join('')}`;}
+ if(j===6){const co=st(c.id).contactos||{};return `<h4>Contactos clave</h4>${CONTACTOS.map((r,k)=>`<div style="margin-bottom:8px"><b style="color:var(--navy);font-size:13px">${r}</b><div class="crow" style="border:0;gap:6px"><input placeholder="Nombre" value="${esc((co[k]&&co[k].n)||'')}" oninput="setCont(${k},'n',this.value)" style="flex:1"><input placeholder="Teléfono" value="${esc((co[k]&&co[k].t)||'')}" oninput="setCont(${k},'t',this.value)" style="flex:1"><input placeholder="Notas" value="${esc((co[k]&&co[k].x)||'')}" oninput="setCont(${k},'x',this.value)" style="flex:1.4"></div></div>`).join('')}`;}
+ if(j===7)return clientMediaHTML();
+ return '';}
+function docsHTML(){const docs=docsOf(cur.id);
+  const slots=DOC_SLOTS.map(([slot,label])=>{const d=docs[slot];const verTexto=d&&d.texto?`<details style="margin-top:4px"><summary style="font-size:12px">Ver contenido leído</summary><div class="dcont" style="white-space:pre-wrap;font-size:12px;color:#555">${esc(d.texto)}</div></details>`:'';
+    return `<div class="docrow" style="flex-wrap:wrap"><b>${label.split(' (')[0]}</b>
+    ${d?`<a href="${d.data}" download="${esc(d.name)}" target="_blank">${esc(d.name)}</a>${d.detectado?`<span class="tag tag-ok">✓ ${esc(d.detectado)}</span>`:'<span class="tag tag-warn">sin datos detectados</span>'}<button class="rm" onclick="rmDoc('${slot}')">quitar</button>${verTexto}`
+    :`<span style="color:#8a93a3;flex:1">${label}</span><label class="upl">Subir<input type="file" accept="application/pdf,image/*" onchange="onDocFile('${slot}',this)"></label>`}
+    </div>`;}).join('');
+  const otros=(docs.otros||[]).map((d,k)=>`<div class="docrow"><b>Otro</b><a href="${d.data}" download="${esc(d.name)}" target="_blank">${esc(d.name)}</a><button class="rm" onclick="rmDoc('otros',${k})">quitar</button></div>`).join('');
+  const facturas=(docs.facturas||[]).map((d,k)=>{const verTexto=d.texto?`<details style="margin-top:4px;flex-basis:100%"><summary style="font-size:12px">Ver contenido leído</summary><div class="dcont" style="white-space:pre-wrap;font-size:12px;color:#555">${esc(d.texto)}</div></details>`:'';
+    return `<div class="docrow" style="flex-wrap:wrap"><b>Factura</b><a href="${d.data}" download="${esc(d.name)}" target="_blank">${esc(d.name)}</a>${d.fechaDoc?`<span class="tag tag-ok">📅 ${esc(d.fechaDoc)}</span>`:'<span class="tag tag-warn">sin fecha detectada</span>'}${d.importe!=null?`<span class="tag tag-ok">💶 ${fmt(d.importe)}</span>`:''}<button class="rm" onclick="rmDoc('facturas',${k})">quitar</button>${verTexto}</div>`;}).join('');
+  return `<button class="upl" style="margin-bottom:14px;font-size:13px" onclick="descargarZip()">📦 Descargar todo en ZIP (documentos + fotos/vídeos cliente) — para subir a Drive</button>
+    <h4>Documentos (Teil 1 / Teil 2 / COC / Scheckheft)</h4>
+    <div class="small" style="margin-bottom:8px">Sube aquí el Teil 1, el Teil 2, el COC y el historial de mantenimiento del coche. Intento leerlos automáticamente: <b>fecha de matriculación</b> (Teil 1), <b>VIN</b> (Teil 2), <b>CO₂</b> (COC) y el <b>contenido</b> del Scheckheft — y los aplico directo a la calculadora de Números. Si el PDF es una foto escaneada puede que no lo detecte: revísalo y complétalo a mano.</div>
+    ${slots}
+    <h4>Facturas (mantenimiento, reparaciones, transporte...)</h4>
+    <div class="small" style="margin-bottom:8px">Cada factura se lee automáticamente para detectar fecha e importe, y puedes abrir "Ver contenido leído" para repasarla sin salir del panel.</div>
+    ${facturas}
+    <label class="upl">+ Añadir factura<input type="file" accept="application/pdf,image/*" onchange="onFactura(this)"></label>
+    <div class="small" style="margin:14px 0 4px">Otros documentos (contrato, ITV...)</div>
+    ${otros}
+    <label class="upl">+ Añadir documento<input type="file" accept="application/pdf,image/*" onchange="onDocOtro(this)"></label>
+    <div class="small" style="margin-top:8px">Los archivos se guardan en este navegador (máx. ~6MB c/u). Para el archivo definitivo, súbelos también a la carpeta del coche en Drive.</div>`;}
+function moduleHTML(key,groups,titulo){const s=st(cur.id)[key]||{};return `<h4>${titulo} — por módulos</h4>`+Object.keys(groups).map(m=>{let done=groups[m].filter((_,k)=>s[m+'#'+k]).length;return `<details><summary><span>${m}</span><span class="small">${done}/${groups[m].length}</span></summary><div class="dcont">${groups[m].map((it,k)=>`<label class="chk"><input type="checkbox" ${s[m+'#'+k]?'checked':''} onchange="toggleChk('${key}','${m}#${k}',this.checked)"> ${esc(it)}</label>`).join('')}</div></details>`;}).join('');}
+function setImg(k){const g=$('gbig');if(g){g.style.backgroundImage=`url('${proxied(cur.fotos[k])}')`;[...$('gthumbs').children].forEach((t,j)=>t.classList&&t.classList.toggle('on',j===k));}}
+function recalc(){const c=cur;[['pc','precioCoche'],['pn','precioNuevo'],['bm','baseImpManual'],['co2','co2'],['tr','transporte'],['itv','itvImp'],['coc','coc'],['tas','tasas'],['hon','honorarios'],['sen','senal']].forEach(([a,b])=>{const el=$('ci_'+a);if(el)c[b]=+el.value;});
+  const t=calcCar(c);$('ci_dep').textContent=(t.antig!=null?t.antig.toFixed(1)+' años':'—')+' → '+(t.coef*100).toFixed(0)+'%';$('ci_base').textContent=fmt(t.base);$('ci_pct').textContent=t.pct;$('ci_iedmt').textContent=fmt(t.iedmt);$('ci_total').textContent='PRECIO TODO INCLUIDO: '+fmt(t.total);$('ci_resto').textContent=fmt(t.resto);$('ci_prof').textContent='Tu ingreso por el servicio: '+fmt(t.hon);
+  saveCoches();render();}
+function toggleChk(key,k,v){const s=st(cur.id);if(!s[key])s[key]={};s[key][k]=v;saveState();
+  let idx=key==='insp'?3:4;let el=$('pane'+idx);if(el)el.innerHTML=paneHTML(idx);}
+function setCrono(k,f,v){const s=st(cur.id);if(!s.crono)s.crono={};if(!s.crono[k])s.crono[k]={};s.crono[k][f]=v;saveState();}
+function setCont(k,f,v){const s=st(cur.id);if(!s.contactos)s.contactos={};if(!s.contactos[k])s.contactos[k]={};s.contactos[k][f]=v;saveState();}
+function closeModal(id){$(id).classList.remove('open');}
+
+// ===== biblioteca de mensajes =====
+let msgN=0;
+function applyVars(txt,v){if(!v)return txt;Object.keys(v).forEach(k=>txt=txt.split(k).join(v[k]));return txt;}
+function msgBox(m,vars){const id='m'+(msgN++);const base={es:applyVars(m.es,vars),en:applyVars(m.en,vars),de:applyVars(m.de,vars)};window['_msg_'+id]=base;
+  return `<div class="msgbox"><div class="h"><b>${m.cat} · ${m.sit}</b><div class="langtabs">${['es','en','de'].map((l,j)=>`<span class="lt ${j===0?'on':''}" onclick="setLang('${id}','${l}',this)">${l.toUpperCase()}</span>`).join('')}</div></div><div class="msgtext" id="${id}">${esc(base.es)}</div><div style="margin-top:8px;display:flex;gap:8px"><button class="copy" onclick="copyMsg('${id}')">Copiar</button><button class="copy" style="background:#25D366" onclick="waMsg('${id}')">WhatsApp</button></div></div>`;}
+function setLang(id,l,el){$(id).textContent=window['_msg_'+id][l];[...el.parentElement.children].forEach(x=>x.classList.remove('on'));el.classList.add('on');}
+function copyMsg(id){const tx=$(id).textContent;navigator.clipboard.writeText(tx);const e=event.target;e.textContent='¡Copiado!';setTimeout(()=>e.textContent='Copiar',1200);}
+function waMsg(id){window.open('https://wa.me/?text='+encodeURIComponent($(id).textContent),'_blank');}
+function openMsgLib(){msgN=1000;const cats=[...new Set(MSGS.map(m=>m.cat))];$('libbody').innerHTML=`<p class="small" style="margin-bottom:12px">Plantillas genéricas en ES / EN / DE. ¿Quieres más plantillas, idiomas o respuestas? Dímelo en el chat y las añado.</p>`+cats.map(cat=>`<div class="catlbl">${cat}</div>`+MSGS.filter(m=>m.cat===cat).map(m=>msgBox(m,null)).join('')).join('');$('lib').classList.add('open');}
+
+// ===== calculadora rápida (header) =====
+function openCalc(){$('cbody').innerHTML=`<div class="calc">
+  <div class="l"><span>Precio del coche</span><input type="number" id="q_pc" value="15000" oninput="qcalc()"></div>
+  <div class="l"><span>Precio nuevo del modelo</span><input type="number" id="q_pn" value="30000" oninput="qcalc()"></div>
+  <div class="l"><span>Año matriculación (ej. 2018)</span><input type="number" id="q_an" value="2018" oninput="qcalc()"></div>
+  <div class="l"><span>CO₂ (g/km)</span><input type="number" id="q_co2" value="140" oninput="qcalc()"></div>
+  <div class="l"><span>Antigüedad → depreciación</span><b id="q_dep"></b></div>
+  <div class="l"><span>Base imponible</span><b id="q_base"></b></div>
+  <div class="l"><span>IEDMT (<span id="q_pct"></span>%)</span><b id="q_iedmt"></b></div>
+  <div class="hr"></div>
+  <div class="l"><span>Transporte</span><input type="number" id="q_tr" value="1200" oninput="qcalc()"></div>
+  <div class="l"><span>ITV+COC+tasas</span><input type="number" id="q_ot" value="650" oninput="qcalc()"></div>
+  <div class="l"><span>Honorarios servicio</span><b id="q_hon"></b></div>
+  <div class="big" id="q_total"></div></div>
+  <div class="small">Estimación con los tramos oficiales y depreciación por antigüedad. Confirmar con gestor y COC.</div>`;
+  qcalc();$('cmodal').classList.add('open');}
+function qcalc(){const pc=+$('q_pc').value,pn=+$('q_pn').value,an=$('q_an').value,co2=+$('q_co2').value,tr=+$('q_tr').value,ot=+$('q_ot').value;
+  const ag=antiguedad(an),coef=depreCoef(ag),base=Math.round(pn*coef),pct=iedmtPct(co2),iedmt=Math.round(base*pct/100),hon=honTramo(pc),total=pc+tr+ot+iedmt+hon;
+  $('q_dep').textContent=(ag!=null?ag.toFixed(1)+'a':'—')+' → '+(coef*100).toFixed(0)+'%';$('q_base').textContent=fmt(base);$('q_pct').textContent=pct;$('q_iedmt').textContent=fmt(iedmt);$('q_hon').textContent=fmt(hon);$('q_total').textContent='TODO INCLUIDO: '+fmt(total);}
+
+function nuevoEnlace(){const link=prompt('Pega el enlace del coche (mobile.de, AutoScout24...):');if(!link)return;const msg='Evalúa este coche y añádelo al panel: '+link;navigator.clipboard.writeText(msg).then(()=>alert('Copiado. Pégalo en el chat de Claude y te devuelvo el coche valorado para el panel.'),()=>prompt('Copia y pega en Claude:',msg));}
+
+// ===== Finanzas de la empresa =====
+let FINANZAS = JSON.parse(localStorage.getItem('jj_finanzas')||'[]');
+function saveFinanzas(){localStorage.setItem('jj_finanzas',JSON.stringify(FINANZAS));}
+const CATS_INGRESO=["Honorario servicio","Venta de coche (stock)","Otros ingresos"];
+const CATS_GASTO=["Transporte","Peritaje/inspección","Gestoría/trámites","ITV/homologación","Publicidad/marketing","Cuota autónomo","Herramientas/software","Dietas/desplazamientos","Comisiones bancarias","Otros gastos"];
+let finChartMes=null,finChartCat=null;
+function finUpdateCats(){const tipo=$('fm_tipo').value;const cats=tipo==='ingreso'?CATS_INGRESO:CATS_GASTO;const sel=$('fm_cat');if(sel)sel.innerHTML=cats.map(c=>`<option>${esc(c)}</option>`).join('');}
+function addMovimiento(){
+  const tipo=$('fm_tipo').value,fecha=$('fm_fecha').value||new Date().toISOString().slice(0,10),categoria=$('fm_cat').value,descripcion=$('fm_desc').value.trim(),importe=+$('fm_imp').value||0,cocheId=$('fm_coche').value;
+  if(!importe){alert('Pon un importe.');return;}
+  FINANZAS.push({id:'m'+Date.now(),tipo,fecha,categoria,descripcion,importe,cocheId});
+  saveFinanzas();$('fm_desc').value='';$('fm_imp').value='';renderFinanzas();
+}
+function rmMovimiento(id){FINANZAS=FINANZAS.filter(m=>m.id!==id);saveFinanzas();renderFinanzas();}
+function cocheLabel(id){const c=COCHES.find(x=>x.id===id);return c?(c.marca+' '+c.modelo):'';}
+function finKPIs(){
+  const ingresos=FINANZAS.filter(m=>m.tipo==='ingreso').reduce((a,m)=>a+(+m.importe||0),0);
+  const gastos=FINANZAS.filter(m=>m.tipo==='gasto').reduce((a,m)=>a+(+m.importe||0),0);
+  const neto=ingresos-gastos;
+  const entregados=COCHES.filter(c=>estadoOf(c)==='Entregado').length;
+  const honorarios=FINANZAS.filter(m=>m.tipo==='ingreso'&&m.categoria==='Honorario servicio');
+  const honMedio=honorarios.length?honorarios.reduce((a,m)=>a+(+m.importe||0),0)/honorarios.length:0;
+  return{ingresos,gastos,neto,entregados,honMedio,nOps:honorarios.length};
+}
+function finPorMes(){
+  const map={};
+  FINANZAS.forEach(m=>{const k=(m.fecha||'').slice(0,7);if(!k)return;if(!map[k])map[k]={ingreso:0,gasto:0};map[k][m.tipo]+=(+m.importe||0);});
+  const meses=Object.keys(map).sort();
+  return{meses,ingresos:meses.map(k=>map[k].ingreso),gastos:meses.map(k=>map[k].gasto),neto:meses.map(k=>map[k].ingreso-map[k].gasto)};
+}
+function finPorCategoria(){
+  const map={};
+  FINANZAS.filter(m=>m.tipo==='gasto').forEach(m=>{map[m.categoria]=(map[m.categoria]||0)+(+m.importe||0);});
+  return{cats:Object.keys(map),vals:Object.values(map)};
+}
+function movimientosTableHTML(){
+  const list=FINANZAS.slice().sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
+  if(!list.length)return '<div class="small">Sin movimientos todavía. Añade el primero arriba.</div>';
+  return list.map(m=>`<div class="docrow"><b style="color:${m.tipo==='ingreso'?'#12673a':'#8f2417'}">${m.tipo==='ingreso'?'+ ':'− '}${fmt(m.importe)}</b><span class="small">${m.fecha}</span><span class="tag ${m.tipo==='ingreso'?'tag-ok':'tag-warn'}">${esc(m.categoria)}</span><span style="flex:1">${esc(m.descripcion||'')}</span>${m.cocheId?`<span class="pill">${esc(cocheLabel(m.cocheId))}</span>`:''}<button class="rm" onclick="rmMovimiento('${m.id}')">quitar</button></div>`).join('');
+}
+function renderFinCharts(){
+  if(!window.Chart)return;
+  const pm=finPorMes();
+  if(finChartMes)finChartMes.destroy();
+  const ctx1=$('finChartMes');if(ctx1){finChartMes=new Chart(ctx1,{type:'bar',data:{labels:pm.meses,datasets:[{label:'Ingresos',data:pm.ingresos,backgroundColor:'#1e9e5a'},{label:'Gastos',data:pm.gastos,backgroundColor:'#D0402E'}]},options:{responsive:true,plugins:{title:{display:true,text:'Ingresos vs gastos por mes'}}}});}
+  const pc=finPorCategoria();
+  if(finChartCat)finChartCat.destroy();
+  const ctx2=$('finChartCat');if(ctx2){finChartCat=new Chart(ctx2,{type:'doughnut',data:{labels:pc.cats,datasets:[{data:pc.vals,backgroundColor:['#1A306D','#2f6fd6','#7c5cd0','#E0802E','#E0A32E','#0d9488','#b23b2c','#8895a7','#c2691c','#25a75b']}]},options:{responsive:true,plugins:{title:{display:true,text:'Gastos por categoría'}}}});}
+}
+function exportFinanzasCSV(){
+  const rows=[['Fecha','Tipo','Categoría','Descripción','Importe','Coche']];
+  FINANZAS.slice().sort((a,b)=>(a.fecha||'').localeCompare(b.fecha||'')).forEach(m=>rows.push([m.fecha,m.tipo,m.categoria,(m.descripcion||'').replace(/"/g,'""'),m.importe,cocheLabel(m.cocheId)]));
+  const csv=rows.map(r=>r.map(v=>`"${v}"`).join(';')).join('\n');
+  const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='JJ_Import_Motors_Finanzas_'+new Date().toISOString().slice(0,10)+'.csv';document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),2000);
+}
+function renderFinanzas(){
+  const k=finKPIs();
+  $('finbody').innerHTML=`
+   <div class="two">
+    <div>
+     <h4>Añadir movimiento</h4>
+     <div class="l"><span>Tipo</span><select id="fm_tipo" onchange="finUpdateCats()"><option value="ingreso">Ingreso</option><option value="gasto">Gasto</option></select></div>
+     <div class="l"><span>Fecha</span><input type="date" id="fm_fecha" value="${new Date().toISOString().slice(0,10)}"></div>
+     <div class="l"><span>Categoría</span><select id="fm_cat"></select></div>
+     <div class="l"><span>Descripción</span><input type="text" id="fm_desc" placeholder="ej. Transporte Astra Hamburgo-Madrid" style="width:220px"></div>
+     <div class="l"><span>Importe (€)</span><input type="number" id="fm_imp" step="0.01"></div>
+     <div class="l"><span>Coche vinculado (opcional)</span><select id="fm_coche"><option value="">—</option>${COCHES.map(c=>`<option value="${c.id}">${esc(c.marca+' '+c.modelo)}</option>`).join('')}</select></div>
+     <button class="btn pri" style="margin-top:8px;width:100%" onclick="addMovimiento()">+ Añadir movimiento</button>
+    </div>
+    <div>
+     <h4>KPIs del negocio</h4>
+     <div class="res">
+      <div class="rcard"><div class="small">FACTURACIÓN</div><div class="n" style="color:#12673a">${fmt(k.ingresos)}</div></div>
+      <div class="rcard"><div class="small">GASTOS</div><div class="n" style="color:#8f2417">${fmt(k.gastos)}</div></div>
+      <div class="rcard"><div class="small">BENEFICIO NETO</div><div class="n">${fmt(k.neto)}</div></div>
+      <div class="rcard"><div class="small">COCHES ENTREGADOS</div><div class="n">${k.entregados}</div><div class="small">Honorario medio: ${fmt(k.honMedio)}</div></div>
+     </div>
+    </div>
+   </div>
+   <h4 style="margin-top:18px">Gráficas</h4>
+   <div class="two">
+    <div><canvas id="finChartMes" height="220"></canvas></div>
+    <div><canvas id="finChartCat" height="220"></canvas></div>
+   </div>
+   <h4 style="margin-top:18px">Movimientos</h4>
+   <button class="upl" style="margin-bottom:10px" onclick="exportFinanzasCSV()">⬇️ Exportar CSV (para el asesor)</button>
+   ${movimientosTableHTML()}
+   <div class="small" style="margin-top:10px">Todo se guarda en este navegador. Exporta el CSV de vez en cuando y guárdalo en Drive (carpeta "05 Legal y administración") como respaldo.</div>`;
+  finUpdateCats();
+  setTimeout(renderFinCharts,0);
+}
+function openFinanzas(){renderFinanzas();$('finmodal').classList.add('open');}
+
+// ===== Compartir / Backup (sin servidor, vía Drive) =====
+function exportarDatos(){
+  const data={
+    _tipo:'JJ_Import_Motors_backup', _version:1, _fecha:new Date().toISOString(),
+    coches:COCHES, state:STATE, finanzas:FINANZAS, vista:localStorage.getItem('jj_vista')||'lista'
+  };
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');
+  a.href=url;a.download='JJ_Import_Motors_datos_'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);
+}
+function importarDatos(input){
+  const f=input.files[0];if(!f)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    let data;try{data=JSON.parse(e.target.result);}catch(err){alert('El archivo no es un JSON válido.');return;}
+    if(data._tipo!=='JJ_Import_Motors_backup'){alert('Este archivo no es un backup del panel JJ Import Motors.');return;}
+    const nC=(data.coches||[]).length, nM=(data.finanzas||[]).length;
+    if(!confirm('Vas a CARGAR los datos del archivo ('+nC+' coche(s) y '+nM+' movimiento(s) de finanzas) y sustituir lo que tienes ahora en este navegador. ¿Continuar?'))return;
+    if(data.coches)localStorage.setItem('jj_coches',JSON.stringify(data.coches));
+    if(data.state)localStorage.setItem('jj_state',JSON.stringify(data.state));
+    if(data.finanzas)localStorage.setItem('jj_finanzas',JSON.stringify(data.finanzas));
+    if(data.vista)localStorage.setItem('jj_vista',data.vista);
+    alert('Datos importados correctamente. Se va a recargar el panel.');location.reload();
+  };
+  reader.readAsText(f);
+}
+function renderDatos(){
+  const nC=COCHES.length, nM=FINANZAS.length;
+  let nDocs=0,nFotos=0;Object.keys(STATE).forEach(id=>{const s=STATE[id]||{};if(s.docs){nDocs+=Object.keys(s.docs).filter(k=>k!=='facturas'&&k!=='otros').length;nDocs+=(s.docs.facturas||[]).length+(s.docs.otros||[]).length;}if(s.media&&s.media.fotos)nFotos+=s.media.fotos.length;});
+  $('datosbody').innerHTML=`
+   <div class="small" style="margin-bottom:12px;color:#555">Como no usamos servidor, los datos del panel viven en <b>este navegador</b>. Para compartir con tu compañero: <b>Exporta</b> un archivo, súbelo a vuestra carpeta compartida de Drive, y tu compañero lo <b>Importa</b>. Así los dos tenéis el mismo estado.</div>
+   <div class="rcard" style="margin-bottom:14px">
+     <div style="font-size:13px">📦 En este navegador tienes ahora:</div>
+     <div class="small" style="color:#555;margin-top:4px">${nC} coche(s) · ${nM} movimiento(s) de finanzas · ${nDocs} documento(s) · ${nFotos} foto(s) de cliente</div>
+   </div>
+   <button class="btn pri" style="width:100%;margin-bottom:8px" onclick="exportarDatos()">⬇️ Exportar todo a un archivo JSON (para Drive)</button>
+   <label class="btn pri" style="width:100%;display:block;text-align:center;cursor:pointer;background:#6d4bd0">⬆️ Importar datos desde un archivo JSON<input type="file" accept="application/json,.json" style="display:none" onchange="importarDatos(this)"></label>
+   <div class="note" style="margin-top:14px;margin-bottom:0">⚠️ Al <b>importar</b> se sustituye lo que tengas en este navegador por lo del archivo. Poneos de acuerdo en quién edita cada momento para no pisaros: el último que importa/exporta manda. Con hosting real (Fase 3) esto se volvería automático y en tiempo real.</div>
+   <div class="small" style="margin-top:10px">Consejo: guarda el JSON en Drive con la fecha (el nombre ya la lleva) para tener histórico. Los archivos pesados (fotos/vídeos originales) mejor súbelos aparte a la carpeta del coche; este JSON ya incluye lo que hayas cargado dentro del panel.</div>`;
+}
+function openDatos(){renderDatos();$('datosmodal').classList.add('open');}
+
+ESTADOS.forEach(e=>{let o=document.createElement('option');o.value=e;o.textContent=e;$('festado').appendChild(o);});
+['modal','lib','cmodal','finmodal','datosmodal'].forEach(id=>$(id).addEventListener('click',e=>{if(e.target.id===id)closeModal(id);}));
+$('q').oninput=render;$('festado').onchange=render;$('orden').onchange=render;
+render();
+</script>
+</body>
+</html>
