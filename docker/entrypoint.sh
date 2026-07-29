@@ -12,17 +12,26 @@ if [ ! -f .env ]; then
 fi
 
 # Substitute Railway environment variables into .env
+echo "🔍 DEBUG: MYSQLHOST=$MYSQLHOST"
+echo "🔍 DEBUG: MYSQLPORT=$MYSQLPORT"
+echo "🔍 DEBUG: MYSQL_DATABASE=$MYSQL_DATABASE"
+echo "🔍 DEBUG: REDISHOST=$REDISHOST"
+echo "🔍 DEBUG: RAILWAY_ENVIRONMENT=$RAILWAY_ENVIRONMENT"
+
 if [ -n "$MYSQLHOST" ]; then
-    sed -i 's|\${MYSQLHOST}|'"$MYSQLHOST"'|g' .env
-    sed -i 's|\${MYSQLPORT}|'"${MYSQLPORT:-3306}"'|g' .env
-    sed -i 's|\${MYSQL_DATABASE}|'"${MYSQL_DATABASE:-railway}"'|g' .env
-    sed -i 's|\${MYSQLUSER}|'"$MYSQLUSER"'|g' .env
-    sed -i 's|\${MYSQLPASSWORD}|'"$MYSQLPASSWORD"'|g' .env
-    sed -i 's|\${REDISHOST}|'"${REDISHOST:-127.0.0.1}"'|g' .env
-    sed -i 's|\${REDISPORT}|'"${REDISPORT:-6379}"'|g' .env
-    sed -i 's|\${APP_URL}|'"${APP_URL:-http://localhost}"'|g' .env
+    sed -i "s|\${MYSQLHOST}|$MYSQLHOST|g" .env
+    sed -i "s|\${MYSQLPORT}|${MYSQLPORT:-3306}|g" .env
+    sed -i "s|\${MYSQL_DATABASE}|${MYSQL_DATABASE:-railway}|g" .env
+    sed -i "s|\${MYSQLUSER}|$MYSQLUSER|g" .env
+    sed -i "s|\${MYSQLPASSWORD}|$MYSQLPASSWORD|g" .env
+    sed -i "s|\${REDISHOST}|${REDISHOST:-127.0.0.1}|g" .env
+    sed -i "s|\${REDISPORT}|${REDISPORT:-6379}|g" .env
+    sed -i "s|\${APP_URL}|${APP_URL:-http://localhost}|g" .env
     echo "✅ .env substituted with Railway values"
 fi
+
+# Show resulting DB_HOST for debugging
+echo "🔍 DEBUG: DB_HOST in .env:"; grep DB_HOST .env
 
 # Wait for MySQL if configured
 if [ -n "$MYSQLHOST" ]; then
