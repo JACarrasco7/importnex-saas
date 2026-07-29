@@ -1,4 +1,4 @@
-FROM php:8.3-apache
+FROM php:8.4-apache
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
@@ -23,8 +23,13 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs
 
-# Enable Apache modules
-RUN a2enmod rewrite headers
+# Fix MPM conflict in php:8.4-apache: remove ALL mpm modules first
+# The base image ships with mpm_prefork enabled; we need ONLY mpm_event
+# (php-fpm doesn't need mpm at all, but we use mod_php so we need one)
+RUN rm -f /etc/apache2/mods-enabled/mpm_* && \
+    echo "# MPM disabled by Dockerfile - we use mod_php via prefork" > /etc/apache2/mods-available/mpm_prefork.load.disabled && \
+    echo "LoadModule mpm_prefork_module /usr/lib/apache2/modules/mod_mpm_prefork.so" > /etc/apache2/mods-available/mpm_prefork.load && \
+    a2enmod rewrite headers mpm_prefork || true
 
 # Configure Apache
 COPY .docker/apache/000-default.conf /etc/apache2/sites-available/000-default.conf
