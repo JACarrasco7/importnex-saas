@@ -107,4 +107,5 @@ php artisan storage:link 2>/dev/null || true
 
 echo "✅ Application ready!"
 
-exec "$@"
+# Start nginx + php-fpm via supervisord
+exec /usr/bin/supervisord -c /etc/supervisord.conf
