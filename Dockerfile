@@ -23,7 +23,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs
 
 # Enable Apache mod_rewrite - remove all MPMs first to avoid conflicts
-RUN a2dismod -f mpm_prefork mpm_worker mpm_event 2>/dev/null || true && \
+RUN rm -f /etc/apache2/mods-enabled/mpm_* && \
     a2enmod rewrite headers mpm_event
 
 # Configure Apache

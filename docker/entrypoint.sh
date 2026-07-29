@@ -12,28 +12,58 @@ if [ ! -f .env ]; then
 fi
 
 # Substitute Railway environment variables into .env
-echo "DEBUG: MYSQLHOST=[$MYSQLHOST] MYSQLPORT=[$MYSQLPORT] REDISHOST=[$REDISHOST]"
+echo "DEBUG: MYSQL_URL=[$MYSQL_URL] REDIS_URL=[$REDIS_URL]"
 
-if [ -n "$MYSQLHOST" ]; then
-    # Use PHP for reliable substitution (single quotes so bash doesn't expand ${MYSQLHOST})
+if [ -n "$MYSQL_URL" ]; then
+    # Parse MYSQL_URL (format: mysql://user:pass@host:port/db) and substitute
     php -r '
+$url = getenv("MYSQL_URL");
+$parts = parse_url($url);
+$host = $parts["host"] ?? "";
+$port = $parts["port"] ?? 3306;
+$user = $parts["user"] ?? "";
+$pass = $parts["pass"] ?? "";
+$path = ltrim($parts["path"] ?? "/railway", "/");
+
 $content = file_get_contents(".env");
 $mapping = [
-    "\${MYSQLHOST}" => getenv("MYSQLHOST") ?: "",
-    "\${MYSQLPORT}" => getenv("MYSQLPORT") ?: "3306",
-    "\${MYSQL_DATABASE}" => getenv("MYSQL_DATABASE") ?: "railway",
-    "\${MYSQLUSER}" => getenv("MYSQLUSER") ?: "",
-    "\${MYSQLPASSWORD}" => getenv("MYSQLPASSWORD") ?: "",
-    "\${REDISHOST}" => getenv("REDISHOST") ?: "127.0.0.1",
-    "\${REDISPORT}" => getenv("REDISPORT") ?: "6379",
-    "\${APP_URL}" => getenv("APP_URL") ?: "http://localhost",
+    "\${MYSQLHOST}" => $host,
+    "\${MYSQLPORT}" => $port,
+    "\${MYSQL_DATABASE}" => $path,
+    "\${MYSQLUSER}" => $user,
+    "\${MYSQLPASSWORD}" => $pass,
 ];
 foreach ($mapping as $k => $v) {
     $content = str_replace($k, $v, $content);
 }
 file_put_contents(".env", $content);
-echo "DEBUG: .env substituted\n";
+echo "DEBUG: parsed MYSQL_URL host=$host db=$path\n";
 '
+fi
+
+if [ -n "$REDIS_URL" ]; then
+    php -r '
+$url = getenv("REDIS_URL");
+$parts = parse_url($url);
+$host = $parts["host"] ?? "127.0.0.1";
+$port = $parts["port"] ?? 6379;
+
+$content = file_get_contents(".env");
+$mapping = [
+    "\${REDISHOST}" => $host,
+    "\${REDISPORT}" => $port,
+];
+foreach ($mapping as $k => $v) {
+    $content = str_replace($k, $v, $content);
+}
+file_put_contents(".env", $content);
+echo "DEBUG: parsed REDIS_URL host=$host\n";
+'
+fi
+
+# APP_URL fallback
+if [ -n "$APP_URL" ]; then
+    sed -i "s|\${APP_URL}|$APP_URL|g" .env
 fi
 
 # Show resulting DB_HOST for debugging
