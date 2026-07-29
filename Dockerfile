@@ -22,8 +22,9 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs
 
-# Enable Apache mod_rewrite
-RUN a2enmod rewrite headers && a2dismod mpm_prefork -f || true && a2enmod mpm_event
+# Enable Apache mod_rewrite - remove all MPMs first to avoid conflicts
+RUN a2dismod -f mpm_prefork mpm_worker mpm_event 2>/dev/null || true && \
+    a2enmod rewrite headers mpm_event
 
 # Configure Apache
 COPY .docker/apache/000-default.conf /etc/apache2/sites-available/000-default.conf
