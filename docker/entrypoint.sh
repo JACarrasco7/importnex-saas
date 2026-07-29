@@ -12,26 +12,32 @@ if [ ! -f .env ]; then
 fi
 
 # Substitute Railway environment variables into .env
-echo "🔍 DEBUG: MYSQLHOST=$MYSQLHOST"
-echo "🔍 DEBUG: MYSQLPORT=$MYSQLPORT"
-echo "🔍 DEBUG: MYSQL_DATABASE=$MYSQL_DATABASE"
-echo "🔍 DEBUG: REDISHOST=$REDISHOST"
-echo "🔍 DEBUG: RAILWAY_ENVIRONMENT=$RAILWAY_ENVIRONMENT"
+echo "DEBUG: MYSQLHOST=[$MYSQLHOST] MYSQLPORT=[$MYSQLPORT] REDISHOST=[$REDISHOST]"
 
 if [ -n "$MYSQLHOST" ]; then
-    sed -i "s|\${MYSQLHOST}|$MYSQLHOST|g" .env
-    sed -i "s|\${MYSQLPORT}|${MYSQLPORT:-3306}|g" .env
-    sed -i "s|\${MYSQL_DATABASE}|${MYSQL_DATABASE:-railway}|g" .env
-    sed -i "s|\${MYSQLUSER}|$MYSQLUSER|g" .env
-    sed -i "s|\${MYSQLPASSWORD}|$MYSQLPASSWORD|g" .env
-    sed -i "s|\${REDISHOST}|${REDISHOST:-127.0.0.1}|g" .env
-    sed -i "s|\${REDISPORT}|${REDISPORT:-6379}|g" .env
-    sed -i "s|\${APP_URL}|${APP_URL:-http://localhost}|g" .env
-    echo "✅ .env substituted with Railway values"
+    # Use PHP for reliable substitution (single quotes so bash doesn't expand ${MYSQLHOST})
+    php -r '
+$content = file_get_contents(".env");
+$mapping = [
+    "\${MYSQLHOST}" => getenv("MYSQLHOST") ?: "",
+    "\${MYSQLPORT}" => getenv("MYSQLPORT") ?: "3306",
+    "\${MYSQL_DATABASE}" => getenv("MYSQL_DATABASE") ?: "railway",
+    "\${MYSQLUSER}" => getenv("MYSQLUSER") ?: "",
+    "\${MYSQLPASSWORD}" => getenv("MYSQLPASSWORD") ?: "",
+    "\${REDISHOST}" => getenv("REDISHOST") ?: "127.0.0.1",
+    "\${REDISPORT}" => getenv("REDISPORT") ?: "6379",
+    "\${APP_URL}" => getenv("APP_URL") ?: "http://localhost",
+];
+foreach ($mapping as $k => $v) {
+    $content = str_replace($k, $v, $content);
+}
+file_put_contents(".env", $content);
+echo "DEBUG: .env substituted\n";
+'
 fi
 
 # Show resulting DB_HOST for debugging
-echo "🔍 DEBUG: DB_HOST in .env:"; grep DB_HOST .env
+echo "DEBUG DB_HOST:"; grep DB_HOST .env
 
 # Wait for MySQL if configured
 if [ -n "$MYSQLHOST" ]; then
