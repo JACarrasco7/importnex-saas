@@ -5,6 +5,12 @@ cd /var/www/html
 
 echo "🚀 Starting Importnex SaaS..."
 
+# Ensure .env exists
+if [ ! -f .env ]; then
+    echo "Creating .env from .env.production..."
+    cp .env.production .env
+fi
+
 # Wait for MySQL if configured
 if [ -n "$MYSQLHOST" ]; then
     echo "Waiting for MySQL at $MYSQLHOST..."
