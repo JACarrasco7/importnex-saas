@@ -40,7 +40,7 @@ RUN composer install --optimize-autoloader --no-dev --no-scripts
 
 # Copy package files
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev
+RUN npm ci
 
 # Copy application code
 COPY . .
