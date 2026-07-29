@@ -23,7 +23,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs
 
 # Enable Apache mod_rewrite
-RUN a2enmod rewrite headers
+RUN a2enmod rewrite headers && a2dismod mpm_prefork -f || true && a2enmod mpm_event
 
 # Configure Apache
 COPY .docker/apache/000-default.conf /etc/apache2/sites-available/000-default.conf
