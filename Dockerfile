@@ -45,6 +45,9 @@ RUN npm ci
 # Copy application code
 COPY . .
 
+# Use .env.production as template if no .env present
+RUN cp -n .env.production .env || true
+
 # Build assets
 RUN npm run build
 
