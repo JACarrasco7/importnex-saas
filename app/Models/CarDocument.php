@@ -23,6 +23,9 @@ class CarDocument extends Model
     public const GROUP_SELLER_ORIGIN = 'seller_origin';
     public const GROUP_PURCHASE_TRANSPORT = 'purchase_transport';
     public const GROUP_SPAIN_PROCEDURES = 'spain_procedures';
+    // Not part of the fixed 17-document expediente (see CarDocumentDefinitions) —
+    // used for one-off AI-generated briefing PDFs attached via the chat bridge.
+    public const GROUP_AI_REPORTS = 'ai_reports';
 
     protected static function booted()
     {

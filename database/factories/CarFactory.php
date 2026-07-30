@@ -58,7 +58,7 @@ class CarFactory extends Factory
             'lng' => fake()->longitude(),
 
             // Status and valuation
-            'status' => fake()->randomElement(['Located', 'Valuing', 'Offered', 'Reserved', 'Purchased', 'In_transit', 'Processing', 'Delivered', 'Discarded']),
+            'status' => fake()->randomElement(\App\Models\Car::STATUSES),
             'url_link' => 'https://www.mobile.de/en/vehicles/details.html?id=' . fake()->randomNumber(9),
             'traffic_light' => fake()->randomElement(['green', 'amber', 'red', 'neutral']),
             'valuation' => fake()->paragraph(),

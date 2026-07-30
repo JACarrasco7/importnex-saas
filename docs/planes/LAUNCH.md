@@ -2,6 +2,26 @@
 
 This document is the go-live checklist for the Importnex SaaS platform.
 
+## 🚀 Current deployment status
+
+**Environment:** DEV (Production-ready)
+**URL:** https://dev.aktive.cloud/importnexcore
+**Status:** ✅ LIVE - Ready for testing
+**Last deployed:** 30 julio 2026
+
+### Quick access
+- **Login:** https://dev.aktive.cloud/importnexcore/login
+- **Credentials:** `carra@admin.com` / `demo1234`
+- **Dashboard:** https://dev.aktive.cloud/importnexcore/dashboard
+
+### Server info
+- **Server:** VPS dev.aktive.cloud
+- **Directory:** `/var/www/importnex-saas`
+- **Tech stack:** PHP 8.3, MySQL 8.0, Apache, Redis
+- **See PROGRESO.md for full deployment details**
+
+---
+
 ## Pre-launch checklist
 
 - [ ] All environment variables configured in production `.env`

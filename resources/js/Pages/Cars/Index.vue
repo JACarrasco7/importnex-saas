@@ -1,7 +1,7 @@
 <script setup>
 import { ref, watch } from 'vue';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
-import { MagnifyingGlassIcon, PlusIcon, Squares2X2Icon, ArrowUpTrayIcon, PencilIcon, EyeIcon, TrashIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/vue/24/outline';
+import { MagnifyingGlassIcon, PlusIcon, Squares2X2Icon, ArrowUpTrayIcon, PencilIcon, EyeIcon, TrashIcon, ChevronLeftIcon, ChevronRightIcon, SparklesIcon } from '@heroicons/vue/24/outline';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Badge from '@/Components/Badge.vue';
 import PageHeader from '@/Components/PageHeader.vue';
@@ -62,6 +62,8 @@ const confirmDelete = () => {
         },
     });
 };
+
+
 </script>
 
 <template>
@@ -79,6 +81,10 @@ const confirmDelete = () => {
                         <Link :href="route('cars.kanban')" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             <Squares2X2Icon class="h-4 w-4" />
                             Kanban
+                        </Link>
+                        <Link :href="route('cars.import-valuation.create')" class="inline-flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-purple-500">
+                            <SparklesIcon class="h-4 w-4" />
+                            Importar informe
                         </Link>
                         <Link :href="route('cars.create')" class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">
                             <PlusIcon class="h-4 w-4" />

@@ -24,7 +24,7 @@ class DashboardController extends Controller
             ->where('organization_id', $orgId)
             ->selectRaw("
                 COUNT(*) as total,
-                SUM(CASE WHEN status IN ('Located', 'Valuing', 'Offered', 'Reserved', 'Purchased', 'In_transit', 'Processing') THEN 1 ELSE 0 END) as active,
+                SUM(CASE WHEN status IN ('" . implode("','", Car::ACTIVE_STATUSES) . "') THEN 1 ELSE 0 END) as active,
                 SUM(CASE WHEN status IN ('Located', 'Valuing', 'Offered', 'Reserved') THEN 1 ELSE 0 END) as for_sale,
                 SUM(CASE WHEN status = 'Purchased' THEN 1 ELSE 0 END) as purchased,
                 SUM(CASE WHEN traffic_light = 'green' THEN 1 ELSE 0 END) as green,

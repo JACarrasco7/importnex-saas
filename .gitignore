@@ -16,3 +16,11 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+
+# Tokens y credenciales locales — NUNCA commitear
+/laravel/api_token.txt
+/test_log*.php
+/test-informe.json
+/test_output.txt
+/importnex-saas-*.zip
+/_tmp/

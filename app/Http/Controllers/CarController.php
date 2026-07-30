@@ -32,7 +32,7 @@ class CarController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        $statuses = ['Located', 'Valuing', 'Offered', 'Reserved', 'Purchased', 'In_transit', 'Processing', 'Pending review', 'Verifying', 'Delivered', 'Discarded'];
+        $statuses = Car::STATUSES;
         $lights = ['green', 'amber', 'red', 'neutral'];
 
         return Inertia::render('Cars/Index', [
@@ -94,7 +94,7 @@ class CarController extends Controller
             'fuel' => 'required|string|max:255',
             'transmission' => 'required|string|max:255',
             'purchase_price' => 'required|numeric|min:0',
-            'status' => ['required', Rule::in(['Located', 'Valuing', 'Offered', 'Reserved', 'Purchased', 'In_transit', 'Processing'])],
+            'status' => ['required', Rule::in(Car::STATUSES)],
             'traffic_light' => ['required', Rule::in(['green', 'amber', 'red', 'neutral'])],
             'client_id' => ['nullable', Rule::exists('clients', 'id')->where('organization_id', auth()->user()->organization_id)],
         ]);
@@ -183,6 +183,7 @@ class CarController extends Controller
             'seller_origin'      => 'Seller / Country of origin',
             'purchase_transport' => 'Purchase & transport',
             'spain_procedures'   => 'Spain procedures',
+            'ai_reports'         => 'AI briefing reports',
             default              => ucfirst(str_replace('_', ' ', $group)),
         };
     }
@@ -206,7 +207,7 @@ class CarController extends Controller
             'transmission' => 'required|string|max:255',
             'client_id' => ['nullable', Rule::exists('clients', 'id')->where('organization_id', auth()->user()->organization_id)],
             'purchase_price' => 'required|numeric|min:0',
-            'status' => ['required', Rule::in(['Located', 'Valuing', 'Offered', 'Reserved', 'Purchased', 'In_transit', 'Processing'])],
+            'status' => ['required', Rule::in(Car::STATUSES)],
             'traffic_light' => ['required', Rule::in(['green', 'amber', 'red', 'neutral'])],
         ]);
 

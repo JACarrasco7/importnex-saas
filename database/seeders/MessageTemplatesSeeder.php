@@ -54,7 +54,10 @@ class MessageTemplatesSeeder extends Seeder
         ];
 
         foreach ($templates as $template) {
-            \App\Models\MessageTemplate::create($template);
+            \App\Models\MessageTemplate::firstOrCreate(
+                ['name' => $template['name']],
+                $template
+            );
         }
     }
 }

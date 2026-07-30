@@ -66,6 +66,14 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::get('/cars/{car}/documents/{document}', [\App\Http\Controllers\CarDocumentController::class, 'show'])->name('cars.documents.show');
     Route::delete('/cars/{car}/documents/{document}', [\App\Http\Controllers\CarDocumentController::class, 'destroy'])->name('cars.documents.destroy');
 
+    // Valuation import (from chat report)
+    Route::get('/cars/import-valuation', [\App\Http\Controllers\ValuationImportController::class, 'create'])
+        ->name('cars.import-valuation.create');
+    Route::post('/cars/import-valuation', [\App\Http\Controllers\ValuationImportController::class, 'store'])
+        ->name('cars.import-valuation.store');
+    Route::get('/cars/import-valuation/pending', [\App\Http\Controllers\ValuationImportController::class, 'pending'])
+        ->name('cars.import-valuation.pending');
+
     // Car Checklist (toggle complete)
     Route::post('/cars/{car}/checklists/{checklist}/toggle', [\App\Http\Controllers\CarChecklistController::class, 'toggle'])
         ->name('cars.checklists.toggle');

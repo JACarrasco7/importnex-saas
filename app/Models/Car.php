@@ -51,6 +51,22 @@ class Car extends Model
         'parts_maintenance', 'unit_specific',
     ];
 
+    public const STATUSES = [
+        'Located', 'Valuing', 'Offered', 'Reserved', 'Purchased',
+        'In_transit', 'Processing', 'Pending review', 'Verifying',
+        'Delivered', 'Discarded'
+    ];
+
+    public const ACTIVE_STATUSES = [
+        'Located', 'Valuing', 'Offered', 'Reserved', 'Purchased',
+        'In_transit', 'Processing'
+    ];
+
+    public const KANBAN_STATUSES = [
+        'Located', 'Valuing', 'Offered', 'Reserved', 'Purchased',
+        'In_transit', 'Processing', 'Delivered'
+    ];
+
     public const CURRENT_SCHEMA_VERSION = 1;
 
     protected static function booted()
@@ -94,7 +110,7 @@ class Car extends Model
 
     public function scopeActive($query)
     {
-        return $query->whereIn('status', ['Located', 'Valuing', 'Offered', 'Reserved', 'Purchased', 'In_transit', 'Processing']);
+        return $query->whereIn('status', self::ACTIVE_STATUSES);
     }
 
     public function scopeStatus($query, $status)

@@ -11,34 +11,37 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->call([
-            OrganizationSeeder::class,
-            MessageTemplatesSeeder::class,
-        ]);
+        // Solo crear la organización JJ Import Motors y los 2 usuarios específicos.
+        // NO se siembran datos demo automáticamente.
 
-        $jjImport = Organization::where('name', 'JJ Import Motors')->first();
-        if ($jjImport) {
-            User::updateOrCreate(
-                ['email' => 'carra@admin.com'],
-                [
-                    'name' => 'Carra',
-                    'password' => Hash::make('joselete7'),
-                    'organization_id' => $jjImport->id,
-                    'role' => 'owner',
-                    'email_verified_at' => now(),
-                ]
-            );
+        $jjImport = Organization::firstOrCreate(
+            ['name' => 'JJ Import Motors'],
+            [
+                'plan' => 'pro',
+                'trial_ends_at' => now()->addDays(30),
+            ]
+        );
 
-            User::updateOrCreate(
-                ['email' => 'jmepegounpeo@admin.com'],
-                [
-                    'name' => 'Jmepegounpeo',
-                    'password' => Hash::make('paraquelaquieresabermecagoentoquelargalaputacontrasehna'),
-                    'organization_id' => $jjImport->id,
-                    'role' => 'owner',
-                    'email_verified_at' => now(),
-                ]
-            );
-        }
+        User::updateOrCreate(
+            ['email' => 'carra@jjimportmotors.com'],
+            [
+                'name' => 'Carra',
+                'password' => Hash::make('joselete7'),
+                'organization_id' => $jjImport->id,
+                'role' => 'owner',
+                'email_verified_at' => now(),
+            ]
+        );
+
+        User::updateOrCreate(
+            ['email' => 'jmepegounpeo@jjimportmotors.com'],
+            [
+                'name' => 'Jmepegounpeo',
+                'password' => Hash::make('paraquelaquieresabermecagoentoquelargalaputacontrasehna'),
+                'organization_id' => $jjImport->id,
+                'role' => 'owner',
+                'email_verified_at' => now(),
+            ]
+        );
     }
 }

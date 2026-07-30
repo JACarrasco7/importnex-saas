@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'overview' => 'Overview',
+    'inventory' => 'Inventory',
+    'crm' => 'CRM',
+    'account' => 'Account',
+    'dashboard' => 'Dashboard',
+    'cars' => 'Cars',
+    'kanban' => 'Kanban',
+    'map' => 'Map',
+    'finance' => 'Finance',
+    'trips' => 'Trips',
+    'clients' => 'Clients',
+    'contacts' => 'Contacts',
+    'templates' => 'Templates',
+    'alerts' => 'Alerts',
+    'plan' => 'Plan',
+    'billing' => 'Billing',
+    'organization' => 'Organization',
+    'profile' => 'Profile',
+    'logout' => 'Log out',
+    'view_plans' => 'View plans',
+    'need_more_features' => 'Need more features?',
+    'upgrade_message' => 'Upgrade your plan to unlock unlimited cars and contacts.',
+];

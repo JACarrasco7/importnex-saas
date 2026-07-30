@@ -5,7 +5,9 @@ namespace App\Services;
 use App\Models\Car;
 use App\Models\Organization;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 
 /**
@@ -22,6 +24,14 @@ class ValuationImporter
      * Schema versioning — bump when contract changes incompatibly.
      */
     public const SUPPORTED_SCHEMA_VERSION = 1;
+
+    /**
+     * Cuando el informe llega dentro de un paquete .zip que ya trae las fotos
+     * en local, no tiene sentido descargarlas otra vez del portal (y ademas el
+     * portal suele bloquear la descarga). El ingestor del paquete pone esto a
+     * true antes de llamar a apply().
+     */
+    public bool $skipRemotePhotos = false;
 
     /** Aspect keys we accept (mapped to canonical English). */
     private const RESEARCH_ASPECT_MAP = [
@@ -185,7 +195,22 @@ class ValuationImporter
                 'transport'       => $c['transporte']         ?? null,
                 'itv_fee'         => $c['itv_matriculacion']  ?? null,
                 'dgt_fees'        => $c['tasa_dgt']           ?? null,
-                'professional_fees'=> $c['gestoria']           ?? null,
+
+                // Honorarios de JJ + gestoria van a la misma columna: son lo que
+                // cobramos por encima del coste. Antes solo se leia 'gestoria'
+                // (casi siempre 0) y los honorarios se perdian.
+                'professional_fees'=> $this->sumProfessionalFees($c),
+
+                // Base del IEDMT. La app NO guarda el importe del impuesto: lo
+                // recalcula con Car::calculateIEDMT() a partir de esta base, la
+                // antiguedad y el CO2. Si el chat no manda la base, el impuesto
+                // sale 0 y el coste total queda por debajo del real.
+                //
+                // Ojo: aqui va el PVP del coche NUEVO, sin depreciar. El
+                // coeficiente por antiguedad lo aplica calculateIEDMT() despues,
+                // asi que mandar la base ya depreciada lo depreciaria dos veces.
+                'new_price'       => $c['pvp_nuevo'] ?? null,
+                'manual_tax_base' => $c['pvp_nuevo'] ?? null,
 
                 // Enriched valuation
                 'research'        => $this->normalizeResearch($i),
@@ -210,13 +235,139 @@ class ValuationImporter
                 'schema_version'   => self::SUPPORTED_SCHEMA_VERSION,
 
                 // Notes: append everything that didn't map to a column
-                'notes' => $this->buildNotes($v, $c, $vd, $payload['avisos'] ?? []),
+                'notes' => $this->buildNotes($v, $c, $vd, $payload['avisos'] ?? [], $payload['fuentes'] ?? []),
             ], fn ($v) => $v !== null && $v !== '' && $v !== []));
 
             $car->save();
+
+            // Guardar fotos y archivos en la estructura de carpetas por organización
+            $this->savePhotosAndFiles($car, $payload);
         });
 
         return $car;
+    }
+
+    /**
+     * Guardar fotos y archivos en la estructura de carpetas por organización
+     */
+    private function savePhotosAndFiles(Car $car, array $payload): void
+    {
+        $org = $car->organization;
+        $orgDirName = str_replace(' ', '_', $org->name);
+
+        // Crear estructura de carpetas: organization_name/vehicles/car_id/
+        $vehicleDir = storage_path('app/importnex/import/' . $orgDirName . '/vehicles/' . $car->id);
+        if (! file_exists($vehicleDir)) {
+            mkdir($vehicleDir, 0755, true);
+        }
+
+        // Guardar el informe JSON
+        $reportFile = $vehicleDir . '/informe_' . now()->format('Ymd-His') . '.json';
+        file_put_contents($reportFile, json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+        // Procesar fotos si existen (salvo que el paquete ya las traiga en local)
+        $fotos = $payload['vehiculo']['fotos'] ?? [];
+        if (! empty($fotos) && ! $this->skipRemotePhotos) {
+            $this->savePhotos($car, $fotos);
+        }
+    }
+
+    /**
+     * Descarga las fotos del anuncio y las registra en car_photos.
+     *
+     * Dos correcciones importantes frente a la version anterior:
+     *  - Se guardan en el disco 'public' bajo cars/{id}/photos, que es donde la
+     *    ficha las busca (<img :src="`/storage/${photo.url}`">). Antes se
+     *    guardaba el fichero en storage/app/importnex y en `url` se metia la URL
+     *    remota, asi que la imagen nunca se veia.
+     *  - Se descargan con User-Agent y Referer. Los CDN de los portales
+     *    (classistatic.de y compania) rechazan file_get_contents sin cabeceras,
+     *    que era la razon por la que no entraba ninguna foto.
+     */
+    private function savePhotos(Car $car, array $photoUrls): void
+    {
+        // No duplicar si el coche ya tiene fotos (reimportacion / reevaluacion).
+        if ($car->photos()->count() > 0) {
+            return;
+        }
+
+        $referer = $car->url_link ?: null;
+        $order = 0;
+
+        foreach ($photoUrls as $url) {
+            if (! is_string($url) || ! filter_var($url, FILTER_VALIDATE_URL)) {
+                continue;
+            }
+
+            try {
+                $request = Http::timeout(20)->withHeaders(array_filter([
+                    'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36',
+                    'Accept'     => 'image/avif,image/webp,image/jpeg,image/png,*/*',
+                    'Referer'    => $referer,
+                ]));
+
+                $response = $request->get($url);
+
+                if (! $response->successful() || $response->body() === '') {
+                    Log::warning('Could not download photo', [
+                        'url' => $url, 'car_id' => $car->id, 'status' => $response->status(),
+                    ]);
+                    continue;
+                }
+
+                $order++;
+                $extension = $this->guessImageExtension($response->header('Content-Type'), $url);
+                $path = sprintf('cars/%d/photos/%03d.%s', $car->id, $order, $extension);
+
+                Storage::disk('public')->put($path, $response->body());
+
+                $car->photos()->create([
+                    'organization_id' => $car->organization_id,
+                    'url'             => $path,
+                    'sort_order'      => $order,
+                    'photo_type'      => 'exterior',
+                ]);
+            } catch (\Throwable $e) {
+                Log::warning('Photo download failed', [
+                    'url' => $url, 'car_id' => $car->id, 'error' => $e->getMessage(),
+                ]);
+            }
+        }
+    }
+
+    private function guessImageExtension(?string $contentType, string $url): string
+    {
+        $map = [
+            'image/jpeg' => 'jpg', 'image/jpg' => 'jpg', 'image/png' => 'png',
+            'image/webp' => 'webp', 'image/avif' => 'avif', 'image/gif' => 'gif',
+        ];
+
+        $type = strtolower(trim(explode(';', (string) $contentType)[0]));
+        if (isset($map[$type])) {
+            return $map[$type];
+        }
+
+        $fromUrl = strtolower(pathinfo(parse_url($url, PHP_URL_PATH) ?? '', PATHINFO_EXTENSION));
+
+        return in_array($fromUrl, ['jpg', 'jpeg', 'png', 'webp', 'avif', 'gif'], true)
+            ? ($fromUrl === 'jpeg' ? 'jpg' : $fromUrl)
+            : 'jpg';
+    }
+
+    /**
+     * Honorarios de JJ + gestoria. Devuelve null si no viene ninguno de los dos,
+     * para que array_filter lo descarte y no pise un valor ya guardado.
+     */
+    private function sumProfessionalFees(array $costes): ?float
+    {
+        $honorarios = $costes['honorarios'] ?? null;
+        $gestoria   = $costes['gestoria']   ?? null;
+
+        if ($honorarios === null && $gestoria === null) {
+            return null;
+        }
+
+        return (float) $honorarios + (float) $gestoria;
     }
 
     private function translate(?string $value, array $map): ?string
@@ -311,7 +462,7 @@ class ValuationImporter
         return $out;
     }
 
-    private function buildNotes(array $v, array $c, array $vd, array $avisos): string
+    private function buildNotes(array $v, array $c, array $vd, array $avisos, array $fuentes = []): string
     {
         $lines = [];
         if (! empty($v['garantia'])) {
@@ -329,8 +480,26 @@ class ValuationImporter
         if (! empty($vd['fecha'])) {
             $lines[] = 'Verdict date: ' . $vd['fecha'];
         }
-        foreach ($avisos as $a) {
-            $lines[] = '• ' . $a;
+        if (! empty($avisos)) {
+            $lines[] = '';
+            $lines[] = 'Avisos:';
+            foreach ($avisos as $a) {
+                $lines[] = '• ' . $a;
+            }
+        }
+        if (! empty($fuentes)) {
+            $lines[] = '';
+            $lines[] = 'Fuentes consultadas:';
+            foreach ($fuentes as $f) {
+                if (! is_array($f)) {
+                    continue;
+                }
+                $aspecto = $f['aspecto'] ?? '';
+                $titulo  = $f['titulo']  ?? '';
+                $url     = $f['url']     ?? '';
+                $label   = trim($titulo !== '' ? $titulo : $aspecto);
+                $lines[] = '• [' . $aspecto . '] ' . $label . ($url ? ' — ' . $url : '');
+            }
         }
         return implode("\n", $lines);
     }

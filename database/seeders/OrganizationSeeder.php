@@ -17,7 +17,5 @@ class OrganizationSeeder extends Seeder
                 'subscribed_at' => null,
             ]
         );
-
-        \App\Models\Organization::factory(5)->create();
     }
 }

@@ -33,6 +33,7 @@ class CarKanbanController extends Controller
         $orgId = $request->user()->organization_id;
 
         $cars = Car::where('organization_id', $orgId)
+            ->whereIn('status', self::COLUMNS)
             ->orderBy('created_at', 'desc')
             ->limit(200)
             ->get(['id', 'brand', 'model', 'year', 'status', 'traffic_light', 'purchase_price', 'city']);

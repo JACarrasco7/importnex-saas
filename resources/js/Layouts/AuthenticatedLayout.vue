@@ -24,6 +24,7 @@ import {
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import FlashMessage from '@/Components/FlashMessage.vue';
 import UpgradeBanner from '@/Components/UpgradeBanner.vue';
+import LocaleSelector from '@/Components/LocaleSelector.vue';
 import { useFormat } from '@/Composables/useFormat';
 
 const sidebarOpen = ref(false);
@@ -144,6 +145,7 @@ const navGroups = [
                 </div>
 
                 <div class="flex items-center gap-2">
+                    <LocaleSelector class="hidden sm:block" />
                     <Link :href="route('alerts.index')" class="relative rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700">
                         <BellIcon class="h-5 w-5" />
                         <span v-if="pendingAlerts > 0" class="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white"></span>

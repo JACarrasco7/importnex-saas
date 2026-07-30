@@ -17,6 +17,14 @@ onMounted(async () => {
 
     const L = await import('leaflet');
 
+    // Configurar rutas de iconos de Leaflet
+    delete L.Icon.Default.prototype._getIconUrl;
+    L.Icon.Default.mergeOptions({
+        iconRetinaUrl: '/importnexcore/build/assets/marker-icon-2x.png',
+        iconUrl: '/importnexcore/build/assets/marker-icon.png',
+        shadowUrl: '/importnexcore/build/assets/marker-shadow.png',
+    });
+
     map = L.map(mapContainer.value, {
         center: [parseFloat(props.lat), parseFloat(props.lng)],
         zoom: 13,

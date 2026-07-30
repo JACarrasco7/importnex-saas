@@ -68,4 +68,12 @@ return [
         ],
     ],
 
+    'importnex_chat' => [
+        // Token compartido para que el chat suba informes de valoracion via
+        // POST /api/import-valuation sin sesion web. Generar con
+        // `openssl rand -hex 32` y pegar el mismo valor aqui y en el sitio
+        // desde el que llama el chat. No es password de ningun usuario.
+        'token' => env('IMPORTNEX_CHAT_IMPORT_TOKEN'),
+    ],
+
 ];

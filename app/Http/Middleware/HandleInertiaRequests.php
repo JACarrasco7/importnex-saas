@@ -32,6 +32,8 @@ class HandleInertiaRequests extends Middleware
         $pendingAlertsCount = 0;
         $planUsage = null;
         $currentPlan = null;
+        $locale = 'en';
+
         if ($user = $request->user()) {
             $pendingAlertsCount = \App\Models\Alert::where('organization_id', $user->organization_id)
                 ->where('resolved', false)
@@ -45,6 +47,13 @@ class HandleInertiaRequests extends Middleware
                     'has_active_subscription' => $organization->hasActiveSubscription(),
                 ];
             }
+
+            $locale = $user->locale ?? 'en';
+        } else {
+            // For guests, try to get locale from session or cookie
+            $locale = $request->session()->get('locale') ??
+                      $request->cookie('locale') ??
+                      'en';
         }
 
         return [
@@ -60,6 +69,7 @@ class HandleInertiaRequests extends Middleware
             'pending_alerts_count' => $pendingAlertsCount,
             'planUsage' => $planUsage,
             'currentPlan' => $currentPlan,
+            'locale' => $locale,
         ];
     }
 }

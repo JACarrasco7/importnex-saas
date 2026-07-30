@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'overview' => 'Resumen',
+    'inventory' => 'Inventario',
+    'crm' => 'CRM',
+    'account' => 'Cuenta',
+    'dashboard' => 'Panel de Control',
+    'cars' => 'Autos',
+    'kanban' => 'Kanban',
+    'map' => 'Mapa',
+    'finance' => 'Finanzas',
+    'trips' => 'Viajes',
+    'clients' => 'Clientes',
+    'contacts' => 'Contactos',
+    'templates' => 'Plantillas',
+    'alerts' => 'Alertas',
+    'plan' => 'Plan',
+    'billing' => 'Facturación',
+    'organization' => 'Organización',
+    'profile' => 'Perfil',
+    'logout' => 'Cerrar sesión',
+    'view_plans' => 'Ver planes',
+    'need_more_features' => '¿Necesita más funciones?',
+    'upgrade_message' => 'Actualice su plan para desbloquear autos y contactos ilimitados.',
+];
