@@ -26,6 +26,7 @@ import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import FlashMessage from '@/Components/FlashMessage.vue';
 import UpgradeBanner from '@/Components/UpgradeBanner.vue';
 import LocaleSelector from '@/Components/LocaleSelector.vue';
+import SidebarGroup from '@/Components/SidebarGroup.vue';
 import { useTranslations } from '@/Composables/useTranslations';
 import { useFormat } from '@/Composables/useFormat';
 
@@ -51,15 +52,17 @@ const isActive = (routeName) => {
     return route().current(routeName + '*') || route().current(routeName);
 };
 
-const navGroups = [
+const navGroups = computed(() => [
     {
         title: t('nav.overview'),
+        icon: HomeIcon,
         items: [{ name: t('nav.dashboard'), route: 'dashboard', icon: HomeIcon }],
     },
     {
         title: t('nav.inventory'),
+        icon: TruckIcon,
         items: [
-            { name: t('nav.cars'), route: 'cars.index', icon: TruckIcon, badge: null },
+            { name: t('nav.cars'), route: 'cars.index', icon: TruckIcon },
             { name: t('nav.kanban'), route: 'cars.kanban', icon: Squares2X2Icon },
             { name: t('nav.map'), route: 'cars.map', icon: MapIcon },
             { name: t('nav.finance'), route: 'finance.index', icon: BanknotesIcon },
@@ -68,23 +71,37 @@ const navGroups = [
     },
     {
         title: t('nav.crm'),
+        icon: UsersIcon,
         items: [
             { name: t('nav.clients'), route: 'clients.index', icon: UsersIcon },
             { name: t('nav.contacts'), route: 'contacts.index', icon: PhoneIcon },
-            { name: t('nav.requests'), route: 'car-requests.index', icon: ClipboardDocumentListIcon },
+            {
+                name: t('nav.requests'),
+                route: 'car-requests.index',
+                icon: ClipboardDocumentListIcon,
+                badge: pendingCarRequests.value,
+                badgeColor: 'bg-indigo-500',
+            },
             { name: t('nav.templates'), route: 'message-templates.index', icon: EnvelopeIcon },
-            { name: t('nav.alerts'), route: 'alerts.index', icon: BellIcon, badge: t('nav.alerts') },
+            {
+                name: t('nav.alerts'),
+                route: 'alerts.index',
+                icon: BellIcon,
+                badge: pendingAlerts.value,
+                badgeColor: 'bg-rose-500',
+            },
         ],
     },
     {
         title: t('nav.account'),
+        icon: BuildingOfficeIcon,
         items: [
             { name: t('nav.plan'), route: 'subscriptions.index', icon: CreditCardIcon },
             { name: t('nav.billing'), route: 'billing.index', icon: BanknotesIcon },
             { name: t('nav.organization'), route: 'organization.show', icon: BuildingOfficeIcon, param: user.value?.organization_id },
         ],
     },
-];
+]);
 </script>
 
 <template>
@@ -105,29 +122,13 @@ const navGroups = [
             </div>
 
             <nav class="flex h-[calc(100vh-4rem)] flex-col overflow-y-auto px-3 py-4">
-                <div v-for="group in navGroups" :key="group.title" class="mb-4">
-                    <h3 class="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-gray-400">{{ group.title }}</h3>
-                    <div class="space-y-1">
-                        <Link
-                            v-for="item in group.items"
-                            :key="item.name"
-                            :href="route(item.route, item.param)"
-                            :class="[
-                                'group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition',
-                                isActive(item.route) ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900',
-                            ]"
-                        >
-                            <component :is="item.icon" :class="['h-5 w-5 flex-shrink-0', isActive(item.route) ? 'text-indigo-600' : 'text-gray-400 group-hover:text-gray-600']" />
-                            <span class="flex-1">{{ item.name }}</span>
-                            <span v-if="item.badge === t('nav.alerts') && pendingAlerts > 0" class="inline-flex items-center justify-center rounded-full bg-rose-500 px-2 py-0.5 text-xs font-semibold text-white">
-                                {{ pendingAlerts }}
-                            </span>
-                            <span v-if="item.route === 'car-requests.index' && pendingCarRequests > 0" class="inline-flex items-center justify-center rounded-full bg-indigo-500 px-2 py-0.5 text-xs font-semibold text-white">
-                                {{ pendingCarRequests }}
-                            </span>
-                        </Link>
-                    </div>
-                </div>
+                <SidebarGroup
+                    v-for="group in navGroups"
+                    :key="group.title"
+                    :title="group.title"
+                    :icon="group.icon"
+                    :items="group.items"
+                />
 
                 <div class="mt-auto rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 p-4 text-white">
                     <p class="text-sm font-semibold">Need more features?</p>

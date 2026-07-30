@@ -1,0 +1,64 @@
+<script setup>
+import { ref, computed } from 'vue';
+import { Link } from '@inertiajs/vue3';
+import { ChevronRightIcon } from '@heroicons/vue/24/outline';
+
+const props = defineProps({
+    title: { type: String, required: true },
+    icon: { type: Object, default: null },
+    items: { type: Array, required: true },
+});
+
+const open = ref(true);
+
+const toggle = () => {
+    open.value = !open.value;
+};
+
+const isActive = (item) => {
+    if (item.route && route().current(item.route)) return true;
+    if (item.route && route().current(item.route + '*')) return true;
+    return false;
+};
+
+const hasActiveChild = computed(() => {
+    return props.items.some((item) => isActive(item));
+});
+</script>
+
+<template>
+    <div class="mb-1">
+        <button
+            @click="toggle"
+            :class="[
+                'group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition',
+                hasActiveChild ? 'bg-indigo-50/50 text-indigo-700' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
+            ]"
+        >
+            <component v-if="icon" :is="icon" :class="['h-5 w-5 flex-shrink-0', hasActiveChild ? 'text-indigo-600' : 'text-gray-400']" />
+            <span class="flex-1 text-left text-sm">{{ title }}</span>
+            <ChevronRightIcon :class="['h-4 w-4 transition-transform', open ? 'rotate-90' : '']" />
+        </button>
+
+        <div v-show="open" class="mt-1 space-y-0.5 pl-3">
+            <Link
+                v-for="item in items"
+                :key="item.route + item.name"
+                :href="route(item.route, item.param)"
+                :class="[
+                    'flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm transition',
+                    isActive(item) ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
+                ]"
+            >
+                <component :is="item.icon" :class="['h-4 w-4 flex-shrink-0', isActive(item) ? 'text-indigo-600' : 'text-gray-400']" />
+                <span class="flex-1">{{ item.name }}</span>
+                <span
+                    v-if="item.badge && item.badge > 0"
+                    :class="['inline-flex items-center justify-center rounded-full px-1.5 py-0 text-xs font-semibold text-white', item.badgeColor || 'bg-rose-500']"
+                >
+                    {{ item.badge }}
+                </span>
+            </Link>
+        </div>
+    </div>
+</template>
