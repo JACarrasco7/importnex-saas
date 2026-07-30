@@ -29,5 +29,17 @@ class AppServiceProvider extends ServiceProvider
 
         Car::observe(CarObserver::class);
         CarDocument::observe(CarDocumentObserver::class);
+
+        // Hotfix: cuando la app se sirve bajo un subpath de Apache (Alias),
+        // el SCRIPT_NAME se mantiene (/importnexcore/index.php) pero el
+        // REQUEST_URI llega strippeado. Esto hace que url('/') genere la URL
+        // sin el prefijo /importnexcore, rompiendo Ziggy y los assets.
+        //
+        // Forzamos el URL root con el subpath para que TODO (route(),
+        // asset(), Ziggy, vue-router) genere URLs absolutas correctas.
+        $appUrl = config('app.url');
+        if ($appUrl && str_contains($appUrl, '/importnexcore')) {
+            \Illuminate\Support\Facades\URL::forceRootUrl($appUrl);
+        }
     }
 }
