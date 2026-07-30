@@ -41,20 +41,20 @@ onClickOutside(userMenuRef, () => {
 });
 
 const pendingAlerts = computed(() => page.props?.pending_alerts_count ?? 0);
+const pendingCarRequests = computed(() => page.props?.pending_car_requests_count ?? 0);
 const userName = computed(() => page.props?.auth?.user?.name || 'User');
 const userEmail = computed(() => page.props?.auth?.user?.email || '');
 const user = computed(() => page.props?.auth?.user);
 const { initials } = useFormat();
 
 const isActive = (routeName) => {
-    if (routeName === t('nav.dashboard')) return route().current(t('nav.dashboard'));
     return route().current(routeName + '*') || route().current(routeName);
 };
 
 const navGroups = [
     {
         title: t('nav.overview'),
-        items: [{ name: t('nav.dashboard'), route: t('nav.dashboard'), icon: HomeIcon }],
+        items: [{ name: t('nav.dashboard'), route: 'dashboard', icon: HomeIcon }],
     },
     {
         title: t('nav.inventory'),
@@ -95,7 +95,7 @@ const navGroups = [
         <!-- Sidebar -->
         <aside :class="['fixed inset-y-0 left-0 z-50 w-64 transform bg-white shadow-xl ring-1 ring-gray-200 transition-transform lg:translate-x-0', sidebarOpen ? 'translate-x-0' : '-translate-x-full']">
             <div class="flex h-16 items-center justify-between px-6 border-b border-gray-200">
-                <Link :href="route(t('nav.dashboard'))" class="flex items-center gap-2">
+                <Link :href="route('dashboard')" class="flex items-center gap-2">
                     <ApplicationLogo class="h-8 w-auto fill-current text-indigo-600" />
                     <span class="text-lg font-bold text-gray-900">Importnex</span>
                 </Link>
@@ -121,6 +121,9 @@ const navGroups = [
                             <span class="flex-1">{{ item.name }}</span>
                             <span v-if="item.badge === t('nav.alerts') && pendingAlerts > 0" class="inline-flex items-center justify-center rounded-full bg-rose-500 px-2 py-0.5 text-xs font-semibold text-white">
                                 {{ pendingAlerts }}
+                            </span>
+                            <span v-if="item.route === 'car-requests.index' && pendingCarRequests > 0" class="inline-flex items-center justify-center rounded-full bg-indigo-500 px-2 py-0.5 text-xs font-semibold text-white">
+                                {{ pendingCarRequests }}
                             </span>
                         </Link>
                     </div>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CarRequest;
 use App\Models\Client;
 use App\Models\Organization;
+use App\Models\Alert;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -76,6 +77,15 @@ class PublicCarRequestController extends Controller
         }
 
         $carRequest = CarRequest::create($data);
+
+        // Create alert for organization admins
+        Alert::create([
+            'organization_id' => $organization->id,
+            'alert_type' => 'car_request',
+            'reference_type' => CarRequest::class,
+            'reference_id' => $carRequest->id,
+            'message' => "Nueva solicitud de {$carRequest->name}" . ($carRequest->brand ? " - {$carRequest->brand} {$carRequest->model}" : ''),
+        ]);
 
         return redirect()
             ->route('public.car-request.success', ['slug' => $slug])

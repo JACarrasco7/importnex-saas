@@ -54,7 +54,7 @@ const submit = () => {
                     {{ organization.name }}
                 </h1>
                 <p class="mt-3 text-lg text-gray-600">
-                    Encuentra tu coche perfecto. Cuéntanos qué buscas y te lo buscamos.
+                    Encuentramos tu coche perfecto.
                 </p>
             </div>
 

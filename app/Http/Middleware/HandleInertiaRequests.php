@@ -30,6 +30,7 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $pendingAlertsCount = 0;
+        $pendingCarRequestsCount = 0;
         $planUsage = null;
         $currentPlan = null;
         $locale = 'en';
@@ -37,6 +38,10 @@ class HandleInertiaRequests extends Middleware
         if ($user = $request->user()) {
             $pendingAlertsCount = \App\Models\Alert::where('organization_id', $user->organization_id)
                 ->where('resolved', false)
+                ->count();
+
+            $pendingCarRequestsCount = \App\Models\CarRequest::where('organization_id', $user->organization_id)
+                ->where('status', 'pending')
                 ->count();
 
             $organization = $user->organization;
@@ -67,6 +72,7 @@ class HandleInertiaRequests extends Middleware
                 'error' => fn () => $request->session()->get('error'),
             ],
             'pending_alerts_count' => $pendingAlertsCount,
+            'pending_car_requests_count' => $pendingCarRequestsCount,
             'planUsage' => $planUsage,
             'currentPlan' => $currentPlan,
             'locale' => $locale,
