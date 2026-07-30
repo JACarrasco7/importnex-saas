@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { Head, Link } from '@inertiajs/vue3';
 import { ArrowLeftIcon, BellIcon, CheckCircleIcon, ClockIcon } from '@heroicons/vue/24/outline';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
@@ -24,7 +24,7 @@ const { datetime } = useFormat();
 
         <div class="py-8">
             <div class="mx-auto max-w-3xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <PageHeader title="Alert details" :subtitle="`${alert.alert_type} · ${alert.reference_type} #${alert.reference_id}`">
+                <PageHeader title="Alert details" :subtitle="`${alert.alert_type} Â· ${alert.reference_type} #${alert.reference_id}`">
                     <template #actions>
                         <Link :href="route('alerts.index')" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             <ArrowLeftIcon class="h-4 w-4" />
@@ -50,7 +50,7 @@ const { datetime } = useFormat();
                             </div>
                             <div>
                                 <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Status</dt>
-                                <dd class="mt-1"><Badge :variant="alert.resolved ? 'green' : 'amber'">{{ alert.resolved ? 'Resolved' : 'Pending' }}</Badge></dd>
+                                <dd class="mt-1"><Badge :variant="alert.resolved ? 'green' : 'amber'">{{ alert.resolved ? t('alerts.resolved') : t('alerts.pending') }}</Badge></dd>
                             </div>
                         </div>
                         <div class="sm:col-span-2">

@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { Head, Link } from '@inertiajs/vue3';
 import {
     ArrowLeftIcon,
@@ -81,7 +81,7 @@ const cardBrandIcon = (brand) => {
                     <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
                         <StatCard label="Total paid" :value="currency(stats.total_paid)" hint="All time" :icon="BanknotesIcon" color="emerald" />
                         <StatCard label="Invoices" :value="stats.invoice_count" hint="Last 50" :icon="DocumentTextIcon" color="indigo" />
-                        <StatCard label="Upcoming" :value="upcomingInvoice ? currency(upcomingInvoice.total / 100) : '—'" hint="Next invoice" :icon="CalendarIcon" color="amber" />
+                        <StatCard label="Upcoming" :value="upcomingInvoice ? currency(upcomingInvoice.total / 100) : 'â€”'" hint="Next invoice" :icon="CalendarIcon" color="amber" />
                     </div>
 
                     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -93,7 +93,7 @@ const cardBrandIcon = (brand) => {
                             <div v-if="subscription" class="grid grid-cols-1 gap-x-6 gap-y-4 p-6 sm:grid-cols-2">
                                 <div>
                                     <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Plan</dt>
-                                    <dd class="mt-1 text-sm font-semibold text-gray-900">{{ subscription.name || '—' }}</dd>
+                                    <dd class="mt-1 text-sm font-semibold text-gray-900">{{ subscription.name || 'â€”' }}</dd>
                                 </div>
                                 <div>
                                     <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Status</dt>
@@ -109,7 +109,7 @@ const cardBrandIcon = (brand) => {
                                 </div>
                                 <div>
                                     <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Renews</dt>
-                                    <dd class="mt-1 text-sm text-gray-900">{{ subscription.ends_at ? date(subscription.ends_at) : '—' }}</dd>
+                                    <dd class="mt-1 text-sm text-gray-900">{{ subscription.ends_at ? date(subscription.ends_at) : 'â€”' }}</dd>
                                 </div>
                                 <div v-if="upcomingInvoice" class="sm:col-span-2">
                                     <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Next invoice</dt>
@@ -133,7 +133,7 @@ const cardBrandIcon = (brand) => {
                                         <component :is="cardBrandIcon(paymentMethod.brand)" class="h-6 w-6" />
                                         <span class="text-xs font-semibold uppercase tracking-wider">{{ paymentMethod.brand }}</span>
                                     </div>
-                                    <p class="mt-8 text-xl font-mono tracking-wider">•••• {{ paymentMethod.last4 }}</p>
+                                    <p class="mt-8 text-xl font-mono tracking-wider">â€¢â€¢â€¢â€¢ {{ paymentMethod.last4 }}</p>
                                     <p class="mt-2 text-xs text-gray-300">Expires {{ String(paymentMethod.exp_month).padStart(2, '0') }} / {{ paymentMethod.exp_year }}</p>
                                 </div>
                                 <a v-if="stripePortalUrl" :href="stripePortalUrl" class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-500">
@@ -142,7 +142,7 @@ const cardBrandIcon = (brand) => {
                                 </a>
                             </div>
                             <div v-else class="p-6">
-                                <EmptyState icon="💳" title="No payment method" description="Add a card via the Stripe portal." />
+                                <EmptyState icon="ðŸ’³" title="No payment method" description="Add a card via the Stripe portal." />
                             </div>
                         </div>
                     </div>
@@ -153,7 +153,7 @@ const cardBrandIcon = (brand) => {
                             <h3 class="text-base font-semibold text-gray-900">Invoices</h3>
                             <span class="text-sm text-gray-500">{{ invoices.length }} total</span>
                         </div>
-                        <EmptyState v-if="!invoices.length" icon="🧾" title="No invoices yet" description="Your first invoice will appear here after your first payment." />
+                        <EmptyState v-if="!invoices.length" icon="ðŸ§¾" title="No invoices yet" description="Your first invoice will appear here after your first payment." />
                         <div v-else class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">

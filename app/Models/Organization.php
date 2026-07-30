@@ -11,13 +11,48 @@ class Organization extends Model
     use HasFactory, Billable;
 
     protected $fillable = [
-        'name', 'plan', 'stripe_id', 'trial_ends_at', 'subscribed_at',
+        'name', 'slug', 'logo', 'is_public', 'plan', 'stripe_id', 'trial_ends_at', 'subscribed_at',
     ];
 
     protected $casts = [
         'trial_ends_at' => 'datetime',
         'subscribed_at' => 'datetime',
+        'is_public' => 'boolean',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function ($organization) {
+            if (empty($organization->slug)) {
+                $organization->slug = static::generateUniqueSlug($organization->name);
+            }
+        });
+
+        static::updating(function ($organization) {
+            if ($organization->isDirty('name') && empty($organization->slug)) {
+                $organization->slug = static::generateUniqueSlug($organization->name);
+            }
+        });
+    }
+
+    public static function generateUniqueSlug(string $name): string
+    {
+        $base = \Illuminate\Support\Str::slug($name);
+        $slug = $base;
+        $counter = 1;
+
+        while (static::where('slug', $slug)->exists()) {
+            $slug = $base . '-' . $counter;
+            $counter++;
+        }
+
+        return $slug;
+    }
+
+    public function getPublicUrlAttribute(): string
+    {
+        return url("/importnexcore/request/{$this->slug}");
+    }
 
     public function users()
     {
@@ -42,6 +77,11 @@ class Organization extends Model
     public function alerts()
     {
         return $this->hasMany(Alert::class);
+    }
+
+    public function carRequests()
+    {
+        return $this->hasMany(CarRequest::class);
     }
 
     public function subscriptions()

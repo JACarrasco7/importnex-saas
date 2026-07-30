@@ -1,7 +1,7 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { MagnifyingGlassIcon, PlusIcon, EyeIcon, PencilIcon, TrashIcon, TagIcon, MapPinIcon, EnvelopeIcon, PhoneIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/vue/24/outline';
+import { MagnifyingGlassIcon, PlusIcon, EyeIcon, PencilIcon, TrashIcon, TagIcon, MapPinIcon, EnvelopeIcon, PhoneIcon } from '@heroicons/vue/24/outline';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Badge from '@/Components/Badge.vue';
 import PageHeader from '@/Components/PageHeader.vue';
@@ -17,6 +17,31 @@ const search = ref(props.filters?.search ?? '');
 const tagFilter = ref(props.filters?.tag ?? '');
 const showDelete = ref(false);
 const contactToDelete = ref(null);
+
+const filteredContacts = computed(() => {
+    let result = props.contacts.data || [];
+    if (search.value) {
+        const term = search.value.toLowerCase();
+        result = result.filter(c =>
+            (c.name && c.name.toLowerCase().includes(term)) ||
+            (c.email && c.email.toLowerCase().includes(term)) ||
+            (c.city && c.city.toLowerCase().includes(term))
+        );
+    }
+    if (tagFilter.value) {
+        result = result.filter(c => c.tags && c.tags.some(t => t.toLowerCase().includes(tagFilter.value.toLowerCase())));
+    }
+    return result;
+});
+
+const stats = computed(() => {
+    const contacts = props.contacts.data || [];
+    return {
+        total: contacts.length,
+        dealers: contacts.filter(c => c.tags && c.tags.some(t => t.toLowerCase().includes('dealer'))).length,
+        transport: contacts.filter(c => c.tags && c.tags.some(t => t.toLowerCase().includes('transport'))).length,
+    };
+});
 
 watch([search, tagFilter], () => {
     router.get(
@@ -85,89 +110,78 @@ const confirmDelete = () => {
                     </div>
                 </div>
 
-                <!-- Table -->
-                <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
-                    <div v-if="contacts.data?.length > 0" class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Contact</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Channels</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">City</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Tags</th>
-                                    <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200">
-                                <tr v-for="contact in contacts.data" :key="contact.id" class="hover:bg-gray-50">
-                                    <td class="px-6 py-4">
-                                        <Link :href="route('contacts.show', contact.id)" class="font-medium text-gray-900 hover:text-indigo-600">
-                                            {{ contact.name }}
-                                        </Link>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <div class="flex flex-col gap-1 text-sm text-gray-600">
-                                            <span v-if="contact.phone" class="inline-flex items-center gap-1.5">
-                                                <PhoneIcon class="h-3.5 w-3.5 text-gray-400" />
-                                                {{ contact.phone }}
-                                            </span>
-                                            <span v-if="contact.email" class="inline-flex items-center gap-1.5">
-                                                <EnvelopeIcon class="h-3.5 w-3.5 text-gray-400" />
-                                                {{ contact.email }}
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <span v-if="contact.city" class="inline-flex items-center gap-1 text-sm text-gray-600">
-                                            <MapPinIcon class="h-3.5 w-3.5 text-gray-400" />
-                                            {{ contact.city }}
-                                        </span>
-                                        <span v-else class="text-gray-400">—</span>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <div v-if="contact.tags?.length" class="flex flex-wrap gap-1">
-                                            <Badge v-for="tag in contact.tags" :key="tag" variant="indigo">{{ tag }}</Badge>
-                                        </div>
-                                        <span v-else class="text-gray-400">—</span>
-                                    </td>
-                                    <td class="px-6 py-4 text-right">
-                                        <div class="inline-flex items-center gap-2">
-                                            <Link :href="route('contacts.show', contact.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-indigo-50 hover:text-indigo-600" title="View">
-                                                <EyeIcon class="h-4 w-4" />
-                                            </Link>
-                                            <Link :href="route('contacts.edit', contact.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600" title="Edit">
-                                                <PencilIcon class="h-4 w-4" />
-                                            </Link>
-                                            <button type="button" @click="askDelete(contact)" class="rounded-md p-1.5 text-gray-400 hover:bg-rose-50 hover:text-rose-600" title="Delete">
-                                                <TrashIcon class="h-4 w-4" />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                <!-- Quick Stats -->
+                <div class="grid grid-cols-3 gap-4 sm:grid-cols-3">
+                    <div class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200">
+                        <div class="text-xs font-semibold uppercase tracking-wider text-gray-500">Total</div>
+                        <div class="mt-1 text-2xl font-bold text-gray-900">{{ stats.total }}</div>
                     </div>
-                    <EmptyState v-else icon="🤝" title="No contacts yet" description="Add dealers, transport companies, and other contacts to your network." action-text="Add your first contact" :action-route="route('contacts.create')" />
+                    <div class="rounded-xl bg-indigo-50 p-4 shadow-sm ring-1 ring-indigo-200">
+                        <div class="text-xs font-semibold uppercase tracking-wider text-indigo-700">Dealers</div>
+                        <div class="mt-1 text-2xl font-bold text-indigo-600">{{ stats.dealers }}</div>
+                    </div>
+                    <div class="rounded-xl bg-emerald-50 p-4 shadow-sm ring-1 ring-emerald-200">
+                        <div class="text-xs font-semibold uppercase tracking-wider text-emerald-700">Transport</div>
+                        <div class="mt-1 text-2xl font-bold text-emerald-600">{{ stats.transport }}</div>
+                    </div>
+                </div>
 
-                    <!-- Pagination -->
-                    <div v-if="contacts.links && contacts.last_page > 1" class="flex items-center justify-between border-t border-gray-200 bg-gray-50 px-6 py-3">
-                        <div class="text-sm text-gray-700">
-                            Showing <span class="font-semibold">{{ contacts.from }}</span> to <span class="font-semibold">{{ contacts.to }}</span> of <span class="font-semibold">{{ contacts.total }}</span>
+                <!-- Cards Grid -->
+                <div v-if="filteredContacts.length > 0" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    <div
+                        v-for="contact in filteredContacts"
+                        :key="contact.id"
+                        class="group relative overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-200 transition-all hover:shadow-md hover:ring-gray-300"
+                    >
+                        <div class="p-5">
+                            <Link :href="route('contacts.show', contact.id)" class="block">
+                                <h3 class="text-base font-semibold text-gray-900 group-hover:text-indigo-600">
+                                    {{ contact.name }}
+                                </h3>
+                                <p v-if="contact.notes" class="mt-1 text-sm text-gray-500 line-clamp-2">{{ contact.notes }}</p>
+                            </Link>
+
+                            <div class="mt-4 space-y-2 text-sm">
+                                <div v-if="contact.phone" class="flex items-center gap-2 text-gray-600">
+                                    <PhoneIcon class="h-4 w-4 text-gray-400 shrink-0" />
+                                    <span>{{ contact.phone }}</span>
+                                </div>
+                                <div v-if="contact.email" class="flex items-center gap-2 text-gray-600">
+                                    <EnvelopeIcon class="h-4 w-4 text-gray-400 shrink-0" />
+                                    <span class="truncate">{{ contact.email }}</span>
+                                </div>
+                                <div v-if="contact.city" class="flex items-center gap-2 text-gray-600">
+                                    <MapPinIcon class="h-4 w-4 text-gray-400 shrink-0" />
+                                    <span>{{ contact.city }}</span>
+                                </div>
+                            </div>
+
+                            <div v-if="contact.tags && contact.tags.length > 0" class="mt-4 flex flex-wrap gap-1.5">
+                                <span v-for="tag in contact.tags" :key="tag" class="inline-flex items-center rounded-md bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-200">
+                                    {{ tag }}
+                                </span>
+                            </div>
                         </div>
-                        <div class="flex items-center gap-1">
-                            <component v-for="link in contacts.links" :key="link.label" :is="link.url ? Link : 'span'" :href="link.url || '#'" :class="[
-                                'inline-flex h-8 min-w-[2rem] items-center justify-center rounded-md px-2 text-sm',
-                                link.active ? 'bg-indigo-600 text-white' : 'text-gray-700 hover:bg-white',
-                                !link.url ? 'cursor-not-allowed opacity-50' : '',
-                            ]">
-                                <ChevronLeftIcon v-if="link.label.includes('Previous')" class="h-4 w-4" />
-                                <ChevronRightIcon v-else-if="link.label.includes('Next')" class="h-4 w-4" />
-                                <span v-else v-html="link.label"></span>
-                            </component>
+
+                        <div class="flex border-t border-gray-100 bg-gray-50 px-5 py-3">
+                            <div class="flex-1" />
+                            <div class="flex items-center gap-1">
+                                <Link :href="route('contacts.show', contact.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-indigo-50 hover:text-indigo-600" title="View">
+                                    <EyeIcon class="h-4 w-4" />
+                                </Link>
+                                <Link :href="route('contacts.edit', contact.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600" title="Edit">
+                                    <PencilIcon class="h-4 w-4" />
+                                </Link>
+                                <button type="button" @click="askDelete(contact)" class="rounded-md p-1.5 text-gray-400 hover:bg-rose-50 hover:text-rose-600" title="Delete">
+                                    <TrashIcon class="h-4 w-4" />
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+
+                <EmptyState v-else icon="📇" title="No contacts found" description="Try adjusting your filters or add your first contact to your network." action-text="Add your first contact" :action-route="route('contacts.create')" />
+
         </div>
 
         <ConfirmDialog

@@ -120,33 +120,78 @@ class ValuationImporter
     }
 
     /**
-     * Resolve an existing car by VIN, then by url_link; otherwise return a new Car instance.
+     * Resolve an existing car by VIN, then by url_link, then by combined criteria; otherwise return a new Car instance.
      */
     public function resolveCar(array $payload, Organization $org): Car
     {
         $vin = $payload['vehiculo']['vin'] ?? null;
         $url = $payload['anuncio']['url'] ?? null;
-
-        if ($vin) {
+        $brand = $payload['vehiculo']['marca'] ?? null;
+        $model = $payload['vehiculo']['modelo'] ?? null;
+        $year = $payload['vehiculo']['anio'] ?? null;
+        
+        // Normalizar año (puede venir como "2019" o "MM/YYYY")
+        $normalizedYear = $this->normalizeYear($year);
+        
+        // Buscar primero por VIN (es el identificador más fiable)
+        if ($vin && !empty(trim($vin))) {
             $car = Car::withoutGlobalScope('organization')
                 ->where('organization_id', $org->id)
-                ->where('vin', $vin)
+                ->where('vin', trim($vin))
                 ->first();
             if ($car) {
+                Log::info("Coche encontrado por VIN: {$vin}", ['car_id' => $car->id]);
                 return $car;
             }
         }
 
-        if ($url) {
+        // Buscar por URL (segundo identificador fiable)
+        if ($url && !empty(trim($url))) {
+            $normalizedUrl = trim($url);
+            // Normalizar URL eliminando parámetros de tracking y trailing slash
+            $normalizedUrl = preg_replace('/[?#].*$/', '', $normalizedUrl);
+            $normalizedUrl = rtrim($normalizedUrl, '/');
+            
+            // También buscar con la URL normalizada en BD
             $car = Car::withoutGlobalScope('organization')
                 ->where('organization_id', $org->id)
-                ->where('url_link', $url)
+                ->where(function($query) use ($url, $normalizedUrl) {
+                    $query->where('url_link', trim($url))
+                          ->orWhere('url_link', $normalizedUrl);
+                })
                 ->first();
+                
             if ($car) {
+                Log::info("Coche encontrado por URL: {$url}", ['car_id' => $car->id]);
                 return $car;
             }
         }
 
+        // Buscar por combinación de marca, modelo y año (para casos sin VIN ni URL)
+        if ($brand && $model && $normalizedYear) {
+            $car = Car::withoutGlobalScope('organization')
+                ->where('organization_id', $org->id)
+                ->where('brand', trim($brand))
+                ->where('model', trim($model))
+                ->where('year', $normalizedYear)
+                ->first();
+                
+            if ($car) {
+                Log::info("Coche encontrado por marca/modelo/año: {$brand} {$model} {$normalizedYear}", ['car_id' => $car->id]);
+                return $car;
+            }
+        }
+
+        // Si no se encuentra nada, crear un nuevo coche
+        Log::warning("No se encontró coche existente, creando nuevo", [
+            'vin' => $vin,
+            'url' => $url,
+            'brand' => $brand,
+            'model' => $model,
+            'year' => $normalizedYear,
+            'organization_id' => $org->id
+        ]);
+        
         return new Car(['organization_id' => $org->id]);
     }
 
@@ -163,7 +208,9 @@ class ValuationImporter
         $c  = $payload['costes']    ?? [];
         $m  = $payload['mercado']   ?? [];
 
-        DB::transaction(function () use ($car, $v, $a, $i, $b, $vd, $c, $m, $payload) {
+        $wasNew = !$car->exists;
+        
+        DB::transaction(function () use ($car, $v, $a, $i, $b, $vd, $c, $m, $payload, $wasNew) {
             $car->fill(array_filter([
                 // Identity
                 'brand'   => $v['marca']    ?? null,
@@ -239,6 +286,22 @@ class ValuationImporter
             ], fn ($v) => $v !== null && $v !== '' && $v !== []));
 
             $car->save();
+            
+            if ($wasNew) {
+                Log::info("Nuevo coche creado", [
+                    'car_id' => $car->id,
+                    'vin' => $car->vin,
+                    'url' => $car->url_link,
+                    'organization_id' => $car->organization_id
+                ]);
+            } else {
+                Log::info("Coche actualizado", [
+                    'car_id' => $car->id,
+                    'vin' => $car->vin,
+                    'url' => $car->url_link,
+                    'organization_id' => $car->organization_id
+                ]);
+            }
 
             // Guardar fotos y archivos en la estructura de carpetas por organización
             $this->savePhotosAndFiles($car, $payload);

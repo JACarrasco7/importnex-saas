@@ -3,6 +3,7 @@
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StripeWebhookController;
+use App\Http\Controllers\PublicCarRequestController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -18,6 +19,14 @@ Route::get('/', function () {
 
 // Stripe webhook (must be outside auth/csrf middleware)
 Route::post('stripe/webhook', [StripeWebhookController::class, 'handleWebhook']);
+
+// Public car request form
+// URL: /request/{slug} — public form for clients to send car preferences
+Route::prefix('request/{slug}')->name('public.car-request.')->group(function () {
+    Route::get('/', [PublicCarRequestController::class, 'index'])->name('index');
+    Route::post('/', [PublicCarRequestController::class, 'store'])->name('store');
+    Route::get('/success', [PublicCarRequestController::class, 'success'])->name('success');
+});
 
 Route::middleware('auth', 'has.organization')->group(function () {
     Route::get('organization/create', [OrganizationController::class, 'create'])
@@ -66,13 +75,11 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::get('/cars/{car}/documents/{document}', [\App\Http\Controllers\CarDocumentController::class, 'show'])->name('cars.documents.show');
     Route::delete('/cars/{car}/documents/{document}', [\App\Http\Controllers\CarDocumentController::class, 'destroy'])->name('cars.documents.destroy');
 
-    // Valuation import (from chat report)
+    // Valuation import (from chat report ZIP)
     Route::get('/cars/import-valuation', [\App\Http\Controllers\ValuationImportController::class, 'create'])
         ->name('cars.import-valuation.create');
     Route::post('/cars/import-valuation', [\App\Http\Controllers\ValuationImportController::class, 'store'])
         ->name('cars.import-valuation.store');
-    Route::get('/cars/import-valuation/pending', [\App\Http\Controllers\ValuationImportController::class, 'pending'])
-        ->name('cars.import-valuation.pending');
 
     // Car Checklist (toggle complete)
     Route::post('/cars/{car}/checklists/{checklist}/toggle', [\App\Http\Controllers\CarChecklistController::class, 'toggle'])
@@ -148,6 +155,12 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::get('/billing/{invoiceId}', [\App\Http\Controllers\BillingController::class, 'show'])->name('billing.show');
     Route::get('/billing/{invoiceId}/download', [\App\Http\Controllers\BillingController::class, 'download'])->name('billing.download');
     Route::get('/billing/portal/redirect', [\App\Http\Controllers\BillingController::class, 'portal'])->name('billing.portal');
+
+    // Car Requests (internal management)
+    Route::get('/car-requests', [\App\Http\Controllers\CarRequestController::class, 'index'])->name('car-requests.index');
+    Route::get('/car-requests/{carRequest}', [\App\Http\Controllers\CarRequestController::class, 'show'])->name('car-requests.show');
+    Route::patch('/car-requests/{carRequest}/status', [\App\Http\Controllers\CarRequestController::class, 'updateStatus'])->name('car-requests.update-status');
+    Route::delete('/car-requests/{carRequest}', [\App\Http\Controllers\CarRequestController::class, 'destroy'])->name('car-requests.destroy');
 });
 
 require __DIR__.'/auth.php';

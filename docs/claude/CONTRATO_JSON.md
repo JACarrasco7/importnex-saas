@@ -109,6 +109,19 @@ Los campos que no se hayan podido confirmar van a `null`, **nunca inventados**. 
 }
 ```
 
+**⚠️ CRITICAL — mobile.de image URLs (bug corregido 30/07/2026):**
+
+mobile.de usa CDN con parámetros `rule` para transformar imágenes:
+- **VÁLIDOS**: `?rule=mo-1024`, `?rule=mo-1600`, `?rule=mo-640w`, `?rule=mo-360`
+- **INVÁLIDO**: `?rule=mo-720x540.jpg` ← **JAMÁS inventar sufijos de resolución en el parámetro rule**
+
+Las URLs de imágenes en el JSON **DEBEN** copiarse tal cual aparecen en el anuncio, sin modificar el parámetro `rule` existente. Si el anuncio no trae `rule`, añade `?rule=mo-1024` para buena calidad, pero NUNCA inventes formatos como `720x540`.
+
+El fallo que causó el error del coche ID 455420293 fue inventar `?rule=mo-720x540.jpg` en vez de copiar la URL original. Las reglas reales son específicas del CDN (mo-1024, mo-1600, etc.), no resolución arbitraria.
+
+**Respeta las URLs del anuncio. No te inventes parámetros.**
+```
+
 ### `investigacion`
 
 Las nueve claves son **siempre las mismas y siempre están presentes**, aunque algún hallazgo venga vacío. Eso permite que tu app las pinte como una tabla fija sin comprobar si existen.

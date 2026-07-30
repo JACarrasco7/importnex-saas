@@ -21,6 +21,20 @@ if (file_exists(__DIR__.'/../.env')) {
     }
 }
 
+// Hotfix: strip Apache subpath prefix
+// When this app is served under a subpath like /importnexcore (Alias), Apache passes
+// the full URI to PHP. Strip the script directory to get the real request path.
+$uri = $_SERVER['REQUEST_URI'] ?? '/';
+$scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
+// SCRIPT_NAME = /importnexcore/index.php → strip /importnexcore
+if (strpos($uri, '/importnexcore') === 0) {
+    $uri = substr($uri, strlen('/importnexcore'));
+    if ($uri === '' || $uri === false) {
+        $uri = '/';
+    }
+    $_SERVER['REQUEST_URI'] = $uri;
+}
+
 // Bootstrap Laravel and handle the request...
 (require_once __DIR__.'/../bootstrap/app.php')
     ->handleRequest(Request::capture());

@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { EnvelopeIcon, ArrowRightIcon } from '@heroicons/vue/24/outline';
 import GuestLayout from '@/Layouts/GuestLayout.vue';

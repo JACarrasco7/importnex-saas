@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { ref, watch } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { BellIcon, CheckIcon, EyeIcon, TrashIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/vue/24/outline';
@@ -14,7 +14,7 @@ const props = defineProps({
     filters: Object,
 });
 
-const filter = ref(props.filters?.filter || 'pending');
+const filter = ref(props.filters?.filter || t('common.pending'));
 const showResolve = ref(false);
 const showDelete = ref(false);
 const alertToAct = ref(null);
@@ -57,8 +57,8 @@ const confirmDelete = () => {
                 <PageHeader title="Alerts" :subtitle="`${alerts.total || 0} alerts in your system`">
                     <template #actions>
                         <div class="inline-flex rounded-lg bg-white p-1 shadow-sm ring-1 ring-gray-200">
-                            <button @click="filter = 'pending'" :class="['rounded-md px-3 py-1.5 text-sm font-semibold transition', filter === 'pending' ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-50']">Pending</button>
-                            <button @click="filter = 'all'" :class="['rounded-md px-3 py-1.5 text-sm font-semibold transition', filter === 'all' ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-50']">All</button>
+                            <button @click="filter = t('common.pending')" :class="['rounded-md px-3 py-1.5 text-sm font-semibold transition', filter === t('common.pending') ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-50']">Pending</button>
+                            <button @click="filter = t('common.all')" :class="['rounded-md px-3 py-1.5 text-sm font-semibold transition', filter === t('common.all') ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-50']">All</button>
                         </div>
                     </template>
                 </PageHeader>
@@ -91,7 +91,7 @@ const confirmDelete = () => {
                             </div>
                         </div>
                     </div>
-                    <EmptyState v-else icon="🔔" title="All clear!" description="No pending alerts. Your fleet is running smoothly." />
+                    <EmptyState v-else icon="ðŸ””" title="All clear!" description="No pending alerts. Your fleet is running smoothly." />
 
                     <!-- Pagination -->
                     <div v-if="alerts.links && alerts.last_page > 1" class="flex items-center justify-between border-t border-gray-200 bg-gray-50 px-6 py-3">

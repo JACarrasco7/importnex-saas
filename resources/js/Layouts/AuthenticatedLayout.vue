@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { ref, computed } from 'vue';
 import { onClickOutside } from '@vueuse/core';
 import { Link, usePage } from '@inertiajs/vue3';
@@ -20,12 +20,16 @@ import {
     EnvelopeIcon,
     CreditCardIcon,
     HomeIcon,
+    ClipboardDocumentListIcon,
 } from '@heroicons/vue/24/outline';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import FlashMessage from '@/Components/FlashMessage.vue';
 import UpgradeBanner from '@/Components/UpgradeBanner.vue';
 import LocaleSelector from '@/Components/LocaleSelector.vue';
+import { useTranslations } from '@/Composables/useTranslations';
 import { useFormat } from '@/Composables/useFormat';
+
+const { t } = useTranslations();
 
 const sidebarOpen = ref(false);
 const userMenuOpen = ref(false);
@@ -43,40 +47,41 @@ const user = computed(() => page.props?.auth?.user);
 const { initials } = useFormat();
 
 const isActive = (routeName) => {
-    if (routeName === 'dashboard') return route().current('dashboard');
+    if (routeName === t('nav.dashboard')) return route().current(t('nav.dashboard'));
     return route().current(routeName + '*') || route().current(routeName);
 };
 
 const navGroups = [
     {
-        title: 'Overview',
-        items: [{ name: 'Dashboard', route: 'dashboard', icon: HomeIcon }],
+        title: t('nav.overview'),
+        items: [{ name: t('nav.dashboard'), route: t('nav.dashboard'), icon: HomeIcon }],
     },
     {
-        title: 'Inventory',
+        title: t('nav.inventory'),
         items: [
-            { name: 'Cars', route: 'cars.index', icon: TruckIcon, badge: null },
-            { name: 'Kanban', route: 'cars.kanban', icon: Squares2X2Icon },
-            { name: 'Map', route: 'cars.map', icon: MapIcon },
-            { name: 'Finance', route: 'finance.index', icon: BanknotesIcon },
-            { name: 'Trips', route: 'trips.index', icon: CalendarDaysIcon },
+            { name: t('nav.cars'), route: 'cars.index', icon: TruckIcon, badge: null },
+            { name: t('nav.kanban'), route: 'cars.kanban', icon: Squares2X2Icon },
+            { name: t('nav.map'), route: 'cars.map', icon: MapIcon },
+            { name: t('nav.finance'), route: 'finance.index', icon: BanknotesIcon },
+            { name: t('nav.trips'), route: 'trips.index', icon: CalendarDaysIcon },
         ],
     },
     {
-        title: 'CRM',
+        title: t('nav.crm'),
         items: [
-            { name: 'Clients', route: 'clients.index', icon: UsersIcon },
-            { name: 'Contacts', route: 'contacts.index', icon: PhoneIcon },
-            { name: 'Templates', route: 'message-templates.index', icon: EnvelopeIcon },
-            { name: 'Alerts', route: 'alerts.index', icon: BellIcon, badge: 'alerts' },
+            { name: t('nav.clients'), route: 'clients.index', icon: UsersIcon },
+            { name: t('nav.contacts'), route: 'contacts.index', icon: PhoneIcon },
+            { name: t('nav.requests'), route: 'car-requests.index', icon: ClipboardDocumentListIcon },
+            { name: t('nav.templates'), route: 'message-templates.index', icon: EnvelopeIcon },
+            { name: t('nav.alerts'), route: 'alerts.index', icon: BellIcon, badge: t('nav.alerts') },
         ],
     },
     {
-        title: 'Account',
+        title: t('nav.account'),
         items: [
-            { name: 'Plan', route: 'subscriptions.index', icon: CreditCardIcon },
-            { name: 'Billing', route: 'billing.index', icon: BanknotesIcon },
-            { name: 'Organization', route: 'organization.show', icon: BuildingOfficeIcon, param: user.value?.organization_id },
+            { name: t('nav.plan'), route: 'subscriptions.index', icon: CreditCardIcon },
+            { name: t('nav.billing'), route: 'billing.index', icon: BanknotesIcon },
+            { name: t('nav.organization'), route: 'organization.show', icon: BuildingOfficeIcon, param: user.value?.organization_id },
         ],
     },
 ];
@@ -90,7 +95,7 @@ const navGroups = [
         <!-- Sidebar -->
         <aside :class="['fixed inset-y-0 left-0 z-50 w-64 transform bg-white shadow-xl ring-1 ring-gray-200 transition-transform lg:translate-x-0', sidebarOpen ? 'translate-x-0' : '-translate-x-full']">
             <div class="flex h-16 items-center justify-between px-6 border-b border-gray-200">
-                <Link :href="route('dashboard')" class="flex items-center gap-2">
+                <Link :href="route(t('nav.dashboard'))" class="flex items-center gap-2">
                     <ApplicationLogo class="h-8 w-auto fill-current text-indigo-600" />
                     <span class="text-lg font-bold text-gray-900">Importnex</span>
                 </Link>
@@ -114,7 +119,7 @@ const navGroups = [
                         >
                             <component :is="item.icon" :class="['h-5 w-5 flex-shrink-0', isActive(item.route) ? 'text-indigo-600' : 'text-gray-400 group-hover:text-gray-600']" />
                             <span class="flex-1">{{ item.name }}</span>
-                            <span v-if="item.badge === 'alerts' && pendingAlerts > 0" class="inline-flex items-center justify-center rounded-full bg-rose-500 px-2 py-0.5 text-xs font-semibold text-white">
+                            <span v-if="item.badge === t('nav.alerts') && pendingAlerts > 0" class="inline-flex items-center justify-center rounded-full bg-rose-500 px-2 py-0.5 text-xs font-semibold text-white">
                                 {{ pendingAlerts }}
                             </span>
                         </Link>

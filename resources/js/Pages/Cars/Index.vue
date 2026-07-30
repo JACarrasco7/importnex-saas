@@ -1,7 +1,7 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
-import { MagnifyingGlassIcon, PlusIcon, Squares2X2Icon, ArrowUpTrayIcon, PencilIcon, EyeIcon, TrashIcon, ChevronLeftIcon, ChevronRightIcon, SparklesIcon } from '@heroicons/vue/24/outline';
+import { MagnifyingGlassIcon, PlusIcon, Squares2X2Icon, ArrowUpTrayIcon, PencilIcon, EyeIcon, TrashIcon, SparklesIcon } from '@heroicons/vue/24/outline';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Badge from '@/Components/Badge.vue';
 import PageHeader from '@/Components/PageHeader.vue';
@@ -17,12 +17,60 @@ const props = defineProps({
 });
 
 const search = ref(props.filters?.search || '');
-const statusFilter = ref(props.filters?.status || '');
 const lightFilter = ref(props.filters?.traffic_light || '');
+const currentTab = ref(props.filters?.status || 'all');
 const showDelete = ref(false);
 const carToDelete = ref(null);
 
 const { currency, statusVariant, trafficLightVariant } = useFormat();
+
+const tabs = computed(() => {
+    const statusOrder = ['Lead', 'Contacted', 'Negotiating', 'Purchased', 'In Transit', 'Arrived', 'Ready', 'Sold'];
+    const ordered = statusOrder.filter(s => props.statuses.includes(s));
+    const remaining = props.statuses.filter(s => !ordered.includes(s));
+    return [
+        { id: 'all', label: 'All', count: props.cars.total },
+        ...ordered.map(status => ({
+            id: status,
+            label: status,
+            count: props.cars.data?.filter(c => c.status === status).length || 0
+        })),
+        ...remaining.map(status => ({
+            id: status,
+            label: status,
+            count: props.cars.data?.filter(c => c.status === status).length || 0
+        }))
+    ];
+});
+
+const stats = computed(() => {
+    const cars = props.cars.data || [];
+    return {
+        green: cars.filter(c => c.traffic_light === 'green').length,
+        amber: cars.filter(c => c.traffic_light === 'amber').length,
+        red: cars.filter(c => c.traffic_light === 'red').length,
+        totalValue: cars.reduce((sum, c) => sum + (c.purchase_price || 0), 0),
+    };
+});
+
+const filteredCars = computed(() => {
+    let result = props.cars.data || [];
+    if (currentTab.value !== 'all') {
+        result = result.filter(c => c.status === currentTab.value);
+    }
+    if (search.value) {
+        const term = search.value.toLowerCase();
+        result = result.filter(c =>
+            (c.brand && c.brand.toLowerCase().includes(term)) ||
+            (c.model && c.model.toLowerCase().includes(term)) ||
+            (c.vin && c.vin.toLowerCase().includes(term))
+        );
+    }
+    if (lightFilter.value) {
+        result = result.filter(c => c.traffic_light === lightFilter.value);
+    }
+    return result;
+});
 
 const importForm = useForm({ file: null });
 const importFile = (event) => {
@@ -36,12 +84,12 @@ const submitImport = () => {
     });
 };
 
-watch([search, statusFilter, lightFilter], () => {
+watch([search, lightFilter], () => {
     router.get(
         route('cars.index'),
         {
             search: search.value || undefined,
-            status: statusFilter.value || undefined,
+            status: currentTab.value === 'all' ? undefined : currentTab.value,
             traffic_light: lightFilter.value || undefined,
         },
         { preserveState: true, preserveScroll: true }
@@ -82,9 +130,9 @@ const confirmDelete = () => {
                             <Squares2X2Icon class="h-4 w-4" />
                             Kanban
                         </Link>
-                        <Link :href="route('cars.import-valuation.create')" class="inline-flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-purple-500">
+                        <Link :href="route('cars.import-valuation.create')" class="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500">
                             <SparklesIcon class="h-4 w-4" />
-                            Importar informe
+                            Subir ZIP
                         </Link>
                         <Link :href="route('cars.create')" class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">
                             <PlusIcon class="h-4 w-4" />
@@ -95,20 +143,13 @@ const confirmDelete = () => {
 
                 <!-- Filters -->
                 <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
-                    <div class="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <div class="grid grid-cols-1 gap-4 p-4 sm:grid-cols-3">
                         <div>
                             <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Search</label>
                             <div class="relative">
                                 <MagnifyingGlassIcon class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                                 <input v-model="search" type="text" placeholder="Brand, model, VIN..." class="block w-full rounded-lg border-gray-300 pl-9 text-sm focus:border-indigo-500 focus:ring-indigo-500" />
                             </div>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Status</label>
-                            <select v-model="statusFilter" class="block w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                <option value="">All statuses</option>
-                                <option v-for="status in statuses" :key="status" :value="status">{{ status }}</option>
-                            </select>
                         </div>
                         <div>
                             <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Traffic light</label>
@@ -133,75 +174,113 @@ const confirmDelete = () => {
                     </div>
                 </div>
 
-                <!-- Table -->
-                <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
-                    <div v-if="cars.data?.length > 0" class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Vehicle</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Year</th>
-                                    <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Mileage</th>
-                                    <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Price</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Status</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Health</th>
-                                    <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200">
-                                <tr v-for="car in cars.data" :key="car.id" class="hover:bg-gray-50">
-                                    <td class="px-6 py-4">
-                                        <Link :href="route('cars.show', car.id)" class="font-medium text-gray-900 hover:text-indigo-600">
-                                            {{ car.brand }} {{ car.model }}
-                                        </Link>
-                                        <div v-if="car.version" class="text-xs text-gray-500">{{ car.version }}</div>
-                                    </td>
-                                    <td class="px-6 py-4 text-sm text-gray-500">{{ car.year }}</td>
-                                    <td class="px-6 py-4 text-right text-sm text-gray-500">{{ car.mileage?.toLocaleString() }} km</td>
-                                    <td class="px-6 py-4 text-right text-sm font-semibold text-gray-900">{{ currency(car.purchase_price) }}</td>
-                                    <td class="px-6 py-4">
-                                        <Badge :variant="statusVariant(car.status)">{{ car.status }}</Badge>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <Badge :variant="trafficLightVariant(car.traffic_light)" dot>{{ car.traffic_light }}</Badge>
-                                    </td>
-                                    <td class="px-6 py-4 text-right">
-                                        <div class="inline-flex items-center gap-2">
-                                            <Link :href="route('cars.show', car.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-indigo-50 hover:text-indigo-600" title="View">
-                                                <EyeIcon class="h-4 w-4" />
-                                            </Link>
-                                            <Link :href="route('cars.edit', car.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600" title="Edit">
-                                                <PencilIcon class="h-4 w-4" />
-                                            </Link>
-                                            <button type="button" @click="askDelete(car)" class="rounded-md p-1.5 text-gray-400 hover:bg-rose-50 hover:text-rose-600" title="Delete">
-                                                <TrashIcon class="h-4 w-4" />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                <!-- Quick Stats -->
+                <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                    <div class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200">
+                        <div class="text-xs font-semibold uppercase tracking-wider text-gray-500">Total Value</div>
+                        <div class="mt-1 text-2xl font-bold text-gray-900">{{ currency(stats.totalValue) }}</div>
                     </div>
-                    <EmptyState v-else icon="🚗" title="No cars registered yet" description="Start by adding your first vehicle to the inventory." action-text="Add your first car" :action-route="route('cars.create')" />
+                    <div class="rounded-xl bg-emerald-50 p-4 shadow-sm ring-1 ring-emerald-200">
+                        <div class="text-xs font-semibold uppercase tracking-wider text-emerald-700">Green Light</div>
+                        <div class="mt-1 text-2xl font-bold text-emerald-600">{{ stats.green }}</div>
+                    </div>
+                    <div class="rounded-xl bg-amber-50 p-4 shadow-sm ring-1 ring-amber-200">
+                        <div class="text-xs font-semibold uppercase tracking-wider text-amber-700">Amber Light</div>
+                        <div class="mt-1 text-2xl font-bold text-amber-600">{{ stats.amber }}</div>
+                    </div>
+                    <div class="rounded-xl bg-red-50 p-4 shadow-sm ring-1 ring-red-200">
+                        <div class="text-xs font-semibold uppercase tracking-wider text-red-700">Red Light</div>
+                        <div class="mt-1 text-2xl font-bold text-red-600">{{ stats.red }}</div>
+                    </div>
+                </div>
 
-                    <!-- Pagination -->
-                    <div v-if="cars.links && cars.last_page > 1" class="flex items-center justify-between border-t border-gray-200 bg-gray-50 px-6 py-3">
-                        <div class="text-sm text-gray-700">
-                            Showing <span class="font-semibold">{{ cars.from }}</span> to <span class="font-semibold">{{ cars.to }}</span> of <span class="font-semibold">{{ cars.total }}</span>
+                <!-- Tabs -->
+                <div class="border-b border-gray-200">
+                    <nav class="-mb-px flex gap-8 overflow-x-auto">
+                        <button
+                            v-for="tab in tabs"
+                            :key="tab.id"
+                            @click="currentTab = tab.id"
+                            :class="[
+                                'whitespace-nowrap border-b-2 px-1 py-4 text-sm font-semibold transition-colors',
+                                currentTab === tab.id
+                                    ? 'border-indigo-600 text-indigo-600'
+                                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                            ]"
+                        >
+                            {{ tab.label }}
+                            <span v-if="tab.count > 0" class="ml-2 rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">{{ tab.count }}</span>
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Cards Grid -->
+                <div v-if="filteredCars.length > 0" class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                    <div
+                        v-for="car in filteredCars"
+                        :key="car.id"
+                        class="group relative overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-200 transition-all hover:shadow-md hover:ring-gray-300"
+                    >
+                        <Link :href="route('cars.show', car.id)" class="block">
+                            <div v-if="car.photos && car.photos.length > 0" class="aspect-video overflow-hidden bg-gray-100">
+                                <img :src="car.photos[0]" :alt="`${car.brand} ${car.model}`" class="h-full w-full object-cover transition-transform group-hover:scale-105" loading="lazy" />
+                            </div>
+                            <div v-else class="flex aspect-square items-center justify-center bg-gray-100">
+                                <span class="text-4xl">🚗</span>
+                            </div>
+                        </Link>
+
+                        <div class="p-4">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="flex-1 min-w-0">
+                                    <Link :href="route('cars.show', car.id)" class="block">
+                                        <h3 class="text-sm font-semibold text-gray-900 group-hover:text-indigo-600">
+                                            {{ car.brand }} {{ car.model }}
+                                        </h3>
+                                        <p v-if="car.version" class="mt-0.5 text-xs text-gray-500 truncate">{{ car.version }}</p>
+                                    </Link>
+                                </div>
+                                <Badge :variant="trafficLightVariant(car.traffic_light)" dot class="shrink-0">{{ car.traffic_light }}</Badge>
+                            </div>
+
+                            <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
+                                <div>
+                                    <span class="text-[10px] uppercase tracking-wider text-gray-500">Year</span>
+                                    <p class="font-medium text-gray-900">{{ car.year }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] uppercase tracking-wider text-gray-500">Mileage</span>
+                                    <p class="font-medium text-gray-900">{{ (car.mileage / 1000).toFixed(0) }}k km</p>
+                                </div>
+                            </div>
+
+                            <div class="mt-3 flex items-center justify-between border-t border-gray-100 pt-3">
+                                <div>
+                                    <span class="text-[10px] uppercase tracking-wider text-gray-500">Price</span>
+                                    <p class="text-base font-bold text-gray-900">{{ currency(car.purchase_price) }}</p>
+                                </div>
+                                <Badge :variant="statusVariant(car.status)" size="sm">{{ car.status }}</Badge>
+                            </div>
                         </div>
-                        <div class="flex items-center gap-1">
-                            <component v-for="link in cars.links" :key="link.label" :is="link.url ? Link : 'span'" :href="link.url || '#'" :class="[
-                                'inline-flex h-8 min-w-[2rem] items-center justify-center rounded-md px-2 text-sm',
-                                link.active ? 'bg-indigo-600 text-white' : 'text-gray-700 hover:bg-white',
-                                !link.url ? 'cursor-not-allowed opacity-50' : '',
-                            ]">
-                                <ChevronLeftIcon v-if="link.label.includes('Previous')" class="h-4 w-4" />
-                                <ChevronRightIcon v-else-if="link.label.includes('Next')" class="h-4 w-4" />
-                                <span v-else v-html="link.label"></span>
-                            </component>
+
+                        <div class="flex border-t border-gray-100 bg-gray-50 px-4 py-2">
+                            <div class="flex-1" />
+                            <div class="flex items-center gap-1">
+                                <Link :href="route('cars.show', car.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-indigo-50 hover:text-indigo-600" title="View">
+                                    <EyeIcon class="h-3.5 w-3.5" />
+                                </Link>
+                                <Link :href="route('cars.edit', car.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600" title="Edit">
+                                    <PencilIcon class="h-3.5 w-3.5" />
+                                </Link>
+                                <button type="button" @click="askDelete(car)" class="rounded-md p-1.5 text-gray-400 hover:bg-rose-50 hover:text-rose-600" title="Delete">
+                                    <TrashIcon class="h-3.5 w-3.5" />
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                <EmptyState v-else icon="🚗" title="No cars found" description="Try adjusting your filters or add your first vehicle to the inventory." action-text="Add your first car" :action-route="route('cars.create')" />
             </div>
         </div>
 

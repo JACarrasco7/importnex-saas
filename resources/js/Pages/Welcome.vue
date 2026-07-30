@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { Head, Link } from '@inertiajs/vue3';
 import { TruckIcon, UsersIcon, MapIcon, ChartBarIcon, SparklesIcon, ArrowRightIcon, CheckIcon } from '@heroicons/vue/24/outline';
 
@@ -8,18 +8,18 @@ defineProps({
 });
 
 const features = [
-    { icon: TruckIcon, title: 'Inventory management', description: 'Track every car from sourcing to delivery in one place.' },
-    { icon: UsersIcon, title: 'CRM with clients', description: 'Manage leads, deals and customer notes with full history.' },
-    { icon: MapIcon, title: 'Map view', description: 'Visualize where your cars are located across cities.' },
-    { icon: ChartBarIcon, title: 'Finance dashboard', description: 'Real-time P&L, transport costs and tax breakdown.' },
-    { icon: SparklesIcon, title: 'AI verification', description: 'Get instant valuations and recommendations from Claude.' },
-    { icon: CheckIcon, title: 'Alerts & checklists', description: 'Never miss a docs renewal, ITV or transport window.' },
+    { icon: TruckIcon, title: t('welcome.inventory_management'), description: t('welcome.track_cars') },
+    { icon: UsersIcon, title: t('nav.crm'), description: t('welcome.manage_leads') },
+    { icon: MapIcon, title: t('nav.map'), description: t('welcome.map_desc') },
+    { icon: ChartBarIcon, title: t('welcome.finance'), description: t('welcome.finance_desc') },
+    { icon: SparklesIcon, title: t('welcome.ai_verification'), description: t('welcome.ai_desc') },
+    { icon: CheckIcon, title: t('nav.alerts'), description: t('welcome.alerts_desc') },
 ];
 
 const stats = [
-    { value: '80%', label: 'less time on spreadsheets' },
-    { value: '3x', label: 'faster inventory turnover' },
-    { value: '24/7', label: 'AI-powered assistance' },
+    { value: '80%', label: t('welcome.spreadsheet_savings') },
+    { value: '3x', label: t('welcome.turnover') },
+    { value: '24/7', label: t('welcome.ai_assistance') },
 ];
 </script>
 
@@ -65,7 +65,7 @@ const stats = [
                     <span class="block bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">on autopilot</span>
                 </h1>
                 <p class="mx-auto mt-6 max-w-2xl text-lg text-gray-600">
-                    Importnex gives car importers a single platform to manage inventory, clients, finance, transports and AI-powered valuations — purpose-built for German-EU imports.
+                    Importnex gives car importers a single platform to manage inventory, clients, finance, transports and AI-powered valuations â€” purpose-built for German-EU imports.
                 </p>
                 <div class="mt-10 flex items-center justify-center gap-4">
                     <Link :href="route('register')" class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-6 py-3 text-base font-semibold text-white shadow-lg hover:bg-indigo-500">
@@ -73,7 +73,7 @@ const stats = [
                         <ArrowRightIcon class="h-4 w-4" />
                     </Link>
                     <Link :href="route('login')" class="text-base font-semibold text-gray-700 hover:text-gray-900">
-                        Log in →
+                        Log in â†’
                     </Link>
                 </div>
 
@@ -121,7 +121,7 @@ const stats = [
 
         <footer class="border-t border-gray-200 bg-white py-8">
             <div class="mx-auto max-w-7xl px-6 text-center text-sm text-gray-500">
-                © {{ new Date().getFullYear() }} Importnex. Made for car importers.
+                Â© {{ new Date().getFullYear() }} Importnex. Made for car importers.
             </div>
         </footer>
     </div>

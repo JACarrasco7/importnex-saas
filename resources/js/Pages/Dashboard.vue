@@ -18,6 +18,9 @@ import Badge from '@/Components/Badge.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import EmptyState from '@/Components/EmptyState.vue';
 import { useFormat } from '@/Composables/useFormat';
+import { useTranslations } from '@/Composables/useTranslations';
+
+const { t } = useTranslations();
 
 const props = defineProps({
     stats: Object,
@@ -32,14 +35,14 @@ const lightKeys = ['green', 'amber', 'red', 'neutral'];
 const totalTraffic = (props.trafficLights?.green || 0) + (props.trafficLights?.amber || 0) + (props.trafficLights?.red || 0) + (props.trafficLights?.neutral || 0);
 
 const quickLinks = [
-    { label: 'Cars', description: 'Inventory', route: 'cars.index', icon: TruckIcon, color: 'indigo' },
-    { label: 'Kanban', description: 'Pipeline', route: 'cars.kanban', icon: Squares2X2Icon, color: 'purple' },
-    { label: 'Map', description: 'Locations', route: 'cars.map', icon: MapIcon, color: 'sky' },
-    { label: 'Finance', description: 'P&L', route: 'finance.index', icon: BanknotesIcon, color: 'emerald' },
-    { label: 'Trips', description: 'Logistics', route: 'trips.index', icon: CalendarDaysIcon, color: 'amber' },
-    { label: 'Clients', description: 'CRM', route: 'clients.index', icon: UsersIcon, color: 'blue' },
-    { label: 'Contacts', description: 'Network', route: 'contacts.index', icon: PhoneIcon, color: 'rose' },
-    { label: 'Alerts', description: 'Notifications', route: 'alerts.index', icon: BellAlertIcon, color: 'red' },
+    { label: t('nav.cars'), description: t('nav.inventory'), route: 'cars.index', icon: TruckIcon, color: 'indigo' },
+    { label: t('nav.kanban'), description: t('nav.map'), route: 'cars.kanban', icon: Squares2XIcon, color: 'purple' },
+    { label: t('nav.map'), description: t('nav.finance'), route: 'cars.map', icon: MapIcon, color: 'sky' },
+    { label: t('nav.finance'), description: t('nav.trips'), route: 'finance.index', icon: BanknotesIcon, color: 'emerald' },
+    { label: t('nav.trips'), description: t('nav.crm'), route: 'trips.index', icon: CalendarDaysIcon, color: 'amber' },
+    { label: t('nav.clients'), description: t('nav.crm'), route: 'clients.index', icon: UsersIcon, color: 'blue' },
+    { label: t('nav.contacts'), description: t('nav.alerts'), route: 'contacts.index', icon: PhoneIcon, color: 'rose' },
+    { label: t('nav.alerts'), description: t('nav.plan'), route: 'alerts.index', icon: BellAlertIcon, color: 'red' },
 ];
 </script>
 
