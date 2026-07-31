@@ -25,7 +25,8 @@ const carToDelete = ref(null);
 const { currency, statusVariant, trafficLightVariant } = useFormat();
 
 const tabs = computed(() => {
-    const statusOrder = ['Lead', 'Contacted', 'Negotiating', 'Purchased', 'In Transit', 'Arrived', 'Ready', 'Sold'];
+    // Order statuses by typical workflow
+    const statusOrder = ['Located', 'Valuing', 'Offered', 'Reserved', 'Purchased', 'In_transit', 'Processing', 'Pending review', 'Verifying', 'Delivered', 'Discarded'];
     const ordered = statusOrder.filter(s => props.statuses.includes(s));
     const remaining = props.statuses.filter(s => !ordered.includes(s));
     return [

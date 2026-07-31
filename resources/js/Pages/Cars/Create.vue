@@ -361,7 +361,8 @@ const scrapeFromUrl = async () => {
                                 <select v-model="form.status" :class="inputClass">
                                     <option>Located</option><option>Valuing</option><option>Offered</option>
                                     <option>Reserved</option><option>Purchased</option><option>In_transit</option>
-                                    <option>Processing</option><option>Delivered</option><option>Discarded</option>
+                                    <option>Processing</option><option>Pending review</option><option>Verifying</option>
+                                    <option>Delivered</option><option>Discarded</option>
                                 </select>
                             </FormField>
                             <FormField label="Traffic light">

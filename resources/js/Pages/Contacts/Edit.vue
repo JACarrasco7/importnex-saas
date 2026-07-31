@@ -8,6 +8,7 @@ import FormField from '@/Components/FormField.vue';
 
 const props = defineProps({
     contact: Object,
+    clients: Array,
 });
 
 const form = useForm({
@@ -15,6 +16,7 @@ const form = useForm({
     phone: props.contact.phone ?? '',
     email: props.contact.email ?? '',
     city: props.contact.city ?? '',
+    client_id: props.contact.client_id ?? null,
     tags: Array.isArray(props.contact.tags) ? props.contact.tags.join(', ') : '',
     notes: props.contact.notes ?? '',
 });
@@ -50,6 +52,12 @@ const inputClass = 'block w-full rounded-lg border-gray-300 text-sm shadow-sm fo
                             <FormField label="Phone"><input v-model="form.phone" type="tel" :class="inputClass" /></FormField>
                             <FormField label="Email"><input v-model="form.email" type="email" :class="inputClass" /></FormField>
                             <FormField label="City"><input v-model="form.city" type="text" :class="inputClass" /></FormField>
+                            <FormField label="Client" v-if="clients?.length">
+                                <select v-model="form.client_id" :class="inputClass">
+                                    <option :value="null">— No client —</option>
+                                    <option v-for="c in clients" :key="c.id" :value="c.id">{{ c.name }}</option>
+                                </select>
+                            </FormField>
                         </div>
                     </FormSection>
 

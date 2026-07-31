@@ -46,6 +46,7 @@ class ContactController extends Controller
             'phone' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255',
             'city' => 'nullable|string|max:255',
+            'client_id' => 'nullable|exists:clients,id',
             'notes' => 'nullable|string',
             'tags' => 'nullable',
         ]);
@@ -56,7 +57,7 @@ class ContactController extends Controller
             : (is_array($tags) ? $tags : []);
 
         Contact::create([
-            ...$request->only(['name', 'phone', 'email', 'city', 'notes']),
+            ...$request->only(['name', 'phone', 'email', 'city', 'client_id', 'notes']),
             'tags' => $tagsArray,
             'organization_id' => auth()->user()->organization_id,
         ]);
@@ -88,6 +89,7 @@ class ContactController extends Controller
             'phone' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255',
             'city' => 'nullable|string|max:255',
+            'client_id' => 'nullable|exists:clients,id',
             'notes' => 'nullable|string',
             'tags' => 'nullable',
         ]);
@@ -98,7 +100,7 @@ class ContactController extends Controller
             : (is_array($tags) ? $tags : []);
 
         $contact->update([
-            ...$request->only(['name', 'phone', 'email', 'city', 'notes']),
+            ...$request->only(['name', 'phone', 'email', 'city', 'client_id', 'notes']),
             'tags' => $tagsArray,
         ]);
 

@@ -128,7 +128,9 @@ const inputClass = 'block w-full rounded-lg border-gray-300 text-sm shadow-sm fo
                             <FormField label="Status" required>
                                 <select v-model="form.status" required :class="inputClass">
                                     <option>Located</option><option>Valuing</option><option>Offered</option><option>Reserved</option>
-                                    <option>Purchased</option><option>In_transit</option><option>Processing</option><option>Delivered</option><option>Discarded</option>
+                                    <option>Purchased</option><option>In_transit</option><option>Processing</option>
+                                    <option>Pending review</option><option>Verifying</option>
+                                    <option>Delivered</option><option>Discarded</option>
                                 </select>
                             </FormField>
                             <FormField label="Traffic light" required>

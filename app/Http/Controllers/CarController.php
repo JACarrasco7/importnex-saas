@@ -67,7 +67,10 @@ class CarController extends Controller
             'url' => ['required', 'string', 'max:2048', 'regex:#^https?://#i'],
         ]);
 
-        $result = $scraper->scrape($request->input('url'));
+        $org = auth()->user()->organization;
+        $url = $request->input('url');
+
+        $result = $scraper->scrape($url, $org);
 
         return response()->json($result, $result['success'] ? 200 : 422);
     }

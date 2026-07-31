@@ -50,11 +50,35 @@ class SubscriptionController extends Controller
             return back()->with('error', 'Plan not found');
         }
 
-        $request->user()->organization->newSubscription('main', $plan)
-            ->trialDays(config('subscription.trial_days'))
-            ->create($request->paymentMethodId);
+        $org = $request->user()->organization;
 
-        $request->user()->organization->update(['plan' => $plan]);
+        // If user has a default payment method (from Stripe portal), use it
+        $paymentMethodId = $request->paymentMethodId;
+
+        if (!$paymentMethodId) {
+            // Try to get the default payment method from Stripe
+            try {
+                $paymentMethod = $org->defaultPaymentMethod();
+                if ($paymentMethod) {
+                    $paymentMethodId = $paymentMethod->id;
+                }
+            } catch (\Throwable $e) {
+                // No payment method available
+            }
+        }
+
+        if ($paymentMethodId) {
+            $org->newSubscription('main', $plan)
+                ->trialDays(config('subscription.trial_days'))
+                ->create($paymentMethodId);
+        } else {
+            // Create subscription without payment method (will be collected via portal)
+            $org->newSubscription('main', $plan)
+                ->trialDays(config('subscription.trial_days'))
+                ->createOrUseDefaultPaymentMethod();
+        }
+
+        $org->update(['plan' => $plan]);
 
         return redirect()->route('subscriptions.index')
             ->with('success', 'Subscription created successfully');

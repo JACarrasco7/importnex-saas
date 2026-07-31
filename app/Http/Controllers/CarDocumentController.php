@@ -23,11 +23,20 @@ class CarDocumentController extends Controller
     {
         $request->validate([
             'documents.*' => 'required|file|mimes:pdf,doc,docx,xls,xlsx|max:10240',
-            'doc_type' => 'required|in:invoice,contract,permit,insurance,registration,other',
+            'doc_key' => 'required|string',
             'name' => 'nullable|string|max:255',
         ]);
 
-        $type = $request->input('doc_type');
+        $docKey = $request->input('doc_key');
+        $customName = $request->input('name');
+
+        // Get document definition from CarDocumentDefinitions
+        $definitions = app(\App\Support\CarDocumentDefinitions::class)->all();
+        $docDef = collect($definitions)->firstWhere('key', $docKey);
+
+        if (!$docDef) {
+            return back()->withErrors(['doc_key' => 'Document type not recognized.']);
+        }
 
         if ($request->hasFile('documents')) {
             foreach ($request->file('documents') as $document) {
@@ -36,13 +45,15 @@ class CarDocumentController extends Controller
                     'public'
                 );
 
-                $name = $request->input('name') ?: $document->getClientOriginalName();
+                $name = $customName ?: $document->getClientOriginalName();
 
                 CarDocument::create([
                     'car_id' => $car->id,
                     'organization_id' => $car->organization_id,
                     'name' => $name,
-                    'doc_type' => $type,
+                    'doc_key' => $docKey,
+                    'doc_type' => $docDef['doc_type'],
+                    'group' => $docDef['group'],
                     'url' => $path,
                     'uploaded_at' => now(),
                 ]);
