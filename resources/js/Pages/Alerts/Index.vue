@@ -7,19 +7,18 @@ import Badge from '@/Components/Badge.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import EmptyState from '@/Components/EmptyState.vue';
 import ConfirmDialog from '@/Components/ConfirmDialog.vue';
+import { useTranslations } from '@/Composables/useTranslations';
 import { useFormat } from '@/Composables/useFormat';
+
+const { t } = useTranslations();
+const { date } = useFormat();
 
 const props = defineProps({
     alerts: Object,
     filters: Object,
 });
 
-const filter = ref(props.filters?.filter || t('common.pending'));
-const showResolve = ref(false);
-const showDelete = ref(false);
-const alertToAct = ref(null);
-
-const { date } = useFormat();
+const filter = ref(props.filters?.filter || 'pending');
 
 watch(filter, () => {
     router.get(route('alerts.index'), { filter: filter.value }, { preserveState: true, preserveScroll: true });

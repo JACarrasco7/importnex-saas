@@ -16,4 +16,10 @@ return [
     'register' => 'Registrarse',
     'name' => 'Nombre',
     'cancel' => 'Cancelar',
+    'confirm_password' => 'Confirmar contraseña',
+    'confirm_password_desc' => 'Ingresa tu contraseña actual para continuar.',
+    'confirm' => 'Confirmar',
+    'choose_new_password' => 'Elige una nueva contraseña',
+    'new_password' => 'Nueva contraseña',
+    'confirm_new_password' => 'Confirmar nueva contraseña',
 ];

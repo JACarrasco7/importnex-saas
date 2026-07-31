@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'inventory_management' => 'Gestión de Inventario',
+    'track_cars' => 'Rastrea tu flota de autos en un lugar',
+    'manage_leads' => 'Administra leads y contactos',
+    'map_desc' => 'Visualiza autos en el mapa',
+    'finance' => 'Finanzas',
+    'finance_desc' => 'Rastrea gastos e ingresos',
+    'ai_verification' => 'Verificación con IA',
+    'ai_desc' => 'Verifica autos con ayuda de IA',
+    'alerts_desc' => 'Recibe notificaciones de eventos importantes',
+    'spreadsheet_savings' => '80% de ahorro en hojas de cálculo',
+    'turnover' => '3x rotación',
+    'ai_assistance' => 'Asistencia de IA 24/7',
+    'ai_powered' => 'Impulsado por IA',
+    'run_business' => 'Ejecuta tu negocio en piloto automático',
+    'on_autopilot' => 'En piloto automático',
+    'importnex_description' => 'Importnex te ayuda a gestionar tu concesionario de autos de manera eficiente.',
+    'start_trial' => 'Comenzar prueba gratuita',
+    'everything_you_need' => 'Todo lo que necesitas para operar tu concesionario de autos',
+    'built_for' => 'Desarrollado para concesionarios y talleres de autos',
+    'ready_to_scale' => 'Listo para escalar tu negocio',
+    'free_trial' => 'Comienza tu prueba gratuita de 14 días',
+    'made_for' => 'Hecho para concesionarios de autos',
+];

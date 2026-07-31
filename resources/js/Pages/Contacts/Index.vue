@@ -97,7 +97,7 @@ const confirmDelete = () => {
                             <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Search</label>
                             <div class="relative">
                                 <MagnifyingGlassIcon class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-<input v-model="search" type="text" placeholder="Name, email, city..." class="block w-full rounded-lg border-gray-300 pl-9 text-sm focus:border-indigo-500 focus:ring-indigo-500" />
+                                <input v-model="search" type="text" placeholder="Name, email, city..." class="block w-full rounded-lg border-gray-300 pl-9 text-sm focus:border-indigo-500 focus:ring-indigo-500" />
                             </div>
                         </div>
                         <div>
@@ -181,7 +181,6 @@ const confirmDelete = () => {
                 </div>
 
                 <EmptyState v-else icon="📇" title="No contacts found" description="Try adjusting your filters or add your first contact to your network." action-text="Add your first contact" :action-route="route('contacts.create')" />
-
             </div>
         </div>
 

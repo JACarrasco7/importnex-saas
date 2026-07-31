@@ -25,11 +25,8 @@ class LocaleController extends Controller
             'locale' => $locale,
         ]);
 
-        // Set cookie for guest users
-        if (!$user) {
-            $response->withCookie(cookie()->forgetting('locale'));
-            $response->withCookie(cookie()->make('locale', $locale, 60 * 24 * 365)); // 1 year
-        }
+        // Set cookie for all users
+        $response->withCookie(cookie()->make('locale', $locale, 60 * 24 * 365)); // 1 year
 
         return $response;
     }

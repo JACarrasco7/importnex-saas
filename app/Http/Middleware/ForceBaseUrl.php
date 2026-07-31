@@ -19,7 +19,7 @@ class ForceBaseUrl
                 \Illuminate\Support\Facades\URL::forceScheme('https');
             }
         }
-        
+
         return $next($request);
     }
 }

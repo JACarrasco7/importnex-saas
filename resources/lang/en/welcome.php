@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'inventory_management' => 'Inventory Management',
+    'track_cars' => 'Track your car fleet in one place',
+    'manage_leads' => 'Manage leads and contacts',
+    'map_desc' => 'Visualize cars on the map',
+    'finance' => 'Finance',
+    'finance_desc' => 'Track expenses and revenue',
+    'ai_verification' => 'AI Verification',
+    'ai_desc' => 'Verify cars with AI assistance',
+    'alerts_desc' => 'Get notified of important events',
+    'spreadsheet_savings' => '80% spreadsheet savings',
+    'turnover' => '3x turnover',
+    'ai_assistance' => '24/7 AI assistance',
+    'ai_powered' => 'Powered by AI',
+    'run_business' => 'Run your business on autopilot',
+    'on_autopilot' => 'On autopilot',
+    'importnex_description' => 'Importnex helps you manage your car dealership efficiently.',
+    'start_trial' => 'Start free trial',
+    'everything_you_need' => 'Everything you need to run your car dealership',
+    'built_for' => 'Built for car dealerships and workshops',
+    'ready_to_scale' => 'Ready to scale your business',
+    'free_trial' => 'Start your free 14-day trial',
+    'made_for' => 'Made for car dealerships',
+];

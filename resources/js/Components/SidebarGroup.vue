@@ -44,7 +44,7 @@ const hasActiveChild = computed(() => {
             <Link
                 v-for="item in items"
                 :key="item.route + item.name"
-                :href="route(item.route, item.param)"
+                :href="item.param ? route(item.route, item.param) : route(item.route)"
                 :class="[
                     'flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm transition',
                     isActive(item) ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',

@@ -65,11 +65,17 @@ class PublicCarRequestController extends Controller
         $data['organization_id'] = $organization->id;
         $data['status'] = 'pending';
 
-        // Try to link to existing client by email
-        if ($data['email']) {
-            $client = Client::where('email', $data['email'])
-                ->where('organization_id', $organization->id)
-                ->first();
+        // Try to link to existing client by contact_info (JSON: {email, phone})
+        if (!empty($data['email']) || !empty($data['phone'])) {
+            $query = Client::where('organization_id', $organization->id);
+
+            if (!empty($data['email'])) {
+                $query->where(function ($q) use ($data) {
+                    $q->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(contact_info, '$.email')) = ?", [$data['email']]);
+                });
+            }
+
+            $client = $query->first();
 
             if ($client) {
                 $data['client_id'] = $client->id;

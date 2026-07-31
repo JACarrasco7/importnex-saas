@@ -1,6 +1,5 @@
 import dayjs from 'dayjs';
 import 'dayjs/locale/en';
-import 'dayjs/locale/de';
 import 'dayjs/locale/es';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -10,9 +9,9 @@ dayjs.extend(localizedFormat);
 dayjs.extend(relativeTime);
 dayjs.extend(advancedFormat);
 
-const LOCALE = 'de';
-const CURRENCY_LOCALE = 'de-DE';
-const CURRENCY = 'EUR';
+const LOCALE = 'en';
+const CURRENCY_LOCALE = 'en-US';
+const CURRENCY = 'USD';
 
 const currencyFormatter = new Intl.NumberFormat(CURRENCY_LOCALE, {
     style: 'currency',

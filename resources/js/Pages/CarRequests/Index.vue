@@ -1,9 +1,9 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import {
     MagnifyingGlassIcon, PlusIcon, EyeIcon, PencilIcon, TrashIcon,
-    CheckCircleIcon, ClockIcon, XCircleIcon, UserIcon, EnvelopeIcon, PhoneIcon
+    CheckCircleIcon, ClockIcon, XCircleIcon, UserIcon, EnvelopeIcon, PhoneIcon, LinkIcon
 } from '@heroicons/vue/24/outline';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Badge from '@/Components/Badge.vue';
@@ -16,6 +16,9 @@ const props = defineProps({
     stats: Object,
     filters: Object,
 });
+
+const page = usePage();
+const organization = page.props.auth?.user?.organization;
 
 const search = ref(props.filters?.search || '');
 const currentTab = ref(props.filters?.status || 'all');
@@ -106,8 +109,8 @@ const updateStatus = (request, newStatus) => {
 };
 
 const copyPublicUrl = () => {
-    const url = window.location.origin + `/request/${props.organization.slug}`;
-    // Get from org data
+    if (!organization?.slug) return;
+    const url = window.location.origin + `/request/${organization.slug}`;
     if (navigator.clipboard) {
         navigator.clipboard.writeText(url);
     }
