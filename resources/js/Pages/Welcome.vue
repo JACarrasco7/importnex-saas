@@ -1,6 +1,9 @@
 ﻿<script setup>
 import { Head, Link } from '@inertiajs/vue3';
 import { TruckIcon, UsersIcon, MapIcon, ChartBarIcon, SparklesIcon, ArrowRightIcon, CheckIcon } from '@heroicons/vue/24/outline';
+import { useTranslations } from '@/Composables/useTranslations';
+
+const { t } = useTranslations();
 
 defineProps({
     canLogin: Boolean,
@@ -24,7 +27,7 @@ const stats = [
 </script>
 
 <template>
-    <Head title="Welcome" />
+    <Head :title="t('app.title')" />
 
     <div class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50">
         <!-- Header -->
@@ -34,16 +37,16 @@ const stats = [
                     <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600">
                         <TruckIcon class="h-5 w-5 text-white" />
                     </div>
-                    <span class="text-xl font-bold text-gray-900">Importnex</span>
+                    <span class="text-xl font-bold text-gray-900">{{ t('app.title') }}</span>
                 </Link>
                 <div class="flex items-center gap-3">
                     <Link v-if="$page.props.auth?.user" :href="route('dashboard')" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">
-                        Dashboard
+                        {{ t('nav.dashboard') }}
                     </Link>
                     <template v-else>
-                        <Link :href="route('login')" class="text-sm font-semibold text-gray-700 hover:text-gray-900">Log in</Link>
+                        <Link :href="route('login')" class="text-sm font-semibold text-gray-700 hover:text-gray-900">{{ t('auth.login') }}</Link>
                         <Link v-if="canRegister" :href="route('register')" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">
-                            Get started
+                            {{ t('auth.register') }}
                         </Link>
                     </template>
                 </div>
@@ -58,22 +61,22 @@ const stats = [
             <div class="relative mx-auto max-w-7xl px-6 text-center">
                 <span class="inline-flex items-center gap-2 rounded-full bg-indigo-100 px-4 py-1.5 text-sm font-semibold text-indigo-700">
                     <SparklesIcon class="h-4 w-4" />
-                    AI-powered import SaaS
+                    {{ t('welcome.ai_powered') }}
                 </span>
                 <h1 class="mt-8 text-5xl font-bold tracking-tight text-gray-900 sm:text-6xl lg:text-7xl">
-                    Run your car import business
-                    <span class="block bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">on autopilot</span>
+                    {{ t('welcome.run_business') }}
+                    <span class="block bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">{{ t('welcome.on_autopilot') }}</span>
                 </h1>
                 <p class="mx-auto mt-6 max-w-2xl text-lg text-gray-600">
-                    Importnex gives car importers a single platform to manage inventory, clients, finance, transports and AI-powered valuations â€” purpose-built for German-EU imports.
+                    {{ t('welcome.importnex_description') }}
                 </p>
                 <div class="mt-10 flex items-center justify-center gap-4">
                     <Link :href="route('register')" class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-6 py-3 text-base font-semibold text-white shadow-lg hover:bg-indigo-500">
-                        Start free trial
+                        {{ t('welcome.start_trial') }}
                         <ArrowRightIcon class="h-4 w-4" />
                     </Link>
                     <Link :href="route('login')" class="text-base font-semibold text-gray-700 hover:text-gray-900">
-                        Log in â†’
+                        {{ t('auth.login') }}
                     </Link>
                 </div>
 
@@ -90,8 +93,8 @@ const stats = [
         <section class="py-20">
             <div class="mx-auto max-w-7xl px-6">
                 <div class="text-center">
-                    <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Everything you need to import cars</h2>
-                    <p class="mt-4 text-lg text-gray-600">Built specifically for workshops, brokers and importers.</p>
+                    <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">{{ t('welcome.everything_you_need') }}</h2>
+                    <p class="mt-4 text-lg text-gray-600">{{ t('welcome.built_for') }}</p>
                 </div>
                 <div class="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     <div v-for="feat in features" :key="feat.title" class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 transition hover:shadow-md hover:ring-indigo-200">
@@ -109,10 +112,10 @@ const stats = [
         <section class="py-20">
             <div class="mx-auto max-w-5xl px-6">
                 <div class="overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-600 to-purple-700 px-8 py-12 text-center shadow-2xl sm:px-12">
-                    <h2 class="text-3xl font-bold text-white sm:text-4xl">Ready to scale your import business?</h2>
-                    <p class="mt-4 text-lg text-indigo-100">14-day free trial. No credit card required.</p>
+                    <h2 class="text-3xl font-bold text-white sm:text-4xl">{{ t('welcome.ready_to_scale') }}</h2>
+                    <p class="mt-4 text-lg text-indigo-100">{{ t('welcome.free_trial') }}</p>
                     <Link :href="route('register')" class="mt-8 inline-flex items-center gap-2 rounded-lg bg-white px-6 py-3 text-base font-semibold text-indigo-700 shadow hover:bg-indigo-50">
-                        Start your trial
+                        {{ t('welcome.start_trial') }}
                         <ArrowRightIcon class="h-4 w-4" />
                     </Link>
                 </div>
@@ -121,7 +124,7 @@ const stats = [
 
         <footer class="border-t border-gray-200 bg-white py-8">
             <div class="mx-auto max-w-7xl px-6 text-center text-sm text-gray-500">
-                Â© {{ new Date().getFullYear() }} Importnex. Made for car importers.
+                © {{ new Date().getFullYear() }} {{ t('app.title') }}. {{ t('welcome.made_for') }}
             </div>
         </footer>
     </div>

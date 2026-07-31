@@ -14,6 +14,13 @@
         @routes
         @vite(['resources/js/app.js', "resources/js/Pages/{$page['component']}.vue"])
         @inertiaHead
+
+        <!-- Force Ziggy base URL for subpath deployment -->
+        @if(str_contains(config('app.url'), '/importnexcore'))
+            <script>
+                window.Ziggy.baseUrl = '{{ config('app.url') }}';
+            </script>
+        @endif
     </head>
     <body class="font-sans antialiased">
         @inertia

@@ -7,6 +7,7 @@ use App\Models\CarChecklist;
 use App\Models\CarDocument;
 use App\Observers\CarObserver;
 use App\Observers\CarDocumentObserver;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 
@@ -30,16 +31,15 @@ class AppServiceProvider extends ServiceProvider
         Car::observe(CarObserver::class);
         CarDocument::observe(CarDocumentObserver::class);
 
-        // Hotfix: cuando la app se sirve bajo un subpath de Apache (Alias),
-        // el SCRIPT_NAME se mantiene (/importnexcore/index.php) pero el
-        // REQUEST_URI llega strippeado. Esto hace que url('/') genere la URL
-        // sin el prefijo /importnexcore, rompiendo Ziggy y los assets.
-        //
-        // Forzamos el URL root con el subpath para que TODO (route(),
-        // asset(), Ziggy, vue-router) genere URLs absolutas correctas.
+        // Forzar URL base con prefijo para que TODOS los redirects (incluido Authenticate)
+        // generen Location con /importnexcore/...
+        // CRÍTICO: aplicar aquí en boot() para que esté disponible ANTES de cualquier middleware
         $appUrl = config('app.url');
-        if ($appUrl && str_contains($appUrl, '/importnexcore')) {
-            \Illuminate\Support\Facades\URL::forceRootUrl($appUrl);
+        if ($appUrl) {
+            URL::forceRootUrl($appUrl);
+            if (str_starts_with($appUrl, 'https://')) {
+                URL::forceScheme('https');
+            }
         }
     }
 }

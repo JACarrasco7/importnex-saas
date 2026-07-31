@@ -1,5 +1,5 @@
 <script setup>
-import { usePage, Inertia } from '@inertiajs/vue3';
+import { usePage, router } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
 
 const page = usePage();
