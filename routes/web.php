@@ -132,6 +132,10 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::post('/clients/{client}/contact-logs', [\App\Http\Controllers\ClientContactLogController::class, 'store'])->name('clients.contact-logs.store');
     Route::delete('/clients/{client}/contact-logs/{log}', [\App\Http\Controllers\ClientContactLogController::class, 'destroy'])->name('clients.contact-logs.destroy');
 
+    // AI generic chat
+    Route::get('/ai/chat', [\App\Http\Controllers\AiChatController::class, 'index'])->name('ai.chat');
+    Route::post('/ai/chat', [\App\Http\Controllers\AiChatController::class, 'send'])->name('ai.chat.send');
+
     // Alerts
     Route::get('/alerts', [\App\Http\Controllers\AlertController::class, 'index'])->name('alerts.index');
     Route::get('/alerts/{alert}', [\App\Http\Controllers\AlertController::class, 'show'])->name('alerts.show');
@@ -162,5 +166,8 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::patch('/car-requests/{carRequest}/status', [\App\Http\Controllers\CarRequestController::class, 'updateStatus'])->name('car-requests.update-status');
     Route::delete('/car-requests/{carRequest}', [\App\Http\Controllers\CarRequestController::class, 'destroy'])->name('car-requests.destroy');
 });
+
+// Locale update (available for all users, including guests)
+Route::put('/locale', [\App\Http\Controllers\LocaleController::class, 'update'])->name('locale.update');
 
 require __DIR__.'/auth.php';

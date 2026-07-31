@@ -21,12 +21,14 @@ import {
     CreditCardIcon,
     HomeIcon,
     ClipboardDocumentListIcon,
+    SparklesIcon,
 } from '@heroicons/vue/24/outline';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import FlashMessage from '@/Components/FlashMessage.vue';
 import UpgradeBanner from '@/Components/UpgradeBanner.vue';
 import LocaleSelector from '@/Components/LocaleSelector.vue';
 import SidebarGroup from '@/Components/SidebarGroup.vue';
+import AIChatWidget from '@/Components/AIChatWidget.vue';
 import { useTranslations } from '@/Composables/useTranslations';
 import { useFormat } from '@/Composables/useFormat';
 
@@ -96,6 +98,7 @@ const navGroups = computed(() => [
         title: t('nav.account'),
         icon: BuildingOfficeIcon,
         items: [
+            { name: t('nav.ai_chat'), route: 'ai.chat', icon: SparklesIcon },
             { name: t('nav.plan'), route: 'subscriptions.index', icon: CreditCardIcon },
             { name: t('nav.billing'), route: 'billing.index', icon: BanknotesIcon },
             { name: t('nav.organization'), route: 'organization.show', icon: BuildingOfficeIcon, param: user.value?.organization_id },
@@ -221,6 +224,14 @@ const navGroups = computed(() => [
             </main>
         </div>
     </div>
+
+    <!-- Floating AI chat widget -->
+    <AIChatWidget
+        v-if="$page.props.aiSettings"
+        :provider="$page.props.aiSettings.provider"
+        :provider-label="$page.props.aiSettings.provider_label"
+        :model="$page.props.aiSettings.model"
+        :has-key="$page.props.aiSettings.has_key" />
 </template>
 
 

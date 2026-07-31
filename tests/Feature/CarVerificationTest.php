@@ -42,7 +42,7 @@ class CarVerificationTest extends TestCase
         $this->assertEquals('Located', $car->fresh()->status);
     }
 
-    public function test_verify_sync_with_mocked_claude_success(): void
+    public function test_verify_sync_with_mocked_ai_success(): void
     {
         Http::fake([
             'api.anthropic.com/*' => Http::response([
@@ -59,13 +59,11 @@ class CarVerificationTest extends TestCase
             ], 200),
         ]);
 
-        $org = Organization::factory()->create();
+        $org = Organization::factory()->withAi('anthropic', 'claude-3-5-sonnet-latest', 'sk-test-fake')->create();
         $user = User::factory()->create(['organization_id' => $org->id, 'role' => 'owner']);
         $car = Car::factory()->create(['organization_id' => $org->id]);
 
         $this->actingAs($user);
-
-        config(['services.anthropic.api_key' => 'sk-test-fake']);
 
         $response = $this->post(route('cars.verify-sync', $car));
         $response->assertRedirect(route('cars.show', $car->id));

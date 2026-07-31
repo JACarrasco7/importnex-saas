@@ -1,6 +1,6 @@
 # Importnex SaaS — Progreso de implementación
 
-**Fecha:** 30 julio 2026
+**Fecha:** 31 julio 2026
 **Estado:** ✅ DESPLEGADO EN DEV - Sistema funcional en dev.aktive.cloud/importnexcore
 **Plan vigente:** `PLAN_IMPLEMENTACION_COMPLETO.md`
 **Deploy:** VPS dev.aktive.cloud con subpath /importnexcore
@@ -175,6 +175,8 @@ ssh -i "C:\Users\jacar\.ssh\id_ed25519_nopass" root@dev.aktive.cloud "mysql -uim
 | F9 — Correcciones iconos Leaflet | ✅ 30/07/2026 |
 | F10 — Corrección estados vehículos | ✅ 30/07/2026 |
 | F11 — Puente automático chat→servidor (API token) | ⏳ Código listo en local; falta desplegar al servidor y fijar `IMPORTNEX_CHAT_IMPORT_TOKEN` en el `.env` real (30/07/2026) |
+| F12 — IA multi-proveedor por organización | ✅ 31/07/2026 |
+| F13 — Widget chat IA flotante | ✅ 31/07/2026 |
 
 ---
 

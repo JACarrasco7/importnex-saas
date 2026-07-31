@@ -12,13 +12,17 @@ class Organization extends Model
 
     protected $fillable = [
         'name', 'slug', 'logo', 'is_public', 'plan', 'stripe_id', 'trial_ends_at', 'subscribed_at',
+        'ai_provider', 'ai_model', 'ai_api_key',
     ];
 
     protected $casts = [
         'trial_ends_at' => 'datetime',
         'subscribed_at' => 'datetime',
         'is_public' => 'boolean',
+        'ai_api_key' => 'encrypted',
     ];
+
+    protected $hidden = ['ai_api_key'];
 
     protected static function booted(): void
     {
@@ -51,7 +55,7 @@ class Organization extends Model
 
     public function getPublicUrlAttribute(): string
     {
-        return url("/importnexcore/request/{$this->slug}");
+        return url("/request/{$this->slug}");
     }
 
     public function users()
@@ -77,6 +81,11 @@ class Organization extends Model
     public function alerts()
     {
         return $this->hasMany(Alert::class);
+    }
+
+    public function hasAiConfigured(): bool
+    {
+        return !empty($this->ai_provider) && !empty($this->ai_api_key);
     }
 
     public function carRequests()

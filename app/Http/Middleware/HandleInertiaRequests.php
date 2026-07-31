@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\Ai\AiProviderRegistry;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -34,6 +35,7 @@ class HandleInertiaRequests extends Middleware
         $planUsage = null;
         $currentPlan = null;
         $locale = 'en';
+        $aiSettings = null;
 
         if ($user = $request->user()) {
             $pendingAlertsCount = \App\Models\Alert::where('organization_id', $user->organization_id)
@@ -50,6 +52,18 @@ class HandleInertiaRequests extends Middleware
                 $currentPlan = [
                     'name' => $organization->plan,
                     'has_active_subscription' => $organization->hasActiveSubscription(),
+                ];
+
+                // Resolve AI provider label without instantiating the class
+                $registry = app(AiProviderRegistry::class);
+                $providerLabel = $organization->ai_provider
+                    ? ($registry->get($organization->ai_provider)?->label() ?? $organization->ai_provider)
+                    : null;
+                $aiSettings = [
+                    'provider' => $organization->ai_provider,
+                    'provider_label' => $providerLabel,
+                    'model' => $organization->ai_model,
+                    'has_key' => $organization->hasAiConfigured(),
                 ];
             }
 
@@ -76,6 +90,7 @@ class HandleInertiaRequests extends Middleware
             'planUsage' => $planUsage,
             'currentPlan' => $currentPlan,
             'locale' => $locale,
+            'aiSettings' => $aiSettings,
         ];
     }
 }
