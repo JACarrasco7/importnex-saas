@@ -1,6 +1,6 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
-import { ArrowLeftIcon, PencilIcon, TruckIcon, ChatBubbleLeftRightIcon, EnvelopeIcon, PhoneIcon, MapPinIcon } from '@heroicons/vue/24/outline';
+import { ArrowLeftIcon, PencilIcon, TruckIcon, ChatBubbleLeftRightIcon, UserIcon } from '@heroicons/vue/24/outline';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Badge from '@/Components/Badge.vue';
 import PageHeader from '@/Components/PageHeader.vue';
@@ -43,25 +43,11 @@ const { currency, date, statusVariant } = useFormat();
                         <Badge :variant="statusVariant(client.status)">{{ client.status }}</Badge>
                     </div>
                     <div class="grid grid-cols-1 gap-x-6 gap-y-4 p-6 sm:grid-cols-2 lg:grid-cols-4">
-                        <div v-if="client.email">
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Email</dt>
+                        <div v-if="client.contact_info">
+                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Contact info</dt>
                             <dd class="mt-1 inline-flex items-center gap-1.5 text-sm text-gray-900">
-                                <EnvelopeIcon class="h-4 w-4 text-gray-400" />
-                                {{ client.email }}
-                            </dd>
-                        </div>
-                        <div v-if="client.phone">
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Phone</dt>
-                            <dd class="mt-1 inline-flex items-center gap-1.5 text-sm text-gray-900">
-                                <PhoneIcon class="h-4 w-4 text-gray-400" />
-                                {{ client.phone }}
-                            </dd>
-                        </div>
-                        <div v-if="client.city">
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">City</dt>
-                            <dd class="mt-1 inline-flex items-center gap-1.5 text-sm text-gray-900">
-                                <MapPinIcon class="h-4 w-4 text-gray-400" />
-                                {{ client.city }}
+                                <UserIcon class="h-4 w-4 text-gray-400" />
+                                {{ client.contact_info }}
                             </dd>
                         </div>
                         <div>

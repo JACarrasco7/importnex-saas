@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { MagnifyingGlassIcon, PlusIcon, EyeIcon, PencilIcon, TrashIcon, EnvelopeIcon, PhoneIcon } from '@heroicons/vue/24/outline';
+import { MagnifyingGlassIcon, PlusIcon, EyeIcon, PencilIcon, TrashIcon, UserIcon } from '@heroicons/vue/24/outline';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Badge from '@/Components/Badge.vue';
 import PageHeader from '@/Components/PageHeader.vue';
@@ -40,8 +40,7 @@ const filteredClients = computed(() => {
         const term = search.value.toLowerCase();
         result = result.filter(c =>
             (c.name && c.name.toLowerCase().includes(term)) ||
-            (c.email && c.email.toLowerCase().includes(term)) ||
-            (c.phone && c.phone.includes(term))
+            (c.contact_info && c.contact_info.toLowerCase().includes(term))
         );
     }
     return result;
@@ -109,7 +108,7 @@ const confirmDelete = () => {
                         <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Search</label>
                         <div class="relative">
                             <MagnifyingGlassIcon class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                            <input v-model="search" type="text" placeholder="Name, email, phone..." class="block w-full rounded-lg border-gray-300 pl-9 text-sm focus:border-indigo-500 focus:ring-indigo-500" />
+                            <input v-model="search" type="text" placeholder="Name, contact info..." class="block w-full rounded-lg border-gray-300 pl-9 text-sm focus:border-indigo-500 focus:ring-indigo-500" />
                         </div>
                     </div>
                 </div>
@@ -171,13 +170,9 @@ const confirmDelete = () => {
                             </div>
 
                             <div class="mt-4 space-y-2 text-sm">
-                                <div v-if="client.email" class="flex items-center gap-2 text-gray-600">
-                                    <EnvelopeIcon class="h-4 w-4 text-gray-400 shrink-0" />
-                                    <span class="truncate">{{ client.email }}</span>
-                                </div>
-                                <div v-if="client.phone" class="flex items-center gap-2 text-gray-600">
-                                    <PhoneIcon class="h-4 w-4 text-gray-400 shrink-0" />
-                                    <span>{{ client.phone }}</span>
+                                <div v-if="client.contact_info" class="flex items-center gap-2 text-gray-600">
+                                    <UserIcon class="h-4 w-4 text-gray-400 shrink-0" />
+                                    <span class="truncate">{{ client.contact_info }}</span>
                                 </div>
                             </div>
 

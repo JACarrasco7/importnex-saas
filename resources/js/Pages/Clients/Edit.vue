@@ -12,9 +12,7 @@ const props = defineProps({
 
 const form = useForm({
     name: props.client.name,
-    email: props.client.email,
-    phone: props.client.phone,
-    city: props.client.city,
+    contact_info: props.client.contact_info,
     looking_for: props.client.looking_for,
     budget_min: props.client.budget_min,
     budget_max: props.client.budget_max,
@@ -50,9 +48,7 @@ const inputClass = 'block w-full rounded-lg border-gray-300 text-sm shadow-sm fo
                     <FormSection title="Contact info">
                         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <FormField label="Name" required><input v-model="form.name" type="text" required :class="inputClass" /></FormField>
-                            <FormField label="Email"><input v-model="form.email" type="email" :class="inputClass" /></FormField>
-                            <FormField label="Phone"><input v-model="form.phone" type="tel" :class="inputClass" /></FormField>
-                            <FormField label="City"><input v-model="form.city" type="text" :class="inputClass" /></FormField>
+                            <FormField label="Contact info"><input v-model="form.contact_info" type="text" :class="inputClass" placeholder="+34 600 123 456" /></FormField>
                         </div>
                     </FormSection>
 
