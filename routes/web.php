@@ -177,8 +177,4 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
 // Locale update (available for all users, including guests)
 Route::put('/locale', [\App\Http\Controllers\LocaleController::class, 'update'])->name('locale.update');
 
-// JJ Import Motors folleto PDF (public, no auth)
-Route::get('/jj-import/folleto', [\App\Http\Controllers\JJImportFolletoController::class, 'download'])
-    ->name('jj-import.folleto');
-
 require __DIR__.'/auth.php';
