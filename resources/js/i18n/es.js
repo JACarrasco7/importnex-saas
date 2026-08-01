@@ -62,6 +62,7 @@ export default {
         billing: 'Facturación',
         organization: 'Organización',
         profile: 'Perfil',
+        guide: 'Guía',
         view_plans: 'Ver planes',
         need_more_features: '¿Necesita más funciones?',
         upgrade_message: 'Actualice su plan para desbloquear autos y contactos ilimitados.',

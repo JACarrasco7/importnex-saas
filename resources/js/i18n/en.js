@@ -62,6 +62,7 @@ export default {
         billing: 'Billing',
         organization: 'Organization',
         profile: 'Profile',
+        guide: 'Guide',
         view_plans: 'View plans',
         need_more_features: 'Need more features?',
         upgrade_message: 'Upgrade your plan to unlock unlimited cars and contacts.',

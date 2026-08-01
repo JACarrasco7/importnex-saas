@@ -22,13 +22,13 @@ import {
     HomeIcon,
     ClipboardDocumentListIcon,
     SparklesIcon,
+    BookIcon,
 } from '@heroicons/vue/24/outline';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import FlashMessage from '@/Components/FlashMessage.vue';
 import UpgradeBanner from '@/Components/UpgradeBanner.vue';
 import LocaleSelector from '@/Components/LocaleSelector.vue';
 import SidebarGroup from '@/Components/SidebarGroup.vue';
-import AIChatWidget from '@/Components/AIChatWidget.vue';
 import { useTranslations } from '@/Composables/useTranslations';
 import { useFormat } from '@/Composables/useFormat';
 
@@ -92,6 +92,13 @@ const navGroups = computed(() => [
                 badge: pendingAlerts.value,
                 badgeColor: 'bg-rose-500',
             },
+        ],
+    },
+    {
+        title: t('nav.guide'),
+        icon: BookIcon,
+        items: [
+            { name: t('nav.guide'), route: 'guide.index', icon: BookIcon },
         ],
     },
     {
@@ -225,13 +232,9 @@ const navGroups = computed(() => [
         </div>
     </div>
 
-    <!-- Floating AI chat widget -->
-    <AIChatWidget
-        v-if="$page.props.aiSettings"
-        :provider="$page.props.aiSettings.provider"
-        :provider-label="$page.props.aiSettings.provider_label"
-        :model="$page.props.aiSettings.model"
-        :has-key="$page.props.aiSettings.has_key" />
+    <!-- Floating AI chat widget is mounted globally via resources/js/aiChatLauncher.js
+         (mounted by app.js). Putting it inline here caused Vite to tree-shake
+         the import in production builds. -->
 </template>
 
 
