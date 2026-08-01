@@ -163,7 +163,8 @@ const onDocKeyChange = () => {
         ?.find((d) => d.doc_key === docForm.doc_key);
     if (def && !docForm.name) {
         docForm.name = def.name;
-    };
+    }
+};
 </script>
 
 <template>
