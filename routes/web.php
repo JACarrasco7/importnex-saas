@@ -28,6 +28,13 @@ Route::prefix('request/{slug}')->name('public.car-request.')->group(function () 
     Route::get('/success', [PublicCarRequestController::class, 'success'])->name('success');
 });
 
+// Public marketplace for vetted cars
+// URL: /marketplace — public browsable marketplace of verified cars
+Route::prefix('marketplace')->name('marketplace.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\PublicMarketplaceController::class, 'index'])->name('index');
+    Route::get('/{car}', [\App\Http\Controllers\PublicMarketplaceController::class, 'show'])->name('show');
+});
+
 Route::middleware('auth', 'has.organization')->group(function () {
     Route::get('organization/create', [OrganizationController::class, 'create'])
         ->name('organization.create');
@@ -169,5 +176,9 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
 
 // Locale update (available for all users, including guests)
 Route::put('/locale', [\App\Http\Controllers\LocaleController::class, 'update'])->name('locale.update');
+
+// JJ Import Motors folleto PDF (public, no auth)
+Route::get('/jj-import/folleto', [\App\Http\Controllers\JJImportFolletoController::class, 'download'])
+    ->name('jj-import.folleto');
 
 require __DIR__.'/auth.php';
