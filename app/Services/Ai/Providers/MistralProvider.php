@@ -4,6 +4,7 @@ namespace App\Services\Ai\Providers;
 
 use App\Services\Ai\AiProviderInterface;
 use App\Services\Ai\Concerns\MakesHttpCalls;
+use App\Services\Ai\ListsModelsInterface;
 
 /**
  * Mistral Chat Completions (mistral-small, mistral-large, codestral, ...).
@@ -11,13 +12,35 @@ use App\Services\Ai\Concerns\MakesHttpCalls;
  * Endpoint: https://api.mistral.ai/v1/chat/completions
  * Supports `response_format: json_object` when caller needs strict JSON.
  */
-class MistralProvider implements AiProviderInterface
+class MistralProvider implements AiProviderInterface, ListsModelsInterface
 {
     use MakesHttpCalls;
 
     public function key(): string { return 'mistral'; }
     public function label(): string { return 'Mistral AI'; }
     public function defaultModel(): string { return 'mistral-small-latest'; }
+
+    public function listModels(string $apiKey): array
+    {
+        try {
+            $resp = $this->http(20)->withToken($apiKey)
+                ->get('https://api.mistral.ai/v1/models');
+
+            if ($resp->failed()) {
+                return ['success' => false, 'error' => 'HTTP '.$resp->status()];
+            }
+
+            $ids = collect($resp->json('data') ?? [])
+                ->pluck('id')
+                ->sort()
+                ->values()
+                ->all();
+
+            return ['success' => true, 'models' => $ids];
+        } catch (\Throwable $e) {
+            return ['success' => false, 'error' => $e->getMessage()];
+        }
+    }
 
     public function chat(string $apiKey, string $model, array $params): array
     {

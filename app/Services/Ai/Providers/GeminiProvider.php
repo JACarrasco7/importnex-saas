@@ -4,6 +4,7 @@ namespace App\Services\Ai\Providers;
 
 use App\Services\Ai\AiProviderInterface;
 use App\Services\Ai\Concerns\MakesHttpCalls;
+use App\Services\Ai\ListsModelsInterface;
 
 /**
  * Google Gemini (gemini-1.5-pro, gemini-1.5-flash, gemini-2.0-flash, ...).
@@ -11,13 +12,37 @@ use App\Services\Ai\Concerns\MakesHttpCalls;
  * Endpoint: https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent
  * Auth: API key in query string (?key=...) for simplicity.
  */
-class GeminiProvider implements AiProviderInterface
+class GeminiProvider implements AiProviderInterface, ListsModelsInterface
 {
     use MakesHttpCalls;
 
     public function key(): string { return 'gemini'; }
     public function label(): string { return 'Google Gemini'; }
     public function defaultModel(): string { return 'gemini-1.5-flash'; }
+
+    public function listModels(string $apiKey): array
+    {
+        try {
+            $resp = $this->http(20)
+                ->get('https://generativelanguage.googleapis.com/v1beta/models?key='.$apiKey);
+
+            if ($resp->failed()) {
+                return ['success' => false, 'error' => 'HTTP '.$resp->status()];
+            }
+
+            $ids = collect($resp->json('models') ?? [])
+                ->filter(fn ($m) => in_array('generateContent', $m['supportedGenerationMethods'] ?? []))
+                ->map(fn ($m) => preg_replace('/^models\//', '', $m['name'] ?? ''))
+                ->filter()
+                ->sort()
+                ->values()
+                ->all();
+
+            return ['success' => true, 'models' => $ids];
+        } catch (\Throwable $e) {
+            return ['success' => false, 'error' => $e->getMessage()];
+        }
+    }
 
     public function chat(string $apiKey, string $model, array $params): array
     {

@@ -56,6 +56,8 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
         ->name('organization.edit');
     Route::patch('/organization/{organization}', [OrganizationController::class, 'update'])
         ->name('organization.update');
+    Route::post('/organization/{organization}/ai-models', [OrganizationController::class, 'aiModels'])
+        ->name('organization.ai-models');
 
     // Cars CRUD
     Route::get('/cars', [\App\Http\Controllers\CarController::class, 'index'])->name('cars.index');
@@ -98,6 +100,16 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::post('/cars/{car}/verify-sync', [\App\Http\Controllers\CarVerificationController::class, 'verifySync'])->name('cars.verify-sync');
     Route::post('/cars/{car}/verify/apply', [\App\Http\Controllers\CarVerificationController::class, 'apply'])->name('cars.verify.apply');
     Route::post('/cars/{car}/verify/discard', [\App\Http\Controllers\CarVerificationController::class, 'discard'])->name('cars.verify.discard');
+
+    // Car Marketing (AI-generated content for sales channels)
+    Route::get('/cars/{car}/marketing', [\App\Http\Controllers\CarMarketingController::class, 'show'])->name('cars.marketing');
+    Route::post('/cars/{car}/marketing/generate', [\App\Http\Controllers\CarMarketingController::class, 'generate'])->name('cars.marketing.generate');
+    Route::post('/cars/{car}/marketing/save', [\App\Http\Controllers\CarMarketingController::class, 'save'])->name('cars.marketing.save');
+    Route::post('/cars/{car}/marketing/publish', [\App\Http\Controllers\CarMarketingController::class, 'publish'])->name('cars.marketing.publish');
+    Route::get('/cars/{car}/marketing/briefing', [\App\Http\Controllers\CarMarketingController::class, 'briefing'])->name('cars.marketing.briefing');
+
+    // Marketing overview
+    Route::get('/marketing', [\App\Http\Controllers\MarketingController::class, 'index'])->name('marketing.index');
 
     // Car Kanban
     Route::get('/cars-kanban', [\App\Http\Controllers\CarKanbanController::class, 'index'])->name('cars.kanban');
@@ -176,5 +188,8 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
 
 // Locale update (available for all users, including guests)
 Route::put('/locale', [\App\Http\Controllers\LocaleController::class, 'update'])->name('locale.update');
+
+// JJ Import Motors folleto PDF
+Route::get('/jj-import/folleto', [\App\Http\Controllers\JJImportFolletoController::class, 'download'])->name('jj-import.folleto');
 
 require __DIR__.'/auth.php';

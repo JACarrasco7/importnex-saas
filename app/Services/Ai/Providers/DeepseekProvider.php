@@ -4,19 +4,42 @@ namespace App\Services\Ai\Providers;
 
 use App\Services\Ai\AiProviderInterface;
 use App\Services\Ai\Concerns\MakesHttpCalls;
+use App\Services\Ai\ListsModelsInterface;
 
 /**
  * DeepSeek (deepseek-chat, deepseek-reasoner) — OpenAI-compatible API.
  *
  * Endpoint: https://api.deepseek.com/v1/chat/completions
  */
-class DeepseekProvider implements AiProviderInterface
+class DeepseekProvider implements AiProviderInterface, ListsModelsInterface
 {
     use MakesHttpCalls;
 
     public function key(): string { return 'deepseek'; }
     public function label(): string { return 'DeepSeek'; }
     public function defaultModel(): string { return 'deepseek-chat'; }
+
+    public function listModels(string $apiKey): array
+    {
+        try {
+            $resp = $this->http(20)->withToken($apiKey)
+                ->get('https://api.deepseek.com/models');
+
+            if ($resp->failed()) {
+                return ['success' => false, 'error' => 'HTTP '.$resp->status()];
+            }
+
+            $ids = collect($resp->json('data') ?? [])
+                ->pluck('id')
+                ->sort()
+                ->values()
+                ->all();
+
+            return ['success' => true, 'models' => $ids];
+        } catch (\Throwable $e) {
+            return ['success' => false, 'error' => $e->getMessage()];
+        }
+    }
 
     public function chat(string $apiKey, string $model, array $params): array
     {

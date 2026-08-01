@@ -181,10 +181,10 @@ function copyToClipboard(text) {
 
 function copyAll() {
     const content = [];
-    if (form.title) content.push(`Título: ${form.title}`);
-    if (form.description) content.push(`Descripción: ${form.description}`);
-    if (form.hashtags.length) content.push(`Hashtags: ${form.hashtags.map(t => `#${t}`).join(' ')}`);
-    if (form.photo_tips.length) content.push(`Tips de fotos: ${form.photo_tips.join(', ')}`);
+    if (form.value.title) content.push(`Título: ${form.value.title}`);
+    if (form.value.description) content.push(`Descripción: ${form.value.description}`);
+    if (form.value.hashtags.length) content.push(`Hashtags: ${form.value.hashtags.map(t => `#${t}`).join(' ')}`);
+    if (form.value.photo_tips.length) content.push(`Tips de fotos: ${form.value.photo_tips.join(', ')}`);
     const text = content.join('\n\n');
     navigator.clipboard.writeText(text);
     successMsg.value = 'Todo copiado al portapapeles.';

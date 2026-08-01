@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Organization;
 use App\Services\Ai\AiProviderRegistry;
+use App\Services\Ai\ListsModelsInterface;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -90,6 +92,34 @@ class OrganizationController extends Controller
 
         return redirect()->route('organization.show', $organization)
             ->with('success', 'Settings saved.');
+    }
+
+    /**
+     * List models available for the given provider + API key.
+     * Uses the typed key, or falls back to the organization's stored key.
+     */
+    public function aiModels(Request $request, Organization $organization, AiProviderRegistry $registry): JsonResponse
+    {
+        $this->authorizeAccess($organization);
+
+        $data = $request->validate([
+            'provider' => ['required', Rule::in(array_column($registry->options(), 'key'))],
+            'api_key' => ['nullable', 'string', 'max:512'],
+        ]);
+
+        $apiKey = $data['api_key'] ?: $organization->ai_api_key;
+        if (! $apiKey) {
+            return response()->json(['success' => false, 'error' => 'Introduce una API key primero.'], 422);
+        }
+
+        $provider = $registry->get($data['provider']);
+        if (! $provider instanceof ListsModelsInterface) {
+            return response()->json(['success' => false, 'error' => 'Este proveedor no soporta listado de modelos.'], 422);
+        }
+
+        $result = $provider->listModels($apiKey);
+
+        return response()->json($result, $result['success'] ? 200 : 422);
     }
 
     protected function authorizeAccess(Organization $organization): void
