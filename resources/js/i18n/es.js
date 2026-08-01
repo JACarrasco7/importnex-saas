@@ -46,6 +46,7 @@ export default {
         overview: 'Resumen',
         inventory: 'Inventario',
         crm: 'CRM',
+        marketing: 'Marketing',
         account: 'Cuenta',
         dashboard: 'Panel de Control',
         cars: 'Autos',

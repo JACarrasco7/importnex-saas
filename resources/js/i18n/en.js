@@ -46,6 +46,7 @@ export default {
         overview: 'Overview',
         inventory: 'Inventory',
         crm: 'CRM',
+        marketing: 'Marketing',
         account: 'Account',
         dashboard: 'Dashboard',
         cars: 'Cars',

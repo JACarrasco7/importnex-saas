@@ -23,6 +23,7 @@ import {
     ClipboardDocumentListIcon,
     SparklesIcon,
     BookIcon,
+    MegaphoneIcon,
 } from '@heroicons/vue/24/outline';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import FlashMessage from '@/Components/FlashMessage.vue';
@@ -92,6 +93,13 @@ const navGroups = computed(() => [
                 badge: pendingAlerts.value,
                 badgeColor: 'bg-rose-500',
             },
+        ],
+    },
+    {
+        title: t('nav.marketing'),
+        icon: MegaphoneIcon,
+        items: [
+            { name: t('nav.dashboard'), route: 'marketing.index', icon: HomeIcon },
         ],
     },
     {
