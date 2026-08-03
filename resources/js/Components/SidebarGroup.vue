@@ -7,9 +7,10 @@ const props = defineProps({
     title: { type: String, required: true },
     icon: { type: Object, default: null },
     items: { type: Array, required: true },
+    openByDefault: { type: Boolean, default: false },
 });
 
-const open = ref(true);
+const open = ref(props.openByDefault ?? false);
 
 const toggle = () => {
     open.value = !open.value;

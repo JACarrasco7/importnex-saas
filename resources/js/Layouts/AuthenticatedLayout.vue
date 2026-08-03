@@ -107,13 +107,15 @@ const navGroups = computed(() => [
             { name: t('nav.cars'), route: 'cars.index', icon: TruckIcon },
         ],
     },
-    {
-        title: t('nav.guide'),
-        icon: BookOpenIcon,
-        items: [
-            { name: t('nav.guide'), route: 'guide.index', icon: BookOpenIcon },
-        ],
-    },
+    // Guía oculta: la ruta 'guide.index' aún no existe en el repo
+    // y Ziggy lanza errores en el sidebar. Reactivar cuando exista el módulo.
+    // {
+    //     title: t('nav.guide'),
+    //     icon: BookOpenIcon,
+    //     items: [
+    //         { name: t('nav.guide'), route: 'guide.index', icon: BookOpenIcon },
+    //     ],
+    // },
     {
         title: t('nav.account'),
         icon: BuildingOfficeIcon,
@@ -210,7 +212,7 @@ const navGroups = computed(() => [
                                         <UserCircleIcon class="h-4 w-4" />
                                         Profile
                                     </Link>
-                                    <Link :href="route('organization.show', user?.organization_id)" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                    <Link v-if="user?.organization_id" :href="route('organization.show', user.organization_id)" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                                         <BuildingOfficeIcon class="h-4 w-4" />
                                         Organization
                                     </Link>

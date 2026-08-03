@@ -1,28 +1,16 @@
 <script setup>
-import { ref, computed } from 'vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { computed } from 'vue';
+import { Head, Link } from '@inertiajs/vue3';
 import {
     ArrowLeftIcon,
-    PencilIcon,
-    SparklesIcon,
-    TrashIcon,
-    DocumentIcon,
-    ArrowDownTrayIcon,
-    EyeIcon,
-    UserCircleIcon,
     ExclamationTriangleIcon,
     CheckCircleIcon,
     XCircleIcon,
     MinusCircleIcon,
     LinkIcon,
-    ChevronDownIcon,
-    ChevronRightIcon,
 } from '@heroicons/vue/24/outline';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import MapaLeaflet from '@/Components/MapaLeaflet.vue';
 import Badge from '@/Components/Badge.vue';
-import PageHeader from '@/Components/PageHeader.vue';
-import ConfirmDialog from '@/Components/ConfirmDialog.vue';
 import { useFormat } from '@/Composables/useFormat';
 
 const props = defineProps({
@@ -30,57 +18,7 @@ const props = defineProps({
     derived: Object,
 });
 
-const uploadProgress = ref(false);
-const showDeletePhoto = ref(false);
-const showDeleteDoc = ref(false);
-const photoToDelete = ref(null);
-const docToDelete = ref(null);
-
-const photoForm = useForm({ photo_type: 'exterior', photos: [] });
-const docForm = useForm({ doc_type: 'invoice', doc_key: '', name: '', documents: [] });
-
-const { currency, date, statusVariant, trafficLightVariant, verdictVariant, confidenceVariant } = useFormat();
-
-const submitPhotos = () => {
-    uploadProgress.value = true;
-    photoForm.post(route('cars.photos.store', props.car.id), {
-        onSuccess: () => {
-            photoForm.reset('photos');
-            uploadProgress.value = false;
-        },
-        onError: () => (uploadProgress.value = false),
-    });
-};
-
-const submitDocuments = () => {
-    uploadProgress.value = true;
-    docForm.post(route('cars.documents.store', props.car.id), {
-        onSuccess: () => {
-            docForm.reset('documents', 'name');
-            uploadProgress.value = false;
-        },
-        onError: () => (uploadProgress.value = false),
-    });
-};
-
-const handlePhotoFiles = (event) => { photoForm.photos = event.target.files; };
-const handleDocFiles = (event) => { docForm.documents = event.target.files; };
-
-const askDeletePhoto = (photo) => { photoToDelete.value = photo; showDeletePhoto.value = true; };
-const confirmDeletePhoto = () => {
-    if (!photoToDelete.value) return;
-    useForm({}).delete(route('cars.photos.destroy', [props.car.id, photoToDelete.value.id]), {
-        onSuccess: () => { showDeletePhoto.value = false; photoToDelete.value = null; },
-    });
-};
-
-const askDeleteDoc = (doc) => { docToDelete.value = doc; showDeleteDoc.value = true; };
-const confirmDeleteDoc = () => {
-    if (!docToDelete.value) return;
-    useForm({}).delete(route('cars.documents.destroy', [props.car.id, docToDelete.value.id]), {
-        onSuccess: () => { showDeleteDoc.value = false; docToDelete.value = null; },
-    });
-};
+const { currency, date, trafficLightVariant, verdictVariant, confidenceVariant } = useFormat();
 
 const costItems = [
     { key: 'purchase_price', label: 'Purchase price' },
@@ -101,15 +39,11 @@ const specItems = [
     { key: 'fuel', label: 'Fuel' },
     { key: 'transmission', label: 'Transmission' },
     { key: 'cv', label: 'Power', suffix: ' CV' },
-    { key: 'co2', label: 'CO₂', suffix: ' g/km' },
+    { key: 'co2', label: 'CO2', suffix: ' g/km' },
     { key: 'color', label: 'Color' },
     { key: 'vin', label: 'VIN' },
 ];
 
-// Enriched valuation helpers
-const ratingVariant = (r) => ({
-    favorable: 'success', neutral: 'neutral', unfavorable: 'danger',
-}[r] || 'neutral');
 const ratingIcon = (r) => ({
     favorable: CheckCircleIcon, neutral: MinusCircleIcon, unfavorable: XCircleIcon,
 }[r] || MinusCircleIcon);
@@ -144,47 +78,30 @@ const marketPosition = computed(() => {
     if (ratio <= 1.05) return { label: 'At market', variant: 'warning', ratio };
     return { label: 'Above market', variant: 'danger', ratio };
 });
-
-const expandedSections = ref({});
-const toggleSection = (key) => { expandedSections.value[key] = !expandedSections.value[key]; };
-
-const priorityVariant = (p) => ({
-    critical: 'danger', important: 'warning', minor: 'neutral',
-}[p] || 'neutral');
-
-const docStatusVariant = (s) => ({
-    pending: 'neutral', ordered: 'warning', received: 'success', not_applicable: 'neutral',
-}[s] || 'neutral');
-
-const onDocKeyChange = () => {
-    // Auto-fill name from selected doc_key for convenience
-    const def = props.derived?.documents_by_group
-        ?.flatMap((g) => g.items)
-        ?.find((d) => d.doc_key === docForm.doc_key);
-    if (def && !docForm.name) {
-        docForm.name = def.name;
-    }
-};
 </script>
 
 <template>
-    <Head :title="`${car.brand} ${car.model}`" />
+    <Head :title="`${car.brand} ${car.model} - Marketplace`" />
 
-    <AuthenticatedLayout>
-        <template #header>
-            <h2 class="text-xl font-semibold leading-tight text-gray-800">{{ car.brand }} {{ car.model }}</h2>
-        </template>
+    <div class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50">
+        <!-- Public header -->
+        <header class="border-b border-gray-200 bg-white/80 backdrop-blur">
+            <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+                <Link :href="route('marketplace.index')" class="flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-gray-900">
+                    <ArrowLeftIcon class="h-4 w-4" />
+                    Back to Marketplace
+                </Link>
+                <a :href="route('login')" class="text-sm font-semibold text-gray-700 hover:text-gray-900">Sign in</a>
+            </div>
+        </header>
 
         <div class="py-8">
             <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <PageHeader :title="`${car.brand} ${car.model}`" :subtitle="`VIN ${car.vin || '—'}`">
-                    <template #actions>
-                        <Link :href="route('marketplace.index')" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
-                            <ArrowLeftIcon class="h-4 w-4" />
-                            Back to Marketplace
-                        </Link>
-                    </template>
-                </PageHeader>
+                <!-- Header -->
+                <div class="border-b border-gray-200 pb-4">
+                    <h1 class="text-3xl font-bold text-gray-900">{{ car.brand }} {{ car.model }}</h1>
+                    <p class="mt-1 text-sm text-gray-500">VIN {{ car.vin || 'N/A' }}</p>
+                </div>
 
                 <!-- Status bar -->
                 <div class="flex flex-wrap items-center gap-3">
@@ -193,7 +110,7 @@ const onDocKeyChange = () => {
                     <span v-if="car.year" class="text-sm text-gray-500">{{ car.year }}</span>
                 </div>
 
-                <!-- IEDMT estimation warning (permanent, per plan) -->
+                <!-- IEDMT estimation warning -->
                 <div class="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
                     <ExclamationTriangleIcon class="h-5 w-5 flex-shrink-0 text-amber-600" />
                     <div class="text-sm text-amber-900">
@@ -226,7 +143,7 @@ const onDocKeyChange = () => {
                     <div class="grid grid-cols-2 gap-x-6 gap-y-4 p-6 md:grid-cols-4">
                         <div v-for="spec in specItems" :key="spec.key">
                             <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ spec.label }}</dt>
-                            <dd class="mt-1 text-sm font-medium text-gray-900" :class="{ 'font-mono text-xs': spec.key === 'vin' }">{{ car[spec.key] ?? '—' }}{{ spec.suffix || '' }}</dd>
+                            <dd class="mt-1 text-sm font-medium text-gray-900" :class="{ 'font-mono text-xs': spec.key === 'vin' }">{{ car[spec.key] || 'N/A' }}{{ spec.suffix || '' }}</dd>
                         </div>
                     </div>
                 </div>
@@ -245,7 +162,7 @@ const onDocKeyChange = () => {
                     </div>
                 </div>
 
-                <!-- ╔ INVESTIGATION ═════════════════════════════════════════════════════════════╗ -->
+                <!-- Investigation -->
                 <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
                         <h3 class="text-base font-semibold text-gray-900">Investigation</h3>
@@ -273,7 +190,7 @@ const onDocKeyChange = () => {
                     </div>
 
                     <div v-if="!car.verdict && !derived?.research_gaps?.length" class="px-6 py-8 text-center text-sm text-gray-500">
-                        No valuation yet. Import a chat report or run the AI verifier.
+                        No valuation yet available.
                     </div>
 
                     <!-- Balance pros / cons -->
@@ -335,7 +252,7 @@ const onDocKeyChange = () => {
                     </div>
                 </div>
 
-                <!-- ╔ MARKET ═════════════════════════════════════════════════════════════════╗ -->
+                <!-- Market comparables -->
                 <div v-if="car.market_avg || derived?.comparables_stats?.count" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
                         <h3 class="text-base font-semibold text-gray-900">Market comparables</h3>
@@ -370,7 +287,7 @@ const onDocKeyChange = () => {
                                     <p class="truncate text-sm font-medium text-gray-900">{{ comp.title || comp.t }}</p>
                                     <p class="text-xs text-gray-500">
                                         <span v-if="comp.km">{{ comp.km.toLocaleString() }} km</span>
-                                        <span v-if="comp.country"> · {{ comp.country || comp.pais }}</span>
+                                        <span v-if="comp.country"> &middot; {{ comp.country || comp.pais }}</span>
                                     </p>
                                 </div>
                                 <div class="flex items-center gap-3">
@@ -384,14 +301,12 @@ const onDocKeyChange = () => {
                     </div>
                 </div>
 
-                <!-- ╔ CHECKLIST ════════════════════════════════════════════════════════════╗ -->
+                <!-- Import progress (read-only) -->
                 <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4">
-                        <h3 class="text-base font-semibold text-gray-900">Checklist</h3>
+                        <h3 class="text-base font-semibold text-gray-900">Import progress</h3>
                     </div>
-
-                    <!-- Milestones progress -->
-                    <div class="border-b border-gray-200 bg-gray-50 px-6 py-4">
+                    <div class="bg-gray-50 px-6 py-4">
                         <div class="mb-2 flex items-center justify-between">
                             <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-700">Milestones</h4>
                             <span class="text-sm font-mono font-semibold text-gray-900">
@@ -402,178 +317,26 @@ const onDocKeyChange = () => {
                             <div class="h-full bg-indigo-500 transition-all"
                                 :style="{ width: derived?.milestones_progress?.total ? ((derived.milestones_progress.completed / derived.milestones_progress.total) * 100) + '%' : '0%' }" />
                         </div>
-                        <ul class="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                            <li v-for="m in car.checklists?.filter(c => c.kind === 'milestone') || []" :key="m.id"
-                                class="flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-3">
-                                <button @click="toggleMilestone(m)" type="button" class="flex-shrink-0">
-                                    <CheckCircleIcon v-if="m.completed" class="h-5 w-5 text-green-600" />
-                                    <MinusCircleIcon v-else class="h-5 w-5 text-gray-400" />
-                                </button>
-                                <div class="flex-1">
-                                    <p class="text-sm font-medium" :class="m.completed ? 'text-gray-500 line-through' : 'text-gray-900'">
-                                        {{ m.item_key.replace(/_/g, ' ') }}
-                                    </p>
-                                    <p v-if="m.completed_at" class="text-xs text-gray-500">{{ date(m.completed_at) }}</p>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <!-- Inspections -->
-                    <div class="px-6 py-4">
-                        <div class="mb-3 flex items-center justify-between">
-                            <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-700">
-                                Inspection ({{ derived?.inspections_progress?.completed || 0 }} / {{ derived?.inspections_progress?.total || 0 }})
-                            </h4>
-                            <span class="text-xs text-gray-500">Acepta o rechaza lo que aplique</span>
-                        </div>
-                        <div class="space-y-2">
-                            <div v-for="section in derived?.inspections_by_section || []" :key="section.section" class="rounded-lg border border-gray-200">
-                                <button @click="toggleSection(section.section)" type="button" class="flex w-full items-center justify-between px-4 py-2 hover:bg-gray-50">
-                                    <span class="flex items-center gap-2">
-                                        <component :is="expandedSections[section.section] ? ChevronDownIcon : ChevronRightIcon" class="h-4 w-4 text-gray-400" />
-                                        <span class="text-sm font-semibold text-gray-900">{{ section.section }}</span>
-                                    </span>
-                                    <span class="text-xs text-gray-500">
-                                        {{ section.items.filter(i => i.completed).length }} / {{ section.items.length }}
-                                    </span>
-                                </button>
-                                <ul v-if="expandedSections[section.section]" class="divide-y divide-gray-100 border-t border-gray-200">
-                                    <li v-for="item in section.items" :key="item.id" class="flex items-start gap-3 px-4 py-2 hover:bg-gray-50">
-                                        <button @click="toggleInspection(item)" type="button" class="mt-0.5 flex-shrink-0">
-                                            <CheckCircleIcon v-if="item.completed" class="h-5 w-5 text-green-600" />
-                                            <MinusCircleIcon v-else class="h-5 w-5 text-gray-400" />
-                                        </button>
-                                        <div class="flex-1">
-                                            <p class="text-sm" :class="item.completed ? 'text-gray-500 line-through' : 'text-gray-900'">
-                                                {{ item.item_key.replace(/_/g, ' ') }}
-                                            </p>
-                                            <Badge v-if="item.priority" :variant="priorityVariant(item.priority)" size="sm">
-                                                {{ item.priority }}
-                                            </Badge>
-                                        </div>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
+                        <p class="mt-3 text-sm text-gray-600">
+                            {{ derived?.inspections_progress?.completed || 0 }} / {{ derived?.inspections_progress?.total || 0 }} inspection items completed.
+                        </p>
                     </div>
                 </div>
 
-                <!-- ╔ DOCUMENTS ═════════════════════════════════════════════════════════════╗ -->
-                <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
-                    <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-                        <h3 class="text-base font-semibold text-gray-900">Documents</h3>
-                        <span class="text-sm text-gray-500">{{ car.documents?.length || 0 }} files</span>
-                    </div>
-                    <div class="p-6 space-y-4">
-                        <form @submit.prevent="submitDocuments" class="grid grid-cols-1 gap-3 rounded-xl bg-gray-50 p-4 sm:grid-cols-4">
-                            <select v-model="docForm.doc_key" @change="onDocKeyChange" class="rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                <option value="">Document type…</option>
-                                <optgroup v-for="g in derived?.documents_by_group || []" :key="g.group" :label="g.label">
-                                    <option v-for="d in g.items" :key="d.id" :value="d.doc_key">{{ d.name }}</option>
-                                </optgroup>
-                            </select>
-                            <input v-model="docForm.name" type="text" placeholder="Name (optional)" class="rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500" />
-                            <input type="file" multiple accept=".pdf,.doc,.docx,.xls,.xlsx" @change="handleDocFiles" class="block w-full text-sm text-gray-500 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-indigo-700 hover:file:bg-indigo-100" />
-                            <button type="submit" :disabled="!docForm.documents.length || uploadProgress" class="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50">
-                                <ArrowDownTrayIcon class="h-4 w-4" />
-                                {{ uploadProgress ? 'Uploading…' : 'Upload' }}
-                            </button>
-                        </form>
-
-                        <div v-for="g in derived?.documents_by_group || []" :key="g.group" class="space-y-2">
-                            <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ g.label }}</h4>
-                            <ul class="divide-y divide-gray-200 rounded-lg border border-gray-200">
-                                <li v-for="doc in g.items" :key="doc.id" class="flex items-center justify-between px-4 py-3 hover:bg-gray-50">
-                                    <div class="flex items-center gap-3 min-w-0 flex-1">
-                                        <DocumentIcon class="h-8 w-8 flex-shrink-0 text-gray-400" />
-                                        <div class="min-w-0 flex-1">
-                                            <p class="font-medium text-gray-900 truncate">{{ doc.name }}</p>
-                                            <p class="text-xs text-gray-500">{{ doc.doc_key }} · {{ doc.doc_type }}</p>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <Badge :variant="docStatusVariant(doc.status)" size="sm">{{ doc.status }}</Badge>
-                                        <a v-if="doc.url" :href="`/storage/${doc.url}`" target="_blank" class="inline-flex items-center gap-1 rounded-md bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100">
-                                            <EyeIcon class="h-3 w-3" />
-                                            View
-                                        </a>
-                                        <button v-if="doc.url" @click="askDeleteDoc(doc)" class="inline-flex items-center gap-1 rounded-md bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-700 hover:bg-rose-100">
-                                            <TrashIcon class="h-3 w-3" />
-                                        </button>
-                                    </div>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Photos -->
-                <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
-                    <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+                <!-- Photos (read-only gallery) -->
+                <div v-if="car.photos?.length" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
+                    <div class="border-b border-gray-200 px-6 py-4">
                         <h3 class="text-base font-semibold text-gray-900">Photos</h3>
-                        <span class="text-sm text-gray-500">{{ car.photos?.length || 0 }} files</span>
                     </div>
-                    <div class="p-6 space-y-4">
-                        <form @submit.prevent="submitPhotos" class="grid grid-cols-1 gap-3 rounded-xl bg-gray-50 p-4 sm:grid-cols-[1fr_2fr_auto]">
-                            <select v-model="photoForm.photo_type" class="block rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                <option value="exterior">Exterior</option>
-                                <option value="interior">Interior</option>
-                                <option value="engine">Engine</option>
-                                <option value="defect">Defect</option>
-                                <option value="document">Document</option>
-                            </select>
-                            <input type="file" multiple accept="image/*" @change="handlePhotoFiles" class="block w-full text-sm text-gray-500 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-indigo-700 hover:file:bg-indigo-100" />
-                            <button type="submit" :disabled="!photoForm.photos.length || uploadProgress" class="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50">
-                                <ArrowDownTrayIcon class="h-4 w-4" />
-                                {{ uploadProgress ? 'Uploading...' : 'Upload' }}
-                            </button>
-                        </form>
-
-                        <div v-if="car.photos?.length" class="grid grid-cols-2 gap-3 md:grid-cols-4">
-                            <div v-for="photo in car.photos" :key="photo.id" class="group relative overflow-hidden rounded-lg">
-                                <img :src="`/storage/${photo.url}`" :alt="photo.photo_type" class="h-32 w-full object-cover" />
-                                <div class="absolute inset-0 flex items-center justify-center bg-black/0 transition group-hover:bg-black/50">
-                                    <button @click="askDeletePhoto(photo)" class="rounded-md bg-rose-600 px-3 py-1 text-xs font-semibold text-white opacity-0 transition group-hover:opacity-100">
-                                        <TrashIcon class="h-3 w-4 inline" />
-                                        Delete
-                                    </button>
-                                </div>
-                                <span class="absolute bottom-2 left-2 rounded bg-black/70 px-2 py-0.5 text-xs text-white">{{ photo.photo_type }}</span>
-                            </div>
-                        </div>
-                        <p v-else class="py-6 text-center text-sm text-gray-500">No photos yet. Upload the first photo of the car.</p>
+                    <div class="grid grid-cols-2 gap-3 p-6 md:grid-cols-4">
+                        <a v-for="photo in car.photos" :key="photo.id" :href="`/storage/${photo.url}`" target="_blank" rel="noopener" class="group relative overflow-hidden rounded-lg">
+                            <img :src="`/storage/${photo.url}`" :alt="photo.photo_type" class="h-32 w-full object-cover transition group-hover:scale-105" loading="lazy" />
+                            <span class="absolute bottom-2 left-2 rounded bg-black/70 px-2 py-0.5 text-xs text-white">{{ photo.photo_type }}</span>
+                        </a>
                     </div>
                 </div>
 
-                <!-- Assigned Client -->
-                <div v-if="car.client" class="overflow-hidden rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 shadow-sm ring-1 ring-blue-200">
-                    <div class="border-b border-blue-200 px-6 py-4 flex items-center gap-2">
-                        <UserCircleIcon class="h-5 w-5 text-blue-600" />
-                        <h3 class="text-base font-semibold text-gray-900">Assigned Client</h3>
-                    </div>
-                    <div class="grid grid-cols-1 gap-4 p-6 sm:grid-cols-4">
-                        <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Name</dt>
-                            <dd class="mt-1 font-medium text-gray-900">{{ car.client.name }}</dd>
-                        </div>
-                        <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Contact</dt>
-                            <dd class="mt-1 text-sm text-gray-700">{{ car.client.contact_info || '—' }}</dd>
-                        </div>
-                        <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Status</dt>
-                            <dd class="mt-1"><Badge :variant="statusVariant(car.client.status)">{{ car.client.status }}</Badge></dd>
-                        </div>
-                        <div class="flex items-end">
-                            <Link :href="route('clients.show', car.client.id)" class="inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 hover:text-indigo-500">
-                                View client →
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Notes -->
+                <!-- Notes (read-only) -->
                 <div v-if="car.notes" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4">
                         <h3 class="text-base font-semibold text-gray-900">Notes</h3>
@@ -582,40 +345,13 @@ const onDocKeyChange = () => {
                         <pre class="whitespace-pre-wrap font-sans text-sm text-gray-700">{{ car.notes }}</pre>
                     </div>
                 </div>
-
-                <!-- Expenses -->
-                <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
-                    <div class="border-b border-gray-200 px-6 py-4">
-                        <h3 class="text-base font-semibold text-gray-900">Expenses vs Estimated</h3>
-                    </div>
-                    <div v-if="car.expenses?.length" class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Concept</th>
-                                    <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Estimated</th>
-                                    <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Actual</th>
-                                    <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Diff</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200">
-                                <tr v-for="exp in car.expenses" :key="exp.id">
-                                    <td class="px-6 py-3 text-sm text-gray-900">{{ exp.concept }}</td>
-                                    <td class="px-6 py-3 text-right font-mono text-sm text-gray-700">{{ currency(exp.estimated) }}</td>
-                                    <td class="px-6 py-3 text-right font-mono text-sm text-gray-900">{{ currency(exp.actual) }}</td>
-                                    <td class="px-6 py-3 text-right font-mono text-sm" :class="(exp.actual - exp.estimated) > 0 ? 'text-red-600' : 'text-green-600'">
-                                        {{ currency(exp.actual - exp.estimated) }}
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <p v-else class="p-6 text-center text-sm text-gray-500">No expenses logged yet.</p>
-                </div>
             </div>
         </div>
 
-        <ConfirmDialog :show="showDeletePhoto" title="Delete photo?" message="This will permanently remove the photo." @confirm="confirmDeletePhoto" @cancel="showDeletePhoto = false" />
-        <ConfirmDialog :show="showDeleteDoc" title="Delete document?" message="This will permanently remove the document." @confirm="confirmDeleteDoc" @cancel="showDeleteDoc = false" />
-    </AuthenticatedLayout>
+        <footer class="mt-12 border-t border-gray-200 bg-white py-6">
+            <div class="mx-auto max-w-7xl px-4 text-center text-sm text-gray-500 sm:px-6 lg:px-8">
+                &copy; {{ new Date().getFullYear() }} Importnex. All rights reserved.
+            </div>
+        </footer>
+    </div>
 </template>

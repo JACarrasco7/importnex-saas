@@ -1,12 +1,9 @@
 <script setup>
-import { ref, computed, watch } from 'vue';
-import { Head, Link, router, useForm } from '@inertiajs/vue3';
-import { MagnifyingGlassIcon, PlusIcon, Squares2X2Icon, ArrowUpTrayIcon, PencilIcon, EyeIcon, TrashIcon, SparklesIcon } from '@heroicons/vue/24/outline';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import { ref, computed } from 'vue';
+import { Head, Link } from '@inertiajs/vue3';
+import { MagnifyingGlassIcon, EyeIcon, ShieldCheckIcon } from '@heroicons/vue/24/outline';
 import Badge from '@/Components/Badge.vue';
-import PageHeader from '@/Components/PageHeader.vue';
 import EmptyState from '@/Components/EmptyState.vue';
-import ConfirmDialog from '@/Components/ConfirmDialog.vue';
 import { useFormat } from '@/Composables/useFormat';
 
 const props = defineProps({
@@ -23,10 +20,8 @@ const minPrice = ref(props.filters?.min_price || '');
 const maxPrice = ref(props.filters?.max_price || '');
 const yearMin = ref(props.filters?.year_min || '');
 const yearMax = ref(props.filters?.year_max || '');
-const showDelete = ref(false);
-const carToDelete = ref(null);
 
-const { currency, statusVariant, trafficLightVariant, verdictVariant } = useFormat();
+const { currency, trafficLightVariant, verdictVariant } = useFormat();
 
 const tabs = computed(() => {
     // Order verdicts by preference
@@ -106,40 +101,31 @@ const filteredCars = computed(() => {
     }
     return result;
 });
-
-const askDelete = (car) => {
-    carToDelete.value = car;
-    showDelete.value = true;
-};
-const confirmDelete = () => {
-    if (!carToDelete.value) return;
-    router.delete(route('cars.destroy', carToDelete.value.id), {
-        preserveScroll: true,
-        onSuccess: () => {
-            showDelete.value = false;
-            carToDelete.value = null;
-        },
-    });
-};
-
-
 </script>
 
 <template>
-    <Head title="Marketplace" />
+    <Head title="Marketplace — Verified Cars" />
 
-    <AuthenticatedLayout>
-        <template #header>
-            <h2 class="text-xl font-semibold leading-tight text-gray-800">Marketplace</h2>
-        </template>
+    <div class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50">
+        <!-- Public header -->
+        <header class="border-b border-gray-200 bg-white/80 backdrop-blur">
+            <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+                <Link :href="route('marketplace.index')" class="flex items-center gap-2">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600">
+                        <ShieldCheckIcon class="h-5 w-5 text-white" />
+                    </span>
+                    <span class="text-lg font-bold text-gray-900">Verified Cars</span>
+                </Link>
+                <a :href="route('login')" class="text-sm font-semibold text-gray-700 hover:text-gray-900">Sign in</a>
+            </div>
+        </header>
 
-        <div class="py-8">
+        <div class="py-8 sm:py-12">
             <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <PageHeader title="Verified Cars" :subtitle="`${cars.total || 0} cars in the marketplace`">
-                    <template #actions>
-                        <!-- Note: We don't allow creating cars from the public marketplace -->
-                    </template>
-                </PageHeader>
+                <div class="text-center">
+                    <h1 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Verified Cars Marketplace</h1>
+                    <p class="mt-2 text-base text-gray-600">{{ cars.total || 0 }} cars investigated, valued and ready to buy.</p>
+                </div>
 
                 <!-- Filters -->
                 <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
@@ -289,14 +275,11 @@ const confirmDelete = () => {
             </div>
         </div>
 
-        <ConfirmDialog
-            :show="showDelete"
-            title="Delete car"
-            :message="`Are you sure you want to delete ${carToDelete?.brand} ${carToDelete?.model}? This action cannot be undone.`"
-            confirm-text="Delete"
-            variant="danger"
-            @close="showDelete = false"
-            @confirm="confirmDelete"
-        />
-    </AuthenticatedLayout>
+        <!-- Public footer -->
+        <footer class="mt-12 border-t border-gray-200 bg-white py-6">
+            <div class="mx-auto max-w-7xl px-4 text-center text-sm text-gray-500 sm:px-6 lg:px-8">
+                &copy; {{ new Date().getFullYear() }} Importnex. All rights reserved.
+            </div>
+        </footer>
+    </div>
 </template>
