@@ -15,7 +15,7 @@ const form = useForm({
     email: user.email,
 });
 
-const inputClass = 'block w-full rounded-lg border-gray-300 pl-10 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500';
+const inputClass = 'block w-full rounded-lg border-gray-300 pl-10 text-sm shadow-sm focus:border-estoril-500 focus:ring-estoril-500';
 </script>
 
 <template>
@@ -57,7 +57,7 @@ const inputClass = 'block w-full rounded-lg border-gray-300 pl-10 text-sm shadow
             </div>
 
             <div class="flex items-center gap-3">
-                <button type="submit" :disabled="form.processing" class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50">
+                <button type="submit" :disabled="form.processing" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500 disabled:opacity-50">
                     <CheckIcon class="h-4 w-4" />
                     {{ form.processing ? 'Saving...' : 'Save' }}
                 </button>

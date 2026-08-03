@@ -129,7 +129,7 @@ onMounted(() => scrollToBottom());
             @click="open = true"
             type="button"
             aria-label="Open AI chat"
-            class="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg ring-1 ring-black/5 transition hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            class="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-estoril-600 to-estoril-800 text-white shadow-lg ring-1 ring-black/5 transition hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-estoril-500"
         >
             <SparklesIcon class="h-6 w-6" />
             <span class="sr-only">AI chat</span>
@@ -139,12 +139,12 @@ onMounted(() => scrollToBottom());
     <!-- Panel -->
     <div v-if="open" :class="panelClass">
         <!-- Header -->
-        <header class="flex items-center justify-between gap-2 rounded-t-2xl border-b border-gray-200 bg-gradient-to-r from-indigo-500 to-purple-600 px-4 py-3 text-white">
+        <header class="flex items-center justify-between gap-2 rounded-t-2xl border-b border-gray-200 bg-gradient-to-r from-estoril-600 to-estoril-800 px-4 py-3 text-white">
             <div class="flex items-center gap-2 min-w-0">
                 <SparklesIcon class="h-5 w-5 flex-shrink-0" />
                 <div class="min-w-0">
                     <p class="text-sm font-semibold leading-tight">Asistente IA</p>
-                    <p class="truncate text-[11px] text-indigo-100">{{ providerText }}</p>
+                    <p class="truncate text-[11px] text-estoril-100">{{ providerText }}</p>
                 </div>
             </div>
             <div class="flex items-center gap-1">
@@ -182,7 +182,7 @@ onMounted(() => scrollToBottom());
                  :class="['flex', m.role === 'user' ? 'justify-end' : 'justify-start']">
                 <div :class="[
                     'max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed',
-                    m.role === 'user' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-800'
+                    m.role === 'user' ? 'bg-estoril-600 text-white' : 'bg-gray-100 text-gray-800'
                 ]">
                     <pre class="whitespace-pre-wrap font-sans">{{ m.content }}</pre>
                 </div>
@@ -208,10 +208,10 @@ onMounted(() => scrollToBottom());
                     rows="1"
                     :disabled="sending || !hasKey"
                     placeholder="Pregúntale a la IA… (Enter para enviar)"
-                    class="block w-full resize-none rounded-lg border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-gray-50"
+                    class="block w-full resize-none rounded-lg border-gray-300 text-sm shadow-sm focus:border-estoril-500 focus:ring-estoril-500 disabled:bg-gray-50"
                     @input="adjustTextareaHeight"></textarea>
                 <button @click="addMessage" :disabled="sending || !hasKey"
-                        class="inline-flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50">
+                        class="inline-flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-estoril-600 text-white shadow-sm hover:bg-estoril-500 disabled:opacity-50">
                     <PaperAirplaneIcon class="h-4 w-4" />
                 </button>
             </div>

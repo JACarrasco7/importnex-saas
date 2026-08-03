@@ -5,6 +5,9 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import FormSection from '@/Components/FormSection.vue';
 import { useFormat } from '@/Composables/useFormat';
+import { useTranslations } from '@/Composables/useTranslations';
+
+const { t } = useTranslations();
 
 const props = defineProps({
     organization: Object,
@@ -14,20 +17,20 @@ const { date } = useFormat();
 </script>
 
 <template>
-    <Head title="Organization" />
+    <Head :title="t('organization.title')" />
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Organization</h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ t('organization.title') }}</h2>
         </template>
 
         <div class="py-8">
             <div class="mx-auto max-w-3xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <PageHeader :title="organization.name" subtitle="Organization details">
+                <PageHeader :title="organization.name" :subtitle="t('organization.details')">
                     <template #actions>
-                        <Link :href="route('organization.edit', organization.id)" class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">
+                        <Link :href="route('organization.edit', organization.id)" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
                             <PencilIcon class="h-4 w-4" />
-                            Edit
+                            {{ t('app.edit') }}
                         </Link>
                     </template>
                 </PageHeader>
@@ -35,8 +38,8 @@ const { date } = useFormat();
                 <FormSection title="Details">
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
                         <div class="flex items-center gap-3">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50">
-                                <BuildingOfficeIcon class="h-5 w-5 text-indigo-600" />
+                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-estoril-50">
+                                <BuildingOfficeIcon class="h-5 w-5 text-estoril-600" />
                             </div>
                             <div>
                                 <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Name</dt>
@@ -44,8 +47,8 @@ const { date } = useFormat();
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50">
-                                <CreditCardIcon class="h-5 w-5 text-purple-600" />
+                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-estoril-50">
+                                <CreditCardIcon class="h-5 w-5 text-estoril-600" />
                             </div>
                             <div>
                                 <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Plan</dt>

@@ -43,8 +43,8 @@ const { currency, statusVariant } = useFormat();
                     <div v-for="trip in trips" :key="trip.city" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                         <div class="border-b border-gray-200 px-6 py-4 flex items-start justify-between">
                             <div class="flex items-center gap-3">
-                                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50">
-                                    <MapPinIcon class="h-5 w-5 text-indigo-600" />
+                                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-estoril-50">
+                                    <MapPinIcon class="h-5 w-5 text-estoril-600" />
                                 </div>
                                 <div>
                                     <h3 class="text-lg font-bold text-gray-900">{{ trip.city }}</h3>
@@ -77,7 +77,7 @@ const { currency, statusVariant } = useFormat();
                                 <tbody class="divide-y divide-gray-200">
                                     <tr v-for="car in trip.cars" :key="car.id" class="hover:bg-gray-50">
                                         <td class="px-6 py-3">
-                                            <Link :href="route('cars.show', car.id)" class="inline-flex items-center gap-1 font-medium text-gray-900 hover:text-indigo-600">
+                                            <Link :href="route('cars.show', car.id)" class="inline-flex items-center gap-1 font-medium text-gray-900 hover:text-estoril-600">
                                                 <TruckIcon class="h-4 w-4 text-gray-400" />
                                                 {{ car.brand }} {{ car.model }}
                                                 <ArrowRightIcon class="h-3 w-3 text-gray-400" />

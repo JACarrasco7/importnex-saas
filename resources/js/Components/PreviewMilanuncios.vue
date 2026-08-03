@@ -13,7 +13,7 @@
 
         <!-- Precio destacado -->
         <div class="mb-3">
-            <span class="text-2xl font-bold text-indigo-600">{{ formatCurrency(car?.purchase_price) }}</span>
+            <span class="text-2xl font-bold text-estoril-600">{{ formatCurrency(car?.purchase_price) }}</span>
             <span class="ml-1 text-sm text-gray-500">Precio fijado</span>
         </div>
 
@@ -46,14 +46,14 @@
                 <span
                     v-for="tag in form.hashtags"
                     :key="tag"
-                    class="text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded"
+                    class="text-xs bg-estoril-100 text-estoril-800 px-2 py-0.5 rounded"
                 >#{{ tag }}</span>
             </div>
         </div>
 
         <!-- Botón de acción -->
         <div class="mt-4 pt-3 border-t border-gray-100">
-            <button class="w-full inline-flex justify-center items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500">
+            <button class="w-full inline-flex justify-center items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white hover:bg-estoril-500">
                 <ChatBubbleBottomCenterIcon class="h-4 w-4" />
                 Contactar con el anuncio
             </button>

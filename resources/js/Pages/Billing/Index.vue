@@ -1,4 +1,4 @@
-﻿<script setup>
+<script setup>
 import { Head, Link } from '@inertiajs/vue3';
 import {
     ArrowLeftIcon,
@@ -55,7 +55,7 @@ const cardBrandIcon = (brand) => {
                         <Link v-if="subscription?.stripe_status && subscription?.stripe_status !== 'canceled'" :href="route('subscriptions.index')" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             Manage plan
                         </Link>
-                        <a v-if="stripePortalUrl" :href="stripePortalUrl" class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">
+                        <a v-if="stripePortalUrl" :href="stripePortalUrl" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
                             <ArrowTopRightOnSquareIcon class="h-4 w-4" />
                             Stripe Portal
                         </a>
@@ -131,7 +131,7 @@ const cardBrandIcon = (brand) => {
                                 <h3 class="text-base font-semibold text-gray-900">Payment method</h3>
                             </div>
                             <div v-if="paymentMethod" class="p-6">
-                                <div class="rounded-xl bg-gradient-to-br from-gray-900 to-indigo-900 p-5 text-white shadow-lg">
+                                <div class="rounded-xl bg-gradient-to-br from-gray-900 to-estoril-900 p-5 text-white shadow-lg">
                                     <div class="flex items-center justify-between">
                                         <component :is="cardBrandIcon(paymentMethod.brand)" class="h-6 w-6" />
                                         <span class="text-xs font-semibold uppercase tracking-wider">{{ paymentMethod.brand }}</span>
@@ -139,7 +139,7 @@ const cardBrandIcon = (brand) => {
                                     <p class="mt-8 text-xl font-mono tracking-wider">â€¢â€¢â€¢â€¢ {{ paymentMethod.last4 }}</p>
                                     <p class="mt-2 text-xs text-gray-300">Expires {{ String(paymentMethod.exp_month).padStart(2, '0') }} / {{ paymentMethod.exp_year }}</p>
                                 </div>
-                                <a v-if="stripePortalUrl" :href="stripePortalUrl" class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-500">
+                                <a v-if="stripePortalUrl" :href="stripePortalUrl" class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-estoril-600 hover:text-estoril-500">
                                     Update card
                                     <ArrowTopRightOnSquareIcon class="h-3 w-3" />
                                 </a>
@@ -171,7 +171,7 @@ const cardBrandIcon = (brand) => {
                                 <tbody class="divide-y divide-gray-200">
                                     <tr v-for="invoice in invoices" :key="invoice.id" class="hover:bg-gray-50">
                                         <td class="px-6 py-4">
-                                            <Link :href="route('billing.show', invoice.id)" class="font-medium text-gray-900 hover:text-indigo-600">
+                                            <Link :href="route('billing.show', invoice.id)" class="font-medium text-gray-900 hover:text-estoril-600">
                                                 {{ invoice.number || invoice.id }}
                                             </Link>
                                         </td>
@@ -188,7 +188,7 @@ const cardBrandIcon = (brand) => {
                                                 <a v-if="invoice.pdf_url" :href="invoice.pdf_url" target="_blank" class="rounded-md p-1.5 text-gray-400 hover:bg-rose-50 hover:text-rose-600" title="Download PDF">
                                                     <ArrowDownTrayIcon class="h-4 w-4" />
                                                 </a>
-                                                <Link :href="route('billing.download', invoice.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-indigo-50 hover:text-indigo-600" title="Download">
+                                                <Link :href="route('billing.download', invoice.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-estoril-50 hover:text-estoril-600" title="Download">
                                                     <DocumentTextIcon class="h-4 w-4" />
                                                 </Link>
                                             </div>

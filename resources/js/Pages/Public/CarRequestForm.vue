@@ -46,7 +46,7 @@ const submit = () => {
 <template>
     <Head :title="t('car_request_form.title')" />
 
-    <div class="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+    <div class="min-h-screen bg-gradient-to-br from-estoril-50 via-white to-platinum-100">
         <div class="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
             <!-- Header -->
             <div class="mb-10 text-center">
@@ -65,8 +65,8 @@ const submit = () => {
             <div class="overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-gray-200">
                 <div class="border-b border-gray-200 bg-gray-50 px-8 py-6">
                     <div class="flex items-center gap-3">
-                        <div class="rounded-lg bg-indigo-100 p-2">
-                            <TruckIcon class="h-6 w-6 text-indigo-600" />
+                        <div class="rounded-lg bg-estoril-100 p-2">
+                            <TruckIcon class="h-6 w-6 text-estoril-700" />
                         </div>
                         <div>
                             <h2 class="text-xl font-semibold text-gray-900">{{ t('car_request_form.section_prefs') }}</h2>
@@ -86,7 +86,7 @@ const submit = () => {
                                     v-model="form.name"
                                     type="text"
                                     required
-                                    class="block w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600"
                                     :placeholder="t('car_request_form.placeholder_name')"
                                 />
                                 <p v-if="form.errors.name" class="mt-1 text-sm text-rose-600">{{ form.errors.name }}</p>
@@ -96,7 +96,7 @@ const submit = () => {
                                 <input
                                     v-model="form.email"
                                     type="email"
-                                    class="block w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600"
                                     :placeholder="t('car_request_form.placeholder_email')"
                                 />
                                 <p v-if="form.errors.email" class="mt-1 text-sm text-rose-600">{{ form.errors.email }}</p>
@@ -106,7 +106,7 @@ const submit = () => {
                                 <input
                                     v-model="form.phone"
                                     type="tel"
-                                    class="block w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600"
                                     :placeholder="t('car_request_form.placeholder_phone')"
                                 />
                                 <p v-if="form.errors.phone" class="mt-1 text-sm text-rose-600">{{ form.errors.phone }}</p>
@@ -123,7 +123,7 @@ const submit = () => {
                                 <input
                                     v-model="form.brand"
                                     type="text"
-                                    class="block w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600"
                                     :placeholder="t('car_request_form.placeholder_brand')"
                                 />
                                 <p v-if="form.errors.brand" class="mt-1 text-sm text-rose-600">{{ form.errors.brand }}</p>
@@ -133,7 +133,7 @@ const submit = () => {
                                 <input
                                     v-model="form.model"
                                     type="text"
-                                    class="block w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600"
                                     :placeholder="t('car_request_form.placeholder_model')"
                                 />
                                 <p v-if="form.errors.model" class="mt-1 text-sm text-rose-600">{{ form.errors.model }}</p>
@@ -144,7 +144,7 @@ const submit = () => {
                         <div class="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('car_request_form.field_year_min') }}</label>
-                                <select v-model="form.year_min" class="block w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <select v-model="form.year_min" class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600">
                                     <option value="">{{ t('car_request_form.any_option') }}</option>
                                     <option v-for="year in 2027" :key="year" :value="2028 - year">{{ 2028 - year }}</option>
                                 </select>
@@ -152,7 +152,7 @@ const submit = () => {
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('car_request_form.field_year_max') }}</label>
-                                <select v-model="form.year_max" class="block w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <select v-model="form.year_max" class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600">
                                     <option value="">{{ t('car_request_form.any_option') }}</option>
                                     <option v-for="year in 2027" :key="year" :value="2028 - year">{{ 2028 - year }}</option>
                                 </select>
@@ -169,7 +169,7 @@ const submit = () => {
                                     type="number"
                                     min="0"
                                     step="500"
-                                    class="block w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600"
                                     :placeholder="t('car_request_form.placeholder_budget')"
                                 />
                                 <p v-if="form.errors.budget_min" class="mt-1 text-sm text-rose-600">{{ form.errors.budget_min }}</p>
@@ -181,7 +181,7 @@ const submit = () => {
                                     type="number"
                                     min="0"
                                     step="500"
-                                    class="block w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600"
                                     :placeholder="t('car_request_form.placeholder_budget_max')"
                                 />
                                 <p v-if="form.errors.budget_max" class="mt-1 text-sm text-rose-600">{{ form.errors.budget_max }}</p>
@@ -196,7 +196,7 @@ const submit = () => {
                                 type="number"
                                 min="0"
                                 step="10000"
-                                class="block w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600"
                                 :placeholder="t('car_request_form.placeholder_mileage')"
                             />
                             <p v-if="form.errors.mileage_max" class="mt-1 text-sm text-rose-600">{{ form.errors.mileage_max }}</p>
@@ -209,7 +209,7 @@ const submit = () => {
                         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('car_request_form.field_fuel') }}</label>
-                                <select v-model="form.fuel" class="block w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <select v-model="form.fuel" class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600">
                                     <option value="">{{ t('car_request_form.any_option') }}</option>
                                     <option v-for="fuel in fuelTypes" :key="fuel" :value="fuel">{{ fuel }}</option>
                                 </select>
@@ -217,7 +217,7 @@ const submit = () => {
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('car_request_form.field_transmission') }}</label>
-                                <select v-model="form.transmission" class="block w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <select v-model="form.transmission" class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600">
                                     <option value="">{{ t('car_request_form.any_option') }}</option>
                                     <option v-for="trans in transmissions" :key="trans" :value="trans">{{ trans }}</option>
                                 </select>
@@ -225,7 +225,7 @@ const submit = () => {
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('car_request_form.field_body_type') }}</label>
-                                <select v-model="form.body_type" class="block w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <select v-model="form.body_type" class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600">
                                     <option value="">{{ t('car_request_form.any_option') }}</option>
                                     <option v-for="type in bodyTypes" :key="type" :value="type">{{ type }}</option>
                                 </select>
@@ -233,7 +233,7 @@ const submit = () => {
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('car_request_form.field_doors') }}</label>
-                                <select v-model="form.doors" class="block w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <select v-model="form.doors" class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600">
                                     <option value="">{{ t('car_request_form.any_option') }}</option>
                                     <option :value="3">3</option>
                                     <option :value="5">5</option>
@@ -242,7 +242,7 @@ const submit = () => {
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('car_request_form.field_seats') }}</label>
-                                <select v-model="form.seats" class="block w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <select v-model="form.seats" class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600">
                                     <option value="">{{ t('car_request_form.any_option') }}</option>
                                     <option :value="5">5</option>
                                     <option :value="7">7</option>
@@ -252,7 +252,7 @@ const submit = () => {
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('car_request_form.field_color') }}</label>
-                                <select v-model="form.color" class="block w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <select v-model="form.color" class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600">
                                     <option value="">{{ t('car_request_form.any_option') }}</option>
                                     <option v-for="color in colors" :key="color" :value="color">{{ color }}</option>
                                 </select>
@@ -270,7 +270,7 @@ const submit = () => {
                                 <textarea
                                     v-model="form.requirements"
                                     rows="3"
-                                    class="block w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600"
                                     :placeholder="t('car_request_form.placeholder_requirements')"
                                 ></textarea>
                                 <p v-if="form.errors.requirements" class="mt-1 text-sm text-rose-600">{{ form.errors.requirements }}</p>
@@ -280,7 +280,7 @@ const submit = () => {
                                 <textarea
                                     v-model="form.notes"
                                     rows="2"
-                                    class="block w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600"
                                     :placeholder="t('car_request_form.placeholder_notes')"
                                 ></textarea>
                                 <p v-if="form.errors.notes" class="mt-1 text-sm text-rose-600">{{ form.errors.notes }}</p>
@@ -296,7 +296,7 @@ const submit = () => {
                         <button
                             type="submit"
                             :disabled="form.processing"
-                            class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            class="inline-flex items-center gap-2 rounded-lg bg-estoril-700 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-estoril-800 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <CheckCircleIcon v-if="!form.processing" class="h-5 w-5" />
                             <span v-if="form.processing">{{ t('car_request_form.sending') }}</span>
@@ -315,12 +315,12 @@ const submit = () => {
         <!-- Floating download button for JJ Import Motors folleto -->
         <div class="fixed bottom-6 right-6 z-40">
             <a
-                :href="route('jj-import.folleto')"
-                target="_blank"
-                class="flex items-center gap-2 rounded-full bg-cyan-600 px-4 py-3 text-sm font-semibold text-white shadow-lg hover:bg-cyan-700 transition-colors"
+                href="/jj-import-folleto.pdf"
+                download="JJ_Import_Motors_Folleto.pdf"
+                class="flex items-center gap-2 rounded-full bg-estoril-700 px-4 py-3 text-sm font-semibold text-white shadow-lg hover:bg-estoril-800 transition-colors"
             >
                 <DocumentArrowDownIcon class="h-5 w-5" />
-                <span class="hidden sm:inline">{{ t('marketplace.folleto') }}</span>
+                <span class="hidden sm:inline">Folleto</span>
             </a>
         </div>
     </div>

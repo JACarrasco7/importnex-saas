@@ -79,7 +79,7 @@ const copyMarketplaceUrl = async () => {
                     :subtitle="t('app.dashboard_subtitle')"
                 >
                     <template #actions>
-                        <Link :href="route('cars.create')" class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">
+                        <Link :href="route('cars.create')" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
                             <TruckIcon class="h-4 w-4" />
                             {{ t('cars.add') }}
                         </Link>
@@ -87,7 +87,7 @@ const copyMarketplaceUrl = async () => {
                 </PageHeader>
 
                 <!-- Public Marketplace CTA -->
-                <div class="overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-700 p-6 shadow-lg sm:p-8">
+                <div class="overflow-hidden rounded-2xl bg-gradient-to-br from-estoril-600 via-estoril-700 to-estoril-900 p-6 shadow-lg sm:p-8">
                     <div class="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                         <div class="flex items-start gap-4">
                             <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-white/20 backdrop-blur">
@@ -154,14 +154,14 @@ const copyMarketplaceUrl = async () => {
                         </div>
                     </div>
 
-                    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-700 p-6 text-white shadow-lg">
+                    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-estoril-700 to-estoril-900 p-6 text-white shadow-lg">
                         <BanknotesIcon class="absolute right-4 top-4 h-12 w-12 text-white/20" />
-                        <p class="text-sm font-medium text-indigo-100">Total invested</p>
+                        <p class="text-sm font-medium text-estoril-100">Total invested</p>
                         <p class="mt-2 text-4xl font-bold tracking-tight">{{ currency(stats.total_cars_cost) }}</p>
-                        <p class="mt-2 text-xs text-indigo-100">In purchased vehicles</p>
+                        <p class="mt-2 text-xs text-estoril-100">In purchased vehicles</p>
                         <div class="mt-6 border-t border-white/20 pt-4">
                             <div class="flex justify-between text-sm">
-                                <span class="text-indigo-100">{{ stats.cars_purchased }} purchased</span>
+                                <span class="text-estoril-100">{{ stats.cars_purchased }} purchased</span>
                                 <span class="font-semibold">{{ currency(stats.total_cars_cost / Math.max(stats.cars_purchased, 1)) }} avg</span>
                             </div>
                         </div>
@@ -175,7 +175,7 @@ const copyMarketplaceUrl = async () => {
                             <h3 class="text-base font-semibold text-gray-900">Recent Cars</h3>
                             <p class="text-sm text-gray-500">Latest 5 added to inventory</p>
                         </div>
-                        <Link :href="route('cars.index')" class="inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 hover:text-indigo-500">
+                        <Link :href="route('cars.index')" class="inline-flex items-center gap-1 text-sm font-semibold text-estoril-600 hover:text-estoril-500">
                             View all
                             <ArrowRightIcon class="h-4 w-4" />
                         </Link>
@@ -194,7 +194,7 @@ const copyMarketplaceUrl = async () => {
                             <tbody class="divide-y divide-gray-200">
                                 <tr v-for="car in recentCars" :key="car.id" class="hover:bg-gray-50">
                                     <td class="px-6 py-4">
-                                        <Link :href="route('cars.show', car.id)" class="font-medium text-gray-900 hover:text-indigo-600">
+                                        <Link :href="route('cars.show', car.id)" class="font-medium text-gray-900 hover:text-estoril-600">
                                             {{ car.brand }} {{ car.model }}
                                         </Link>
                                     </td>
@@ -221,7 +221,7 @@ const copyMarketplaceUrl = async () => {
                             v-for="link in quickLinks"
                             :key="link.label"
                             :href="route(link.route)"
-                            class="group flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-gray-200 transition hover:shadow-md hover:ring-indigo-300"
+                            class="group flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-gray-200 transition hover:shadow-md hover:ring-estoril-300"
                         >
                             <div :class="['flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl', `bg-${link.color}-50 group-hover:bg-${link.color}-100`]">
                                 <component :is="link.icon" class="h-5 w-5" :class="`text-${link.color}-600`" />
@@ -230,7 +230,7 @@ const copyMarketplaceUrl = async () => {
                                 <p class="text-sm font-semibold text-gray-900">{{ link.label }}</p>
                                 <p class="text-xs text-gray-500">{{ link.description }}</p>
                             </div>
-                            <ArrowRightIcon class="h-4 w-4 text-gray-400 transition group-hover:translate-x-1 group-hover:text-indigo-600" />
+                            <ArrowRightIcon class="h-4 w-4 text-gray-400 transition group-hover:translate-x-1 group-hover:text-estoril-600" />
                         </Link>
                     </div>
                 </div>

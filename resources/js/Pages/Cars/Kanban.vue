@@ -63,7 +63,7 @@ const onDrop = (column) => {
                         @dragover="onDragOver($event, column)"
                         @dragleave="onDragLeave"
                         @drop="onDrop(column)"
-                        :class="['flex-shrink-0 w-72 rounded-2xl p-3 transition', dragOverColumn === column.key ? 'bg-indigo-100 ring-2 ring-indigo-400' : 'bg-gray-100']">
+                        :class="['flex-shrink-0 w-72 rounded-2xl p-3 transition', dragOverColumn === column.key ? 'bg-estoril-100 ring-2 ring-estoril-400' : 'bg-gray-100']">
                         <div class="flex items-center justify-between px-2 py-2">
                             <h3 class="text-sm font-semibold text-gray-700">{{ column.label }}</h3>
                             <span class="rounded-full bg-gray-300 px-2 py-0.5 text-xs font-semibold text-gray-700">
@@ -77,7 +77,7 @@ const onDrop = (column) => {
                                 @dragstart="startDrag(car)"
                                 class="cursor-move rounded-lg bg-white p-3 shadow-sm ring-1 ring-gray-200 hover:shadow-md">
                                 <div class="flex items-start justify-between">
-                                    <Link :href="route('cars.show', car.id)" class="font-medium text-gray-900 hover:text-indigo-600">
+                                    <Link :href="route('cars.show', car.id)" class="font-medium text-gray-900 hover:text-estoril-600">
                                         {{ car.brand }} {{ car.model }}
                                     </Link>
                                     <Badge :variant="trafficLightVariant(car.traffic_light)" dot />
@@ -85,7 +85,7 @@ const onDrop = (column) => {
                                 <p class="mt-1 text-xs text-gray-500">{{ car.year }}</p>
                                 <div class="mt-2 flex items-center justify-between text-xs">
                                     <span class="font-semibold text-gray-900">{{ currency(car.purchase_price) }}</span>
-                                    <Link :href="route('cars.show', car.id)" class="text-gray-400 hover:text-indigo-600">
+                                    <Link :href="route('cars.show', car.id)" class="text-gray-400 hover:text-estoril-600">
                                         <ChevronRightIcon class="h-4 w-4" />
                                     </Link>
                                 </div>

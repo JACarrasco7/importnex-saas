@@ -7,7 +7,7 @@
 
         <!-- Video mockup -->
         <div class="relative mb-3">
-            <div class="aspect-video w-full rounded-lg bg-gradient-to-br from-purple-900 to-pink-800 flex items-center justify-center">
+            <div class="aspect-video w-full rounded-lg bg-gradient-to-br from-estoril-900 to-pink-800 flex items-center justify-center">
                 <PlayIcon class="h-12 w-12 text-white opacity-50" />
             </div>
             <div class="absolute bottom-3 right-3 flex items-center gap-1 bg-black/70 px-2 py-1 rounded">
@@ -28,7 +28,7 @@
                 <span
                     v-for="tag in form.hashtags.slice(0, 3)"
                     :key="tag"
-                    class="text-xs text-purple-600 font-semibold"
+                    class="text-xs text-estoril-600 font-semibold"
                 >#{{ tag }}</span>
             </div>
         </div>

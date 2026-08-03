@@ -34,7 +34,7 @@ const { currency, date } = useFormat();
                             <ArrowTopRightOnSquareIcon class="h-4 w-4" />
                             View on Stripe
                         </a>
-                        <Link :href="route('billing.download', invoice.id)" class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">
+                        <Link :href="route('billing.download', invoice.id)" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
                             <ArrowDownTrayIcon class="h-4 w-4" />
                             Download PDF
                         </Link>

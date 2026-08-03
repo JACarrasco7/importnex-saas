@@ -33,10 +33,10 @@ const { currency } = useFormat();
                     </template>
                 </PageHeader>
 
-                <div class="overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-700 p-6 text-white shadow-lg">
-                    <p class="text-sm font-medium text-indigo-100">Monthly price</p>
+                <div class="overflow-hidden rounded-2xl bg-gradient-to-br from-estoril-700 to-estoril-900 p-6 text-white shadow-lg">
+                    <p class="text-sm font-medium text-estoril-100">Monthly price</p>
                     <p class="mt-2 text-5xl font-bold tracking-tight">{{ currency(planData.price) }}</p>
-                    <p class="mt-2 text-sm text-indigo-100">Billed monthly</p>
+                    <p class="mt-2 text-sm text-estoril-100">Billed monthly</p>
                 </div>
 
                 <FormSection title="What's included">
@@ -60,8 +60,8 @@ const { currency } = useFormat();
                             </div>
                         </li>
                         <li class="flex items-center gap-3">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50">
-                                <CheckIcon class="h-5 w-5 text-purple-600" />
+                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-estoril-50">
+                                <CheckIcon class="h-5 w-5 text-estoril-600" />
                             </div>
                             <div>
                                 <p class="text-sm font-semibold text-gray-900">All features</p>

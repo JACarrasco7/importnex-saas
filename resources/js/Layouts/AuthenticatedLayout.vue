@@ -1,4 +1,4 @@
-﻿<script setup>
+<script setup>
 import { ref, computed } from 'vue';
 import { onClickOutside } from '@vueuse/core';
 import { Link, usePage } from '@inertiajs/vue3';
@@ -86,7 +86,7 @@ const navGroups = computed(() => [
                 route: 'car-requests.index',
                 icon: ClipboardDocumentListIcon,
                 badge: pendingCarRequests.value,
-                badgeColor: 'bg-indigo-500',
+                badgeColor: 'bg-estoril-500',
             },
             { name: t('nav.templates'), route: 'message-templates.index', icon: EnvelopeIcon },
             {
@@ -137,7 +137,7 @@ const navGroups = computed(() => [
         <aside :class="['fixed inset-y-0 left-0 z-50 w-64 transform bg-white shadow-xl ring-1 ring-gray-200 transition-transform lg:translate-x-0', sidebarOpen ? 'translate-x-0' : '-translate-x-full']">
             <div class="flex h-16 items-center justify-between px-6 border-b border-gray-200">
                 <Link :href="route('dashboard')" class="flex items-center gap-2">
-                    <ApplicationLogo class="h-8 w-auto fill-current text-indigo-600" />
+                    <ApplicationLogo class="h-8 w-auto fill-current text-estoril-600" />
                     <span class="text-lg font-bold text-gray-900">Importnex</span>
                 </Link>
                 <button @click="sidebarOpen = false" class="rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 lg:hidden">
@@ -154,10 +154,10 @@ const navGroups = computed(() => [
                     :items="group.items"
                 />
 
-                <div class="mt-auto rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 p-4 text-white">
+                <div class="mt-auto rounded-xl bg-gradient-to-br from-estoril-600 to-estoril-800 p-4 text-white">
                     <p class="text-sm font-semibold">Need more features?</p>
-                    <p class="mt-1 text-xs text-indigo-100">Upgrade your plan to unlock unlimited cars and contacts.</p>
-                    <Link :href="route('subscriptions.index')" class="mt-3 inline-flex w-full items-center justify-center rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-50">
+                    <p class="mt-1 text-xs text-estoril-100">Upgrade your plan to unlock unlimited cars and contacts.</p>
+                    <Link :href="route('subscriptions.index')" class="mt-3 inline-flex w-full items-center justify-center rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-estoril-700 hover:bg-estoril-50">
                         View plans
                     </Link>
                 </div>
@@ -186,7 +186,7 @@ const navGroups = computed(() => [
 
                     <div class="relative" ref="userMenuRef">
                         <button @click="userMenuOpen = !userMenuOpen" class="flex items-center gap-2 rounded-full p-1 text-sm hover:bg-gray-100">
-                            <span class="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-xs font-semibold text-white">
+                            <span class="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-estoril-600 to-estoril-800 text-xs font-semibold text-white">
                                 {{ initials(userName) }}
                             </span>
                             <span class="hidden md:block text-sm font-medium text-gray-700">{{ userName }}</span>

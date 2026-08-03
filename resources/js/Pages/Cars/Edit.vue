@@ -53,7 +53,7 @@ const totalCost = computed(() =>
 
 const submit = () => form.patch(route('cars.update', props.car.id));
 
-const inputClass = 'block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500';
+const inputClass = 'block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-estoril-500 focus:ring-estoril-500';
 </script>
 
 <template>
@@ -116,10 +116,10 @@ const inputClass = 'block w-full rounded-lg border-gray-300 text-sm shadow-sm fo
                             <FormField label="Professional fees"><input v-model="form.professional_fees" type="number" step="0.01" :class="inputClass" /></FormField>
                             <FormField label="Deposit"><input v-model="form.deposit" type="number" step="0.01" :class="inputClass" /></FormField>
                         </div>
-                        <div class="mt-4 flex items-center gap-2 rounded-lg bg-indigo-50 px-4 py-3 text-sm">
-                            <BanknotesIcon class="h-5 w-5 text-indigo-600" />
-                            <span class="font-medium text-indigo-900">Estimated total cost:</span>
-                            <span class="font-bold text-indigo-700">{{ currency(totalCost) }}</span>
+                        <div class="mt-4 flex items-center gap-2 rounded-lg bg-estoril-50 px-4 py-3 text-sm">
+                            <BanknotesIcon class="h-5 w-5 text-estoril-600" />
+                            <span class="font-medium text-estoril-900">Estimated total cost:</span>
+                            <span class="font-bold text-estoril-700">{{ currency(totalCost) }}</span>
                         </div>
                     </FormSection>
 
@@ -154,7 +154,7 @@ const inputClass = 'block w-full rounded-lg border-gray-300 text-sm shadow-sm fo
 
                     <div class="flex items-center justify-end gap-3 rounded-2xl bg-gray-50 px-6 py-4 ring-1 ring-gray-200">
                         <Link :href="route('cars.show', car.id)" class="text-sm font-semibold text-gray-700 hover:text-gray-900">Cancel</Link>
-                        <button type="submit" :disabled="form.processing" class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50">
+                        <button type="submit" :disabled="form.processing" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500 disabled:opacity-50">
                             <CheckIcon class="h-4 w-4" />
                             {{ form.processing ? 'Updating...' : 'Update car' }}
                         </button>

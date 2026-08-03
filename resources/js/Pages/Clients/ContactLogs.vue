@@ -60,7 +60,7 @@ const channelIcon = (channel) => {
     return opt ? opt.icon : ChatBubbleLeftRightIcon;
 };
 
-const inputClass = 'block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500';
+const inputClass = 'block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-estoril-500 focus:ring-estoril-500';
 </script>
 
 <template>
@@ -99,7 +99,7 @@ const inputClass = 'block w-full rounded-lg border-gray-300 text-sm shadow-sm fo
                             <textarea v-model="form.summary" rows="3" required :class="inputClass" placeholder="What was discussed?" />
                         </FormField>
                         <div class="flex justify-end">
-                            <button type="submit" :disabled="form.processing" class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50">
+                            <button type="submit" :disabled="form.processing" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500 disabled:opacity-50">
                                 <CheckIcon class="h-4 w-4" />
                                 {{ form.processing ? 'Saving...' : 'Log contact' }}
                             </button>
@@ -115,8 +115,8 @@ const inputClass = 'block w-full rounded-lg border-gray-300 text-sm shadow-sm fo
                     <EmptyState v-if="!logs?.data?.length" icon="💬" title="No contact logs yet" description="Log your first interaction with this client." />
                     <div v-else class="divide-y divide-gray-200">
                         <div v-for="log in logs.data" :key="log.id" class="flex items-start gap-4 px-6 py-4 hover:bg-gray-50">
-                            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-indigo-50">
-                                <component :is="channelIcon(log.channel)" class="h-5 w-5 text-indigo-600" />
+                            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-estoril-50">
+                                <component :is="channelIcon(log.channel)" class="h-5 w-5 text-estoril-600" />
                             </div>
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center gap-2">

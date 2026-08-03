@@ -6,6 +6,9 @@ import PageHeader from '@/Components/PageHeader.vue';
 import Badge from '@/Components/Badge.vue';
 import FormSection from '@/Components/FormSection.vue';
 import { useFormat } from '@/Composables/useFormat';
+import { useTranslations } from '@/Composables/useTranslations';
+
+const { t } = useTranslations();
 
 const props = defineProps({
     alert: Object,
@@ -15,11 +18,11 @@ const { datetime } = useFormat();
 </script>
 
 <template>
-    <Head title="Alert Details" />
+    <Head :title="t('alerts.details')" />
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Alert Details</h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ t('alerts.details') }}</h2>
         </template>
 
         <div class="py-8">

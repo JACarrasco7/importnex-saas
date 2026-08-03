@@ -103,7 +103,7 @@ const createdAt = new Date(props.carRequest.created_at).toLocaleDateString(local
                         <button
                             v-if="carRequest.status !== 'in_progress'"
                             @click="updateStatus('in_progress')"
-                            class="inline-flex items-center gap-2 rounded-lg bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-700 hover:bg-indigo-100"
+                            class="inline-flex items-center gap-2 rounded-lg bg-estoril-50 px-4 py-2 text-sm font-semibold text-estoril-700 hover:bg-estoril-100"
                         >
                             <TruckIcon class="h-4 w-4" />
                             {{ t('car_requests.status.in_progress') }}
@@ -145,14 +145,14 @@ const createdAt = new Date(props.carRequest.created_at).toLocaleDateString(local
                                 <EnvelopeIcon class="h-5 w-5 text-gray-400" />
                                 <div>
                                     <div class="text-xs text-gray-500">{{ t('car_requests.field_email') }}</div>
-                                    <a :href="`mailto:${carRequest.email}`" class="font-medium text-indigo-600 hover:text-indigo-500">{{ carRequest.email }}</a>
+                                    <a :href="`mailto:${carRequest.email}`" class="font-medium text-estoril-600 hover:text-estoril-500">{{ carRequest.email }}</a>
                                 </div>
                             </div>
                             <div v-if="carRequest.phone" class="flex items-center gap-3">
                                 <PhoneIcon class="h-5 w-5 text-gray-400" />
                                 <div>
                                     <div class="text-xs text-gray-500">{{ t('car_requests.field_phone') }}</div>
-                                    <a :href="`tel:${carRequest.phone}`" class="font-medium text-indigo-600 hover:text-indigo-500">{{ carRequest.phone }}</a>
+                                    <a :href="`tel:${carRequest.phone}`" class="font-medium text-estoril-600 hover:text-estoril-500">{{ carRequest.phone }}</a>
                                 </div>
                             </div>
                             <div v-if="carRequest.client" class="flex items-center gap-3 rounded-lg bg-emerald-50 p-3">

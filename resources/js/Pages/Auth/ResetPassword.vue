@@ -21,7 +21,7 @@ const form = useForm({
 
 const submit = () => form.post(route('password.store'), { onFinish: () => form.reset('password', 'password_confirmation') });
 
-const inputClass = 'block w-full rounded-lg border-gray-300 pl-10 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500';
+const inputClass = 'block w-full rounded-lg border-gray-300 pl-10 text-sm shadow-sm focus:border-estoril-500 focus:ring-estoril-500';
 </script>
 
 <template>
@@ -55,7 +55,7 @@ const inputClass = 'block w-full rounded-lg border-gray-300 pl-10 text-sm shadow
                 </div>
             </FormField>
 
-            <button type="submit" :disabled="form.processing" class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50">
+            <button type="submit" :disabled="form.processing" class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-estoril-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500 disabled:opacity-50">
                 <ArrowRightIcon class="h-4 w-4" />
                 {{ form.processing ? t('app.loading') : t('auth.reset_password') }}
             </button>

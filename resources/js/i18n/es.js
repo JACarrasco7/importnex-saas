@@ -27,6 +27,9 @@ export default {
         quick_actions: 'Acciones Rápidas',
     },
     auth: {
+        verify_email: 'Verificar correo',
+        verify_title: 'Verifica tu correo',
+        verify_desc: '¡Gracias por registrarte! Antes de empezar, verifica tu correo haciendo clic en el enlace que te hemos enviado.',
         login: 'Iniciar sesión',
         logout: 'Cerrar sesión',
         register: 'Registrarse',
@@ -97,6 +100,7 @@ export default {
     clients: {
         title: 'Clientes',
         subtitle: ':count en tu CRM',
+        add_subtitle: 'Añade un nuevo cliente a tu CRM',
         add: 'Añadir Cliente',
         no_clients: 'Aún no hay clientes',
         create_first: 'Crea tu primer cliente',
@@ -110,6 +114,7 @@ export default {
     },
     alerts: {
         title: 'Alertas',
+        details: 'Detalles de Alerta',
         resolve: 'Resolver',
         mark_resolved: 'Marcar como resuelta',
         resolved: 'Resuelta',
@@ -161,8 +166,12 @@ export default {
     },
     organization: {
         title: 'Organización',
+        create: 'Crear Organización',
+        create_your: 'Crea tu Organización',
+        create_desc: 'Para empezar, crea tu organización. Esto te permitirá gestionar tus coches, clientes y contactos de forma aislada.',
         edit: 'Editar Organización',
         edit_subtitle: 'Actualiza los datos de la organización y el proveedor de IA',
+        details: 'Datos de la organización',
         name: 'Nombre de la Organización',
         members: 'Miembros',
         invite_user: 'Invitar Usuario',
@@ -297,6 +306,23 @@ export default {
         subtitle: ':count contactos en tu red',
         network_title: 'Red',
         add: 'Nuevo Contacto',
+        add_subtitle: 'Añade un concesionario, transportista u otro contacto',
+        edit: 'Editar',
+        edit_subtitle: 'Actualiza los datos del contacto',
+    },
+    marketing: {
+        title: 'Marketing de Coches',
+        subtitle: 'Genera y gestiona anuncios para todos tus canales',
+    },
+    templates: {
+        title: 'Plantillas',
+        subtitle: ':count mensajes reutilizables',
+        empty_title: 'Aún no hay plantillas',
+        empty_desc: 'Crea plantillas reutilizables para acelerar la comunicación con clientes.',
+    },
+    ai_chat: {
+        title: 'AI Playground',
+        using: 'Usando',
     },
     marketplace: {
         title: 'Verified Cars - Marketplace',

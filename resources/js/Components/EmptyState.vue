@@ -41,7 +41,7 @@ defineProps({
             :href="actionRoute"
             :method="actionMethod"
             as="button"
-            class="px-4 py-2 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700"
+            class="px-4 py-2 bg-estoril-600 text-white text-sm rounded-md hover:bg-estoril-700"
         >
             {{ actionText }}
         </Link>

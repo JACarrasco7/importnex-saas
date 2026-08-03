@@ -45,12 +45,12 @@ const props = defineProps({
 });
 
 const colorMap = {
-    indigo: { bg: 'bg-indigo-50', text: 'text-indigo-600' },
+    indigo: { bg: 'bg-estoril-50', text: 'text-estoril-600' },
     blue: { bg: 'bg-blue-50', text: 'text-blue-600' },
     emerald: { bg: 'bg-emerald-50', text: 'text-emerald-600' },
     amber: { bg: 'bg-amber-50', text: 'text-amber-600' },
     rose: { bg: 'bg-rose-50', text: 'text-rose-600' },
-    purple: { bg: 'bg-purple-50', text: 'text-purple-600' },
+    purple: { bg: 'bg-estoril-50', text: 'text-estoril-600' },
     sky: { bg: 'bg-sky-50', text: 'text-sky-600' },
     gray: { bg: 'bg-gray-100', text: 'text-gray-600' },
 };

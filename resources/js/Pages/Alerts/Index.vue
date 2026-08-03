@@ -1,4 +1,4 @@
-﻿<script setup>
+<script setup>
 import { ref, watch } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { BellIcon, CheckIcon, EyeIcon, TrashIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/vue/24/outline';
@@ -56,8 +56,8 @@ const confirmDelete = () => {
                 <PageHeader title="Alerts" :subtitle="`${alerts.total || 0} alerts in your system`">
                     <template #actions>
                         <div class="inline-flex rounded-lg bg-white p-1 shadow-sm ring-1 ring-gray-200">
-                            <button @click="filter = t('common.pending')" :class="['rounded-md px-3 py-1.5 text-sm font-semibold transition', filter === t('common.pending') ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-50']">Pending</button>
-                            <button @click="filter = t('common.all')" :class="['rounded-md px-3 py-1.5 text-sm font-semibold transition', filter === t('common.all') ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-50']">All</button>
+                            <button @click="filter = t('common.pending')" :class="['rounded-md px-3 py-1.5 text-sm font-semibold transition', filter === t('common.pending') ? 'bg-estoril-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-50']">Pending</button>
+                            <button @click="filter = t('common.all')" :class="['rounded-md px-3 py-1.5 text-sm font-semibold transition', filter === t('common.all') ? 'bg-estoril-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-50']">All</button>
                         </div>
                     </template>
                 </PageHeader>
@@ -81,7 +81,7 @@ const confirmDelete = () => {
                                 <button v-if="!alert.resolved" @click="askResolve(alert)" class="rounded-md bg-emerald-50 p-1.5 text-emerald-600 hover:bg-emerald-100" title="Resolve">
                                     <CheckIcon class="h-4 w-4" />
                                 </button>
-                                <Link :href="route('alerts.show', alert.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-indigo-50 hover:text-indigo-600" title="View">
+                                <Link :href="route('alerts.show', alert.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-estoril-50 hover:text-estoril-600" title="View">
                                     <EyeIcon class="h-4 w-4" />
                                 </Link>
                                 <button @click="askDelete(alert)" class="rounded-md p-1.5 text-gray-400 hover:bg-rose-50 hover:text-rose-600" title="Delete">
@@ -100,7 +100,7 @@ const confirmDelete = () => {
                         <div class="flex items-center gap-1">
                             <component v-for="link in alerts.links" :key="link.label" :is="link.url ? Link : 'span'" :href="link.url || '#'" :class="[
                                 'inline-flex h-8 min-w-[2rem] items-center justify-center rounded-md px-2 text-sm',
-                                link.active ? 'bg-indigo-600 text-white' : 'text-gray-700 hover:bg-white',
+                                link.active ? 'bg-estoril-600 text-white' : 'text-gray-700 hover:bg-white',
                                 !link.url ? 'cursor-not-allowed opacity-50' : '',
                             ]">
                                 <ChevronLeftIcon v-if="link.label.includes('Previous')" class="h-4 w-4" />

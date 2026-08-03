@@ -97,7 +97,7 @@ const confirmDelete = () => {
             <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
                 <PageHeader :title="t('clients.title')" :subtitle="t('clients.subtitle', { count: clients.total || 0 })">
                     <template #actions>
-                        <Link :href="route('clients.create')" class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">
+                        <Link :href="route('clients.create')" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
                             <PlusIcon class="h-4 w-4" />
                             {{ t('clients.add') }}
                         </Link>
@@ -110,7 +110,7 @@ const confirmDelete = () => {
                         <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Search</label>
                         <div class="relative">
                             <MagnifyingGlassIcon class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                            <input v-model="search" type="text" placeholder="Name, contact info..." class="block w-full rounded-lg border-gray-300 pl-9 text-sm focus:border-indigo-500 focus:ring-indigo-500" />
+                            <input v-model="search" type="text" placeholder="Name, contact info..." class="block w-full rounded-lg border-gray-300 pl-9 text-sm focus:border-estoril-500 focus:ring-estoril-500" />
                         </div>
                     </div>
                 </div>
@@ -121,9 +121,9 @@ const confirmDelete = () => {
                         <div class="text-xs font-semibold uppercase tracking-wider text-gray-500">Total</div>
                         <div class="mt-1 text-2xl font-bold text-gray-900">{{ stats.total }}</div>
                     </div>
-                    <div class="rounded-xl bg-indigo-50 p-4 shadow-sm ring-1 ring-indigo-200">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-indigo-700">Active</div>
-                        <div class="mt-1 text-2xl font-bold text-indigo-600">{{ stats.active }}</div>
+                    <div class="rounded-xl bg-estoril-50 p-4 shadow-sm ring-1 ring-estoril-200">
+                        <div class="text-xs font-semibold uppercase tracking-wider text-estoril-700">Active</div>
+                        <div class="mt-1 text-2xl font-bold text-estoril-600">{{ stats.active }}</div>
                     </div>
                     <div class="rounded-xl bg-amber-50 p-4 shadow-sm ring-1 ring-amber-200">
                         <div class="text-xs font-semibold uppercase tracking-wider text-amber-700">Leads</div>
@@ -141,7 +141,7 @@ const confirmDelete = () => {
                             :class="[
                                 'whitespace-nowrap border-b-2 px-1 py-4 text-sm font-semibold transition-colors',
                                 currentTab === tab.id
-                                    ? 'border-indigo-600 text-indigo-600'
+                                    ? 'border-estoril-600 text-estoril-600'
                                     : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
                             ]"
                         >
@@ -162,7 +162,7 @@ const confirmDelete = () => {
                             <div class="flex items-start justify-between gap-3">
                                 <div class="flex-1 min-w-0">
                                     <Link :href="route('clients.show', client.id)" class="block">
-                                        <h3 class="text-base font-semibold text-gray-900 group-hover:text-indigo-600">
+                                        <h3 class="text-base font-semibold text-gray-900 group-hover:text-estoril-600">
                                             {{ client.name }}
                                         </h3>
                                         <p v-if="client.looking_for" class="mt-1 text-sm text-gray-500 truncate">{{ client.looking_for }}</p>
@@ -189,7 +189,7 @@ const confirmDelete = () => {
                         <div class="flex border-t border-gray-100 bg-gray-50 px-5 py-3">
                             <div class="flex-1" />
                             <div class="flex items-center gap-1">
-                                <Link :href="route('clients.show', client.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-indigo-50 hover:text-indigo-600" title="View">
+                                <Link :href="route('clients.show', client.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-estoril-50 hover:text-estoril-600" title="View">
                                     <EyeIcon class="h-4 w-4" />
                                 </Link>
                                 <Link :href="route('clients.edit', client.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600" title="Edit">

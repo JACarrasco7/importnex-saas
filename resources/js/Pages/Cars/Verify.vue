@@ -159,12 +159,12 @@ function apply() {
                 </div>
                 <div v-else class="overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 p-6">
                     <div class="flex items-start gap-3">
-                        <SparklesIcon class="h-5 w-5 flex-shrink-0 text-indigo-600" />
+                        <SparklesIcon class="h-5 w-5 flex-shrink-0 text-estoril-600" />
                         <div>
                             <p class="text-sm text-gray-900">This car has not been verified yet. Send it to the configured AI for analysis.</p>
                             <form method="POST" :action="route('cars.verify-sync', car.id)" class="mt-4">
                                 <input type="hidden" name="_token" :value="$page.props.csrfToken" />
-                                <button type="submit" class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">
+                                <button type="submit" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
                                     <SparklesIcon class="h-4 w-4" />
                                     Verify with AI
                                 </button>
@@ -177,14 +177,14 @@ function apply() {
                 <div v-if="car.valuation || car.recommendation" class="space-y-6">
                     <FormSection v-if="car.valuation" title="Valuation">
                         <div class="flex items-start gap-3">
-                            <ChartBarIcon class="h-5 w-5 flex-shrink-0 text-indigo-600" />
+                            <ChartBarIcon class="h-5 w-5 flex-shrink-0 text-estoril-600" />
                             <p class="text-sm text-gray-900">{{ car.valuation }}</p>
                         </div>
                     </FormSection>
 
                     <FormSection v-if="car.recommendation" title="Recommendation">
                         <div class="flex items-start gap-3">
-                            <LightBulbIcon class="h-5 w-5 flex-shrink-0 text-purple-600" />
+                            <LightBulbIcon class="h-5 w-5 flex-shrink-0 text-estoril-600" />
                             <p class="text-sm text-gray-900">{{ car.recommendation }}</p>
                         </div>
                     </FormSection>
@@ -213,7 +213,7 @@ function apply() {
                     <button
                         type="button"
                         @click="openModal"
-                        class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">
+                        class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
                         <SparklesIcon class="h-4 w-4" />
                         Review &amp; apply AI suggestions
                     </button>
@@ -282,7 +282,7 @@ function apply() {
                                                 <input
                                                     type="checkbox"
                                                     v-model="checked[def.key]"
-                                                    class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+                                                    class="h-4 w-4 rounded border-gray-300 text-estoril-600 focus:ring-estoril-500" />
                                             </td>
                                             <td class="py-3 pr-3">
                                                 <div class="font-medium text-gray-900">{{ def.label }}</div>
@@ -328,7 +328,7 @@ function apply() {
                                 type="button"
                                 @click="apply"
                                 :disabled="submitting || selectedCount === 0"
-                                class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50">
+                                class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500 disabled:opacity-50">
                                 <CheckIcon class="h-4 w-4" />
                                 {{ submitting ? 'Applying…' : `Apply ${selectedCount} field${selectedCount === 1 ? '' : 's'}` }}
                             </button>

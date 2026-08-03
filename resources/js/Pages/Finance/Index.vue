@@ -128,7 +128,7 @@ const costCategories = computed(() => [
                         <div v-for="entry in monthly" :key="entry.month" class="flex items-center gap-3">
                             <div class="w-20 text-sm font-medium text-gray-700">{{ entry.month }}</div>
                             <div class="relative flex-1 h-9 overflow-hidden rounded-lg bg-gray-100">
-                                <div class="absolute inset-y-0 left-0 bg-gradient-to-r from-indigo-500 to-purple-600 transition-all" :style="{ width: ((Number(entry.total) / maxMonthlyTotal) * 100) + '%' }"></div>
+                                <div class="absolute inset-y-0 left-0 bg-gradient-to-r from-estoril-600 to-estoril-800 transition-all" :style="{ width: ((Number(entry.total) / maxMonthlyTotal) * 100) + '%' }"></div>
                                 <div class="absolute inset-0 flex items-center justify-between px-3 text-xs font-medium text-gray-700">
                                     <span>{{ entry.count }} cars</span>
                                     <span class="font-semibold text-gray-900">{{ currency(entry.total) }}</span>

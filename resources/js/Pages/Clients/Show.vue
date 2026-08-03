@@ -29,7 +29,7 @@ const { currency, date, statusVariant } = useFormat();
                             <ArrowLeftIcon class="h-4 w-4" />
                             Back
                         </Link>
-                        <Link :href="route('clients.edit', client.id)" class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">
+                        <Link :href="route('clients.edit', client.id)" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
                             <PencilIcon class="h-4 w-4" />
                             Edit
                         </Link>
@@ -88,7 +88,7 @@ const { currency, date, statusVariant } = useFormat();
                                 <ChatBubbleLeftRightIcon class="h-5 w-5 text-gray-400" />
                                 <h3 class="text-base font-semibold text-gray-900">Contact log</h3>
                             </div>
-                            <Link :href="route('clients.contact-logs.index', client.id)" class="text-sm font-semibold text-indigo-600 hover:text-indigo-500">
+                            <Link :href="route('clients.contact-logs.index', client.id)" class="text-sm font-semibold text-estoril-600 hover:text-estoril-500">
                                 View all →
                             </Link>
                         </div>

@@ -86,7 +86,7 @@ const confirmDelete = () => {
             <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
                 <PageHeader :title="t('contacts.network_title')" :subtitle="t('contacts.subtitle', { count: contacts.total || 0 })">
                     <template #actions>
-                        <Link :href="route('contacts.create')" class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">
+                        <Link :href="route('contacts.create')" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
                             <PlusIcon class="h-4 w-4" />
                             {{ t('contacts.add') }}
                         </Link>
@@ -100,14 +100,14 @@ const confirmDelete = () => {
                             <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">{{ t('app.search') }}</label>
                             <div class="relative">
                                 <MagnifyingGlassIcon class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                                <input v-model="search" type="text" placeholder="Name, email, city..." class="block w-full rounded-lg border-gray-300 pl-9 text-sm focus:border-indigo-500 focus:ring-indigo-500" />
+                                <input v-model="search" type="text" placeholder="Name, email, city..." class="block w-full rounded-lg border-gray-300 pl-9 text-sm focus:border-estoril-500 focus:ring-estoril-500" />
                             </div>
                         </div>
                         <div>
                             <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Tag</label>
                             <div class="relative">
                                 <TagIcon class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                                <input v-model="tagFilter" type="text" placeholder="e.g. dealer, transport..." class="block w-full rounded-lg border-gray-300 pl-9 text-sm focus:border-indigo-500 focus:ring-indigo-500" />
+                                <input v-model="tagFilter" type="text" placeholder="e.g. dealer, transport..." class="block w-full rounded-lg border-gray-300 pl-9 text-sm focus:border-estoril-500 focus:ring-estoril-500" />
                             </div>
                         </div>
                     </div>
@@ -119,9 +119,9 @@ const confirmDelete = () => {
                         <div class="text-xs font-semibold uppercase tracking-wider text-gray-500">Total</div>
                         <div class="mt-1 text-2xl font-bold text-gray-900">{{ stats.total }}</div>
                     </div>
-                    <div class="rounded-xl bg-indigo-50 p-4 shadow-sm ring-1 ring-indigo-200">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-indigo-700">Dealers</div>
-                        <div class="mt-1 text-2xl font-bold text-indigo-600">{{ stats.dealers }}</div>
+                    <div class="rounded-xl bg-estoril-50 p-4 shadow-sm ring-1 ring-estoril-200">
+                        <div class="text-xs font-semibold uppercase tracking-wider text-estoril-700">Dealers</div>
+                        <div class="mt-1 text-2xl font-bold text-estoril-600">{{ stats.dealers }}</div>
                     </div>
                     <div class="rounded-xl bg-emerald-50 p-4 shadow-sm ring-1 ring-emerald-200">
                         <div class="text-xs font-semibold uppercase tracking-wider text-emerald-700">Transport</div>
@@ -138,7 +138,7 @@ const confirmDelete = () => {
                     >
                         <div class="p-5">
                             <Link :href="route('contacts.show', contact.id)" class="block">
-                                <h3 class="text-base font-semibold text-gray-900 group-hover:text-indigo-600">
+                                <h3 class="text-base font-semibold text-gray-900 group-hover:text-estoril-600">
                                     {{ contact.name }}
                                 </h3>
                                 <p v-if="contact.notes" class="mt-1 text-sm text-gray-500 line-clamp-2">{{ contact.notes }}</p>
@@ -160,7 +160,7 @@ const confirmDelete = () => {
                             </div>
 
                             <div v-if="contact.tags && contact.tags.length > 0" class="mt-4 flex flex-wrap gap-1.5">
-                                <span v-for="tag in contact.tags" :key="tag" class="inline-flex items-center rounded-md bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-200">
+                                <span v-for="tag in contact.tags" :key="tag" class="inline-flex items-center rounded-md bg-estoril-50 px-2 py-0.5 text-xs font-medium text-estoril-700 ring-1 ring-inset ring-estoril-200">
                                     {{ tag }}
                                 </span>
                             </div>
@@ -169,7 +169,7 @@ const confirmDelete = () => {
                         <div class="flex border-t border-gray-100 bg-gray-50 px-5 py-3">
                             <div class="flex-1" />
                             <div class="flex items-center gap-1">
-                                <Link :href="route('contacts.show', contact.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-indigo-50 hover:text-indigo-600" title="View">
+                                <Link :href="route('contacts.show', contact.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-estoril-50 hover:text-estoril-600" title="View">
                                     <EyeIcon class="h-4 w-4" />
                                 </Link>
                                 <Link :href="route('contacts.edit', contact.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600" title="Edit">

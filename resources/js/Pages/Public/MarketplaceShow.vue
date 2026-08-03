@@ -85,7 +85,7 @@ const marketPosition = computed(() => {
 <template>
     <Head :title="`${car.brand} ${car.model} - Marketplace`" />
 
-    <div class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50">
+    <div class="min-h-screen bg-gradient-to-br from-platinum-100 via-white to-estoril-50">
         <!-- Public header -->
         <header class="border-b border-gray-200 bg-white/80 backdrop-blur">
             <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
@@ -194,13 +194,13 @@ const marketPosition = computed(() => {
                     <!-- Balance pros / cons -->
                     <div v-if="(car.pros?.length || car.cons?.length)" class="grid grid-cols-1 gap-6 p-6 md:grid-cols-2">
                         <div>
-                            <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-green-700">{{ t('marketplace_show.in_favor', { count: car.pros?.length || 0 }) }}</h4>
+                            <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-estoril-800">{{ t('marketplace_show.in_favor', { count: car.pros?.length || 0 }) }}</h4>
                             <ul v-if="car.pros?.length" class="space-y-2">
-                                <li v-for="(pro, i) in car.pros" :key="i" class="flex items-start gap-2 rounded-lg border border-green-200 bg-green-50 p-3">
-                                    <CheckCircleIcon class="mt-0.5 h-4 w-4 flex-shrink-0 text-green-600" />
+                                <li v-for="(pro, i) in car.pros" :key="i" class="flex items-start gap-2 rounded-lg border border-estoril-200 bg-estoril-50 p-3">
+                                    <CheckCircleIcon class="mt-0.5 h-4 w-4 flex-shrink-0 text-estoril-700" />
                                     <div class="flex-1">
                                         <p class="text-sm text-gray-900">{{ pro.text }}</p>
-                                        <span class="mt-1 inline-block text-xs font-medium uppercase text-green-700">{{ pro.weight }}</span>
+                                        <span class="mt-1 inline-block text-xs font-medium uppercase text-estoril-800">{{ pro.weight }}</span>
                                     </div>
                                 </li>
                             </ul>
@@ -231,7 +231,7 @@ const marketPosition = computed(() => {
                                     <p class="text-sm font-medium text-gray-900">{{ aspect.label }}</p>
                                     <component v-if="!aspect.missing" :is="ratingIcon(aspect.rating)" class="h-4 w-4 flex-shrink-0"
                                         :class="{
-                                            'text-green-600': aspect.rating === 'favorable',
+                                            'text-estoril-700': aspect.rating === 'favorable',
                                             'text-red-600': aspect.rating === 'unfavorable',
                                             'text-gray-500': aspect.rating === 'neutral' || !aspect.rating,
                                         }" />
@@ -239,7 +239,7 @@ const marketPosition = computed(() => {
                                 <p v-if="aspect.missing" class="mt-2 text-xs italic text-gray-500">{{ t('marketplace_show.not_yet_investigated') }}</p>
                                 <template v-else>
                                     <p v-if="aspect.finding" class="mt-2 text-sm text-gray-700">{{ aspect.finding }}</p>
-                                    <a v-if="aspect.source" :href="aspect.source" target="_blank" rel="noopener" class="mt-2 inline-flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-500">
+                                    <a v-if="aspect.source" :href="aspect.source" target="_blank" rel="noopener" class="mt-2 inline-flex items-center gap-1 text-xs text-estoril-600 hover:text-estoril-500">
                                         <LinkIcon class="h-3 w-3" />
                                         {{ t('marketplace_show.source') }}
                                     </a>
@@ -273,7 +273,7 @@ const marketPosition = computed(() => {
                         </div>
                         <div>
                             <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('marketplace_show.estimated_saving') }}</dt>
-                            <dd class="mt-1 font-mono text-lg font-semibold text-green-700">{{ currency(car.estimated_saving) }}</dd>
+                            <dd class="mt-1 font-mono text-lg font-semibold text-estoril-800">{{ currency(car.estimated_saving) }}</dd>
                         </div>
                     </div>
 
@@ -290,7 +290,7 @@ const marketPosition = computed(() => {
                                 </div>
                                 <div class="flex items-center gap-3">
                                     <span class="font-mono text-sm font-semibold text-gray-900">{{ currency(comp.price ?? comp.p) }}</span>
-                                    <a v-if="comp.url || comp.u" :href="comp.url || comp.u" target="_blank" rel="noopener" class="text-indigo-600 hover:text-indigo-500">
+                                    <a v-if="comp.url || comp.u" :href="comp.url || comp.u" target="_blank" rel="noopener" class="text-estoril-600 hover:text-estoril-500">
                                         <LinkIcon class="h-4 w-4" />
                                     </a>
                                 </div>
@@ -312,7 +312,7 @@ const marketPosition = computed(() => {
                             </span>
                         </div>
                         <div class="h-2 w-full overflow-hidden rounded-full bg-gray-200">
-                            <div class="h-full bg-indigo-500 transition-all"
+                            <div class="h-full bg-estoril-600 transition-all"
                                 :style="{ width: derived?.milestones_progress?.total ? ((derived.milestones_progress.completed / derived.milestones_progress.total) * 100) + '%' : '0%' }" />
                         </div>
                         <p class="mt-3 text-sm text-gray-600">

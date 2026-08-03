@@ -5,6 +5,9 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, useForm } from '@inertiajs/vue3';
+import { useTranslations } from '@/Composables/useTranslations';
+
+const { t } = useTranslations();
 
 const form = useForm({
     name: '',
@@ -19,17 +22,16 @@ const submit = () => {
 
 <template>
     <GuestLayout>
-        <Head title="Create Organization" />
+        <Head :title="t('organization.create')" />
 
         <div class="max-w-2xl mx-auto">
             <div class="bg-white shadow sm:rounded-lg sm:p-8">
                 <h2 class="text-2xl font-bold text-gray-900 mb-4">
-                    Create your Organization
+                    {{ t('organization.create_your') }}
                 </h2>
 
                 <p class="text-sm text-gray-600 mb-6">
-                    To get started, create your organization. This will allow you to manage
-                    your cars, clients and contacts in isolation.
+                    {{ t('organization.create_desc') }}
                 </p>
 
                 <form @submit.prevent="submit">

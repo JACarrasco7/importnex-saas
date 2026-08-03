@@ -54,7 +54,7 @@ const onZipSelected = (event) => {
                                 class="mt-2 block w-full text-sm text-gray-500 file:mr-3 file:rounded-lg file:border-0 file:bg-green-50 file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-green-700 hover:file:bg-green-100 disabled:opacity-50" />
                             <p class="mt-2 text-xs text-gray-500">
                                 Máx. 200 MB. Solo <code class="font-mono">.zip</code>.
-                                <span v-if="processing" class="ml-2 text-indigo-600">Procesando…</span>
+                                <span v-if="processing" class="ml-2 text-estoril-600">Procesando…</span>
                             </p>
                         </div>
                     </div>

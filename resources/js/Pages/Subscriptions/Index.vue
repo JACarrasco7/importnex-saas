@@ -50,8 +50,8 @@ const planKeys = ['starter', 'pro', 'enterprise'];
                 </div>
 
                 <div class="grid gap-6 md:grid-cols-3">
-                    <div v-for="key in planKeys" :key="key" :class="['overflow-hidden rounded-2xl bg-white shadow-sm ring-1', currentPlan === key ? 'ring-2 ring-indigo-500' : 'ring-gray-200']">
-                        <div v-if="currentPlan === key" class="bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-3 text-center text-sm font-semibold text-white">
+                    <div v-for="key in planKeys" :key="key" :class="['overflow-hidden rounded-2xl bg-white shadow-sm ring-1', currentPlan === key ? 'ring-2 ring-estoril-500' : 'ring-gray-200']">
+                        <div v-if="currentPlan === key" class="bg-gradient-to-r from-estoril-600 to-estoril-800 px-6 py-3 text-center text-sm font-semibold text-white">
                             Current Plan
                         </div>
                         <div class="p-6">
@@ -79,13 +79,13 @@ const planKeys = ['starter', 'pro', 'enterprise'];
                                 </Link>
                                 <form v-else-if="on_trial || !subscription" method="POST" :action="route('subscriptions.create', key)">
                                     <input type="hidden" name="_token" :value="$page.props.csrfToken" />
-                                    <button type="submit" class="block w-full rounded-lg bg-indigo-600 py-3 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">
+                                    <button type="submit" class="block w-full rounded-lg bg-estoril-600 py-3 text-center text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
                                         {{ on_trial ? 'Activate' : 'Subscribe' }}
                                     </button>
                                 </form>
                                 <form v-else method="POST" :action="route('subscriptions.swap', key)">
                                     <input type="hidden" name="_token" :value="$page.props.csrfToken" />
-                                    <button type="submit" class="block w-full rounded-lg bg-purple-600 py-3 text-center text-sm font-semibold text-white shadow-sm hover:bg-purple-500">
+                                    <button type="submit" class="block w-full rounded-lg bg-estoril-600 py-3 text-center text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
                                         Switch to {{ plans[key].name }}
                                     </button>
                                 </form>

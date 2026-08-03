@@ -1,4 +1,4 @@
-﻿<script setup>
+<script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { EnvelopeIcon, LockClosedIcon, ArrowRightIcon } from '@heroicons/vue/24/outline';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
@@ -16,7 +16,7 @@ const form = useForm({ email: '', password: '', remember: false });
 
 const submit = () => form.post(route('login'), { onFinish: () => form.reset('password') });
 
-const inputClass = 'block w-full rounded-lg border-gray-300 pl-10 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500';
+const inputClass = 'block w-full rounded-lg border-gray-300 pl-10 text-sm shadow-sm focus:border-estoril-500 focus:ring-estoril-500';
 </script>
 
 <template>
@@ -49,22 +49,22 @@ const inputClass = 'block w-full rounded-lg border-gray-300 pl-10 text-sm shadow
 
             <div class="flex items-center justify-between">
                 <label class="flex items-center gap-2">
-                    <input v-model="form.remember" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" />
+                    <input v-model="form.remember" type="checkbox" class="rounded border-gray-300 text-estoril-600 shadow-sm focus:ring-estoril-500" />
                     <span class="text-sm text-gray-700">{{ t('auth.remember_me') }}</span>
                 </label>
-                <Link v-if="canResetPassword" :href="route('password.request')" class="text-sm font-semibold text-indigo-600 hover:text-indigo-500">
+                <Link v-if="canResetPassword" :href="route('password.request')" class="text-sm font-semibold text-estoril-600 hover:text-estoril-500">
                     {{ t('auth.forgot_password') }}
                 </Link>
             </div>
 
-            <button type="submit" :disabled="form.processing" class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50">
+            <button type="submit" :disabled="form.processing" class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-estoril-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500 disabled:opacity-50">
                 <ArrowRightIcon class="h-4 w-4" />
                 {{ form.processing ? t('app.loading') : t('auth.login') }}
             </button>
 
             <p class="text-center text-sm text-gray-600">
                 {{ t('auth.register') }}?
-                <Link :href="route('register')" class="font-semibold text-indigo-600 hover:text-indigo-500">{{ t('auth.register') }}</Link>
+                <Link :href="route('register')" class="font-semibold text-estoril-600 hover:text-estoril-500">{{ t('auth.register') }}</Link>
             </p>
         </form>
     </GuestLayout>

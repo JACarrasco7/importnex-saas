@@ -206,15 +206,15 @@ const onDocKeyChange = () => {
                             <ArrowLeftIcon class="h-4 w-4" />
                             Back
                         </Link>
-                        <Link v-if="['Located', 'Valuing'].includes(car.status)" :href="route('cars.verify.show', car.id)" class="inline-flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-purple-500">
+                        <Link v-if="['Located', 'Valuing'].includes(car.status)" :href="route('cars.verify.show', car.id)" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
                             <SparklesIcon class="h-4 w-4" />
                             Verify with AI
                         </Link>
-                        <Link :href="route('cars.marketing', car.id)" class="inline-flex items-center gap-2 rounded-lg bg-cyan-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-cyan-500">
+                        <Link :href="route('cars.marketing', car.id)" class="inline-flex items-center gap-2 rounded-lg bg-estoril-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-600">
                             <MegaphoneIcon class="h-4 w-4" />
                             Marketing
                         </Link>
-                        <Link :href="route('cars.edit', car.id)" class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">
+                        <Link :href="route('cars.edit', car.id)" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
                             <PencilIcon class="h-4 w-4" />
                             Edit
                         </Link>
@@ -359,7 +359,7 @@ const onDocKeyChange = () => {
                                 <p v-if="aspect.missing" class="mt-2 text-xs italic text-gray-500">Not yet investigated.</p>
                                 <template v-else>
                                     <p v-if="aspect.finding" class="mt-2 text-sm text-gray-700">{{ aspect.finding }}</p>
-                                    <a v-if="aspect.source" :href="aspect.source" target="_blank" rel="noopener" class="mt-2 inline-flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-500">
+                                    <a v-if="aspect.source" :href="aspect.source" target="_blank" rel="noopener" class="mt-2 inline-flex items-center gap-1 text-xs text-estoril-600 hover:text-estoril-500">
                                         <LinkIcon class="h-3 w-3" />
                                         Source
                                     </a>
@@ -410,7 +410,7 @@ const onDocKeyChange = () => {
                                 </div>
                                 <div class="flex items-center gap-3">
                                     <span class="font-mono text-sm font-semibold text-gray-900">{{ currency(comp.price ?? comp.p) }}</span>
-                                    <a v-if="comp.url || comp.u" :href="comp.url || comp.u" target="_blank" rel="noopener" class="text-indigo-600 hover:text-indigo-500">
+                                    <a v-if="comp.url || comp.u" :href="comp.url || comp.u" target="_blank" rel="noopener" class="text-estoril-600 hover:text-estoril-500">
                                         <LinkIcon class="h-4 w-4" />
                                     </a>
                                 </div>
@@ -434,7 +434,7 @@ const onDocKeyChange = () => {
                             </span>
                         </div>
                         <div class="h-2 w-full overflow-hidden rounded-full bg-gray-200">
-                            <div class="h-full bg-indigo-500 transition-all"
+                            <div class="h-full bg-estoril-500 transition-all"
                                 :style="{ width: derived?.milestones_progress?.total ? ((derived.milestones_progress.completed / derived.milestones_progress.total) * 100) + '%' : '0%' }" />
                         </div>
                         <ul class="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -502,15 +502,15 @@ const onDocKeyChange = () => {
                     </div>
                     <div class="p-6 space-y-4">
                         <form @submit.prevent="submitDocuments" class="grid grid-cols-1 gap-3 rounded-xl bg-gray-50 p-4 sm:grid-cols-4">
-                            <select v-model="docForm.doc_key" @change="onDocKeyChange" class="rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <select v-model="docForm.doc_key" @change="onDocKeyChange" class="rounded-lg border-gray-300 text-sm focus:border-estoril-500 focus:ring-estoril-500">
                                 <option value="">Document type…</option>
                                 <optgroup v-for="g in derived?.documents_by_group || []" :key="g.group" :label="g.label">
                                     <option v-for="d in g.items" :key="d.id" :value="d.doc_key">{{ d.name }}</option>
                                 </optgroup>
                             </select>
-                            <input v-model="docForm.name" type="text" placeholder="Name (optional)" class="rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500" />
-                            <input type="file" multiple accept=".pdf,.doc,.docx,.xls,.xlsx" @change="handleDocFiles" class="block w-full text-sm text-gray-500 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-indigo-700 hover:file:bg-indigo-100" />
-                            <button type="submit" :disabled="!docForm.documents.length || uploadProgress" class="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50">
+                            <input v-model="docForm.name" type="text" placeholder="Name (optional)" class="rounded-lg border-gray-300 text-sm focus:border-estoril-500 focus:ring-estoril-500" />
+                            <input type="file" multiple accept=".pdf,.doc,.docx,.xls,.xlsx" @change="handleDocFiles" class="block w-full text-sm text-gray-500 file:mr-3 file:rounded-lg file:border-0 file:bg-estoril-50 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-estoril-700 hover:file:bg-estoril-100" />
+                            <button type="submit" :disabled="!docForm.documents.length || uploadProgress" class="inline-flex items-center justify-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white hover:bg-estoril-500 disabled:opacity-50">
                                 <ArrowDownTrayIcon class="h-4 w-4" />
                                 {{ uploadProgress ? 'Uploading…' : 'Upload' }}
                             </button>
@@ -551,15 +551,15 @@ const onDocKeyChange = () => {
                     </div>
                     <div class="p-6 space-y-4">
                         <form @submit.prevent="submitPhotos" class="grid grid-cols-1 gap-3 rounded-xl bg-gray-50 p-4 sm:grid-cols-[1fr_2fr_auto]">
-                            <select v-model="photoForm.photo_type" class="block rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <select v-model="photoForm.photo_type" class="block rounded-lg border-gray-300 text-sm focus:border-estoril-500 focus:ring-estoril-500">
                                 <option value="exterior">Exterior</option>
                                 <option value="interior">Interior</option>
                                 <option value="engine">Engine</option>
                                 <option value="defect">Defect</option>
                                 <option value="document">Document</option>
                             </select>
-                            <input type="file" multiple accept="image/*" @change="handlePhotoFiles" class="block w-full text-sm text-gray-500 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-indigo-700 hover:file:bg-indigo-100" />
-                            <button type="submit" :disabled="!photoForm.photos.length || uploadProgress" class="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50">
+                            <input type="file" multiple accept="image/*" @change="handlePhotoFiles" class="block w-full text-sm text-gray-500 file:mr-3 file:rounded-lg file:border-0 file:bg-estoril-50 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-estoril-700 hover:file:bg-estoril-100" />
+                            <button type="submit" :disabled="!photoForm.photos.length || uploadProgress" class="inline-flex items-center justify-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white hover:bg-estoril-500 disabled:opacity-50">
                                 <ArrowDownTrayIcon class="h-4 w-4" />
                                 {{ uploadProgress ? 'Uploading...' : 'Upload' }}
                             </button>
@@ -582,7 +582,7 @@ const onDocKeyChange = () => {
                 </div>
 
                 <!-- Assigned Client -->
-                <div v-if="car.client" class="overflow-hidden rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 shadow-sm ring-1 ring-blue-200">
+                <div v-if="car.client" class="overflow-hidden rounded-2xl bg-gradient-to-br from-blue-50 to-estoril-50 shadow-sm ring-1 ring-blue-200">
                     <div class="border-b border-blue-200 px-6 py-4 flex items-center gap-2">
                         <UserCircleIcon class="h-5 w-5 text-blue-600" />
                         <h3 class="text-base font-semibold text-gray-900">Assigned Client</h3>
@@ -601,7 +601,7 @@ const onDocKeyChange = () => {
                             <dd class="mt-1"><Badge :variant="statusVariant(car.client.status)">{{ car.client.status }}</Badge></dd>
                         </div>
                         <div class="flex items-end">
-                            <Link :href="route('clients.show', car.client.id)" class="inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 hover:text-indigo-500">
+                            <Link :href="route('clients.show', car.client.id)" class="inline-flex items-center gap-1 text-sm font-semibold text-estoril-600 hover:text-estoril-500">
                                 View client →
                             </Link>
                         </div>

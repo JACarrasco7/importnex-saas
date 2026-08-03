@@ -11,6 +11,9 @@ import {
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import Badge from '@/Components/Badge.vue';
+import { useTranslations } from '@/Composables/useTranslations';
+
+const { t } = useTranslations();
 
 const props = defineProps({
     cars: Array,
@@ -42,16 +45,16 @@ function getStatusBadge(content) {
 </script>
 
 <template>
-    <Head title="Marketing" />
+    <Head :title="t('nav.marketing')" />
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Marketing</h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ t('nav.marketing') }}</h2>
         </template>
 
         <div class="py-8">
             <div class="mx-auto max-w-6xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <PageHeader title="Marketing de Coches" subtitle="Genera y gestiona anuncios para todos tus canales">
+                <PageHeader :title="t('marketing.title')" :subtitle="t('marketing.subtitle')">
                     <template #actions>
                         <Link :href="route('dashboard')" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             <ArrowLeftIcon class="h-4 w-4" />
@@ -63,7 +66,7 @@ function getStatusBadge(content) {
                 <!-- Stats -->
                 <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
                     <div class="rounded-xl bg-white p-4 ring-1 ring-gray-200">
-                        <div class="text-2xl font-bold text-indigo-600">{{ stats.total_cars }}</div>
+                        <div class="text-2xl font-bold text-estoril-600">{{ stats.total_cars }}</div>
                         <div class="text-xs text-gray-500">Coches registrados</div>
                     </div>
                     <div class="rounded-xl bg-white p-4 ring-1 ring-gray-200">
@@ -128,7 +131,7 @@ function getStatusBadge(content) {
                                 <td class="px-4 py-3 text-right">
                                     <Link
                                         :href="route('cars.marketing', car.id)"
-                                        class="inline-flex items-center gap-1 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-500"
+                                        class="inline-flex items-center gap-1 rounded-lg bg-estoril-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-estoril-500"
                                     >
                                         <MegaphoneIcon class="h-3 w-3" />
                                         Marketing

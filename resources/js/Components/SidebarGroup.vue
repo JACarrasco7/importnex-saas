@@ -33,10 +33,10 @@ const hasActiveChild = computed(() => {
             @click="toggle"
             :class="[
                 'group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition',
-                hasActiveChild ? 'bg-indigo-50/50 text-indigo-700' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
+                hasActiveChild ? 'bg-estoril-50/50 text-estoril-700' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
             ]"
         >
-            <component v-if="icon" :is="icon" :class="['h-5 w-5 flex-shrink-0', hasActiveChild ? 'text-indigo-600' : 'text-gray-400']" />
+            <component v-if="icon" :is="icon" :class="['h-5 w-5 flex-shrink-0', hasActiveChild ? 'text-estoril-600' : 'text-gray-400']" />
             <span class="flex-1 text-left text-sm">{{ title }}</span>
             <ChevronRightIcon :class="['h-4 w-4 transition-transform', open ? 'rotate-90' : '']" />
         </button>
@@ -48,11 +48,11 @@ const hasActiveChild = computed(() => {
                 :href="route(item.route)"
                 target="_blank"
                 rel="noopener"
-                class="flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50"
+                class="flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm font-semibold text-estoril-700 transition hover:bg-estoril-50"
             >
-                <component :is="item.icon" class="h-4 w-4 flex-shrink-0 text-emerald-600" />
+                <component :is="item.icon" class="h-4 w-4 flex-shrink-0 text-estoril-600" />
                 <span class="flex-1">{{ item.name }}</span>
-                <ArrowTopRightOnSquareIcon class="h-3.5 w-3.5 text-emerald-500" />
+                <ArrowTopRightOnSquareIcon class="h-3.5 w-3.5 text-estoril-500" />
             </a>
             <Link
                 v-for="item in items.filter((i) => !i.external)"
@@ -60,10 +60,10 @@ const hasActiveChild = computed(() => {
                 :href="item.param ? route(item.route, item.param) : route(item.route)"
                 :class="[
                     'flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm transition',
-                    isActive(item) ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
+                    isActive(item) ? 'bg-estoril-50 text-estoril-700 font-semibold' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
                 ]"
             >
-                <component :is="item.icon" :class="['h-4 w-4 flex-shrink-0', isActive(item) ? 'text-indigo-600' : 'text-gray-400']" />
+                <component :is="item.icon" :class="['h-4 w-4 flex-shrink-0', isActive(item) ? 'text-estoril-600' : 'text-gray-400']" />
                 <span class="flex-1">{{ item.name }}</span>
                 <span
                     v-if="item.badge && item.badge > 0"

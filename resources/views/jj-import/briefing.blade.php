@@ -40,7 +40,7 @@
 
         html, body {
             font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
-            background: #06101f;
+            background: #0f1d42;
             color: #e5e7eb;
             width: 100%;
             min-height: 100vh;
@@ -54,9 +54,9 @@
             padding: 40px 40px 80px 40px;
             min-height: 100vh;
             background:
-                radial-gradient(ellipse at 100% 0%, rgba(34, 211, 238, 0.10) 0%, transparent 45%),
-                radial-gradient(ellipse at 0% 100%, rgba(168, 85, 247, 0.10) 0%, transparent 45%),
-                linear-gradient(180deg, #06101f 0%, #0a1628 50%, #06101f 100%);
+                radial-gradient(ellipse at 100% 0%, rgba(26, 48, 109, 0.10) 0%, transparent 45%),
+                radial-gradient(ellipse at 0% 100%, rgba(190, 192, 195, 0.10) 0%, transparent 45%),
+                linear-gradient(180deg, #0f1d42 0%, #14265a 50%, #0f1d42 100%);
         }
 
         body::before {
@@ -78,7 +78,7 @@
             right: -120px;
             width: 380px;
             height: 380px;
-            background: radial-gradient(circle, rgba(34, 211, 238, 0.08) 0%, transparent 60%);
+            background: radial-gradient(circle, rgba(26, 48, 109, 0.08) 0%, transparent 60%);
             border-radius: 50%;
             pointer-events: none;
             z-index: 0;
@@ -111,14 +111,14 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: linear-gradient(135deg, #15803d 0%, #16a34a 100%);
+            background: linear-gradient(135deg, #1A306D 0%, #2a3d87 100%);
             color: #fff;
             padding: 9px 18px;
             border-radius: 100px;
             font-size: 11px;
             font-weight: 700;
             letter-spacing: 1.5px;
-            box-shadow: 0 4px 14px rgba(22, 163, 74, 0.35);
+            box-shadow: 0 4px 14px rgba(26, 48, 109, 0.35);
         }
 
         .badge-llave svg {
@@ -138,9 +138,9 @@
             display: inline-flex;
             align-items: center;
             gap: 9px;
-            background: rgba(34, 211, 238, 0.08);
-            border: 1px solid rgba(34, 211, 238, 0.25);
-            color: #22d3ee;
+            background: rgba(26, 48, 109, 0.08);
+            border: 1px solid rgba(143, 163, 217, 0.25);
+            color: #8fa3d9;
             padding: 6px 14px;
             border-radius: 100px;
             font-size: 10.5px;
@@ -153,9 +153,9 @@
         .hero-eyebrow .pulse {
             width: 6px;
             height: 6px;
-            background: #22d3ee;
+            background: #8fa3d9;
             border-radius: 50%;
-            box-shadow: 0 0 10px #22d3ee;
+            box-shadow: 0 0 10px #8fa3d9;
         }
 
         .h1-title {
@@ -170,7 +170,7 @@
         }
 
         .h1-title .accent {
-            color: #22d3ee;
+            color: #8fa3d9;
             font-weight: 800;
             display: inline-block;
         }
@@ -193,7 +193,7 @@
         }
 
         .car-info-card .section-tag {
-            color: #22d3ee;
+            color: #8fa3d9;
             font-size: 10px;
             font-weight: 700;
             letter-spacing: 2.5px;
@@ -228,7 +228,7 @@
         .car-specs .spec-item .check {
             width: 16px;
             height: 16px;
-            background: #22d3ee;
+            background: #8fa3d9;
             border-radius: 50%;
             display: inline-flex;
             align-items: center;
@@ -240,8 +240,8 @@
             content: '';
             width: 5px;
             height: 3px;
-            border-left: 2px solid #06101f;
-            border-bottom: 2px solid #06101f;
+            border-left: 2px solid #0f1d42;
+            border-bottom: 2px solid #0f1d42;
             transform: rotate(-45deg) translate(0.8px, -0.8px);
         }
 
@@ -260,7 +260,7 @@
         }
 
         .channel-section .section-tag {
-            color: #22d3ee;
+            color: #8fa3d9;
             font-size: 10px;
             font-weight: 700;
             letter-spacing: 2.5px;
@@ -287,7 +287,7 @@
         .channel-content .title {
             font-size: 14px;
             font-weight: 700;
-            color: #22d3ee;
+            color: #8fa3d9;
             margin-bottom: 6px;
         }
 
@@ -303,8 +303,8 @@
         }
 
         .hashtag {
-            background: rgba(34, 211, 238, 0.15);
-            color: #22d3ee;
+            background: rgba(26, 48, 109, 0.15);
+            color: #8fa3d9;
             padding: 3px 8px;
             border-radius: 4px;
             font-size: 10px;
@@ -322,7 +322,7 @@
         }
 
         .tips-list .tip-bullet {
-            color: #22d3ee;
+            color: #8fa3d9;
             font-weight: 700;
         }
 
@@ -335,8 +335,8 @@
         }
 
         .honorarios-section {
-            background: linear-gradient(135deg, rgba(34, 211, 238, 0.10) 0%, rgba(168, 85, 247, 0.10) 100%);
-            border: 1px solid rgba(34, 211, 238, 0.25);
+            background: linear-gradient(135deg, rgba(26, 48, 109, 0.10) 0%, rgba(190, 192, 195, 0.10) 100%);
+            border: 1px solid rgba(143, 163, 217, 0.25);
             border-radius: 14px;
             padding: 18px 22px;
             text-align: center;
@@ -346,7 +346,7 @@
         }
 
         .honorarios-tag {
-            color: #22d3ee;
+            color: #8fa3d9;
             font-size: 10px;
             font-weight: 700;
             letter-spacing: 2.5px;
@@ -367,7 +367,7 @@
         .honorarios-price {
             font-size: 44px;
             font-weight: 900;
-            color: #22d3ee;
+            color: #8fa3d9;
             line-height: 1;
             margin-bottom: 5px;
         }
@@ -382,7 +382,7 @@
 
         .qr-card {
             background: linear-gradient(180deg, rgba(15, 23, 42, 0.75) 0%, rgba(15, 23, 42, 0.45) 100%);
-            border: 1px solid rgba(34, 211, 238, 0.3);
+            border: 1px solid rgba(143, 163, 217, 0.3);
             border-radius: 14px;
             padding: 12px;
             display: flex;
@@ -400,7 +400,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 18px rgba(34, 211, 238, 0.3);
+            box-shadow: 0 4px 18px rgba(143, 163, 217, 0.3);
         }
 
         .qr-box svg {
@@ -414,7 +414,7 @@
         }
 
         .qr-tag {
-            color: #22d3ee;
+            color: #8fa3d9;
             font-size: 9.5px;
             font-weight: 700;
             letter-spacing: 1.8px;
@@ -459,8 +459,8 @@
             width: 32px;
             height: 32px;
             border-radius: 8px;
-            background: rgba(34, 211, 238, 0.14);
-            color: #22d3ee;
+            background: rgba(26, 48, 109, 0.14);
+            color: #8fa3d9;
             display: flex;
             align-items: center;
             justify-content: center;

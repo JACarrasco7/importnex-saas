@@ -55,7 +55,7 @@ const langVariant = (lang) => {
                             <ArrowLeftIcon class="h-4 w-4" />
                             Back
                         </Link>
-                        <button @click="copyToClipboard" class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">
+                        <button @click="copyToClipboard" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
                             <ClipboardDocumentIcon class="h-4 w-4" />
                             Copy
                         </button>
@@ -74,8 +74,8 @@ const langVariant = (lang) => {
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50">
-                                <TagIcon class="h-5 w-5 text-purple-600" />
+                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-estoril-50">
+                                <TagIcon class="h-5 w-5 text-estoril-600" />
                             </div>
                             <div>
                                 <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Category</dt>

@@ -60,7 +60,7 @@ const scrapedPhotos = ref([]);
 
 const submit = () => form.post(route('cars.store'));
 
-const inputClass = 'block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500';
+const inputClass = 'block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-estoril-500 focus:ring-estoril-500';
 const labelClass = 'block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1';
 
 // Friendly hostname detection for the URL preview badge.
@@ -189,7 +189,7 @@ const scrapeFromUrl = async () => {
                                         type="url"
                                         placeholder="https://mobile.de/..."
                                         :disabled="isScraping"
-                                        class="block w-full rounded-lg border-gray-300 pl-9 pr-20 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-gray-100"
+                                        class="block w-full rounded-lg border-gray-300 pl-9 pr-20 text-sm shadow-sm focus:border-estoril-500 focus:ring-estoril-500 disabled:bg-gray-100"
                                         @keydown.enter.prevent="scrapeFromUrl"
                                     />
                                     <span
@@ -210,7 +210,7 @@ const scrapeFromUrl = async () => {
                                     type="button"
                                     @click="scrapeFromUrl"
                                     :disabled="isScraping || !scrapeUrl.trim()"
-                                    class="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:bg-gray-300"
+                                    class="inline-flex items-center justify-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500 disabled:cursor-not-allowed disabled:bg-gray-300"
                                 >
                                     <svg v-if="isScraping" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -393,7 +393,7 @@ const scrapeFromUrl = async () => {
 
                     <div class="flex items-center justify-end gap-3 rounded-2xl bg-gray-50 px-6 py-4 ring-1 ring-gray-200">
                         <Link :href="route('cars.index')" class="text-sm font-semibold text-gray-700 hover:text-gray-900">Cancel</Link>
-                        <button type="submit" :disabled="form.processing" class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50">
+                        <button type="submit" :disabled="form.processing" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500 disabled:opacity-50">
                             <CheckIcon class="h-4 w-4" />
                             {{ form.processing ? 'Saving...' : 'Create car' }}
                         </button>

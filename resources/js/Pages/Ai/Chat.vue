@@ -4,6 +4,9 @@ import { ref, computed } from 'vue';
 import { PaperAirplaneIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outline';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import { useTranslations } from '@/Composables/useTranslations';
+
+const { t } = useTranslations();
 
 const props = defineProps({
     providers: Array,
@@ -55,17 +58,17 @@ async function send() {
 </script>
 
 <template>
-    <Head title="AI Chat" />
+    <Head :title="t('nav.ai_chat')" />
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">AI Chat</h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ t('nav.ai_chat') }}</h2>
         </template>
 
         <div class="py-8">
             <div class="mx-auto max-w-3xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <PageHeader title="AI Playground"
-                            :subtitle="`Using ${providerLabel}${current?.model ? ' · ' + current.model : ''}`">
+                <PageHeader :title="t('ai_chat.title')"
+                            :subtitle="`${t('ai_chat.using')} ${providerLabel}${current?.model ? ' · ' + current.model : ''}`">
                 </PageHeader>
 
                 <div class="rounded-2xl bg-white p-6 shadow ring-1 ring-gray-200">
@@ -83,10 +86,10 @@ async function send() {
 
                     <div class="space-y-4">
                         <div v-for="(msg, idx) in messages" :key="idx"
-                             :class="['rounded-lg p-4 ring-1', msg.role === 'assistant' ? 'bg-indigo-50 ring-indigo-200' : 'bg-gray-50 ring-gray-200']">
+                             :class="['rounded-lg p-4 ring-1', msg.role === 'assistant' ? 'bg-estoril-50 ring-estoril-200' : 'bg-gray-50 ring-gray-200']">
                             <div class="flex items-center justify-between">
                                 <span class="text-xs font-semibold uppercase tracking-wide"
-                                      :class="msg.role === 'assistant' ? 'text-indigo-700' : 'text-gray-500'">
+                                      :class="msg.role === 'assistant' ? 'text-estoril-700' : 'text-gray-500'">
                                     {{ msg.role }}
                                 </span>
                                 <button v-if="msg.role === 'user' && messages.length > 1" @click="removeMessage(idx)"
@@ -106,7 +109,7 @@ async function send() {
 
                     <div class="mt-6 flex justify-end">
                         <button @click="send" :disabled="sending || !current?.has_key"
-                                class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50">
+                                class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500 disabled:opacity-50">
                             <PaperAirplaneIcon class="h-4 w-4" />
                             {{ sending ? 'Sending…' : 'Send to ' + providerLabel }}
                         </button>

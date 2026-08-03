@@ -93,7 +93,7 @@ const howItWorks = computed(() => [
         <header class="sticky top-0 z-40 border-b border-gray-200 bg-white/90 backdrop-blur">
             <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
                 <Link :href="route('marketplace.index')" class="flex items-center gap-2">
-                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-sm">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-estoril-600 to-estoril-800 shadow-sm">
                         <ShieldCheckIcon class="h-5 w-5 text-white" />
                     </span>
                     <div>
@@ -113,13 +113,13 @@ const howItWorks = computed(() => [
         </header>
 
         <!-- HERO -->
-        <section class="relative overflow-hidden bg-gradient-to-br from-emerald-50 via-white to-teal-50">
-            <div class="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-emerald-200/30 blur-3xl"></div>
-            <div class="absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-teal-200/30 blur-3xl"></div>
+        <section class="relative overflow-hidden bg-gradient-to-br from-estoril-50 via-white to-platinum-100">
+            <div class="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-estoril-200/30 blur-3xl"></div>
+            <div class="absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-platinum-300/30 blur-3xl"></div>
 
             <div class="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
                 <div class="mx-auto max-w-3xl text-center">
-                    <span class="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-4 py-1.5 text-sm font-semibold text-emerald-700">
+                    <span class="inline-flex items-center gap-2 rounded-full bg-estoril-100 px-4 py-1.5 text-sm font-semibold text-estoril-800">
                         <SparklesIcon class="h-4 w-4" />
                         {{ t('marketplace.tagline') }}
                     </span>
@@ -130,7 +130,7 @@ const howItWorks = computed(() => [
                         {{ t('marketplace.description') }}
                     </p>
                     <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                        <a href="#catalogo" class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-6 py-3 text-base font-semibold text-white shadow-lg hover:bg-emerald-700">
+                        <a href="#catalogo" class="inline-flex items-center gap-2 rounded-lg bg-estoril-700 px-6 py-3 text-base font-semibold text-white shadow-lg hover:bg-estoril-800">
                             {{ t('marketplace.cta_primary') }}
                             <ArrowRightIcon class="h-4 w-4" />
                         </a>
@@ -143,8 +143,8 @@ const howItWorks = computed(() => [
                     <!-- Trust signals -->
                     <div class="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-3">
                         <div v-for="item in trustItems" :key="item.label" class="rounded-2xl bg-white/70 p-5 text-left shadow-sm ring-1 ring-gray-200 backdrop-blur">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100">
-                                <component :is="item.icon" class="h-5 w-5 text-emerald-600" />
+                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-estoril-100">
+                                <component :is="item.icon" class="h-5 w-5 text-estoril-700" />
                             </div>
                             <p class="mt-3 text-sm font-semibold text-gray-900">{{ item.label }}</p>
                             <p class="mt-1 text-xs text-gray-600">{{ item.description }}</p>
@@ -163,7 +163,7 @@ const howItWorks = computed(() => [
                 </div>
                 <div class="mt-12 grid grid-cols-1 gap-6 md:grid-cols-3">
                     <div v-for="item in howItWorks" :key="item.step" class="relative rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
-                        <span class="absolute -top-4 left-6 flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white shadow-sm">
+                        <span class="absolute -top-4 left-6 flex h-8 w-8 items-center justify-center rounded-full bg-estoril-700 text-sm font-bold text-white shadow-sm">
                             {{ item.step }}
                         </span>
                         <h3 class="mt-3 text-lg font-semibold text-gray-900">{{ item.title }}</h3>
@@ -197,21 +197,21 @@ const howItWorks = computed(() => [
                                 v-model="search"
                                 type="text"
                                 :placeholder="t('marketplace.filter_search_placeholder')"
-                                class="block w-full rounded-lg border-gray-200 pl-9 text-sm focus:border-emerald-500 focus:ring-emerald-500"
+                                class="block w-full rounded-lg border-gray-200 pl-9 text-sm focus:border-estoril-600 focus:ring-estoril-600"
                             />
                         </div>
                     </div>
                     <div>
                         <label class="mb-1.5 block text-xs font-semibold text-gray-700">{{ t('marketplace.filter_budget') }}</label>
                         <div class="flex gap-2">
-                            <input v-model.number="minPrice" type="number" min="0" step="500" :placeholder="t('marketplace.filter_budget_min')" class="block w-full rounded-lg border-gray-200 text-sm focus:border-emerald-500 focus:ring-emerald-500" />
-                            <input v-model.number="maxPrice" type="number" min="0" step="500" :placeholder="t('marketplace.filter_budget_max')" class="block w-full rounded-lg border-gray-200 text-sm focus:border-emerald-500 focus:ring-emerald-500" />
+                            <input v-model.number="minPrice" type="number" min="0" step="500" :placeholder="t('marketplace.filter_budget_min')" class="block w-full rounded-lg border-gray-200 text-sm focus:border-estoril-600 focus:ring-estoril-600" />
+                            <input v-model.number="maxPrice" type="number" min="0" step="500" :placeholder="t('marketplace.filter_budget_max')" class="block w-full rounded-lg border-gray-200 text-sm focus:border-estoril-600 focus:ring-estoril-600" />
                         </div>
                     </div>
                     <div>
                         <label class="mb-1.5 block text-xs font-semibold text-gray-700">{{ t('marketplace.filter_mileage') }}</label>
                         <div class="flex gap-2">
-                            <input v-model.number="mileageFilter" type="number" min="0" step="1000" :placeholder="t('marketplace.filter_mileage_placeholder')" class="block w-full rounded-lg border-gray-200 text-sm focus:border-emerald-500 focus:ring-emerald-500" />
+                            <input v-model.number="mileageFilter" type="number" min="0" step="1000" :placeholder="t('marketplace.filter_mileage_placeholder')" class="block w-full rounded-lg border-gray-200 text-sm focus:border-estoril-600 focus:ring-estoril-600" />
                         </div>
                     </div>
                 </div>
@@ -239,7 +239,7 @@ const howItWorks = computed(() => [
                         v-for="car in filteredCars"
                         :key="car.id"
                         :href="route('marketplace.show', car.id)"
-                        class="group overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 transition hover:shadow-lg hover:ring-emerald-300"
+                        class="group overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 transition hover:shadow-lg hover:ring-estoril-300"
                     >
                         <div class="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
                             <img
@@ -260,7 +260,7 @@ const howItWorks = computed(() => [
                         <div class="p-5">
                             <div class="flex items-start justify-between gap-2">
                                 <div class="min-w-0 flex-1">
-                                    <h3 class="truncate text-lg font-semibold text-gray-900 group-hover:text-emerald-700">
+                                    <h3 class="truncate text-lg font-semibold text-gray-900 group-hover:text-estoril-800">
                                         {{ car.brand }} {{ car.model }}
                                     </h3>
                                     <p v-if="car.version" class="truncate text-sm text-gray-500">{{ car.version }}</p>
@@ -285,7 +285,7 @@ const howItWorks = computed(() => [
                                     <p class="text-xs text-gray-500">{{ t('marketplace.price_from') }}</p>
                                     <p class="text-2xl font-extrabold text-gray-900">{{ currency(car.purchase_price) }}</p>
                                 </div>
-                                <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+                                <span class="inline-flex items-center gap-1 rounded-full bg-estoril-50 px-3 py-1 text-xs font-semibold text-estoril-800">
                                     {{ t('marketplace.view_report') }}
                                     <ArrowRightIcon class="h-3 w-3" />
                                 </span>
@@ -296,14 +296,14 @@ const howItWorks = computed(() => [
 
                 <!-- Empty state -->
                 <div v-else class="rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 p-12 text-center">
-                    <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
-                        <SparklesIcon class="h-8 w-8 text-emerald-600" />
+                    <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-estoril-100">
+                        <SparklesIcon class="h-8 w-8 text-estoril-700" />
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900">{{ t('marketplace.no_cars_title') }}</h3>
                     <p class="mx-auto mt-2 max-w-md text-sm text-gray-600">
                         {{ t('marketplace.no_cars_desc') }}
                     </p>
-                    <a href="#contacto" class="mt-6 inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">
+                    <a href="#contacto" class="mt-6 inline-flex items-center gap-2 rounded-lg bg-estoril-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-estoril-800">
                         <PhoneIcon class="h-4 w-4" />
                         {{ t('marketplace.cta_request_notify') }}
                     </a>
@@ -312,7 +312,7 @@ const howItWorks = computed(() => [
         </section>
 
         <!-- CTA / Contacto -->
-        <section id="contacto" class="bg-gradient-to-br from-gray-900 to-emerald-900 py-16">
+        <section id="contacto" class="bg-gradient-to-br from-asphalt-900 to-estoril-900 py-16">
             <div class="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
                 <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">
                     {{ t('marketplace.section_contact') }}
@@ -321,7 +321,7 @@ const howItWorks = computed(() => [
                     {{ t('marketplace.section_contact_desc') }}
                 </p>
                 <div class="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                    <a href="https://wa.me/34675701439" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-6 py-3 text-base font-semibold text-white shadow-lg hover:bg-emerald-400">
+                    <a href="https://wa.me/34675701439" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-6 py-3 text-base font-semibold text-white shadow-lg hover:bg-estoril-500">
                         <PhoneIcon class="h-5 w-5" />
                         {{ t('marketplace.cta_whatsapp') }}
                     </a>
@@ -345,7 +345,7 @@ const howItWorks = computed(() => [
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
                     <div class="flex items-center gap-2">
-                        <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600">
+                        <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-estoril-600 to-estoril-800">
                             <ShieldCheckIcon class="h-4 w-4 text-white" />
                         </span>
                         <span class="text-sm font-semibold text-gray-900">{{ t('marketplace.brand') }}</span>
@@ -360,9 +360,9 @@ const howItWorks = computed(() => [
         <!-- Floating download button for JJ Import Motors folleto -->
         <div class="fixed bottom-6 right-6 z-40">
             <a
-                :href="route('jj-import.folleto')"
-                target="_blank"
-                class="flex items-center gap-2 rounded-full bg-cyan-600 px-4 py-3 text-sm font-semibold text-white shadow-lg hover:bg-cyan-700 transition-colors"
+                href="/jj-import-folleto.pdf"
+                download="JJ_Import_Motors_Folleto.pdf"
+                class="flex items-center gap-2 rounded-full bg-estoril-700 px-4 py-3 text-sm font-semibold text-white shadow-lg hover:bg-estoril-800 transition-colors"
             >
                 <DocumentArrowDownIcon class="h-5 w-5" />
                 <span class="hidden sm:inline">{{ t('marketplace.folleto') }}</span>

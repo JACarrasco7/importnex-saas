@@ -27,7 +27,7 @@ const props = defineProps({
                             <ArrowLeftIcon class="h-4 w-4" />
                             Back
                         </Link>
-                        <Link :href="route('contacts.edit', contact.id)" class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">
+                        <Link :href="route('contacts.edit', contact.id)" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
                             <PencilIcon class="h-4 w-4" />
                             Edit
                         </Link>

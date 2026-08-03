@@ -33,7 +33,7 @@
 
         html, body {
             font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
-            background: #06101f;
+            background: #0f1d42;
             color: #e5e7eb;
             width: 100%;
             min-height: 100vh;
@@ -47,9 +47,9 @@
             padding: 40px 40px 80px 40px;
             min-height: 100vh;
             background:
-                radial-gradient(ellipse at 100% 0%, rgba(34, 211, 238, 0.10) 0%, transparent 45%),
-                radial-gradient(ellipse at 0% 100%, rgba(168, 85, 247, 0.10) 0%, transparent 45%),
-                linear-gradient(180deg, #06101f 0%, #0a1628 50%, #06101f 100%);
+                radial-gradient(ellipse at 100% 0%, rgba(26, 48, 109, 0.10) 0%, transparent 45%),
+                radial-gradient(ellipse at 0% 100%, rgba(190, 192, 195, 0.10) 0%, transparent 45%),
+                linear-gradient(180deg, #0f1d42 0%, #14265a 50%, #0f1d42 100%);
         }
 
         body::before {
@@ -71,7 +71,7 @@
             right: -120px;
             width: 380px;
             height: 380px;
-            background: radial-gradient(circle, rgba(34, 211, 238, 0.08) 0%, transparent 60%);
+            background: radial-gradient(circle, rgba(26, 48, 109, 0.08) 0%, transparent 60%);
             border-radius: 50%;
             pointer-events: none;
             z-index: 0;
@@ -104,14 +104,14 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: linear-gradient(135deg, #15803d 0%, #16a34a 100%);
+            background: linear-gradient(135deg, #1A306D 0%, #2a3d87 100%);
             color: #fff;
             padding: 9px 18px;
             border-radius: 100px;
             font-size: 11px;
             font-weight: 700;
             letter-spacing: 1.5px;
-            box-shadow: 0 4px 14px rgba(22, 163, 74, 0.35);
+            box-shadow: 0 4px 14px rgba(26, 48, 109, 0.35);
         }
 
         .badge-llave svg {
@@ -131,9 +131,9 @@
             display: inline-flex;
             align-items: center;
             gap: 9px;
-            background: rgba(34, 211, 238, 0.08);
-            border: 1px solid rgba(34, 211, 238, 0.25);
-            color: #22d3ee;
+            background: rgba(26, 48, 109, 0.08);
+            border: 1px solid rgba(143, 163, 217, 0.25);
+            color: #8fa3d9;
             padding: 6px 14px;
             border-radius: 100px;
             font-size: 10.5px;
@@ -146,9 +146,9 @@
         .hero-eyebrow .pulse {
             width: 6px;
             height: 6px;
-            background: #22d3ee;
+            background: #8fa3d9;
             border-radius: 50%;
-            box-shadow: 0 0 10px #22d3ee;
+            box-shadow: 0 0 10px #8fa3d9;
         }
 
         .h1-title {
@@ -163,7 +163,7 @@
         }
 
         .h1-title .accent {
-            color: #22d3ee;
+            color: #8fa3d9;
             font-weight: 800;
             display: inline-block;
         }
@@ -184,7 +184,7 @@
 
         .sub-badge {
             background: rgba(30, 41, 59, 0.5);
-            border: 1px solid rgba(34, 211, 238, 0.2);
+            border: 1px solid rgba(143, 163, 217, 0.2);
             color: #cbd5e1;
             padding: 7px 16px;
             border-radius: 100px;
@@ -198,7 +198,7 @@
         .sub-badge .check {
             width: 14px;
             height: 14px;
-            background: #22d3ee;
+            background: #8fa3d9;
             border-radius: 50%;
             display: inline-flex;
             align-items: center;
@@ -210,8 +210,8 @@
             content: '';
             width: 4px;
             height: 2.5px;
-            border-left: 1.8px solid #06101f;
-            border-bottom: 1.8px solid #06101f;
+            border-left: 1.8px solid #0f1d42;
+            border-bottom: 1.8px solid #0f1d42;
             transform: rotate(-45deg) translate(0.8px, -0.8px);
         }
 
@@ -244,10 +244,10 @@
         }
 
         .card.informe {
-            border-top-color: #22d3ee;
+            border-top-color: #8fa3d9;
             box-shadow:
                 0 1px 3px rgba(0, 0, 0, 0.4),
-                0 8px 24px rgba(34, 211, 238, 0.18),
+                0 8px 24px rgba(143, 163, 217, 0.18),
                 inset 0 1px 0 rgba(255, 255, 255, 0.05);
         }
 
@@ -260,10 +260,10 @@
         }
 
         .card.gestion {
-            border-top-color: #a855f7;
+            border-top-color: #BEC0C3;
             box-shadow:
                 0 1px 3px rgba(0, 0, 0, 0.4),
-                0 8px 24px rgba(168, 85, 247, 0.18),
+                0 8px 24px rgba(190, 192, 195, 0.18),
                 inset 0 1px 0 rgba(255, 255, 255, 0.05);
         }
 
@@ -284,9 +284,9 @@
             flex-shrink: 0;
         }
 
-        .card.informe .card-icon { background: rgba(34, 211, 238, 0.15); color: #22d3ee; }
+        .card.informe .card-icon { background: rgba(26, 48, 109, 0.15); color: #8fa3d9; }
         .card.ahorro .card-icon { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
-        .card.gestion .card-icon { background: rgba(168, 85, 247, 0.15); color: #a855f7; }
+        .card.gestion .card-icon { background: rgba(190, 192, 195, 0.15); color: #BEC0C3; }
 
         .card h3 {
             font-size: 12.5px;
@@ -308,7 +308,7 @@
         }
 
         .section-tag {
-            color: #22d3ee;
+            color: #8fa3d9;
             font-size: 10px;
             font-weight: 700;
             letter-spacing: 2.5px;
@@ -348,25 +348,25 @@
             font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
             font-size: 15px;
             font-weight: 700;
-            color: #06101f;
+            color: #0f1d42;
             background: #1e293b;
-            border: 2px solid #22d3ee;
+            border: 2px solid #8fa3d9;
             position: relative;
             z-index: 2;
-            box-shadow: 0 0 0 4px #06101f, 0 4px 14px rgba(34, 211, 238, 0.3);
+            box-shadow: 0 0 0 4px #0f1d42, 0 4px 14px rgba(143, 163, 217, 0.3);
             line-height: 1;
         }
 
         .step.active .step-badge {
-            background: #22d3ee;
-            color: #06101f;
+            background: #8fa3d9;
+            color: #0f1d42;
         }
 
         .step.final .step-badge {
-            background: linear-gradient(135deg, #22d3ee, #a855f7);
+            background: linear-gradient(135deg, #8fa3d9, #BEC0C3);
             color: #fff;
-            border-color: #a855f7;
-            box-shadow: 0 0 0 4px #06101f, 0 4px 18px rgba(168, 85, 247, 0.5);
+            border-color: #BEC0C3;
+            box-shadow: 0 0 0 4px #0f1d42, 0 4px 18px rgba(190, 192, 195, 0.5);
         }
 
         .step:not(:last-child)::after {
@@ -376,7 +376,7 @@
             left: calc(50% + 24px);
             right: calc(-50% + 24px);
             height: 0;
-            border-top: 2px dashed rgba(34, 211, 238, 0.3);
+            border-top: 2px dashed rgba(143, 163, 217, 0.3);
             z-index: 1;
         }
 
@@ -437,7 +437,7 @@
         .transparency-item .check {
             width: 16px;
             height: 16px;
-            background: #22d3ee;
+            background: #8fa3d9;
             border-radius: 50%;
             display: inline-flex;
             align-items: center;
@@ -449,8 +449,8 @@
             content: '';
             width: 5px;
             height: 3px;
-            border-left: 2px solid #06101f;
-            border-bottom: 2px solid #06101f;
+            border-left: 2px solid #0f1d42;
+            border-bottom: 2px solid #0f1d42;
             transform: rotate(-45deg) translate(0.8px, -0.8px);
         }
 
@@ -473,8 +473,8 @@
         }
 
         .honorarios-section {
-            background: linear-gradient(135deg, rgba(34, 211, 238, 0.10) 0%, rgba(168, 85, 247, 0.10) 100%);
-            border: 1px solid rgba(34, 211, 238, 0.25);
+            background: linear-gradient(135deg, rgba(26, 48, 109, 0.10) 0%, rgba(190, 192, 195, 0.10) 100%);
+            border: 1px solid rgba(143, 163, 217, 0.25);
             border-radius: 14px;
             padding: 18px 22px;
             text-align: center;
@@ -484,7 +484,7 @@
         }
 
         .honorarios-tag {
-            color: #22d3ee;
+            color: #8fa3d9;
             font-size: 10px;
             font-weight: 700;
             letter-spacing: 2.5px;
@@ -498,7 +498,7 @@
         .honorarios-tag svg {
             width: 14px;
             height: 14px;
-            fill: #22d3ee;
+            fill: #8fa3d9;
         }
 
         .honorarios-title {
@@ -511,7 +511,7 @@
         .honorarios-price {
             font-size: 44px;
             font-weight: 900;
-            color: #22d3ee;
+            color: #8fa3d9;
             line-height: 1;
             margin-bottom: 5px;
         }
@@ -526,7 +526,7 @@
 
         .qr-card {
             background: linear-gradient(180deg, rgba(15, 23, 42, 0.75) 0%, rgba(15, 23, 42, 0.45) 100%);
-            border: 1px solid rgba(34, 211, 238, 0.3);
+            border: 1px solid rgba(143, 163, 217, 0.3);
             border-radius: 14px;
             padding: 12px;
             display: flex;
@@ -544,7 +544,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 18px rgba(34, 211, 238, 0.3);
+            box-shadow: 0 4px 18px rgba(143, 163, 217, 0.3);
         }
 
         .qr-box svg {
@@ -558,7 +558,7 @@
         }
 
         .qr-tag {
-            color: #22d3ee;
+            color: #8fa3d9;
             font-size: 9.5px;
             font-weight: 700;
             letter-spacing: 1.8px;
@@ -603,8 +603,8 @@
             width: 32px;
             height: 32px;
             border-radius: 8px;
-            background: rgba(34, 211, 238, 0.14);
-            color: #22d3ee;
+            background: rgba(26, 48, 109, 0.14);
+            color: #8fa3d9;
             display: flex;
             align-items: center;
             justify-content: center;

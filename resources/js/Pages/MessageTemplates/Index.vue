@@ -7,6 +7,9 @@ import Badge from '@/Components/Badge.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import Toast from '@/Components/Toast.vue';
 import EmptyState from '@/Components/EmptyState.vue';
+import { useTranslations } from '@/Composables/useTranslations';
+
+const { t } = useTranslations();
 
 const props = defineProps({
     templates: Object,
@@ -41,18 +44,18 @@ const langVariant = (lang) => {
 </script>
 
 <template>
-    <Head title="Message Templates" />
+    <Head :title="t('nav.templates')" />
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Message Templates</h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ t('nav.templates') }}</h2>
         </template>
 
         <div class="py-8">
             <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <PageHeader title="Templates" :subtitle="`${templates.total || 0} reusable messages`" />
+                <PageHeader :title="t('templates.title')" :subtitle="t('templates.subtitle', { count: templates.total || 0 })" />
 
-                <EmptyState v-if="!templates.data?.length" icon="📨" title="No templates yet" description="Create reusable message templates to speed up client communication." />
+                <EmptyState v-if="!templates.data?.length" icon="📨" :title="t('templates.empty_title')" :description="t('templates.empty_desc')" />
 
                 <div v-else class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="overflow-x-auto">
@@ -69,8 +72,8 @@ const langVariant = (lang) => {
                                 <tr v-for="tpl in templates.data" :key="tpl.id" class="hover:bg-gray-50">
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-3">
-                                            <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50">
-                                                <EnvelopeIcon class="h-5 w-5 text-indigo-600" />
+                                            <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-estoril-50">
+                                                <EnvelopeIcon class="h-5 w-5 text-estoril-600" />
                                             </div>
                                             <span class="font-medium text-gray-900">{{ tpl.name }}</span>
                                         </div>
@@ -79,7 +82,7 @@ const langVariant = (lang) => {
                                     <td class="px-6 py-4 text-sm text-gray-700">{{ tpl.category }}</td>
                                     <td class="px-6 py-4 text-right">
                                         <div class="inline-flex items-center gap-2">
-                                            <button @click="copyToClipboard(tpl.content)" class="rounded-md p-1.5 text-gray-400 hover:bg-indigo-50 hover:text-indigo-600" title="Copy">
+                                            <button @click="copyToClipboard(tpl.content)" class="rounded-md p-1.5 text-gray-400 hover:bg-estoril-50 hover:text-estoril-600" title="Copy">
                                                 <ClipboardDocumentIcon class="h-4 w-4" />
                                             </button>
                                             <Link :href="route('message-templates.show', tpl.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600" title="View">

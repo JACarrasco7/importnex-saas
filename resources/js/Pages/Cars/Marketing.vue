@@ -223,7 +223,7 @@ function renderPreview() {
                             <ArrowLeftIcon class="h-4 w-4" />
                             Volver al coche
                         </Link>
-                        <a :href="route('cars.marketing.briefing', car.id)" target="_blank" class="inline-flex items-center gap-2 rounded-lg bg-cyan-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-cyan-500">
+                        <a :href="route('cars.marketing.briefing', car.id)" target="_blank" class="inline-flex items-center gap-2 rounded-lg bg-estoril-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-600">
                             <DocumentIcon class="h-4 w-4" />
                             Briefing PDF
                         </a>
@@ -247,7 +247,7 @@ function renderPreview() {
                         :class="[
                             'flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition',
                             activeChannel === ch.key
-                                ? 'bg-indigo-600 text-white shadow'
+                                ? 'bg-estoril-600 text-white shadow'
                                 : 'bg-white text-gray-700 ring-1 ring-gray-300 hover:bg-gray-50'
                         ]"
                     >
@@ -267,7 +267,7 @@ function renderPreview() {
                         <button
                             @click="generate"
                             :disabled="generating"
-                            class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
+                            class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white hover:bg-estoril-500 disabled:opacity-50"
                         >
                             <SparklesIcon v-if="generating" class="h-4 w-4 animate-spin" />
                             <SparklesIcon v-else class="h-4 w-4" />
@@ -289,7 +289,7 @@ function renderPreview() {
                                 v-model="form.title"
                                 type="text"
                                 placeholder="Título del anuncio..."
-                                class="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                class="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-estoril-500 focus:ring-estoril-500"
                             />
                             <button
                                 v-if="form.title"
@@ -308,7 +308,7 @@ function renderPreview() {
                             v-model="form.description"
                             placeholder="Descripción del anuncio..."
                             rows="8"
-                            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+                            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-estoril-500 focus:ring-estoril-500"
                         ></textarea>
                         <div class="mt-2 flex justify-end">
                             <button
@@ -328,10 +328,10 @@ function renderPreview() {
                             <span
                                 v-for="tag in form.hashtags"
                                 :key="tag"
-                                class="inline-flex items-center gap-1 rounded-full bg-indigo-100 px-3 py-1 text-xs text-indigo-800"
+                                class="inline-flex items-center gap-1 rounded-full bg-estoril-100 px-3 py-1 text-xs text-estoril-800"
                             >
                                 #{{ tag }}
-                                <button @click="removeHashtag(tag)" class="hover:text-indigo-600">
+                                <button @click="removeHashtag(tag)" class="hover:text-estoril-600">
                                     <XMarkIcon class="h-3 w-3" />
                                 </button>
                             </span>
@@ -342,11 +342,11 @@ function renderPreview() {
                                 @keyup.enter="addHashtag"
                                 type="text"
                                 placeholder="Añadir hashtag..."
-                                class="flex-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                class="flex-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-estoril-500 focus:ring-estoril-500"
                             />
                             <button
                                 @click="addHashtag"
-                                class="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-500"
+                                class="rounded-lg bg-estoril-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-estoril-500"
                             >
                                 Añadir
                             </button>
@@ -375,11 +375,11 @@ function renderPreview() {
                                 @keyup.enter="addTip"
                                 type="text"
                                 placeholder="Añadir tip de foto..."
-                                class="flex-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                class="flex-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-estoril-500 focus:ring-estoril-500"
                             />
                             <button
                                 @click="addTip"
-                                class="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-500"
+                                class="rounded-lg bg-estoril-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-estoril-500"
                             >
                                 Añadir
                             </button>
@@ -391,7 +391,7 @@ function renderPreview() {
                         <button
                             v-if="currentContent?.status === 'published'"
                             @click="publish"
-                            class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500"
+                            class="inline-flex items-center gap-2 rounded-lg bg-estoril-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-800"
                         >
                             <CheckCircleIcon class="h-4 w-4" />
                             Publicado
@@ -399,14 +399,14 @@ function renderPreview() {
                         <button
                             v-else-if="currentContent"
                             @click="publish"
-                            class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
+                            class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white hover:bg-estoril-500"
                         >
                             <MegaphoneIcon class="h-4 w-4" />
                             Marcar como publicado
                         </button>
                         <button
                             @click="copyAll"
-                            class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
+                            class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white hover:bg-estoril-500"
                         >
                             <DocumentDuplicateIcon class="h-4 w-4" />
                             Copiar todo
