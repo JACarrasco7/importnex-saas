@@ -351,7 +351,7 @@ const howItWorks = computed(() => [
                         <span class="text-sm font-semibold text-gray-900">{{ t('marketplace.brand') }}</span>
                     </div>
                     <p class="text-xs text-gray-500">
-                        &copy; {{ new Date().getFullYear() }} {{ t('marketplace.footer_copy').replace(':year', new Date().getFullYear()) }}
+                        {{ t('marketplace.footer_copy').replace(':year', new Date().getFullYear()) }}
                     </p>
                 </div>
             </div>
