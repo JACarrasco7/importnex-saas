@@ -1,6 +1,7 @@
 # 🚗 Plan — Marketplace para clientes (JJ Import Motors)
 
 > Fecha: 03/08/2026 · Estado: ✅ Implementado y desplegado en producción
+> Actualizado: flujo de solicitudes verificado end-to-end y conectado desde el marketplace (03/08)
 
 ## Objetivo
 
