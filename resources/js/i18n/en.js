@@ -52,6 +52,7 @@ export default {
         cars: 'Cars',
         kanban: 'Kanban',
         map: 'Map',
+        marketplace: 'Marketplace',
         finance: 'Finance',
         trips: 'Trips',
         clients: 'Clients',

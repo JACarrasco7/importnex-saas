@@ -22,8 +22,10 @@ import {
     HomeIcon,
     ClipboardDocumentListIcon,
     SparklesIcon,
-    BookIcon,
+    BookOpenIcon,
     MegaphoneIcon,
+    ShoppingBagIcon,
+    ArrowTopRightOnSquareIcon,
 } from '@heroicons/vue/24/outline';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import FlashMessage from '@/Components/FlashMessage.vue';
@@ -70,6 +72,7 @@ const navGroups = computed(() => [
             { name: t('nav.map'), route: 'cars.map', icon: MapIcon },
             { name: t('nav.finance'), route: 'finance.index', icon: BanknotesIcon },
             { name: t('nav.trips'), route: 'trips.index', icon: CalendarDaysIcon },
+            { name: t('nav.marketplace'), route: 'marketplace.index', icon: ShoppingBagIcon, external: true },
         ],
     },
     {
@@ -104,9 +107,9 @@ const navGroups = computed(() => [
     },
     {
         title: t('nav.guide'),
-        icon: BookIcon,
+        icon: BookOpenIcon,
         items: [
-            { name: t('nav.guide'), route: 'guide.index', icon: BookIcon },
+            { name: t('nav.guide'), route: 'guide.index', icon: BookOpenIcon },
         ],
     },
     {

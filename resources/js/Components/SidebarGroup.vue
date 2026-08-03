@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { Link } from '@inertiajs/vue3';
-import { ChevronRightIcon } from '@heroicons/vue/24/outline';
+import { ChevronRightIcon, ArrowTopRightOnSquareIcon } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
     title: { type: String, required: true },
@@ -41,9 +41,21 @@ const hasActiveChild = computed(() => {
         </button>
 
         <div v-show="open" class="mt-1 space-y-0.5 pl-3">
+            <a
+                v-for="item in items.filter((i) => i.external)"
+                :key="'ext-' + item.route"
+                :href="route(item.route)"
+                target="_blank"
+                rel="noopener"
+                class="flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50"
+            >
+                <component :is="item.icon" class="h-4 w-4 flex-shrink-0 text-emerald-600" />
+                <span class="flex-1">{{ item.name }}</span>
+                <ArrowTopRightOnSquareIcon class="h-3.5 w-3.5 text-emerald-500" />
+            </a>
             <Link
-                v-for="item in items"
-                :key="item.route + item.name"
+                v-for="item in items.filter((i) => !i.external)"
+                :key="'int-' + item.route + item.name"
                 :href="item.param ? route(item.route, item.param) : route(item.route)"
                 :class="[
                     'flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm transition',
