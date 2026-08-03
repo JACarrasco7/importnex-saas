@@ -6,7 +6,7 @@ import {
     SparklesIcon,
     CheckCircleIcon,
     XMarkIcon,
-    CopyIcon,
+    DocumentDuplicateIcon,
     MegaphoneIcon,
     PhotoIcon,
     HashtagIcon,
@@ -297,7 +297,7 @@ function renderPreview() {
                                 class="rounded-lg bg-gray-100 p-2 text-gray-600 hover:bg-gray-200"
                                 title="Copiar título"
                             >
-                                <CopyIcon class="h-4 w-4" />
+                                <DocumentDuplicateIcon class="h-4 w-4" />
                             </button>
                         </div>
                     </FormSection>
@@ -316,7 +316,7 @@ function renderPreview() {
                                 @click="copyToClipboard(form.description)"
                                 class="inline-flex items-center gap-1 rounded-lg bg-gray-100 px-2 py-1 text-xs text-gray-600 hover:bg-gray-200"
                             >
-                                <CopyIcon class="h-3 w-3" />
+                                <DocumentDuplicateIcon class="h-3 w-3" />
                                 Copiar descripción
                             </button>
                         </div>
@@ -408,7 +408,7 @@ function renderPreview() {
                             @click="copyAll"
                             class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
                         >
-                            <CopyIcon class="h-4 w-4" />
+                            <DocumentDuplicateIcon class="h-4 w-4" />
                             Copiar todo
                         </button>
                         <button

@@ -4,7 +4,7 @@
             <h3 class="text-sm font-semibold text-gray-900">Vista previa - Instagram</h3>
             <span class="text-xs text-gray-500">Post carrusel</span>
         </div>
-        
+
         <!-- Carrusel de fotos -->
         <div class="grid grid-cols-3 gap-1 mb-3">
             <div
@@ -15,13 +15,13 @@
                 <CameraIcon class="h-6 w-6 text-gray-400" />
             </div>
         </div>
-        
+
         <!-- Título -->
         <div class="mb-2">
             <h4 class="text-sm font-bold text-gray-900 mb-1">{{ form.title || 'Título del post' }}</h4>
             <p class="text-xs text-gray-600">{{ form.description || 'Descripción del vehículo...' }}</p>
         </div>
-        
+
         <!-- Hashtags -->
         <div v-if="form.hashtags.length" class="mb-3">
             <div class="flex flex-wrap gap-1">
@@ -32,7 +32,7 @@
                 >#{{ tag }}</span>
             </div>
         </div>
-        
+
         <!-- Tips de foto -->
         <div v-if="form.photo_tips.length" class="mb-3">
             <h5 class="text-xs font-semibold text-gray-500 mb-1">Tips para fotos</h5>
@@ -43,7 +43,7 @@
                 </li>
             </ul>
         </div>
-        
+
         <!-- Botón -->
         <div class="pt-3 border-t border-gray-100">
             <button class="w-full inline-flex justify-center items-center gap-2 rounded-lg bg-gradient-to-r from-pink-500 to-red-500 px-4 py-2 text-sm font-semibold text-white hover:opacity-90">

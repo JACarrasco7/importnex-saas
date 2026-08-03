@@ -4,7 +4,7 @@
             <h3 class="text-sm font-semibold text-gray-900">Vista previa - Facebook</h3>
             <span class="text-xs text-gray-500">Publicación</span>
         </div>
-        
+
         <!-- Header del post -->
         <div class="flex items-center gap-2 mb-3">
             <div class="w-8 h-8 rounded-full bg-gray-200"></div>
@@ -13,18 +13,18 @@
                 <div class="text-xs text-gray-500">Hace 2 horas</div>
             </div>
         </div>
-        
+
         <!-- Imagen del post -->
         <div class="mb-3">
             <div class="aspect-video w-full rounded-lg bg-gray-200"></div>
         </div>
-        
+
         <!-- Título -->
         <div class="mb-2">
             <h4 class="text-sm font-bold text-gray-900 mb-1">{{ form.title || 'Título del anuncio' }}</h4>
             <p class="text-xs text-gray-700">{{ form.description || 'Descripción del vehículo...' }}</p>
         </div>
-        
+
         <!-- Hashtags -->
         <div v-if="form.hashtags.length" class="mb-3">
             <div class="flex flex-wrap gap-1">
@@ -35,11 +35,11 @@
                 >#{{ tag }}</span>
             </div>
         </div>
-        
+
         <!-- Acciones -->
         <div class="flex items-center gap-4 pt-2 border-t border-gray-100">
             <button class="flex items-center gap-1 text-xs text-gray-500 hover:text-blue-600">
-                <ThumbUpIcon class="h-4 w-4" />
+                <HandThumbUpIcon class="h-4 w-4" />
                 Me gusta
             </button>
             <button class="flex items-center gap-1 text-xs text-gray-500 hover:text-blue-600">
@@ -56,7 +56,7 @@
 
 <script setup>
 import {
-    ThumbUpIcon,
+    HandThumbUpIcon,
     ChatBubbleBottomCenterIcon,
     ArrowTopRightOnSquareIcon,
 } from '@heroicons/vue/24/outline';

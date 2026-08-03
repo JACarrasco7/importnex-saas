@@ -5,6 +5,7 @@ import {
     ArrowLeftIcon,
     PencilIcon,
     SparklesIcon,
+    MegaphoneIcon,
     TrashIcon,
     DocumentIcon,
     ArrowDownTrayIcon,
@@ -208,6 +209,10 @@ const onDocKeyChange = () => {
                         <Link v-if="['Located', 'Valuing'].includes(car.status)" :href="route('cars.verify.show', car.id)" class="inline-flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-purple-500">
                             <SparklesIcon class="h-4 w-4" />
                             Verify with AI
+                        </Link>
+                        <Link :href="route('cars.marketing', car.id)" class="inline-flex items-center gap-2 rounded-lg bg-cyan-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-cyan-500">
+                            <MegaphoneIcon class="h-4 w-4" />
+                            Marketing
                         </Link>
                         <Link :href="route('cars.edit', car.id)" class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">
                             <PencilIcon class="h-4 w-4" />

@@ -4,7 +4,7 @@
             <h3 class="text-sm font-semibold text-gray-900">Vista previa - TikTok</h3>
             <span class="text-xs text-gray-500">Video corto</span>
         </div>
-        
+
         <!-- Video mockup -->
         <div class="relative mb-3">
             <div class="aspect-video w-full rounded-lg bg-gradient-to-br from-purple-900 to-pink-800 flex items-center justify-center">
@@ -15,13 +15,13 @@
                 <PlayIcon class="h-3 w-3 text-white" />
             </div>
         </div>
-        
+
         <!-- Título -->
         <div class="mb-2">
             <h4 class="text-sm font-bold text-gray-900 mb-1">{{ form.title || 'Título del video' }}</h4>
             <p class="text-xs text-gray-600">{{ form.description || 'Descripción del video...' }}</p>
         </div>
-        
+
         <!-- Hashtags -->
         <div v-if="form.hashtags.length" class="mb-3">
             <div class="flex flex-wrap gap-1">
@@ -32,7 +32,7 @@
                 >#{{ tag }}</span>
             </div>
         </div>
-        
+
         <!-- Tips de foto -->
         <div v-if="form.photo_tips.length" class="mb-3">
             <h5 class="text-xs font-semibold text-gray-500 mb-1">Tips para el video</h5>
@@ -43,7 +43,7 @@
                 </li>
             </ul>
         </div>
-        
+
         <!-- Botón -->
         <div class="pt-3 border-t border-gray-100">
             <button class="w-full inline-flex justify-center items-center gap-2 rounded-lg bg-pink-600 px-4 py-2 text-sm font-semibold text-white hover:bg-pink-500">
