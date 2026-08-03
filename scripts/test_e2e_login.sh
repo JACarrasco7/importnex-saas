@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-BASE="https://dev.aktive.cloud/importnexcore"
+BASE="https://jjimportmotors.on-forge.com"
 JAR=/tmp/cookies.txt
 
 rm -f $JAR

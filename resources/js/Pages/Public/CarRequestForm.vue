@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import { Head, useForm } from '@inertiajs/vue3';
-import { TruckIcon, CheckCircleIcon } from '@heroicons/vue/24/outline';
+import { TruckIcon, CheckCircleIcon, DocumentArrowDownIcon } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
     organization: Object,
@@ -307,6 +307,18 @@ const submit = () => {
             <div class="mt-8 text-center text-sm text-gray-500">
                 <p>&copy; 2026 {{ organization.name }}. Todos los derechos reservados.</p>
             </div>
+        </div>
+
+        <!-- Floating download button for JJ Import Motors folleto -->
+        <div class="fixed bottom-6 right-6 z-40">
+            <a
+                :href="route('jj-import.folleto')"
+                target="_blank"
+                class="flex items-center gap-2 rounded-full bg-cyan-600 px-4 py-3 text-sm font-semibold text-white shadow-lg hover:bg-cyan-700 transition-colors"
+            >
+                <DocumentArrowDownIcon class="h-5 w-5" />
+                <span class="hidden sm:inline">Folleto</span>
+            </a>
         </div>
     </div>
 </template>

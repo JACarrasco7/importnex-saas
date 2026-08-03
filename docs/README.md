@@ -25,5 +25,5 @@ docs/
 ## 📋 Flujo resumido
 
 1. **Claude investiga** coche → genera ZIP con `informe.json` + fotos + PDFs
-2. **Usuario sube** ZIP en `https://dev.aktive.cloud/importnexcore/cars/import-valuation` → pestaña "Subir ZIP"
+2. **Usuario sube** ZIP en `https://jjimportmotors.on-forge.com/cars/import-valuation` → pestaña "Subir ZIP"
 3. **Sistema importa** todo automáticamente: coche, fotos, documentos

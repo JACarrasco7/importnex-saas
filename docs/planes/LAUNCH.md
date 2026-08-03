@@ -1,22 +1,22 @@
-# Launch Checklist — Importnex SaaS
+﻿# Launch Checklist — Importnex SaaS
 
 This document is the go-live checklist for the Importnex SaaS platform.
 
 ## 🚀 Current deployment status
 
 **Environment:** DEV (Production-ready)
-**URL:** https://dev.aktive.cloud/importnexcore
+**URL:** https://jjimportmotors.on-forge.com
 **Status:** ✅ LIVE - Ready for testing
 **Last deployed:** 30 julio 2026
 
 ### Quick access
-- **Login:** https://dev.aktive.cloud/importnexcore/login
+- **Login:** https://jjimportmotors.on-forge.com/login
 - **Credentials:** `carra@admin.com` / `demo1234`
-- **Dashboard:** https://dev.aktive.cloud/importnexcore/dashboard
+- **Dashboard:** https://jjimportmotors.on-forge.com/dashboard
 
 ### Server info
-- **Server:** VPS dev.aktive.cloud
-- **Directory:** `/var/www/importnex-saas`
+- **Server:** Laravel Forge
+- **Directory:** `/home/forge/jjimportmotors.on-forge.com/current`
 - **Tech stack:** PHP 8.3, MySQL 8.0, Apache, Redis
 - **See PROGRESO.md for full deployment details**
 

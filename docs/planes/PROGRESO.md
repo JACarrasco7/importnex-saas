@@ -1,9 +1,9 @@
-# Importnex SaaS — Progreso de implementación
+﻿# Importnex SaaS — Progreso de implementación
 
 **Fecha:** 31 julio 2026
-**Estado:** ✅ DESPLEGADO EN DEV - Sistema funcional en dev.aktive.cloud/importnexcore
+**Estado:** ✅ DESPLEGADO EN DEV - Sistema funcional en jjimportmotors.on-forge.com
 **Plan vigente:** `PLAN_IMPLEMENTACION_COMPLETO.md`
-**Deploy:** VPS dev.aktive.cloud con subpath /importnexcore
+**Deploy:** Laravel Forge con subpath /importnexcore
 
 ---
 
@@ -18,18 +18,18 @@
 - Subida de fotos y documentos
 - Código 100% en inglés
 - **Tests: 195 ✅ passed · 0 risky · 0 failed (757 assertions)**
-- **DEPLOY PRODUCCIÓN: ✅ https://dev.aktive.cloud/importnexcore**
+- **DEPLOY PRODUCCIÓN: ✅ https://jjimportmotors.on-forge.com**
 
 ---
 
-## 🚀 Deployment dev.aktive.cloud (30/07/2026)
+## 🚀 Deployment 168.144.6.105 (30/07/2026)
 
 ### Información de conexión
 
-**Servidor:** VPS dev.aktive.cloud
-**URL producción:** https://dev.aktive.cloud/importnexcore
-**SSH:** `ssh -i "C:\Users\jacar\.ssh\id_ed25519_nopass" root@dev.aktive.cloud`
-**Directorio proyecto:** `/var/www/importnex-saas`
+**Servidor:** Laravel Forge
+**URL producción:** https://jjimportmotors.on-forge.com
+**SSH:** `ssh -i "C:\Users\jacar\.ssh\id_ed25519_nopass" forge@168.144.6.105`
+**Directorio proyecto:** `/home/forge/jjimportmotors.on-forge.com/current`
 **Apache:** Subpath configurado en `/etc/apache2/sites-enabled/000-default-le-ssl.conf`
 
 ### Credenciales demo
@@ -54,9 +54,9 @@
 
 **Configuración Apache:**
 ```apache
-Alias /importnexcore /var/www/importnex-saas/public
+Alias /importnexcore /home/forge/jjimportmotors.on-forge.com/current/public
 
-<Directory /var/www/importnex-saas/public>
+<Directory /home/forge/jjimportmotors.on-forge.com/current/public>
     Options +FollowSymLinks
     AllowOverride All
     Require all granted
@@ -72,7 +72,7 @@ Alias /importnexcore /var/www/importnex-saas/public
 
 **Variables de entorno (.env):**
 ```
-APP_URL=https://dev.aktive.cloud/importnexcore
+APP_URL=https://jjimportmotors.on-forge.com
 APP_NAME=Importnex
 APP_KEY=base64:TeBtlinZCiVikQxDfcel0eAkBMURmZpXu7br2v/yAoE=
 DB_HOST=127.0.0.1
@@ -86,23 +86,23 @@ DB_PASSWORD="Importnex2026Saas#"
 **Desplegar cambios:**
 ```bash
 # Subir archivos modificados
-scp -i "C:\Users\jacar\.ssh\id_ed25519_nopass" archivo.php root@dev.aktive.cloud:/var/www/importnex-saas/path/
+scp -i "C:\Users\jacar\.ssh\id_ed25519_nopass" archivo.php forge@168.144.6.105:/home/forge/jjimportmotors.on-forge.com/current/path/
 
 # Limpiar cachés
-ssh -i "C:\Users\jacar\.ssh\id_ed25519_nopass" root@dev.aktive.cloud "cd /var/www/importnex-saas; php artisan route:clear && php artisan config:clear && php artisan cache:clear"
+ssh -i "C:\Users\jacar\.ssh\id_ed25519_nopass" forge@168.144.6.105 "cd /home/forge/jjimportmotors.on-forge.com/current; php artisan route:clear && php artisan config:clear && php artisan cache:clear"
 
 # Rebuild assets
-ssh -i "C:\Users\jacar\.ssh\id_ed25519_nopass" root@dev.aktive.cloud "cd /var/www/importnex-saas; npm run build"
+ssh -i "C:\Users\jacar\.ssh\id_ed25519_nopass" forge@168.144.6.105 "cd /home/forge/jjimportmotors.on-forge.com/current; npm run build"
 ```
 
 **Verificar logs:**
 ```bash
-ssh -i "C:\Users\jacar\.ssh\id_ed25519_nopass" root@dev.aktive.cloud "tail -f /var/www/importnex-saas/storage/logs/laravel.log"
+ssh -i "C:\Users\jacar\.ssh\id_ed25519_nopass" forge@168.144.6.105 "tail -f /home/forge/jjimportmotors.on-forge.com/current/storage/logs/laravel.log"
 ```
 
 **Acceso BD:**
 ```bash
-ssh -i "C:\Users\jacar\.ssh\id_ed25519_nopass" root@dev.aktive.cloud "mysql -uimportnex -p'Importnex2026Saas#' importnex_saas"
+ssh -i "C:\Users\jacar\.ssh\id_ed25519_nopass" forge@168.144.6.105 "mysql -uimportnex -p'Importnex2026Saas#' importnex_saas"
 ```
 
 ### Correcciones aplicadas en producción
@@ -136,11 +136,11 @@ ssh -i "C:\Users\jacar\.ssh\id_ed25519_nopass" root@dev.aktive.cloud "mysql -uim
 - ✅ Assets compilados en public/build/
 
 **Accesos directos:**
-- Dashboard: https://dev.aktive.cloud/importnexcore/dashboard
-- Cars: https://dev.aktive.cloud/importnexcore/cars
-- Kanban: https://dev.aktive.cloud/importnexcore/cars-kanban
-- Map: https://dev.aktive.cloud/importnexcore/cars-map
-- Clients: https://dev.aktive.cloud/importnexcore/clients
+- Dashboard: https://jjimportmotors.on-forge.com/dashboard
+- Cars: https://jjimportmotors.on-forge.com/cars
+- Kanban: https://jjimportmotors.on-forge.com/cars-kanban
+- Map: https://jjimportmotors.on-forge.com/cars-map
+- Clients: https://jjimportmotors.on-forge.com/clients
 
 ---
 

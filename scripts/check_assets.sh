@@ -8,4 +8,4 @@ python3 -c "import json; m = json.load(open('/var/www/importnex-saas/public/buil
 
 echo ""
 echo "=== Test fetch the asset ==="
-curl -s -o /dev/null -w "HTTP:%{http_code} | size:%{size_download} bytes\n" "https://dev.aktive.cloud/build/assets/ImportValuation-CHmCPoOl.js" -k
+curl -s -o /dev/null -w "HTTP:%{http_code} | size:%{size_download} bytes\n" "https://jjimportmotors.on-forge.com/build/assets/ImportValuation-CHmCPoOl.js" -k

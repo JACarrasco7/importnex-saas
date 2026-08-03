@@ -2,7 +2,7 @@
 
 ## 🚀 Sistema DESPLEGADO y funcional
 
-**URL:** https://dev.aktive.cloud/importnexcore
+**URL:** https://jjimportmotors.on-forge.com
 **Estado:** ✅ ONLINE - Listo para uso
 
 ---
@@ -11,9 +11,8 @@
 
 | Cosa | Credenciales |
 |------|--------------|
-| **URL** | https://dev.aktive.cloud/importnexcore |
-| **Login** | carra@admin.com |
-| **Password** | demo1234 |
+| **URL** | https://jjimportmotors.on-forge.com |
+| **Servidor** | Laravel Forge (IP 168.144.6.105, user forge) |
 | **Organización** | JJ Import Motors |
 | **Plan** | Pro (trial activo) |
 
@@ -23,6 +22,7 @@
 
 | Función | URL |
 |---------|-----|
+| Marketplace público | /marketplace |
 | Dashboard | /dashboard |
 | Coches (lista) | /cars |
 | Kanban | /cars-kanban |
@@ -35,92 +35,38 @@
 
 ---
 
-## 🖥️ Comandos de desarrollo
+## 🖥️ Despliegue (Forge)
 
-### Acceso SSH
+Forge despliega automáticamente desde GitHub al hacer push a `main`:
+
 ```bash
-ssh -i "C:\Users\jacar\.ssh\id_ed25519_nopass" root@dev.aktive.cloud
+git add .
+git commit -m "descripcion"
+git push origin main
 ```
 
-### Directorio del proyecto
+### Despliegue manual (SSH)
 ```bash
-cd /var/www/importnex-saas
+ssh -i "C:\Users\jacar\.ssh\id_ed25519_nopass" forge@168.144.6.105
+cd /home/forge/jjimportmotors.on-forge.com/current
+php artisan optimize:clear
+npm run build
 ```
 
-### Desplegar cambios desde local
-```bash
-# Copiar archivos modificados
-scp -i "C:\Users\jacar\.ssh\id_ed25519_nopass" archivo.php root@dev.aktive.cloud:/var/www/importnex-saas/path/
-
-# Limpiar cachés
-ssh -i "C:\Users\jacar\.ssh\id_ed25519_nopass" root@dev.aktive.cloud "cd /var/www/importnex-saas; php artisan route:clear && php artisan config:clear && php artisan cache:clear"
-
-# Rebuild frontend
-ssh -i "C:\Users\jacar\.ssh\id_ed25519_nopass" root@dev.aktive.cloud "cd /var/www/importnex-saas; npm run build"
-```
+### Acceso MySQL
+Usa `forge-mysql-tunnel.bat` para abrir túnel a HeidiSQL (puerto local 3307).
 
 ### Verificar logs
 ```bash
 # Logs de aplicación
-tail -f /var/www/importnex-saas/storage/logs/laravel.log
+tail -f /home/forge/jjimportmotors.on-forge.com/current/storage/logs/laravel.log
 
-# Logs de Apache
-tail -f /var/log/apache2/error.log
-
-# Logs de MySQL
-tail -f /var/log/mysql/error.log
-```
-
-### Base de datos
-```bash
-# Acceso directo
-mysql -uimportnex -p'Importnex2026Saas#' importnex_saas
-
-# Query rápida
-mysql -uimportnex -p'Importnex2026Saas#' importnex_saas -e "SELECT COUNT(*) FROM cars;"
-```
-
----
-
-## 🔧 Configuración del servidor
-
-### Stack técnico
-- **PHP:** 8.3 con Composer 2.8.4
-- **MySQL:** 8.0.46
-- **Web server:** Apache con PHP-FPM
-- **Cache:** Redis Server
-- **Frontend:** Node.js 20 + Vite
-
-### Configuración Apache (subpath)
-**Archivo:** `/etc/apache2/sites-enabled/000-default-le-ssl.conf`
-
-```apache
-Alias /importnexcore /var/www/importnex-saas/public
-
-<Directory /var/www/importnex-saas/public>
-    Options +FollowSymLinks
-    AllowOverride All
-    Require all granted
-
-    RewriteEngine On
-    RewriteBase /importnexcore
-    RewriteRule ^index\.php$ - [L]
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule . /importnexcore/index.php [L]
-</Directory>
+# Logs de Nginx
+tail -f /var/log/nginx/error.log
 ```
 
 ### Variables de entorno clave
-```bash
-APP_URL=https://dev.aktive.cloud/importnexcore
-APP_NAME=Importnex
-APP_KEY=base64:TeBtlinZCiVikQxDfcel0eAkBMURmZpXu7br2v/yAoE=
-DB_HOST=127.0.0.1
-DB_DATABASE=importnex_saas
-DB_USERNAME=importnex
-DB_PASSWORD="Importnex2026Saas#"
-```
+Gestionadas en el panel de Laravel Forge (Sitio → Environment). Las credenciales de base de datos se generan al crear el sitio.
 
 ---
 

@@ -1,30 +1,41 @@
 # Deploy — ImportnexCore
 
-## Servidor
+## Servidor (Forge)
 
 | Dato | Valor |
 |---|---|
-| URL | https://dev.aktive.cloud/importnexcore |
-| Servidor | VPS dev.aktive.cloud |
-| Directorio | `/var/www/importnex-saas` |
-| Stack | PHP 8.3, MySQL 8.0, Apache, Redis |
-| Entorno | DEV |
+| URL | https://jjimportmotors.on-forge.com |
+| Servidor | Laravel Forge |
+| IP | 168.144.6.105 |
+| SSH user | forge |
+| Directorio | `/home/forge/jjimportmotors.on-forge.com/current` |
+| Stack | PHP, MySQL, Nginx (gestionado por Forge) |
+| Entorno | PRODUCCIÓN |
 
-## Desplegar cambios
+## Cómo desplegar
+
+Forge despliega automáticamente desde GitHub al hacer push a `main`:
 
 ```powershell
-# Subir archivos PHP al servidor
-scp -i "~\.ssh\id_ed25519_nopass" archivo.php root@dev.aktive.cloud:/var/www/importnex-saas/ruta/
-
-# Regenerar autoload (si hay clases nuevas)
-ssh root@dev.aktive.cloud "cd /var/www/importnex-saas; composer dump-autoload"
-
-# Limpiar caché
-ssh root@dev.aktive.cloud "cd /var/www/importnex-saas; php artisan optimize:clear; php -r 'opcache_reset();'; apachectl graceful"
-
-# Build frontend (si cambian archivos Vue/JS)
-ssh root@dev.aktive.cloud "cd /var/www/importnex-saas; npm run build"
+git add .
+git commit -m "descripcion de cambios"
+git push origin main
 ```
+
+Forge hace: pull → composer install → npm build → migraciones → symlink `current`.
+
+## Despliegue manual (SSH)
+
+```powershell
+ssh -i "C:\Users\jacar\.ssh\id_ed25519_nopass" forge@168.144.6.105
+cd /home/forge/jjimportmotors.on-forge.com/current
+php artisan optimize:clear
+npm run build
+```
+
+## Acceso MySQL (túnel)
+
+Usa `forge-mysql-tunnel.bat` para abrir un túnel a HeidiSQL (puerto local 3307).
 
 ## Archivos clave
 

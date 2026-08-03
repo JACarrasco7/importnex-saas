@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Log;
  * del servidor. No des este token de alta como password de ningún usuario.
  *
  * Uso desde el chat (curl):
- *   curl -X POST https://dev.aktive.cloud/importnexcore/api/import-valuation \
+ *   curl -X POST https://jjimportmotors.on-forge.com/api/import-valuation \
  *     -H "X-Import-Token: <token>" \
  *     -H "Content-Type: application/json" \
  *     --data @informe.json

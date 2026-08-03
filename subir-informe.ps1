@@ -16,7 +16,7 @@ $ErrorActionPreference = "Continue"
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
 $TOKEN  = "22a600ba2f1f52eaa96a450dfd82bb9a36c26a28ee54f879e763583770a1fc32"
-$API    = "https://dev.aktive.cloud/importnexcore/api/import-valuation"
+$API    = "https://jjimportmotors.on-forge.com/api/import-valuation"
 
 # â”€â”€ Modo: un solo archivo â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 if ($Archivo) {

@@ -5,7 +5,7 @@ import { ref, computed } from 'vue';
 const page = usePage();
 const isSaving = ref(false);
 
-const locale = computed(() => page.props.locale || 'en');
+const locale = computed(() => page.props.locale || 'es');
 
 const isEnglish = computed(() => locale.value === 'en');
 const isSpanish = computed(() => locale.value === 'es');

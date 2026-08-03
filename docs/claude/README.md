@@ -24,7 +24,7 @@ El contrato JSON completo está en `CONTRATO_JSON.md`.
 ## Para Claude — JSON suelto (alternativa)
 
 Si solo generas el JSON del informe, el usuario puede:
-1. Abrir https://dev.aktive.cloud/importnexcore/cars/import-valuation
+1. Abrir https://jjimportmotors.on-forge.com/cars/import-valuation
 2. Pestaña **"Pegar JSON"** → pegar → Importar
 3. O pestaña **"Subir archivo"** → seleccionar .json
 4. O pestaña **"Leer del servidor"** → si ya está en `storage/app/importnex/import/`
@@ -39,14 +39,14 @@ El sistema decide si CREA o ACTUALIZA:
 ## Endpoint API (backup)
 
 ```
-POST https://dev.aktive.cloud/importnexcore/api/import-valuation
+POST https://jjimportmotors.on-forge.com/api/import-valuation
 Header: X-Import-Token: <token>
 ```
 
 ## Al final de cada investigación, dile al usuario
 
 > "ZIP listo en `laravel\export\[nombre].zip`.
-> Súbelo en https://dev.aktive.cloud/importnexcore/cars/import-valuation → pestaña Subir ZIP"
+> Súbelo en https://jjimportmotors.on-forge.com/cars/import-valuation → pestaña Subir ZIP"
 
 ## Bugs conocidos resueltos
 

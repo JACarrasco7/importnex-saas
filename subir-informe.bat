@@ -6,7 +6,7 @@ REM ================================================================
 setlocal enabledelayedexpansion
 
 set TOKEN=22a600ba2f1f52eaa96a450dfd82bb9a36c26a28ee54f879e763583770a1fc32
-set API=https://dev.aktive.cloud/importnexcore/api/import-valuation
+set API=https://jjimportmotors.on-forge.com/api/import-valuation
 set CARPETA=C:\Users\jacar\Desktop\JJImportMotors\laravel\informes
 
 if not "%~1"=="" (

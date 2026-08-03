@@ -53,6 +53,10 @@ class PublicMarketplaceController extends Controller
             'verdicts' => $verdicts,
             'lights' => $lights,
             'filters' => $request->only(['search', 'verdict', 'traffic_light', 'min_price', 'max_price', 'year_min', 'year_max']),
+            'translations' => [
+                'en' => __('marketplace'),
+                'es' => __('marketplace'),
+            ],
         ]);
     }
 

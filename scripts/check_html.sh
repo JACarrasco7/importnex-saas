@@ -1,5 +1,5 @@
 #!/bin/bash
-curl -s 'https://dev.aktive.cloud/importnexcore/cars/import-valuation' -o /tmp/imp3.html -w "HTTP:%{http_code}\n" -k
+curl -s 'https://jjimportmotors.on-forge.com/cars/import-valuation' -o /tmp/imp3.html -w "HTTP:%{http_code}\n" -k
 echo "--- assets js ---"
 grep -oE 'src="[^"]+\.js"' /tmp/imp3.html | head -10
 echo "--- data-page ---"

@@ -91,7 +91,7 @@ const { t } = useFormat();
                     <h3>Paso 6 — Subir el paquete a Laravel</h3>
 
                     <ol>
-                        <li>Entra en <code>https://dev.aktive.cloud/importnexcore/cars/import-valuation</code>.</li>
+                        <li>Entra en <code>https://jjimportmotors.on-forge.com/cars/import-valuation</code>.</li>
                         <li>Ve a la pestaña <strong>Subir ZIP</strong>.</li>
                         <li>Selecciona el archivo <code>.zip</code> que te ha dado Claude.</li>
                         <li>Laravel lo hace todo solo: crea o actualiza la ficha del coche, adjunta los dos PDFs al expediente, y sube las fotos a la galería.</li>

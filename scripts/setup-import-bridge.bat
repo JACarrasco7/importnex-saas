@@ -34,11 +34,11 @@ echo ✅ Caché limpiado
 echo.
 echo 🎯 Bridge configurado correctamente!
 echo.
-echo 📍 Endpoint: https://dev.aktive.cloud/importnexcore/api/import-valuation
+echo 📍 Endpoint: https://jjimportmotors.on-forge.com/api/import-valuation
 echo 🔑 Token: %TOKEN%
 echo.
 echo 📋 Instrucciones para el chat:
-echo    curl -X POST https://dev.aktive.cloud/importnexcore/api/import-valuation ^
+echo    curl -X POST https://jjimportmotors.on-forge.com/api/import-valuation ^
 echo      -H "X-Import-Token: %TOKEN%" ^
 echo      -H "Content-Type: application/json" ^
 echo      --data @informe.json

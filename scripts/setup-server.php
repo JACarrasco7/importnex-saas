@@ -106,6 +106,6 @@ echo "\n============================================================\n";
 echo "   ✅ Setup completado\n";
 echo "============================================================\n";
 echo "\nEndpoint para subir informes:\n";
-echo "  POST https://dev.aktive.cloud/importnexcore/api/import-valuation\n";
+echo "  POST https://jjimportmotors.on-forge.com/api/import-valuation\n";
 echo "  Header: X-Import-Token: $token\n";
 echo "\n";

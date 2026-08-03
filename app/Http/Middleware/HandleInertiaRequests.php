@@ -34,7 +34,7 @@ class HandleInertiaRequests extends Middleware
         $pendingCarRequestsCount = 0;
         $planUsage = null;
         $currentPlan = null;
-        $locale = 'en';
+        $locale = 'es';
         $aiSettings = null;
 
         if ($user = $request->user()) {
@@ -67,12 +67,12 @@ class HandleInertiaRequests extends Middleware
                 ];
             }
 
-            $locale = $user->locale ?? 'en';
+            $locale = $user->locale ?? 'es';
         } else {
             // For guests, try to get locale from session or cookie
             $locale = $request->session()->get('locale') ??
                       $request->cookie('locale') ??
-                      'en';
+                      'es';
         }
 
         return [

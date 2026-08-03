@@ -10,7 +10,7 @@ class LocaleMiddleware
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $locale = $request->header('X-Locale') ?? $request->input('locale') ?? $request->cookie('locale') ?? 'en';
+        $locale = $request->header('X-Locale') ?? $request->input('locale') ?? $request->cookie('locale') ?? 'es';
 
         if (in_array($locale, ['en', 'es'])) {
             app()->setLocale($locale);
