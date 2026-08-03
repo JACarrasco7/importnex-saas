@@ -4,6 +4,7 @@ export default {
     app: {
         title: 'Importnex',
         dashboard_subtitle: "Here's what's happening with your inventory today.",
+        kanban_subtitle: 'Drag cars between columns to update their status',
         loading: 'Loading...',
         save: 'Save',
         cancel: 'Cancel',

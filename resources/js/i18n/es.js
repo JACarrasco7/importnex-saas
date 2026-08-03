@@ -4,6 +4,7 @@ export default {
     app: {
         title: 'Importnex',
         dashboard_subtitle: 'Esto es lo que está pasando con tu inventario hoy.',
+        kanban_subtitle: 'Arrastra los coches entre columnas para actualizar su estado',
         loading: 'Cargando...',
         save: 'Guardar',
         cancel: 'Cancelar',
@@ -73,7 +74,6 @@ export default {
     },
     cars: {
         title: 'Autos',
-        subtitle: 'Arrastra los coches entre columnas para actualizar su estado',
         add: 'Añadir Auto',
         import: 'Importar CSV',
         vin: 'VIN',

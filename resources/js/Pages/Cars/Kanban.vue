@@ -46,7 +46,7 @@ const onDrop = (column) => {
 
         <div class="py-6">
             <div class="mx-auto max-w-full px-4 sm:px-6 lg:px-8">
-                <PageHeader :title="t('kanban.title')" :subtitle="t('kanban.subtitle')">
+                <PageHeader :title="t('nav.kanban')" :subtitle="t('app.kanban_subtitle')">
                     <template #actions>
                         <Link :href="route('cars.index')" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             <Squares2X2Icon class="h-4 w-4" />
