@@ -3,6 +3,7 @@ import { ref, computed, onMounted, nextTick } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import { SparklesIcon, XMarkIcon, PaperAirplaneIcon, TrashIcon, ArrowsPointingOutIcon, ArrowsPointingInIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outline';
 import axios from 'axios';
+import FloatingActionGrid from '@/Components/FloatingActionGrid.vue';
 
 const open = ref(false);
 const expanded = ref(false);
@@ -121,16 +122,19 @@ onMounted(() => scrollToBottom());
 </script>
 
 <template>
-    <!-- Floating button -->
-    <button
-        v-if="!open"
-        @click="open = true"
-        type="button"
-        aria-label="Open AI chat"
-        class="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg ring-1 ring-black/5 transition hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-        <SparklesIcon class="h-6 w-6" />
-        <span class="sr-only">AI chat</span>
-    </button>
+    <!-- Floating action button (grid wrapper for 1+ FABs) -->
+    <FloatingActionGrid position="bottom-right" orientation="vertical">
+        <button
+            v-if="!open"
+            @click="open = true"
+            type="button"
+            aria-label="Open AI chat"
+            class="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg ring-1 ring-black/5 transition hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        >
+            <SparklesIcon class="h-6 w-6" />
+            <span class="sr-only">AI chat</span>
+        </button>
+    </FloatingActionGrid>
 
     <!-- Panel -->
     <div v-if="open" :class="panelClass">
