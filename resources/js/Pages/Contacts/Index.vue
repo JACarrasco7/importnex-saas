@@ -100,14 +100,14 @@ const confirmDelete = () => {
                             <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">{{ t('app.search') }}</label>
                             <div class="relative">
                                 <MagnifyingGlassIcon class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                                <input v-model="search" type="text" placeholder="Name, email, city..." class="block w-full rounded-lg border-gray-300 pl-9 text-sm focus:border-estoril-500 focus:ring-estoril-500" />
+                                <input v-model="search" type="text" placeholder="Nombre, email, ciudad..." class="block w-full rounded-lg border-gray-300 pl-9 text-sm focus:border-estoril-500 focus:ring-estoril-500" />
                             </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Tag</label>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Etiqueta</label>
                             <div class="relative">
                                 <TagIcon class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                                <input v-model="tagFilter" type="text" placeholder="e.g. dealer, transport..." class="block w-full rounded-lg border-gray-300 pl-9 text-sm focus:border-estoril-500 focus:ring-estoril-500" />
+                                <input v-model="tagFilter" type="text" placeholder="p. ej. concesionario, transporte..." class="block w-full rounded-lg border-gray-300 pl-9 text-sm focus:border-estoril-500 focus:ring-estoril-500" />
                             </div>
                         </div>
                     </div>
@@ -120,11 +120,11 @@ const confirmDelete = () => {
                         <div class="mt-1 text-2xl font-bold text-gray-900">{{ stats.total }}</div>
                     </div>
                     <div class="rounded-xl bg-estoril-50 p-4 shadow-sm ring-1 ring-estoril-200">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-estoril-700">Dealers</div>
+                        <div class="text-xs font-semibold uppercase tracking-wider text-estoril-700">Concesionarios</div>
                         <div class="mt-1 text-2xl font-bold text-estoril-600">{{ stats.dealers }}</div>
                     </div>
                     <div class="rounded-xl bg-emerald-50 p-4 shadow-sm ring-1 ring-emerald-200">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-emerald-700">Transport</div>
+                        <div class="text-xs font-semibold uppercase tracking-wider text-emerald-700">Transporte</div>
                         <div class="mt-1 text-2xl font-bold text-emerald-600">{{ stats.transport }}</div>
                     </div>
                 </div>
