@@ -25,3 +25,4 @@ yarn-error.log
 /importnex-saas-*.zip
 /_tmp/
 _tmp_check_providers.php
+.env.production
