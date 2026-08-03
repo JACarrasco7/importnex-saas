@@ -179,7 +179,7 @@ const howItWorks = computed(() => [
                 <div class="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end">
                     <div>
                         <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">{{ t('marketplace.section_catalog') }}</h2>
-                        <p class="mt-2 text-sm text-gray-600">{{ cars.total || 0 }} {{ t('marketplace.catalog_desc').replace(':count', cars.total || 0) }}</p>
+                        <p class="mt-2 text-sm text-gray-600">{{ t('marketplace.catalog_desc').replace(':count', cars.total || 0) }}</p>
                     </div>
                     <a href="#contacto" class="inline-flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800">
                         <PhoneIcon class="h-4 w-4" />
