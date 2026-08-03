@@ -190,7 +190,7 @@ const confirmDelete = () => {
         <ConfirmDialog
             :show="showDelete"
             title="Delete contact"
-            :message="`Are you sure you want to delete ${contactToDelete?.name}? This action cannot be undone.`"
+            :message="`Are you sure you want to delete ${contactToDelete?.name}? Esta acción no se puede deshacer.`"
             confirm-text="Delete"
             variant="danger"
             @close="showDelete = false"

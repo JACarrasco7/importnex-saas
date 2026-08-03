@@ -89,7 +89,7 @@ const { currency, date, statusVariant } = useFormat();
                                 <h3 class="text-base font-semibold text-gray-900">Contact log</h3>
                             </div>
                             <Link :href="route('clients.contact-logs.index', client.id)" class="text-sm font-semibold text-estoril-600 hover:text-estoril-500">
-                                View all →
+                                Ver todos →
                             </Link>
                         </div>
                         <div v-if="client.contact_logs?.length" class="divide-y divide-gray-200">

@@ -1,4 +1,4 @@
-﻿<script setup>
+<script setup>
 import { Head, Link } from '@inertiajs/vue3';
 import {
     ArrowLeftIcon,
@@ -125,10 +125,10 @@ const cardBrandIcon = (brand) => {
                             <p v-else class="p-6 text-sm text-gray-500">No active subscription.</p>
                         </div>
 
-                        <!-- Payment method -->
+                        <!-- Método de pago -->
                         <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                             <div class="border-b border-gray-200 px-6 py-4">
-                                <h3 class="text-base font-semibold text-gray-900">Payment method</h3>
+                                <h3 class="text-base font-semibold text-gray-900">Método de pago</h3>
                             </div>
                             <div v-if="paymentMethod" class="p-6">
                                 <div class="rounded-xl bg-gradient-to-br from-gray-900 to-estoril-900 p-5 text-white shadow-lg">
@@ -185,10 +185,10 @@ const cardBrandIcon = (brand) => {
                                         </td>
                                         <td class="px-6 py-4 text-right">
                                             <div class="inline-flex items-center gap-2">
-                                                <a v-if="invoice.pdf_url" :href="invoice.pdf_url" target="_blank" class="rounded-md p-1.5 text-gray-400 hover:bg-rose-50 hover:text-rose-600" title="Download PDF">
+                                                <a v-if="invoice.pdf_url" :href="invoice.pdf_url" target="_blank" class="rounded-md p-1.5 text-gray-400 hover:bg-rose-50 hover:text-rose-600" title="Descargar PDF">
                                                     <ArrowDownTrayIcon class="h-4 w-4" />
                                                 </a>
-                                                <Link :href="route('billing.download', invoice.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-estoril-50 hover:text-estoril-600" title="Download">
+                                                <Link :href="route('billing.download', invoice.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-estoril-50 hover:text-estoril-600" title="Descargar">
                                                     <DocumentTextIcon class="h-4 w-4" />
                                                 </Link>
                                             </div>

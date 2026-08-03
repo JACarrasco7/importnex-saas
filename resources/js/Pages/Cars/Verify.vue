@@ -154,7 +154,7 @@ function apply() {
                 <div v-else-if="car.status === 'Verifying'" class="overflow-hidden rounded-2xl border border-blue-200 bg-blue-50 p-4">
                     <div class="flex items-start gap-3">
                         <InformationCircleIcon class="h-5 w-5 flex-shrink-0 text-blue-600" />
-                        <p class="text-sm text-blue-900">Verification in progress. Refresh this page in a moment.</p>
+                        <p class="text-sm text-blue-900">Verification in progress. Actualizar this page in a moment.</p>
                     </div>
                 </div>
                 <div v-else class="overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 p-6">
