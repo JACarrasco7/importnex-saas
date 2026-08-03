@@ -12,36 +12,38 @@ import {
 import MapaLeaflet from '@/Components/MapaLeaflet.vue';
 import Badge from '@/Components/Badge.vue';
 import { useFormat } from '@/Composables/useFormat';
+import { useTranslations } from '@/Composables/useTranslations';
 
 const props = defineProps({
     car: Object,
     derived: Object,
 });
 
+const { t } = useTranslations();
 const { currency, date, trafficLightVariant, verdictVariant, confidenceVariant } = useFormat();
 
 const costItems = [
-    { key: 'purchase_price', label: 'Purchase price' },
-    { key: 'new_price', label: 'New price' },
-    { key: 'transport', label: 'Transport' },
-    { key: 'itv_fee', label: 'ITV fee' },
-    { key: 'coc_fee', label: 'COC fee' },
-    { key: 'dgt_fees', label: 'DGT fees' },
-    { key: 'professional_fees', label: 'Professional fees' },
-    { key: 'deposit', label: 'Deposit' },
+    { key: 'purchase_price', label: t('marketplace_show.cost_purchase') },
+    { key: 'new_price', label: t('marketplace_show.cost_new') },
+    { key: 'transport', label: t('marketplace_show.cost_transport') },
+    { key: 'itv_fee', label: t('marketplace_show.cost_itv') },
+    { key: 'coc_fee', label: t('marketplace_show.cost_coc') },
+    { key: 'dgt_fees', label: t('marketplace_show.cost_dgt') },
+    { key: 'professional_fees', label: t('marketplace_show.cost_professional') },
+    { key: 'deposit', label: t('marketplace_show.cost_deposit') },
 ];
 
 const specItems = [
-    { key: 'brand', label: 'Brand' },
-    { key: 'model', label: 'Model' },
-    { key: 'year', label: 'Year' },
-    { key: 'mileage', label: 'Mileage', suffix: ' km' },
-    { key: 'fuel', label: 'Fuel' },
-    { key: 'transmission', label: 'Transmission' },
-    { key: 'cv', label: 'Power', suffix: ' CV' },
-    { key: 'co2', label: 'CO2', suffix: ' g/km' },
-    { key: 'color', label: 'Color' },
-    { key: 'vin', label: 'VIN' },
+    { key: 'brand', label: t('marketplace_show.brand') },
+    { key: 'model', label: t('marketplace_show.model') },
+    { key: 'year', label: t('marketplace_show.year') },
+    { key: 'mileage', label: t('marketplace_show.mileage'), suffix: ' km' },
+    { key: 'fuel', label: t('marketplace_show.fuel') },
+    { key: 'transmission', label: t('marketplace_show.transmission') },
+    { key: 'cv', label: t('marketplace_show.power'), suffix: ' CV' },
+    { key: 'co2', label: t('marketplace_show.co2'), suffix: ' g/km' },
+    { key: 'color', label: t('marketplace_show.color') },
+    { key: 'vin', label: t('marketplace_show.vin') },
 ];
 
 const ratingIcon = (r) => ({
@@ -49,15 +51,15 @@ const ratingIcon = (r) => ({
 }[r] || MinusCircleIcon);
 
 const researchAspectLabels = {
-    common_issues: 'Common issues',
-    recalls: 'Recalls',
-    market_price: 'Market price',
-    reliability: 'Reliability',
-    spain_homologation: 'Spain homologation',
-    dgt_label: 'DGT environmental label',
-    insurance_estimate: 'Insurance estimate',
-    parts_maintenance: 'Parts & maintenance',
-    unit_specific: 'Unit-specific',
+    common_issues: t('marketplace_show.aspect_common_issues'),
+    recalls: t('marketplace_show.aspect_recalls'),
+    market_price: t('marketplace_show.aspect_market_price'),
+    reliability: t('marketplace_show.aspect_reliability'),
+    spain_homologation: t('marketplace_show.aspect_spain_homologation'),
+    dgt_label: t('marketplace_show.aspect_dgt_label'),
+    insurance_estimate: t('marketplace_show.aspect_insurance_estimate'),
+    parts_maintenance: t('marketplace_show.aspect_parts_maintenance'),
+    unit_specific: t('marketplace_show.aspect_unit_specific'),
 };
 
 const aspects = computed(() => {
@@ -74,9 +76,9 @@ const marketPosition = computed(() => {
     const total = props.derived?.total_cost || 0;
     if (!stats.avg || !total) return null;
     const ratio = total / stats.avg;
-    if (ratio <= 1.00) return { label: 'Below market', variant: 'success', ratio };
-    if (ratio <= 1.05) return { label: 'At market', variant: 'warning', ratio };
-    return { label: 'Above market', variant: 'danger', ratio };
+    if (ratio <= 1.00) return { label: t('marketplace_show.market_below'), variant: 'success', ratio };
+    if (ratio <= 1.05) return { label: t('marketplace_show.market_at'), variant: 'warning', ratio };
+    return { label: t('marketplace_show.market_above'), variant: 'danger', ratio };
 });
 </script>
 
@@ -89,9 +91,9 @@ const marketPosition = computed(() => {
             <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
                 <Link :href="route('marketplace.index')" class="flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-gray-900">
                     <ArrowLeftIcon class="h-4 w-4" />
-                    Back to Marketplace
+                    {{ t('marketplace_show.back_to_marketplace') }}
                 </Link>
-                <a :href="route('login')" class="text-sm font-semibold text-gray-700 hover:text-gray-900">Sign in</a>
+                <a :href="route('login')" class="text-sm font-semibold text-gray-700 hover:text-gray-900">{{ t('marketplace_show.sign_in') }}</a>
             </div>
         </header>
 
@@ -100,7 +102,7 @@ const marketPosition = computed(() => {
                 <!-- Header -->
                 <div class="border-b border-gray-200 pb-4">
                     <h1 class="text-3xl font-bold text-gray-900">{{ car.brand }} {{ car.model }}</h1>
-                    <p class="mt-1 text-sm text-gray-500">VIN {{ car.vin || 'N/A' }}</p>
+                    <p class="mt-1 text-sm text-gray-500">{{ t('marketplace_show.vin_label') }} {{ car.vin || t('marketplace.not_available') }}</p>
                 </div>
 
                 <!-- Status bar -->
@@ -114,13 +116,9 @@ const marketPosition = computed(() => {
                 <div class="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
                     <ExclamationTriangleIcon class="h-5 w-5 flex-shrink-0 text-amber-600" />
                     <div class="text-sm text-amber-900">
-                        <p class="font-semibold">IEDMT is an estimate.</p>
+                        <p class="font-semibold">{{ t('marketplace_show.iedmt_warning_title') }}</p>
                         <p class="mt-1 text-amber-800">
-                            Hacienda calculates the registration tax on its official tables of market value, not on the price you paid.
-                            Current estimate:
-                            <span class="font-mono font-semibold">{{ currency(derived?.iedmt) }}</span>
-                            &middot; Total all-in:
-                            <span class="font-mono font-semibold">{{ currency(derived?.total_cost) }}</span>
+                            {{ t('marketplace_show.iedmt_warning_desc', { amount: currency(derived?.iedmt), total: currency(derived?.total_cost) }) }}
                         </p>
                     </div>
                 </div>
@@ -128,7 +126,7 @@ const marketPosition = computed(() => {
                 <!-- Location -->
                 <div v-if="car.lat && car.lng" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4">
-                        <h3 class="text-base font-semibold text-gray-900">Location</h3>
+                        <h3 class="text-base font-semibold text-gray-900">{{ t('marketplace_show.section_location') }}</h3>
                     </div>
                     <div class="p-6">
                         <MapaLeaflet :lat="car.lat" :lng="car.lng" :marker-text="`${car.brand} ${car.model} - ${car.city || ''}`" height="300px" />
@@ -138,12 +136,12 @@ const marketPosition = computed(() => {
                 <!-- Technical specs -->
                 <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4">
-                        <h3 class="text-base font-semibold text-gray-900">Technical specs</h3>
+                        <h3 class="text-base font-semibold text-gray-900">{{ t('marketplace_show.section_tech_specs') }}</h3>
                     </div>
                     <div class="grid grid-cols-2 gap-x-6 gap-y-4 p-6 md:grid-cols-4">
                         <div v-for="spec in specItems" :key="spec.key">
                             <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ spec.label }}</dt>
-                            <dd class="mt-1 text-sm font-medium text-gray-900" :class="{ 'font-mono text-xs': spec.key === 'vin' }">{{ car[spec.key] || 'N/A' }}{{ spec.suffix || '' }}</dd>
+                            <dd class="mt-1 text-sm font-medium text-gray-900" :class="{ 'font-mono text-xs': spec.key === 'vin' }">{{ car[spec.key] || t('marketplace.not_available') }}{{ spec.suffix || '' }}</dd>
                         </div>
                     </div>
                 </div>
@@ -151,8 +149,8 @@ const marketPosition = computed(() => {
                 <!-- Costs -->
                 <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-                        <h3 class="text-base font-semibold text-gray-900">Costs</h3>
-                        <span class="text-sm text-gray-500">Total all-in: <span class="font-mono font-semibold text-gray-900">{{ currency(derived?.total_cost) }}</span></span>
+                        <h3 class="text-base font-semibold text-gray-900">{{ t('marketplace_show.section_costs') }}</h3>
+                        <span class="text-sm text-gray-500">{{ t('marketplace_show.total_all_in') }}: <span class="font-mono font-semibold text-gray-900">{{ currency(derived?.total_cost) }}</span></span>
                     </div>
                     <div class="grid grid-cols-2 gap-x-6 gap-y-4 p-6 md:grid-cols-4">
                         <div v-for="cost in costItems" :key="cost.key">
@@ -165,9 +163,9 @@ const marketPosition = computed(() => {
                 <!-- Investigation -->
                 <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-                        <h3 class="text-base font-semibold text-gray-900">Investigation</h3>
+                        <h3 class="text-base font-semibold text-gray-900">{{ t('marketplace_show.section_investigation') }}</h3>
                         <span v-if="derived?.research_gaps?.length" class="text-xs font-medium text-amber-700">
-                            {{ derived.research_gaps.length }} aspect{{ derived.research_gaps.length === 1 ? '' : 's' }} pending
+                            {{ derived.research_gaps.length === 1 ? t('marketplace_show.aspects_pending', { count: derived.research_gaps.length }) : t('marketplace_show.aspects_pending_plural', { count: derived.research_gaps.length }) }}
                         </span>
                     </div>
 
@@ -176,7 +174,7 @@ const marketPosition = computed(() => {
                         <div class="flex flex-wrap items-center gap-3">
                             <Badge :variant="verdictVariant(car.verdict)" dot size="lg">{{ car.verdict }}</Badge>
                             <Badge v-if="car.verdict_confidence" :variant="confidenceVariant(car.verdict_confidence)">
-                                Confidence: {{ car.verdict_confidence }}
+                                {{ t('marketplace_show.confidence') }}: {{ car.verdict_confidence }}
                             </Badge>
                             <span v-if="car.verdict_at" class="text-xs text-gray-500">
                                 {{ date(car.verdict_at) }}
@@ -184,19 +182,19 @@ const marketPosition = computed(() => {
                         </div>
                         <p v-if="car.verdict_reasoning" class="mt-3 text-sm text-gray-700">{{ car.verdict_reasoning }}</p>
                         <p v-if="car.verdict_changes" class="mt-2 text-xs italic text-gray-600">
-                            <span class="font-semibold not-italic text-gray-700">What would change this:</span>
+                            <span class="font-semibold not-italic text-gray-700">{{ t('marketplace_show.what_would_change') }}</span>
                             {{ car.verdict_changes }}
                         </p>
                     </div>
 
                     <div v-if="!car.verdict && !derived?.research_gaps?.length" class="px-6 py-8 text-center text-sm text-gray-500">
-                        No valuation yet available.
+                        {{ t('marketplace_show.no_valuation') }}
                     </div>
 
                     <!-- Balance pros / cons -->
                     <div v-if="(car.pros?.length || car.cons?.length)" class="grid grid-cols-1 gap-6 p-6 md:grid-cols-2">
                         <div>
-                            <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-green-700">In favor ({{ car.pros?.length || 0 }})</h4>
+                            <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-green-700">{{ t('marketplace_show.in_favor', { count: car.pros?.length || 0 }) }}</h4>
                             <ul v-if="car.pros?.length" class="space-y-2">
                                 <li v-for="(pro, i) in car.pros" :key="i" class="flex items-start gap-2 rounded-lg border border-green-200 bg-green-50 p-3">
                                     <CheckCircleIcon class="mt-0.5 h-4 w-4 flex-shrink-0 text-green-600" />
@@ -206,10 +204,10 @@ const marketPosition = computed(() => {
                                     </div>
                                 </li>
                             </ul>
-                            <p v-else class="text-sm italic text-gray-500">No points in favor.</p>
+                            <p v-else class="text-sm italic text-gray-500">{{ t('marketplace_show.no_points_in_favor') }}</p>
                         </div>
                         <div>
-                            <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-red-700">Against ({{ car.cons?.length || 0 }})</h4>
+                            <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-red-700">{{ t('marketplace_show.against', { count: car.cons?.length || 0 }) }}</h4>
                             <ul v-if="car.cons?.length" class="space-y-2">
                                 <li v-for="(con, i) in car.cons" :key="i" class="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3">
                                     <XCircleIcon class="mt-0.5 h-4 w-4 flex-shrink-0 text-red-600" />
@@ -219,13 +217,13 @@ const marketPosition = computed(() => {
                                     </div>
                                 </li>
                             </ul>
-                            <p v-else class="text-sm italic text-gray-500">No points against.</p>
+                            <p v-else class="text-sm italic text-gray-500">{{ t('marketplace_show.no_points_against') }}</p>
                         </div>
                     </div>
 
                     <!-- 9 research aspects -->
                     <div class="border-t border-gray-200 px-6 py-4">
-                        <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">9 research aspects</h4>
+                        <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('marketplace_show.nine_research_aspects') }}</h4>
                         <ul class="grid grid-cols-1 gap-3 md:grid-cols-2">
                             <li v-for="aspect in aspects" :key="aspect.key" class="rounded-lg border p-3"
                                 :class="aspect.missing ? 'border-dashed border-gray-300 bg-gray-50' : 'border-gray-200 bg-white'">
@@ -238,12 +236,12 @@ const marketPosition = computed(() => {
                                             'text-gray-500': aspect.rating === 'neutral' || !aspect.rating,
                                         }" />
                                 </div>
-                                <p v-if="aspect.missing" class="mt-2 text-xs italic text-gray-500">Not yet investigated.</p>
+                                <p v-if="aspect.missing" class="mt-2 text-xs italic text-gray-500">{{ t('marketplace_show.not_yet_investigated') }}</p>
                                 <template v-else>
                                     <p v-if="aspect.finding" class="mt-2 text-sm text-gray-700">{{ aspect.finding }}</p>
                                     <a v-if="aspect.source" :href="aspect.source" target="_blank" rel="noopener" class="mt-2 inline-flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-500">
                                         <LinkIcon class="h-3 w-3" />
-                                        Source
+                                        {{ t('marketplace_show.source') }}
                                     </a>
                                     <span v-if="aspect.date" class="ml-2 text-xs text-gray-400">{{ aspect.date }}</span>
                                 </template>
@@ -255,32 +253,32 @@ const marketPosition = computed(() => {
                 <!-- Market comparables -->
                 <div v-if="car.market_avg || derived?.comparables_stats?.count" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-                        <h3 class="text-base font-semibold text-gray-900">Market comparables</h3>
+                        <h3 class="text-base font-semibold text-gray-900">{{ t('marketplace_show.section_market_comparables') }}</h3>
                         <Badge v-if="marketPosition" :variant="marketPosition.variant">
                             {{ marketPosition.label }} ({{ (marketPosition.ratio * 100).toFixed(1) }}%)
                         </Badge>
                     </div>
                     <div class="grid grid-cols-1 gap-6 p-6 md:grid-cols-4">
                         <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Average</dt>
+                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('marketplace_show.avg') }}</dt>
                             <dd class="mt-1 font-mono text-lg font-semibold text-gray-900">{{ currency(car.market_avg) }}</dd>
                         </div>
                         <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Minimum</dt>
+                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('marketplace_show.minimum') }}</dt>
                             <dd class="mt-1 font-mono text-lg font-semibold text-gray-900">{{ currency(car.market_min) }}</dd>
                         </div>
                         <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Maximum</dt>
+                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('marketplace_show.maximum') }}</dt>
                             <dd class="mt-1 font-mono text-lg font-semibold text-gray-900">{{ currency(car.market_max) }}</dd>
                         </div>
                         <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Estimated saving</dt>
+                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('marketplace_show.estimated_saving') }}</dt>
                             <dd class="mt-1 font-mono text-lg font-semibold text-green-700">{{ currency(car.estimated_saving) }}</dd>
                         </div>
                     </div>
 
                     <div v-if="car.comparables_list?.length" class="border-t border-gray-200 px-6 py-4">
-                        <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Comparables ({{ car.comparables_list.length }})</h4>
+                        <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('marketplace_show.comparables_count', { count: car.comparables_list.length }) }}</h4>
                         <ul class="divide-y divide-gray-200 rounded-lg border border-gray-200">
                             <li v-for="(comp, i) in car.comparables_list" :key="i" class="flex items-center justify-between px-4 py-3 hover:bg-gray-50">
                                 <div class="min-w-0 flex-1">
@@ -304,11 +302,11 @@ const marketPosition = computed(() => {
                 <!-- Import progress (read-only) -->
                 <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4">
-                        <h3 class="text-base font-semibold text-gray-900">Import progress</h3>
+                        <h3 class="text-base font-semibold text-gray-900">{{ t('marketplace_show.section_import_progress') }}</h3>
                     </div>
                     <div class="bg-gray-50 px-6 py-4">
                         <div class="mb-2 flex items-center justify-between">
-                            <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-700">Milestones</h4>
+                            <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-700">{{ t('marketplace_show.milestones') }}</h4>
                             <span class="text-sm font-mono font-semibold text-gray-900">
                                 {{ derived?.milestones_progress?.completed || 0 }} / {{ derived?.milestones_progress?.total || 0 }}
                             </span>
@@ -318,7 +316,7 @@ const marketPosition = computed(() => {
                                 :style="{ width: derived?.milestones_progress?.total ? ((derived.milestones_progress.completed / derived.milestones_progress.total) * 100) + '%' : '0%' }" />
                         </div>
                         <p class="mt-3 text-sm text-gray-600">
-                            {{ derived?.inspections_progress?.completed || 0 }} / {{ derived?.inspections_progress?.total || 0 }} inspection items completed.
+                            {{ t('marketplace_show.inspections', { done: derived?.inspections_progress?.completed || 0, total: derived?.inspections_progress?.total || 0 }) }}
                         </p>
                     </div>
                 </div>
@@ -326,7 +324,7 @@ const marketPosition = computed(() => {
                 <!-- Photos (read-only gallery) -->
                 <div v-if="car.photos?.length" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4">
-                        <h3 class="text-base font-semibold text-gray-900">Photos</h3>
+                        <h3 class="text-base font-semibold text-gray-900">{{ t('marketplace_show.section_photos') }}</h3>
                     </div>
                     <div class="grid grid-cols-2 gap-3 p-6 md:grid-cols-4">
                         <a v-for="photo in car.photos" :key="photo.id" :href="`/storage/${photo.url}`" target="_blank" rel="noopener" class="group relative overflow-hidden rounded-lg">
@@ -339,7 +337,7 @@ const marketPosition = computed(() => {
                 <!-- Notes (read-only) -->
                 <div v-if="car.notes" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4">
-                        <h3 class="text-base font-semibold text-gray-900">Notes</h3>
+                        <h3 class="text-base font-semibold text-gray-900">{{ t('marketplace_show.section_notes') }}</h3>
                     </div>
                     <div class="p-6">
                         <pre class="whitespace-pre-wrap font-sans text-sm text-gray-700">{{ car.notes }}</pre>
@@ -350,7 +348,7 @@ const marketPosition = computed(() => {
 
         <footer class="mt-12 border-t border-gray-200 bg-white py-6">
             <div class="mx-auto max-w-7xl px-4 text-center text-sm text-gray-500 sm:px-6 lg:px-8">
-                &copy; {{ new Date().getFullYear() }} Importnex. All rights reserved.
+                &copy; {{ new Date().getFullYear() }} Importnex. {{ t('marketplace_show.footer_rights') }}
             </div>
         </footer>
     </div>

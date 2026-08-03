@@ -65,7 +65,7 @@ class PublicMarketplaceController extends Controller
     {
         // Verify this car should be publicly visible
         if (!$car->organization || !$car->organization->is_public ||
-            !in_array($car->status, ['Delivered']) || 
+            !in_array($car->status, ['Delivered']) ||
             !in_array($car->verdict, ['Buy', 'Buy if price drops'])) {
             abort(404);
         }

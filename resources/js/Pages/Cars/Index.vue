@@ -8,6 +8,7 @@ import PageHeader from '@/Components/PageHeader.vue';
 import EmptyState from '@/Components/EmptyState.vue';
 import ConfirmDialog from '@/Components/ConfirmDialog.vue';
 import { useFormat } from '@/Composables/useFormat';
+import { useTranslations } from '@/Composables/useTranslations';
 
 const props = defineProps({
     cars: Object,
@@ -23,6 +24,7 @@ const showDelete = ref(false);
 const carToDelete = ref(null);
 
 const { currency, statusVariant, trafficLightVariant } = useFormat();
+const { t } = useTranslations();
 
 const tabs = computed(() => {
     // Order statuses by typical workflow
@@ -116,16 +118,16 @@ const confirmDelete = () => {
 </script>
 
 <template>
-    <Head title="Cars" />
+    <Head :title="t('cars.title')" />
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="text-xl font-semibold leading-tight text-gray-800">Cars</h2>
+            <h2 class="text-xl font-semibold leading-tight text-gray-800">{{ t('cars.title') }}</h2>
         </template>
 
         <div class="py-8">
             <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <PageHeader title="Inventory" :subtitle="`${cars.total || 0} cars in your fleet`">
+                <PageHeader :title="t('nav.inventory')" :subtitle="t('app.inventory_count', { count: cars.total || 0 })">
                     <template #actions>
                         <Link :href="route('cars.kanban')" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             <Squares2X2Icon class="h-4 w-4" />
@@ -137,7 +139,7 @@ const confirmDelete = () => {
                         </Link>
                         <Link :href="route('cars.create')" class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">
                             <PlusIcon class="h-4 w-4" />
-                            New Car
+                            {{ t('cars.add') }}
                         </Link>
                     </template>
                 </PageHeader>
@@ -146,10 +148,10 @@ const confirmDelete = () => {
                 <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="grid grid-cols-1 gap-4 p-4 sm:grid-cols-3">
                         <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Search</label>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">{{ t('app.search') }}</label>
                             <div class="relative">
                                 <MagnifyingGlassIcon class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                                <input v-model="search" type="text" placeholder="Brand, model, VIN..." class="block w-full rounded-lg border-gray-300 pl-9 text-sm focus:border-indigo-500 focus:ring-indigo-500" />
+                                <input v-model="search" type="text" :placeholder="t('cars.vin') + ', ' + t('cars.make') + '...'" class="block w-full rounded-lg border-gray-300 pl-9 text-sm focus:border-indigo-500 focus:ring-indigo-500" />
                             </div>
                         </div>
                         <div>

@@ -2,10 +2,13 @@
 import { ref } from 'vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { TruckIcon, CheckCircleIcon, DocumentArrowDownIcon } from '@heroicons/vue/24/outline';
+import { useTranslations } from '@/Composables/useTranslations';
 
 const props = defineProps({
     organization: Object,
 });
+
+const { t } = useTranslations();
 
 const form = useForm({
     name: '',
@@ -41,7 +44,7 @@ const submit = () => {
 </script>
 
 <template>
-    <Head title="Buscar mi coche perfecto" />
+    <Head :title="t('car_request_form.title')" />
 
     <div class="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
         <div class="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
@@ -54,7 +57,7 @@ const submit = () => {
                     {{ organization.name }}
                 </h1>
                 <p class="mt-3 text-lg text-gray-600">
-                    Encuentramos tu coche perfecto.
+                    {{ t('car_request_form.subtitle') }}
                 </p>
             </div>
 
@@ -66,8 +69,8 @@ const submit = () => {
                             <TruckIcon class="h-6 w-6 text-indigo-600" />
                         </div>
                         <div>
-                            <h2 class="text-xl font-semibold text-gray-900">Tus preferencias</h2>
-                            <p class="text-sm text-gray-500">Todos los campos marcados con * son obligatorios</p>
+                            <h2 class="text-xl font-semibold text-gray-900">{{ t('car_request_form.section_prefs') }}</h2>
+                            <p class="text-sm text-gray-500">{{ t('car_request_form.section_required_help') }}</p>
                         </div>
                     </div>
                 </div>
@@ -75,36 +78,36 @@ const submit = () => {
                 <form @submit.prevent="submit" class="space-y-8 px-8 py-8">
                     <!-- Contact Info -->
                     <div>
-                        <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-900">Tus datos</h3>
+                        <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-900">{{ t('car_request_form.section_contact') }}</h3>
                         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Nombre completo *</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('car_request_form.field_name') }}</label>
                                 <input
                                     v-model="form.name"
                                     type="text"
                                     required
                                     class="block w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                    placeholder="Tu nombre"
+                                    :placeholder="t('car_request_form.placeholder_name')"
                                 />
                                 <p v-if="form.errors.name" class="mt-1 text-sm text-rose-600">{{ form.errors.name }}</p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('car_request_form.field_email') }}</label>
                                 <input
                                     v-model="form.email"
                                     type="email"
                                     class="block w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                    placeholder="tu@email.com"
+                                    :placeholder="t('car_request_form.placeholder_email')"
                                 />
                                 <p v-if="form.errors.email" class="mt-1 text-sm text-rose-600">{{ form.errors.email }}</p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('car_request_form.field_phone') }}</label>
                                 <input
                                     v-model="form.phone"
                                     type="tel"
                                     class="block w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                    placeholder="+34 600 000 000"
+                                    :placeholder="t('car_request_form.placeholder_phone')"
                                 />
                                 <p v-if="form.errors.phone" class="mt-1 text-sm text-rose-600">{{ form.errors.phone }}</p>
                             </div>
@@ -113,25 +116,25 @@ const submit = () => {
 
                     <!-- Car Preferences -->
                     <div>
-                        <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-900">El coche que buscas</h3>
+                        <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-900">{{ t('car_request_form.section_car') }}</h3>
                         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Marca</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('car_request_form.field_brand') }}</label>
                                 <input
                                     v-model="form.brand"
                                     type="text"
                                     class="block w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                    placeholder="BMW, Mercedes, Audi..."
+                                    :placeholder="t('car_request_form.placeholder_brand')"
                                 />
                                 <p v-if="form.errors.brand" class="mt-1 text-sm text-rose-600">{{ form.errors.brand }}</p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Modelo</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('car_request_form.field_model') }}</label>
                                 <input
                                     v-model="form.model"
                                     type="text"
                                     class="block w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                    placeholder="Serie 3, Clase C, A4..."
+                                    :placeholder="t('car_request_form.placeholder_model')"
                                 />
                                 <p v-if="form.errors.model" class="mt-1 text-sm text-rose-600">{{ form.errors.model }}</p>
                             </div>
@@ -140,17 +143,17 @@ const submit = () => {
                         <!-- Year Range -->
                         <div class="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Año mínimo</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('car_request_form.field_year_min') }}</label>
                                 <select v-model="form.year_min" class="block w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                    <option value="">Cualquiera</option>
+                                    <option value="">{{ t('car_request_form.any_option') }}</option>
                                     <option v-for="year in 2027" :key="year" :value="2028 - year">{{ 2028 - year }}</option>
                                 </select>
                                 <p v-if="form.errors.year_min" class="mt-1 text-sm text-rose-600">{{ form.errors.year_min }}</p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Año máximo</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('car_request_form.field_year_max') }}</label>
                                 <select v-model="form.year_max" class="block w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                    <option value="">Cualquiera</option>
+                                    <option value="">{{ t('car_request_form.any_option') }}</option>
                                     <option v-for="year in 2027" :key="year" :value="2028 - year">{{ 2028 - year }}</option>
                                 </select>
                                 <p v-if="form.errors.year_max" class="mt-1 text-sm text-rose-600">{{ form.errors.year_max }}</p>
@@ -160,26 +163,26 @@ const submit = () => {
                         <!-- Budget Range -->
                         <div class="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Presupuesto mínimo (€)</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('car_request_form.field_budget_min') }}</label>
                                 <input
                                     v-model="form.budget_min"
                                     type="number"
                                     min="0"
                                     step="500"
                                     class="block w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                    placeholder="10000"
+                                    :placeholder="t('car_request_form.placeholder_budget')"
                                 />
                                 <p v-if="form.errors.budget_min" class="mt-1 text-sm text-rose-600">{{ form.errors.budget_min }}</p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Presupuesto máximo (€)</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('car_request_form.field_budget_max') }}</label>
                                 <input
                                     v-model="form.budget_max"
                                     type="number"
                                     min="0"
                                     step="500"
                                     class="block w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                    placeholder="30000"
+                                    :placeholder="t('car_request_form.placeholder_budget_max')"
                                 />
                                 <p v-if="form.errors.budget_max" class="mt-1 text-sm text-rose-600">{{ form.errors.budget_max }}</p>
                             </div>
@@ -187,14 +190,14 @@ const submit = () => {
 
                         <!-- Mileage -->
                         <div class="mt-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Kilometraje máximo</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('car_request_form.field_mileage_max') }}</label>
                             <input
                                 v-model="form.mileage_max"
                                 type="number"
                                 min="0"
                                 step="10000"
                                 class="block w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                placeholder="100000 km"
+                                :placeholder="t('car_request_form.placeholder_mileage')"
                             />
                             <p v-if="form.errors.mileage_max" class="mt-1 text-sm text-rose-600">{{ form.errors.mileage_max }}</p>
                         </div>
@@ -202,45 +205,45 @@ const submit = () => {
 
                     <!-- Technical Preferences -->
                     <div>
-                        <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-900">Preferencias técnicas</h3>
+                        <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-900">{{ t('car_request_form.section_tech') }}</h3>
                         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Combustible</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('car_request_form.field_fuel') }}</label>
                                 <select v-model="form.fuel" class="block w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                    <option value="">Cualquiera</option>
+                                    <option value="">{{ t('car_request_form.any_option') }}</option>
                                     <option v-for="fuel in fuelTypes" :key="fuel" :value="fuel">{{ fuel }}</option>
                                 </select>
                                 <p v-if="form.errors.fuel" class="mt-1 text-sm text-rose-600">{{ form.errors.fuel }}</p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Cambio</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('car_request_form.field_transmission') }}</label>
                                 <select v-model="form.transmission" class="block w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                    <option value="">Cualquiera</option>
+                                    <option value="">{{ t('car_request_form.any_option') }}</option>
                                     <option v-for="trans in transmissions" :key="trans" :value="trans">{{ trans }}</option>
                                 </select>
                                 <p v-if="form.errors.transmission" class="mt-1 text-sm text-rose-600">{{ form.errors.transmission }}</p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Carrocería</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('car_request_form.field_body_type') }}</label>
                                 <select v-model="form.body_type" class="block w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                    <option value="">Cualquiera</option>
+                                    <option value="">{{ t('car_request_form.any_option') }}</option>
                                     <option v-for="type in bodyTypes" :key="type" :value="type">{{ type }}</option>
                                 </select>
                                 <p v-if="form.errors.body_type" class="mt-1 text-sm text-rose-600">{{ form.errors.body_type }}</p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Puertas</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('car_request_form.field_doors') }}</label>
                                 <select v-model="form.doors" class="block w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                    <option value="">Cualquiera</option>
+                                    <option value="">{{ t('car_request_form.any_option') }}</option>
                                     <option :value="3">3</option>
                                     <option :value="5">5</option>
                                 </select>
                                 <p v-if="form.errors.doors" class="mt-1 text-sm text-rose-600">{{ form.errors.doors }}</p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Plazas</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('car_request_form.field_seats') }}</label>
                                 <select v-model="form.seats" class="block w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                    <option value="">Cualquiera</option>
+                                    <option value="">{{ t('car_request_form.any_option') }}</option>
                                     <option :value="5">5</option>
                                     <option :value="7">7</option>
                                     <option :value="9">9</option>
@@ -248,9 +251,9 @@ const submit = () => {
                                 <p v-if="form.errors.seats" class="mt-1 text-sm text-rose-600">{{ form.errors.seats }}</p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Color</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('car_request_form.field_color') }}</label>
                                 <select v-model="form.color" class="block w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                    <option value="">Cualquiera</option>
+                                    <option value="">{{ t('car_request_form.any_option') }}</option>
                                     <option v-for="color in colors" :key="color" :value="color">{{ color }}</option>
                                 </select>
                                 <p v-if="form.errors.color" class="mt-1 text-sm text-rose-600">{{ form.errors.color }}</p>
@@ -260,25 +263,25 @@ const submit = () => {
 
                     <!-- Additional Info -->
                     <div>
-                        <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-900">Información adicional</h3>
+                        <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-900">{{ t('car_request_form.section_additional') }}</h3>
                         <div class="space-y-6">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Requisitos obligatorios</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('car_request_form.field_requirements') }}</label>
                                 <textarea
                                     v-model="form.requirements"
                                     rows="3"
                                     class="block w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                    placeholder="GPS, cámara de aparcamiento, asientos de cuero, etc..."
+                                    :placeholder="t('car_request_form.placeholder_requirements')"
                                 ></textarea>
                                 <p v-if="form.errors.requirements" class="mt-1 text-sm text-rose-600">{{ form.errors.requirements }}</p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Notas adicionales</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('car_request_form.field_notes') }}</label>
                                 <textarea
                                     v-model="form.notes"
                                     rows="2"
                                     class="block w-full rounded-lg border-gray-300 text-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                    placeholder="Cualquier otra información que consideres relevante..."
+                                    :placeholder="t('car_request_form.placeholder_notes')"
                                 ></textarea>
                                 <p v-if="form.errors.notes" class="mt-1 text-sm text-rose-600">{{ form.errors.notes }}</p>
                             </div>
@@ -288,7 +291,7 @@ const submit = () => {
                     <!-- Submit -->
                     <div class="flex items-center justify-end gap-4 border-t border-gray-200 pt-6">
                         <p class="text-sm text-gray-500">
-                            Tus datos serán utilizados solo para contactarte sobre tu solicitud.
+                            {{ t('car_request_form.privacy') }}
                         </p>
                         <button
                             type="submit"
@@ -296,8 +299,8 @@ const submit = () => {
                             class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <CheckCircleIcon v-if="!form.processing" class="h-5 w-5" />
-                            <span v-if="form.processing">Enviando...</span>
-                            <span v-else>Enviar solicitud</span>
+                            <span v-if="form.processing">{{ t('car_request_form.sending') }}</span>
+                            <span v-else>{{ t('car_request_form.submit') }}</span>
                         </button>
                     </div>
                 </form>
@@ -305,7 +308,7 @@ const submit = () => {
 
             <!-- Footer -->
             <div class="mt-8 text-center text-sm text-gray-500">
-                <p>&copy; 2026 {{ organization.name }}. Todos los derechos reservados.</p>
+                <p>&copy; {{ new Date().getFullYear() }} {{ organization.name }}. {{ t('car_request_form.rights') }}</p>
             </div>
         </div>
 
@@ -317,7 +320,7 @@ const submit = () => {
                 class="flex items-center gap-2 rounded-full bg-cyan-600 px-4 py-3 text-sm font-semibold text-white shadow-lg hover:bg-cyan-700 transition-colors"
             >
                 <DocumentArrowDownIcon class="h-5 w-5" />
-                <span class="hidden sm:inline">Folleto</span>
+                <span class="hidden sm:inline">{{ t('marketplace.folleto') }}</span>
             </a>
         </div>
     </div>

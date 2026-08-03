@@ -63,25 +63,25 @@ const copyMarketplaceUrl = async () => {
 </script>
 
 <template>
-    <Head title="Dashboard" />
+    <Head :title="t('nav.dashboard')" />
 
     <AuthenticatedLayout>
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ organization?.name || 'Dashboard' }}
+                {{ organization?.name || t('nav.dashboard') }}
             </h2>
         </template>
 
         <div class="py-8">
             <div class="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8">
                 <PageHeader
-                    :title="`Welcome back, ${organization?.name || 'there'}`"
-                    subtitle="Here's what's happening with your inventory today."
+                    :title="`Bienvenido, ${organization?.name || 'usuario'}`"
+                    :subtitle="t('app.dashboard_subtitle')"
                 >
                     <template #actions>
                         <Link :href="route('cars.create')" class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">
                             <TruckIcon class="h-4 w-4" />
-                            New car
+                            {{ t('cars.add') }}
                         </Link>
                     </template>
                 </PageHeader>

@@ -41,7 +41,7 @@ export function useTranslations() {
     const messages = ref({});
     const ready = ref(false);
 
-    const locale = computed(() => page.props.locale || 'en');
+    const locale = computed(() => page.props.locale || 'es');
     const isEnglish = computed(() => locale.value === 'en');
     const isSpanish = computed(() => locale.value === 'es');
 

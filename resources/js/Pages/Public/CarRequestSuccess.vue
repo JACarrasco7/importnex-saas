@@ -1,14 +1,17 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
 import { CheckCircleIcon, TruckIcon, PhoneIcon, EnvelopeIcon } from '@heroicons/vue/24/outline';
+import { useTranslations } from '@/Composables/useTranslations';
 
 const props = defineProps({
     organization: Object,
 });
+
+const { t } = useTranslations();
 </script>
 
 <template>
-    <Head title="Solicitud enviada" />
+    <Head :title="t('car_request_success.title')" />
 
     <div class="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
         <div class="mx-auto max-w-2xl px-4 py-16 sm:px-6 lg:px-8">
@@ -19,10 +22,10 @@ const props = defineProps({
                     </div>
 
                     <h1 class="text-3xl font-bold text-gray-900">
-                        ¡Solicitud recibida!
+                        {{ t('car_request_success.heading') }}
                     </h1>
                     <p class="mt-4 text-lg text-gray-600">
-                        Hemos recibido tu solicitud. Nuestro equipo analizará tus preferencias y te contactará pronto con las mejores opciones.
+                        {{ t('car_request_success.description') }}
                     </p>
 
                     <div v-if="organization.logo" class="mx-auto mt-8 h-16 w-16 overflow-hidden rounded-xl bg-white shadow-md">
@@ -35,7 +38,7 @@ const props = defineProps({
 
                 <div class="border-t border-gray-200 bg-gray-50 px-8 py-6">
                     <h2 class="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-900">
-                        ¿Qué pasa ahora?
+                        {{ t('car_request_success.what_now') }}
                     </h2>
                     <div class="space-y-4">
                         <div class="flex items-start gap-3">
@@ -43,8 +46,8 @@ const props = defineProps({
                                 <TruckIcon class="h-5 w-5 text-indigo-600" />
                             </div>
                             <div>
-                                <p class="text-sm font-medium text-gray-900">Revisamos tu solicitud</p>
-                                <p class="text-sm text-gray-500">Nuestro equipo analizará tus preferencias en detalle.</p>
+                                <p class="text-sm font-medium text-gray-900">{{ t('car_request_success.step1_title') }}</p>
+                                <p class="text-sm text-gray-500">{{ t('car_request_success.step1_desc') }}</p>
                             </div>
                         </div>
                         <div class="flex items-start gap-3">
@@ -52,8 +55,8 @@ const props = defineProps({
                                 <PhoneIcon class="h-5 w-5 text-indigo-600" />
                             </div>
                             <div>
-                                <p class="text-sm font-medium text-gray-900">Te contactamos</p>
-                                <p class="text-sm text-gray-500">Nos pondremos en contacto contigo en breve con opciones.</p>
+                                <p class="text-sm font-medium text-gray-900">{{ t('car_request_success.step2_title') }}</p>
+                                <p class="text-sm text-gray-500">{{ t('car_request_success.step2_desc') }}</p>
                             </div>
                         </div>
                         <div class="flex items-start gap-3">
@@ -61,8 +64,8 @@ const props = defineProps({
                                 <EnvelopeIcon class="h-5 w-5 text-indigo-600" />
                             </div>
                             <div>
-                                <p class="text-sm font-medium text-gray-900">Recibes propuestas</p>
-                                <p class="text-sm text-gray-500">Te enviaremos las mejores opciones según tu presupuesto.</p>
+                                <p class="text-sm font-medium text-gray-900">{{ t('car_request_success.step3_title') }}</p>
+                                <p class="text-sm text-gray-500">{{ t('car_request_success.step3_desc') }}</p>
                             </div>
                         </div>
                     </div>
@@ -73,13 +76,13 @@ const props = defineProps({
                         :href="route('public.car-request.index', organization.slug)"
                         class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-6 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
                     >
-                        Enviar otra solicitud
+                        {{ t('car_request_success.send_another') }}
                     </Link>
                 </div>
             </div>
 
             <div class="mt-8 text-center text-sm text-gray-500">
-                <p>&copy; 2026 {{ organization.name }}. Todos los derechos reservados.</p>
+                <p>&copy; {{ new Date().getFullYear() }} {{ organization.name }}. {{ t('car_request_success.rights') }}</p>
             </div>
         </div>
     </div>

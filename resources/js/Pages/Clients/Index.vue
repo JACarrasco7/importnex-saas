@@ -8,6 +8,7 @@ import PageHeader from '@/Components/PageHeader.vue';
 import EmptyState from '@/Components/EmptyState.vue';
 import ConfirmDialog from '@/Components/ConfirmDialog.vue';
 import { useFormat } from '@/Composables/useFormat';
+import { useTranslations } from '@/Composables/useTranslations';
 
 const props = defineProps({
     clients: Object,
@@ -21,6 +22,7 @@ const showDelete = ref(false);
 const clientToDelete = ref(null);
 
 const { currency, statusVariant } = useFormat();
+const { t } = useTranslations();
 
 const tabs = computed(() => [
     { id: 'all', label: 'All', count: props.clients.total },
@@ -84,20 +86,20 @@ const confirmDelete = () => {
 </script>
 
 <template>
-    <Head title="Clients" />
+    <Head :title="t('clients.title')" />
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="text-xl font-semibold leading-tight text-gray-800">Clients</h2>
+            <h2 class="text-xl font-semibold leading-tight text-gray-800">{{ t('clients.title') }}</h2>
         </template>
 
         <div class="py-8">
             <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <PageHeader title="Clients" :subtitle="`${clients.total || 0} in your CRM`">
+                <PageHeader :title="t('clients.title')" :subtitle="t('clients.subtitle', { count: clients.total || 0 })">
                     <template #actions>
                         <Link :href="route('clients.create')" class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">
                             <PlusIcon class="h-4 w-4" />
-                            New Client
+                            {{ t('clients.add') }}
                         </Link>
                     </template>
                 </PageHeader>

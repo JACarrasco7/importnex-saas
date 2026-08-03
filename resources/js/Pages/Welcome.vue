@@ -72,7 +72,7 @@ const stats = [
                 </p>
                 <div class="mt-10 flex items-center justify-center gap-4">
                     <Link :href="route('marketplace.index')" class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-6 py-3 text-base font-semibold text-white shadow-lg hover:bg-emerald-500">
-                        Ver Marketplace
+                        {{ t('welcome.view_marketplace') }}
                         <ArrowRightIcon class="h-4 w-4" />
                     </Link>
                     <Link :href="route('register')" class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-6 py-3 text-base font-semibold text-white shadow-lg hover:bg-indigo-500">

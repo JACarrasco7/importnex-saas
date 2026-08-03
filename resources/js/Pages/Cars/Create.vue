@@ -6,6 +6,9 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import FormSection from '@/Components/FormSection.vue';
 import FormField from '@/Components/FormField.vue';
+import { useTranslations } from '@/Composables/useTranslations';
+
+const { t } = useTranslations();
 
 const props = defineProps({
     clients: Array,
@@ -155,11 +158,11 @@ const scrapeFromUrl = async () => {
 </script>
 
 <template>
-    <Head title="New Car" />
+    <Head :title="t('cars.add')" />
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="text-xl font-semibold leading-tight text-gray-800">New Car</h2>
+            <h2 class="text-xl font-semibold leading-tight text-gray-800">{{ t('cars.add') }}</h2>
         </template>
 
         <div class="py-8">
