@@ -72,21 +72,21 @@ const filteredCars = computed(() => {
 
 // Trust signals
 const trustItems = [
-    { icon: ShieldCheckIcon, label: t('trust_verified'), description: t('trust_verified_desc') },
-    { icon: ChartBarIcon, label: t('trust_investigated'), description: t('trust_investigated_desc') },
-    { icon: TruckIcon, label: t('trust_import'), description: t('trust_import_desc') },
+    { icon: ShieldCheckIcon, label: t('marketplace.trust_verified'), description: t('marketplace.trust_verified_desc') },
+    { icon: ChartBarIcon, label: t('marketplace.trust_investigated'), description: t('marketplace.trust_investigated_desc') },
+    { icon: TruckIcon, label: t('marketplace.trust_import'), description: t('marketplace.trust_import_desc') },
 ];
 
 // How it works
 const howItWorks = [
-    { step: '1', title: t('step1_title'), description: t('step1_desc') },
-    { step: '2', title: t('step2_title'), description: t('step2_desc') },
-    { step: '3', title: t('step3_title'), description: t('step3_desc') },
+    { step: '1', title: t('marketplace.step1_title'), description: t('marketplace.step1_desc') },
+    { step: '2', title: t('marketplace.step2_title'), description: t('marketplace.step2_desc') },
+    { step: '3', title: t('marketplace.step3_title'), description: t('marketplace.step3_desc') },
 ];
 </script>
 
 <template>
-    <Head :title="t('title')" />
+    <Head :title="t('marketplace.title')" />
 
     <div class="min-h-screen bg-white">
         <!-- Public header -->
@@ -97,16 +97,16 @@ const howItWorks = [
                         <ShieldCheckIcon class="h-5 w-5 text-white" />
                     </span>
                     <div>
-                        <p class="text-base font-bold leading-tight text-gray-900">{{ t('brand') }}</p>
+                        <p class="text-base font-bold leading-tight text-gray-900">{{ t('marketplace.brand') }}</p>
                         <p class="text-[11px] leading-tight text-gray-500">by Importnex</p>
                     </div>
                 </Link>
                 <nav class="flex items-center gap-3">
-                    <a :href="locale === 'es' ? '#catalogo' : '#catalog'" class="hidden text-sm font-medium text-gray-700 hover:text-gray-900 sm:inline">{{ t('section_catalog') }}</a>
-                    <a :href="locale === 'es' ? '#como-funciona' : '#how-it-works'" class="hidden text-sm font-medium text-gray-700 hover:text-gray-900 sm:inline">{{ t('section_how_it_works') }}</a>
+                    <a :href="locale === 'es' ? '#catalogo' : '#catalog'" class="hidden text-sm font-medium text-gray-700 hover:text-gray-900 sm:inline">{{ t('marketplace.section_catalog') }}</a>
+                    <a :href="locale === 'es' ? '#como-funciona' : '#how-it-works'" class="hidden text-sm font-medium text-gray-700 hover:text-gray-900 sm:inline">{{ t('marketplace.section_how_it_works') }}</a>
                     <a href="#contacto" class="inline-flex items-center gap-1.5 rounded-lg bg-gray-900 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-800">
                         <PhoneIcon class="h-4 w-4" />
-                        {{ t('cta_contact') }}
+                        {{ t('marketplace.cta_contact') }}
                     </a>
                 </nav>
             </div>
@@ -117,26 +117,26 @@ const howItWorks = [
             <div class="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-emerald-200/30 blur-3xl"></div>
             <div class="absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-teal-200/30 blur-3xl"></div>
 
-            <div class="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+            <div class="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
                 <div class="mx-auto max-w-3xl text-center">
                     <span class="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-4 py-1.5 text-sm font-semibold text-emerald-700">
                         <SparklesIcon class="h-4 w-4" />
-                        {{ t('tagline') }}
+                        {{ t('marketplace.tagline') }}
                     </span>
                     <h1 class="mt-6 text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl">
-                        {{ t('hero_title') }}
+                        {{ t('marketplace.hero_title') }}
                     </h1>
                     <p class="mx-auto mt-5 max-w-2xl text-lg text-gray-600">
-                        {{ t('description') }}
+                        {{ t('marketplace.description') }}
                     </p>
                     <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
                         <a href="#catalogo" class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-6 py-3 text-base font-semibold text-white shadow-lg hover:bg-emerald-700">
-                            {{ t('cta_primary') }}
+                            {{ t('marketplace.cta_primary') }}
                             <ArrowRightIcon class="h-4 w-4" />
                         </a>
                         <a href="#contacto" class="inline-flex items-center gap-2 rounded-lg bg-white px-6 py-3 text-base font-semibold text-gray-900 shadow-sm ring-1 ring-gray-200 hover:bg-gray-50">
                             <PhoneIcon class="h-4 w-4" />
-                            {{ t('cta_secondary') }}
+                            {{ t('marketplace.cta_secondary') }}
                         </a>
                     </div>
 
@@ -158,8 +158,8 @@ const howItWorks = [
         <section :id="locale === 'es' ? 'como-funciona' : 'how-it-works'" class="border-y border-gray-200 bg-gray-50 py-16">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="mx-auto max-w-2xl text-center">
-                    <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">{{ t('section_how_it_works') }}</h2>
-                    <p class="mt-3 text-base text-gray-600">{{ t('section_how_it_works_desc') }}</p>
+                    <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">{{ t('marketplace.section_how_it_works') }}</h2>
+                    <p class="mt-3 text-base text-gray-600">{{ t('marketplace.section_how_it_works_desc') }}</p>
                 </div>
                 <div class="mt-12 grid grid-cols-1 gap-6 md:grid-cols-3">
                     <div v-for="item in howItWorks" :key="item.step" class="relative rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
@@ -178,40 +178,40 @@ const howItWorks = [
             <div class="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8">
                 <div class="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end">
                     <div>
-                        <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">{{ t('section_catalog') }}</h2>
-                        <p class="mt-2 text-sm text-gray-600">{{ t('catalog_desc', { count: cars.total || 0 }) }}</p>
+                        <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">{{ t('marketplace.section_catalog') }}</h2>
+                        <p class="mt-2 text-sm text-gray-600">{{ cars.total || 0 }} {{ t('marketplace.catalog_desc').replace(':count', cars.total || 0) }}</p>
                     </div>
                     <a href="#contacto" class="inline-flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800">
                         <PhoneIcon class="h-4 w-4" />
-                        {{ t('cta_request_notify') }}
+                        {{ t('marketplace.cta_request_notify') }}
                     </a>
                 </div>
 
                 <!-- Filters -->
                 <div class="grid grid-cols-1 gap-3 rounded-2xl bg-gray-50 p-4 sm:grid-cols-2 lg:grid-cols-3">
                     <div class="sm:col-span-2 lg:col-span-2">
-                        <label class="mb-1.5 block text-xs font-semibold text-gray-700">{{ t('filter_search') }}</label>
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-700">{{ t('marketplace.filter_search') }}</label>
                         <div class="relative">
                             <MagnifyingGlassIcon class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                             <input
                                 v-model="search"
                                 type="text"
-                                :placeholder="t('filter_search_placeholder')"
+                                :placeholder="t('marketplace.filter_search_placeholder')"
                                 class="block w-full rounded-lg border-gray-200 pl-9 text-sm focus:border-emerald-500 focus:ring-emerald-500"
                             />
                         </div>
                     </div>
                     <div>
-                        <label class="mb-1.5 block text-xs font-semibold text-gray-700">{{ t('filter_budget') }}</label>
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-700">{{ t('marketplace.filter_budget') }}</label>
                         <div class="flex gap-2">
-                            <input v-model.number="minPrice" type="number" min="0" step="500" :placeholder="t('filter_budget_min')" class="block w-full rounded-lg border-gray-200 text-sm focus:border-emerald-500 focus:ring-emerald-500" />
-                            <input v-model.number="maxPrice" type="number" min="0" step="500" :placeholder="t('filter_budget_max')" class="block w-full rounded-lg border-gray-200 text-sm focus:border-emerald-500 focus:ring-emerald-500" />
+                            <input v-model.number="minPrice" type="number" min="0" step="500" :placeholder="t('marketplace.filter_budget_min')" class="block w-full rounded-lg border-gray-200 text-sm focus:border-emerald-500 focus:ring-emerald-500" />
+                            <input v-model.number="maxPrice" type="number" min="0" step="500" :placeholder="t('marketplace.filter_budget_max')" class="block w-full rounded-lg border-gray-200 text-sm focus:border-emerald-500 focus:ring-emerald-500" />
                         </div>
                     </div>
                     <div>
-                        <label class="mb-1.5 block text-xs font-semibold text-gray-700">{{ t('filter_mileage') }}</label>
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-700">{{ t('marketplace.filter_mileage') }}</label>
                         <div class="flex gap-2">
-                            <input v-model.number="mileageFilter" type="number" min="0" step="1000" :placeholder="t('filter_mileage_placeholder')" class="block w-full rounded-lg border-gray-200 text-sm focus:border-emerald-500 focus:ring-emerald-500" />
+                            <input v-model.number="mileageFilter" type="number" min="0" step="1000" :placeholder="t('marketplace.filter_mileage_placeholder')" class="block w-full rounded-lg border-gray-200 text-sm focus:border-emerald-500 focus:ring-emerald-500" />
                         </div>
                     </div>
                 </div>
@@ -219,7 +219,7 @@ const howItWorks = [
                 <!-- Tabs (verdict quick filter) -->
                 <div class="flex flex-wrap gap-2">
                     <button
-                        v-for="v in [{id:'all',label:t('tab_all')},{id:'Buy',label:t('tab_recommended')},{id:'Buy if price drops',label:t('tab_price_drop')}]"
+                        v-for="v in [{id:'all',label:t('marketplace.tab_all')},{id:'Buy',label:t('marketplace.tab_recommended')},{id:'Buy if price drops',label:t('marketplace.tab_price_drop')}]"
                         :key="v.id"
                         @click="verdictFilter = v.id"
                         :class="[
@@ -268,25 +268,25 @@ const howItWorks = [
                             </div>
                             <dl class="mt-4 grid grid-cols-3 gap-3 text-xs">
                                 <div>
-                                    <dt class="text-gray-500">{{ t('year') }}</dt>
+                                    <dt class="text-gray-500">{{ t('marketplace.year') }}</dt>
                                     <dd class="font-semibold text-gray-900">{{ car.year }}</dd>
                                 </div>
                                 <div>
-                                    <dt class="text-gray-500">{{ t('km') }}</dt>
-                                    <dd class="font-semibold text-gray-900">{{ car.mileage ? (car.mileage / 1000).toFixed(0) + 'k' : t('not_available') }}</dd>
+                                    <dt class="text-gray-500">{{ t('marketplace.km_label') }}</dt>
+                                    <dd class="font-semibold text-gray-900">{{ car.mileage ? (car.mileage / 1000).toFixed(0) + 'k' : t('marketplace.not_available') }}</dd>
                                 </div>
                                 <div>
-                                    <dt class="text-gray-500">{{ t('fuel') }}</dt>
-                                    <dd class="truncate font-semibold text-gray-900">{{ car.fuel || t('not_available') }}</dd>
+                                    <dt class="text-gray-500">{{ t('marketplace.fuel') }}</dt>
+                                    <dd class="truncate font-semibold text-gray-900">{{ car.fuel || t('marketplace.not_available') }}</dd>
                                 </div>
                             </dl>
                             <div class="mt-5 flex items-end justify-between border-t border-gray-100 pt-4">
                                 <div>
-                                    <p class="text-xs text-gray-500">{{ t('price_from') }}</p>
+                                    <p class="text-xs text-gray-500">{{ t('marketplace.price_from') }}</p>
                                     <p class="text-2xl font-extrabold text-gray-900">{{ currency(car.purchase_price) }}</p>
                                 </div>
                                 <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-                                    {{ t('view_report') }}
+                                    {{ t('marketplace.view_report') }}
                                     <ArrowRightIcon class="h-3 w-3" />
                                 </span>
                             </div>
@@ -299,13 +299,13 @@ const howItWorks = [
                     <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
                         <SparklesIcon class="h-8 w-8 text-emerald-600" />
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900">{{ t('no_cars_title') }}</h3>
+                    <h3 class="text-lg font-semibold text-gray-900">{{ t('marketplace.no_cars_title') }}</h3>
                     <p class="mx-auto mt-2 max-w-md text-sm text-gray-600">
-                        {{ t('no_cars_desc') }}
+                        {{ t('marketplace.no_cars_desc') }}
                     </p>
                     <a href="#contacto" class="mt-6 inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">
                         <PhoneIcon class="h-4 w-4" />
-                        {{ t('cta_request_notify') }}
+                        {{ t('marketplace.cta_request_notify') }}
                     </a>
                 </div>
             </div>
@@ -315,27 +315,27 @@ const howItWorks = [
         <section id="contacto" class="bg-gradient-to-br from-gray-900 to-emerald-900 py-16">
             <div class="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
                 <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-                    {{ t('section_contact') }}
+                    {{ t('marketplace.section_contact') }}
                 </h2>
                 <p class="mx-auto mt-3 max-w-2xl text-lg text-gray-300">
-                    {{ t('section_contact_desc') }}
+                    {{ t('marketplace.section_contact_desc') }}
                 </p>
                 <div class="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
                     <a href="https://wa.me/34675701439" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-6 py-3 text-base font-semibold text-white shadow-lg hover:bg-emerald-400">
                         <PhoneIcon class="h-5 w-5" />
-                        {{ t('cta_whatsapp') }}
+                        {{ t('marketplace.cta_whatsapp') }}
                     </a>
                     <a href="tel:+34675701439" class="inline-flex items-center gap-2 rounded-lg bg-white/10 px-6 py-3 text-base font-semibold text-white ring-1 ring-white/20 hover:bg-white/20">
                         <PhoneIcon class="h-5 w-5" />
-                        {{ t('cta_call') }}
+                        {{ t('marketplace.cta_call') }}
                     </a>
                     <a href="mailto:jjimportmotors@gmail.com" class="inline-flex items-center gap-2 rounded-lg bg-white/10 px-6 py-3 text-base font-semibold text-white ring-1 ring-white/20 hover:bg-white/20">
                         <EnvelopeIcon class="h-5 w-5" />
-                        {{ t('cta_email') }}
+                        {{ t('marketplace.cta_email') }}
                     </a>
                 </div>
                 <p class="mt-8 text-sm text-gray-400">
-                    Importnex &middot; JJ Import Motors &middot; {{ t('tagline_sub') }}
+                    Importnex &middot; JJ Import Motors &middot; Servicio llave en mano Alemania → España
                 </p>
             </div>
         </section>
@@ -348,10 +348,10 @@ const howItWorks = [
                         <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600">
                             <ShieldCheckIcon class="h-4 w-4 text-white" />
                         </span>
-                        <span class="text-sm font-semibold text-gray-900">{{ t('brand') }}</span>
+                        <span class="text-sm font-semibold text-gray-900">{{ t('marketplace.brand') }}</span>
                     </div>
                     <p class="text-xs text-gray-500">
-                        &copy; {{ new Date().getFullYear() }} {{ t('footer_copy').replace(':year', new Date().getFullYear()) }}
+                        &copy; {{ new Date().getFullYear() }} {{ t('marketplace.footer_copy').replace(':year', new Date().getFullYear()) }}
                     </p>
                 </div>
             </div>
@@ -365,7 +365,7 @@ const howItWorks = [
                 class="flex items-center gap-2 rounded-full bg-cyan-600 px-4 py-3 text-sm font-semibold text-white shadow-lg hover:bg-cyan-700 transition-colors"
             >
                 <DocumentArrowDownIcon class="h-5 w-5" />
-                <span class="hidden sm:inline">{{ t('folleto') }}</span>
+                <span class="hidden sm:inline">{{ t('marketplace.folleto') }}</span>
             </a>
         </div>
     </div>
