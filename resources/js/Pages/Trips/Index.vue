@@ -6,6 +6,9 @@ import PageHeader from '@/Components/PageHeader.vue';
 import Badge from '@/Components/Badge.vue';
 import EmptyState from '@/Components/EmptyState.vue';
 import { useFormat } from '@/Composables/useFormat';
+import { useTranslations } from '@/Composables/useTranslations';
+
+const { t } = useTranslations();
 
 const props = defineProps({
     trips: Array,
@@ -17,19 +20,19 @@ const { currency, statusVariant } = useFormat();
 </script>
 
 <template>
-    <Head title="Trip Planner" />
+    <Head :title="t('trips.title')" />
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Trip Planner</h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ t('trips.title') }}</h2>
         </template>
 
         <div class="py-8">
             <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <PageHeader title="Trip Planner" subtitle="Optimize logistics by grouping cars by city">
+                <PageHeader :title="t('trips.title')" :subtitle="t('trips.subtitle')">
                     <template #actions>
                         <span class="rounded-lg bg-white px-4 py-2 text-sm text-gray-700 shadow-sm ring-1 ring-gray-200">
-                            <strong>{{ totalCars }}</strong> cars · <strong>{{ currency(totalTransport) }}</strong> transport
+                            <strong>{{ totalCars }}</strong> {{ t('map.cars') }} · <strong>{{ currency(totalTransport) }}</strong> {{ t('trips.transport') }}
                         </span>
                     </template>
                 </PageHeader>

@@ -44,11 +44,11 @@ const confirmDelete = () => {
 </script>
 
 <template>
-    <Head title="Alerts" />
+    <Head :title="t('alerts.title')" />
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Alerts</h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ t('alerts.title') }}</h2>
         </template>
 
         <div class="py-8">

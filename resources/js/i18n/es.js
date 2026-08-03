@@ -124,6 +124,8 @@ export default {
     },
     subscription: {
         title: 'Suscripción',
+        choose_plan: 'Elige tu plan',
+        subtitle: 'Mejora o reduce tu suscripción en cualquier momento',
         current_plan: 'Plan Actual',
         upgrade: 'Subir de Plan',
         downgrade: 'Bajar de Plan',
@@ -134,6 +136,7 @@ export default {
     },
     billing: {
         title: 'Facturación',
+        subtitle: 'Facturas, pagos y suscripción',
         invoices: 'Facturas',
         no_invoices: 'Aún no hay facturas',
         download: 'Descargar',
@@ -147,6 +150,7 @@ export default {
     },
     profile: {
         title: 'Perfil',
+        subtitle: 'Gestiona los ajustes de tu cuenta',
         update_profile: 'Actualizar Perfil',
         update_password: 'Actualizar Contraseña',
         current_password: 'Contraseña Actual',
@@ -157,6 +161,8 @@ export default {
     },
     organization: {
         title: 'Organización',
+        edit: 'Editar Organización',
+        edit_subtitle: 'Actualiza los datos de la organización y el proveedor de IA',
         name: 'Nombre de la Organización',
         members: 'Miembros',
         invite_user: 'Invitar Usuario',
@@ -166,6 +172,7 @@ export default {
     },
     common: {
         confirm: 'Confirmar',
+        empty: 'Vacío',
         back: 'Atrás',
         next: 'Siguiente',
         submit: 'Enviar',
@@ -220,6 +227,10 @@ export default {
     },
     finance: {
         title: 'Finanzas',
+        transport: 'Transporte',
+        taxes: 'Impuestos (ITV+COC+DGT)',
+        professional_fees: 'Honorarios profesionales',
+        tax_breakdown: 'Desglose de impuestos',
         dashboard: 'Panel de Finanzas',
         p_and_l: 'P&L',
         transport_costs: 'Costos de transporte',
@@ -227,6 +238,8 @@ export default {
     },
     trips: {
         title: 'Planificador de Viajes',
+        subtitle: 'Optimiza la logística agrupando coches por ciudad',
+        transport: 'transporte',
         logistics: 'Logística',
     },
     requests: {
@@ -269,6 +282,21 @@ export default {
             completed: 'Completada',
             cancelled: 'Cancelada',
         },
+    },
+    map: {
+        title: 'Vista geográfica',
+        subtitle: 'Ve dónde están ubicados tus coches',
+        cars: 'coches',
+        cities: 'ciudades',
+        cars_in: 'coches en',
+        empty_title: 'Aún no hay datos de ubicación',
+        empty_desc: 'Añade lat/lng a tus coches para verlos en el mapa.',
+    },
+    contacts: {
+        title: 'Contactos',
+        subtitle: ':count contactos en tu red',
+        network_title: 'Red',
+        add: 'Nuevo Contacto',
     },
     marketplace: {
         title: 'Verified Cars - Marketplace',

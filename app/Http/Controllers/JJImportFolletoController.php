@@ -11,14 +11,17 @@ class JJImportFolletoController extends Controller
 {
     public function download(Request $request)
     {
-        $cachePath = storage_path('app/public/jj-import-folleto.pdf');
         $publicPath = public_path('jj-import-folleto.pdf');
 
-        if (file_exists($cachePath) && filesize($cachePath) > 100000) {
-            return response()->download($cachePath, 'JJ_Import_Motors_Folleto.pdf');
+        // Serve static PDF directly (PDF is generated locally and uploaded via SCP)
+        if (file_exists($publicPath) && filesize($publicPath) > 100000) {
+            return response()->download($publicPath, 'JJ_Import_Motors_Folleto.pdf');
         }
 
+        // Fallback: try to generate on the fly (requires Chrome/Chromium on server)
         try {
+            $cachePath = storage_path('app/public/jj-import-folleto.pdf');
+
             $logoPath = public_path('images/jj-import/logo-horizontal-blanco.png');
             $logoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
 
@@ -53,19 +56,14 @@ class JJImportFolletoController extends Controller
 
             if (file_exists($cachePath)) {
                 copy($cachePath, $publicPath);
+                return response()->download($cachePath, 'JJ_Import_Motors_Folleto.pdf');
             }
-
-            return response()->download($cachePath, 'JJ_Import_Motors_Folleto.pdf');
         } catch (\Exception $e) {
             Log::error('Error generando PDF JJ Import Motors: ' . $e->getMessage());
-
-            if (file_exists($publicPath)) {
-                return response()->download($publicPath, 'JJ_Import_Motors_Folleto.pdf');
-            }
-
-            return response()->json([
-                'error' => 'No se pudo generar el PDF. Configura Chrome/Chromium en el servidor.',
-            ], 500);
         }
+
+        return response()->json([
+            'error' => 'No se pudo generar el PDF. Configura Chrome/Chromium en el servidor.',
+        ], 500);
     }
 }

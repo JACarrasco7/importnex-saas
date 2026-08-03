@@ -6,6 +6,9 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import FormSection from '@/Components/FormSection.vue';
 import FormField from '@/Components/FormField.vue';
+import { useTranslations } from '@/Composables/useTranslations';
+
+const { t } = useTranslations();
 
 const props = defineProps({
     organization: Object,
@@ -73,16 +76,16 @@ async function detectModels() {
 </script>
 
 <template>
-    <Head title="Edit Organization" />
+    <Head :title="t('organization.edit')" />
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Edit Organization</h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ t('organization.edit') }}</h2>
         </template>
 
         <div class="py-8">
             <div class="mx-auto max-w-2xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <PageHeader title="Edit organization" subtitle="Update organization details and AI provider">
+                <PageHeader :title="t('organization.edit')" :subtitle="t('organization.edit_subtitle')">
                     <template #actions>
                         <Link :href="route('organization.show', organization.id)" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             <ArrowLeftIcon class="h-4 w-4" />

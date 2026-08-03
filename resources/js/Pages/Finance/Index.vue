@@ -6,6 +6,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import StatCard from '@/Components/StatCard.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import { useFormat } from '@/Composables/useFormat';
+import { useTranslations } from '@/Composables/useTranslations';
 
 const props = defineProps({
     kpis: Object,
@@ -15,28 +16,29 @@ const props = defineProps({
     monthly: Array,
 });
 
+const { t } = useTranslations();
 const { currency } = useFormat();
 
 const maxMonthlyTotal = computed(() => Math.max(1, ...(props.monthly?.map((m) => Number(m.total)) || [0])));
 
 const costCategories = computed(() => [
-    { label: 'Transport', value: props.kpis.totalTransport, icon: TruckIcon, color: 'amber' },
-    { label: 'Taxes (ITV+COC+DGT)', value: props.kpis.totalTaxes, icon: ReceiptPercentIcon, color: 'rose' },
-    { label: 'Professional fees', value: props.kpis.totalFees, icon: CalculatorIcon, color: 'purple' },
+    { label: t('finance.transport'), value: props.kpis.totalTransport, icon: TruckIcon, color: 'amber' },
+    { label: t('finance.taxes'), value: props.kpis.totalTaxes, icon: ReceiptPercentIcon, color: 'rose' },
+    { label: t('finance.professional_fees'), value: props.kpis.totalFees, icon: CalculatorIcon, color: 'purple' },
 ]);
 </script>
 
 <template>
-    <Head title="Finance" />
+    <Head :title="t('finance.title')" />
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Finance Dashboard</h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ t('finance.title') }}</h2>
         </template>
 
         <div class="py-8">
             <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <PageHeader title="Finance" subtitle="P&L and cost breakdown" />
+                <PageHeader :title="t('finance.title')" :subtitle="t('finance.p_and_l')" />
 
                 <!-- KPIs -->
                 <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">

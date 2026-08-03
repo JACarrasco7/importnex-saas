@@ -7,11 +7,14 @@ import Badge from '@/Components/Badge.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import EmptyState from '@/Components/EmptyState.vue';
 import ConfirmDialog from '@/Components/ConfirmDialog.vue';
+import { useTranslations } from '@/Composables/useTranslations';
 
 const props = defineProps({
     contacts: Object,
     filters: Object,
 });
+
+const { t } = useTranslations();
 
 const search = ref(props.filters?.search ?? '');
 const tagFilter = ref(props.filters?.tag ?? '');
@@ -72,20 +75,20 @@ const confirmDelete = () => {
 </script>
 
 <template>
-    <Head title="Contacts" />
+    <Head :title="t('contacts.title')" />
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Contacts</h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ t('contacts.title') }}</h2>
         </template>
 
         <div class="py-8">
             <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <PageHeader title="Network" :subtitle="`${contacts.total || 0} contacts in your network`">
+                <PageHeader :title="t('contacts.network_title')" :subtitle="t('contacts.subtitle', { count: contacts.total || 0 })">
                     <template #actions>
                         <Link :href="route('contacts.create')" class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500">
                             <PlusIcon class="h-4 w-4" />
-                            New Contact
+                            {{ t('contacts.add') }}
                         </Link>
                     </template>
                 </PageHeader>
@@ -94,7 +97,7 @@ const confirmDelete = () => {
                 <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2">
                         <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Search</label>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">{{ t('app.search') }}</label>
                             <div class="relative">
                                 <MagnifyingGlassIcon class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                                 <input v-model="search" type="text" placeholder="Name, email, city..." class="block w-full rounded-lg border-gray-300 pl-9 text-sm focus:border-indigo-500 focus:ring-indigo-500" />

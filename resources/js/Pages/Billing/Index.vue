@@ -18,6 +18,7 @@ import StatCard from '@/Components/StatCard.vue';
 import Badge from '@/Components/Badge.vue';
 import EmptyState from '@/Components/EmptyState.vue';
 import { useFormat } from '@/Composables/useFormat';
+import { useTranslations } from '@/Composables/useTranslations';
 
 const props = defineProps({
     invoices: Array,
@@ -29,6 +30,8 @@ const props = defineProps({
     stripePortalUrl: String,
 });
 
+const { t } = useTranslations();
+
 const { currency, date } = useFormat();
 
 const cardBrandIcon = (brand) => {
@@ -38,16 +41,16 @@ const cardBrandIcon = (brand) => {
 </script>
 
 <template>
-    <Head title="Billing" />
+    <Head :title="t('nav.billing')" />
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="text-xl font-semibold leading-tight text-gray-800">Billing</h2>
+            <h2 class="text-xl font-semibold leading-tight text-gray-800">{{ t('nav.billing') }}</h2>
         </template>
 
         <div class="py-8">
             <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <PageHeader title="Billing" subtitle="Invoices, payments and subscription">
+                <PageHeader :title="t('nav.billing')" :subtitle="t('billing.subtitle')">
                     <template #actions>
                         <Link v-if="subscription?.stripe_status && subscription?.stripe_status !== 'canceled'" :href="route('subscriptions.index')" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             Manage plan

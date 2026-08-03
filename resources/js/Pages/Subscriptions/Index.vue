@@ -5,6 +5,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import Badge from '@/Components/Badge.vue';
 import { useFormat } from '@/Composables/useFormat';
+import { useTranslations } from '@/Composables/useTranslations';
 
 const props = defineProps({
     plans: Object,
@@ -14,21 +15,22 @@ const props = defineProps({
     trial_ends_at: String,
 });
 
+const { t } = useTranslations();
 const { date, currency } = useFormat();
 const planKeys = ['starter', 'pro', 'enterprise'];
 </script>
 
 <template>
-    <Head title="Subscription" />
+    <Head :title="t('subscription.title')" />
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Subscription Plans</h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ t('subscription.title') }}</h2>
         </template>
 
         <div class="py-8">
             <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <PageHeader title="Choose your plan" subtitle="Upgrade or downgrade your subscription at any time" />
+                <PageHeader :title="t('subscription.choose_plan')" :subtitle="t('subscription.subtitle')" />
 
                 <div v-if="on_trial" class="overflow-hidden rounded-2xl border border-blue-200 bg-blue-50 p-4">
                     <div class="flex items-center gap-3">

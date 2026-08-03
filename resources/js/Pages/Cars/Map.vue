@@ -6,6 +6,9 @@ import PageHeader from '@/Components/PageHeader.vue';
 import MapaLeaflet from '@/Components/MapaLeaflet.vue';
 import EmptyState from '@/Components/EmptyState.vue';
 import Badge from '@/Components/Badge.vue';
+import { useTranslations } from '@/Composables/useTranslations';
+
+const { t } = useTranslations();
 
 const props = defineProps({
     clusters: Array,
@@ -14,31 +17,31 @@ const props = defineProps({
 });
 
 const buildMarkerText = (cluster) => {
-    if (!cluster?.cars?.length) return 'Empty';
+    if (!cluster?.cars?.length) return t('common.empty');
     const first = cluster.cars[0];
-    return `${cluster.count} cars in ${cluster.city} — ${first.brand} ${first.model}`;
+    return `${cluster.count} ${t('map.cars_in')} ${cluster.city} — ${first.brand} ${first.model}`;
 };
 </script>
 
 <template>
-    <Head title="Cars Map" />
+    <Head :title="t('nav.map')" />
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Cars Map</h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ t('nav.map') }}</h2>
         </template>
 
         <div class="py-6">
             <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <PageHeader title="Geographic view" subtitle="See where your cars are located">
+                <PageHeader :title="t('map.title')" :subtitle="t('map.subtitle')">
                     <template #actions>
                         <span class="rounded-lg bg-white px-4 py-2 text-sm text-gray-700 shadow-sm ring-1 ring-gray-200">
-                            <strong>{{ totalCars }}</strong> cars · <strong>{{ totalCities }}</strong> cities
+                            <strong>{{ totalCars }}</strong> {{ t('map.cars') }} · <strong>{{ totalCities }}</strong> {{ t('map.cities') }}
                         </span>
                     </template>
                 </PageHeader>
 
-                <EmptyState v-if="totalCars === 0" icon="📍" title="No location data yet" description="Add lat/lng to your cars to see them on the map." />
+                <EmptyState v-if="totalCars === 0" icon="📍" :title="t('map.empty_title')" :description="t('map.empty_desc')" />
 
                 <div v-else class="space-y-6">
                     <div v-for="(cluster, idx) in clusters" :key="idx" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
@@ -49,7 +52,7 @@ const buildMarkerText = (cluster) => {
                                 </div>
                                 <h3 class="text-lg font-semibold text-gray-900">{{ cluster.city }}</h3>
                             </div>
-                            <Badge variant="indigo">{{ cluster.count }} cars</Badge>
+                            <Badge variant="indigo">{{ cluster.count }} {{ t('map.cars') }}</Badge>
                         </div>
                         <div class="p-6">
                             <MapaLeaflet v-if="cluster.lat && cluster.lng" :lat="cluster.lat" :lng="cluster.lng" :marker-text="buildMarkerText(cluster)" height="280px" />
