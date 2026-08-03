@@ -49,6 +49,7 @@ export default {
         marketing: 'Marketing',
         account: 'Cuenta',
         dashboard: 'Panel de Control',
+        marketing_center: 'Centro de Marketing',
         cars: 'Autos',
         kanban: 'Kanban',
         map: 'Mapa',

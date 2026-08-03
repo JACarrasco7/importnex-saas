@@ -26,6 +26,7 @@ import {
     MegaphoneIcon,
     ShoppingBagIcon,
     ArrowTopRightOnSquareIcon,
+    DocumentArrowDownIcon,
 } from '@heroicons/vue/24/outline';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import FlashMessage from '@/Components/FlashMessage.vue';
@@ -102,7 +103,8 @@ const navGroups = computed(() => [
         title: t('nav.marketing'),
         icon: MegaphoneIcon,
         items: [
-            { name: t('nav.dashboard'), route: 'marketing.index', icon: HomeIcon },
+            { name: t('nav.marketing_center'), route: 'marketing.index', icon: MegaphoneIcon },
+            { name: t('nav.cars'), route: 'cars.index', icon: TruckIcon },
         ],
     },
     {
@@ -241,6 +243,18 @@ const navGroups = computed(() => [
                 <slot />
             </main>
         </div>
+    </div>
+
+    <!-- Floating download button for JJ Import Motors folleto -->
+    <div class="fixed bottom-6 right-6 z-40">
+        <a
+            :href="route('jj-import.folleto')"
+            target="_blank"
+            class="flex items-center gap-2 rounded-full bg-cyan-600 px-4 py-3 text-sm font-semibold text-white shadow-lg hover:bg-cyan-700 transition-colors"
+        >
+            <DocumentArrowDownIcon class="h-5 w-5" />
+            <span class="hidden sm:inline">Folleto</span>
+        </a>
     </div>
 
     <!-- Floating AI chat widget is mounted globally via resources/js/aiChatLauncher.js

@@ -49,6 +49,7 @@ export default {
         marketing: 'Marketing',
         account: 'Account',
         dashboard: 'Dashboard',
+        marketing_center: 'Marketing Center',
         cars: 'Cars',
         kanban: 'Kanban',
         map: 'Map',
