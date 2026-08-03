@@ -36,6 +36,7 @@ const form = useForm({
     city: props.car.city,
     status: props.car.status,
     traffic_light: props.car.traffic_light,
+    is_marketplace: props.car.is_marketplace ?? false,
     client_id: props.car.client_id,
     notes: props.car.notes,
 });
@@ -145,6 +146,26 @@ const inputClass = 'block w-full rounded-lg border-gray-300 text-sm shadow-sm fo
                                     <option v-for="c in clients" :key="c.id" :value="c.id">{{ c.name }}</option>
                                 </select>
                             </FormField>
+                        </div>
+
+                        <!-- Publicar en marketplace -->
+                        <div class="mt-4 flex items-start justify-between gap-4 rounded-xl bg-estoril-50 p-4 ring-1 ring-estoril-100">
+                            <div>
+                                <p class="text-sm font-semibold text-gray-900">Publicar en el Marketplace</p>
+                                <p class="mt-0.5 text-xs text-gray-600">
+                                    Si está activo, este coche aparecerá en la web pública (solo con estado Delivered y veredicto positivo).
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                role="switch"
+                                :aria-checked="form.is_marketplace"
+                                @click="form.is_marketplace = !form.is_marketplace"
+                                :class="form.is_marketplace ? 'bg-estoril-700' : 'bg-gray-300'"
+                                class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-estoril-500 focus:ring-offset-2"
+                            >
+                                <span :class="form.is_marketplace ? 'translate-x-6' : 'translate-x-1'" class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform" />
+                            </button>
                         </div>
                     </FormSection>
 

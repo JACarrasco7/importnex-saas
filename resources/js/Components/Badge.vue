@@ -31,6 +31,7 @@ const variantMap = {
     blue: 'bg-blue-50 text-blue-700 ring-blue-200',
     indigo: 'bg-estoril-50 text-estoril-700 ring-estoril-200',
     purple: 'bg-estoril-50 text-estoril-700 ring-estoril-200',
+    estoril: 'bg-estoril-50 text-estoril-700 ring-estoril-200',
     sky: 'bg-sky-50 text-sky-700 ring-sky-200',
 };
 
@@ -42,6 +43,7 @@ const dotColorMap = {
     blue: 'bg-blue-500',
     indigo: 'bg-estoril-500',
     purple: 'bg-estoril-500',
+    estoril: 'bg-estoril-500',
     sky: 'bg-sky-500',
 };
 

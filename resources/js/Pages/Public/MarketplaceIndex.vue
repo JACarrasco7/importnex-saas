@@ -16,6 +16,9 @@ import {
     ArrowRightIcon,
     SparklesIcon,
     DocumentArrowDownIcon,
+    MapPinIcon,
+    CalendarDaysIcon,
+    BoltIcon,
 } from '@heroicons/vue/24/outline';
 import Badge from '@/Components/Badge.vue';
 import { useFormat } from '@/Composables/useFormat';
@@ -114,40 +117,46 @@ const howItWorks = computed(() => [
 
         <!-- HERO -->
         <section class="relative overflow-hidden bg-gradient-to-br from-estoril-50 via-white to-platinum-100">
-            <div class="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-estoril-200/30 blur-3xl"></div>
-            <div class="absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-platinum-300/30 blur-3xl"></div>
+            <div class="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-estoril-200/40 blur-3xl"></div>
+            <div class="absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-platinum-300/40 blur-3xl"></div>
+            <div class="absolute left-1/2 top-1/3 h-72 w-72 -translate-x-1/2 rounded-full bg-estoril-100/70 blur-3xl"></div>
 
-            <div class="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+            <div class="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8 lg:py-28">
                 <div class="mx-auto max-w-3xl text-center">
-                    <span class="inline-flex items-center gap-2 rounded-full bg-estoril-100 px-4 py-1.5 text-sm font-semibold text-estoril-800">
+                    <span class="inline-flex items-center gap-2 rounded-full bg-estoril-100 px-4 py-1.5 text-sm font-semibold text-estoril-800 ring-1 ring-estoril-200">
                         <SparklesIcon class="h-4 w-4" />
                         {{ t('marketplace.tagline') }}
                     </span>
                     <h1 class="mt-6 text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl">
                         {{ t('marketplace.hero_title') }}
                     </h1>
-                    <p class="mx-auto mt-5 max-w-2xl text-lg text-gray-600">
+                    <p class="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-gray-600">
                         {{ t('marketplace.description') }}
                     </p>
-                    <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                        <a href="#catalogo" class="inline-flex items-center gap-2 rounded-lg bg-estoril-700 px-6 py-3 text-base font-semibold text-white shadow-lg hover:bg-estoril-800">
+                    <div class="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                        <a href="#catalogo" class="inline-flex items-center gap-2 rounded-xl bg-estoril-700 px-7 py-3.5 text-base font-semibold text-white shadow-lg shadow-estoril-700/20 transition hover:-translate-y-0.5 hover:bg-estoril-800 hover:shadow-xl">
                             {{ t('marketplace.cta_primary') }}
                             <ArrowRightIcon class="h-4 w-4" />
                         </a>
-                        <a href="#contacto" class="inline-flex items-center gap-2 rounded-lg bg-white px-6 py-3 text-base font-semibold text-gray-900 shadow-sm ring-1 ring-gray-200 hover:bg-gray-50">
+                        <a href="#contacto" class="inline-flex items-center gap-2 rounded-xl bg-white px-7 py-3.5 text-base font-semibold text-gray-900 shadow-sm ring-1 ring-gray-200 transition hover:bg-gray-50 hover:ring-estoril-300">
                             <PhoneIcon class="h-4 w-4" />
                             {{ t('marketplace.cta_secondary') }}
                         </a>
                     </div>
 
-                    <!-- Trust signals -->
-                    <div class="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-3">
-                        <div v-for="item in trustItems" :key="item.label" class="rounded-2xl bg-white/70 p-5 text-left shadow-sm ring-1 ring-gray-200 backdrop-blur">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-estoril-100">
-                                <component :is="item.icon" class="h-5 w-5 text-estoril-700" />
-                            </div>
-                            <p class="mt-3 text-sm font-semibold text-gray-900">{{ item.label }}</p>
-                            <p class="mt-1 text-xs text-gray-600">{{ item.description }}</p>
+                    <!-- Stats strip -->
+                    <div class="mt-12 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                        <div class="rounded-2xl bg-white/70 px-4 py-4 shadow-sm ring-1 ring-gray-200 backdrop-blur">
+                            <p class="text-3xl font-extrabold text-estoril-800">9</p>
+                            <p class="mt-0.5 text-xs font-medium text-gray-600">{{ t('marketplace.stat_points') }}</p>
+                        </div>
+                        <div class="rounded-2xl bg-white/70 px-4 py-4 shadow-sm ring-1 ring-gray-200 backdrop-blur">
+                            <p class="text-3xl font-extrabold text-estoril-800">100%</p>
+                            <p class="mt-0.5 text-xs font-medium text-gray-600">{{ t('marketplace.stat_price') }}</p>
+                        </div>
+                        <div class="rounded-2xl bg-white/70 px-4 py-4 shadow-sm ring-1 ring-gray-200 backdrop-blur">
+                            <p class="text-3xl font-extrabold text-estoril-800">🇪🇸</p>
+                            <p class="mt-0.5 text-xs font-medium text-gray-600">{{ t('marketplace.stat_import') }}</p>
                         </div>
                     </div>
                 </div>
@@ -239,53 +248,80 @@ const howItWorks = computed(() => [
                         v-for="car in filteredCars"
                         :key="car.id"
                         :href="route('marketplace.show', car.id)"
-                        class="group overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 transition hover:shadow-lg hover:ring-estoril-300"
+                        class="group relative flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:ring-estoril-300"
                     >
-                        <div class="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
+                        <!-- Photo -->
+                        <div class="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-asphalt-200 to-gray-300">
                             <img
                                 v-if="car.photos && car.photos.length > 0"
                                 :src="car.photos[0].startsWith('http') ? car.photos[0] : `/storage/${car.photos[0]}`"
                                 :alt="`${car.brand} ${car.model}`"
-                                class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                                class="h-full w-full object-cover transition duration-700 group-hover:scale-110"
                                 loading="lazy"
                             />
                             <div v-else class="flex h-full items-center justify-center text-6xl text-gray-400">🚗</div>
-                            <div class="absolute top-3 left-3">
-                                <Badge :variant="trafficLightVariant(car.traffic_light)" dot>{{ car.traffic_light }}</Badge>
-                            </div>
-                            <div class="absolute top-3 right-3">
+                            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-asphalt-900/60 via-transparent to-transparent opacity-50 transition group-hover:opacity-80"></div>
+
+                            <!-- Badges -->
+                            <div class="absolute left-3 top-3">
                                 <Badge :variant="verdictVariant(car.verdict)" size="sm">{{ car.verdict }}</Badge>
                             </div>
+                            <div class="absolute right-3 top-3">
+                                <Badge :variant="trafficLightVariant(car.traffic_light)" dot>{{ car.traffic_light }}</Badge>
+                            </div>
+
+                            <!-- Savings + location -->
+                            <div v-if="car.estimated_saving > 0" class="absolute bottom-3 left-3">
+                                <span class="inline-flex items-center rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-estoril-700 shadow-sm backdrop-blur">
+                                    {{ t('marketplace.saving_badge').replace(':amount', currency(car.estimated_saving)) }}
+                                </span>
+                            </div>
+                            <div v-if="car.city" class="absolute bottom-3 right-3">
+                                <span class="inline-flex items-center gap-1 rounded-full bg-black/45 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur">
+                                    <MapPinIcon class="h-3 w-3" />
+                                    {{ car.city }}
+                                </span>
+                            </div>
                         </div>
-                        <div class="p-5">
+
+                        <!-- Body -->
+                        <div class="flex flex-1 flex-col p-5">
                             <div class="flex items-start justify-between gap-2">
                                 <div class="min-w-0 flex-1">
-                                    <h3 class="truncate text-lg font-semibold text-gray-900 group-hover:text-estoril-800">
+                                    <h3 class="truncate text-lg font-bold text-gray-900 transition group-hover:text-estoril-800">
                                         {{ car.brand }} {{ car.model }}
                                     </h3>
                                     <p v-if="car.version" class="truncate text-sm text-gray-500">{{ car.version }}</p>
                                 </div>
                             </div>
-                            <dl class="mt-4 grid grid-cols-3 gap-3 text-xs">
-                                <div>
-                                    <dt class="text-gray-500">{{ t('marketplace.year') }}</dt>
-                                    <dd class="font-semibold text-gray-900">{{ car.year }}</dd>
+
+                            <dl class="mt-4 grid grid-cols-3 gap-2">
+                                <div class="rounded-lg bg-gray-50 px-2 py-2 text-center">
+                                    <dt class="flex items-center justify-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
+                                        <CalendarDaysIcon class="h-3 w-3" /> {{ t('marketplace.specs_year') }}
+                                    </dt>
+                                    <dd class="mt-0.5 text-sm font-semibold text-gray-900">{{ car.year }}</dd>
                                 </div>
-                                <div>
-                                    <dt class="text-gray-500">{{ t('marketplace.km_label') }}</dt>
-                                    <dd class="font-semibold text-gray-900">{{ car.mileage ? (car.mileage / 1000).toFixed(0) + 'k' : t('marketplace.not_available') }}</dd>
+                                <div class="rounded-lg bg-gray-50 px-2 py-2 text-center">
+                                    <dt class="flex items-center justify-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
+                                        <BoltIcon class="h-3 w-3" /> {{ t('marketplace.specs_km') }}
+                                    </dt>
+                                    <dd class="mt-0.5 text-sm font-semibold text-gray-900">{{ car.mileage ? (car.mileage / 1000).toFixed(0) + 'k' : t('marketplace.not_available') }}</dd>
                                 </div>
-                                <div>
-                                    <dt class="text-gray-500">{{ t('marketplace.fuel') }}</dt>
-                                    <dd class="truncate font-semibold text-gray-900">{{ car.fuel || t('marketplace.not_available') }}</dd>
+                                <div class="rounded-lg bg-gray-50 px-2 py-2 text-center">
+                                    <dt class="flex items-center justify-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
+                                        {{ t('marketplace.specs_fuel') }}
+                                    </dt>
+                                    <dd class="mt-0.5 truncate text-sm font-semibold text-gray-900">{{ car.fuel || t('marketplace.not_available') }}</dd>
                                 </div>
                             </dl>
-                            <div class="mt-5 flex items-end justify-between border-t border-gray-100 pt-4">
-                                <div>
+
+                            <div class="mt-4 flex items-end justify-between gap-3 border-t border-gray-100 pt-4">
+                                <div class="min-w-0">
                                     <p class="text-xs text-gray-500">{{ t('marketplace.price_from') }}</p>
-                                    <p class="text-2xl font-extrabold text-gray-900">{{ currency(car.purchase_price) }}</p>
+                                    <p class="truncate text-2xl font-extrabold tracking-tight text-estoril-800">{{ currency(car.purchase_price) }}</p>
                                 </div>
-                                <span class="inline-flex items-center gap-1 rounded-full bg-estoril-50 px-3 py-1 text-xs font-semibold text-estoril-800">
+                                <span class="inline-flex shrink-0 items-center gap-1 rounded-full bg-estoril-700 px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm transition group-hover:bg-estoril-800">
                                     {{ t('marketplace.view_report') }}
                                     <ArrowRightIcon class="h-3 w-3" />
                                 </span>

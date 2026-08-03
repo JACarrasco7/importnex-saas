@@ -23,6 +23,7 @@ class PublicMarketplaceController extends Controller
             ->whereHas('organization', function ($query) {
                 $query->where('is_public', true);
             })
+            ->where('is_marketplace', true) // Solo coches marcados para publicar
             ->whereIn('status', ['Delivered']) // Only show delivered cars
             ->whereIn('verdict', ['Buy', 'Buy if price drops']) // Only show positive verdicts
             ->when($request->input('search'), function($q, $s) {
@@ -65,6 +66,7 @@ class PublicMarketplaceController extends Controller
     {
         // Verify this car should be publicly visible
         if (!$car->organization || !$car->organization->is_public ||
+            !$car->is_marketplace ||
             !in_array($car->status, ['Delivered']) ||
             !in_array($car->verdict, ['Buy', 'Buy if price drops'])) {
             abort(404);

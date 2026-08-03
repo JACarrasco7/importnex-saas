@@ -2,9 +2,9 @@
 import { Head } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
-import { useFormat } from '@/Composables/useFormat';
+import { useTranslations } from '@/Composables/useTranslations';
 
-const { t } = useFormat();
+const { t } = useTranslations();
 </script>
 
 <template>

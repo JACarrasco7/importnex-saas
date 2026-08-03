@@ -167,11 +167,11 @@ const scrapeFromUrl = async () => {
 
         <div class="py-8">
             <div class="mx-auto max-w-5xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <PageHeader title="Add a new car" subtitle="Register a vehicle in your inventory" icon-class="h-6 w-6">
+                <PageHeader :title="t('cars.add_title')" :subtitle="t('cars.add_subtitle_full')" icon-class="h-6 w-6">
                     <template #actions>
                         <Link :href="route('cars.index')" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             <ArrowLeftIcon class="h-4 w-4" />
-                            Back
+                            {{ t('common.back') }}
                         </Link>
                     </template>
                 </PageHeader>
