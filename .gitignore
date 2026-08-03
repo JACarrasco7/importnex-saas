@@ -24,3 +24,4 @@ yarn-error.log
 /test_output.txt
 /importnex-saas-*.zip
 /_tmp/
+_tmp_check_providers.php

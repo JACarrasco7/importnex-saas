@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
-import { Head, Link, usePage } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import {
     MagnifyingGlassIcon,
     EyeIcon,
@@ -19,20 +19,15 @@ import {
 } from '@heroicons/vue/24/outline';
 import Badge from '@/Components/Badge.vue';
 import { useFormat } from '@/Composables/useFormat';
+import { useTranslations } from '@/Composables/useTranslations';
 
 const props = defineProps({
     cars: Object,
     verdicts: Array,
     filters: Object,
-    translations: Object,
 });
 
-const page = usePage();
-const locale = computed(() => page.props.locale || 'es');
-const t = (key) => {
-    const lang = locale.value;
-    return props.translations?.[lang]?.[key] ?? key;
-};
+const { t, locale } = useTranslations();
 
 const search = ref(props.filters?.search || '');
 const verdictFilter = ref(props.filters?.verdict || 'all');
@@ -107,11 +102,11 @@ const howItWorks = [
                     </div>
                 </Link>
                 <nav class="flex items-center gap-3">
-                    <a :href="locale.value === 'es' ? '#catalogo' : '#catalog'" class="hidden text-sm font-medium text-gray-700 hover:text-gray-900 sm:inline">{{ t('section_catalog') }}</a>
-                    <a :href="locale.value === 'es' ? '#como-funciona' : '#how-it-works'" class="hidden text-sm font-medium text-gray-700 hover:text-gray-900 sm:inline">{{ t('section_how_it_works') }}</a>
+                    <a :href="locale === 'es' ? '#catalogo' : '#catalog'" class="hidden text-sm font-medium text-gray-700 hover:text-gray-900 sm:inline">{{ t('section_catalog') }}</a>
+                    <a :href="locale === 'es' ? '#como-funciona' : '#how-it-works'" class="hidden text-sm font-medium text-gray-700 hover:text-gray-900 sm:inline">{{ t('section_how_it_works') }}</a>
                     <a href="#contacto" class="inline-flex items-center gap-1.5 rounded-lg bg-gray-900 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-800">
                         <PhoneIcon class="h-4 w-4" />
-                        {{ t('cta_secondary') }}
+                        {{ t('cta_contact') }}
                     </a>
                 </nav>
             </div>
@@ -130,7 +125,6 @@ const howItWorks = [
                     </span>
                     <h1 class="mt-6 text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl">
                         {{ t('hero_title') }}
-                        <span class="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">ya verificado</span>
                     </h1>
                     <p class="mx-auto mt-5 max-w-2xl text-lg text-gray-600">
                         {{ t('description') }}
@@ -161,7 +155,7 @@ const howItWorks = [
         </section>
 
         <!-- HOW IT WORKS -->
-        <section :id="locale.value === 'es' ? 'como-funciona' : 'how-it-works'" class="border-y border-gray-200 bg-gray-50 py-16">
+        <section :id="locale === 'es' ? 'como-funciona' : 'how-it-works'" class="border-y border-gray-200 bg-gray-50 py-16">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="mx-auto max-w-2xl text-center">
                     <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">{{ t('section_how_it_works') }}</h2>
@@ -180,12 +174,12 @@ const howItWorks = [
         </section>
 
         <!-- CATALOG -->
-        <section :id="locale.value === 'es' ? 'catalogo' : 'catalog'" class="py-16">
+        <section :id="locale === 'es' ? 'catalogo' : 'catalog'" class="py-16">
             <div class="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8">
                 <div class="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end">
                     <div>
                         <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">{{ t('section_catalog') }}</h2>
-                        <p class="mt-2 text-sm text-gray-600">{{ cars.total || 0 }} {{ t('catalog_desc').replace(':count', cars.total || 0) }}</p>
+                        <p class="mt-2 text-sm text-gray-600">{{ t('catalog_desc', { count: cars.total || 0 }) }}</p>
                     </div>
                     <a href="#contacto" class="inline-flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800">
                         <PhoneIcon class="h-4 w-4" />
@@ -341,7 +335,7 @@ const howItWorks = [
                     </a>
                 </div>
                 <p class="mt-8 text-sm text-gray-400">
-                    Importnex &middot; JJ Import Motors &middot; Servicio llave en mano Alemania → España
+                    Importnex &middot; JJ Import Motors &middot; {{ t('tagline_sub') }}
                 </p>
             </div>
         </section>
@@ -371,7 +365,7 @@ const howItWorks = [
                 class="flex items-center gap-2 rounded-full bg-cyan-600 px-4 py-3 text-sm font-semibold text-white shadow-lg hover:bg-cyan-700 transition-colors"
             >
                 <DocumentArrowDownIcon class="h-5 w-5" />
-                <span class="hidden sm:inline">Folleto</span>
+                <span class="hidden sm:inline">{{ t('folleto') }}</span>
             </a>
         </div>
     </div>
