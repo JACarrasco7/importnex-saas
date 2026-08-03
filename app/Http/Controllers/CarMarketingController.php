@@ -120,16 +120,67 @@ class CarMarketingController extends Controller
 
         $contents = CarMarketingContent::where('car_id', $car->id)->get();
 
-        return View::make('jj-import.briefing', [
+        // Resolve main car photo (local -> base64 so it renders in the PDF)
+        $carPhotoBase64 = null;
+        $car->load('photos');
+        $photoUrl = $car->photos->first()?->url ?? ($car->fotos_json[0] ?? null);
+        if ($photoUrl) {
+            if (preg_match('#^https?://#', $photoUrl)) {
+                // Remote URL: keep as-is (Browsershot can fetch it)
+                $carPhotoBase64 = $photoUrl;
+            } else {
+                // Local storage path
+                $abs = str_starts_with($photoUrl, '/storage/')
+                    ? public_path($photoUrl)
+                    : storage_path('app/public/' . ltrim($photoUrl, '/'));
+                if (file_exists($abs)) {
+                    $mime = mime_content_type($abs) ?: 'image/jpeg';
+                    $carPhotoBase64 = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($abs));
+                }
+            }
+        }
+
+        $viewData = [
             'car' => $car,
             'contents' => $contents,
             'logo_base64' => $logoBase64,
+            'car_photo_base64' => $carPhotoBase64,
             'qr_svg' => $qrSvg,
             'qr_url' => $qrUrl,
             'precio_honorarios' => '1.500 €',
             'telefono_1' => '675 70 14 39',
             'telefono_2' => '691 48 59 27',
             'email' => 'jjimportmotors@gmail.com',
-        ]);
+        ];
+
+        // Prefer generating a real PDF (requires Chrome/Chromium via Browsershot)
+        if (class_exists(\Spatie\Browsershot\Browsershot::class)) {
+            try {
+                $chromePath = \App\Support\ChromePath::resolve();
+                if ($chromePath) {
+                    $html = View::make('jj-import.briefing', $viewData)->render();
+
+                    $pdfPath = storage_path('app/public/briefing-' . $car->id . '.pdf');
+                    $browser = \Spatie\Browsershot\Browsershot::html($html)
+                        ->setNodeBinary(\App\Support\ChromePath::nodeBinary())
+                        ->setChromePath($chromePath)
+                        ->format('A4')
+                        ->landscape(false)
+                        ->margins(0, 0, 0, 0)
+                        ->showBackground()
+                        ->waitUntilNetworkIdle()
+                        ->deviceScaleFactor(2)
+                        ->scale(1)
+                        ->savePdf($pdfPath);
+
+                    return response()->download($pdfPath, 'Briefing_' . $car->brand . '_' . $car->model . '.pdf');
+                }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Briefing PDF fallback (no Chrome): ' . $e->getMessage());
+                // Fall through to HTML view if Chrome is not available
+            }
+        }
+
+        return View::make('jj-import.briefing', $viewData);
     }
 }

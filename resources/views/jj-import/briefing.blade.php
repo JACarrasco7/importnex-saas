@@ -183,6 +183,83 @@
             letter-spacing: 0.2px;
         }
 
+        /* ============ CAR PHOTO ============ */
+        .car-photo {
+            width: 100%;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid rgba(143, 163, 217, 0.25);
+            margin-bottom: 22px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+            background: #14265a;
+        }
+
+        .car-photo img {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-height: 340px;
+            object-fit: cover;
+        }
+
+        .car-photo.no-photo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+        }
+
+        .car-photo.no-photo span {
+            font-size: 56px;
+            color: #8fa3d9;
+        }
+
+        /* ============ PRICE STRIP ============ */
+        .price-strip {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .price-box {
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.85) 0%, rgba(15, 23, 42, 0.55) 100%);
+            border: 1px solid rgba(56, 189, 248, 0.12);
+            border-radius: 12px;
+            padding: 12px 14px;
+            text-align: center;
+        }
+
+        .price-box.main {
+            border-color: rgba(143, 163, 217, 0.4);
+            background: linear-gradient(135deg, rgba(26, 48, 109, 0.25) 0%, rgba(26, 48, 109, 0.10) 100%);
+        }
+
+        .price-box .label {
+            font-size: 9px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .price-box .value {
+            font-size: 16px;
+            font-weight: 800;
+            color: #f8fafc;
+            line-height: 1.2;
+        }
+
+        .price-box.main .value {
+            font-size: 22px;
+            color: #8fa3d9;
+        }
+
+        .price-box .value.saving {
+            color: #4ade80;
+        }
+
         /* ============ CAR INFO CARD ============ */
         .car-info-card {
             background: linear-gradient(180deg, rgba(15, 23, 42, 0.85) 0%, rgba(15, 23, 42, 0.55) 100%);
@@ -503,9 +580,42 @@
         </div>
 
         <div class="hero">
-            <span class="hero-eyebrow">Importación Premium · Alemania → España</span>
+            <span class="hero-eyebrow"><span class="pulse"></span>Importación Premium · Alemania → España</span>
             <h1 class="h1-title">{{ $car->brand }} {{ $car->model }} <span class="accent">{{ $car->year }}</span></h1>
-            <p class="hero-subtitle">{{ $car->mileage }} km · {{ $car->fuel }} · {{ $car->transmission }}</p>
+            <p class="hero-subtitle">{{ number_format($car->mileage) }} km · {{ $car->fuel }} · {{ $car->transmission }}</p>
+        </div>
+
+        <!-- Car Photo -->
+        <div class="car-photo {{ $car_photo_base64 ? '' : 'no-photo' }}">
+            @if($car_photo_base64)
+                @if(preg_match('#^https?://#', $car_photo_base64))
+                    <img src="{{ $car_photo_base64 }}" alt="{{ $car->brand }} {{ $car->model }}">
+                @else
+                    <img src="{{ $car_photo_base64 }}" alt="{{ $car->brand }} {{ $car->model }}">
+                @endif
+            @else
+                <span>🚗</span>
+            @endif
+        </div>
+
+        <!-- Price Strip -->
+        <div class="price-strip">
+            <div class="price-box main">
+                <div class="label">Precio</div>
+                <div class="value">{{ number_format($car->purchase_price, 0, ',', '.') }} €</div>
+            </div>
+            <div class="price-box">
+                <div class="label">Mercado</div>
+                <div class="value">{{ number_format($car->market_avg ?? $car->purchase_price, 0, ',', '.') }} €</div>
+            </div>
+            <div class="price-box">
+                <div class="label">Ahorro</div>
+                <div class="value saving">{{ ($car->estimated_saving ?? 0) > 0 ? number_format($car->estimated_saving, 0, ',', '.') . ' €' : '—' }}</div>
+            </div>
+            <div class="price-box">
+                <div class="label">Veredicto</div>
+                <div class="value">{{ $car->verdict ?? 'N/A' }}</div>
+            </div>
         </div>
 
         <!-- Car Info -->
@@ -513,10 +623,6 @@
             <span class="section-tag">DATOS DEL VEHÍCULO</span>
             <h2 class="section-title">{{ $car->brand }} {{ $car->model }} {{ $car->version }}</h2>
             <div class="car-specs">
-                <div class="spec-item">
-                    <span class="check"></span>
-                    <span><strong>Precio:</strong> €{{ number_format($car->purchase_price, 2) }}</span>
-                </div>
                 <div class="spec-item">
                     <span class="check"></span>
                     <span><strong>Kilómetros:</strong> {{ number_format($car->mileage) }} km</span>
@@ -539,11 +645,15 @@
                 </div>
                 <div class="spec-item">
                     <span class="check"></span>
-                    <span><strong>Veredicto IA:</strong> {{ $car->verdict ?? 'N/A' }}</span>
+                    <span><strong>Plazas:</strong> {{ $car->seats ?? '—' }}</span>
                 </div>
                 <div class="spec-item">
                     <span class="check"></span>
-                    <span><strong>Precio medio mercado:</strong> €{{ number_format($car->market_avg ?? 0, 2) }}</span>
+                    <span><strong>Ciudad:</strong> {{ $car->city ?? '—' }}</span>
+                </div>
+                <div class="spec-item">
+                    <span class="check"></span>
+                    <span><strong>Precio medio mercado:</strong> {{ number_format($car->market_avg ?? 0, 0, ',', '.') }} €</span>
                 </div>
             </div>
         </div>
