@@ -21,9 +21,12 @@ export default {
         'border-emerald-300', 'border-rose-300',
         'from-indigo-500', 'to-purple-600', 'from-indigo-600', 'to-purple-700',
         'from-indigo-50', 'to-indigo-100', 'from-blue-50', 'to-indigo-50',
-        'bg-estoril-50', 'bg-estoril-100', 'bg-estoril-600', 'bg-estoril-700',
-        'text-estoril-600', 'text-estoril-700', 'ring-estoril-200', 'ring-estoril-300',
-        'border-estoril-300', 'from-estoril-50', 'to-estoril-50', 'from-estoril-600', 'to-estoril-800',
+        'bg-estoril-50', 'bg-estoril-100', 'bg-estoril-500', 'bg-estoril-600', 'bg-estoril-700', 'bg-estoril-800',
+        'text-estoril-500', 'text-estoril-600', 'text-estoril-700', 'text-estoril-800',
+        'ring-estoril-200', 'ring-estoril-300', 'ring-estoril-600',
+        'border-estoril-200', 'border-estoril-300',
+        'from-estoril-50', 'from-estoril-600', 'from-estoril-700', 'to-estoril-50', 'to-estoril-800', 'to-estoril-900',
+        'hover:bg-estoril-50', 'hover:bg-estoril-800', 'hover:ring-estoril-300',
     ],
     theme: {
         extend: {
