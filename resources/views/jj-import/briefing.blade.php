@@ -1,38 +1,55 @@
 @php
-    $precio_honorarios = '1.500 €';
-    $telefono_1 = '675 70 14 39';
-    $telefono_2 = '691 48 59 27';
-    $email = 'jjimportmotors@gmail.com';
+    $precio_honorarios = $precio_honorarios ?? '1.500 €';
+    $telefono_1 = $telefono_1 ?? '675 70 14 39';
+    $telefono_2 = $telefono_2 ?? '691 48 59 27';
+    $email = $email ?? 'jjimportmotors@gmail.com';
     $qr_url = $qr_url ?? 'https://jjimportmotors.on-forge.com/request/jj-import-motors';
 
-    $qr_svg = null;
-    try {
-        $qr_svg = \SimpleSoftwareIO\QrCode\Generator::class
-            ? (new \SimpleSoftwareIO\QrCode\Generator())->format('svg')
-                ->size(280)
-                ->margin(1)
-                ->errorCorrection('H')
-                ->backgroundColor(255, 255, 255)
-                ->color(6, 16, 31)
-                ->generate($qr_url)
-            : null;
-    } catch (\Exception $e) {
-        $qr_svg = null;
+    $qr_svg = $qr_svg ?? null;
+    if (!$qr_svg) {
+        try {
+            $qr_svg = \SimpleSoftwareIO\QrCode\Generator::class
+                ? (new \SimpleSoftwareIO\QrCode\Generator())->format('svg')
+                    ->size(280)
+                    ->margin(1)
+                    ->errorCorrection('H')
+                    ->backgroundColor(255, 255, 255)
+                    ->color(6, 16, 31)
+                    ->generate($qr_url)
+                : null;
+        } catch (\Exception $e) {
+            $qr_svg = null;
+        }
     }
 
-    // Get marketing content for each channel
-    $milanuncios = $contents->firstWhere('channel', 'milanuncios');
-    $cochesNet = $contents->firstWhere('channel', 'coches_net');
-    $wallapop = $contents->firstWhere('channel', 'wallapop');
-    $tiktok = $contents->firstWhere('channel', 'tiktok');
-    $instagram = $contents->firstWhere('channel', 'instagram');
+    // Specs normalized
+    $specs = [
+        'Año' => $car->year ?? '—',
+        'Kilómetros' => isset($car->mileage) ? number_format($car->mileage) . ' km' : '—',
+        'Combustible' => $car->fuel ?? '—',
+        'Cambio' => $car->transmission ?? '—',
+        'Potencia' => isset($car->cv) ? $car->cv . ' CV' : '—',
+        'Color' => $car->color ?? '—',
+        'Puertas' => $car->doors ?? '—',
+        'Plazas' => $car->seats ?? '—',
+        'Norma Euro' => $car->euro_norm ?? '—',
+        'Ciudad' => $car->city ?? '—',
+    ];
+
+    $price = $car->purchase_price ?? 0;
+    $marketAvg = $car->market_avg ?? $price;
+    $saving = $car->estimated_saving ?? ($marketAvg - $price > 0 ? $marketAvg - $price : 0);
+    $description = $car->description
+        ?? $car->recommendation
+        ?? ($car->brand . ' ' . $car->model . ' importado y matriculado por JJ Import Motors. Servicio llave en mano: inspección, transporte, trámites y entrega a tu nombre.');
+    $equipment = collect($car->equipment ?? [])->take(8)->values();
 @endphp
 
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Briefing Marketing - {{ $car->brand }} {{ $car->model }}</title>
+    <title>JJ Import Motors - {{ $car->brand }} {{ $car->model }}</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
@@ -51,11 +68,11 @@
 
         body {
             position: relative;
-            padding: 40px 40px 80px 40px;
+            padding: 36px 36px 70px 36px;
             min-height: 100vh;
             background:
-                radial-gradient(ellipse at 100% 0%, rgba(26, 48, 109, 0.10) 0%, transparent 45%),
-                radial-gradient(ellipse at 0% 100%, rgba(190, 192, 195, 0.10) 0%, transparent 45%),
+                radial-gradient(ellipse at 100% 0%, rgba(143, 163, 217, 0.12) 0%, transparent 45%),
+                radial-gradient(ellipse at 0% 100%, rgba(190, 192, 195, 0.08) 0%, transparent 45%),
                 linear-gradient(180deg, #0f1d42 0%, #14265a 50%, #0f1d42 100%);
         }
 
@@ -64,22 +81,9 @@
             position: absolute;
             inset: 0;
             background-image:
-                linear-gradient(rgba(56, 189, 248, 0.035) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(56, 189, 248, 0.035) 1px, transparent 1px);
+                linear-gradient(rgba(143, 163, 217, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(143, 163, 217, 0.04) 1px, transparent 1px);
             background-size: 28px 28px;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        body::after {
-            content: '';
-            position: absolute;
-            top: 35%;
-            right: -120px;
-            width: 380px;
-            height: 380px;
-            background: radial-gradient(circle, rgba(26, 48, 109, 0.08) 0%, transparent 60%);
-            border-radius: 50%;
             pointer-events: none;
             z-index: 0;
         }
@@ -87,7 +91,7 @@
         .container {
             position: relative;
             z-index: 1;
-            max-width: 1100px;
+            max-width: 1060px;
             margin: 0 auto;
         }
 
@@ -97,15 +101,11 @@
             justify-content: space-between;
             align-items: center;
             padding-bottom: 18px;
-            border-bottom: 1px solid rgba(56, 189, 248, 0.12);
-            margin-bottom: 26px;
+            border-bottom: 1px solid rgba(143, 163, 217, 0.2);
+            margin-bottom: 24px;
         }
 
-        .logo {
-            height: 52px;
-            width: auto;
-            filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4));
-        }
+        .logo { height: 50px; width: auto; }
 
         .badge-llave {
             display: inline-flex;
@@ -115,82 +115,62 @@
             color: #fff;
             padding: 9px 18px;
             border-radius: 100px;
-            font-size: 11px;
+            font-size: 10.5px;
             font-weight: 700;
-            letter-spacing: 1.5px;
-            box-shadow: 0 4px 14px rgba(26, 48, 109, 0.35);
-        }
-
-        .badge-llave svg {
-            width: 14px;
-            height: 14px;
-            fill: #fff;
+            letter-spacing: 1.4px;
+            box-shadow: 0 4px 14px rgba(26, 48, 109, 0.4);
         }
 
         /* ============ HERO ============ */
-        .hero {
-            width: 100%;
-            margin-bottom: 30px;
-            margin-top: 15px !important;
-        }
+        .hero { margin-bottom: 20px; text-align: center; }
 
         .hero-eyebrow {
             display: inline-flex;
             align-items: center;
             gap: 9px;
-            background: rgba(26, 48, 109, 0.08);
-            border: 1px solid rgba(143, 163, 217, 0.25);
+            background: rgba(26, 48, 109, 0.15);
+            border: 1px solid rgba(143, 163, 217, 0.3);
             color: #8fa3d9;
-            padding: 6px 14px;
+            padding: 6px 16px;
             border-radius: 100px;
-            font-size: 10.5px;
+            font-size: 10px;
             font-weight: 600;
-            letter-spacing: 1.5px;
+            letter-spacing: 1.6px;
             text-transform: uppercase;
             margin-bottom: 12px;
         }
 
         .hero-eyebrow .pulse {
-            width: 6px;
-            height: 6px;
-            background: #8fa3d9;
-            border-radius: 50%;
+            width: 6px; height: 6px;
+            background: #8fa3d9; border-radius: 50%;
             box-shadow: 0 0 10px #8fa3d9;
         }
 
         .h1-title {
-            font-family: 'Inter', sans-serif;
-            font-size: 32px;
+            font-size: 30px;
             font-weight: 800;
-            line-height: 1.15;
+            line-height: 1.12;
             color: #ffffff;
-            margin-bottom: 8px;
-            letter-spacing: -0.8px;
-            width: 100%;
+            letter-spacing: -0.6px;
         }
 
-        .h1-title .accent {
-            color: #8fa3d9;
-            font-weight: 800;
-            display: inline-block;
-        }
+        .h1-title .accent { color: #8fa3d9; }
 
         .hero-subtitle {
-            font-size: 15px;
+            font-size: 13.5px;
             color: #94a3b8;
-            font-weight: 400;
-            margin-bottom: 16px;
-            letter-spacing: 0.2px;
+            margin-top: 8px;
+            letter-spacing: 0.3px;
         }
 
-        /* ============ CAR PHOTO ============ */
+        /* ============ PHOTO ============ */
         .car-photo {
             width: 100%;
-            border-radius: 14px;
+            border-radius: 16px;
             overflow: hidden;
             border: 1px solid rgba(143, 163, 217, 0.25);
-            margin-bottom: 22px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+            margin-bottom: 20px;
+            box-shadow: 0 10px 36px rgba(0, 0, 0, 0.5);
             background: #14265a;
         }
 
@@ -198,646 +178,303 @@
             display: block;
             width: 100%;
             height: auto;
-            max-height: 340px;
+            max-height: 360px;
             object-fit: cover;
         }
 
         .car-photo.no-photo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 200px;
+            display: flex; align-items: center; justify-content: center;
+            min-height: 210px;
         }
+        .car-photo.no-photo span { font-size: 58px; color: #8fa3d9; }
 
-        .car-photo.no-photo span {
-            font-size: 56px;
-            color: #8fa3d9;
-        }
-
-        /* ============ PRICE STRIP ============ */
-        .price-strip {
+        /* ============ PRICE ============ */
+        .price-row {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin-bottom: 24px;
+            grid-template-columns: 1.5fr 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
         }
 
-        .price-box {
+        .price-card {
             background: linear-gradient(180deg, rgba(15, 23, 42, 0.85) 0%, rgba(15, 23, 42, 0.55) 100%);
-            border: 1px solid rgba(56, 189, 248, 0.12);
-            border-radius: 12px;
-            padding: 12px 14px;
+            border-radius: 14px;
+            padding: 16px 18px;
             text-align: center;
+            border: 1px solid rgba(143, 163, 217, 0.2);
         }
 
-        .price-box.main {
-            border-color: rgba(143, 163, 217, 0.4);
-            background: linear-gradient(135deg, rgba(26, 48, 109, 0.25) 0%, rgba(26, 48, 109, 0.10) 100%);
+        .price-card.main {
+            border-color: rgba(143, 163, 217, 0.55);
+            background: linear-gradient(135deg, rgba(26, 48, 109, 0.35) 0%, rgba(26, 48, 109, 0.15) 100%);
         }
 
-        .price-box .label {
-            font-size: 9px;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            font-weight: 600;
-            margin-bottom: 3px;
+        .price-card .label {
+            font-size: 9px; color: #64748b;
+            text-transform: uppercase; letter-spacing: 1px; font-weight: 600;
+            margin-bottom: 4px;
         }
+        .price-card .value { font-size: 18px; font-weight: 800; color: #f8fafc; line-height: 1.2; }
+        .price-card.main .value { font-size: 26px; color: #8fa3d9; }
+        .price-card .value.saving { color: #4ade80; }
 
-        .price-box .value {
-            font-size: 16px;
-            font-weight: 800;
-            color: #f8fafc;
-            line-height: 1.2;
-        }
-
-        .price-box.main .value {
-            font-size: 22px;
-            color: #8fa3d9;
-        }
-
-        .price-box .value.saving {
-            color: #4ade80;
-        }
-
-        /* ============ CAR INFO CARD ============ */
-        .car-info-card {
-            background: linear-gradient(180deg, rgba(15, 23, 42, 0.85) 0%, rgba(15, 23, 42, 0.55) 100%);
-            border: 1px solid rgba(56, 189, 248, 0.12);
-            border-radius: 14px;
-            padding: 20px 24px;
-            margin-bottom: 24px;
-        }
-
-        .car-info-card .section-tag {
-            color: #8fa3d9;
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 2.5px;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            display: block;
-        }
-
-        .car-info-card .section-title {
-            font-size: 18px;
-            font-weight: 800;
-            color: #f8fafc;
-            margin-bottom: 12px;
-            letter-spacing: -0.3px;
-        }
-
-        .car-specs {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px 28px;
-        }
-
-        .car-specs .spec-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 12px;
-            color: #cbd5e1;
-            padding: 4px 0;
-        }
-
-        .car-specs .spec-item .check {
-            width: 16px;
-            height: 16px;
-            background: #8fa3d9;
-            border-radius: 50%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .car-specs .spec-item .check::after {
-            content: '';
-            width: 5px;
-            height: 3px;
-            border-left: 2px solid #0f1d42;
-            border-bottom: 2px solid #0f1d42;
-            transform: rotate(-45deg) translate(0.8px, -0.8px);
-        }
-
-        .car-specs .spec-item strong {
-            color: #f1f5f9;
-            font-weight: 600;
-        }
-
-        /* ============ CHANNEL SECTIONS ============ */
-        .channel-section {
+        /* ============ DESCRIPTION ============ */
+        .section {
             background: linear-gradient(180deg, rgba(15, 23, 42, 0.6) 0%, rgba(15, 23, 42, 0.35) 100%);
-            border: 1px solid rgba(56, 189, 248, 0.12);
-            border-radius: 14px;
-            padding: 20px 24px;
-            margin-bottom: 24px;
-        }
-
-        .channel-section .section-tag {
-            color: #8fa3d9;
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 2.5px;
-            margin-bottom: 4px;
-            text-transform: uppercase;
-            display: block;
-        }
-
-        .channel-section .section-title {
-            font-size: 16px;
-            font-weight: 800;
-            color: #f8fafc;
-            margin-bottom: 12px;
-            letter-spacing: -0.3px;
-        }
-
-        .channel-content {
-            font-size: 12px;
-            color: #cbd5e1;
-            line-height: 1.6;
-            white-space: pre-wrap;
-        }
-
-        .channel-content .title {
-            font-size: 14px;
-            font-weight: 700;
-            color: #8fa3d9;
-            margin-bottom: 6px;
-        }
-
-        .channel-content .description {
-            margin-bottom: 10px;
-        }
-
-        .hashtags-list {
-            display: flex;
-            flex-wrap: gap;
-            gap: 6px;
-            margin-top: 8px;
-        }
-
-        .hashtag {
-            background: rgba(26, 48, 109, 0.15);
-            color: #8fa3d9;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 10px;
-        }
-
-        .tips-list {
-            margin-top: 8px;
-        }
-
-        .tips-list li {
-            display: flex;
-            align-items: flex-start;
-            gap: 6px;
-            margin-bottom: 4px;
-        }
-
-        .tips-list .tip-bullet {
-            color: #8fa3d9;
-            font-weight: 700;
-        }
-
-        /* ============ HONORARIOS + QR ============ */
-        .honorarios-row {
-            display: grid;
-            grid-template-columns: 1.6fr 1fr;
-            gap: 14px;
-            margin-bottom: 28px;
-        }
-
-        .honorarios-section {
-            background: linear-gradient(135deg, rgba(26, 48, 109, 0.10) 0%, rgba(190, 192, 195, 0.10) 100%);
-            border: 1px solid rgba(143, 163, 217, 0.25);
+            border: 1px solid rgba(143, 163, 217, 0.15);
             border-radius: 14px;
             padding: 18px 22px;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+            margin-bottom: 16px;
         }
 
-        .honorarios-tag {
+        .section-tag {
             color: #8fa3d9;
+            font-size: 10px; font-weight: 700; letter-spacing: 2.4px;
+            text-transform: uppercase; display: block; margin-bottom: 6px;
+        }
+
+        .section-title {
+            font-size: 16px; font-weight: 800; color: #f8fafc;
+            margin-bottom: 10px; letter-spacing: -0.2px;
+        }
+
+        .description-text {
+            font-size: 12.5px;
+            color: #cbd5e1;
+            line-height: 1.65;
+            white-space: pre-line;
+        }
+
+        /* Equipment chips */
+        .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+        .chip {
+            background: rgba(26, 48, 109, 0.25);
+            border: 1px solid rgba(143, 163, 217, 0.25);
+            color: #cbd5e1;
+            padding: 4px 10px;
+            border-radius: 100px;
             font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 2.5px;
-            margin-bottom: 6px;
-            text-transform: uppercase;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
+            font-weight: 500;
         }
 
-        .honorarios-title {
-            font-size: 14px;
-            font-weight: 700;
-            color: #f8fafc;
-            margin-bottom: 6px;
+        /* ============ SPECS ============ */
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
         }
 
-        .honorarios-price {
-            font-size: 44px;
-            font-weight: 900;
-            color: #8fa3d9;
-            line-height: 1;
-            margin-bottom: 5px;
+        .spec-cell {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(143, 163, 217, 0.12);
+            border-radius: 10px;
+            padding: 10px 12px;
         }
 
-        .honorarios-conditions {
-            font-size: 11.5px;
-            color: #94a3b8;
-            line-height: 1.5;
+        .spec-cell .k {
+            font-size: 9px; color: #64748b;
+            text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600;
+            margin-bottom: 3px;
         }
+        .spec-cell .v { font-size: 13px; font-weight: 700; color: #f1f5f9; }
 
-        .honorarios-conditions strong { color: #e2e8f0; }
+        /* ============ VERDICT ============ */
+        .verdict-strip {
+            display: flex; align-items: center; gap: 12px;
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.12) 0%, rgba(26, 48, 109, 0.12) 100%);
+            border: 1px solid rgba(74, 222, 128, 0.3);
+            border-radius: 12px;
+            padding: 12px 18px;
+            margin-bottom: 16px;
+        }
+        .verdict-dot { width: 10px; height: 10px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 10px #4ade80; flex-shrink: 0; }
+        .verdict-text { font-size: 12px; color: #cbd5e1; }
+        .verdict-text strong { color: #f1f5f9; }
+
+        /* ============ QR + CONTACT ============ */
+        .bottom-row {
+            display: grid;
+            grid-template-columns: 1fr 1.3fr;
+            gap: 14px;
+            margin-bottom: 18px;
+        }
 
         .qr-card {
             background: linear-gradient(180deg, rgba(15, 23, 42, 0.75) 0%, rgba(15, 23, 42, 0.45) 100%);
             border: 1px solid rgba(143, 163, 217, 0.3);
             border-radius: 14px;
-            padding: 12px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            padding: 14px;
+            display: flex; align-items: center; gap: 14px;
         }
 
         .qr-box {
             flex-shrink: 0;
-            width: 95px;
-            height: 95px;
-            background: #fff;
-            border-radius: 9px;
-            padding: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            width: 96px; height: 96px;
+            background: #fff; border-radius: 9px; padding: 5px;
+            display: flex; align-items: center; justify-content: center;
             box-shadow: 0 4px 18px rgba(143, 163, 217, 0.3);
         }
+        .qr-box svg { width: 100%; height: 100%; display: block; }
 
-        .qr-box svg {
-            width: 100%;
-            height: 100%;
-            display: block;
+        .qr-tag { color: #8fa3d9; font-size: 9px; font-weight: 700; letter-spacing: 1.8px; margin-bottom: 4px; text-transform: uppercase; }
+        .qr-title { font-size: 14px; font-weight: 800; color: #f8fafc; margin-bottom: 4px; line-height: 1.15; }
+        .qr-desc { font-size: 10px; color: #94a3b8; line-height: 1.4; }
+
+        .contact-card {
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.6) 0%, rgba(15, 23, 42, 0.35) 100%);
+            border: 1px solid rgba(143, 163, 217, 0.15);
+            border-radius: 14px;
+            padding: 14px 18px;
+            display: flex; flex-direction: column; justify-content: center; gap: 8px;
         }
 
-        .qr-content {
-            flex: 1;
+        .contact-item { display: flex; align-items: center; gap: 10px; font-size: 12px; color: #cbd5e1; }
+        .contact-item .icon {
+            width: 30px; height: 30px; border-radius: 8px;
+            background: rgba(26, 48, 109, 0.2); color: #8fa3d9;
+            display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0;
         }
+        .contact-item .label { font-size: 9px; color: #64748b; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600; }
+        .contact-item .value { font-weight: 700; color: #f1f5f9; font-size: 12.5px; }
 
-        .qr-tag {
-            color: #8fa3d9;
-            font-size: 9.5px;
-            font-weight: 700;
-            letter-spacing: 1.8px;
-            margin-bottom: 4px;
-            text-transform: uppercase;
-        }
-
-        .qr-title {
-            font-size: 14px;
-            font-weight: 800;
-            color: #f8fafc;
-            margin-bottom: 4px;
-            line-height: 1.1;
-        }
-
-        .qr-desc {
-            font-size: 10px;
-            color: #94a3b8;
-            line-height: 1.35;
-        }
-
-        /* ============ FOOTER ============ */
-        .footer {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            background: rgba(15, 23, 42, 0.55);
-            border-radius: 10px;
-            padding: 12px 16px;
-            border: 1px solid rgba(56, 189, 248, 0.12);
-        }
-
-        .footer-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .honorarios {
+            text-align: center;
             font-size: 11.5px;
-            color: #cbd5e1;
+            color: #94a3b8;
+            background: linear-gradient(135deg, rgba(26, 48, 109, 0.1) 0%, rgba(190, 192, 195, 0.1) 100%);
+            border: 1px solid rgba(143, 163, 217, 0.2);
+            border-radius: 12px;
+            padding: 10px 16px;
+            margin-bottom: 16px;
         }
-
-        .footer-item .icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            background: rgba(26, 48, 109, 0.14);
-            color: #8fa3d9;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .footer-item .label {
-            font-size: 9px;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.6px;
-            font-weight: 600;
-            margin-bottom: 1px;
-        }
-
-        .footer-item .value {
-            font-weight: 700;
-            color: #f1f5f9;
-            font-size: 12px;
-            letter-spacing: 0.2px;
-        }
+        .honorarios strong { color: #8fa3d9; }
 
         .disclaimer {
-            text-align: center;
-            font-size: 10px;
-            color: #94a3b8;
-            margin-top: 20px;
-            line-height: 1.5;
-            padding: 0 18px;
-            font-style: italic;
+            text-align: center; font-size: 9.5px; color: #94a3b8;
+            margin-top: 16px; line-height: 1.5; padding: 0 18px; font-style: italic;
         }
     </style>
 </head>
 <body>
     <div class="container">
 
+        <!-- Header -->
         <div class="header">
             <img src="{{ $logo_base64 }}" alt="JJ Import Motors" class="logo">
-            <span class="badge-llave">BRIEFING DE MARKETING</span>
+            <span class="badge-llave">SERVICIO LLAVE EN MANO</span>
         </div>
 
+        <!-- Hero -->
         <div class="hero">
             <span class="hero-eyebrow"><span class="pulse"></span>Importación Premium · Alemania → España</span>
-            <h1 class="h1-title">{{ $car->brand }} {{ $car->model }} <span class="accent">{{ $car->year }}</span></h1>
-            <p class="hero-subtitle">{{ number_format($car->mileage) }} km · {{ $car->fuel }} · {{ $car->transmission }}</p>
+            <h1 class="h1-title">{{ $car->brand }} {{ $car->model }} @if($car->version ?? null)<span class="accent">{{ $car->version }}</span>@endif</h1>
+            <p class="hero-subtitle">{{ $car->year ?? '' }} · {{ isset($car->mileage) ? number_format($car->mileage) . ' km' : '' }} · {{ $car->fuel ?? '' }} · {{ $car->transmission ?? '' }}</p>
         </div>
 
-        <!-- Car Photo -->
+        <!-- Photo -->
         <div class="car-photo {{ $car_photo_base64 ? '' : 'no-photo' }}">
             @if($car_photo_base64)
-                @if(preg_match('#^https?://#', $car_photo_base64))
-                    <img src="{{ $car_photo_base64 }}" alt="{{ $car->brand }} {{ $car->model }}">
-                @else
-                    <img src="{{ $car_photo_base64 }}" alt="{{ $car->brand }} {{ $car->model }}">
-                @endif
+                <img src="{{ $car_photo_base64 }}" alt="{{ $car->brand }} {{ $car->model }}">
             @else
                 <span>🚗</span>
             @endif
         </div>
 
-        <!-- Price Strip -->
-        <div class="price-strip">
-            <div class="price-box main">
+        <!-- Price -->
+        <div class="price-row">
+            <div class="price-card main">
                 <div class="label">Precio</div>
-                <div class="value">{{ number_format($car->purchase_price, 0, ',', '.') }} €</div>
+                <div class="value">{{ number_format($price, 0, ',', '.') }} €</div>
             </div>
-            <div class="price-box">
-                <div class="label">Mercado</div>
-                <div class="value">{{ number_format($car->market_avg ?? $car->purchase_price, 0, ',', '.') }} €</div>
+            <div class="price-card">
+                <div class="label">Valor de mercado</div>
+                <div class="value">{{ number_format($marketAvg, 0, ',', '.') }} €</div>
             </div>
-            <div class="price-box">
-                <div class="label">Ahorro</div>
-                <div class="value saving">{{ ($car->estimated_saving ?? 0) > 0 ? number_format($car->estimated_saving, 0, ',', '.') . ' €' : '—' }}</div>
-            </div>
-            <div class="price-box">
-                <div class="label">Veredicto</div>
-                <div class="value">{{ $car->verdict ?? 'N/A' }}</div>
+            <div class="price-card">
+                <div class="label">Ahorro estimado</div>
+                <div class="value saving">{{ $saving > 0 ? number_format($saving, 0, ',', '.') . ' €' : '—' }}</div>
             </div>
         </div>
 
-        <!-- Car Info -->
-        <div class="car-info-card">
-            <span class="section-tag">DATOS DEL VEHÍCULO</span>
-            <h2 class="section-title">{{ $car->brand }} {{ $car->model }} {{ $car->version }}</h2>
-            <div class="car-specs">
-                <div class="spec-item">
-                    <span class="check"></span>
-                    <span><strong>Kilómetros:</strong> {{ number_format($car->mileage) }} km</span>
-                </div>
-                <div class="spec-item">
-                    <span class="check"></span>
-                    <span><strong>Combustible:</strong> {{ $car->fuel }}</span>
-                </div>
-                <div class="spec-item">
-                    <span class="check"></span>
-                    <span><strong>Cambio:</strong> {{ $car->transmission }}</span>
-                </div>
-                <div class="spec-item">
-                    <span class="check"></span>
-                    <span><strong>Potencia:</strong> {{ $car->cv }} CV</span>
-                </div>
-                <div class="spec-item">
-                    <span class="check"></span>
-                    <span><strong>Color:</strong> {{ $car->color }}</span>
-                </div>
-                <div class="spec-item">
-                    <span class="check"></span>
-                    <span><strong>Plazas:</strong> {{ $car->seats ?? '—' }}</span>
-                </div>
-                <div class="spec-item">
-                    <span class="check"></span>
-                    <span><strong>Ciudad:</strong> {{ $car->city ?? '—' }}</span>
-                </div>
-                <div class="spec-item">
-                    <span class="check"></span>
-                    <span><strong>Precio medio mercado:</strong> {{ number_format($car->market_avg ?? 0, 0, ',', '.') }} €</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Channel Sections -->
-        @if($milanuncios)
-        <div class="channel-section">
-            <span class="section-tag">Milanuncios</span>
-            <h2 class="section-title">Anuncio para Milanuncios</h2>
-            <div class="channel-content">
-                <div class="title">{{ $milanuncios->title }}</div>
-                <div class="description">{{ $milanuncios->description }}</div>
-                @if($milanuncios->hashtags)
-                <div class="hashtags-list">
-                    @foreach($milanuncios->hashtags as $tag)
-                    <span class="hashtag">#{{ $tag }}</span>
-                    @endforeach
-                </div>
-                @endif
-                @if($milanuncios->photo_tips)
-                <div class="tips-list">
-                    <ul>
-                        @foreach($milanuncios->photo_tips as $tip)
-                        <li><span class="tip-bullet">📸</span> {{ $tip }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-                @endif
+        <!-- Verdict -->
+        @if(($car->verdict ?? null) || ($car->traffic_light ?? null))
+        <div class="verdict-strip">
+            <span class="verdict-dot"></span>
+            <div class="verdict-text">
+                <strong>Veredicto del informe técnico:</strong>
+                {{ $car->verdict ?? 'Verificado' }}
+                @if($car->verdict_confidence ?? null) · Confianza {{ $car->verdict_confidence }}@endif
+                — Inspeccionado y validado por JJ Import Motors.
             </div>
         </div>
         @endif
 
-        @if($cochesNet)
-        <div class="channel-section">
-            <span class="section-tag">Coches.net</span>
-            <h2 class="section-title">Anuncio para Coches.net</h2>
-            <div class="channel-content">
-                <div class="title">{{ $cochesNet->title }}</div>
-                <div class="description">{{ $cochesNet->description }}</div>
-                @if($cochesNet->hashtags)
-                <div class="hashtags-list">
-                    @foreach($cochesNet->hashtags as $tag)
-                    <span class="hashtag">#{{ $tag }}</span>
-                    @endforeach
-                </div>
-                @endif
-                @if($cochesNet->photo_tips)
-                <div class="tips-list">
-                    <ul>
-                        @foreach($cochesNet->photo_tips as $tip)
-                        <li><span class="tip-bullet">📸</span> {{ $tip }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-                @endif
+        <!-- Description -->
+        @if($description)
+        <div class="section">
+            <span class="section-tag">Sobre este coche</span>
+            <div class="description-text">{{ $description }}</div>
+        </div>
+        @endif
+
+        <!-- Equipment -->
+        @if($equipment->count())
+        <div class="section">
+            <span class="section-tag">Equipamiento destacado</span>
+            <div class="chips">
+                @foreach($equipment as $item)
+                    <span class="chip">{{ $item }}</span>
+                @endforeach
             </div>
         </div>
         @endif
 
-        @if($wallapop)
-        <div class="channel-section">
-            <span class="section-tag">Wallapop</span>
-            <h2 class="section-title">Anuncio para Wallapop</h2>
-            <div class="channel-content">
-                <div class="title">{{ $wallapop->title }}</div>
-                <div class="description">{{ $wallapop->description }}</div>
-                @if($wallapop->hashtags)
-                <div class="hashtags-list">
-                    @foreach($wallapop->hashtags as $tag)
-                    <span class="hashtag">#{{ $tag }}</span>
-                    @endforeach
-                </div>
-                @endif
-                @if($wallapop->photo_tips)
-                <div class="tips-list">
-                    <ul>
-                        @foreach($wallapop->photo_tips as $tip)
-                        <li><span class="tip-bullet">📸</span> {{ $tip }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-                @endif
+        <!-- Specs -->
+        <div class="section">
+            <span class="section-tag">Ficha técnica</span>
+            <div class="specs-grid">
+                @foreach($specs as $k => $v)
+                    @if($v && $v !== '—')
+                    <div class="spec-cell">
+                        <div class="k">{{ $k }}</div>
+                        <div class="v">{{ $v }}</div>
+                    </div>
+                    @endif
+                @endforeach
             </div>
         </div>
-        @endif
 
-        @if($tiktok)
-        <div class="channel-section">
-            <span class="section-tag">TikTok</span>
-            <h2 class="section-title">Anuncio para TikTok</h2>
-            <div class="channel-content">
-                <div class="title">{{ $tiktok->title }}</div>
-                <div class="description">{{ $tiktok->description }}</div>
-                @if($tiktok->hashtags)
-                <div class="hashtags-list">
-                    @foreach($tiktok->hashtags as $tag)
-                    <span class="hashtag">#{{ $tag }}</span>
-                    @endforeach
-                </div>
-                @endif
-                @if($tiktok->photo_tips)
-                <div class="tips-list">
-                    <ul>
-                        @foreach($tiktok->photo_tips as $tip)
-                        <li><span class="tip-bullet">📸</span> {{ $tip }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-                @endif
-            </div>
-        </div>
-        @endif
-
-        @if($instagram)
-        <div class="channel-section">
-            <span class="section-tag">Instagram</span>
-            <h2 class="section-title">Anuncio para Instagram</h2>
-            <div class="channel-content">
-                <div class="title">{{ $instagram->title }}</div>
-                <div class="description">{{ $instagram->description }}</div>
-                @if($instagram->hashtags)
-                <div class="hashtags-list">
-                    @foreach($instagram->hashtags as $tag)
-                    <span class="hashtag">#{{ $tag }}</span>
-                    @endforeach
-                </div>
-                @endif
-                @if($instagram->photo_tips)
-                <div class="tips-lists">
-                    <ul>
-                        @foreach($instagram->photo_tips as $tip)
-                        <li><span class="tip-bullet">📸</span> {{ $tip }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-                @endif
-            </div>
-        </div>
-        @endif
-
-        <!-- Honorarios + QR -->
-        <div class="honorarios-row">
-            <div class="honorarios-section">
-                <div class="honorarios-tag">
-                    Nuestros Honorarios de Gestión
-                </div>
-                <div class="honorarios-price">{{ $precio_honorarios }}</div>
-                <div class="honorarios-conditions"><strong>+ coste del vehículo e impuestos</strong><br>Contacta sin compromiso · Ponte en manos de profesionales.</div>
-            </div>
+        <!-- QR + Contact -->
+        <div class="bottom-row">
             <div class="qr-card">
                 <div class="qr-box">
                     {!! $qr_svg !!}
                 </div>
                 <div class="qr-content">
-                    <div class="qr-tag">Ver coche</div>
-                    <div class="qr-title">Escanea para<br>ver el coche</div>
-                    <div class="qr-desc">Accede al detalle completo del vehículo.</div>
+                    <div class="qr-tag">Escanea para verlo</div>
+                    <div class="qr-title">Este coche,<br>en la web</div>
+                    <div class="qr-desc">Accede a la ficha completa, fotos e informe técnico desde tu móvil.</div>
+                </div>
+            </div>
+            <div class="contact-card">
+                <div class="contact-item">
+                    <div class="icon">📞</div>
+                    <div><div class="label">Teléfono 1</div><div class="value">{{ $telefono_1 }}</div></div>
+                </div>
+                <div class="contact-item">
+                    <div class="icon">📞</div>
+                    <div><div class="label">Teléfono 2</div><div class="value">{{ $telefono_2 }}</div></div>
+                </div>
+                <div class="contact-item">
+                    <div class="icon">✉️</div>
+                    <div><div class="label">Email</div><div class="value">{{ $email }}</div></div>
                 </div>
             </div>
         </div>
 
-        <!-- Footer -->
-        <div class="footer">
-            <div class="footer-item">
-                <div class="icon">📞</div>
-                <div>
-                    <div class="label">Teléfono 1</div>
-                    <div class="value">{{ $telefono_1 }}</div>
-                </div>
-            </div>
-            <div class="footer-item">
-                <div class="icon">📞</div>
-                <div>
-                    <div class="label">Teléfono 2</div>
-                    <div class="value">{{ $telefono_2 }}</div>
-                </div>
-            </div>
-            <div class="footer-item">
-                <div class="icon">✉️</div>
-                <div>
-                    <div class="label">Email</div>
-                    <div class="value">{{ $email }}</div>
-                </div>
-            </div>
+        <!-- Honorarios -->
+        <div class="honorarios">
+            <strong>Honorarios de gestión: {{ $precio_honorarios }}</strong> + coste del vehículo e impuestos · Contacta sin compromiso
         </div>
 
         <p class="disclaimer">*El precio final puede variar según las especificaciones del vehículo, impuestos aplicables, logística y transporte.</p>

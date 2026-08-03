@@ -49,10 +49,18 @@ class PublicMarketplaceController extends Controller
         $verdicts = Car::VERDICTS;
         $lights = ['green', 'amber', 'red', 'neutral'];
 
+        // Enlace al formulario público de solicitud (para clientes que no encuentren su coche)
+        $requestUrl = null;
+        $publicOrg = Organization::where('is_public', true)->first();
+        if ($publicOrg && $publicOrg->slug) {
+            $requestUrl = route('public.car-request.index', ['slug' => $publicOrg->slug]);
+        }
+
         return Inertia::render('Public/MarketplaceIndex', [
             'cars' => $cars,
             'verdicts' => $verdicts,
             'lights' => $lights,
+            'requestUrl' => $requestUrl,
             'filters' => $request->only(['search', 'verdict', 'traffic_light', 'min_price', 'max_price', 'year_min', 'year_max']),
         ]);
     }

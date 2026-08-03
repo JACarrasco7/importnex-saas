@@ -7,7 +7,6 @@ use App\Models\Client;
 use App\Models\Organization;
 use App\Models\Alert;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -31,8 +30,6 @@ class PublicCarRequestController extends Controller
 
     public function store(Request $request, string $slug)
     {
-        Log::debug('CAR_REQUEST_STORE hit', ['slug' => $slug, 'method' => $request->method(), 'all' => $request->all()]);
-
         $organization = Organization::where('slug', $slug)
             ->where('is_public', true)
             ->firstOrFail();
@@ -59,7 +56,6 @@ class PublicCarRequestController extends Controller
         ]);
 
         if ($validator->fails()) {
-            Log::debug('CAR_REQUEST_STORE validation failed', ['errors' => $validator->errors()->toArray()]);
             return back()
                 ->withErrors($validator)
                 ->withInput();
@@ -87,7 +83,6 @@ class PublicCarRequestController extends Controller
         }
 
         $carRequest = CarRequest::create($data);
-        Log::debug('CAR_REQUEST_STORE created', ['id' => $carRequest->id]);
 
         // Create alert for organization admins
         Alert::create([

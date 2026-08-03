@@ -362,6 +362,7 @@ export default {
         no_cars_title: 'No hay coches disponibles ahora mismo',
         no_cars_desc: 'Estamos buscando activamente nuevos coches para ti. Cuéntanos qué buscas y te avisaremos cuando aparezca uno que encaje.',
         cta_request_notify: 'Pedir que te avisen',
+        cta_request_form: 'Enviar tu solicitud',
         section_contact: '¿No has encontrado tu coche?',
         section_contact_desc: 'Cuéntanos qué buscas. Rastreamos el mercado alemán cada semana y te enviamos opciones que encajan contigo.',
         cta_whatsapp: 'WhatsApp: 675 70 14 39',

@@ -26,3 +26,4 @@ yarn-error.log
 /_tmp/
 _tmp_check_providers.php
 .env.production
+gen_briefing.php

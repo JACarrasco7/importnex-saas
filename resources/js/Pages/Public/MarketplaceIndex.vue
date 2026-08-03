@@ -28,9 +28,13 @@ const props = defineProps({
     cars: Object,
     verdicts: Array,
     filters: Object,
+    requestUrl: String,
 });
 
 const { t, locale } = useTranslations();
+
+// Enlace al formulario público de solicitud (fallback: sección de contacto)
+const requestHref = computed(() => props.requestUrl || '#contacto');
 
 const search = ref(props.filters?.search || '');
 const brandFilter = ref('');
@@ -128,11 +132,20 @@ const howItWorks = computed(() => [
 
         <!-- HERO -->
         <section class="relative overflow-hidden bg-gradient-to-br from-estoril-100 via-estoril-50 to-platinum-200">
-            <div class="absolute -top-40 -right-40 h-[28rem] w-[28rem] rounded-full bg-estoril-300/50 blur-3xl"></div>
-            <div class="absolute -bottom-40 -left-40 h-[28rem] w-[28rem] rounded-full bg-platinum-400/40 blur-3xl"></div>
-            <div class="absolute left-1/2 top-1/4 h-80 w-80 -translate-x-1/2 rounded-full bg-estoril-500/15 blur-3xl"></div>
-            <div class="absolute left-10 top-24 h-24 w-24 rounded-full bg-estoril-400/30 blur-2xl"></div>
-            <div class="absolute right-16 bottom-24 h-32 w-32 rounded-full bg-asphalt-300/20 blur-2xl"></div>
+            <div class="absolute -top-40 -right-40 h-[28rem] w-[28rem] rounded-full bg-estoril-300/60 blur-3xl"></div>
+            <div class="absolute -bottom-40 -left-40 h-[28rem] w-[28rem] rounded-full bg-platinum-400/50 blur-3xl"></div>
+            <div class="absolute left-1/2 top-1/4 h-80 w-80 -translate-x-1/2 rounded-full bg-estoril-500/20 blur-3xl"></div>
+            <div class="absolute left-10 top-24 h-24 w-24 rounded-full bg-estoril-400/40 blur-2xl"></div>
+            <div class="absolute right-16 bottom-24 h-32 w-32 rounded-full bg-asphalt-300/30 blur-2xl"></div>
+            <div class="absolute left-1/3 top-10 h-16 w-16 rounded-full bg-platinum-300/50 blur-xl"></div>
+
+            <!-- Ola decorativa inferior -->
+            <div class="pointer-events-none absolute bottom-0 left-0 right-0">
+                <svg class="h-12 w-full sm:h-16" viewBox="0 0 1440 80" preserveAspectRatio="none" aria-hidden="true">
+                    <path d="M0,40 C240,80 480,0 720,30 C960,60 1200,10 1440,40 L1440,80 L0,80 Z" fill="#ffffff" fill-opacity="0.7"></path>
+                    <path d="M0,60 C260,90 520,20 760,50 C1000,80 1240,40 1440,60 L1440,80 L0,80 Z" fill="#1A306D" fill-opacity="0.12"></path>
+                </svg>
+            </div>
 
             <!-- Rejilla decorativa sutil -->
             <div class="pointer-events-none absolute inset-0 opacity-[0.06]" style="background-image: radial-gradient(circle, #1A306D 1px, transparent 1px); background-size: 22px 22px;"></div>
@@ -202,8 +215,8 @@ const howItWorks = computed(() => [
                     <p class="mt-3 text-base text-gray-600">{{ t('marketplace.section_how_it_works_desc') }}</p>
                 </div>
                 <div class="mt-12 grid grid-cols-1 gap-6 md:grid-cols-3">
-                    <div v-for="item in howItWorks" :key="item.step" class="relative rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
-                        <span class="absolute -top-4 left-6 flex h-8 w-8 items-center justify-center rounded-full bg-estoril-700 text-sm font-bold text-white shadow-sm">
+                    <div v-for="item in howItWorks" :key="item.step" class="relative rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 transition hover:-translate-y-0.5 hover:shadow-md">
+                        <span class="absolute -top-4 left-6 flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-estoril-600 to-estoril-800 text-sm font-bold text-white shadow-md shadow-estoril-700/30">
                             {{ item.step }}
                         </span>
                         <h3 class="mt-3 text-lg font-semibold text-gray-900">{{ item.title }}</h3>
@@ -221,7 +234,7 @@ const howItWorks = computed(() => [
                         <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">{{ t('marketplace.section_catalog') }}</h2>
                         <p class="mt-2 text-sm text-gray-600">{{ t('marketplace.catalog_desc').replace(':count', cars.total || 0) }}</p>
                     </div>
-                    <a href="#contacto" class="inline-flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800">
+                    <a :href="requestHref" class="inline-flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800">
                         <PhoneIcon class="h-4 w-4" />
                         {{ t('marketplace.cta_request_notify') }}
                     </a>
@@ -394,7 +407,7 @@ const howItWorks = computed(() => [
                     <p class="mx-auto mt-2 max-w-md text-sm text-gray-600">
                         {{ t('marketplace.no_cars_desc') }}
                     </p>
-                    <a href="#contacto" class="mt-6 inline-flex items-center gap-2 rounded-lg bg-estoril-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-estoril-800">
+                    <a :href="requestHref" class="mt-6 inline-flex items-center gap-2 rounded-lg bg-estoril-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-estoril-800">
                         <PhoneIcon class="h-4 w-4" />
                         {{ t('marketplace.cta_request_notify') }}
                     </a>
@@ -412,7 +425,11 @@ const howItWorks = computed(() => [
                     {{ t('marketplace.section_contact_desc') }}
                 </p>
                 <div class="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                    <a href="https://wa.me/34675701439" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-6 py-3 text-base font-semibold text-white shadow-lg hover:bg-estoril-500">
+                    <a :href="requestHref" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-6 py-3 text-base font-semibold text-white shadow-lg hover:bg-estoril-500">
+                        <EnvelopeIcon class="h-5 w-5" />
+                        {{ t('marketplace.cta_request_form') }}
+                    </a>
+                    <a href="https://wa.me/34675701439" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-lg bg-white/10 px-6 py-3 text-base font-semibold text-white ring-1 ring-white/20 hover:bg-white/20">
                         <PhoneIcon class="h-5 w-5" />
                         {{ t('marketplace.cta_whatsapp') }}
                     </a>
