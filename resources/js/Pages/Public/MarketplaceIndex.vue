@@ -71,18 +71,18 @@ const filteredCars = computed(() => {
 });
 
 // Trust signals
-const trustItems = [
+const trustItems = computed(() => [
     { icon: ShieldCheckIcon, label: t('marketplace.trust_verified'), description: t('marketplace.trust_verified_desc') },
     { icon: ChartBarIcon, label: t('marketplace.trust_investigated'), description: t('marketplace.trust_investigated_desc') },
     { icon: TruckIcon, label: t('marketplace.trust_import'), description: t('marketplace.trust_import_desc') },
-];
+]);
 
 // How it works
-const howItWorks = [
+const howItWorks = computed(() => [
     { step: '1', title: t('marketplace.step1_title'), description: t('marketplace.step1_desc') },
     { step: '2', title: t('marketplace.step2_title'), description: t('marketplace.step2_desc') },
     { step: '3', title: t('marketplace.step3_title'), description: t('marketplace.step3_desc') },
-];
+]);
 </script>
 
 <template>
