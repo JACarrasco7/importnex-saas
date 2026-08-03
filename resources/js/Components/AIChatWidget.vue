@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, onMounted, nextTick } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 import { SparklesIcon, XMarkIcon, PaperAirplaneIcon, TrashIcon, ArrowsPointingOutIcon, ArrowsPointingInIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outline';
 import axios from 'axios';
 
@@ -8,22 +9,37 @@ const expanded = ref(false);
 const sending = ref(false);
 const errorMsg = ref('');
 const scroller = ref(null);
+const textareaRef = ref(null);
 
+const page = usePage();
+const aiSettings = computed(() => page.props.aiSettings ?? null);
+
+// Accept overrides via props OR fall back to $page.props.aiSettings (global mount).
 const props = defineProps({
     provider: { type: String, default: null },
-    providerLabel: { type: String, default: 'AI' },
+    providerLabel: { type: String, default: null },
     model: { type: String, default: null },
     hasKey: { type: Boolean, default: false },
 });
 
+const provider = computed(() => props.provider ?? aiSettings.value?.provider ?? null);
+const providerLabel = computed(() => {
+    const v = props.providerLabel ?? aiSettings.value?.provider_label ?? null;
+    return v ?? provider.value ?? 'AI';
+});
+const model = computed(() => props.model ?? aiSettings.value?.model ?? null);
+const hasKey = computed(() => Boolean(props.hasKey || (aiSettings.value?.has_key ?? false)));
+
 const messages = ref([
-    { role: 'assistant', content: '¡Hola! Soy tu asistente IA. Pregúntame lo que necesites sobre tus coches, clientes o cualquier operativa.' },
+    { role: 'assistant', content: '¡Hola! Soy tu asistente IA. Pregúntame lo que necesito.' },
 ]);
 
+const inputText = ref('');
+
 const providerText = computed(() => {
-    if (!props.provider) return 'IA no configurada';
-    let s = props.providerLabel || props.provider;
-    if (props.model) s += ` · ${props.model}`;
+    if (!provider.value) return 'IA no configurada';
+    let s = providerLabel.value || provider.value;
+    if (model.value) s += ` · ${model.value}`;
     return s;
 });
 
@@ -39,21 +55,21 @@ function clearAll() {
 }
 
 async function send() {
-    const lastUser = [...messages.value].reverse().find(m => m.role === 'user' && m.content.trim() !== '');
-    if (!lastUser) return;
-    if (!props.hasKey) {
+    const userText = inputText.value.trim();
+    if (!userText) return;
+    if (!hasKey.value) {
         errorMsg.value = 'No hay IA configurada. Ve a Organización → Edit para añadir un proveedor y una API key.';
         return;
     }
 
+    messages.value.push({ role: 'user', content: userText });
+    inputText.value = '';
     sending.value = true;
     errorMsg.value = '';
-    const userText = lastUser.content;
 
     try {
         const resp = await axios.post(route('ai.chat.send'), {
             messages: messages.value
-                .filter(m => m.role !== 'assistant' || m.content.trim() !== '')
                 .map(m => ({ role: m.role, content: m.content })),
             max_tokens: 1500,
         });
@@ -67,6 +83,12 @@ async function send() {
     } finally {
         sending.value = false;
         scrollToBottom();
+        // Reset textarea height after sending
+        nextTick(() => {
+            if (textareaRef.value) {
+                textareaRef.value.style.height = 'auto';
+            }
+        });
     }
 }
 
@@ -77,10 +99,22 @@ function handleEnter(e) {
     }
 }
 
+function addMessage() {
+    if (inputText.value.trim()) {
+        send();
+    }
+}
+
+function adjustTextareaHeight(e) {
+    const textarea = e.target;
+    textarea.style.height = 'auto';
+    textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+}
+
 const panelClass = computed(() =>
     expanded
         ? 'fixed inset-4 z-50 flex flex-col rounded-2xl bg-white shadow-2xl ring-1 ring-gray-200 sm:inset-8'
-        : 'fixed bottom-24 right-6 z-50 flex h-[640px] w-[420px] max-w-[calc(100vw-2rem)] flex-col rounded-2xl bg-white shadow-2xl ring-1 ring-gray-200',
+        : 'fixed bottom-24 right-6 z-50 flex h-[480px] w-[360px] max-w-[calc(100vw-2rem)] flex-col rounded-2xl bg-white shadow-2xl ring-1 ring-gray-200',
 );
 
 onMounted(() => scrollToBottom());
@@ -160,17 +194,19 @@ onMounted(() => scrollToBottom());
             </div>
         </div>
 
-        <!-- Composer (Inertia v-model on last user message) -->
+        <!-- Composer -->
         <footer class="border-t border-gray-200 bg-white p-3 rounded-b-2xl">
             <div class="flex items-end gap-2">
                 <textarea
-                    v-model="messages[messages.length - 1].content"
+                    ref="textareaRef"
+                    v-model="inputText"
                     @keydown="handleEnter"
-                    rows="2"
+                    rows="1"
                     :disabled="sending || !hasKey"
-                    placeholder="Pregúntale a la IA… (Enter para enviar, Shift+Enter salto)"
-                    class="block w-full resize-none rounded-lg border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-gray-50"></textarea>
-                <button @click="send" :disabled="sending || !hasKey"
+                    placeholder="Pregúntale a la IA… (Enter para enviar)"
+                    class="block w-full resize-none rounded-lg border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-gray-50"
+                    @input="adjustTextareaHeight"></textarea>
+                <button @click="addMessage" :disabled="sending || !hasKey"
                         class="inline-flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50">
                     <PaperAirplaneIcon class="h-4 w-4" />
                 </button>

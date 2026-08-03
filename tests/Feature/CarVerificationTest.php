@@ -101,13 +101,54 @@ class CarVerificationTest extends TestCase
         $car = Car::factory()->create([
             'organization_id' => $org->id,
             'status' => 'Pending review',
+            'ai_analysis_json' => [
+                'valuation' => 'AI says it is overpriced',
+                'verdict' => 'Discard',
+                'market_avg' => 15000,
+            ],
         ]);
 
         $this->actingAs($user);
 
-        $response = $this->post(route('cars.verify.apply', $car));
+        $response = $this->post(route('cars.verify.apply', $car), [
+            'fields' => ['valuation', 'verdict', 'market_avg'],
+        ]);
         $response->assertRedirect(route('cars.show', $car->id));
 
-        $this->assertEquals('Valuing', $car->fresh()->status);
+        $fresh = $car->fresh();
+        $this->assertEquals('Valuing', $fresh->status);
+        $this->assertEquals('AI says it is overpriced', $fresh->valuation);
+        $this->assertEquals('Discard', $fresh->verdict);
+        $this->assertEquals(15000.0, (float) $fresh->market_avg);
+        $this->assertNull($fresh->ai_analysis_json, 'ai_analysis_json should be cleared after applying');
+    }
+
+    public function test_apply_skips_unselected_fields_and_unfilled_proposals(): void
+    {
+        $org = Organization::factory()->create();
+        $user = User::factory()->create(['organization_id' => $org->id, 'role' => 'owner']);
+        $car = Car::factory()->create([
+            'organization_id' => $org->id,
+            'status' => 'Pending review',
+            'description' => 'Already set by user',
+            'ai_analysis_json' => [
+                'valuation' => 'AI valuation text',
+                'description' => 'AI description text',
+                'verdict' => null,
+            ],
+        ]);
+
+        $this->actingAs($user);
+
+        // Apply ONLY valuation. Leave description (already set) untouched.
+        $response = $this->post(route('cars.verify.apply', $car), [
+            'fields' => ['valuation', 'verdict'], // verdict has null proposal => skipped
+        ]);
+        $response->assertRedirect();
+
+        $fresh = $car->fresh();
+        $this->assertEquals('AI valuation text', $fresh->valuation);
+        $this->assertEquals('Already set by user', $fresh->description, 'description must be left intact');
+        $this->assertNull($fresh->verdict);
     }
 }

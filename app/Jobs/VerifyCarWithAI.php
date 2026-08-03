@@ -40,7 +40,11 @@ class VerifyCarWithAI implements ShouldQueue
         }
 
         $analysis = $result['analysis'];
+        $analysisFull = $result['analysis_full'] ?? $analysis;
 
+        // Persist the legacy short summary into the dedicated review columns
+        // and store the full enriched payload in `ai_analysis_json` so the
+        // user can decide per field which suggestions to apply via the modal.
         $this->car->update([
             'status' => 'Pending review',
             'traffic_light' => $analysis['traffic_light'] ?? 'neutral',
@@ -48,6 +52,7 @@ class VerifyCarWithAI implements ShouldQueue
             'recommendation' => $analysis['recommendation'] ?? null,
             'red_flags' => $analysis['red_flags'] ?? [],
             'tips' => $analysis['tips'] ?? [],
+            'ai_analysis_json' => $analysisFull,
         ]);
 
         Alert::create([

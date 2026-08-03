@@ -50,6 +50,7 @@ class CarVerificationController extends Controller
         }
 
         $analysis = $result['analysis'];
+        $analysisFull = $result['analysis_full'] ?? $analysis;
 
         $car->update([
             'status' => 'Pending review',
@@ -58,6 +59,7 @@ class CarVerificationController extends Controller
             'recommendation' => $analysis['recommendation'] ?? null,
             'red_flags' => $analysis['red_flags'] ?? [],
             'tips' => $analysis['tips'] ?? [],
+            'ai_analysis_json' => $analysisFull,
         ]);
 
         return redirect()->route('cars.show', $car->id)
@@ -65,14 +67,49 @@ class CarVerificationController extends Controller
     }
 
     /**
-     * Apply the AI suggestions to the car (Save button).
+     * Apply selected AI suggestions to the car.
+     *
+     * The user picks per-field which AI suggestions to apply (via a modal on
+     * the Verify page). Only the chosen fields are written; everything else
+     * keeps its current value.
      */
-    public function apply(Car $car): RedirectResponse
+    public function apply(Request $request, Car $car): RedirectResponse
     {
-        $car->update(['status' => 'Valuing']);
+        $data = $request->validate([
+            'fields' => 'required|array',
+            'fields.*' => 'string|in:description,purchase_price,manual_tax_base,tips,red_flags,verdict,verdict_confidence,verdict_reasoning,market_avg,market_min,market_max,estimated_saving,pros,cons,valuation',
+        ]);
+
+        $analysis = $car->ai_analysis_json;
+        if (!is_array($analysis) || empty($analysis)) {
+            return back()->with('error', 'No AI analysis available for this car. Run the verification first.');
+        }
+
+        $fillable = [];
+        $touched = [];
+
+        foreach ($data['fields'] as $field) {
+            $proposed = $analysis[$field] ?? null;
+            if ($proposed === null || $proposed === '' || $proposed === []) {
+                continue;
+            }
+            $fillable[$field] = $proposed;
+            $touched[] = $field;
+        }
+
+        if (empty($fillable)) {
+            return back()->with('error', 'No fields selected or suggestions were empty.');
+        }
+
+        // Move the car out of Pending review and reset the analysis snapshot so
+        // the modal stops offering the same suggestions after they're consumed.
+        $fillable['status'] = 'Valuing';
+        $fillable['ai_analysis_json'] = null;
+
+        $car->update($fillable);
 
         return redirect()->route('cars.show', $car->id)
-            ->with('success', 'AI suggestions applied.');
+            ->with('success', 'AI suggestions applied to: ' . implode(', ', $touched) . '.');
     }
 
     /**

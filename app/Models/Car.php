@@ -24,11 +24,13 @@ class Car extends Model
         'market_avg', 'market_min', 'market_max', 'estimated_saving',
         'research_source', 'schema_version',
         'comparables_list', 'fotos_json', 'notes', 'organization_id', 'client_id',
+        'ai_analysis_json',
     ];
 
     protected $casts = [
         'equipment' => 'array', 'tips' => 'array', 'red_flags' => 'array',
         'research' => 'array', 'pros' => 'array', 'cons' => 'array',
+        'ai_analysis_json' => 'array',
         'comparables_list' => 'array', 'fotos_json' => 'array', 'boe_confirmed' => 'boolean',
         'verdict_at' => 'datetime',
         'lat' => 'decimal:8', 'lng' => 'decimal:8',
@@ -106,6 +108,11 @@ class Car extends Model
     public function checklists()
     {
         return $this->hasMany(CarChecklist::class);
+    }
+
+    public function marketingContents()
+    {
+        return $this->hasMany(CarMarketingContent::class);
     }
 
     public function scopeActive($query)
