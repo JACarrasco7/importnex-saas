@@ -33,17 +33,28 @@ const props = defineProps({
 const { t, locale } = useTranslations();
 
 const search = ref(props.filters?.search || '');
-const verdictFilter = ref(props.filters?.verdict || 'all');
+const brandFilter = ref('');
+const dealFilter = ref(false);
 const minPrice = ref(props.filters?.min_price || '');
 const maxPrice = ref(props.filters?.max_price || '');
 const mileageFilter = ref(props.filters?.mileage || '');
 
-const { currency, verdictVariant } = useFormat();
+const { currency, verdictVariant, trafficLightVariant } = useFormat();
+
+// Marcas disponibles en el catálogo actual
+const brands = computed(() => {
+    const set = new Set();
+    (props.cars.data || []).forEach(c => { if (c.brand) set.add(c.brand); });
+    return [...set].sort();
+});
 
 const filteredCars = computed(() => {
     let result = props.cars.data || [];
-    if (verdictFilter.value && verdictFilter.value !== 'all') {
-        result = result.filter(c => c.verdict === verdictFilter.value);
+    if (brandFilter.value) {
+        result = result.filter(c => c.brand === brandFilter.value);
+    }
+    if (dealFilter.value) {
+        result = result.filter(c => (c.estimated_saving || 0) > 0);
     }
     if (minPrice.value) {
         const min = parseFloat(minPrice.value);
@@ -101,7 +112,7 @@ const howItWorks = computed(() => [
                     </span>
                     <div>
                         <p class="text-base font-bold leading-tight text-gray-900">{{ t('marketplace.brand') }}</p>
-                        <p class="text-[11px] leading-tight text-gray-500">by Importnex</p>
+                        <p class="text-[11px] leading-tight text-gray-500">{{ t('marketplace.brand_sub') }}</p>
                     </div>
                 </Link>
                 <nav class="flex items-center gap-3">
@@ -116,15 +127,20 @@ const howItWorks = computed(() => [
         </header>
 
         <!-- HERO -->
-        <section class="relative overflow-hidden bg-gradient-to-br from-estoril-50 via-white to-platinum-100">
-            <div class="absolute -top-32 -right-32 h-96 w-96 rounded-full bg-estoril-200/40 blur-3xl"></div>
-            <div class="absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-platinum-300/40 blur-3xl"></div>
-            <div class="absolute left-1/2 top-1/3 h-72 w-72 -translate-x-1/2 rounded-full bg-estoril-100/70 blur-3xl"></div>
+        <section class="relative overflow-hidden bg-gradient-to-br from-estoril-100 via-estoril-50 to-platinum-200">
+            <div class="absolute -top-40 -right-40 h-[28rem] w-[28rem] rounded-full bg-estoril-300/50 blur-3xl"></div>
+            <div class="absolute -bottom-40 -left-40 h-[28rem] w-[28rem] rounded-full bg-platinum-400/40 blur-3xl"></div>
+            <div class="absolute left-1/2 top-1/4 h-80 w-80 -translate-x-1/2 rounded-full bg-estoril-500/15 blur-3xl"></div>
+            <div class="absolute left-10 top-24 h-24 w-24 rounded-full bg-estoril-400/30 blur-2xl"></div>
+            <div class="absolute right-16 bottom-24 h-32 w-32 rounded-full bg-asphalt-300/20 blur-2xl"></div>
+
+            <!-- Rejilla decorativa sutil -->
+            <div class="pointer-events-none absolute inset-0 opacity-[0.06]" style="background-image: radial-gradient(circle, #1A306D 1px, transparent 1px); background-size: 22px 22px;"></div>
 
             <div class="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8 lg:py-28">
                 <div class="mx-auto max-w-3xl text-center">
-                    <span class="inline-flex items-center gap-2 rounded-full bg-estoril-100 px-4 py-1.5 text-sm font-semibold text-estoril-800 ring-1 ring-estoril-200">
-                        <SparklesIcon class="h-4 w-4" />
+                    <span class="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-1.5 text-sm font-semibold text-estoril-800 shadow-sm ring-1 ring-estoril-200 backdrop-blur">
+                        <SparklesIcon class="h-4 w-4 text-estoril-600" />
                         {{ t('marketplace.tagline') }}
                     </span>
                     <h1 class="mt-6 text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl">
@@ -146,17 +162,32 @@ const howItWorks = computed(() => [
 
                     <!-- Stats strip -->
                     <div class="mt-12 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                        <div class="rounded-2xl bg-white/70 px-4 py-4 shadow-sm ring-1 ring-gray-200 backdrop-blur">
-                            <p class="text-3xl font-extrabold text-estoril-800">9</p>
-                            <p class="mt-0.5 text-xs font-medium text-gray-600">{{ t('marketplace.stat_points') }}</p>
+                        <div class="flex items-center gap-3 rounded-2xl bg-white/80 px-4 py-4 text-left shadow-sm ring-1 ring-estoril-200 backdrop-blur">
+                            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-estoril-600 shadow-md shadow-estoril-600/30">
+                                <ShieldCheckIcon class="h-6 w-6 text-white" />
+                            </div>
+                            <div>
+                                <p class="text-2xl font-extrabold text-estoril-800">9</p>
+                                <p class="text-xs font-medium text-gray-600">{{ t('marketplace.stat_points') }}</p>
+                            </div>
                         </div>
-                        <div class="rounded-2xl bg-white/70 px-4 py-4 shadow-sm ring-1 ring-gray-200 backdrop-blur">
-                            <p class="text-3xl font-extrabold text-estoril-800">100%</p>
-                            <p class="mt-0.5 text-xs font-medium text-gray-600">{{ t('marketplace.stat_price') }}</p>
+                        <div class="flex items-center gap-3 rounded-2xl bg-white/80 px-4 py-4 text-left shadow-sm ring-1 ring-estoril-200 backdrop-blur">
+                            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-estoril-700 shadow-md shadow-estoril-700/30">
+                                <ChartBarIcon class="h-6 w-6 text-white" />
+                            </div>
+                            <div>
+                                <p class="text-2xl font-extrabold text-estoril-800">100%</p>
+                                <p class="text-xs font-medium text-gray-600">{{ t('marketplace.stat_price') }}</p>
+                            </div>
                         </div>
-                        <div class="rounded-2xl bg-white/70 px-4 py-4 shadow-sm ring-1 ring-gray-200 backdrop-blur">
-                            <p class="text-3xl font-extrabold text-estoril-800">🇪🇸</p>
-                            <p class="mt-0.5 text-xs font-medium text-gray-600">{{ t('marketplace.stat_import') }}</p>
+                        <div class="flex items-center gap-3 rounded-2xl bg-white/80 px-4 py-4 text-left shadow-sm ring-1 ring-estoril-200 backdrop-blur">
+                            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-asphalt-700 shadow-md shadow-asphalt-700/30">
+                                <TruckIcon class="h-6 w-6 text-white" />
+                            </div>
+                            <div>
+                                <p class="text-2xl font-extrabold text-estoril-800">🇪🇸</p>
+                                <p class="text-xs font-medium text-gray-600">{{ t('marketplace.stat_import') }}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -197,8 +228,8 @@ const howItWorks = computed(() => [
                 </div>
 
                 <!-- Filters -->
-                <div class="grid grid-cols-1 gap-3 rounded-2xl bg-gray-50 p-4 sm:grid-cols-2 lg:grid-cols-3">
-                    <div class="sm:col-span-1 lg:col-span-1">
+                <div class="grid grid-cols-1 gap-3 rounded-2xl bg-gray-50 p-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <div class="sm:col-span-2 lg:col-span-2">
                         <label class="mb-1.5 block text-xs font-semibold text-gray-700">{{ t('marketplace.filter_search') }}</label>
                         <div class="relative">
                             <MagnifyingGlassIcon class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
@@ -210,14 +241,14 @@ const howItWorks = computed(() => [
                             />
                         </div>
                     </div>
-                    <div>
+                    <div class="lg:col-span-1">
                         <label class="mb-1.5 block text-xs font-semibold text-gray-700">{{ t('marketplace.filter_budget') }}</label>
                         <div class="flex gap-2">
                             <input v-model.number="minPrice" type="number" min="0" step="500" :placeholder="t('marketplace.filter_budget_min')" class="block w-full rounded-lg border-gray-200 text-sm focus:border-estoril-600 focus:ring-estoril-600" />
                             <input v-model.number="maxPrice" type="number" min="0" step="500" :placeholder="t('marketplace.filter_budget_max')" class="block w-full rounded-lg border-gray-200 text-sm focus:border-estoril-600 focus:ring-estoril-600" />
                         </div>
                     </div>
-                    <div>
+                    <div class="lg:col-span-1">
                         <label class="mb-1.5 block text-xs font-semibold text-gray-700">{{ t('marketplace.filter_mileage') }}</label>
                         <div class="flex gap-2">
                             <input v-model.number="mileageFilter" type="number" min="0" step="1000" :placeholder="t('marketplace.filter_mileage_placeholder')" class="block w-full rounded-lg border-gray-200 text-sm focus:border-estoril-600 focus:ring-estoril-600" />
@@ -225,20 +256,44 @@ const howItWorks = computed(() => [
                     </div>
                 </div>
 
-                <!-- Tabs (verdict quick filter) -->
-                <div class="flex flex-wrap gap-2">
+                <!-- Quick filters: marcas + ofertas -->
+                <div class="flex flex-wrap items-center gap-2">
                     <button
-                        v-for="v in [{id:'all',label:t('marketplace.tab_all')},{id:'Buy',label:t('marketplace.tab_recommended')},{id:'Buy if price drops',label:t('marketplace.tab_price_drop')}]"
-                        :key="v.id"
-                        @click="verdictFilter = v.id"
+                        @click="brandFilter = ''"
                         :class="[
                             'rounded-full px-4 py-2 text-sm font-medium transition',
-                            verdictFilter === v.id
-                                ? 'bg-gray-900 text-white shadow-sm'
-                                : 'bg-white text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50',
+                            brandFilter === ''
+                                ? 'bg-estoril-700 text-white shadow-sm'
+                                : 'bg-white text-gray-700 ring-1 ring-gray-200 hover:bg-estoril-50 hover:text-estoril-700',
                         ]"
                     >
-                        {{ v.label }}
+                        {{ t('marketplace.filter_all_brands') }}
+                    </button>
+                    <button
+                        v-for="b in brands"
+                        :key="b"
+                        @click="brandFilter = brandFilter === b ? '' : b"
+                        :class="[
+                            'rounded-full px-4 py-2 text-sm font-medium transition',
+                            brandFilter === b
+                                ? 'bg-estoril-700 text-white shadow-sm'
+                                : 'bg-white text-gray-700 ring-1 ring-gray-200 hover:bg-estoril-50 hover:text-estoril-700',
+                        ]"
+                    >
+                        {{ b }}
+                    </button>
+                    <span class="mx-1 hidden h-5 w-px bg-gray-300 sm:block"></span>
+                    <button
+                        @click="dealFilter = !dealFilter"
+                        :class="[
+                            'inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition',
+                            dealFilter
+                                ? 'bg-amber-500 text-white shadow-sm'
+                                : 'bg-amber-50 text-amber-700 ring-1 ring-amber-200 hover:bg-amber-100',
+                        ]"
+                    >
+                        <SparklesIcon class="h-4 w-4" />
+                        {{ t('marketplace.filter_good_deal') }}
                     </button>
                 </div>
 
@@ -371,7 +426,7 @@ const howItWorks = computed(() => [
                     </a>
                 </div>
                 <p class="mt-8 text-sm text-gray-400">
-                    Importnex &middot; JJ Import Motors &middot; Servicio llave en mano Alemania → España
+                    {{ t('marketplace.footer_line') }}
                 </p>
             </div>
         </section>
