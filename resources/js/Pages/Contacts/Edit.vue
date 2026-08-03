@@ -24,7 +24,7 @@ const form = useForm({
     notes: props.contact.notes ?? '',
 });
 
-const submit = () => form.put(route('contacts.update', props.contact.id));
+const submit = () => form.patch(route('contacts.update', props.contact.id));
 
 const inputClass = 'block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-estoril-500 focus:ring-estoril-500';
 </script>

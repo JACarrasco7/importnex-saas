@@ -27,7 +27,7 @@ watch(filter, () => {
 const askResolve = (alert) => { alertToAct.value = alert; showResolve.value = true; };
 const confirmResolve = () => {
     if (!alertToAct.value) return;
-    router.post(route('alerts.mark-resolved', alertToAct.value.id), {}, {
+    router.patch(route('alerts.mark-resolved', alertToAct.value.id), {}, {
         preserveScroll: true,
         onSuccess: () => { showResolve.value = false; alertToAct.value = null; },
     });
