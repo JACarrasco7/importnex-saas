@@ -198,7 +198,7 @@ const howItWorks = computed(() => [
 
                 <!-- Filters -->
                 <div class="grid grid-cols-1 gap-3 rounded-2xl bg-gray-50 p-4 sm:grid-cols-2 lg:grid-cols-3">
-                    <div class="sm:col-span-2 lg:col-span-2">
+                    <div class="sm:col-span-1 lg:col-span-1">
                         <label class="mb-1.5 block text-xs font-semibold text-gray-700">{{ t('marketplace.filter_search') }}</label>
                         <div class="relative">
                             <MagnifyingGlassIcon class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />

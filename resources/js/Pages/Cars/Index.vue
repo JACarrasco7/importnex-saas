@@ -32,7 +32,7 @@ const tabs = computed(() => {
     const ordered = statusOrder.filter(s => props.statuses.includes(s));
     const remaining = props.statuses.filter(s => !ordered.includes(s));
     return [
-        { id: 'all', label: 'All', count: props.cars.total },
+        { id: 'all', label: t('common.all'), count: props.cars.total },
         ...ordered.map(status => ({
             id: status,
             label: status,
@@ -131,7 +131,7 @@ const confirmDelete = () => {
                     <template #actions>
                         <Link :href="route('cars.kanban')" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             <Squares2X2Icon class="h-4 w-4" />
-                            Kanban
+                            {{ t('nav.kanban') }}
                         </Link>
                         <Link :href="route('cars.import-valuation.create')" class="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500">
                             <SparklesIcon class="h-4 w-4" />
@@ -155,22 +155,22 @@ const confirmDelete = () => {
                             </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Traffic light</label>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Semáforo</label>
                             <select v-model="lightFilter" class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-500 focus:ring-estoril-500">
-                                <option value="">All lights</option>
+                                <option value="">Todos</option>
                                 <option v-for="light in lights" :key="light" :value="light">{{ light }}</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Import</label>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Importar</label>
                             <form @submit.prevent="submitImport" class="flex gap-2">
                                 <label class="flex-1 cursor-pointer">
-                                    <span class="sr-only">Choose file</span>
+                                    <span class="sr-only">Elegir archivo</span>
                                     <input type="file" accept=".csv,.xlsx,.xls" @change="importFile" class="block w-full text-xs text-gray-500 file:mr-2 file:rounded-lg file:border-0 file:bg-estoril-50 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-estoril-700 hover:file:bg-estoril-100" />
                                 </label>
                                 <button v-if="importForm.file" type="submit" class="inline-flex items-center gap-1 rounded-lg bg-estoril-700 px-3 py-2 text-xs font-semibold text-white hover:bg-estoril-800">
                                     <ArrowUpTrayIcon class="h-3 w-3" />
-                                    Upload
+                                    Subir
                                 </button>
                             </form>
                         </div>
@@ -180,19 +180,19 @@ const confirmDelete = () => {
                 <!-- Quick Stats -->
                 <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
                     <div class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-gray-500">Total Value</div>
+                        <div class="text-xs font-semibold uppercase tracking-wider text-gray-500">Valor total</div>
                         <div class="mt-1 text-2xl font-bold text-gray-900">{{ currency(stats.totalValue) }}</div>
                     </div>
                     <div class="rounded-xl bg-emerald-50 p-4 shadow-sm ring-1 ring-emerald-200">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-emerald-700">Green Light</div>
+                        <div class="text-xs font-semibold uppercase tracking-wider text-emerald-700">Luz verde</div>
                         <div class="mt-1 text-2xl font-bold text-emerald-600">{{ stats.green }}</div>
                     </div>
                     <div class="rounded-xl bg-amber-50 p-4 shadow-sm ring-1 ring-amber-200">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-amber-700">Amber Light</div>
+                        <div class="text-xs font-semibold uppercase tracking-wider text-amber-700">Luz ámbar</div>
                         <div class="mt-1 text-2xl font-bold text-amber-600">{{ stats.amber }}</div>
                     </div>
                     <div class="rounded-xl bg-red-50 p-4 shadow-sm ring-1 ring-red-200">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-red-700">Red Light</div>
+                        <div class="text-xs font-semibold uppercase tracking-wider text-red-700">Luz roja</div>
                         <div class="mt-1 text-2xl font-bold text-red-600">{{ stats.red }}</div>
                     </div>
                 </div>
@@ -248,18 +248,18 @@ const confirmDelete = () => {
 
                             <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
                                 <div>
-                                    <span class="text-[10px] uppercase tracking-wider text-gray-500">Year</span>
+                                    <span class="text-[10px] uppercase tracking-wider text-gray-500">Año</span>
                                     <p class="font-medium text-gray-900">{{ car.year }}</p>
                                 </div>
                                 <div>
-                                    <span class="text-[10px] uppercase tracking-wider text-gray-500">Mileage</span>
+                                    <span class="text-[10px] uppercase tracking-wider text-gray-500">Km</span>
                                     <p class="font-medium text-gray-900">{{ (car.mileage / 1000).toFixed(0) }}k km</p>
                                 </div>
                             </div>
 
                             <div class="mt-3 flex items-center justify-between gap-2 border-t border-gray-100 pt-3">
                                 <div>
-                                    <span class="text-[10px] uppercase tracking-wider text-gray-500">Price</span>
+                                    <span class="text-[10px] uppercase tracking-wider text-gray-500">Precio</span>
                                     <p class="text-base font-bold text-gray-900">{{ currency(car.purchase_price) }}</p>
                                 </div>
                                 <div class="flex flex-wrap items-center justify-end gap-1">
@@ -272,13 +272,13 @@ const confirmDelete = () => {
                         <div class="flex border-t border-gray-100 bg-gray-50 px-4 py-2">
                             <div class="flex-1" />
                             <div class="flex items-center gap-1">
-                                <Link :href="route('cars.show', car.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-estoril-50 hover:text-estoril-600" title="View">
+                                <Link :href="route('cars.show', car.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-estoril-50 hover:text-estoril-600" title="Ver">
                                     <EyeIcon class="h-3.5 w-3.5" />
                                 </Link>
-                                <Link :href="route('cars.edit', car.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600" title="Edit">
+                                <Link :href="route('cars.edit', car.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600" title="Editar">
                                     <PencilIcon class="h-3.5 w-3.5" />
                                 </Link>
-                                <button type="button" @click="askDelete(car)" class="rounded-md p-1.5 text-gray-400 hover:bg-rose-50 hover:text-rose-600" title="Delete">
+                                <button type="button" @click="askDelete(car)" class="rounded-md p-1.5 text-gray-400 hover:bg-rose-50 hover:text-rose-600" title="Eliminar">
                                     <TrashIcon class="h-3.5 w-3.5" />
                                 </button>
                             </div>
@@ -286,15 +286,15 @@ const confirmDelete = () => {
                     </div>
                 </div>
 
-                <EmptyState v-else icon="🚗" title="No cars found" description="Try adjusting your filters or add your first vehicle to the inventory." action-text="Add your first car" :action-route="route('cars.create')" />
+                <EmptyState v-else icon="🚗" title="No se encontraron coches" description="Ajusta tus filtros o añade tu primer vehículo al inventario." action-text="Añadir tu primer coche" :action-route="route('cars.create')" />
             </div>
         </div>
 
         <ConfirmDialog
             :show="showDelete"
-            title="Delete car"
-            :message="`Are you sure you want to delete ${carToDelete?.brand} ${carToDelete?.model}? This action cannot be undone.`"
-            confirm-text="Delete"
+            title="Eliminar coche"
+            :message="`¿Seguro que quieres eliminar ${carToDelete?.brand} ${carToDelete?.model}? Esta acción no se puede deshacer.`"
+            confirm-text="Eliminar"
             variant="danger"
             @close="showDelete = false"
             @confirm="confirmDelete"

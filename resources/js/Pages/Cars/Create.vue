@@ -177,7 +177,7 @@ const scrapeFromUrl = async () => {
                 </PageHeader>
 
                 <form @submit.prevent="submit" class="space-y-6">
-                    <FormSection title="Import from URL" description="Paste a mobile.de or autoscout24.de link to auto-fill the form with AI">
+                    <FormSection title="Importar desde URL" description="Pega un enlace de mobile.de o autoscout24.de para autocompletar el formulario con IA">
                         <div class="space-y-3">
                             <div class="flex flex-col gap-2 sm:flex-row">
                                 <div class="relative flex-1">
@@ -217,7 +217,7 @@ const scrapeFromUrl = async () => {
                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
                                     </svg>
                                     <SparklesIcon v-else class="h-4 w-4" />
-                                    {{ isScraping ? 'Extrayendo...' : 'Auto-fill' }}
+                                    {{ isScraping ? 'Extrayendo...' : 'Autocompletar' }}
                                 </button>
                             </div>
 
@@ -258,18 +258,18 @@ const scrapeFromUrl = async () => {
                         </div>
                     </FormSection>
 
-                    <FormSection title="Vehicle identification" description="Basic info about the car">
+                    <FormSection title="Identificación del vehículo" description="Información básica del coche">
                         <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-                            <FormField label="Brand" required :error="form.errors.brand">
+                            <FormField label="Marca" required :error="form.errors.brand">
                                 <input v-model="form.brand" type="text" required :class="inputClass" />
                             </FormField>
-                            <FormField label="Model" required :error="form.errors.model">
+                            <FormField label="Modelo" required :error="form.errors.model">
                                 <input v-model="form.model" type="text" required :class="inputClass" />
                             </FormField>
-                            <FormField label="Version" :error="form.errors.version">
+                            <FormField label="Versión" :error="form.errors.version">
                                 <input v-model="form.version" type="text" :class="inputClass" />
                             </FormField>
-                            <FormField label="Year (MM/YYYY)" required hint="e.g. 07/2020">
+                            <FormField label="Año (MM/AAAA)" required hint="p. ej. 07/2020">
                                 <input v-model="form.year" type="text" pattern="\d{2}/\d{4}" required :class="inputClass" placeholder="07/2020" />
                             </FormField>
                             <FormField label="VIN" :error="form.errors.vin">
@@ -281,21 +281,21 @@ const scrapeFromUrl = async () => {
                         </div>
                     </FormSection>
 
-                    <FormSection title="Technical specs" description="Engine, transmission, dimensions">
+                    <FormSection title="Ficha técnica" description="Motor, transmisión, dimensiones">
                         <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
-                            <FormField label="Mileage (km)">
+                            <FormField label="Kilometraje (km)">
                                 <input v-model="form.mileage" type="number" :class="inputClass" />
                             </FormField>
-                            <FormField label="Power (CV)">
+                            <FormField label="Potencia (CV)">
                                 <input v-model="form.cv" type="number" :class="inputClass" />
                             </FormField>
                             <FormField label="CO₂ (g/km)">
                                 <input v-model="form.co2" type="number" :class="inputClass" />
                             </FormField>
-                            <FormField label="Consumption">
+                            <FormField label="Consumo">
                                 <input v-model="form.consumption" type="text" :class="inputClass" placeholder="L/100km" />
                             </FormField>
-                            <FormField label="Fuel" required>
+                            <FormField label="Combustible" required>
                                 <select v-model="form.fuel" required :class="inputClass">
                                     <option>Diesel</option>
                                     <option>Gasoline</option>
@@ -303,16 +303,16 @@ const scrapeFromUrl = async () => {
                                     <option>Electric</option>
                                 </select>
                             </FormField>
-                            <FormField label="Transmission" required>
+                            <FormField label="Transmisión" required>
                                 <select v-model="form.transmission" required :class="inputClass">
                                     <option>Manual</option>
                                     <option>Automatic</option>
                                 </select>
                             </FormField>
-                            <FormField label="Owners">
+                            <FormField label="Propietarios">
                                 <input v-model="form.owners" type="number" :class="inputClass" />
                             </FormField>
-                            <FormField label="Doors">
+                            <FormField label="Puertas">
                                 <select v-model="form.doors" :class="inputClass">
                                     <option>3</option><option>4</option><option>5</option>
                                 </select>
@@ -320,47 +320,47 @@ const scrapeFromUrl = async () => {
                         </div>
                     </FormSection>
 
-                    <FormSection title="Pricing & costs" description="Purchase, fees and taxes">
+                    <FormSection title="Precio y costes" description="Compra, tasas e impuestos">
                         <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
-                            <FormField label="Purchase price" required hint="EUR">
+                            <FormField label="Precio de compra" required hint="EUR">
                                 <input v-model="form.purchase_price" type="number" step="0.01" required :class="inputClass" />
                             </FormField>
-                            <FormField label="New price" hint="EUR">
+                            <FormField label="Precio nuevo" hint="EUR">
                                 <input v-model="form.new_price" type="number" step="0.01" :class="inputClass" />
                             </FormField>
-                            <FormField label="Transport" hint="EUR">
+                            <FormField label="Transporte" hint="EUR">
                                 <input v-model="form.transport" type="number" step="0.01" :class="inputClass" />
                             </FormField>
-                            <FormField label="ITV fee" hint="EUR">
+                            <FormField label="Tasa ITV" hint="EUR">
                                 <input v-model="form.itv_fee" type="number" step="0.01" :class="inputClass" />
                             </FormField>
-                            <FormField label="COC fee" hint="EUR">
+                            <FormField label="Tasa COC" hint="EUR">
                                 <input v-model="form.coc_fee" type="number" step="0.01" :class="inputClass" />
                             </FormField>
-                            <FormField label="DGT fees" hint="EUR">
+                            <FormField label="Tasas DGT" hint="EUR">
                                 <input v-model="form.dgt_fees" type="number" step="0.01" :class="inputClass" />
                             </FormField>
-                            <FormField label="Professional fees" hint="EUR">
+                            <FormField label="Honorarios" hint="EUR">
                                 <input v-model="form.professional_fees" type="number" step="0.01" :class="inputClass" />
                             </FormField>
-                            <FormField label="Deposit" hint="EUR">
+                            <FormField label="Fianza" hint="EUR">
                                 <input v-model="form.deposit" type="number" step="0.01" :class="inputClass" />
                             </FormField>
                         </div>
                     </FormSection>
 
-                    <FormSection title="Location & status">
+                    <FormSection title="Ubicación y estado">
                         <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-                            <FormField label="City">
+                            <FormField label="Ciudad">
                                 <input v-model="form.city" type="text" :class="inputClass" />
                             </FormField>
-                            <FormField label="VAT scenario">
+                            <FormField label="Escenario IVA">
                                 <select v-model="form.vat_scenario" :class="inputClass">
-                                    <option value="margin">Margin</option>
-                                    <option value="standard">Standard</option>
+                                    <option value="margin">Margen</option>
+                                    <option value="standard">Estándar</option>
                                 </select>
                             </FormField>
-                            <FormField label="Status">
+                            <FormField label="Estado">
                                 <select v-model="form.status" :class="inputClass">
                                     <option>Located</option><option>Valuing</option><option>Offered</option>
                                     <option>Reserved</option><option>Purchased</option><option>In_transit</option>
@@ -368,34 +368,34 @@ const scrapeFromUrl = async () => {
                                     <option>Delivered</option><option>Discarded</option>
                                 </select>
                             </FormField>
-                            <FormField label="Traffic light">
+                            <FormField label="Semáforo">
                                 <select v-model="form.traffic_light" :class="inputClass">
-                                    <option value="green">Green</option>
-                                    <option value="amber">Amber</option>
-                                    <option value="red">Red</option>
-                                    <option value="neutral">Neutral</option>
+                                    <option value="green">Verde</option>
+                                    <option value="amber">Ámbar</option>
+                                    <option value="red">Rojo</option>
+                                    <option value="neutral">Neutro</option>
                                 </select>
                             </FormField>
-                            <FormField label="Client" v-if="clients?.length">
+                            <FormField label="Cliente" v-if="clients?.length">
                                 <select v-model="form.client_id" :class="inputClass">
-                                    <option :value="null">— No client —</option>
+                                    <option :value="null">— Sin cliente —</option>
                                     <option v-for="c in clients" :key="c.id" :value="c.id">{{ c.name }}</option>
                                 </select>
                             </FormField>
                         </div>
                     </FormSection>
 
-                    <FormSection title="Description" description="Private notes for the team">
-                        <FormField label="Notes">
+                    <FormSection title="Descripción" description="Notas privadas para el equipo">
+                        <FormField label="Notas">
                             <textarea v-model="form.notes" rows="3" :class="inputClass" />
                         </FormField>
                     </FormSection>
 
                     <div class="flex items-center justify-end gap-3 rounded-2xl bg-gray-50 px-6 py-4 ring-1 ring-gray-200">
-                        <Link :href="route('cars.index')" class="text-sm font-semibold text-gray-700 hover:text-gray-900">Cancel</Link>
+                        <Link :href="route('cars.index')" class="text-sm font-semibold text-gray-700 hover:text-gray-900">Cancelar</Link>
                         <button type="submit" :disabled="form.processing" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500 disabled:opacity-50">
                             <CheckIcon class="h-4 w-4" />
-                            {{ form.processing ? 'Saving...' : 'Create car' }}
+                            {{ form.processing ? 'Guardando...' : 'Crear coche' }}
                         </button>
                     </div>
                 </form>

@@ -173,7 +173,7 @@ async function detectModels() {
                     </FormSection>
 
                     <div class="flex items-center justify-end gap-3 rounded-2xl bg-gray-50 px-6 py-4 ring-1 ring-gray-200">
-                        <Link :href="route('organization.show', organization.id)" class="text-sm font-semibold text-gray-700 hover:text-gray-900">Cancel</Link>
+                        <Link :href="route('organization.show', organization.id)" class="text-sm font-semibold text-gray-700 hover:text-gray-900">Cancelar</Link>
                         <button type="submit" :disabled="form.processing" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500 disabled:opacity-50">
                             <CheckIcon class="h-4 w-4" />
                             {{ form.processing ? 'Saving...' : 'Save changes' }}
