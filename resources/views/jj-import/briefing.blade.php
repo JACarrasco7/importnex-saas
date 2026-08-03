@@ -10,7 +10,7 @@
         try {
             $qr_svg = \SimpleSoftwareIO\QrCode\Generator::class
                 ? (new \SimpleSoftwareIO\QrCode\Generator())->format('svg')
-                    ->size(280)
+                    ->size(240)
                     ->margin(1)
                     ->errorCorrection('H')
                     ->backgroundColor(255, 255, 255)
@@ -22,13 +22,19 @@
         }
     }
 
-    // Specs normalized
+    $price = $car->purchase_price ?? 0;
+    $marketAvg = $car->market_avg ?? $price;
+    $saving = $car->estimated_saving ?? ($marketAvg - $price > 0 ? $marketAvg - $price : 0);
+    $description = $car->description
+        ?? $car->recommendation
+        ?? ($car->brand . ' ' . $car->model . ' importado y matriculado por JJ Import Motors. Servicio llave en mano: inspección, transporte, trámites y entrega a tu nombre.');
+
     $specs = [
         'Año' => $car->year ?? '—',
-        'Kilómetros' => isset($car->mileage) ? number_format($car->mileage) . ' km' : '—',
+        'Km' => isset($car->mileage) ? number_format($car->mileage, 0, ',', '.') . ' km' : '—',
         'Combustible' => $car->fuel ?? '—',
         'Cambio' => $car->transmission ?? '—',
-        'Potencia' => isset($car->cv) ? $car->cv . ' CV' : '—',
+        'CV' => isset($car->cv) ? $car->cv : '—',
         'Color' => $car->color ?? '—',
         'Puertas' => $car->doors ?? '—',
         'Plazas' => $car->seats ?? '—',
@@ -36,13 +42,7 @@
         'Ciudad' => $car->city ?? '—',
     ];
 
-    $price = $car->purchase_price ?? 0;
-    $marketAvg = $car->market_avg ?? $price;
-    $saving = $car->estimated_saving ?? ($marketAvg - $price > 0 ? $marketAvg - $price : 0);
-    $description = $car->description
-        ?? $car->recommendation
-        ?? ($car->brand . ' ' . $car->model . ' importado y matriculado por JJ Import Motors. Servicio llave en mano: inspección, transporte, trámites y entrega a tu nombre.');
-    $equipment = collect($car->equipment ?? [])->take(8)->values();
+    $equipment = collect($car->equipment ?? [])->take(6)->values();
 @endphp
 
 <!DOCTYPE html>
@@ -53,14 +53,17 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
+        @page { size: A4; margin: 0; }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         html, body {
             font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
             background: #0f1d42;
             color: #e5e7eb;
-            width: 100%;
-            min-height: 100vh;
+            width: 210mm;
+            height: 297mm;
+            overflow: hidden;
             -webkit-font-smoothing: antialiased;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
@@ -68,8 +71,7 @@
 
         body {
             position: relative;
-            padding: 36px 36px 70px 36px;
-            min-height: 100vh;
+            padding: 18px 28px 20px 28px;
             background:
                 radial-gradient(ellipse at 100% 0%, rgba(143, 163, 217, 0.12) 0%, transparent 45%),
                 radial-gradient(ellipse at 0% 100%, rgba(190, 192, 195, 0.08) 0%, transparent 45%),
@@ -91,8 +93,10 @@
         .container {
             position: relative;
             z-index: 1;
-            max-width: 1060px;
-            margin: 0 auto;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
         }
 
         /* ============ HEADER ============ */
@@ -100,258 +104,264 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-bottom: 18px;
+            padding-bottom: 10px;
             border-bottom: 1px solid rgba(143, 163, 217, 0.2);
-            margin-bottom: 24px;
+            margin-bottom: 10px;
+            flex-shrink: 0;
         }
 
-        .logo { height: 50px; width: auto; }
+        .logo { height: 40px; width: auto; }
 
         .badge-llave {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 7px;
             background: linear-gradient(135deg, #1A306D 0%, #2a3d87 100%);
             color: #fff;
-            padding: 9px 18px;
+            padding: 7px 14px;
             border-radius: 100px;
-            font-size: 10.5px;
+            font-size: 9px;
             font-weight: 700;
-            letter-spacing: 1.4px;
+            letter-spacing: 1.2px;
             box-shadow: 0 4px 14px rgba(26, 48, 109, 0.4);
         }
 
-        /* ============ HERO ============ */
-        .hero { margin-bottom: 20px; text-align: center; }
-
-        .hero-eyebrow {
-            display: inline-flex;
+        /* ============ TITLE ============ */
+        .title-row {
+            display: flex;
             align-items: center;
-            gap: 9px;
-            background: rgba(26, 48, 109, 0.15);
-            border: 1px solid rgba(143, 163, 217, 0.3);
-            color: #8fa3d9;
-            padding: 6px 16px;
-            border-radius: 100px;
-            font-size: 10px;
-            font-weight: 600;
-            letter-spacing: 1.6px;
-            text-transform: uppercase;
-            margin-bottom: 12px;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 10px;
+            flex-shrink: 0;
         }
 
-        .hero-eyebrow .pulse {
-            width: 6px; height: 6px;
-            background: #8fa3d9; border-radius: 50%;
-            box-shadow: 0 0 10px #8fa3d9;
+        .title-left { min-width: 0; }
+
+        .title-eyebrow {
+            color: #8fa3d9;
+            font-size: 8.5px;
+            font-weight: 700;
+            letter-spacing: 1.8px;
+            text-transform: uppercase;
+            margin-bottom: 2px;
         }
 
         .h1-title {
-            font-size: 30px;
+            font-size: 24px;
             font-weight: 800;
-            line-height: 1.12;
+            line-height: 1.1;
             color: #ffffff;
-            letter-spacing: -0.6px;
+            letter-spacing: -0.5px;
         }
 
         .h1-title .accent { color: #8fa3d9; }
 
-        .hero-subtitle {
-            font-size: 13.5px;
-            color: #94a3b8;
-            margin-top: 8px;
-            letter-spacing: 0.3px;
+        .title-meta { font-size: 11px; color: #94a3b8; margin-top: 3px; }
+
+        .title-price {
+            text-align: right;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, rgba(26, 48, 109, 0.4) 0%, rgba(26, 48, 109, 0.15) 100%);
+            border: 1px solid rgba(143, 163, 217, 0.45);
+            border-radius: 12px;
+            padding: 8px 16px;
         }
 
-        /* ============ PHOTO ============ */
-        .car-photo {
-            width: 100%;
-            border-radius: 16px;
+        .title-price .label { font-size: 8px; color: #8fa3d9; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+        .title-price .value { font-size: 22px; font-weight: 900; color: #fff; line-height: 1.1; }
+
+        /* ============ MAIN GRID ============ */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.05fr;
+            gap: 12px;
+            flex: 1;
+            min-height: 0;
+        }
+
+        /* Left: photo */
+        .photo-box {
+            border-radius: 12px;
             overflow: hidden;
             border: 1px solid rgba(143, 163, 217, 0.25);
-            margin-bottom: 20px;
-            box-shadow: 0 10px 36px rgba(0, 0, 0, 0.5);
             background: #14265a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 0;
         }
 
-        .car-photo img {
-            display: block;
+        .photo-box img {
             width: 100%;
-            height: auto;
-            max-height: 360px;
+            height: 100%;
             object-fit: cover;
         }
 
-        .car-photo.no-photo {
-            display: flex; align-items: center; justify-content: center;
-            min-height: 210px;
-        }
-        .car-photo.no-photo span { font-size: 58px; color: #8fa3d9; }
+        .photo-box.no-photo span { font-size: 64px; color: #8fa3d9; }
 
-        /* ============ PRICE ============ */
+        /* Right: content column */
+        .right-col {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-height: 0;
+        }
+
         .price-row {
             display: grid;
-            grid-template-columns: 1.5fr 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 20px;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
         }
 
         .price-card {
-            background: linear-gradient(180deg, rgba(15, 23, 42, 0.85) 0%, rgba(15, 23, 42, 0.55) 100%);
-            border-radius: 14px;
-            padding: 16px 18px;
-            text-align: center;
+            background: rgba(15, 23, 42, 0.6);
             border: 1px solid rgba(143, 163, 217, 0.2);
+            border-radius: 10px;
+            padding: 8px 12px;
+            text-align: center;
         }
 
-        .price-card.main {
-            border-color: rgba(143, 163, 217, 0.55);
-            background: linear-gradient(135deg, rgba(26, 48, 109, 0.35) 0%, rgba(26, 48, 109, 0.15) 100%);
-        }
-
-        .price-card .label {
-            font-size: 9px; color: #64748b;
-            text-transform: uppercase; letter-spacing: 1px; font-weight: 600;
-            margin-bottom: 4px;
-        }
-        .price-card .value { font-size: 18px; font-weight: 800; color: #f8fafc; line-height: 1.2; }
-        .price-card.main .value { font-size: 26px; color: #8fa3d9; }
+        .price-card .label { font-size: 8px; color: #64748b; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; }
+        .price-card .value { font-size: 15px; font-weight: 800; color: #f1f5f9; }
         .price-card .value.saving { color: #4ade80; }
 
-        /* ============ DESCRIPTION ============ */
-        .section {
-            background: linear-gradient(180deg, rgba(15, 23, 42, 0.6) 0%, rgba(15, 23, 42, 0.35) 100%);
+        .desc-box {
+            background: rgba(15, 23, 42, 0.45);
             border: 1px solid rgba(143, 163, 217, 0.15);
-            border-radius: 14px;
-            padding: 18px 22px;
-            margin-bottom: 16px;
+            border-radius: 10px;
+            padding: 10px 14px;
+            flex: 1;
+            min-height: 0;
         }
 
-        .section-tag {
+        .desc-label {
             color: #8fa3d9;
-            font-size: 10px; font-weight: 700; letter-spacing: 2.4px;
-            text-transform: uppercase; display: block; margin-bottom: 6px;
+            font-size: 8.5px;
+            font-weight: 700;
+            letter-spacing: 1.8px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
         }
 
-        .section-title {
-            font-size: 16px; font-weight: 800; color: #f8fafc;
-            margin-bottom: 10px; letter-spacing: -0.2px;
-        }
-
-        .description-text {
-            font-size: 12.5px;
+        .desc-text {
+            font-size: 10.5px;
             color: #cbd5e1;
-            line-height: 1.65;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 7;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
             white-space: pre-line;
         }
 
-        /* Equipment chips */
-        .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
-        .chip {
-            background: rgba(26, 48, 109, 0.25);
-            border: 1px solid rgba(143, 163, 217, 0.25);
-            color: #cbd5e1;
-            padding: 4px 10px;
-            border-radius: 100px;
+        .verdict-line {
+            display: flex; align-items: center; gap: 8px;
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.12) 0%, rgba(26, 48, 109, 0.12) 100%);
+            border: 1px solid rgba(74, 222, 128, 0.3);
+            border-radius: 8px;
+            padding: 7px 12px;
             font-size: 10px;
-            font-weight: 500;
+            color: #cbd5e1;
+        }
+        .verdict-line .dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 8px #4ade80; flex-shrink: 0; }
+        .verdict-line strong { color: #f1f5f9; }
+
+        /* ============ BOTTOM: specs + equipment + qr ============ */
+        .bottom-grid {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            gap: 12px;
+            margin-top: 12px;
+            flex-shrink: 0;
         }
 
-        /* ============ SPECS ============ */
         .specs-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
         }
 
         .spec-cell {
             background: rgba(15, 23, 42, 0.5);
             border: 1px solid rgba(143, 163, 217, 0.12);
-            border-radius: 10px;
-            padding: 10px 12px;
+            border-radius: 8px;
+            padding: 6px 8px;
+        }
+        .spec-cell .k { font-size: 7.5px; color: #64748b; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600; }
+        .spec-cell .v { font-size: 11.5px; font-weight: 700; color: #f1f5f9; margin-top: 1px; }
+
+        .equip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 8px;
         }
 
-        .spec-cell .k {
-            font-size: 9px; color: #64748b;
-            text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600;
-            margin-bottom: 3px;
-        }
-        .spec-cell .v { font-size: 13px; font-weight: 700; color: #f1f5f9; }
-
-        /* ============ VERDICT ============ */
-        .verdict-strip {
-            display: flex; align-items: center; gap: 12px;
-            background: linear-gradient(135deg, rgba(34, 197, 94, 0.12) 0%, rgba(26, 48, 109, 0.12) 100%);
-            border: 1px solid rgba(74, 222, 128, 0.3);
-            border-radius: 12px;
-            padding: 12px 18px;
-            margin-bottom: 16px;
-        }
-        .verdict-dot { width: 10px; height: 10px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 10px #4ade80; flex-shrink: 0; }
-        .verdict-text { font-size: 12px; color: #cbd5e1; }
-        .verdict-text strong { color: #f1f5f9; }
-
-        /* ============ QR + CONTACT ============ */
-        .bottom-row {
-            display: grid;
-            grid-template-columns: 1fr 1.3fr;
-            gap: 14px;
-            margin-bottom: 18px;
+        .chip {
+            background: rgba(26, 48, 109, 0.25);
+            border: 1px solid rgba(143, 163, 217, 0.25);
+            color: #cbd5e1;
+            padding: 3px 9px;
+            border-radius: 100px;
+            font-size: 8.5px;
+            font-weight: 500;
         }
 
-        .qr-card {
+        .qr-box-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
             background: linear-gradient(180deg, rgba(15, 23, 42, 0.75) 0%, rgba(15, 23, 42, 0.45) 100%);
             border: 1px solid rgba(143, 163, 217, 0.3);
-            border-radius: 14px;
-            padding: 14px;
-            display: flex; align-items: center; gap: 14px;
+            border-radius: 12px;
+            padding: 10px 14px;
         }
 
         .qr-box {
             flex-shrink: 0;
-            width: 96px; height: 96px;
-            background: #fff; border-radius: 9px; padding: 5px;
+            width: 78px; height: 78px;
+            background: #fff; border-radius: 8px; padding: 4px;
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 18px rgba(143, 163, 217, 0.3);
+            box-shadow: 0 4px 14px rgba(143, 163, 217, 0.3);
         }
         .qr-box svg { width: 100%; height: 100%; display: block; }
 
-        .qr-tag { color: #8fa3d9; font-size: 9px; font-weight: 700; letter-spacing: 1.8px; margin-bottom: 4px; text-transform: uppercase; }
-        .qr-title { font-size: 14px; font-weight: 800; color: #f8fafc; margin-bottom: 4px; line-height: 1.15; }
-        .qr-desc { font-size: 10px; color: #94a3b8; line-height: 1.4; }
+        .qr-tag { color: #8fa3d9; font-size: 8px; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 3px; text-transform: uppercase; }
+        .qr-title { font-size: 12px; font-weight: 800; color: #f8fafc; margin-bottom: 3px; line-height: 1.15; }
+        .qr-desc { font-size: 8.5px; color: #94a3b8; line-height: 1.35; }
 
-        .contact-card {
-            background: linear-gradient(180deg, rgba(15, 23, 42, 0.6) 0%, rgba(15, 23, 42, 0.35) 100%);
-            border: 1px solid rgba(143, 163, 217, 0.15);
-            border-radius: 14px;
-            padding: 14px 18px;
-            display: flex; flex-direction: column; justify-content: center; gap: 8px;
+        /* ============ FOOTER ============ */
+        .footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(143, 163, 217, 0.2);
+            flex-shrink: 0;
         }
 
-        .contact-item { display: flex; align-items: center; gap: 10px; font-size: 12px; color: #cbd5e1; }
-        .contact-item .icon {
-            width: 30px; height: 30px; border-radius: 8px;
-            background: rgba(26, 48, 109, 0.2); color: #8fa3d9;
-            display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0;
-        }
-        .contact-item .label { font-size: 9px; color: #64748b; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600; }
-        .contact-item .value { font-weight: 700; color: #f1f5f9; font-size: 12.5px; }
+        .contact-row { display: flex; gap: 16px; }
+        .contact-item { display: flex; align-items: center; gap: 7px; font-size: 10px; color: #cbd5e1; }
+        .contact-item .label { font-size: 7.5px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+        .contact-item .value { font-weight: 700; color: #f1f5f9; font-size: 10.5px; }
 
         .honorarios {
-            text-align: center;
-            font-size: 11.5px;
+            font-size: 9px;
             color: #94a3b8;
-            background: linear-gradient(135deg, rgba(26, 48, 109, 0.1) 0%, rgba(190, 192, 195, 0.1) 100%);
-            border: 1px solid rgba(143, 163, 217, 0.2);
-            border-radius: 12px;
-            padding: 10px 16px;
-            margin-bottom: 16px;
+            text-align: right;
         }
         .honorarios strong { color: #8fa3d9; }
 
         .disclaimer {
-            text-align: center; font-size: 9.5px; color: #94a3b8;
-            margin-top: 16px; line-height: 1.5; padding: 0 18px; font-style: italic;
+            text-align: center;
+            font-size: 7.5px;
+            color: #64748b;
+            margin-top: 6px;
+            font-style: italic;
+            flex-shrink: 0;
         }
     </style>
 </head>
@@ -364,120 +374,113 @@
             <span class="badge-llave">SERVICIO LLAVE EN MANO</span>
         </div>
 
-        <!-- Hero -->
-        <div class="hero">
-            <span class="hero-eyebrow"><span class="pulse"></span>Importación Premium · Alemania → España</span>
-            <h1 class="h1-title">{{ $car->brand }} {{ $car->model }} @if($car->version ?? null)<span class="accent">{{ $car->version }}</span>@endif</h1>
-            <p class="hero-subtitle">{{ $car->year ?? '' }} · {{ isset($car->mileage) ? number_format($car->mileage) . ' km' : '' }} · {{ $car->fuel ?? '' }} · {{ $car->transmission ?? '' }}</p>
-        </div>
-
-        <!-- Photo -->
-        <div class="car-photo {{ $car_photo_base64 ? '' : 'no-photo' }}">
-            @if($car_photo_base64)
-                <img src="{{ $car_photo_base64 }}" alt="{{ $car->brand }} {{ $car->model }}">
-            @else
-                <span>🚗</span>
-            @endif
-        </div>
-
-        <!-- Price -->
-        <div class="price-row">
-            <div class="price-card main">
+        <!-- Title + price -->
+        <div class="title-row">
+            <div class="title-left">
+                <div class="title-eyebrow">Importación Premium · Alemania → España</div>
+                <h1 class="h1-title">{{ $car->brand }} {{ $car->model }} <span class="accent">@if($car->version ?? null){{ $car->version }}@endif</span></h1>
+                <div class="title-meta">{{ $car->year ?? '' }} · {{ number_format($car->mileage, 0, ',', '.') }} km · {{ $car->fuel ?? '' }} · {{ $car->transmission ?? '' }}</div>
+            </div>
+            <div class="title-price">
                 <div class="label">Precio</div>
                 <div class="value">{{ number_format($price, 0, ',', '.') }} €</div>
             </div>
-            <div class="price-card">
-                <div class="label">Valor de mercado</div>
-                <div class="value">{{ number_format($marketAvg, 0, ',', '.') }} €</div>
-            </div>
-            <div class="price-card">
-                <div class="label">Ahorro estimado</div>
-                <div class="value saving">{{ $saving > 0 ? number_format($saving, 0, ',', '.') . ' €' : '—' }}</div>
-            </div>
         </div>
 
-        <!-- Verdict -->
-        @if(($car->verdict ?? null) || ($car->traffic_light ?? null))
-        <div class="verdict-strip">
-            <span class="verdict-dot"></span>
-            <div class="verdict-text">
-                <strong>Veredicto del informe técnico:</strong>
-                {{ $car->verdict ?? 'Verificado' }}
-                @if($car->verdict_confidence ?? null) · Confianza {{ $car->verdict_confidence }}@endif
-                — Inspeccionado y validado por JJ Import Motors.
+        <!-- Main grid: photo + content -->
+        <div class="main-grid">
+            <div class="photo-box {{ $car_photo_base64 ? '' : 'no-photo' }}">
+                @if($car_photo_base64)
+                    <img src="{{ $car_photo_base64 }}" alt="{{ $car->brand }} {{ $car->model }}">
+                @else
+                    <span>🚗</span>
+                @endif
             </div>
-        </div>
-        @endif
 
-        <!-- Description -->
-        @if($description)
-        <div class="section">
-            <span class="section-tag">Sobre este coche</span>
-            <div class="description-text">{{ $description }}</div>
-        </div>
-        @endif
-
-        <!-- Equipment -->
-        @if($equipment->count())
-        <div class="section">
-            <span class="section-tag">Equipamiento destacado</span>
-            <div class="chips">
-                @foreach($equipment as $item)
-                    <span class="chip">{{ $item }}</span>
-                @endforeach
-            </div>
-        </div>
-        @endif
-
-        <!-- Specs -->
-        <div class="section">
-            <span class="section-tag">Ficha técnica</span>
-            <div class="specs-grid">
-                @foreach($specs as $k => $v)
-                    @if($v && $v !== '—')
-                    <div class="spec-cell">
-                        <div class="k">{{ $k }}</div>
-                        <div class="v">{{ $v }}</div>
+            <div class="right-col">
+                <div class="price-row">
+                    <div class="price-card">
+                        <div class="label">Valor de mercado</div>
+                        <div class="value">{{ number_format($marketAvg, 0, ',', '.') }} €</div>
                     </div>
-                    @endif
-                @endforeach
+                    <div class="price-card">
+                        <div class="label">Ahorro estimado</div>
+                        <div class="value saving">{{ $saving > 0 ? number_format($saving, 0, ',', '.') . ' €' : '—' }}</div>
+                    </div>
+                </div>
+
+                <div class="desc-box">
+                    <div class="desc-label">Sobre este coche</div>
+                    <div class="desc-text">{{ $description }}</div>
+                </div>
+
+                @if(($car->verdict ?? null) || ($car->traffic_light ?? null))
+                <div class="verdict-line">
+                    <span class="dot"></span>
+                    <span><strong>Veredicto:</strong> {{ $car->verdict ?? 'Verificado' }}@if($car->verdict_confidence ?? null) · confianza {{ $car->verdict_confidence }}@endif — Inspeccionado por JJ Import Motors.</span>
+                </div>
+                @endif
             </div>
         </div>
 
-        <!-- QR + Contact -->
-        <div class="bottom-row">
-            <div class="qr-card">
+        <!-- Bottom: specs + equipment + QR -->
+        <div class="bottom-grid">
+            <div>
+                <div class="desc-label">Ficha técnica</div>
+                <div class="specs-grid">
+                    @foreach($specs as $k => $v)
+                        @if($v && $v !== '—')
+                        <div class="spec-cell">
+                            <div class="k">{{ $k }}</div>
+                            <div class="v">{{ $v }}</div>
+                        </div>
+                        @endif
+                    @endforeach
+                </div>
+                @if($equipment->count())
+                <div class="desc-label" style="margin-top:8px;">Equipamiento</div>
+                <div class="equip-row">
+                    @foreach($equipment as $item)
+                        <span class="chip">{{ $item }}</span>
+                    @endforeach
+                </div>
+                @endif
+            </div>
+
+            <div class="qr-box-wrap">
                 <div class="qr-box">
                     {!! $qr_svg !!}
                 </div>
-                <div class="qr-content">
+                <div>
                     <div class="qr-tag">Escanea para verlo</div>
-                    <div class="qr-title">Este coche,<br>en la web</div>
-                    <div class="qr-desc">Accede a la ficha completa, fotos e informe técnico desde tu móvil.</div>
-                </div>
-            </div>
-            <div class="contact-card">
-                <div class="contact-item">
-                    <div class="icon">📞</div>
-                    <div><div class="label">Teléfono 1</div><div class="value">{{ $telefono_1 }}</div></div>
-                </div>
-                <div class="contact-item">
-                    <div class="icon">📞</div>
-                    <div><div class="label">Teléfono 2</div><div class="value">{{ $telefono_2 }}</div></div>
-                </div>
-                <div class="contact-item">
-                    <div class="icon">✉️</div>
-                    <div><div class="label">Email</div><div class="value">{{ $email }}</div></div>
+                    <div class="qr-title">Este coche, en la web</div>
+                    <div class="qr-desc">Ficha completa, fotos e informe técnico desde tu móvil.</div>
                 </div>
             </div>
         </div>
 
-        <!-- Honorarios -->
-        <div class="honorarios">
-            <strong>Honorarios de gestión: {{ $precio_honorarios }}</strong> + coste del vehículo e impuestos · Contacta sin compromiso
+        <!-- Footer -->
+        <div class="footer">
+            <div class="contact-row">
+                <div class="contact-item">
+                    <span class="label">📞 Tel 1</span>
+                    <span class="value">{{ $telefono_1 }}</span>
+                </div>
+                <div class="contact-item">
+                    <span class="label">📞 Tel 2</span>
+                    <span class="value">{{ $telefono_2 }}</span>
+                </div>
+                <div class="contact-item">
+                    <span class="label">✉️ Email</span>
+                    <span class="value">{{ $email }}</span>
+                </div>
+            </div>
+            <div class="honorarios">
+                <strong>Honorarios: {{ $precio_honorarios }}</strong> + coste e impuestos
+            </div>
         </div>
 
-        <p class="disclaimer">*El precio final puede variar según las especificaciones del vehículo, impuestos aplicables, logística y transporte.</p>
+        <p class="disclaimer">*Precio final orientativo. Puede variar según especificaciones, impuestos, logística y transporte. · JJ Import Motors — Servicio llave en mano.</p>
 
     </div>
 </body>
