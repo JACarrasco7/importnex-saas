@@ -210,6 +210,14 @@ const onDocKeyChange = () => {
                             <SparklesIcon class="h-4 w-4" />
                             Verificar con IA
                         </Link>
+                        <a :href="route('cars.ficha', car.id)" target="_blank" class="inline-flex items-center gap-2 rounded-lg bg-estoril-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-600">
+                            <DocumentIcon class="h-4 w-4" />
+                            Ficha cliente
+                        </a>
+                        <a :href="route('cars.informe-interno', car.id)" target="_blank" class="inline-flex items-center gap-2 rounded-lg bg-asphalt-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-asphalt-800">
+                            <DocumentIcon class="h-4 w-4" />
+                            Informe interno
+                        </a>
                         <Link :href="route('cars.marketing', car.id)" class="inline-flex items-center gap-2 rounded-lg bg-estoril-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-600">
                             <MegaphoneIcon class="h-4 w-4" />
                             Marketing

@@ -1,0 +1,130 @@
+# Esqueleto de contenido. La maquetacion la hace la plantilla Blade.
+# Formato: una linea [BLOQUE] abre un bloque; su contenido va detras en la
+# misma linea, o en las lineas siguientes hasta el proximo bloque.
+# Las lineas que empiezan por # son comentarios. Ver FORMATO_ESQUELETO.md.
+# Se puede editar a mano: solo hay que respetar los nombres de bloque.
+# DOCUMENTO INTERNO: lleva coste de compra y margen. No entregar al cliente.
+
+[DOC] informe-interno
+[COCHE_ID] opel-astra-opc-2013-455420293
+[GENERADO] 04/08/2026
+[VALIDO_HASTA] 03/10/2026
+[CONFIDENCIAL] Documento técnico interno · uso exclusivo del equipo
+
+[TITULO] Ajuste de valoración y peritaje: Opel Astra GTC OPC 2.0 Turbo 280cv
+[ORIGEN] mobile.de  ·  Eichstetten am Kaiserstuhl (Alemania)  ·  capturado el 30/07/2026
+[URL_ANUNCIO] https://suchen.mobile.de/fahrzeuge/details.html?id=455420293&scopeId=C&action=parkItem&vc=Car&s=Car
+[VIN] PENDIENTE — pedírselo al vendedor
+
+[DICTAMEN] COMPRAR
+[SEMAFORO] verde
+[CONFIANZA] MEDIA
+[RESUMEN] El margen es real y bueno: el coche esta un 19% por debajo de la media de comparables espanoles de igual anio y potencia, y el historial de mantenimiento (revision reciente, kilometraje coherente) es una buena senal.
+[RAZONAMIENTO] El margen es real y bueno: el coche esta un 19% por debajo de la media de comparables espanoles de igual anio y potencia, y el historial de mantenimiento (revision reciente, kilometraje coherente) es una buena senal. Lo que evita una confianza alta es el VIN: hay campanias de recall conocidas justo para esta configuracion (2010-2015, manual, freno de mano electrico) y no puedo confirmar si ya se aplicaron sin el numero de bastidor. La venta 'im Kundenauftrag' tambien merece una pregunta directa al vendedor sobre que garantia legal aplica exactamente.
+[QUE_CAMBIARIA] Confirmar el VIN y comprobar los recalls pendientes subiria la confianza a alta. Si alguno esta sin aplicar, habria que presupuestar esa reparacion antes de matricular, lo que reduciria el margen pero no lo eliminaria dado el colchon actual de ahorro.
+
+[H2] Desglose de la operación financiera
+[COSTE] Precio del anuncio | 12.990 €
+[COSTE] Transporte | 1.000 €
+[COSTE] ITV y matriculación | 95 €
+[COSTE] Tasa DGT | 20,61 €
+[COSTE] IEDMT estimado (9,75% por CO2 de 192 g/km) | 314,44 €
+[COSTE] Gestoría | 0 €
+[TOTAL] COSTE TOTAL EN ESPAÑA | 14.420,05 €
+[COSTE] Honorarios JJ Import Motors | +1.500 €
+[DESTACADO] PRECIO FINAL AL CLIENTE | 15.920,05 €
+[MERCADO] Media de mercado en España (rango 15.900 € - 25.000 €) | 19.600 €
+[AHORRO] AHORRO REAL CLIENTE | 3.679,95 €
+[NOTA] Cálculo IEDMT | Base imponible = PVP nuevo aprox. (32.250 EUR, ficha coches.net) x coeficiente de depreciacion por antiguedad (10%, tramo 'mas de 12 anios', vehiculo matriculado 11/2013) = 3.225,00 EUR. IEDMT = 3.225,00 EUR x 9,75% (tramo CO2 160-199 g/km, este coche 192 g/km) = 314,44 EUR.
+
+[H2] A favor vs. puntos a vigilar
+[A_FAVOR] Precio muy por debajo de comparables espanoles de igual anio y potencia (~3.800 euros de ahorro estimado) | alto
+[A_FAVOR] Ultima revision reciente (10/2025) y coherente con el kilometraje actual | medio
+[A_FAVOR] Vendedor profesional muy bien valorado (5,0 estrellas, 11 opiniones) | medio
+[A_FAVOR] Se vendio oficialmente en Espania, sin riesgo de homologacion individual | medio
+[EN_CONTRA] Recalls conocidos (airbag Takata, freno de mano electronico) en el rango de anios de este coche, sin VIN para verificar si ya se aplicaron | alto
+[EN_CONTRA] Venta 'im Kundenauftrag' (por encargo): matiza la garantia legal frente a una venta directa del concesionario | medio
+[EN_CONTRA] Mantenimiento mas caro que un Astra normal (embrague, frenos, neumaticos, turbo) | medio
+[EN_CONTRA] CO2 alto (192 g/km) sube el tramo del IEDMT | bajo
+
+[H2] Auditoría detallada
+
+[ASPECTO] Averías y problemas conocidos
+[VALORACION] neutro
+[TEXTO] El uso deportivo de este motor 2.0 Turbo 280cv desgasta antes de lo habitual el embrague (un caso documentado con fallo a 54.000 km de uso), los frenos y los neumaticos. El turbo exige cambios de aceite 5W-30 cada maximo 15.000 km para no acortar su vida util. No son averias inherentes al modelo, pero si un mantenimiento mas caro que un Astra normal.
+[FUENTE] https://www.autodoc.de/info/probleme-mit-dem-opel-astra-j
+[FECHA] 30/07/2026
+
+[ASPECTO] Campañas de revisión (recalls)
+[VALORACION] desfavorable
+[TEXTO] Hay campanias de recall conocidas para el Astra J en el rango de anios 2010-2015 que incluyen exactamente esta configuracion: airbag Takata defectuoso, y un fallo de software del freno de mano electronico (afecta a unidades con cambio manual + freno de mano electrico + hill start assist). Sin el VIN del anuncio no puedo confirmar si esta unidad ya paso por el taller para aplicarlas. Hay que pedir el VIN al vendedor y comprobarlo antes de comprometerse.
+[FUENTE] https://www.astra-j.de/t/rueckruf-wegen-defekter-airbags.19943/
+[FECHA] 30/07/2026
+
+[ASPECTO] Precio de mercado en España
+[VALORACION] favorable
+[TEXTO] 3 comparables reales en Espania con la misma potencia (280cv): 15.900 euros (2013, 143.000 km, Barcelona), 17.900 euros (2012, 185.000 km, Las Palmas) y 25.000 euros (2015, 33.500 km, Salamanca). Media 19.600 euros. El precio aleman de 12.990 euros esta muy por debajo de esa media incluso sumando transporte e impuestos.
+[FUENTE] https://www.coches.net/opel-astra-20-turbo-ss-opc-gtc-3p-gasolina-2013-en-barcelona-70926300-covo.aspx
+[FECHA] 30/07/2026
+
+[ASPECTO] Fiabilidad general del modelo
+[VALORACION] favorable
+[TEXTO] El Astra J en general se considera un coche fundamentalmente fiable, con chasis y motor bien valorados. La version OPC hereda esa base pero con mayor desgaste mecanico por el caracter deportivo.
+[FUENTE] https://www.opc-club.de/forum/index.php?thread%2F31796-astra-j-opc-erfahrungen-und-probleme%2F=
+[FECHA] 30/07/2026
+
+[ASPECTO] Homologación y matriculación
+[VALORACION] favorable
+[TEXTO] El Astra OPC se vendio y matriculo oficialmente en Espania (hay varias unidades identicas ya matriculadas y a la venta en portales espanoles), asi que la matriculacion deberia ser el tramite ordinario sin homologacion individual. No he consultado directamente la ficha de homologacion de la DGT, esto es una inferencia a partir de la oferta ya existente en Espania.
+[FECHA] 30/07/2026
+
+[ASPECTO] Etiqueta ambiental DGT
+[VALORACION] neutro
+[TEXTO] Le corresponde etiqueta C (gasolina Euro 5, matriculado en 2013), lo que permite circular por las ZBE de Madrid y Barcelona con las condiciones vigentes.
+[FUENTE] https://www.dgt.es/nuestros-servicios/tu-vehiculo/tus-vehiculos/distintivo-ambiental/etiqueta-c/
+[FECHA] 30/07/2026
+
+[ASPECTO] Coste estimado de seguro
+[VALORACION] neutro
+[TEXTO] Estimacion orientativa (no una cotizacion real de esta version): todo riesgo entre 700 y 1.000 euros al ano por ser la variante deportiva de 280cv, terceros ampliado entre 350 y 500 euros al ano. Depende mucho del perfil del conductor.
+[FECHA] 30/07/2026
+
+[ASPECTO] Recambios y mantenimiento
+[VALORACION] favorable
+[TEXTO] Opel tiene una red de recambios y talleres muy extendida en Espania. Las piezas especificas OPC (frenos, suspension FlexRide) son algo mas caras que las de un Astra normal, pero sin sobrecoste grave frente a comprarlo aqui.
+[FECHA] 30/07/2026
+
+[ASPECTO] Particularidades de esta unidad
+[VALORACION] neutro
+[TEXTO] Vendedor profesional (Kamo GmbH) con valoracion 5,0 sobre 11 opiniones y 7 meses activo en mobile.de. Ultima revision en 10/2025 a 107.543 km, coherente con los 114.615 km actuales. Venta 'im Kundenauftrag': el concesionario actua como intermediario entre particulares, lo que matiza la garantia legal frente a una compra directa a un profesional.
+[FUENTE] https://suchen.mobile.de/fahrzeuge/details.html?id=455420293&scopeId=C&action=parkItem&vc=Car&s=Car
+[FECHA] 30/07/2026
+
+[H2] Comparables reales en España
+[COMPARABLE] Opel Astra 2.0 Turbo SS OPC GTC, 2013, 143.000 km | 143.000 km | 15.900 € | https://www.coches.net/opel-astra-20-turbo-ss-opc-gtc-3p-gasolina-2013-en-barcelona-70926300-covo.aspx
+[COMPARABLE] Opel Astra 2.0 Turbo SS OPC GTC, 2012, 185.000 km | 185.000 km | 17.900 € | https://www.coches.net/opel-astra-2.0-turbo-ss-opc-gtc-3p-gasolina-2012-en-las-palmas-61552106-covo.aspx
+[COMPARABLE] Opel Astra 2.0 Turbo SS OPC GTC, 2015, 33.500 km | 33.500 km | 25.000 € | https://www.coches.net/opel-astra-20-turbo-ss-opc-gtc-3p-gasolina-2015-en-salamanca-71171204-covo.aspx
+
+[H2] Fuentes verificadas
+[FUENTE_LISTA] anuncio_original | mobile.de - anuncio original | https://suchen.mobile.de/fahrzeuge/details.html?id=455420293&scopeId=C&action=parkItem&vc=Car&s=Car
+[FUENTE_LISTA] problemas_comunes | autodoc.de - problemas Astra J | https://www.autodoc.de/info/probleme-mit-dem-opel-astra-j
+[FUENTE_LISTA] problemas_comunes | opc-club.de - foro de propietarios OPC | https://www.opc-club.de/forum/index.php?thread%2F31796-astra-j-opc-erfahrungen-und-probleme%2F=
+[FUENTE_LISTA] problemas_comunes | motor-talk.de - foro Astra J GTC OPC | https://www.motor-talk.de/forum/opel-astra-j-gtc-opc-haltbarkeit-t6137927.html
+[FUENTE_LISTA] recalls | astra-j.de - recall airbag Takata | https://www.astra-j.de/t/rueckruf-wegen-defekter-airbags.19943/
+[FUENTE_LISTA] recalls | autohaus.de - recall abril 2017 Opel Astra | https://www.autohaus.de/automarken/rueckrufe/eintrag/rueckruf-april-2017-opel-astra-1942307
+[FUENTE_LISTA] etiqueta_ambiental | dgt.es - etiqueta C | https://www.dgt.es/nuestros-servicios/tu-vehiculo/tus-vehiculos/distintivo-ambiental/etiqueta-c/
+[FUENTE_LISTA] mercado | coches.net - Barcelona 15.900€ (2013, 143.000 km) | https://www.coches.net/opel-astra-20-turbo-ss-opc-gtc-3p-gasolina-2013-en-barcelona-70926300-covo.aspx
+[FUENTE_LISTA] mercado | coches.net - Las Palmas 17.900€ (2012, 185.000 km) | https://www.coches.net/opel-astra-2.0-turbo-ss-opc-gtc-3p-gasolina-2012-en-las-palmas-61552106-covo.aspx
+[FUENTE_LISTA] mercado | coches.net - Salamanca 25.000€ (2015, 33.500 km) | https://www.coches.net/opel-astra-20-turbo-ss-opc-gtc-3p-gasolina-2015-en-salamanca-71171204-covo.aspx
+[FUENTE_LISTA] mercado_descartado | milanuncios.com - mismo vehiculo que el comparable de Barcelona (no se cuenta dos veces) | https://www.milanuncios.com/opel-de-segunda-mano/opel-astra-gtc-opc-2-0-280cv-turbo.htm
+[FUENTE_LISTA] mercado_descartado | wallapop.com - candidato Madrid 22.500€ (ya no disponible al verificarlo) | https://es.wallapop.com/item/opel-astra-opc-280cv-1132843898
+[FUENTE_LISTA] mercado_descartado | wallapop.com - candidato Mejorada del Campo 19.500€ (vendido al verificarlo) | https://es.wallapop.com/item/opel-astra-gtc-2-0-t-280cv-s-s-3p-opc-1197431156
+
+[H2] Pasos siguientes / checklist técnico
+[CHECK] VIN no visible en el anuncio: pedirlo al vendedor y comprobar recalls (airbag Takata, freno de mano) antes de comprometerse.
+[CHECK] IEDMT recalculado con metodologia oficial (Orden HAC/1501/2025): PVP nuevo aprox. x coeficiente de depreciacion por antiguedad x tipo segun CO2. El PVP nuevo (32.250 EUR) viene de una ficha tecnica de coches.net localizada por busqueda, no se pudo verificar contra la fuente primaria (pagina con contenido cargado por JavaScript); si se dispone de la factura o el precio de venta al publico oficial del fabricante, conviene sustituirlo.
+[CHECK] Venta 'im Kundenauftrag' (por encargo): confirmar con el vendedor que garantia legal aplica exactamente.
+[CHECK] Solo se encontraron 3 comparables reales activos con URL verificable en el momento de la investigacion (coches.net); Milanuncios devolvio el mismo vehiculo ya contado, y los candidatos localizados en Wallapop aparecian vendidos o no eran la misma version (280cv) al verificarlos uno a uno.
+
+[PIE] Documento exclusivo de valoración técnica interna para JJ Import Motors. Prohibida la entrega al cliente final · el IEDMT es una estimación: Hacienda liquida sobre sus tablas oficiales de valor de mercado.
+

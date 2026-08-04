@@ -33,7 +33,11 @@ class ValuationPackageIngestor
 {
     public const MANIFEST_VERSION = 1;
 
+    /** paquete_version 2: contenido/*.txt en vez de documentos/*.pdf + publicidad/*.pdf */
+    public const PACKAGE_VERSION_2 = 2;
+
     private const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'avif', 'gif'];
+    private const CONTENT_FOLDER = 'contenido';
 
     public function __construct(private ValuationImporter $importer)
     {
@@ -42,7 +46,7 @@ class ValuationPackageIngestor
     /**
      * Procesa el zip entero.
      *
-     * @return array{car: Car, was_new: bool, photos: int, documents: int, warnings: array<int,string>}
+     * @return array{car: Car, was_new: bool, photos: int, documents: int, contents: int, warnings: array<int,string>}
      */
     public function ingest(string $zipPath, Organization $org): array
     {
@@ -58,8 +62,13 @@ class ValuationPackageIngestor
             $car    = $this->importer->resolveCar($payload, $org);
             $wasNew = ! $car->exists;
 
+            $packageVersion = (int) ($manifest['paquete_version'] ?? 1);
+
             $photoFiles = $this->collectPhotos($workDir, $manifest);
-            $docFiles   = $this->collectDocuments($workDir, $manifest);
+            $contentFiles = $packageVersion >= self::PACKAGE_VERSION_2
+                ? $this->collectContent($workDir, $manifest)
+                : [];
+            $docFiles = $this->collectDocuments($workDir, $manifest);
 
             // Si el paquete trae fotos, no descargamos las del anuncio.
             $this->importer->skipRemotePhotos = count($photoFiles) > 0;
@@ -67,6 +76,7 @@ class ValuationPackageIngestor
             $this->importer->apply($car, $payload);
 
             $photos    = $this->attachPhotos($car, $photoFiles, $warnings);
+            $contents  = $this->attachContent($car, $contentFiles, $warnings);
             $documents = $this->attachDocuments($car, $docFiles, $warnings);
 
             return [
@@ -74,6 +84,7 @@ class ValuationPackageIngestor
                 'was_new'   => $wasNew,
                 'photos'    => $photos,
                 'documents' => $documents,
+                'contents'  => $contents,
                 'warnings'  => $warnings,
             ];
         } finally {
@@ -227,6 +238,83 @@ class ValuationPackageIngestor
         }
 
         return array_values($docs);
+    }
+
+    /**
+     * Archivos de contenido (paquete_version 2): contenido/*.txt que alimentan
+     * las vistas Blade (ficha del cliente + informe interno).
+     *
+     * @return array<int, array{path:string, archivo:string, plantilla:?string, visibilidad:?string}>
+     */
+    private function collectContent(string $dir, array $manifest): array
+    {
+        $contenidos = [];
+
+        // 1) Lo que declare el manifest en contenido[].
+        foreach ($manifest['contenido'] ?? [] as $entry) {
+            $relative = is_array($entry) ? ($entry['archivo'] ?? null) : $entry;
+            $path = $relative ? $this->resolveInside($dir, $relative) : null;
+
+            if ($path && File::exists($path)) {
+                $contenidos[$path] = [
+                    'path'        => $path,
+                    'archivo'     => basename($path),
+                    'plantilla'   => is_array($entry) ? ($entry['plantilla'] ?? null) : null,
+                    'visibilidad' => is_array($entry) ? ($entry['visibilidad'] ?? null) : null,
+                ];
+            }
+        }
+
+        // 2) Cualquier .txt en contenido/ no declarado.
+        foreach ($this->allFiles($dir) as $file) {
+            $path = $file->getPathname();
+            if (isset($contenidos[$path]) || strtolower($file->getExtension()) !== 'txt') {
+                continue;
+            }
+            if (! $this->inFolder($dir, $path, self::CONTENT_FOLDER)) {
+                continue;
+            }
+
+            $contenidos[$path] = [
+                'path'        => $path,
+                'archivo'     => $file->getFilename(),
+                'plantilla'   => null,
+                'visibilidad' => null,
+            ];
+        }
+
+        return array_values($contenidos);
+    }
+
+    /**
+     * Guarda los esqueletos .txt en storage local (privado): cars/{id}/contenido/.
+     * Reimportar el mismo coche sustituye los anteriores, no los duplica.
+     *
+     * @param  array<int, array{path:string, archivo:string, plantilla:?string, visibilidad:?string}>  $contenidos
+     * @param  array<int, string>  $warnings
+     */
+    private function attachContent(Car $car, array $contenidos, array &$warnings): int
+    {
+        if ($contenidos === []) {
+            return 0;
+        }
+
+        $dir = 'cars/' . $car->id . '/contenido';
+        Storage::disk('local')->deleteDirectory($dir);
+
+        $saved = 0;
+        foreach ($contenidos as $c) {
+            try {
+                $archivo = $this->safeFilename($c['archivo']);
+                Storage::disk('local')->put($dir . '/' . $archivo, File::get($c['path']));
+                $saved++;
+            } catch (\Throwable $e) {
+                $warnings[] = 'No se pudo guardar el contenido ' . $c['archivo'] . ': ' . $e->getMessage();
+                Log::warning('Package content failed', ['car_id' => $car->id, 'error' => $e->getMessage()]);
+            }
+        }
+
+        return $saved;
     }
 
     // ── Persistencia ─────────────────────────────────────────────────────────

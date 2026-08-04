@@ -108,6 +108,12 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::post('/cars/{car}/marketing/publish', [\App\Http\Controllers\CarMarketingController::class, 'publish'])->name('cars.marketing.publish');
     Route::get('/cars/{car}/marketing/briefing', [\App\Http\Controllers\CarMarketingController::class, 'briefing'])->name('cars.marketing.briefing');
 
+    // Paquete de valoración (esqueletos .txt → PDF con Blade + Browsershot)
+    // Ficha del cliente: cuelga del expediente (autenticado).
+    Route::get('/cars/{car}/ficha', [\App\Http\Controllers\PaqueteValoracionController::class, 'ficha'])->name('cars.ficha');
+    // Informe interno: SOLO equipo, nunca expuesto al cliente.
+    Route::get('/cars/{car}/informe-interno', [\App\Http\Controllers\PaqueteValoracionController::class, 'interno'])->name('cars.informe-interno');
+
     // Marketing overview
     Route::get('/marketing', [\App\Http\Controllers\MarketingController::class, 'index'])->name('marketing.index');
 

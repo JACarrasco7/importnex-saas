@@ -1,0 +1,67 @@
+# Esqueleto de contenido. La maquetacion la hace la plantilla Blade.
+# Formato: una linea [BLOQUE] abre un bloque; su contenido va detras en la
+# misma linea, o en las lineas siguientes hasta el proximo bloque.
+# Las lineas que empiezan por # son comentarios. Ver FORMATO_ESQUELETO.md.
+# Se puede editar a mano: solo hay que respetar los nombres de bloque.
+# DOCUMENTO DE CLIENTE: aqui no entra ningun coste interno ni margen.
+
+[DOC] ficha-publicitaria
+[COCHE_ID] opel-astra-opc-2013-455420293
+[GENERADO] 04/08/2026
+
+[TITULO] Opel Astra GTC OPC 2.0 Turbo 280cv
+[CLAIM] Te lo importo de Alemania y te lo entrego matriculado en España, listo para circular.
+
+[SPEC] AÑO | 11/2013
+[SPEC] KILÓMETROS | 114.615 km
+[SPEC] POTENCIA | 280 CV
+[SPEC] CAMBIO | Manual
+[ETIQUETA_DGT] C
+
+[PRECIO] Aprox. 15.920 €
+[PRECIO_CAPTION] todo incluido y matriculado
+[PRECIO_NOTA] Precio orientativo: puede variar según el impuesto de matriculación que liquide Hacienda.
+[PLAZO] 4-6 semanas desde la reserva
+
+[H2] ¿Qué incluye ese precio?
+[INCLUYE] El vehículo
+[INCLUYE] Transporte hasta España
+[INCLUYE] ITV de importación
+[INCLUYE] Impuesto de matriculación (IEDMT)
+[INCLUYE] Tasas de la DGT
+[INCLUYE] Gestión documental y COC
+[INCLUYE] Matriculación a tu nombre
+[INCLUYE] Revisión completa e informe
+
+[H2] ¿Por qué este coche?
+[ARGUMENTO] **Etiqueta C de la DGT:** muévete sin restricciones por las zonas de bajas emisiones.
+[ARGUMENTO] **Mantenimiento al día y kilómetros reales**, comprobados minuciosamente antes de comprar.
+[ARGUMENTO] **Coche 100% libre de golpes o accidentes.**
+[ARGUMENTO] **Muy poco uso:** solo unos 8.817 km al año de media.
+[ARGUMENTO] **Súper equipado:** 16 extras de fábrica, con Navegador SD Navi 900 y Faros Bi-Xenon adaptativos (AFL).
+[ARGUMENTO] **Revisión completa previa y todo el papeleo hecho:** recibes las llaves con el coche matriculado a tu nombre, listo para rodar.
+
+[H2] Equipamiento destacado
+[EQUIPAMIENTO] Navegador SD Navi 900
+[EQUIPAMIENTO] Faros Bi-Xenon adaptativos (AFL)
+[EQUIPAMIENTO] Climatizador automatico bizona
+[EQUIPAMIENTO] Asientos deportivos OPC Performance con ajuste electrico y calefaccion
+[EQUIPAMIENTO] Volante multifuncion de cuero calefactable
+[EQUIPAMIENTO] Llantas de aleacion OPC 20" bicolor
+[EQUIPAMIENTO] Sonido Infinity
+[EQUIPAMIENTO] Bluetooth y manos libres
+[EQUIPAMIENTO] Control de crucero (Tempomat)
+[EQUIPAMIENTO] ESP, ABS y control de traccion
+[EQUIPAMIENTO] Alarma
+[EQUIPAMIENTO] Sensor de lluvia
+[EQUIPAMIENTO] Sistema Start/Stop
+[EQUIPAMIENTO] Suspension deportiva FlexRide Sport
+[EQUIPAMIENTO] Diferencial autoblocante (Sperrdifferential)
+[EQUIPAMIENTO] Interior en cuero Nappa negro
+
+[CTA] ¿Te interesa? Escríbeme o llámame y te lo reservo
+[CONTACTO] 675 70 14 39 / 691 48 59 27  ·  jjimportmotors@gmail.com
+[QR] https://dev.aktive.cloud/importnexcore/request/jj-import-motors
+[QR_TEXTO] ¿Otro coche? Escanea aquí
+[LEGAL] Servicio de gestión de importación. El vehículo se importa y matricula a nombre del cliente; JJ Import Motors actúa como gestor de importación, no como vendedor del vehículo. Precio sujeto a confirmación de emisiones (CO2/COC) y a disponibilidad del vehículo en origen.
+
