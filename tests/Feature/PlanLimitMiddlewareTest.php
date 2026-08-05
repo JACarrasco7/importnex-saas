@@ -136,7 +136,7 @@ class PlanLimitMiddlewareTest extends TestCase
         $response->assertSessionDoesntHaveErrors('plan_limit');
     }
 
-    public function test_organization_usageFor_returns_correct_percentage(): void
+    public function test_organization_usage_for_returns_correct_percentage(): void
     {
         $org = Organization::factory()->create(['plan' => 'starter']);
         Car::factory()->count(7)->create(['organization_id' => $org->id]);
@@ -150,7 +150,7 @@ class PlanLimitMiddlewareTest extends TestCase
         $this->assertFalse($usage['reached']);
     }
 
-    public function test_organization_usageFor_contacts_works(): void
+    public function test_organization_usage_for_contacts_works(): void
     {
         $org = Organization::factory()->create(['plan' => 'pro']);
         Contact::factory()->count(125)->create(['organization_id' => $org->id]);
@@ -162,7 +162,28 @@ class PlanLimitMiddlewareTest extends TestCase
         $this->assertEquals(50, $usage['percentage']);
     }
 
-    public function test_organization_planUsage_returns_all_resources(): void
+    public function test_owner_org_bypasses_plan_limit(): void
+    {
+        // Even when starter limit (10 cars) is exceeded, owner orgs always pass.
+        $org = Organization::factory()->create(['plan' => 'starter', 'is_owner' => true]);
+        $user = User::factory()->create(['organization_id' => $org->id, 'role' => 'owner']);
+        Car::factory()->count(15)->create(['organization_id' => $org->id]);
+
+        $response = $this->actingAs($user)->post(route('cars.store'), [
+            'brand' => 'BMW',
+            'model' => '320d',
+            'year' => '07/2020',
+            'fuel' => 'Diesel',
+            'transmission' => 'Manual',
+            'purchase_price' => 15000,
+            'status' => 'Located',
+            'traffic_light' => 'green',
+        ]);
+
+        $response->assertSessionDoesntHaveErrors('plan_limit');
+    }
+
+    public function test_organization_plan_usage_returns_all_resources(): void
     {
         $org = Organization::factory()->create(['plan' => 'starter']);
         Car::factory()->count(3)->create(['organization_id' => $org->id]);

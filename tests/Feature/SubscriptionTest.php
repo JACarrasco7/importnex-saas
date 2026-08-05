@@ -2,10 +2,10 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
-use App\Models\Organization;
 use App\Models\Car;
 use App\Models\Client;
+use App\Models\Organization;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -22,31 +22,31 @@ class SubscriptionTest extends TestCase
     public function test_starter_limits_cars_to_10(): void
     {
         $plan = config('subscription.plans.starter');
-        $this->assertEquals(10, $plan['car_limit']);
+        $this->assertEquals(10, $plan['cars_limit']);
     }
 
     public function test_pro_limits_cars_to_100(): void
     {
         $plan = config('subscription.plans.pro');
-        $this->assertEquals(100, $plan['car_limit']);
+        $this->assertEquals(100, $plan['cars_limit']);
     }
 
     public function test_enterprise_limits_cars_to_1000(): void
     {
         $plan = config('subscription.plans.enterprise');
-        $this->assertEquals(1000, $plan['car_limit']);
+        $this->assertEquals(1000, $plan['cars_limit']);
     }
 
     public function test_starter_limits_clients_to_50(): void
     {
         $plan = config('subscription.plans.starter');
-        $this->assertEquals(50, $plan['client_limit']);
+        $this->assertEquals(50, $plan['clients_limit']);
     }
 
     public function test_pro_limits_clients_to_500(): void
     {
         $plan = config('subscription.plans.pro');
-        $this->assertEquals(500, $plan['client_limit']);
+        $this->assertEquals(500, $plan['clients_limit']);
     }
 
     public function test_trial_is_14_days_by_default(): void

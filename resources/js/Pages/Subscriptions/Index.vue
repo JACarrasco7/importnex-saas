@@ -49,7 +49,10 @@ const planKeys = Object.keys(props.plans);
                 <div v-else-if="isOwner" class="overflow-hidden rounded-2xl border border-amber-200 bg-amber-50 p-4">
                     <div class="flex items-center gap-3">
                         <SparklesIcon class="h-5 w-5 text-amber-600" />
-                        <p class="text-sm text-amber-700"><strong>Acceso ilimitado vitalicio:</strong> todos los recursos sin restricciones.</p>
+                        <p class="text-sm text-amber-700">
+                            <strong>{{ t('subscription.vitalicio_badge') }}</strong>
+                            {{ t('subscription.vitalicio_detail') }}
+                        </p>
                     </div>
                 </div>
 
@@ -103,7 +106,7 @@ const planKeys = Object.keys(props.plans);
 
                             <div class="mt-8">
                                 <div v-if="isOwner" class="block w-full rounded-lg bg-amber-50 py-3 text-center text-sm font-semibold text-amber-700">
-                                    Incluido en tu acceso vitalicio
+                                    {{ t('subscription.vitalicio_included') }}
                                 </div>
                                 <Link v-else-if="currentPlan === key" :href="route('subscriptions.show', key)" class="block w-full rounded-lg border border-gray-300 bg-gray-50 py-3 text-center text-sm font-semibold text-gray-700 hover:bg-gray-100">
                                     View details

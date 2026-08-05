@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Organization;
+use App\Services\Billing\SubscriptionPlanResolver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -208,43 +209,11 @@ class StripeWebhookController extends CashierWebhookController
 
     /**
      * Extract plan name from Stripe subscription items.
-     * Falls back through: lookup_key → nickname → stripe_price_id mapping → null.
+     * Delegates to SubscriptionPlanResolver so the logic lives in one place.
      */
     private function extractPlanFromSubscription(array $subscription): ?string
     {
-        $items = $subscription['items']['data'] ?? [];
-        if (empty($items)) {
-            Log::warning('Stripe subscription has no items', ['subscription_id' => $subscription['id'] ?? null]);
-
-            return null;
-        }
-
-        // The plan is stored as the price nickname or lookup key
-        $price = $items[0]['price'] ?? [];
-        $planId = $price['lookup_key'] ?? $price['nickname'] ?? null;
-
-        if ($planId && config('subscription.plans.'.$planId)) {
-            return $planId;
-        }
-
-        // Fallback: use price ID and match against config
-        $priceId = $price['id'] ?? null;
-        if ($priceId) {
-            $plans = config('subscription.plans');
-            foreach ($plans as $key => $plan) {
-                if (($plan['stripe_price_id'] ?? null) === $priceId) {
-                    return $key;
-                }
-            }
-        }
-
-        Log::warning('Stripe plan could not be resolved', [
-            'subscription_id' => $subscription['id'] ?? null,
-            'price_id' => $priceId,
-            'lookup_key' => $price['lookup_key'] ?? null,
-            'nickname' => $price['nickname'] ?? null,
-        ]);
-
-        return null;
+        return app(SubscriptionPlanResolver::class)
+            ->fromStripeSubscription($subscription);
     }
 }
