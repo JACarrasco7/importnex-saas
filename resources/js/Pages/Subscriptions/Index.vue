@@ -10,6 +10,7 @@ import { useTranslations } from '@/Composables/useTranslations';
 const props = defineProps({
     plans: Object,
     currentPlan: String,
+    isOwner: Boolean,
     subscription: Object,
     on_trial: Boolean,
     trial_ends_at: String,
@@ -32,10 +33,24 @@ const planKeys = ['starter', 'pro', 'enterprise'];
             <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
                 <PageHeader :title="t('subscription.choose_plan')" :subtitle="t('subscription.subtitle')" />
 
-                <div v-if="on_trial" class="overflow-hidden rounded-2xl border border-blue-200 bg-blue-50 p-4">
+                <div v-if="isOwner" class="overflow-hidden rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                    <div class="flex items-center gap-3">
+                        <SparklesIcon class="h-5 w-5 text-amber-600" />
+                        <p class="text-sm text-amber-700"><strong>Acceso ilimitado vitalicio:</strong> todos los recursos sin restricciones.</p>
+                    </div>
+                </div>
+
+                <div v-else-if="on_trial" class="overflow-hidden rounded-2xl border border-blue-200 bg-blue-50 p-4">
                     <div class="flex items-center gap-3">
                         <SparklesIcon class="h-5 w-5 text-blue-600" />
                         <p class="text-sm text-blue-700"><strong>Trial active:</strong> ends {{ date(trial_ends_at) }}</p>
+                    </div>
+                </div>
+
+                <div v-else-if="subscription && subscription.ends_at" class="overflow-hidden rounded-2xl border border-rose-200 bg-rose-50 p-4">
+                    <div class="flex items-center gap-3">
+                        <SparklesIcon class="h-5 w-5 text-rose-600" />
+                        <p class="text-sm text-rose-700"><strong>Suscripción cancelada:</strong> termina el {{ date(subscription.ends_at) }}. Después pasarás al plan Starter.</p>
                     </div>
                 </div>
 
@@ -74,7 +89,10 @@ const planKeys = ['starter', 'pro', 'enterprise'];
                             </ul>
 
                             <div class="mt-8">
-                                <Link v-if="currentPlan === key" :href="route('subscriptions.show', key)" class="block w-full rounded-lg border border-gray-300 bg-gray-50 py-3 text-center text-sm font-semibold text-gray-700 hover:bg-gray-100">
+                                <div v-if="isOwner" class="block w-full rounded-lg bg-amber-50 py-3 text-center text-sm font-semibold text-amber-700">
+                                    Incluido en tu acceso vitalicio
+                                </div>
+                                <Link v-else-if="currentPlan === key" :href="route('subscriptions.show', key)" class="block w-full rounded-lg border border-gray-300 bg-gray-50 py-3 text-center text-sm font-semibold text-gray-700 hover:bg-gray-100">
                                     View details
                                 </Link>
                                 <form v-else-if="on_trial || !subscription" method="POST" :action="route('subscriptions.create', key)">

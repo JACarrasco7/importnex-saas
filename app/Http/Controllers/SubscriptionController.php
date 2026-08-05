@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
+use Laravel\Cashier\Exceptions\PaymentActionRequired;
+use Laravel\Cashier\Exceptions\PaymentFailure;
 
 class SubscriptionController extends Controller
 {
@@ -18,6 +21,7 @@ class SubscriptionController extends Controller
         return Inertia::render('Subscriptions/Index', [
             'plans' => $plans,
             'currentPlan' => $org->plan ?? 'starter',
+            'isOwner' => $org->isOwner(),
             'subscription' => $subscription ? [
                 'status' => $subscription->stripe_status,
                 'ends_at' => $subscription->ends_at?->format('Y-m-d'),
@@ -32,13 +36,14 @@ class SubscriptionController extends Controller
     {
         $plans = config('subscription.plans');
 
-        if (!isset($plans[$plan])) {
+        if (! isset($plans[$plan])) {
             abort(404);
         }
 
         return Inertia::render('Subscriptions/Show', [
             'plan' => $plan,
             'planData' => $plans[$plan],
+            'isOwner' => auth()->user()->organization?->isOwner() ?? false,
         ]);
     }
 
@@ -46,74 +51,160 @@ class SubscriptionController extends Controller
     {
         $plans = config('subscription.plans');
 
-        if (!isset($plans[$plan])) {
+        if (! isset($plans[$plan])) {
             return back()->with('error', 'Plan not found');
         }
 
         $org = $request->user()->organization;
 
-        // If user has a default payment method (from Stripe portal), use it
+        if ($org->isOwner()) {
+            return back()->with('error', 'Tu cuenta tiene acceso ilimitado vitalicio.');
+        }
+
+        $existing = $org->subscription('main');
+        if ($existing && $existing->active() && $org->plan === $plan) {
+            return redirect()->route('subscriptions.index')
+                ->with('success', 'Ya tienes este plan activo.');
+        }
+
         $paymentMethodId = $request->paymentMethodId;
 
-        if (!$paymentMethodId) {
-            // Try to get the default payment method from Stripe
+        if (! $paymentMethodId) {
             try {
                 $paymentMethod = $org->defaultPaymentMethod();
                 if ($paymentMethod) {
                     $paymentMethodId = $paymentMethod->id;
                 }
             } catch (\Throwable $e) {
-                // No payment method available
+                // No payment method available — handled below
             }
         }
 
-        if ($paymentMethodId) {
+        try {
             $org->newSubscription('main', $plan)
                 ->trialDays(config('subscription.trial_days'))
                 ->create($paymentMethodId);
-        } else {
-            // Create subscription without payment method (will be collected via portal)
-            $org->newSubscription('main', $plan)
-                ->trialDays(config('subscription.trial_days'))
-                ->createOrUseDefaultPaymentMethod();
+
+            $org->update([
+                'plan' => $plan,
+                'subscribed_at' => $org->subscribed_at ?? now(),
+            ]);
+        } catch (PaymentActionRequired $e) {
+            return redirect()->route('cashier.payment', [$e->payment->id])
+                ->with('warning', 'Se requiere acción adicional para confirmar el pago.');
+        } catch (PaymentFailure $e) {
+            return back()->with('error', 'El pago fue rechazado. Revisa el método de pago.');
+        } catch (\Throwable $e) {
+            Log::error('Subscription create failed', [
+                'organization_id' => $org->id,
+                'plan' => $plan,
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->with('error', 'No se pudo crear la suscripción. Inténtalo de nuevo o contacta soporte.');
         }
 
-        $org->update(['plan' => $plan]);
-
         return redirect()->route('subscriptions.index')
-            ->with('success', 'Subscription created successfully');
+            ->with('success', 'Suscripción creada correctamente.');
     }
 
     public function swap(Request $request, $newPlan): RedirectResponse
     {
         $plans = config('subscription.plans');
 
-        if (!isset($plans[$newPlan])) {
+        if (! isset($plans[$newPlan])) {
             return back()->with('error', 'Plan not found');
         }
 
-        $request->user()->organization->subscription('main')
-            ->swap($newPlan);
+        $org = $request->user()->organization;
 
-        $request->user()->organization->update(['plan' => $newPlan]);
+        if ($org->isOwner()) {
+            return back()->with('error', 'Tu cuenta tiene acceso ilimitado vitalicio.');
+        }
+
+        $subscription = $org->subscription('main');
+
+        if (! $subscription) {
+            return redirect()->route('subscriptions.create', $newPlan);
+        }
+
+        if ($org->plan === $newPlan) {
+            return redirect()->route('subscriptions.index')
+                ->with('success', 'Ya estás en este plan.');
+        }
+
+        try {
+            $subscription->swap($newPlan);
+            $org->update(['plan' => $newPlan]);
+        } catch (\Throwable $e) {
+            Log::error('Subscription swap failed', [
+                'organization_id' => $org->id,
+                'new_plan' => $newPlan,
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->with('error', 'No se pudo cambiar el plan. Inténtalo de nuevo.');
+        }
 
         return redirect()->route('subscriptions.index')
-            ->with('success', 'Plan updated successfully');
+            ->with('success', 'Plan actualizado correctamente.');
     }
 
     public function cancel(Request $request): RedirectResponse
     {
-        $request->user()->organization->subscription('main')->cancel();
+        $org = $request->user()->organization;
+
+        if ($org->isOwner()) {
+            return back()->with('error', 'No tienes ninguna suscripción que cancelar.');
+        }
+
+        $subscription = $org->subscription('main');
+
+        if (! $subscription) {
+            return back()->with('error', 'No tienes una suscripción activa.');
+        }
+
+        try {
+            $subscription->cancel();
+        } catch (\Throwable $e) {
+            Log::error('Subscription cancel failed', [
+                'organization_id' => $org->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->with('error', 'No se pudo cancelar la suscripción.');
+        }
 
         return redirect()->route('subscriptions.index')
-            ->with('success', 'Subscription cancelled. Will continue until period end.');
+            ->with('success', 'Suscripción cancelada. Mantendrás el acceso hasta fin de periodo.');
     }
 
     public function resume(Request $request): RedirectResponse
     {
-        $request->user()->organization->subscription('main')->resume();
+        $org = $request->user()->organization;
+
+        if ($org->isOwner()) {
+            return back()->with('error', 'No tienes ninguna suscripción para reactivar.');
+        }
+
+        $subscription = $org->subscription('main');
+
+        if (! $subscription) {
+            return back()->with('error', 'No tienes una suscripción para reactivar.');
+        }
+
+        try {
+            $subscription->resume();
+        } catch (\Throwable $e) {
+            Log::error('Subscription resume failed', [
+                'organization_id' => $org->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->with('error', 'No se pudo reactivar la suscripción.');
+        }
 
         return redirect()->route('subscriptions.index')
-            ->with('success', 'Subscription reactivated successfully');
+            ->with('success', 'Suscripción reactivada correctamente.');
     }
 }
