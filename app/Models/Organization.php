@@ -200,7 +200,7 @@ class Organization extends Model
     {
         $limit = $this->limitFor($type);
         $current = $this->currentCount($type);
-        $unlimited = $this->isOwner() || $limit === self::OWNER_UNLIMITED;
+        $unlimited = $this->isOwner();
 
         return [
             'current' => $current,
