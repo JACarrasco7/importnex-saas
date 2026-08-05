@@ -42,10 +42,10 @@ class PublicCarRequestController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|max:255',
             'phone' => 'required|string|max:50',
-            'brand' => 'nullable|string|max:100',
-            'model' => 'nullable|string|max:100',
-            'year_min' => 'nullable|integer|min:1990|max:2027',
-            'year_max' => ['nullable', 'integer', 'min:1990', 'max:2027', function ($attribute, $value, $fail) use ($request) {
+            'brand' => 'required|string|max:100',
+            'model' => 'required|string|max:100',
+            'year_min' => 'required|integer|min:1990|max:2027',
+            'year_max' => ['required', 'integer', 'min:1990', 'max:2027', function ($attribute, $value, $fail) use ($request) {
                 if ($request->filled('year_min') && (int) $value < (int) $request->input('year_min')) {
                     $fail('El año máximo no puede ser menor que el año mínimo.');
                 }
@@ -56,21 +56,21 @@ class PublicCarRequestController extends Controller
                     $fail('El presupuesto máximo no puede ser menor que el mínimo.');
                 }
             }],
-            'mileage_max' => 'nullable|integer|min:0',
-            'power_min' => 'nullable|integer|min:50|max:2000',
-            'power_max' => ['nullable', 'integer', 'min:50', 'max:2000', function ($attribute, $value, $fail) use ($request) {
+            'mileage_max' => 'required|integer|min:0',
+            'power_min' => 'required|integer|min:50|max:2000',
+            'power_max' => ['required', 'integer', 'min:50', 'max:2000', function ($attribute, $value, $fail) use ($request) {
                 if ($request->filled('power_min') && (int) $value < (int) $request->input('power_min')) {
                     $fail('La potencia máxima no puede ser menor que la mínima.');
                 }
             }],
             'engine_type' => 'nullable|string|max:50',
             'fuel' => 'required|string|max:50',
-            'transmission' => 'nullable|string|max:50',
+            'transmission' => 'required|string|max:50',
             'body_type' => 'required|string|max:50',
             'doors' => 'nullable|integer|min:2|max:5',
-            'seats' => 'nullable|integer|min:2|max:9',
-            'color' => 'nullable|string|max:50',
-            'requirements' => 'nullable|string|max:2000',
+            'seats' => 'required|integer|min:2|max:9',
+            'color' => 'required|string|max:50',
+            'requirements' => 'required|string|max:2000',
             'notes' => 'nullable|string|max:2000',
         ]);
 
