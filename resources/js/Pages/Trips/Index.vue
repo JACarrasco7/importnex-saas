@@ -37,7 +37,7 @@ const { currency, statusVariant } = useFormat();
                     </template>
                 </PageHeader>
 
-                <EmptyState v-if="!trips?.length" icon="🚛" title="No trips to plan" description="No cars in Purchased or In transit status with location data yet." />
+                <EmptyState v-if="!trips?.length" icon="🚛" :title="t('trips.no_trips_to_plan')" :description="t('trips.no_trips_desc')" />
 
                 <div v-else class="space-y-6">
                     <div v-for="trip in trips" :key="trip.city" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
