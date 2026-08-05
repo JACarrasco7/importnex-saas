@@ -17,14 +17,14 @@ class PlanLimitMiddleware
             return $next($request);
         }
 
-        if (! $organization->limitReached($resource)) {
+        if ($organization->isOwner() || ! $organization->limitReached($resource)) {
             return $next($request);
         }
 
         $resourceName = rtrim($resource, 's');
         $limit = $organization->limitFor($resource);
         $current = $organization->currentCount($resource);
-        $planName = config('subscription.plans.' . $organization->plan . '.name', $organization->plan);
+        $planName = config('subscription.plans.'.$organization->plan.'.name', $organization->plan);
 
         if ($request->expectsJson() || $request->wantsJson()) {
             return response()->json([

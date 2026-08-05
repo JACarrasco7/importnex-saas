@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Alert;
+use App\Models\CarRequest;
 use App\Services\Ai\AiProviderRegistry;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -38,11 +40,11 @@ class HandleInertiaRequests extends Middleware
         $aiSettings = null;
 
         if ($user = $request->user()) {
-            $pendingAlertsCount = \App\Models\Alert::where('organization_id', $user->organization_id)
+            $pendingAlertsCount = Alert::where('organization_id', $user->organization_id)
                 ->where('resolved', false)
                 ->count();
 
-            $pendingCarRequestsCount = \App\Models\CarRequest::where('organization_id', $user->organization_id)
+            $pendingCarRequestsCount = CarRequest::where('organization_id', $user->organization_id)
                 ->where('status', 'pending')
                 ->count();
 
@@ -51,6 +53,7 @@ class HandleInertiaRequests extends Middleware
                 $planUsage = $organization->planUsage();
                 $currentPlan = [
                     'name' => $organization->plan,
+                    'is_owner' => $organization->isOwner(),
                     'has_active_subscription' => $organization->hasActiveSubscription(),
                 ];
 

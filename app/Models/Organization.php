@@ -4,14 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 use Laravel\Cashier\Billable;
+use Laravel\Cashier\Subscription;
 
 class Organization extends Model
 {
-    use HasFactory, Billable;
+    use Billable, HasFactory;
 
     protected $fillable = [
-        'name', 'slug', 'logo', 'is_public', 'plan', 'stripe_id', 'trial_ends_at', 'subscribed_at',
+        'name', 'slug', 'logo', 'is_public', 'plan', 'is_owner', 'stripe_id', 'trial_ends_at', 'subscribed_at',
         'ai_provider', 'ai_model', 'ai_api_key',
     ];
 
@@ -19,8 +21,16 @@ class Organization extends Model
         'trial_ends_at' => 'datetime',
         'subscribed_at' => 'datetime',
         'is_public' => 'boolean',
+        'is_owner' => 'boolean',
         'ai_api_key' => 'encrypted',
     ];
+
+    public const OWNER_UNLIMITED = PHP_INT_MAX;
+
+    public function isOwner(): bool
+    {
+        return (bool) $this->is_owner;
+    }
 
     protected $hidden = ['ai_api_key'];
 
@@ -41,12 +51,12 @@ class Organization extends Model
 
     public static function generateUniqueSlug(string $name): string
     {
-        $base = \Illuminate\Support\Str::slug($name);
+        $base = Str::slug($name);
         $slug = $base;
         $counter = 1;
 
         while (static::where('slug', $slug)->exists()) {
-            $slug = $base . '-' . $counter;
+            $slug = $base.'-'.$counter;
             $counter++;
         }
 
@@ -85,7 +95,7 @@ class Organization extends Model
 
     public function hasAiConfigured(): bool
     {
-        return !empty($this->ai_provider) && !empty($this->ai_api_key);
+        return ! empty($this->ai_provider) && ! empty($this->ai_api_key);
     }
 
     public function carRequests()
@@ -95,7 +105,7 @@ class Organization extends Model
 
     public function subscriptions()
     {
-        return $this->hasMany(\Laravel\Cashier\Subscription::class);
+        return $this->hasMany(Subscription::class);
     }
 
     public function hasActiveSubscription(): bool
@@ -112,26 +122,35 @@ class Organization extends Model
 
     public function limitReached(string $type): bool
     {
-        $plan = config('subscription.plans.' . $this->plan);
+        if ($this->isOwner()) {
+            return false;
+        }
 
-        if (!$plan) {
+        $plan = config('subscription.plans.'.$this->plan);
+
+        if (! $plan) {
             return false;
         }
 
         $current = $this->currentCount($type);
+        $limit = $this->rawPlanLimit($plan, $type);
 
-        return $current >= ($plan[rtrim($type, 's') . '_limit'] ?? 0);
+        return $current >= $limit;
     }
 
     public function available(string $type): int
     {
-        $plan = config('subscription.plans.' . $this->plan);
+        if ($this->isOwner()) {
+            return self::OWNER_UNLIMITED;
+        }
 
-        if (!$plan) {
+        $plan = config('subscription.plans.'.$this->plan);
+
+        if (! $plan) {
             return 0;
         }
 
-        $limit = $plan[rtrim($type, 's') . '_limit'] ?? 0;
+        $limit = $this->rawPlanLimit($plan, $type);
         $current = $this->currentCount($type);
 
         return max(0, $limit - $current);
@@ -139,7 +158,31 @@ class Organization extends Model
 
     public function limitFor(string $type): int
     {
-        return (int) (config('subscription.plans.' . $this->plan . '.' . rtrim($type, 's') . '_limit') ?? 0);
+        if ($this->isOwner()) {
+            return self::OWNER_UNLIMITED;
+        }
+
+        return (int) ($this->rawPlanLimit(config('subscription.plans.'.$this->plan) ?: [], $type) ?? 0);
+    }
+
+    private function rawPlanLimit(?array $plan, string $type): int
+    {
+        if (! $plan) {
+            return 0;
+        }
+
+        $candidates = [
+            rtrim($type, 's').'_limit',
+            $type.'_limit',
+        ];
+
+        foreach ($candidates as $key) {
+            if (array_key_exists($key, $plan)) {
+                return (int) $plan[$key];
+            }
+        }
+
+        return 0;
     }
 
     public function currentCount(string $type): int
@@ -156,13 +199,15 @@ class Organization extends Model
     {
         $limit = $this->limitFor($type);
         $current = $this->currentCount($type);
+        $unlimited = $this->isOwner() || $limit === self::OWNER_UNLIMITED;
 
         return [
             'current' => $current,
-            'limit' => $limit,
-            'available' => max(0, $limit - $current),
-            'percentage' => $limit > 0 ? min(100, (int) round(($current / $limit) * 100)) : 0,
-            'reached' => $limit > 0 && $current >= $limit,
+            'limit' => $unlimited ? null : $limit,
+            'available' => $unlimited ? null : max(0, $limit - $current),
+            'percentage' => $unlimited ? 0 : ($limit > 0 ? min(100, (int) round(($current / $limit) * 100)) : 0),
+            'reached' => ! $unlimited && $limit > 0 && $current >= $limit,
+            'unlimited' => $unlimited,
         ];
     }
 
