@@ -5,6 +5,9 @@
 ```
 docs/
 ├── README.md               ← este índice
+├── BRAND.md                ← paleta estoril/asphalt/platinum + guía visual
+├── PLAN_MARKETPLACE.md     ← lógica del marketplace público
+├── ARQUITECTURA_VISTAS.md  ← reparto público/privado, rutas, layouts, flujos
 ├── claude/
 │   ├── README.md           ← flujo Claude ↔ ImportnexCore
 │   └── CONTRATO_JSON.md    ← formato exacto del JSON de valoración
@@ -21,6 +24,9 @@ docs/
 | Claude (cómo generar y subir) | [claude/README.md](claude/README.md) |
 | Contrato JSON | [claude/CONTRATO_JSON.md](claude/CONTRATO_JSON.md) |
 | Desplegar cambios | [deploy/README.md](deploy/README.md) |
+| Arquitectura de vistas (público/privado) | [ARQUITECTURA_VISTAS.md](ARQUITECTURA_VISTAS.md) |
+| Manual de marca | [BRAND.md](BRAND.md) |
+| Plan del marketplace | [PLAN_MARKETPLACE.md](PLAN_MARKETPLACE.md) |
 
 ## 📋 Flujo resumido
 
