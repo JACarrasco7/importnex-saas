@@ -4,7 +4,9 @@ use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\PublicCarRequestController;
+use App\Models\Organization;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -14,11 +16,16 @@ Route::get('/', function () {
 
 // Admin landing — private intro page (login / register CTAs)
 Route::get('/admin', function () {
+    $user = Auth::user();
+    $org = $user?->organization
+        ?? Organization::orderBy('id')->first();
+
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
+        'organizationName' => $org?->name,
     ]);
 })->name('admin');
 

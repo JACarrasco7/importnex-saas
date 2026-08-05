@@ -8,6 +8,7 @@ const { t } = useTranslations();
 defineProps({
     canLogin: Boolean,
     canRegister: Boolean,
+    organizationName: { type: String, default: null },
 });
 
 const features = [
@@ -33,11 +34,11 @@ const stats = [
         <!-- Header -->
         <header class="absolute inset-x-0 top-0 z-10">
             <nav class="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
-                <Link href="/" class="flex items-center gap-2">
+                <Link :href="route('admin')" class="flex items-center gap-2">
                     <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-estoril-600 to-estoril-800">
                         <TruckIcon class="h-5 w-5 text-white" />
                     </div>
-                    <span class="text-xl font-bold text-gray-900">{{ t('app.title') }}</span>
+                    <span class="text-xl font-bold text-gray-900">{{ organizationName || t('app.title') }}</span>
                 </Link>
                 <div class="flex items-center gap-3">
                     <Link v-if="$page.props.auth?.user" :href="route('dashboard')" class="rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">

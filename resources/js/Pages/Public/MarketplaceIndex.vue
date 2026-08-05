@@ -458,9 +458,12 @@ const howItWorks = computed(() => [
                         </span>
                         <span class="text-sm font-semibold text-gray-900">{{ t('marketplace.brand') }}</span>
                     </div>
-                    <p class="text-xs text-gray-500">
-                        {{ t('marketplace.footer_copy').replace(':year', new Date().getFullYear()) }}
-                    </p>
+                    <div class="flex items-center gap-4">
+                        <Link :href="route('admin')" class="text-xs font-medium text-gray-500 hover:text-estoril-700">{{ t('marketplace.footer_admin_link') }}</Link>
+                        <p class="text-xs text-gray-500">
+                            {{ t('marketplace.footer_copy').replace(':year', new Date().getFullYear()) }}
+                        </p>
+                    </div>
                 </div>
             </div>
         </footer>

@@ -26,6 +26,7 @@ import {
     MegaphoneIcon,
     ShoppingBagIcon,
     ArrowTopRightOnSquareIcon,
+    GlobeAltIcon,
 } from '@heroicons/vue/24/outline';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import FlashMessage from '@/Components/FlashMessage.vue';

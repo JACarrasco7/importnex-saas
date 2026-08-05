@@ -372,6 +372,7 @@ export default {
         tagline_sub: 'Servicio llave en mano Alemania → España',
         footer_copy: 'Importnex © :year. Coches investigados, valorados y listos para entregar.',
         footer_line: 'Importnex · JJ Import Motors · Servicio llave en mano Alemania → España',
+        footer_admin_link: 'Acceder al panel',
         brand: 'Verified Cars by Importnex',
         brand_sub: 'by Importnex',
         folleto: 'Folleto',

@@ -386,6 +386,7 @@ export default {
         tagline_sub: 'Key-to-hand service Germany → Spain',
         footer_copy: 'Importnex © :year. Cars investigated, valued and ready to deliver.',
         footer_line: 'Importnex · JJ Import Motors · Key-to-hand service Germany → Spain',
+        footer_admin_link: 'Admin panel',
         brand: 'Verified Cars by Importnex',
         brand_sub: 'by Importnex',
         folleto: 'Brochure',
