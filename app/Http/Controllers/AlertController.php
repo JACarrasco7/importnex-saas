@@ -15,6 +15,7 @@ class AlertController extends Controller
         $alerts = Alert::query()
             ->when($request->input('type'), fn ($q, $t) => $q->where('alert_type', $t))
             ->when($request->input('resolved') !== null, fn ($q, $r) => $q->where('resolved', $r === '1'))
+            ->when($request->input('filter') === 'pending', fn ($q) => $q->where('resolved', false))
             ->orderBy('created_at', 'desc')
             ->paginate(15)
             ->withQueryString();
@@ -27,7 +28,7 @@ class AlertController extends Controller
         return Inertia::render('Alerts/Index', [
             'alerts' => $alerts,
             'types' => $types,
-            'filters' => $request->only(['type', 'resolved']),
+            'filters' => $request->only(['type', 'resolved', 'filter']),
         ]);
     }
 

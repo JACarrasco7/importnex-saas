@@ -31,11 +31,18 @@ const props = defineProps({
     filters: Object,
 });
 
-const filter = ref(props.filters?.filter || 'pending');
+// Filtro por estado de resolucion (pending / all)
+// Nota: el controlador solo acepta 'pending' o 'all' en el input 'filter'
+const validFilters = ['pending', 'all'];
+const filter = ref(validFilters.includes(props.filters?.filter) ? props.filters.filter : 'pending');
 
 watch(filter, () => {
     router.get(route('alerts.index'), { filter: filter.value }, { preserveState: true, preserveScroll: true });
 });
+
+const alertToAct = ref(null);
+const showResolve = ref(false);
+const showDelete = ref(false);
 
 const askResolve = (alert) => { alertToAct.value = alert; showResolve.value = true; };
 const confirmResolve = () => {
@@ -66,11 +73,11 @@ const confirmDelete = () => {
 
         <div class="py-8">
             <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <PageHeader title="Alerts" :subtitle="`${alerts.total || 0} alerts in your system`">
+                <PageHeader :title="t('alerts.title')" :subtitle="`${alerts.total || 0} ${filter === 'pending' ? t('alerts.subtitle_pending') : t('alerts.subtitle_all')}`">
                     <template #actions>
                         <div class="inline-flex rounded-lg bg-white p-1 shadow-sm ring-1 ring-gray-200">
-                            <button @click="filter = t('common.pending')" :class="['rounded-md px-3 py-1.5 text-sm font-semibold transition', filter === t('common.pending') ? 'bg-estoril-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-50']">{{ t('cars.pending_status') }}</button>
-                            <button @click="filter = t('common.all')" :class="['rounded-md px-3 py-1.5 text-sm font-semibold transition', filter === t('common.all') ? 'bg-estoril-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-50']">{{ t('common.all') }}</button>
+                            <button @click="filter = 'pending'" :class="['rounded-md px-3 py-1.5 text-sm font-semibold transition', filter === 'pending' ? 'bg-estoril-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-50']">{{ t('alerts.filter_pending') }}</button>
+                            <button @click="filter = 'all'" :class="['rounded-md px-3 py-1.5 text-sm font-semibold transition', filter === 'all' ? 'bg-estoril-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-50']">{{ t('common.all') }}</button>
                         </div>
                     </template>
                 </PageHeader>
@@ -103,12 +110,12 @@ const confirmDelete = () => {
                             </div>
                         </div>
                     </div>
-                    <EmptyState v-else icon="ðŸ””" title="All clear!" description="No pending alerts. Your fleet is running smoothly." />
+                    <EmptyState v-else icon="🔔" :title="t('alerts.empty_title')" :description="t('alerts.empty_description')" />
 
                     <!-- Pagination -->
                     <div v-if="alerts.links && alerts.last_page > 1" class="flex items-center justify-between border-t border-gray-200 bg-gray-50 px-6 py-3">
                         <div class="text-sm text-gray-700">
-                            Showing <span class="font-semibold">{{ alerts.from }}</span> to <span class="font-semibold">{{ alerts.to }}</span> of <span class="font-semibold">{{ alerts.total }}</span>
+                            {{ t('common.showing') }} <span class="font-semibold">{{ alerts.from }}</span> {{ t('common.to') }} <span class="font-semibold">{{ alerts.to }}</span> {{ t('common.of') }} <span class="font-semibold">{{ alerts.total }}</span>
                         </div>
                         <div class="flex items-center gap-1">
                             <component v-for="link in alerts.links" :key="link.label" :is="link.url ? Link : 'span'" :href="link.url || '#'" :class="[
