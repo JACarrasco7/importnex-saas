@@ -39,14 +39,14 @@ const lightKeys = ['green', 'amber', 'red', 'neutral'];
 const totalTraffic = (props.trafficLights?.green || 0) + (props.trafficLights?.amber || 0) + (props.trafficLights?.red || 0) + (props.trafficLights?.neutral || 0);
 
 const quickLinks = [
-    { label: t('nav.cars'), description: t('nav.inventory'), route: 'cars.index', icon: TruckIcon, color: 'indigo' },
-    { label: t('nav.kanban'), description: t('nav.map'), route: 'cars.kanban', icon: Squares2X2Icon, color: 'purple' },
-    { label: t('nav.map'), description: t('nav.finance'), route: 'cars.map', icon: MapIcon, color: 'sky' },
-    { label: t('nav.finance'), description: t('nav.trips'), route: 'finance.index', icon: BanknotesIcon, color: 'emerald' },
-    { label: t('nav.trips'), description: t('nav.crm'), route: 'trips.index', icon: CalendarDaysIcon, color: 'amber' },
-    { label: t('nav.clients'), description: t('nav.crm'), route: 'clients.index', icon: UsersIcon, color: 'blue' },
-    { label: t('nav.contacts'), description: t('nav.alerts'), route: 'contacts.index', icon: PhoneIcon, color: 'rose' },
-    { label: t('nav.alerts'), description: t('nav.plan'), route: 'alerts.index', icon: BellAlertIcon, color: 'red' },
+    { label: t('nav.cars'), description: t('dashboard.quick_inventory'), route: 'cars.index', icon: TruckIcon, color: 'indigo' },
+    { label: t('nav.kanban'), description: t('dashboard.quick_kanban'), route: 'cars.kanban', icon: Squares2X2Icon, color: 'purple' },
+    { label: t('nav.map'), description: t('dashboard.quick_map'), route: 'cars.map', icon: MapIcon, color: 'sky' },
+    { label: t('nav.finance'), description: t('dashboard.quick_finance'), route: 'finance.index', icon: BanknotesIcon, color: 'emerald' },
+    { label: t('nav.trips'), description: t('dashboard.quick_trips'), route: 'trips.index', icon: CalendarDaysIcon, color: 'amber' },
+    { label: t('nav.clients'), description: t('dashboard.quick_clients'), route: 'clients.index', icon: UsersIcon, color: 'blue' },
+    { label: t('nav.contacts'), description: t('dashboard.quick_contacts'), route: 'contacts.index', icon: PhoneIcon, color: 'rose' },
+    { label: t('nav.alerts'), description: t('dashboard.quick_alerts'), route: 'alerts.index', icon: BellAlertIcon, color: 'red' },
 ];
 
 const copyLabel = ref(t('dashboard.cta_marketplace_copy'));
