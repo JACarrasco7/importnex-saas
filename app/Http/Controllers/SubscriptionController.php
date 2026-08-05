@@ -18,6 +18,10 @@ class SubscriptionController extends Controller
         $org = auth()->user()->organization;
         $subscription = $org->subscription('main');
 
+        // payment_failed_at is set by the webhook and rendered as a banner.
+        // It's cleared on resume/create so the banner disappears once fixed.
+        $paymentFailed = $org->payment_failed_at !== null;
+
         return Inertia::render('Subscriptions/Index', [
             'plans' => $plans,
             'currentPlan' => $org->plan ?? 'starter',
@@ -29,6 +33,7 @@ class SubscriptionController extends Controller
             ] : null,
             'on_trial' => $org->onTrial('main'),
             'trial_ends_at' => $org->trialEndsAt('main')?->format('Y-m-d'),
+            'paymentFailed' => $paymentFailed,
         ]);
     }
 
@@ -131,6 +136,12 @@ class SubscriptionController extends Controller
         if ($org->plan === $newPlan) {
             return redirect()->route('subscriptions.index')
                 ->with('success', 'Ya estás en este plan.');
+        }
+
+        // Downgrade to 'starter' requires cancellation: Cashier cannot swap to
+        // a non-Stripe-managed free plan without explicit cancel + downgrade flow.
+        if ($newPlan === 'starter') {
+            return redirect()->route('subscriptions.cancel');
         }
 
         try {

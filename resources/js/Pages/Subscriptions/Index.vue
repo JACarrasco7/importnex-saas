@@ -14,11 +14,14 @@ const props = defineProps({
     subscription: Object,
     on_trial: Boolean,
     trial_ends_at: String,
+    paymentFailed: Boolean,
 });
 
 const { t } = useTranslations();
 const { date, currency } = useFormat();
-const planKeys = ['starter', 'pro', 'enterprise'];
+// Plans are rendered dynamically from the config-driven `plans` prop so adding
+// a new plan only requires updating config/subscription.php.
+const planKeys = Object.keys(props.plans);
 </script>
 
 <template>
@@ -33,7 +36,17 @@ const planKeys = ['starter', 'pro', 'enterprise'];
             <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
                 <PageHeader :title="t('subscription.choose_plan')" :subtitle="t('subscription.subtitle')" />
 
-                <div v-if="isOwner" class="overflow-hidden rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                <div v-if="paymentFailed" class="overflow-hidden rounded-2xl border border-rose-300 bg-rose-50 p-4">
+                    <div class="flex items-center gap-3">
+                        <SparklesIcon class="h-5 w-5 text-rose-600" />
+                        <p class="text-sm text-rose-700">
+                            <strong>Pago rechazado.</strong> Tu suscripción se ha degradado al plan Starter.
+                            <Link href="/billing" class="font-semibold underline">Gestionar método de pago</Link> para reactivar.
+                        </p>
+                    </div>
+                </div>
+
+                <div v-else-if="isOwner" class="overflow-hidden rounded-2xl border border-amber-200 bg-amber-50 p-4">
                     <div class="flex items-center gap-3">
                         <SparklesIcon class="h-5 w-5 text-amber-600" />
                         <p class="text-sm text-amber-700"><strong>Acceso ilimitado vitalicio:</strong> todos los recursos sin restricciones.</p>

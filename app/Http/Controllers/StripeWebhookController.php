@@ -58,32 +58,6 @@ class StripeWebhookController extends CashierWebhookController
     }
 
     /**
-     * Handle customer subscription created.
-     */
-    protected function handleCustomerSubscriptionCreated(array $payload): void
-    {
-        $user = $this->getUserByStripeId($payload['data']['object']['customer'] ?? null);
-        if (! $user) {
-            return;
-        }
-
-        $org = $user->organization;
-        if (! $org) {
-            return;
-        }
-
-        $plan = $this->extractPlanFromSubscription($payload['data']['object']);
-        if ($plan) {
-            $org->update([
-                'plan' => $plan,
-                'subscribed_at' => now(),
-            ]);
-        }
-
-        Log::info('Subscription created', ['organization_id' => $org->id, 'plan' => $plan]);
-    }
-
-    /**
      * Handle customer subscription updated (plan swap, cancel at period end, etc).
      */
     protected function handleCustomerSubscriptionUpdated(array $payload): void
@@ -135,8 +109,9 @@ class StripeWebhookController extends CashierWebhookController
     }
 
     /**
-     * Handle invoice payment failed. Degrade the org to starter after grace period
-     * is handled via the trial_ends_at (kept in the future for grace).
+     * Handle invoice payment failed. Marks the org as payment_failed and
+     * degrades to starter. The frontend will display a banner using
+     * `payment_failed_at` until the user reactivates a subscription.
      */
     protected function handleInvoicePaymentFailed(array $payload): void
     {
@@ -158,10 +133,37 @@ class StripeWebhookController extends CashierWebhookController
             'attempt_count' => $invoice['attempt_count'] ?? null,
         ]);
 
-        // Degrade to starter immediately. Frontend will show a banner based on
-        // the next 'customer.subscription.deleted' webhook that will follow.
-        // Keeping this conservative — product owner can override.
-        $org->update(['plan' => 'starter']);
+        $org->update([
+            'plan' => 'starter',
+            'payment_failed_at' => now(),
+        ]);
+    }
+
+    /**
+     * Clear payment_failed_at when a new subscription is created.
+     */
+    protected function handleCustomerSubscriptionCreated(array $payload): void
+    {
+        $user = $this->getUserByStripeId($payload['data']['object']['customer'] ?? null);
+        if (! $user) {
+            return;
+        }
+
+        $org = $user->organization;
+        if (! $org) {
+            return;
+        }
+
+        $plan = $this->extractPlanFromSubscription($payload['data']['object']);
+        if ($plan) {
+            $org->update([
+                'plan' => $plan,
+                'subscribed_at' => now(),
+                'payment_failed_at' => null,
+            ]);
+        }
+
+        Log::info('Subscription created', ['organization_id' => $org->id, 'plan' => $plan]);
     }
 
     /**
