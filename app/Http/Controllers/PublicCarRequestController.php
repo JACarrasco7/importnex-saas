@@ -41,9 +41,17 @@ class PublicCarRequestController extends Controller
             'brand' => 'nullable|string|max:100',
             'model' => 'nullable|string|max:100',
             'year_min' => 'nullable|integer|min:1990|max:2027',
-            'year_max' => 'nullable|integer|min:1990|max:2027|gte:year_min',
+            'year_max' => ['nullable', 'integer', 'min:1990', 'max:2027', function ($attribute, $value, $fail) use ($request) {
+                if ($request->filled('year_min') && (int) $value < (int) $request->input('year_min')) {
+                    $fail('El año máximo no puede ser menor que el año mínimo.');
+                }
+            }],
             'budget_min' => 'nullable|integer|min:0',
-            'budget_max' => 'nullable|integer|min:0|gte:budget_min',
+            'budget_max' => ['nullable', 'integer', 'min:0', function ($attribute, $value, $fail) use ($request) {
+                if ($request->filled('budget_min') && (int) $value < (int) $request->input('budget_min')) {
+                    $fail('El presupuesto máximo no puede ser menor que el mínimo.');
+                }
+            }],
             'mileage_max' => 'nullable|integer|min:0',
             'fuel' => 'nullable|string|max:50',
             'transmission' => 'nullable|string|max:50',
