@@ -21,6 +21,9 @@ const form = useForm({
     budget_min: '',
     budget_max: '',
     mileage_max: '',
+    power_min: '',
+    power_max: '',
+    engine_type: '',
     fuel: '',
     transmission: '',
     body_type: '',
@@ -31,10 +34,11 @@ const form = useForm({
     notes: '',
 });
 
-const fuelTypes = ['Diesel', 'Gasolina', 'Híbrido', 'Eléctrico', 'Gas'];
+const fuelTypes = ['Diesel', 'Gasolina', 'Híbrido', 'Híbrido enchufable', 'Eléctrico', 'Gas'];
 const transmissions = ['Manual', 'Automático'];
-const bodyTypes = ['Berlina', 'SUV', 'Compacto', 'Monovolumen', 'Coupe', 'Cabrio', 'Pickup'];
-const colors = ['Negro', 'Blanco', 'Gris', 'Plata', 'Azul', 'Rojo', 'Beige', 'Marrón'];
+const bodyTypes = ['Berlina', 'SUV', 'Compacto', 'Monovolumen', 'Coupe', 'Cabrio', 'Pickup', 'Familiar'];
+const engineTypes = ['3 cilindros', '4 cilindros', '5 cilindros', '6 cilindros', '8 cilindros', 'Eléctrico'];
+const colors = ['Negro', 'Blanco', 'Gris', 'Plata', 'Azul', 'Rojo', 'Beige', 'Marrón', 'Verde'];
 
 const submit = () => {
     form.post(route('public.car-request.store', props.organization.slug), {
@@ -105,10 +109,14 @@ const submit = () => {
                                 <p v-if="form.errors.email" class="mt-1 text-sm text-rose-600">{{ form.errors.email }}</p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('car_request_form.field_phone') }}</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    {{ t('car_request_form.field_phone') }}
+                                    <span class="ml-0.5 text-rose-600" aria-hidden="true">*</span>
+                                </label>
                                 <input
                                     v-model="form.phone"
                                     type="tel"
+                                    required
                                     class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600"
                                     :placeholder="t('car_request_form.placeholder_phone')"
                                 />
@@ -166,24 +174,32 @@ const submit = () => {
                         <!-- Budget Range -->
                         <div class="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('car_request_form.field_budget_min') }}</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    {{ t('car_request_form.field_budget_min') }}
+                                    <span class="ml-0.5 text-rose-600" aria-hidden="true">*</span>
+                                </label>
                                 <input
                                     v-model="form.budget_min"
                                     type="number"
                                     min="0"
                                     step="500"
+                                    required
                                     class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600"
                                     :placeholder="t('car_request_form.placeholder_budget')"
                                 />
                                 <p v-if="form.errors.budget_min" class="mt-1 text-sm text-rose-600">{{ form.errors.budget_min }}</p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('car_request_form.field_budget_max') }}</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    {{ t('car_request_form.field_budget_max') }}
+                                    <span class="ml-0.5 text-rose-600" aria-hidden="true">*</span>
+                                </label>
                                 <input
                                     v-model="form.budget_max"
                                     type="number"
                                     min="0"
                                     step="500"
+                                    required
                                     class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600"
                                     :placeholder="t('car_request_form.placeholder_budget_max')"
                                 />
@@ -211,12 +227,26 @@ const submit = () => {
                         <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-900">{{ t('car_request_form.section_tech') }}</h3>
                         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('car_request_form.field_fuel') }}</label>
-                                <select v-model="form.fuel" class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600">
-                                    <option value="">{{ t('car_request_form.any_option') }}</option>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    {{ t('car_request_form.field_fuel') }}
+                                    <span class="ml-0.5 text-rose-600" aria-hidden="true">*</span>
+                                </label>
+                                <select v-model="form.fuel" required class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600">
+                                    <option value="">{{ t('car_request_form.select_option') }}</option>
                                     <option v-for="fuel in fuelTypes" :key="fuel" :value="fuel">{{ fuel }}</option>
                                 </select>
                                 <p v-if="form.errors.fuel" class="mt-1 text-sm text-rose-600">{{ form.errors.fuel }}</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    {{ t('car_request_form.field_body_type') }}
+                                    <span class="ml-0.5 text-rose-600" aria-hidden="true">*</span>
+                                </label>
+                                <select v-model="form.body_type" required class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600">
+                                    <option value="">{{ t('car_request_form.select_option') }}</option>
+                                    <option v-for="type in bodyTypes" :key="type" :value="type">{{ type }}</option>
+                                </select>
+                                <p v-if="form.errors.body_type" class="mt-1 text-sm text-rose-600">{{ form.errors.body_type }}</p>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('car_request_form.field_transmission') }}</label>
@@ -227,12 +257,38 @@ const submit = () => {
                                 <p v-if="form.errors.transmission" class="mt-1 text-sm text-rose-600">{{ form.errors.transmission }}</p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('car_request_form.field_body_type') }}</label>
-                                <select v-model="form.body_type" class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('car_request_form.field_engine_type') }}</label>
+                                <select v-model="form.engine_type" class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600">
                                     <option value="">{{ t('car_request_form.any_option') }}</option>
-                                    <option v-for="type in bodyTypes" :key="type" :value="type">{{ type }}</option>
+                                    <option v-for="engine in engineTypes" :key="engine" :value="engine">{{ engine }}</option>
                                 </select>
-                                <p v-if="form.errors.body_type" class="mt-1 text-sm text-rose-600">{{ form.errors.body_type }}</p>
+                                <p v-if="form.errors.engine_type" class="mt-1 text-sm text-rose-600">{{ form.errors.engine_type }}</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('car_request_form.field_power_min') }}</label>
+                                <input
+                                    v-model="form.power_min"
+                                    type="number"
+                                    min="50"
+                                    max="2000"
+                                    step="10"
+                                    class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600"
+                                    :placeholder="t('car_request_form.placeholder_power')"
+                                />
+                                <p v-if="form.errors.power_min" class="mt-1 text-sm text-rose-600">{{ form.errors.power_min }}</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('car_request_form.field_power_max') }}</label>
+                                <input
+                                    v-model="form.power_max"
+                                    type="number"
+                                    min="50"
+                                    max="2000"
+                                    step="10"
+                                    class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600"
+                                    :placeholder="t('car_request_form.placeholder_power_max')"
+                                />
+                                <p v-if="form.errors.power_max" class="mt-1 text-sm text-rose-600">{{ form.errors.power_max }}</p>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('car_request_form.field_doors') }}</label>

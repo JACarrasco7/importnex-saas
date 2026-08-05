@@ -24,6 +24,9 @@ class CarRequest extends Model
         'budget_min',
         'budget_max',
         'mileage_max',
+        'power_min',
+        'power_max',
+        'engine_type',
         'fuel',
         'transmission',
         'body_type',
@@ -41,6 +44,8 @@ class CarRequest extends Model
         'budget_min' => 'integer',
         'budget_max' => 'integer',
         'mileage_max' => 'integer',
+        'power_min' => 'integer',
+        'power_max' => 'integer',
         'doors' => 'integer',
         'seats' => 'integer',
     ];
@@ -97,5 +102,17 @@ class CarRequest extends Model
         $max = $this->year_max ?: '';
 
         return trim($min . ' - ' . $max, ' - ');
+    }
+
+    public function getPowerRangeAttribute(): string
+    {
+        if (!$this->power_min && !$this->power_max) {
+            return 'No especificado';
+        }
+
+        $min = $this->power_min ?: '0';
+        $max = $this->power_max ?: '∞';
+
+        return "{$min} - {$max} CV";
     }
 }

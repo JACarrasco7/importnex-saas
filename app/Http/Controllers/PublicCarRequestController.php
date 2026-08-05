@@ -18,6 +18,9 @@ class PublicCarRequestController extends Controller
             ->where('is_public', true)
             ->firstOrFail();
 
+        $locale = app()->getLocale();
+        $translations = trans('car_request_form', [], $locale);
+
         return inertia('Public/CarRequestForm', [
             'organization' => [
                 'id' => $organization->id,
@@ -25,6 +28,7 @@ class PublicCarRequestController extends Controller
                 'slug' => $organization->slug,
                 'logo' => $organization->logo,
             ],
+            'translations' => ['car_request_form' => $translations],
         ]);
     }
 
@@ -37,7 +41,7 @@ class PublicCarRequestController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|max:255',
-            'phone' => 'nullable|string|max:50',
+            'phone' => 'required|string|max:50',
             'brand' => 'nullable|string|max:100',
             'model' => 'nullable|string|max:100',
             'year_min' => 'nullable|integer|min:1990|max:2027',
@@ -46,16 +50,23 @@ class PublicCarRequestController extends Controller
                     $fail('El año máximo no puede ser menor que el año mínimo.');
                 }
             }],
-            'budget_min' => 'nullable|integer|min:0',
-            'budget_max' => ['nullable', 'integer', 'min:0', function ($attribute, $value, $fail) use ($request) {
+            'budget_min' => 'required|integer|min:0',
+            'budget_max' => ['required', 'integer', 'min:0', function ($attribute, $value, $fail) use ($request) {
                 if ($request->filled('budget_min') && (int) $value < (int) $request->input('budget_min')) {
                     $fail('El presupuesto máximo no puede ser menor que el mínimo.');
                 }
             }],
             'mileage_max' => 'nullable|integer|min:0',
-            'fuel' => 'nullable|string|max:50',
+            'power_min' => 'nullable|integer|min:50|max:2000',
+            'power_max' => ['nullable', 'integer', 'min:50', 'max:2000', function ($attribute, $value, $fail) use ($request) {
+                if ($request->filled('power_min') && (int) $value < (int) $request->input('power_min')) {
+                    $fail('La potencia máxima no puede ser menor que la mínima.');
+                }
+            }],
+            'engine_type' => 'nullable|string|max:50',
+            'fuel' => 'required|string|max:50',
             'transmission' => 'nullable|string|max:50',
-            'body_type' => 'nullable|string|max:50',
+            'body_type' => 'required|string|max:50',
             'doors' => 'nullable|integer|min:2|max:5',
             'seats' => 'nullable|integer|min:2|max:9',
             'color' => 'nullable|string|max:50',

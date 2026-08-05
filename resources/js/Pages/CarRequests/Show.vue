@@ -193,6 +193,14 @@ const createdAt = new Date(props.carRequest.created_at).toLocaleDateString(local
                                 <span class="text-sm text-gray-500">{{ t('car_requests.field_mileage_max') }}</span>
                                 <span class="font-medium text-gray-900">{{ carRequest.mileage_max.toLocaleString() }} {{ t('car_requests.km') }}</span>
                             </div>
+                            <div v-if="carRequest.power_min || carRequest.power_max" class="flex items-center justify-between">
+                                <span class="text-sm text-gray-500">Potencia (CV)</span>
+                                <span class="font-medium text-gray-900">{{ carRequest.power_min || '0' }} - {{ carRequest.power_max || '∞' }}</span>
+                            </div>
+                            <div v-if="carRequest.engine_type" class="flex items-center justify-between">
+                                <span class="text-sm text-gray-500">Tipo de motor</span>
+                                <span class="font-medium text-gray-900">{{ carRequest.engine_type }}</span>
+                            </div>
                             <div v-if="carRequest.fuel" class="flex items-center justify-between">
                                 <span class="text-sm text-gray-500">{{ t('car_requests.field_fuel') }}</span>
                                 <span class="font-medium text-gray-900">{{ carRequest.fuel }}</span>

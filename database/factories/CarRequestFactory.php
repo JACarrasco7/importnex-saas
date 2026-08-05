@@ -12,9 +12,10 @@ class CarRequestFactory extends Factory
 
     public function definition(): array
     {
-        $fuelTypes = ['Diesel', 'Gasolina', 'Híbrido', 'Eléctrico', 'Gas'];
+        $fuelTypes = ['Diesel', 'Gasolina', 'Híbrido', 'Híbrido enchufable', 'Eléctrico', 'Gas'];
         $transmissions = ['Manual', 'Automático'];
-        $bodyTypes = ['Berlina', 'SUV', 'Compacto', 'Monovolumen', 'Coupe', 'Cabrio'];
+        $bodyTypes = ['Berlina', 'SUV', 'Compacto', 'Monovolumen', 'Coupe', 'Cabrio', 'Pickup', 'Familiar'];
+        $engineTypes = ['3 cilindros', '4 cilindros', '5 cilindros', '6 cilindros', '8 cilindros', 'Eléctrico'];
 
         return [
             'organization_id' => Organization::factory(),
@@ -29,6 +30,9 @@ class CarRequestFactory extends Factory
             'budget_min' => fake()->numberBetween(10000, 20000),
             'budget_max' => fake()->numberBetween(25000, 45000),
             'mileage_max' => fake()->numberBetween(50000, 150000),
+            'power_min' => fake()->numberBetween(80, 150),
+            'power_max' => fake()->numberBetween(150, 400),
+            'engine_type' => fake()->randomElement($engineTypes),
             'fuel' => fake()->randomElement($fuelTypes),
             'transmission' => fake()->randomElement($transmissions),
             'body_type' => fake()->randomElement($bodyTypes),
