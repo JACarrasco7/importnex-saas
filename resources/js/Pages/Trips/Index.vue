@@ -84,7 +84,7 @@ const { currency, statusVariant } = useFormat();
                                             </Link>
                                         </td>
                                         <td class="px-6 py-3 text-sm text-gray-500">{{ car.year }}</td>
-                                        <td class="px-6 py-3"><Badge :variant="statusVariant(car.status)">{{ car.status }}</Badge></td>
+                                        <td class="px-6 py-3"><Badge :variant="statusVariant(car.status)">{{ statusLabel(t, car.status) }}</Badge></td>
                                         <td class="px-6 py-3 text-right text-sm text-gray-700">{{ currency(car.transport) }}</td>
                                         <td class="px-6 py-3 text-right text-sm font-semibold text-gray-900">{{ currency(car.purchase_price) }}</td>
                                     </tr>

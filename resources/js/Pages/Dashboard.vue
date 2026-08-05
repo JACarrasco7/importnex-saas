@@ -200,7 +200,7 @@ const copyMarketplaceUrl = async () => {
                                     </td>
                                     <td class="px-6 py-4 text-sm text-gray-500">{{ car.year }}</td>
                                     <td class="px-6 py-4">
-                                        <Badge :variant="statusVariant(car.status)">{{ car.status }}</Badge>
+                                        <Badge :variant="statusVariant(car.status)">{{ statusLabel(t, car.status) }}</Badge>
                                     </td>
                                     <td class="px-6 py-4">
                                         <Badge :variant="trafficLightVariant(car.traffic_light)" dot>{{ car.traffic_light }}</Badge>

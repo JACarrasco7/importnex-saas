@@ -264,7 +264,7 @@ const confirmDelete = () => {
                                 </div>
                                 <div class="flex flex-wrap items-center justify-end gap-1">
                                     <Badge v-if="car.is_marketplace" variant="estoril" size="sm">🌐 Marketplace</Badge>
-                                    <Badge :variant="statusVariant(car.status)" size="sm">{{ car.status }}</Badge>
+                                    <Badge :variant="statusVariant(car.status)" size="sm">{{ statusLabel(t, car.status) }}</Badge>
                                 </div>
                             </div>
                         </div>

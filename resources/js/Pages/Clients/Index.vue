@@ -168,7 +168,7 @@ const confirmDelete = () => {
                                         <p v-if="client.looking_for" class="mt-1 text-sm text-gray-500 truncate">{{ client.looking_for }}</p>
                                     </Link>
                                 </div>
-                                <Badge :variant="statusVariant(client.status)" class="shrink-0">{{ client.status }}</Badge>
+                                <Badge :variant="statusVariant(client.status)" class="shrink-0">{{ statusLabel(t, client.status) }}</Badge>
                             </div>
 
                             <div class="mt-4 space-y-2 text-sm">

@@ -37,6 +37,18 @@ export function useFormat() {
             const num = Number(value) || 0;
             return currencyFormatter.format(num);
         },
+        // Traduce un enum de estado (Located, Valuing, ...) a label legible.
+        // Recibe `t` del composable de traducciones porque useFormat
+        // no puede llamar a useTranslations() fuera de un setup().
+        // Devuelve el enum tal cual si no hay clave i18n, para no romper nada.
+        statusLabel: (t, status) => {
+            if (!status) return '—';
+            if (!t) return status;
+            const key = `cars.status.${status.toLowerCase().replace(/\s+/g, '_')}`;
+            const label = t(key);
+            if (label === key) return status;
+            return label;
+        },
         number: (value, decimals = 0) => {
             const num = Number(value) || 0;
             return new Intl.NumberFormat(CURRENCY_LOCALE, {

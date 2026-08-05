@@ -232,7 +232,7 @@ const onDocKeyChange = () => {
                 <!-- Status bar -->
                 <div class="flex flex-wrap items-center gap-3">
                     <Badge :variant="trafficLightVariant(car.traffic_light)" dot>{{ car.traffic_light }}</Badge>
-                    <Badge :variant="statusVariant(car.status)">{{ car.status }}</Badge>
+                    <Badge :variant="statusVariant(car.status)">{{ statusLabel(t, car.status) }}</Badge>
                     <span v-if="car.year" class="text-sm text-gray-500">{{ car.year }}</span>
                 </div>
 
@@ -535,7 +535,7 @@ const onDocKeyChange = () => {
                                         </div>
                                     </div>
                                     <div class="flex items-center gap-2">
-                                        <Badge :variant="docStatusVariant(doc.status)" size="sm">{{ doc.status }}</Badge>
+                                        <Badge :variant="docStatusVariant(doc.status)" size="sm">{{ statusLabel(t, doc.status) }}</Badge>
                                         <a v-if="doc.url" :href="`/storage/${doc.url}`" target="_blank" class="inline-flex items-center gap-1 rounded-md bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100">
                                             <EyeIcon class="h-3 w-3" />
                                             View
@@ -605,7 +605,7 @@ const onDocKeyChange = () => {
                         </div>
                         <div>
                             <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Status</dt>
-                            <dd class="mt-1"><Badge :variant="statusVariant(car.client.status)">{{ car.client.status }}</Badge></dd>
+                            <dd class="mt-1"><Badge :variant="statusVariant(car.client.status)">{{ statusLabel(t, car.client.status) }}</Badge></dd>
                         </div>
                         <div class="flex items-end">
                             <Link :href="route('clients.show', car.client.id)" class="inline-flex items-center gap-1 text-sm font-semibold text-estoril-600 hover:text-estoril-500">
