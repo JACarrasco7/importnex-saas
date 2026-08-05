@@ -10,6 +10,11 @@ import Badge from '@/Components/Badge.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import EmptyState from '@/Components/EmptyState.vue';
 import ConfirmDialog from '@/Components/ConfirmDialog.vue';
+import { useTranslations } from '@/Composables/useTranslations';
+import { useFormat } from '@/Composables/useFormat';
+
+const { t, locale } = useTranslations();
+const { date } = useFormat();
 
 const props = defineProps({
     requests: Object,
@@ -26,11 +31,11 @@ const showDelete = ref(false);
 const requestToDelete = ref(null);
 
 const tabs = computed(() => [
-    { id: 'all', label: 'Todas', count: props.stats.total },
-    { id: 'pending', label: 'Pendientes', count: props.stats.pending },
-    { id: 'contacted', label: 'Contactados', count: props.stats.contacted },
-    { id: 'in_progress', label: 'En proceso', count: props.stats.in_progress },
-    { id: 'completed', label: 'Completadas', count: props.stats.completed },
+    { id: 'all', label: t('requests.all'), count: props.stats.total },
+    { id: 'pending', label: t('requests.pending'), count: props.stats.pending },
+    { id: 'contacted', label: t('requests.contacted'), count: props.stats.contacted },
+    { id: 'in_progress', label: t('requests.in_progress'), count: props.stats.in_progress },
+    { id: 'completed', label: t('requests.completed'), count: props.stats.completed },
 ]);
 
 const statusVariant = (status) => {
@@ -46,11 +51,11 @@ const statusVariant = (status) => {
 
 const statusLabel = (status) => {
     const map = {
-        pending: 'Pendiente',
-        contacted: 'Contactado',
-        in_progress: 'En proceso',
-        completed: 'Completada',
-        cancelled: 'Cancelada',
+        pending: t('car_requests.status.pending'),
+        contacted: t('car_requests.status.contacted'),
+        in_progress: t('car_requests.status.in_progress'),
+        completed: t('car_requests.status.completed'),
+        cancelled: t('car_requests.status.cancelled'),
     };
     return map[status] || status;
 };

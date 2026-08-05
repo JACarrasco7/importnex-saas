@@ -1809,7 +1809,9 @@ export default {
         pending: 'Pendientes',
         completed: 'Completadas',
         cancelled: 'Canceladas',
-    },
+            contacted: "Contactados",
+        in_progress: "En proceso",
+},
     car_requests: {
         title: 'Solicitud',
         back_to_list: 'Volver a solicitudes',

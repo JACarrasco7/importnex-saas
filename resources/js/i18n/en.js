@@ -1294,7 +1294,9 @@ export default {
         pending: 'Pending',
         completed: 'Completed',
         cancelled: 'Cancelled',
-    },
+            contacted: "Contacted",
+        in_progress: "In progress",
+},
     car_requests: {
         title: 'Request',
         back_to_list: 'Back to requests',
