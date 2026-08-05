@@ -177,7 +177,7 @@ const scrapeFromUrl = async () => {
                 </PageHeader>
 
                 <form @submit.prevent="submit" class="space-y-6">
-                    <FormSection title="Importar desde URL" description="Pega un enlace de mobile.de o autoscout24.de para autocompletar el formulario con IA">
+                    <FormSection :title="t('cars.import_from_url')" :description="t('cars.import_from_url_desc')">
                         <div class="space-y-3">
                             <div class="flex flex-col gap-2 sm:flex-row">
                                 <div class="relative flex-1">
@@ -187,7 +187,7 @@ const scrapeFromUrl = async () => {
                                     <input
                                         v-model="scrapeUrl"
                                         type="url"
-                                        placeholder="https://mobile.de/..."
+                                        :placeholder="t('cars.url_placeholder')"
                                         :disabled="isScraping"
                                         class="block w-full rounded-lg border-gray-300 pl-9 pr-20 text-sm shadow-sm focus:border-estoril-500 focus:ring-estoril-500 disabled:bg-gray-100"
                                         @keydown.enter.prevent="scrapeFromUrl"
@@ -217,7 +217,7 @@ const scrapeFromUrl = async () => {
                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
                                     </svg>
                                     <SparklesIcon v-else class="h-4 w-4" />
-                                    {{ isScraping ? 'Extrayendo...' : 'Autocompletar' }}
+                                    {{ isScraping ? t('cars.extracting') : t('cars.autocomplete') }}
                                 </button>
                             </div>
 
@@ -252,67 +252,67 @@ const scrapeFromUrl = async () => {
                                     </a>
                                 </div>
                                 <p class="mt-2 text-xs text-gray-500">
-                                    Las fotos están disponibles como URLs. Se descargarán al guardar el coche.
+                                    {{ t('cars.photos_available_hint') }}
                                 </p>
                             </div>
                         </div>
                     </FormSection>
 
-                    <FormSection title="Identificación del vehículo" description="Información básica del coche">
+                    <FormSection :title="t('cars.vehicle_identification')" :description="t('cars.vehicle_identification_desc')">
                         <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-                            <FormField label="Marca" required :error="form.errors.brand">
+                            <FormField :label="t('cars.make')" required :error="form.errors.brand">
                                 <input v-model="form.brand" type="text" required :class="inputClass" />
                             </FormField>
-                            <FormField label="Modelo" required :error="form.errors.model">
+                            <FormField :label="t('cars.model')" required :error="form.errors.model">
                                 <input v-model="form.model" type="text" required :class="inputClass" />
                             </FormField>
-                            <FormField label="Versión" :error="form.errors.version">
+                            <FormField :label="t('cars.field_version')" :error="form.errors.version">
                                 <input v-model="form.version" type="text" :class="inputClass" />
                             </FormField>
-                            <FormField label="Año (MM/AAAA)" required hint="p. ej. 07/2020">
+                            <FormField :label="t('cars.field_year_format')" required :hint="t('cars.hint_year_example')">
                                 <input v-model="form.year" type="text" pattern="\d{2}/\d{4}" required :class="inputClass" placeholder="07/2020" />
                             </FormField>
-                            <FormField label="VIN" :error="form.errors.vin">
+                            <FormField :label="t('cars.vin')" :error="form.errors.vin">
                                 <input v-model="form.vin" type="text" :class="[inputClass, 'font-mono']" />
                             </FormField>
-                            <FormField label="Color">
+                            <FormField :label="t('cars.color')">
                                 <input v-model="form.color" type="text" :class="inputClass" />
                             </FormField>
                         </div>
                     </FormSection>
 
-                    <FormSection title="Ficha técnica" description="Motor, transmisión, dimensiones">
+                    <FormSection :title="t('cars.section_tech_sheet')" :description="t('cars.tech_sheet_desc')">
                         <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
-                            <FormField label="Kilometraje (km)">
+                            <FormField :label="t('cars.field_mileage')">
                                 <input v-model="form.mileage" type="number" :class="inputClass" />
                             </FormField>
-                            <FormField label="Potencia (CV)">
+                            <FormField :label="t('cars.field_power')">
                                 <input v-model="form.cv" type="number" :class="inputClass" />
                             </FormField>
-                            <FormField label="CO₂ (g/km)">
+                            <FormField :label="t('cars.field_co2')">
                                 <input v-model="form.co2" type="number" :class="inputClass" />
                             </FormField>
-                            <FormField label="Consumo">
+                            <FormField :label="t('cars.field_consumption')">
                                 <input v-model="form.consumption" type="text" :class="inputClass" placeholder="L/100km" />
                             </FormField>
-                            <FormField label="Combustible" required>
+                            <FormField :label="t('cars.fuel')" required>
                                 <select v-model="form.fuel" required :class="inputClass">
                                     <option>Diesel</option>
                                     <option>Gasoline</option>
                                     <option>Hybrid</option>
-                                    <option>Electric</option>
+                                    <option>{{ t('cars.electric') }}</option>
                                 </select>
                             </FormField>
-                            <FormField label="Transmisión" required>
+                            <FormField :label="t('cars.transmission')" required>
                                 <select v-model="form.transmission" required :class="inputClass">
                                     <option>Manual</option>
                                     <option>Automatic</option>
                                 </select>
                             </FormField>
-                            <FormField label="Propietarios">
+                            <FormField :label="t('cars.field_owners')">
                                 <input v-model="form.owners" type="number" :class="inputClass" />
                             </FormField>
-                            <FormField label="Puertas">
+                            <FormField :label="t('cars.doors')">
                                 <select v-model="form.doors" :class="inputClass">
                                     <option>3</option><option>4</option><option>5</option>
                                 </select>
@@ -320,47 +320,47 @@ const scrapeFromUrl = async () => {
                         </div>
                     </FormSection>
 
-                    <FormSection title="Precio y costes" description="Compra, tasas e impuestos">
+                    <FormSection :title="t('cars.section_pricing')" :description="t('cars.pricing_desc')">
                         <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
-                            <FormField label="Precio de compra" required hint="EUR">
+                            <FormField :label="t('cars.field_purchase_price')" required hint="EUR">
                                 <input v-model="form.purchase_price" type="number" step="0.01" required :class="inputClass" />
                             </FormField>
-                            <FormField label="Precio nuevo" hint="EUR">
+                            <FormField :label="t('cars.field_new_price')" hint="EUR">
                                 <input v-model="form.new_price" type="number" step="0.01" :class="inputClass" />
                             </FormField>
-                            <FormField label="Transporte" hint="EUR">
+                            <FormField :label="t('cars.field_transport')" hint="EUR">
                                 <input v-model="form.transport" type="number" step="0.01" :class="inputClass" />
                             </FormField>
-                            <FormField label="Tasa ITV" hint="EUR">
+                            <FormField :label="t('cars.field_itv_fee')" hint="EUR">
                                 <input v-model="form.itv_fee" type="number" step="0.01" :class="inputClass" />
                             </FormField>
-                            <FormField label="Tasa COC" hint="EUR">
+                            <FormField :label="t('cars.field_coc_fee')" hint="EUR">
                                 <input v-model="form.coc_fee" type="number" step="0.01" :class="inputClass" />
                             </FormField>
-                            <FormField label="Tasas DGT" hint="EUR">
+                            <FormField :label="t('cars.field_dgt_fees')" hint="EUR">
                                 <input v-model="form.dgt_fees" type="number" step="0.01" :class="inputClass" />
                             </FormField>
-                            <FormField label="Honorarios" hint="EUR">
+                            <FormField :label="t('cars.field_professional_fees')" hint="EUR">
                                 <input v-model="form.professional_fees" type="number" step="0.01" :class="inputClass" />
                             </FormField>
-                            <FormField label="Fianza" hint="EUR">
+                            <FormField :label="t('cars.field_deposit')" hint="EUR">
                                 <input v-model="form.deposit" type="number" step="0.01" :class="inputClass" />
                             </FormField>
                         </div>
                     </FormSection>
 
-                    <FormSection title="Ubicación y estado">
+                    <FormSection :title="t('cars.section_status_location')">
                         <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-                            <FormField label="Ciudad">
+                            <FormField :label="t('cars.field_city')">
                                 <input v-model="form.city" type="text" :class="inputClass" />
                             </FormField>
-                            <FormField label="Escenario IVA">
+                            <FormField :label="t('cars.field_vat_scenario')">
                                 <select v-model="form.vat_scenario" :class="inputClass">
-                                    <option value="margin">Margen</option>
-                                    <option value="standard">Estándar</option>
+                                    <option value="margin">{{ t('cars.vat_margin') }}</option>
+                                    <option value="standard">{{ t('cars.vat_standard') }}</option>
                                 </select>
                             </FormField>
-                            <FormField label="Estado">
+                            <FormField :label="t('cars.status')">
                                 <select v-model="form.status" :class="inputClass">
                                     <option>Located</option><option>Valuing</option><option>Offered</option>
                                     <option>Reserved</option><option>Purchased</option><option>In_transit</option>
@@ -368,34 +368,34 @@ const scrapeFromUrl = async () => {
                                     <option>Delivered</option><option>Discarded</option>
                                 </select>
                             </FormField>
-                            <FormField label="Semáforo">
+                            <FormField :label="t('cars.traffic_light')">
                                 <select v-model="form.traffic_light" :class="inputClass">
-                                    <option value="green">Verde</option>
-                                    <option value="amber">Ámbar</option>
-                                    <option value="red">Rojo</option>
-                                    <option value="neutral">Neutro</option>
+                                    <option value="green">{{ t('cars.traffic_green') }}</option>
+                                    <option value="amber">{{ t('cars.traffic_amber') }}</option>
+                                    <option value="red">{{ t('cars.traffic_red') }}</option>
+                                    <option value="neutral">{{ t('cars.traffic_neutral') }}</option>
                                 </select>
                             </FormField>
-                            <FormField label="Cliente" v-if="clients?.length">
+                            <FormField :label="t('cars.client')" v-if="clients?.length">
                                 <select v-model="form.client_id" :class="inputClass">
-                                    <option :value="null">— Sin cliente —</option>
+                                    <option :value="null">— {{ t('cars.no_client') }} —</option>
                                     <option v-for="c in clients" :key="c.id" :value="c.id">{{ c.name }}</option>
                                 </select>
                             </FormField>
                         </div>
                     </FormSection>
 
-                    <FormSection title="Descripción" description="Notas privadas para el equipo">
-                        <FormField label="Notas">
+                    <FormSection :title="t('cars.description')" :description="t('cars.description_desc')">
+                        <FormField :label="t('cars.notes')">
                             <textarea v-model="form.notes" rows="3" :class="inputClass" />
                         </FormField>
                     </FormSection>
 
                     <div class="flex items-center justify-end gap-3 rounded-2xl bg-gray-50 px-6 py-4 ring-1 ring-gray-200">
-                        <Link :href="route('cars.index')" class="text-sm font-semibold text-gray-700 hover:text-gray-900">Cancelar</Link>
+                        <Link :href="route('cars.index')" class="text-sm font-semibold text-gray-700 hover:text-gray-900">{{ t('common.cancel') }}</Link>
                         <button type="submit" :disabled="form.processing" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500 disabled:opacity-50">
                             <CheckIcon class="h-4 w-4" />
-                            {{ form.processing ? 'Guardando...' : 'Crear coche' }}
+                            {{ form.processing ? t('cars.saving') : t('cars.create_car') }}
                         </button>
                     </div>
                 </form>

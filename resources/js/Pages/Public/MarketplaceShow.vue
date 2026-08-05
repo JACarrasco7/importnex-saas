@@ -83,7 +83,7 @@ const marketPosition = computed(() => {
 </script>
 
 <template>
-    <Head :title="`${car.brand} ${car.model} - Marketplace`" />
+    <Head :title="t('cars.marketplace_brand_model_title', { brand: car.brand, model: car.model })" />
 
     <div class="min-h-screen bg-gradient-to-br from-platinum-100 via-white to-estoril-50">
         <!-- Public header -->

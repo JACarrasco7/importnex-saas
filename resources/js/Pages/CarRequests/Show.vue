@@ -198,7 +198,7 @@ const createdAt = new Date(props.carRequest.created_at).toLocaleDateString(local
                                 <span class="font-medium text-gray-900">{{ carRequest.power_min || '0' }} - {{ carRequest.power_max || '∞' }}</span>
                             </div>
                             <div v-if="carRequest.engine_type" class="flex items-center justify-between">
-                                <span class="text-sm text-gray-500">Tipo de motor</span>
+                                <span class="text-sm text-gray-500">{{ t('cars.engine_type') }}</span>
                                 <span class="font-medium text-gray-900">{{ carRequest.engine_type }}</span>
                             </div>
                             <div v-if="carRequest.fuel" class="flex items-center justify-between">

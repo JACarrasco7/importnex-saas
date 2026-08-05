@@ -116,15 +116,15 @@ const confirmDelete = () => {
                 <!-- Quick Stats -->
                 <div class="grid grid-cols-3 gap-4 sm:grid-cols-3">
                     <div class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-gray-500">Total</div>
+                        <div class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.total_label') }}</div>
                         <div class="mt-1 text-2xl font-bold text-gray-900">{{ stats.total }}</div>
                     </div>
                     <div class="rounded-xl bg-estoril-50 p-4 shadow-sm ring-1 ring-estoril-200">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-estoril-700">Concesionarios</div>
+                        <div class="text-xs font-semibold uppercase tracking-wider text-estoril-700">{{ t('cars.dealers') }}</div>
                         <div class="mt-1 text-2xl font-bold text-estoril-600">{{ stats.dealers }}</div>
                     </div>
                     <div class="rounded-xl bg-emerald-50 p-4 shadow-sm ring-1 ring-emerald-200">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-emerald-700">Transporte</div>
+                        <div class="text-xs font-semibold uppercase tracking-wider text-emerald-700">{{ t('cars.transport') }}</div>
                         <div class="mt-1 text-2xl font-bold text-emerald-600">{{ stats.transport }}</div>
                     </div>
                 </div>
@@ -169,13 +169,13 @@ const confirmDelete = () => {
                         <div class="flex border-t border-gray-100 bg-gray-50 px-5 py-3">
                             <div class="flex-1" />
                             <div class="flex items-center gap-1">
-                                <Link :href="route('contacts.show', contact.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-estoril-50 hover:text-estoril-600" title="View">
+                                <Link :href="route('contacts.show', contact.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-estoril-50 hover:text-estoril-600" :title="t('common.view')">
                                     <EyeIcon class="h-4 w-4" />
                                 </Link>
-                                <Link :href="route('contacts.edit', contact.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600" title="Edit">
+                                <Link :href="route('contacts.edit', contact.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600" :title="t('cars.edit')">
                                     <PencilIcon class="h-4 w-4" />
                                 </Link>
-                                <button type="button" @click="askDelete(contact)" class="rounded-md p-1.5 text-gray-400 hover:bg-rose-50 hover:text-rose-600" title="Delete">
+                                <button type="button" @click="askDelete(contact)" class="rounded-md p-1.5 text-gray-400 hover:bg-rose-50 hover:text-rose-600" :title="t('cars.delete_label')">
                                     <TrashIcon class="h-4 w-4" />
                                 </button>
                             </div>
@@ -183,14 +183,14 @@ const confirmDelete = () => {
                     </div>
                 </div>
 
-                <EmptyState v-else icon="📇" title="No contacts found" description="Try adjusting your filters or add your first contact to your network." action-text="Add your first contact" :action-route="route('contacts.create')" />
+                <EmptyState v-else icon="📇" :title="t('cars.no_contacts_found')" :description="t('cars.no_contacts_found_desc')" :action-text="t('cars.add_first_contact')" :action-route="route('contacts.create')" />
             </div>
         </div>
 
         <ConfirmDialog
             :show="showDelete"
-            title="Delete contact"
-            :message="`Are you sure you want to delete ${contactToDelete?.name}? Esta acción no se puede deshacer.`"
+            :title="t('contacts.delete_contact')"
+            :message="t('contacts.delete_contact_message', { name: contactToDelete?.name })"
             confirm-text="Delete"
             variant="danger"
             @close="showDelete = false"

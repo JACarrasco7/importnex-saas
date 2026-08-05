@@ -58,47 +58,47 @@ const inputClass = 'block w-full rounded-lg border-gray-300 text-sm shadow-sm fo
 </script>
 
 <template>
-    <Head :title="`Editar: ${car.brand} ${car.model}`" />
+    <Head :title="t('cars.edit_title', { brand: car.brand, model: car.model })" />
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="text-xl font-semibold leading-tight text-gray-800">Editar: {{ car.brand }} {{ car.model }}</h2>
+            <h2 class="text-xl font-semibold leading-tight text-gray-800">{{ t('cars.edit_title', { brand: car.brand, model: car.model }) }}</h2>
         </template>
 
         <div class="py-8">
             <div class="mx-auto max-w-5xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <PageHeader :title="`Editar ${car.brand} ${car.model}`" :subtitle="`VIN ${car.vin || '—'}`">
+                <PageHeader :title="t('cars.edit_title', { brand: car.brand, model: car.model })" :subtitle="`VIN ${car.vin || '—'}`">
                     <template #actions>
                         <Link :href="route('cars.show', car.id)" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             <ArrowLeftIcon class="h-4 w-4" />
-                            Volver
+                            {{ t('common.back') }}
                         </Link>
                     </template>
                 </PageHeader>
 
                 <form @submit.prevent="submit" class="space-y-6">
-                    <FormSection title="Datos del vehículo">
+                    <FormSection :title="t('cars.section_vehicle_data')">
                         <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-                            <FormField label="Marca" required><input v-model="form.brand" type="text" required :class="inputClass" /></FormField>
-                            <FormField label="Modelo" required><input v-model="form.model" type="text" required :class="inputClass" /></FormField>
-                            <FormField label="Versión"><input v-model="form.version" type="text" :class="inputClass" /></FormField>
-                            <FormField label="Año (MM/AAAA)" required><input v-model="form.year" type="text" pattern="\d{2}/\d{4}" required :class="inputClass" /></FormField>
-                            <FormField label="VIN"><input v-model="form.vin" type="text" :class="[inputClass, 'font-mono']" /></FormField>
-                            <FormField label="Color"><input v-model="form.color" type="text" :class="inputClass" /></FormField>
+                            <FormField :label="t('cars.make')" required><input v-model="form.brand" type="text" required :class="inputClass" /></FormField>
+                            <FormField :label="t('cars.model')" required><input v-model="form.model" type="text" required :class="inputClass" /></FormField>
+                            <FormField :label="t('cars.field_version')"><input v-model="form.version" type="text" :class="inputClass" /></FormField>
+                            <FormField :label="t('cars.field_year_format')" required><input v-model="form.year" type="text" pattern="\d{2}/\d{4}" required :class="inputClass" /></FormField>
+                            <FormField :label="t('cars.vin')"><input v-model="form.vin" type="text" :class="[inputClass, 'font-mono']" /></FormField>
+                            <FormField :label="t('cars.color')"><input v-model="form.color" type="text" :class="inputClass" /></FormField>
                         </div>
                     </FormSection>
 
-                    <FormSection title="Ficha técnica">
+                    <FormSection :title="t('cars.section_tech_sheet')">
                         <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
-                            <FormField label="Kilometraje (km)"><input v-model="form.mileage" type="number" :class="inputClass" /></FormField>
-                            <FormField label="Potencia (CV)"><input v-model="form.cv" type="number" :class="inputClass" /></FormField>
-                            <FormField label="CO₂ (g/km)"><input v-model="form.co2" type="number" :class="inputClass" /></FormField>
-                            <FormField label="Combustible" required>
+                            <FormField :label="t('cars.field_mileage')"><input v-model="form.mileage" type="number" :class="inputClass" /></FormField>
+                            <FormField :label="t('cars.field_power')"><input v-model="form.cv" type="number" :class="inputClass" /></FormField>
+                            <FormField :label="t('cars.field_co2')"><input v-model="form.co2" type="number" :class="inputClass" /></FormField>
+                            <FormField :label="t('cars.fuel')" required>
                                 <select v-model="form.fuel" required :class="inputClass">
                                     <option>Diesel</option><option>Gasoline</option><option>Hybrid</option><option>Electric</option>
                                 </select>
                             </FormField>
-                            <FormField label="Transmisión" required>
+                            <FormField :label="t('cars.transmission')" required>
                                 <select v-model="form.transmission" required :class="inputClass">
                                     <option>Manual</option><option>Automatic</option>
                                 </select>
@@ -106,27 +106,27 @@ const inputClass = 'block w-full rounded-lg border-gray-300 text-sm shadow-sm fo
                         </div>
                     </FormSection>
 
-                    <FormSection title="Precio y costes">
+                    <FormSection :title="t('cars.section_pricing')">
                         <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
-                            <FormField label="Precio de compra" required><input v-model="form.purchase_price" type="number" step="0.01" required :class="inputClass" /></FormField>
-                            <FormField label="Precio nuevo"><input v-model="form.new_price" type="number" step="0.01" :class="inputClass" /></FormField>
-                            <FormField label="Transporte"><input v-model="form.transport" type="number" step="0.01" :class="inputClass" /></FormField>
-                            <FormField label="Tasa ITV"><input v-model="form.itv_fee" type="number" step="0.01" :class="inputClass" /></FormField>
-                            <FormField label="Tasa COC"><input v-model="form.coc_fee" type="number" step="0.01" :class="inputClass" /></FormField>
-                            <FormField label="Tasas DGT"><input v-model="form.dgt_fees" type="number" step="0.01" :class="inputClass" /></FormField>
-                            <FormField label="Honorarios"><input v-model="form.professional_fees" type="number" step="0.01" :class="inputClass" /></FormField>
-                            <FormField label="Fianza"><input v-model="form.deposit" type="number" step="0.01" :class="inputClass" /></FormField>
+                            <FormField :label="t('cars.field_purchase_price')" required><input v-model="form.purchase_price" type="number" step="0.01" required :class="inputClass" /></FormField>
+                            <FormField :label="t('cars.field_new_price')"><input v-model="form.new_price" type="number" step="0.01" :class="inputClass" /></FormField>
+                            <FormField :label="t('cars.field_transport')"><input v-model="form.transport" type="number" step="0.01" :class="inputClass" /></FormField>
+                            <FormField :label="t('cars.field_itv_fee')"><input v-model="form.itv_fee" type="number" step="0.01" :class="inputClass" /></FormField>
+                            <FormField :label="t('cars.field_coc_fee')"><input v-model="form.coc_fee" type="number" step="0.01" :class="inputClass" /></FormField>
+                            <FormField :label="t('cars.field_dgt_fees')"><input v-model="form.dgt_fees" type="number" step="0.01" :class="inputClass" /></FormField>
+                            <FormField :label="t('cars.field_professional_fees')"><input v-model="form.professional_fees" type="number" step="0.01" :class="inputClass" /></FormField>
+                            <FormField :label="t('cars.field_deposit')"><input v-model="form.deposit" type="number" step="0.01" :class="inputClass" /></FormField>
                         </div>
                         <div class="mt-4 flex items-center gap-2 rounded-lg bg-estoril-50 px-4 py-3 text-sm">
                             <BanknotesIcon class="h-5 w-5 text-estoril-600" />
-                            <span class="font-medium text-estoril-900">Coste total estimado:</span>
+                            <span class="font-medium text-estoril-900">{{ t('cars.total_estimated_cost') }}:</span>
                             <span class="font-bold text-estoril-700">{{ currency(totalCost) }}</span>
                         </div>
                     </FormSection>
 
-                    <FormSection title="Estado y ubicación">
+                    <FormSection :title="t('cars.section_status_location')">
                         <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-                            <FormField label="Estado" required>
+                            <FormField :label="t('cars.status')" required>
                                 <select v-model="form.status" required :class="inputClass">
                                     <option>Located</option><option>Valuing</option><option>Offered</option><option>Reserved</option>
                                     <option>Purchased</option><option>In_transit</option><option>Processing</option>
@@ -134,15 +134,15 @@ const inputClass = 'block w-full rounded-lg border-gray-300 text-sm shadow-sm fo
                                     <option>Delivered</option><option>Discarded</option>
                                 </select>
                             </FormField>
-                            <FormField label="Semáforo" required>
+                            <FormField :label="t('cars.traffic_light')" required>
                                 <select v-model="form.traffic_light" required :class="inputClass">
-                                    <option value="green">Verde</option><option value="amber">Ámbar</option><option value="red">Rojo</option><option value="neutral">Neutro</option>
+                                    <option value="green">{{ t('cars.traffic_green') }}</option><option value="amber">{{ t('cars.traffic_amber') }}</option><option value="red">{{ t('cars.traffic_red') }}</option><option value="neutral">{{ t('cars.traffic_neutral') }}</option>
                                 </select>
                             </FormField>
-                            <FormField label="Ciudad"><input v-model="form.city" type="text" :class="inputClass" /></FormField>
-                            <FormField label="Cliente" v-if="clients?.length">
+                            <FormField :label="t('cars.field_city')"><input v-model="form.city" type="text" :class="inputClass" /></FormField>
+                            <FormField :label="t('cars.client')" v-if="clients?.length">
                                 <select v-model="form.client_id" :class="inputClass">
-                                    <option :value="null">— Sin cliente —</option>
+                                    <option :value="null">— {{ t('cars.no_client') }} —</option>
                                     <option v-for="c in clients" :key="c.id" :value="c.id">{{ c.name }}</option>
                                 </select>
                             </FormField>
@@ -151,9 +151,9 @@ const inputClass = 'block w-full rounded-lg border-gray-300 text-sm shadow-sm fo
                         <!-- Publicar en marketplace -->
                         <div class="mt-4 flex items-start justify-between gap-4 rounded-xl bg-estoril-50 p-4 ring-1 ring-estoril-100">
                             <div>
-                                <p class="text-sm font-semibold text-gray-900">Publicar en el Marketplace</p>
+                                <p class="text-sm font-semibold text-gray-900">{{ t('cars.publish_marketplace') }}</p>
                                 <p class="mt-0.5 text-xs text-gray-600">
-                                    Si está activo, este coche aparecerá en la web pública (solo con estado Delivered y veredicto positivo).
+                                    {{ t('cars.publish_marketplace_desc') }}
                                 </p>
                             </div>
                             <button
@@ -169,15 +169,15 @@ const inputClass = 'block w-full rounded-lg border-gray-300 text-sm shadow-sm fo
                         </div>
                     </FormSection>
 
-                    <FormSection title="Notas">
-                        <FormField label="Notas internas"><textarea v-model="form.notes" rows="3" :class="inputClass" /></FormField>
+                    <FormSection :title="t('cars.notes')">
+                        <FormField :label="t('cars.field_internal_notes')"><textarea v-model="form.notes" rows="3" :class="inputClass" /></FormField>
                     </FormSection>
 
                     <div class="flex items-center justify-end gap-3 rounded-2xl bg-gray-50 px-6 py-4 ring-1 ring-gray-200">
-                        <Link :href="route('cars.show', car.id)" class="text-sm font-semibold text-gray-700 hover:text-gray-900">Cancelar</Link>
+                        <Link :href="route('cars.show', car.id)" class="text-sm font-semibold text-gray-700 hover:text-gray-900">{{ t('common.cancel') }}</Link>
                         <button type="submit" :disabled="form.processing" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500 disabled:opacity-50">
                             <CheckIcon class="h-4 w-4" />
-                            {{ form.processing ? 'Actualizando...' : 'Actualizar coche' }}
+                            {{ form.processing ? t('cars.updating') : t('cars.update_car') }}
                         </button>
                     </div>
                 </form>

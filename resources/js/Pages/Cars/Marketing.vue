@@ -208,24 +208,24 @@ function renderPreview() {
 </script>
 
 <template>
-    <Head :title="`Marketing ${car.brand} ${car.model}`" />
+    <Head :title="t('cars.ads_title', { brand: car.brand, model: car.model })" />
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Marketing: {{ car.brand }} {{ car.model }}</h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ t('cars.ads_title', { brand: car.brand, model: car.model }) }}</h2>
         </template>
 
         <div class="py-8">
             <div class="mx-auto max-w-6xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <PageHeader :title="`${car.brand} ${car.model} ${car.year}`" :subtitle="`${formatCurrency(car.purchase_price)} · ${car.mileage} km`">
+                <PageHeader :title="t('cars.car_full_name', { brand: car.brand, model: car.model, year: car.year })" :subtitle="`${formatCurrency(car.purchase_price)} · ${car.mileage} km`">
                     <template #actions>
                         <Link :href="route('cars.show', car.id)" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             <ArrowLeftIcon class="h-4 w-4" />
-                            Volver al coche
+                            {{ t('common.back') }}
                         </Link>
                         <a :href="route('cars.marketing.briefing', car.id)" target="_blank" class="inline-flex items-center gap-2 rounded-lg bg-estoril-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-600">
                             <DocumentIcon class="h-4 w-4" />
-                            Briefing PDF
+                            {{ t('cars.briefing_pdf') }}
                         </a>
                     </template>
                 </PageHeader>
@@ -283,19 +283,19 @@ function renderPreview() {
                     </div>
 
                     <!-- Title -->
-                    <FormSection title="Título">
+                    <FormSection :title="t('cars.ad_title')">
                         <div class="flex items-center gap-2">
                             <input
                                 v-model="form.title"
                                 type="text"
-                                placeholder="Título del anuncio..."
+                                :placeholder="t('cars.ad_title_placeholder')"
                                 class="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-estoril-500 focus:ring-estoril-500"
                             />
                             <button
                                 v-if="form.title"
                                 @click="copyToClipboard(form.title)"
                                 class="rounded-lg bg-gray-100 p-2 text-gray-600 hover:bg-gray-200"
-                                title="Copiar título"
+                                :title="t('cars.copy_title')"
                             >
                                 <DocumentDuplicateIcon class="h-4 w-4" />
                             </button>
@@ -303,10 +303,10 @@ function renderPreview() {
                     </FormSection>
 
                     <!-- Description -->
-                    <FormSection title="Descripción">
+                    <FormSection :title="t('cars.description')">
                         <textarea
                             v-model="form.description"
-                            placeholder="Descripción del anuncio..."
+                            :placeholder="t('cars.ad_description_placeholder')"
                             rows="8"
                             class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-estoril-500 focus:ring-estoril-500"
                         ></textarea>
@@ -317,13 +317,13 @@ function renderPreview() {
                                 class="inline-flex items-center gap-1 rounded-lg bg-gray-100 px-2 py-1 text-xs text-gray-600 hover:bg-gray-200"
                             >
                                 <DocumentDuplicateIcon class="h-3 w-3" />
-                                Copiar descripción
+                                {{ t('cars.copy_description') }}
                             </button>
                         </div>
                     </FormSection>
 
                     <!-- Hashtags -->
-                    <FormSection title="Hashtags">
+                    <FormSection :title="t('cars.hashtags')">
                         <div class="flex flex-wrap gap-2">
                             <span
                                 v-for="tag in form.hashtags"
@@ -341,20 +341,20 @@ function renderPreview() {
                                 v-model="newHashtag"
                                 @keyup.enter="addHashtag"
                                 type="text"
-                                placeholder="Añadir hashtag..."
+                                :placeholder="t('cars.hashtag_placeholder')"
                                 class="flex-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-estoril-500 focus:ring-estoril-500"
                             />
                             <button
                                 @click="addHashtag"
                                 class="rounded-lg bg-estoril-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-estoril-500"
                             >
-                                Añadir
+                                {{ t('cars.add') }}
                             </button>
                         </div>
                     </FormSection>
 
                     <!-- Photo Tips -->
-                    <FormSection title="Tips para fotos">
+                    <FormSection :title="t('cars.photo_tips')">
                         <ul v-if="form.photo_tips.length" class="space-y-2">
                             <li
                                 v-for="(tip, i) in form.photo_tips"
@@ -368,20 +368,20 @@ function renderPreview() {
                                 </button>
                             </li>
                         </ul>
-                        <p v-else class="text-sm text-gray-400">No hay tips generados.</p>
+                        <p v-else class="text-sm text-gray-400">{{ t('cars.ads_no_tips') }}</p>
                         <div class="mt-2 flex gap-2">
                             <input
                                 v-model="newTip"
                                 @keyup.enter="addTip"
                                 type="text"
-                                placeholder="Añadir tip de foto..."
+                                :placeholder="t('cars.photo_tip_placeholder')"
                                 class="flex-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-estoril-500 focus:ring-estoril-500"
                             />
                             <button
                                 @click="addTip"
                                 class="rounded-lg bg-estoril-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-estoril-500"
                             >
-                                Añadir
+                                {{ t('cars.add') }}
                             </button>
                         </div>
                     </FormSection>
@@ -424,7 +424,7 @@ function renderPreview() {
 
                 <!-- Preview Section -->
                 <div v-if="showPreview" class="space-y-4">
-                    <h3 class="text-lg font-semibold text-gray-900">Vista previa del anuncio</h3>
+                    <h3 class="text-lg font-semibold text-gray-900">{{ t('cars.ads_preview') }}</h3>
                     <component
                         :is="renderPreview()"
                         :car="car"
@@ -433,7 +433,7 @@ function renderPreview() {
                 </div>
 
                 <!-- History -->
-                <FormSection title="Historial de anuncios">
+                <FormSection :title="t('cars.ads_history')">
                     <div v-if="contents.length" class="space-y-3">
                         <div
                             v-for="content in contents"
@@ -445,17 +445,17 @@ function renderPreview() {
                                 <div>
                                     <div class="font-medium text-gray-900">{{ CHANNELS.find(c => c.key === content.channel)?.label || content.channel }}</div>
                                     <div class="text-xs text-gray-500">
-                                        {{ content.status === 'published' ? 'Publicado' : 'Borrador' }}
+                                        {{ content.status === 'published' ? t('cars.published') : t('cars.draft_label') }}
                                         · {{ new Date(content.updated_at).toLocaleDateString('es-ES') }}
                                     </div>
                                 </div>
                             </div>
                             <Badge :variant="content.status === 'published' ? 'success' : 'warning'">
-                                {{ content.status === 'published' ? 'Publicado' : 'Borrador' }}
+                                {{ content.status === 'published' ? t('cars.published') : t('cars.draft_label') }}
                             </Badge>
                         </div>
                     </div>
-                    <p v-else class="text-sm text-gray-400">No hay anuncios generados aún.</p>
+                    <p v-else class="text-sm text-gray-400">{{ t('cars.ads_no_announcements') }}</p>
                 </FormSection>
             </div>
         </div>

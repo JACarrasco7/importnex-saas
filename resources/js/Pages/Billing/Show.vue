@@ -30,15 +30,15 @@ const { t } = useTranslations();
                     <template #actions>
                         <Link :href="route('billing.index')" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             <ArrowLeftIcon class="h-4 w-4" />
-                            Back
+                            {{ t('common.back') }}
                         </Link>
                         <a v-if="invoice.hosted_url" :href="invoice.hosted_url" target="_blank" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             <ArrowTopRightOnSquareIcon class="h-4 w-4" />
-                            View on Stripe
+                            {{ t('billing.view_on_stripe') }}
                         </a>
                         <Link :href="route('billing.download', invoice.id)" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
                             <ArrowDownTrayIcon class="h-4 w-4" />
-                            Descargar PDF
+                            {{ t('billing.download_pdf') }}
                         </Link>
                     </template>
                 </PageHeader>

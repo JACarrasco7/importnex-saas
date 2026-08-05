@@ -10,6 +10,9 @@ import FormField from '@/Components/FormField.vue';
 import EmptyState from '@/Components/EmptyState.vue';
 import ConfirmDialog from '@/Components/ConfirmDialog.vue';
 import { useFormat } from '@/Composables/useFormat';
+import { useTranslations } from '@/Composables/useTranslations';
+
+const { t } = useTranslations();
 
 const props = defineProps({
     client: Object,
@@ -77,7 +80,7 @@ const inputClass = 'block w-full rounded-lg border-gray-300 text-sm shadow-sm fo
                     <template #actions>
                         <Link :href="route('clients.show', client.id)" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             <ArrowLeftIcon class="h-4 w-4" />
-                            Back to client
+                            {{ t('common.back_to_client') }}
                         </Link>
                     </template>
                 </PageHeader>
@@ -112,7 +115,7 @@ const inputClass = 'block w-full rounded-lg border-gray-300 text-sm shadow-sm fo
                     <div class="border-b border-gray-200 px-6 py-4">
                         <h3 class="text-base font-semibold text-gray-900">History</h3>
                     </div>
-                    <EmptyState v-if="!logs?.data?.length" icon="💬" title="No contact logs yet" description="Log your first interaction with this client." />
+                    <EmptyState v-if="!logs?.data?.length" icon="💬" :title="t('cars.no_contact_logs_yet')" :description="t('cars.no_contact_logs_desc')" />
                     <div v-else class="divide-y divide-gray-200">
                         <div v-for="log in logs.data" :key="log.id" class="flex items-start gap-4 px-6 py-4 hover:bg-gray-50">
                             <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-estoril-50">
@@ -136,9 +139,9 @@ const inputClass = 'block w-full rounded-lg border-gray-300 text-sm shadow-sm fo
 
         <ConfirmDialog
             :show="showDelete"
-            title="Delete log"
-            message="This contact log will be permanently removed."
-            confirm-text="Delete"
+            :title="t('clients.delete_log')"
+            :message="t('clients.delete_log_message')"
+            :confirm-text="t('common.delete')"
             variant="danger"
             @close="showDelete = false"
             @confirm="confirmDelete"

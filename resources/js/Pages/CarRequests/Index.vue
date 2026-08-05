@@ -118,23 +118,23 @@ const copyPublicUrl = () => {
 </script>
 
 <template>
-    <Head title="Solicitudes de coches" />
+    <Head :title="t('cars.car_requests_title')" />
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="text-xl font-semibold leading-tight text-gray-800">Solicitudes</h2>
+            <h2 class="text-xl font-semibold leading-tight text-gray-800">{{ t('requests.title') }}</h2>
         </template>
 
         <div class="py-8">
             <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <PageHeader title="Solicitudes de coches" :subtitle="`${stats.total} solicitudes en total`">
+                <PageHeader :title="t('cars.car_requests_title')" :subtitle="t('cars.requests_total', { count: stats.total })">
                     <template #actions>
                         <button
                             @click="copyPublicUrl"
                             class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500"
                         >
                             <LinkIcon class="h-4 w-4" />
-                            Copiar enlace público
+                            {{ t('cars.copy_public_link') }}
                         </button>
                     </template>
                 </PageHeader>
@@ -142,23 +142,23 @@ const copyPublicUrl = () => {
                 <!-- Quick Stats -->
                 <div class="grid grid-cols-2 gap-4 sm:grid-cols-5">
                     <div class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-gray-500">Total</div>
+                        <div class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.total') }}</div>
                         <div class="mt-1 text-2xl font-bold text-gray-900">{{ stats.total }}</div>
                     </div>
                     <div class="rounded-xl bg-amber-50 p-4 shadow-sm ring-1 ring-amber-200">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-amber-700">Pendientes</div>
+                        <div class="text-xs font-semibold uppercase tracking-wider text-amber-700">{{ t('requests.pending') }}</div>
                         <div class="mt-1 text-2xl font-bold text-amber-600">{{ stats.pending }}</div>
                     </div>
                     <div class="rounded-xl bg-blue-50 p-4 shadow-sm ring-1 ring-blue-200">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-blue-700">Contactados</div>
+                        <div class="text-xs font-semibold uppercase tracking-wider text-blue-700">{{ t('cars.contacted') }}</div>
                         <div class="mt-1 text-2xl font-bold text-blue-600">{{ stats.contacted }}</div>
                     </div>
                     <div class="rounded-xl bg-estoril-50 p-4 shadow-sm ring-1 ring-estoril-200">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-estoril-700">En proceso</div>
+                        <div class="text-xs font-semibold uppercase tracking-wider text-estoril-700">{{ t('cars.in_progress') }}</div>
                         <div class="mt-1 text-2xl font-bold text-estoril-600">{{ stats.in_progress }}</div>
                     </div>
                     <div class="rounded-xl bg-emerald-50 p-4 shadow-sm ring-1 ring-emerald-200">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-emerald-700">Completadas</div>
+                        <div class="text-xs font-semibold uppercase tracking-wider text-emerald-700">{{ t('requests.completed') }}</div>
                         <div class="mt-1 text-2xl font-bold text-emerald-600">{{ stats.completed }}</div>
                     </div>
                 </div>
@@ -166,10 +166,10 @@ const copyPublicUrl = () => {
                 <!-- Filters -->
                 <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="p-4">
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Buscar</label>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">{{ t('cars.search') }}</label>
                         <div class="relative">
                             <MagnifyingGlassIcon class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                            <input v-model="search" type="text" placeholder="Nombre, email, marca..." class="block w-full rounded-lg border-gray-300 pl-9 text-sm focus:border-estoril-500 focus:ring-estoril-500" />
+                            <input v-model="search" type="text" :placeholder="t('cars.search_placeholder')" class="block w-full rounded-lg border-gray-300 pl-9 text-sm focus:border-estoril-500 focus:ring-estoril-500" />
                         </div>
                     </div>
                 </div>
@@ -211,7 +211,7 @@ const copyPublicUrl = () => {
                                         <p class="mt-1 text-sm text-gray-500">
                                             <span v-if="request.brand">{{ request.brand }}</span>
                                             <span v-if="request.model"> {{ request.model }}</span>
-                                            <span v-if="!request.brand && !request.model">Sin preferencia de marca</span>
+                                            <span v-if="!request.brand && !request.model">{{ t('cars.no_preference_brand') }}</span>
                                         </p>
                                     </Link>
                                 </div>
@@ -231,11 +231,11 @@ const copyPublicUrl = () => {
 
                             <div class="mt-4 grid grid-cols-2 gap-3 border-t border-gray-100 pt-3">
                                 <div v-if="request.budget_min || request.budget_max">
-                                    <span class="text-xs text-gray-500 uppercase tracking-wider">Presupuesto</span>
+                                    <span class="text-xs text-gray-500 uppercase tracking-wider">{{ t('cars.field_budget') }}</span>
                                     <p class="text-sm font-semibold text-gray-900">{{ request.budget_range }}</p>
                                 </div>
                                 <div v-if="request.year_min || request.year_max">
-                                    <span class="text-xs text-gray-500 uppercase tracking-wider">Año</span>
+                                    <span class="text-xs text-gray-500 uppercase tracking-wider">{{ t('cars.year') }}</span>
                                     <p class="text-sm font-semibold text-gray-900">{{ request.year_range }}</p>
                                 </div>
                             </div>
@@ -247,21 +247,21 @@ const copyPublicUrl = () => {
                                     @click="updateStatus(request, 'contacted')"
                                     class="flex-1 rounded-lg bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-100"
                                 >
-                                    Marcar contactado
+                                    {{ t('cars.mark_contacted') }}
                                 </button>
                                 <button
                                     v-if="request.status === 'contacted'"
                                     @click="updateStatus(request, 'in_progress')"
                                     class="flex-1 rounded-lg bg-estoril-50 px-3 py-2 text-xs font-semibold text-estoril-700 hover:bg-estoril-100"
                                 >
-                                    Marcar en proceso
+                                    {{ t('cars.mark_in_progress') }}
                                 </button>
                                 <button
                                     v-if="request.status === 'in_progress'"
                                     @click="updateStatus(request, 'completed')"
                                     class="flex-1 rounded-lg bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-100"
                                 >
-                                    Marcar completada
+                                    {{ t('cars.mark_completed') }}
                                 </button>
                             </div>
                         </div>
@@ -269,10 +269,10 @@ const copyPublicUrl = () => {
                         <div class="flex border-t border-gray-100 bg-gray-50 px-5 py-3">
                             <div class="flex-1" />
                             <div class="flex items-center gap-1">
-                                <Link :href="route('car-requests.show', request.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-estoril-50 hover:text-estoril-600" title="Ver">
+                                <Link :href="route('car-requests.show', request.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-estoril-50 hover:text-estoril-600" :title="t('common.view')">
                                     <EyeIcon class="h-4 w-4" />
                                 </Link>
-                                <button type="button" @click="askDelete(request)" class="rounded-md p-1.5 text-gray-400 hover:bg-rose-50 hover:text-rose-600" title="Eliminar">
+                                <button type="button" @click="askDelete(request)" class="rounded-md p-1.5 text-gray-400 hover:bg-rose-50 hover:text-rose-600" :title="t('cars.remove')">
                                     <TrashIcon class="h-4 w-4" />
                                 </button>
                             </div>
@@ -280,15 +280,15 @@ const copyPublicUrl = () => {
                     </div>
                 </div>
 
-                <EmptyState v-else icon="📋" title="No hay solicitudes" description="Cuando alguien envíe una solicitud desde tu formulario público, aparecerá aquí." />
+                <EmptyState v-else icon="📋" :title="t('cars.no_requests')" :description="t('cars.no_requests_desc')" />
             </div>
         </div>
 
         <ConfirmDialog
             :show="showDelete"
-            title="Eliminar solicitud"
-            :message="`¿Estás seguro de que quieres eliminar la solicitud de ${requestToDelete?.name}?`"
-            confirm-text="Eliminar"
+            :title="t('cars.remove_request')"
+            :message="t('cars.confirm_remove_request', { name: requestToDelete?.name })"
+            :confirm-text="t('cars.remove')"
             variant="danger"
             @close="showDelete = false"
             @confirm="confirmDelete"

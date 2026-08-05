@@ -1,3 +1,43 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@plugin "@tailwindcss/forms";
+@plugin "@tailwindcss/typography";
+
+@theme {
+    --color-estoril-50: #eef1fa;
+    --color-estoril-100: #dce3f5;
+    --color-estoril-200: #b9c6ea;
+    --color-estoril-300: #8fa3d9;
+    --color-estoril-400: #5c73bd;
+    --color-estoril-500: #3a4f9e;
+    --color-estoril-600: #2a3d87;
+    --color-estoril-700: #1A306D;
+    --color-estoril-800: #152756;
+    --color-estoril-900: #101d42;
+
+    --color-asphalt-50: #f6f6f7;
+    --color-asphalt-100: #e7e7e9;
+    --color-asphalt-200: #cfcfd2;
+    --color-asphalt-300: #a7a8ab;
+    --color-asphalt-400: #7e7f83;
+    --color-asphalt-500: #5d5e62;
+    --color-asphalt-600: #4a4b4f;
+    --color-asphalt-700: #38393D;
+    --color-asphalt-800: #2a2b2e;
+    --color-asphalt-900: #1e1f21;
+
+    --color-platinum-50: #fafafa;
+    --color-platinum-100: #f3f3f4;
+    --color-platinum-200: #e3e4e6;
+    --color-platinum-300: #d1d2d5;
+    --color-platinum-400: #BEC0C3;
+    --color-platinum-500: #a5a7ab;
+    --color-platinum-600: #8a8c91;
+    --color-platinum-700: #6e7075;
+    --color-platinum-800: #525459;
+    --color-platinum-900: #383a3e;
+}
+
+/* Pre-Tailwind v4 dark variants (compatibility with existing classes) */
+@layer base {
+    /* Tailwind v4 enables color-mix by default */
+}

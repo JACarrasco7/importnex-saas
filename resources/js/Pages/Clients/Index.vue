@@ -107,10 +107,10 @@ const confirmDelete = () => {
                 <!-- Filters -->
                 <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="p-4">
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Buscar</label>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">{{ t('cars.search') }}</label>
                         <div class="relative">
                             <MagnifyingGlassIcon class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                            <input v-model="search" type="text" placeholder="Nombre, datos de contacto..." class="block w-full rounded-lg border-gray-300 pl-9 text-sm focus:border-estoril-500 focus:ring-estoril-500" />
+                            <input v-model="search" type="text" :placeholder="t('cars.filter_clients_placeholder')" class="block w-full rounded-lg border-gray-300 pl-9 text-sm focus:border-estoril-500 focus:ring-estoril-500" />
                         </div>
                     </div>
                 </div>
@@ -118,15 +118,15 @@ const confirmDelete = () => {
                 <!-- Quick Stats -->
                 <div class="grid grid-cols-3 gap-4 sm:grid-cols-3">
                     <div class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-gray-500">Total</div>
+                        <div class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.total_label') }}</div>
                         <div class="mt-1 text-2xl font-bold text-gray-900">{{ stats.total }}</div>
                     </div>
                     <div class="rounded-xl bg-estoril-50 p-4 shadow-sm ring-1 ring-estoril-200">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-estoril-700">Activos</div>
+                        <div class="text-xs font-semibold uppercase tracking-wider text-estoril-700">{{ t('cars.active_label') }}</div>
                         <div class="mt-1 text-2xl font-bold text-estoril-600">{{ stats.active }}</div>
                     </div>
                     <div class="rounded-xl bg-amber-50 p-4 shadow-sm ring-1 ring-amber-200">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-amber-700">Leads</div>
+                        <div class="text-xs font-semibold uppercase tracking-wider text-amber-700">{{ t('cars.leads') }}</div>
                         <div class="mt-1 text-2xl font-bold text-amber-600">{{ stats.leads }}</div>
                     </div>
                 </div>
@@ -189,13 +189,13 @@ const confirmDelete = () => {
                         <div class="flex border-t border-gray-100 bg-gray-50 px-5 py-3">
                             <div class="flex-1" />
                             <div class="flex items-center gap-1">
-                                <Link :href="route('clients.show', client.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-estoril-50 hover:text-estoril-600" title="Ver">
+                                <Link :href="route('clients.show', client.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-estoril-50 hover:text-estoril-600" :title="t('common.view')">
                                     <EyeIcon class="h-4 w-4" />
                                 </Link>
-                                <Link :href="route('clients.edit', client.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600" title="Editar">
+                                <Link :href="route('clients.edit', client.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600" :title="t('cars.edit')">
                                     <PencilIcon class="h-4 w-4" />
                                 </Link>
-                                <button type="button" @click="askDelete(client)" class="rounded-md p-1.5 text-gray-400 hover:bg-rose-50 hover:text-rose-600" title="Eliminar">
+                                <button type="button" @click="askDelete(client)" class="rounded-md p-1.5 text-gray-400 hover:bg-rose-50 hover:text-rose-600" :title="t('cars.remove')">
                                     <TrashIcon class="h-4 w-4" />
                                 </button>
                             </div>
@@ -203,15 +203,15 @@ const confirmDelete = () => {
                     </div>
                 </div>
 
-                <EmptyState v-else icon="👥" title="No se encontraron clientes" description="Ajusta tus filtros o añade tu primer cliente al CRM." action-text="Añadir tu primer cliente" :action-route="route('clients.create')" />
+                <EmptyState v-else icon="👥" :title="t('cars.no_clients_found')" :description="t('cars.no_clients_found_desc')" :action-text="t('cars.add_first_client')" :action-route="route('clients.create')" />
             </div>
         </div>
 
         <ConfirmDialog
             :show="showDelete"
-            title="Eliminar cliente"
-            :message="`¿Seguro que quieres eliminar ${clientToDelete?.name}? Esta acción no se puede deshacer.`"
-            confirm-text="Eliminar"
+            :title="t('cars.delete_client')"
+            :message="t('cars.confirm_delete_client', { name: clientToDelete?.name })"
+            :confirm-text="t('cars.remove')"
             variant="danger"
             @close="showDelete = false"
             @confirm="confirmDelete"

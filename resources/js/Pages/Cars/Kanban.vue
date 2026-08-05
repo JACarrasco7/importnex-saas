@@ -50,7 +50,7 @@ const onDrop = (column) => {
                     <template #actions>
                         <Link :href="route('cars.index')" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             <Squares2X2Icon class="h-4 w-4" />
-                            List view
+                            {{ t('cars.list_view') }}
                         </Link>
                         <span class="rounded-lg bg-white px-4 py-2 text-sm text-gray-700 shadow-sm ring-1 ring-gray-200">
                             <strong>{{ totalCars }}</strong> cars · <strong>{{ currency(totalValue) }}</strong>

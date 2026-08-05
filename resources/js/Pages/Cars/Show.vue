@@ -191,7 +191,7 @@ const onDocKeyChange = () => {
 </script>
 
 <template>
-    <Head :title="`${car.brand} ${car.model}`" />
+    <Head :title="t('cars.marketplace_brand_model', { brand: car.brand, model: car.model })" />
 
     <AuthenticatedLayout>
         <template #header>
@@ -200,31 +200,31 @@ const onDocKeyChange = () => {
 
         <div class="py-8">
             <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <PageHeader :title="`${car.brand} ${car.model}`" :subtitle="`VIN ${car.vin || '—'}`">
+                <PageHeader :title="t('cars.marketplace_brand_model', { brand: car.brand, model: car.model })" :subtitle="`VIN ${car.vin || '—'}`">
                     <template #actions>
                         <Link :href="route('cars.index')" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             <ArrowLeftIcon class="h-4 w-4" />
-                            Volver
+                            {{ t('common.back') }}
                         </Link>
                         <Link v-if="['Located', 'Valuing'].includes(car.status)" :href="route('cars.verify.show', car.id)" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
                             <SparklesIcon class="h-4 w-4" />
-                            Verificar con IA
+                            {{ t('cars.verify_with_ai') }}
                         </Link>
                         <a :href="route('cars.ficha', car.id)" target="_blank" class="inline-flex items-center gap-2 rounded-lg bg-estoril-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-600">
                             <DocumentIcon class="h-4 w-4" />
-                            Ficha cliente
+                            {{ t('cars.client_sheet') }}
                         </a>
                         <a :href="route('cars.informe-interno', car.id)" target="_blank" class="inline-flex items-center gap-2 rounded-lg bg-asphalt-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-asphalt-800">
                             <DocumentIcon class="h-4 w-4" />
-                            Informe interno
+                            {{ t('cars.internal_report') }}
                         </a>
                         <Link :href="route('cars.marketing', car.id)" class="inline-flex items-center gap-2 rounded-lg bg-estoril-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-600">
                             <MegaphoneIcon class="h-4 w-4" />
-                            Marketing
+                            {{ t('cars.marketing') }}
                         </Link>
                         <Link :href="route('cars.edit', car.id)" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
                             <PencilIcon class="h-4 w-4" />
-                            Editar
+                            {{ t('cars.edit_action') }}
                         </Link>
                     </template>
                 </PageHeader>
@@ -240,12 +240,11 @@ const onDocKeyChange = () => {
                 <div class="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
                     <ExclamationTriangleIcon class="h-5 w-5 flex-shrink-0 text-amber-600" />
                     <div class="text-sm text-amber-900">
-                        <p class="font-semibold">El IEDMT es una estimación.</p>
+                        <p class="font-semibold">{{ t('cars.iedmt_estimate') }}</p>
                         <p class="mt-1 text-amber-800">
-                            Hacienda calcula el impuesto de matriculación sobre sus tablas oficiales de valor de mercado, no sobre el precio que pagaste.
-                            Estimación actual:
+                            {{ t('cars.iedmt_explanation') }}
                             <span class="font-mono font-semibold">{{ currency(derived?.iedmt) }}</span>
-                            &middot; Coste total:
+                            &middot; {{ t('cars.total_cost_label') }}:
                             <span class="font-mono font-semibold">{{ currency(derived?.total_cost) }}</span>
                         </p>
                     </div>
@@ -254,17 +253,17 @@ const onDocKeyChange = () => {
                 <!-- Location -->
                 <div v-if="car.lat && car.lng" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4">
-                        <h3 class="text-base font-semibold text-gray-900">Ubicación</h3>
+                        <h3 class="text-base font-semibold text-gray-900">{{ t('cars.location') }}</h3>
                     </div>
                     <div class="p-6">
-                        <MapaLeaflet :lat="car.lat" :lng="car.lng" :marker-text="`${car.brand} ${car.model} - ${car.city || ''}`" height="300px" />
+                        <MapaLeaflet :lat="car.lat" :lng="car.lng" :marker-text="t('cars.car_full_name', { brand: car.brand, model: car.model, year: car.city || '' })" height="300px" />
                     </div>
                 </div>
 
                 <!-- Technical specs -->
                 <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4">
-                        <h3 class="text-base font-semibold text-gray-900">Ficha técnica</h3>
+                        <h3 class="text-base font-semibold text-gray-900">{{ t('cars.section_tech_sheet') }}</h3>
                     </div>
                     <div class="grid grid-cols-2 gap-x-6 gap-y-4 p-6 md:grid-cols-4">
                         <div v-for="spec in specItems" :key="spec.key">
@@ -277,8 +276,8 @@ const onDocKeyChange = () => {
                 <!-- Costs -->
                 <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-                        <h3 class="text-base font-semibold text-gray-900">Costes</h3>
-                        <span class="text-sm text-gray-500">Total todo incluido: <span class="font-mono font-semibold text-gray-900">{{ currency(derived?.total_cost) }}</span></span>
+                        <h3 class="text-base font-semibold text-gray-900">{{ t('cars.costs') }}</h3>
+                        <span class="text-sm text-gray-500">{{ t('cars.total_all_included') }} <span class="font-mono font-semibold text-gray-900">{{ currency(derived?.total_cost) }}</span></span>
                     </div>
                     <div class="grid grid-cols-2 gap-x-6 gap-y-4 p-6 md:grid-cols-4">
                         <div v-for="cost in costItems" :key="cost.key">
@@ -351,7 +350,7 @@ const onDocKeyChange = () => {
 
                     <!-- 9 research aspects -->
                     <div class="border-t border-gray-200 px-6 py-4">
-                        <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">9 aspectos de investigación</h4>
+                        <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.research_aspects') }}</h4>
                         <ul class="grid grid-cols-1 gap-3 md:grid-cols-2">
                             <li v-for="aspect in aspects" :key="aspect.key" class="rounded-lg border p-3"
                                 :class="aspect.missing ? 'border-dashed border-gray-300 bg-gray-50' : 'border-gray-200 bg-white'">
@@ -364,7 +363,7 @@ const onDocKeyChange = () => {
                                             'text-gray-500': aspect.rating === 'neutral' || !aspect.rating,
                                         }" />
                                 </div>
-                                <p v-if="aspect.missing" class="mt-2 text-xs italic text-gray-500">Aún no investigado.</p>
+                                <p v-if="aspect.missing" class="mt-2 text-xs italic text-gray-500">{{ t('cars.not_researched_yet') }}</p>
                                 <template v-else>
                                     <p v-if="aspect.finding" class="mt-2 text-sm text-gray-700">{{ aspect.finding }}</p>
                                     <a v-if="aspect.source" :href="aspect.source" target="_blank" rel="noopener" class="mt-2 inline-flex items-center gap-1 text-xs text-estoril-600 hover:text-estoril-500">
@@ -381,7 +380,7 @@ const onDocKeyChange = () => {
                 <!-- ╔ MARKET ═══════════════════════════════════════════════════════════╗ -->
                 <div v-if="car.market_avg || derived?.comparables_stats?.count" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-                        <h3 class="text-base font-semibold text-gray-900">Comparables de mercado</h3>
+                        <h3 class="text-base font-semibold text-gray-900">{{ t('cars.market_comparables') }}</h3>
                         <Badge v-if="marketPosition" :variant="marketPosition.variant">
                             {{ marketPosition.label }} ({{ (marketPosition.ratio * 100).toFixed(1) }}%)
                         </Badge>
@@ -585,7 +584,7 @@ const onDocKeyChange = () => {
                                 <span class="absolute bottom-2 left-2 rounded bg-black/70 px-2 py-0.5 text-xs text-white">{{ photo.photo_type }}</span>
                             </div>
                         </div>
-                        <p v-else class="py-6 text-center text-sm text-gray-500">No photos yet. Upload the first photo of the car.</p>
+                        <p v-else class="py-6 text-center text-sm text-gray-500">{{ t('cars.no_photos_yet') }}</p>
                     </div>
                 </div>
 
@@ -653,7 +652,7 @@ const onDocKeyChange = () => {
                             </tbody>
                         </table>
                     </div>
-                    <p v-else class="p-6 text-center text-sm text-gray-500">No expenses logged yet.</p>
+                    <p v-else class="p-6 text-center text-sm text-gray-500">{{ t('cars.no_expenses_logged') }}</p>
                 </div>
             </div>
         </div>

@@ -53,11 +53,11 @@ const cardBrandIcon = (brand) => {
                 <PageHeader :title="t('nav.billing')" :subtitle="t('billing.subtitle')">
                     <template #actions>
                         <Link v-if="subscription?.stripe_status && subscription?.stripe_status !== 'canceled'" :href="route('subscriptions.index')" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
-                            Manage plan
+                            {{ t('billing.manage_plan') }}
                         </Link>
                         <a v-if="stripePortalUrl" :href="stripePortalUrl" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
                             <ArrowTopRightOnSquareIcon class="h-4 w-4" />
-                            Stripe Portal
+                            {{ t('billing.stripe_portal') }}
                         </a>
                     </template>
                 </PageHeader>

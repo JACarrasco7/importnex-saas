@@ -59,7 +59,7 @@ const planKeys = Object.keys(props.plans);
                 <div v-else-if="on_trial" class="overflow-hidden rounded-2xl border border-blue-200 bg-blue-50 p-4">
                     <div class="flex items-center gap-3">
                         <SparklesIcon class="h-5 w-5 text-blue-600" />
-                        <p class="text-sm text-blue-700"><strong>Trial active:</strong> ends {{ date(trial_ends_at) }}</p>
+                        <p class="text-sm text-blue-700"><strong>{{ t('subscription.trial_active') }}:</strong> {{ t('subscription.ends_on') }} {{ date(trial_ends_at) }}</p>
                     </div>
                 </div>
 
@@ -74,8 +74,8 @@ const planKeys = Object.keys(props.plans);
                     <div class="flex items-center gap-3">
                         <CheckIcon class="h-5 w-5 text-emerald-600" />
                         <p class="text-sm text-emerald-700">
-                            <strong>Subscription active:</strong> {{ subscription.status }}
-                            <span v-if="subscription.ends_at"> — ends {{ date(subscription.ends_at) }}</span>
+                            <strong>{{ t('subscription.active_banner') }}:</strong> {{ subscription.status }}
+                            <span v-if="subscription.ends_at"> — {{ t('subscription.ends_on') }} {{ date(subscription.ends_at) }}</span>
                         </p>
                     </div>
                 </div>
@@ -83,7 +83,7 @@ const planKeys = Object.keys(props.plans);
                 <div class="grid gap-6 md:grid-cols-3">
                     <div v-for="key in planKeys" :key="key" :class="['overflow-hidden rounded-2xl bg-white shadow-sm ring-1', currentPlan === key ? 'ring-2 ring-estoril-500' : 'ring-gray-200']">
                         <div v-if="currentPlan === key" class="bg-gradient-to-r from-estoril-600 to-estoril-800 px-6 py-3 text-center text-sm font-semibold text-white">
-                            Current Plan
+                            {{ t('subscription.current_plan_badge') }}
                         </div>
                         <div class="p-6">
                             <div class="flex items-center gap-2">
@@ -109,18 +109,18 @@ const planKeys = Object.keys(props.plans);
                                     {{ t('subscription.vitalicio_included') }}
                                 </div>
                                 <Link v-else-if="currentPlan === key" :href="route('subscriptions.show', key)" class="block w-full rounded-lg border border-gray-300 bg-gray-50 py-3 text-center text-sm font-semibold text-gray-700 hover:bg-gray-100">
-                                    View details
+                                    {{ t('subscription.view_details') }}
                                 </Link>
                                 <form v-else-if="on_trial || !subscription" method="POST" :action="route('subscriptions.create', key)">
                                     <input type="hidden" name="_token" :value="$page.props.csrfToken" />
                                     <button type="submit" class="block w-full rounded-lg bg-estoril-600 py-3 text-center text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
-                                        {{ on_trial ? 'Activate' : 'Subscribe' }}
+                                        {{ on_trial ? t('subscription.activate') : t('subscription.subscribe') }}
                                     </button>
                                 </form>
                                 <form v-else method="POST" :action="route('subscriptions.swap', key)">
                                     <input type="hidden" name="_token" :value="$page.props.csrfToken" />
                                     <button type="submit" class="block w-full rounded-lg bg-estoril-600 py-3 text-center text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
-                                        Switch to {{ plans[key].name }}
+                                        {{ t('subscription.switch_to', { name: plans[key].name }) }}
                                     </button>
                                 </form>
                             </div>

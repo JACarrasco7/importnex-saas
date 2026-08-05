@@ -58,7 +58,7 @@ function getStatusBadge(content) {
                     <template #actions>
                         <Link :href="route('dashboard')" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             <ArrowLeftIcon class="h-4 w-4" />
-                            Dashboard
+                            {{ t('nav.dashboard') }}
                         </Link>
                     </template>
                 </PageHeader>
@@ -88,11 +88,11 @@ function getStatusBadge(content) {
                     <table class="w-full text-sm">
                         <thead>
                             <tr class="border-b border-gray-200 bg-gray-50 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                <th class="px-4 py-3">Coche</th>
-                                <th class="px-4 py-3">Precio</th>
-                                <th class="px-4 py-3">Canales</th>
-                                <th class="px-4 py-3">Estado</th>
-                                <th class="px-4 py-3 text-right">Acciones</th>
+                                <th class="px-4 py-3">{{ t('cars.car_label') }}</th>
+                                <th class="px-4 py-3">{{ t('cars.price') }}</th>
+                                <th class="px-4 py-3">{{ t('cars.channels') }}</th>
+                                <th class="px-4 py-3">{{ t('cars.status') }}</th>
+                                <th class="px-4 py-3 text-right">{{ t('cars.actions') }}</th>
                             </tr>
                         </thead>
                         <tbody>

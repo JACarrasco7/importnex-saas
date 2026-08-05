@@ -323,7 +323,7 @@ const howItWorks = computed(() => [
                             <img
                                 v-if="car.photos && car.photos.length > 0"
                                 :src="car.photos[0].startsWith('http') ? car.photos[0] : `/storage/${car.photos[0]}`"
-                                :alt="`${car.brand} ${car.model}`"
+                                :alt="t('cars.marketplace_brand_model', { brand: car.brand, model: car.model })"
                                 class="h-full w-full object-cover transition duration-700 group-hover:scale-110"
                                 loading="lazy"
                             />

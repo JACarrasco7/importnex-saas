@@ -25,11 +25,11 @@ const props = defineProps({
                     <template #actions>
                         <Link :href="route('contacts.index')" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             <ArrowLeftIcon class="h-4 w-4" />
-                            Back
+                            {{ t('common.back') }}
                         </Link>
                         <Link :href="route('contacts.edit', contact.id)" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
                             <PencilIcon class="h-4 w-4" />
-                            Edit
+                            {{ t('common.edit') }}
                         </Link>
                     </template>
                 </PageHeader>
@@ -43,7 +43,7 @@ const props = defineProps({
                             </dd>
                         </div>
                         <div v-if="contact.email">
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Email</dt>
+                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.email_field') }}</dt>
                             <dd class="mt-1 inline-flex items-center gap-1.5 text-sm text-gray-900">
                                 <EnvelopeIcon class="h-4 w-4 text-gray-400" /> {{ contact.email }}
                             </dd>

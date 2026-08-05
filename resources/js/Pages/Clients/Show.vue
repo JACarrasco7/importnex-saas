@@ -27,11 +27,11 @@ const { currency, date, statusVariant } = useFormat();
                     <template #actions>
                         <Link :href="route('clients.index')" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             <ArrowLeftIcon class="h-4 w-4" />
-                            Back
+                            {{ t('common.back') }}
                         </Link>
                         <Link :href="route('clients.edit', client.id)" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
                             <PencilIcon class="h-4 w-4" />
-                            Edit
+                            {{ t('common.edit') }}
                         </Link>
                     </template>
                 </PageHeader>
@@ -78,7 +78,7 @@ const { currency, date, statusVariant } = useFormat();
                                 <Badge :variant="statusVariant(car.status)">{{ car.status }}</Badge>
                             </Link>
                         </div>
-                        <p v-else class="p-6 text-center text-sm text-gray-500">No cars assigned</p>
+                        <p v-else class="p-6 text-center text-sm text-gray-500">{{ t('cars.no_cars_assigned') }}</p>
                     </div>
 
                     <!-- Contact log -->
@@ -89,7 +89,7 @@ const { currency, date, statusVariant } = useFormat();
                                 <h3 class="text-base font-semibold text-gray-900">Contact log</h3>
                             </div>
                             <Link :href="route('clients.contact-logs.index', client.id)" class="text-sm font-semibold text-estoril-600 hover:text-estoril-500">
-                                Ver todos →
+                                {{ t('cars.view_all') }} →
                             </Link>
                         </div>
                         <div v-if="client.contact_logs?.length" class="divide-y divide-gray-200">
@@ -98,7 +98,7 @@ const { currency, date, statusVariant } = useFormat();
                                 <p class="mt-1 text-sm text-gray-900">{{ log.summary }}</p>
                             </div>
                         </div>
-                        <p v-else class="p-6 text-center text-sm text-gray-500">No contact history</p>
+                        <p v-else class="p-6 text-center text-sm text-gray-500">{{ t('cars.no_contact_history') }}</p>
                     </div>
                 </div>
             </div>

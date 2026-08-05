@@ -135,7 +135,7 @@ const confirmDelete = () => {
                         </Link>
                         <Link :href="route('cars.import-valuation.create')" class="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500">
                             <SparklesIcon class="h-4 w-4" />
-                            Subir ZIP
+                            {{ t('cars.upload_zip') }}
                         </Link>
                         <Link :href="route('cars.create')" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
                             <PlusIcon class="h-4 w-4" />
@@ -155,22 +155,22 @@ const confirmDelete = () => {
                             </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Semáforo</label>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">{{ t('cars.traffic_light') }}</label>
                             <select v-model="lightFilter" class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-500 focus:ring-estoril-500">
-                                <option value="">Todos</option>
+                                <option value="">{{ t('common.all') }}</option>
                                 <option v-for="light in lights" :key="light" :value="light">{{ light }}</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Importar</label>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">{{ t('cars.import') }}</label>
                             <form @submit.prevent="submitImport" class="flex gap-2">
                                 <label class="flex-1 cursor-pointer">
-                                    <span class="sr-only">Elegir archivo</span>
+                                    <span class="sr-only">{{ t('cars.choose_file') }}</span>
                                     <input type="file" accept=".csv,.xlsx,.xls" @change="importFile" class="block w-full text-xs text-gray-500 file:mr-2 file:rounded-lg file:border-0 file:bg-estoril-50 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-estoril-700 hover:file:bg-estoril-100" />
                                 </label>
                                 <button v-if="importForm.file" type="submit" class="inline-flex items-center gap-1 rounded-lg bg-estoril-700 px-3 py-2 text-xs font-semibold text-white hover:bg-estoril-800">
                                     <ArrowUpTrayIcon class="h-3 w-3" />
-                                    Subir
+                                    {{ t('cars.upload') }}
                                 </button>
                             </form>
                         </div>
@@ -180,19 +180,19 @@ const confirmDelete = () => {
                 <!-- Quick Stats -->
                 <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
                     <div class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-gray-500">Valor total</div>
+                        <div class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.total_value') }}</div>
                         <div class="mt-1 text-2xl font-bold text-gray-900">{{ currency(stats.totalValue) }}</div>
                     </div>
                     <div class="rounded-xl bg-emerald-50 p-4 shadow-sm ring-1 ring-emerald-200">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-emerald-700">Luz verde</div>
+                        <div class="text-xs font-semibold uppercase tracking-wider text-emerald-700">{{ t('cars.light_green') }}</div>
                         <div class="mt-1 text-2xl font-bold text-emerald-600">{{ stats.green }}</div>
                     </div>
                     <div class="rounded-xl bg-amber-50 p-4 shadow-sm ring-1 ring-amber-200">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-amber-700">Luz ámbar</div>
+                        <div class="text-xs font-semibold uppercase tracking-wider text-amber-700">{{ t('cars.light_amber') }}</div>
                         <div class="mt-1 text-2xl font-bold text-amber-600">{{ stats.amber }}</div>
                     </div>
                     <div class="rounded-xl bg-red-50 p-4 shadow-sm ring-1 ring-red-200">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-red-700">Luz roja</div>
+                        <div class="text-xs font-semibold uppercase tracking-wider text-red-700">{{ t('cars.light_red') }}</div>
                         <div class="mt-1 text-2xl font-bold text-red-600">{{ stats.red }}</div>
                     </div>
                 </div>
@@ -226,7 +226,7 @@ const confirmDelete = () => {
                     >
                         <Link :href="route('cars.show', car.id)" class="block">
                             <div v-if="car.photos && car.photos.length > 0" class="aspect-video overflow-hidden bg-gray-100">
-                                <img :src="car.photos[0]" :alt="`${car.brand} ${car.model}`" class="h-full w-full object-cover transition-transform group-hover:scale-105" loading="lazy" />
+                                <img :src="car.photos[0]" :alt="t('cars.marketplace_brand_model', { brand: car.brand, model: car.model })" class="h-full w-full object-cover transition-transform group-hover:scale-105" loading="lazy" />
                             </div>
                             <div v-else class="flex aspect-square items-center justify-center bg-gray-100">
                                 <span class="text-4xl">🚗</span>
@@ -248,7 +248,7 @@ const confirmDelete = () => {
 
                             <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
                                 <div>
-                                    <span class="text-[10px] uppercase tracking-wider text-gray-500">Año</span>
+                                    <span class="text-[10px] uppercase tracking-wider text-gray-500">{{ t('cars.year') }}</span>
                                     <p class="font-medium text-gray-900">{{ car.year }}</p>
                                 </div>
                                 <div>
@@ -259,7 +259,7 @@ const confirmDelete = () => {
 
                             <div class="mt-3 flex items-center justify-between gap-2 border-t border-gray-100 pt-3">
                                 <div>
-                                    <span class="text-[10px] uppercase tracking-wider text-gray-500">Precio</span>
+                                    <span class="text-[10px] uppercase tracking-wider text-gray-500">{{ t('cars.price') }}</span>
                                     <p class="text-base font-bold text-gray-900">{{ currency(car.purchase_price) }}</p>
                                 </div>
                                 <div class="flex flex-wrap items-center justify-end gap-1">
@@ -272,13 +272,13 @@ const confirmDelete = () => {
                         <div class="flex border-t border-gray-100 bg-gray-50 px-4 py-2">
                             <div class="flex-1" />
                             <div class="flex items-center gap-1">
-                                <Link :href="route('cars.show', car.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-estoril-50 hover:text-estoril-600" title="Ver">
+                                <Link :href="route('cars.show', car.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-estoril-50 hover:text-estoril-600" :title="t('common.view')">
                                     <EyeIcon class="h-3.5 w-3.5" />
                                 </Link>
-                                <Link :href="route('cars.edit', car.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600" title="Editar">
+                                <Link :href="route('cars.edit', car.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600" :title="t('cars.edit')">
                                     <PencilIcon class="h-3.5 w-3.5" />
                                 </Link>
-                                <button type="button" @click="askDelete(car)" class="rounded-md p-1.5 text-gray-400 hover:bg-rose-50 hover:text-rose-600" title="Eliminar">
+                                <button type="button" @click="askDelete(car)" class="rounded-md p-1.5 text-gray-400 hover:bg-rose-50 hover:text-rose-600" :title="t('cars.remove')">
                                     <TrashIcon class="h-3.5 w-3.5" />
                                 </button>
                             </div>
@@ -286,15 +286,15 @@ const confirmDelete = () => {
                     </div>
                 </div>
 
-                <EmptyState v-else icon="🚗" title="No se encontraron coches" description="Ajusta tus filtros o añade tu primer vehículo al inventario." action-text="Añadir tu primer coche" :action-route="route('cars.create')" />
+                <EmptyState v-else icon="🚗" :title="t('cars.no_cars_found')" :description="t('cars.no_cars_found_desc')" :action-text="t('cars.add_first_car')" :action-route="route('cars.create')" />
             </div>
         </div>
 
         <ConfirmDialog
             :show="showDelete"
-            title="Eliminar coche"
-            :message="`¿Seguro que quieres eliminar ${carToDelete?.brand} ${carToDelete?.model}? Esta acción no se puede deshacer.`"
-            confirm-text="Eliminar"
+            :title="t('cars.delete_car')"
+            :message="t('cars.confirm_delete_car_full', { brand: carToDelete?.brand, model: carToDelete?.model })"
+            :confirm-text="t('cars.remove')"
             variant="danger"
             @close="showDelete = false"
             @confirm="confirmDelete"

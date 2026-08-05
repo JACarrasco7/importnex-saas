@@ -102,9 +102,9 @@ const costCategories = computed(() => [
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Status</th>
-                                    <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Cars</th>
-                                    <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Total investment</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.status') }}</th>
+                                    <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.title') }}</th>
+                                    <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.total_investment') }}</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200">
@@ -121,9 +121,9 @@ const costCategories = computed(() => [
                 <!-- Monthly chart -->
                 <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4">
-                        <h3 class="text-base font-semibold text-gray-900">Last 6 months</h3>
+                        <h3 class="text-base font-semibold text-gray-900">{{ t('cars.last_6_months') }}</h3>
                     </div>
-                    <div v-if="monthly.length === 0" class="p-6 text-center text-sm text-gray-500">No data yet.</div>
+                    <div v-if="monthly.length === 0" class="p-6 text-center text-sm text-gray-500">{{ t('cars.no_data_yet') }}</div>
                     <div v-else class="space-y-3 p-6">
                         <div v-for="entry in monthly" :key="entry.month" class="flex items-center gap-3">
                             <div class="w-20 text-sm font-medium text-gray-700">{{ entry.month }}</div>

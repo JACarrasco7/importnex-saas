@@ -126,20 +126,20 @@ function apply() {
 </script>
 
 <template>
-    <Head :title="`Verify ${car.brand} ${car.model}`" />
+    <Head :title="t('cars.verification_title', { brand: car.brand, model: car.model })" />
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Verify: {{ car.brand }} {{ car.model }}</h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ t('cars.verification_title', { brand: car.brand, model: car.model }) }}</h2>
         </template>
 
         <div class="py-8">
             <div class="mx-auto max-w-4xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <PageHeader :title="`${car.brand} ${car.model}`" :subtitle="`${car.year} · Current status: ${car.status}`">
+                <PageHeader :title="t('cars.marketplace_brand_model', { brand: car.brand, model: car.model })" :subtitle="`${car.year} · Current status: ${car.status}`">
                     <template #actions>
                         <Link :href="route('cars.show', car.id)" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             <ArrowLeftIcon class="h-4 w-4" />
-                            Back
+                            {{ t('common.back') }}
                         </Link>
                     </template>
                 </PageHeader>
@@ -154,7 +154,7 @@ function apply() {
                 <div v-else-if="car.status === 'Verifying'" class="overflow-hidden rounded-2xl border border-blue-200 bg-blue-50 p-4">
                     <div class="flex items-start gap-3">
                         <InformationCircleIcon class="h-5 w-5 flex-shrink-0 text-blue-600" />
-                        <p class="text-sm text-blue-900">Verification in progress. Actualizar this page in a moment.</p>
+                        <p class="text-sm text-blue-900">{{ t('cars.verification_in_progress') }}</p>
                     </div>
                 </div>
                 <div v-else class="overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 p-6">
@@ -166,7 +166,7 @@ function apply() {
                                 <input type="hidden" name="_token" :value="$page.props.csrfToken" />
                                 <button type="submit" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
                                     <SparklesIcon class="h-4 w-4" />
-                                    Verify with AI
+                                    {{ t('cars.verify_with_ai') }}
                                 </button>
                             </form>
                         </div>
