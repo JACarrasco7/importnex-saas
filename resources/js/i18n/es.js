@@ -22,7 +22,7 @@ export default {
         no: 'No',
         success: 'Éxito',
         error: 'Error',
-        inventory_count: ':count autos en su flota',
+        inventory_count: ':count vehículos en su flota',
         recent_activity: 'Actividad Reciente',
         quick_actions: 'Acciones Rápidas',
     },
@@ -74,7 +74,7 @@ export default {
         guide: 'Guía',
         view_plans: 'Ver planes',
         need_more_features: '¿Necesita más funciones?',
-        upgrade_message: 'Actualice su plan para desbloquear autos y contactos ilimitados.',
+        upgrade_message: 'Actualice su plan para desbloquear vehículos y contactos ilimitados.',
     },
     cars: {
         title: 'Autos',
