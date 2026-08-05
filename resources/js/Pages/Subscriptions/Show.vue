@@ -5,6 +5,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import FormSection from '@/Components/FormSection.vue';
 import { useFormat } from '@/Composables/useFormat';
+import { useTranslations } from '@/Composables/useTranslations';
 
 const props = defineProps({
     plan: String,
@@ -12,10 +13,11 @@ const props = defineProps({
 });
 
 const { currency } = useFormat();
+const { t } = useTranslations();
 </script>
 
 <template>
-    <Head :title="`Plan ${planData.name}`" />
+    <Head :title="t('subscription.head_plan', { name: planData.name })" />
 
     <AuthenticatedLayout>
         <template #header>

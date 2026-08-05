@@ -40,8 +40,8 @@ const planKeys = Object.keys(props.plans);
                     <div class="flex items-center gap-3">
                         <SparklesIcon class="h-5 w-5 text-rose-600" />
                         <p class="text-sm text-rose-700">
-                            <strong>Pago rechazado.</strong> Tu suscripción se ha degradado al plan Starter.
-                            <Link href="/billing" class="font-semibold underline">Gestionar método de pago</Link> para reactivar.
+                            <strong>{{ t('subscription.payment_failed') }}</strong> {{ t('subscription.degraded_to_starter') }}
+                            <Link href="/billing" class="font-semibold underline">{{ t('subscription.manage_payment') }}</Link> {{ t('subscription.to_reactivate') }}
                         </p>
                     </div>
                 </div>
@@ -63,7 +63,7 @@ const planKeys = Object.keys(props.plans);
                 <div v-else-if="subscription && subscription.ends_at" class="overflow-hidden rounded-2xl border border-rose-200 bg-rose-50 p-4">
                     <div class="flex items-center gap-3">
                         <SparklesIcon class="h-5 w-5 text-rose-600" />
-                        <p class="text-sm text-rose-700"><strong>Suscripción cancelada:</strong> termina el {{ date(subscription.ends_at) }}. Después pasarás al plan Starter.</p>
+                        <p class="text-sm text-rose-700"><strong>{{ t('subscription.canceled') }}:</strong> {{ t('subscription.ends_on') }} {{ date(subscription.ends_at) }}. {{ t('subscription.after_cancel_fallback') }}</p>
                     </div>
                 </div>
 

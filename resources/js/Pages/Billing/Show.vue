@@ -6,12 +6,14 @@ import PageHeader from '@/Components/PageHeader.vue';
 import Badge from '@/Components/Badge.vue';
 import FormSection from '@/Components/FormSection.vue';
 import { useFormat } from '@/Composables/useFormat';
+import { useTranslations } from '@/Composables/useTranslations';
 
 const props = defineProps({
     invoice: Object,
 });
 
 const { currency, date } = useFormat();
+const { t } = useTranslations();
 </script>
 
 <template>
@@ -54,24 +56,24 @@ const { currency, date } = useFormat();
                             </dd>
                         </div>
                         <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Date</dt>
+                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('billing.date') }}</dt>
                             <dd class="mt-1 text-sm font-medium text-gray-900">{{ date(invoice.date) }}</dd>
                         </div>
                         <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Total</dt>
+                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.total_label') }}</dt>
                             <dd class="mt-1 text-lg font-bold text-gray-900">{{ currency(invoice.total / 100) }}</dd>
                         </div>
                     </div>
                 </FormSection>
 
-                <FormSection title="Line items">
+                <FormSection :title="t('cars.line_items')">
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Description</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Qty</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Amount</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.description') }}</th>
+                                    <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.qty') }}</th>
+                                    <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.amount') }}</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200">
@@ -87,15 +89,15 @@ const { currency, date } = useFormat();
                     <div class="mt-4 flex justify-end">
                         <div class="w-full max-w-xs space-y-2 rounded-lg bg-gray-50 p-4">
                             <div class="flex justify-between text-sm">
-                                <span class="text-gray-600">Subtotal</span>
+                                <span class="text-gray-600">{{ t('cars.subtotal') }}</span>
                                 <span class="font-medium text-gray-900">{{ currency(invoice.subtotal / 100) }}</span>
                             </div>
                             <div v-if="invoice.tax" class="flex justify-between text-sm">
-                                <span class="text-gray-600">Tax</span>
+                                <span class="text-gray-600">{{ t('cars.tax') }}</span>
                                 <span class="font-medium text-gray-900">{{ currency(invoice.tax / 100) }}</span>
                             </div>
                             <div class="flex justify-between border-t border-gray-200 pt-2 text-base">
-                                <span class="font-semibold text-gray-900">Total</span>
+                                <span class="font-semibold text-gray-900">{{ t('cars.total_label') }}</span>
                                 <span class="font-bold text-gray-900">{{ currency(invoice.total / 100) }}</span>
                             </div>
                         </div>

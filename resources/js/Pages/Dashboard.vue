@@ -49,15 +49,15 @@ const quickLinks = [
     { label: t('nav.alerts'), description: t('nav.plan'), route: 'alerts.index', icon: BellAlertIcon, color: 'red' },
 ];
 
-const copyLabel = ref('Copiar URL pública');
+const copyLabel = ref(t('dashboard.cta_marketplace_copy'));
 const copyMarketplaceUrl = async () => {
     const url = route('marketplace.index');
     try {
         await navigator.clipboard.writeText(window.location.origin + url);
-        copyLabel.value = '¡Copiado!';
-        setTimeout(() => (copyLabel.value = 'Copiar URL pública'), 2000);
+        copyLabel.value = t('dashboard.cta_marketplace_copied');
+        setTimeout(() => (copyLabel.value = t('dashboard.cta_marketplace_copy')), 2000);
     } catch (e) {
-        window.prompt('Copiar esta URL:', window.location.origin + url);
+        window.prompt(t('dashboard.cta_marketplace_copy_prompt'), window.location.origin + url);
     }
 };
 </script>
@@ -75,7 +75,7 @@ const copyMarketplaceUrl = async () => {
         <div class="py-8">
             <div class="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8">
                 <PageHeader
-                    :title="`Bienvenido, ${organization?.name || 'usuario'}`"
+                    :title="t('dashboard.welcome', { name: organization?.name || t('app.user') })"
                     :subtitle="t('app.dashboard_subtitle')"
                 >
                     <template #actions>
@@ -95,21 +95,21 @@ const copyMarketplaceUrl = async () => {
                             </div>
                             <div>
                                 <div class="flex items-center gap-2">
-                                    <h3 class="text-lg font-bold text-white">Marketplace público</h3>
+                                    <h3 class="text-lg font-bold text-white">{{ t('dashboard.cta_marketplace') }}</h3>
                                     <span class="inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-xs font-semibold text-white backdrop-blur">
                                         <CheckBadgeIcon class="h-3 w-3" />
-                                        Coches verificados
+                                        {{ t('dashboard.cta_marketplace_badge') }}
                                     </span>
                                 </div>
                                 <p class="mt-1 text-sm text-emerald-50">
-                                    Comparte esta URL con tus clientes para mostrarles coches ya investigados, valorados y listos para comprar.
+                                    {{ t('dashboard.cta_marketplace_desc') }}
                                 </p>
                             </div>
                         </div>
                         <div class="flex flex-col gap-2 sm:flex-row">
                             <a :href="route('marketplace.index')" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-50">
                                 <ArrowTopRightOnSquareIcon class="h-4 w-4" />
-                                Abrir marketplace
+                                {{ t('dashboard.cta_marketplace_open') }}
                             </a>
                             <button type="button" @click="copyMarketplaceUrl" class="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-700/40 px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/30 backdrop-blur transition hover:bg-emerald-700/60">
                                 <ArrowRightIcon class="h-4 w-4" />
@@ -121,10 +121,10 @@ const copyMarketplaceUrl = async () => {
 
                 <!-- KPI Cards -->
                 <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                    <StatCard label="Total coches" :value="stats.cars_total" :hint="`${stats.cars_active} activos · ${stats.cars_for_sale} en venta`" :icon="TruckIcon" color="indigo" />
-                    <StatCard label="Clientes" :value="stats.clients_total" :hint="`${stats.clients_active} activos`" :icon="UsersIcon" color="blue" />
-                    <StatCard label="Red" :value="stats.contacts_total" hint="Concesionarios y transporte" :icon="PhoneIcon" color="purple" />
-                    <StatCard label="Alertas pendientes" :value="stats.alerts_pending" hint="Requiere atención" :icon="BellAlertIcon" color="rose" />
+                    <StatCard :label="t('dashboard.kpi_cars')" :value="stats.cars_total" :hint="t('dashboard.kpi_hint_active_sale', { active: stats.cars_active, sale: stats.cars_for_sale })" :icon="TruckIcon" color="indigo" />
+                    <StatCard :label="t('dashboard.kpi_clients')" :value="stats.clients_total" :hint="t('dashboard.kpi_hint_active_only', { active: stats.clients_active })" :icon="UsersIcon" color="blue" />
+                    <StatCard :label="t('dashboard.kpi_network')" :value="stats.contacts_total" :hint="t('dashboard.kpi_network_hint')" :icon="PhoneIcon" color="purple" />
+                    <StatCard :label="t('dashboard.kpi_alerts')" :value="stats.alerts_pending" :hint="t('dashboard.kpi_alerts_hint')" :icon="BellAlertIcon" color="rose" />
                 </div>
 
                 <!-- Traffic Lights + Total Cost -->
@@ -132,8 +132,8 @@ const copyMarketplaceUrl = async () => {
                     <div class="lg:col-span-2 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                         <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4">
                             <div>
-                                <h3 class="text-base font-semibold text-gray-900">Distribución de semáforos</h3>
-                                <p class="text-sm text-gray-500">Salud de tu inventario activo</p>
+                                <h3 class="text-base font-semibold text-gray-900">{{ t('dashboard.traffic_title') }}</h3>
+                                <p class="text-sm text-gray-500">{{ t('dashboard.traffic_subtitle') }}</p>
                             </div>
                             <ChartBarIcon class="h-5 w-5 text-gray-400" />
                         </div>
@@ -156,13 +156,13 @@ const copyMarketplaceUrl = async () => {
 
                     <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-estoril-700 to-estoril-900 p-6 text-white shadow-lg">
                         <BanknotesIcon class="absolute right-4 top-4 h-12 w-12 text-white/20" />
-                        <p class="text-sm font-medium text-estoril-100">Total invertido</p>
+                        <p class="text-sm font-medium text-estoril-100">{{ t('dashboard.invested_title') }}</p>
                         <p class="mt-2 text-4xl font-bold tracking-tight">{{ currency(stats.total_cars_cost) }}</p>
-                        <p class="mt-2 text-xs text-estoril-100">En vehículos comprados</p>
+                        <p class="mt-2 text-xs text-estoril-100">{{ t('dashboard.invested_subtitle') }}</p>
                         <div class="mt-6 border-t border-white/20 pt-4">
                             <div class="flex justify-between text-sm">
-                                <span class="text-estoril-100">{{ stats.cars_purchased }} comprados</span>
-                                <span class="font-semibold">{{ currency(stats.total_cars_cost / Math.max(stats.cars_purchased, 1)) }} promedio</span>
+                                <span class="text-estoril-100">{{ t('dashboard.invested_purchased', { count: stats.cars_purchased }) }}</span>
+                                <span class="font-semibold">{{ currency(stats.total_cars_cost / Math.max(stats.cars_purchased, 1)) }} {{ t('dashboard.invested_average') }}</span>
                             </div>
                         </div>
                     </div>
@@ -172,11 +172,11 @@ const copyMarketplaceUrl = async () => {
                 <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4">
                         <div>
-                            <h3 class="text-base font-semibold text-gray-900">Coches recientes</h3>
-                            <p class="text-sm text-gray-500">Últimos 5 añadidos al inventario</p>
+                            <h3 class="text-base font-semibold text-gray-900">{{ t('dashboard.recent_title') }}</h3>
+                            <p class="text-sm text-gray-500">{{ t('dashboard.recent_subtitle') }}</p>
                         </div>
                         <Link :href="route('cars.index')" class="inline-flex items-center gap-1 text-sm font-semibold text-estoril-600 hover:text-estoril-500">
-                            Ver todos
+                            {{ t('dashboard.recent_view_all') }}
                             <ArrowRightIcon class="h-4 w-4" />
                         </Link>
                     </div>
@@ -184,11 +184,11 @@ const copyMarketplaceUrl = async () => {
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Vehículo</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Año</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Estado</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Salud</th>
-                                    <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Compra</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('dashboard.recent_col_vehicle') }}</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('dashboard.recent_col_year') }}</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('dashboard.recent_col_status') }}</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('dashboard.recent_col_health') }}</th>
+                                    <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('dashboard.recent_col_purchase') }}</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200">
@@ -210,12 +210,12 @@ const copyMarketplaceUrl = async () => {
                             </tbody>
                         </table>
                     </div>
-                    <EmptyState v-else icon="🚗" title="Aún no hay coches" description="Empieza añadiendo tu primer vehículo al inventario." action-text="Añadir coche" :action-route="route('cars.create')" />
+                    <EmptyState v-else icon="🚗" :title="t('dashboard.recent_empty_title')" :description="t('dashboard.recent_empty_desc')" :action-text="t('dashboard.recent_empty_action')" :action-route="route('cars.create')" />
                 </div>
 
                 <!-- Quick Links -->
                 <div>
-                    <h3 class="mb-4 text-base font-semibold text-gray-900">Acceso rápido</h3>
+                    <h3 class="mb-4 text-base font-semibold text-gray-900">{{ t('dashboard.quick_title') }}</h3>
                     <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
                         <Link
                             v-for="link in quickLinks"
