@@ -13,6 +13,8 @@ class Alert extends Model
 
     protected $casts = ['resolved' => 'boolean', 'resolved_at' => 'datetime'];
 
+    protected $appends = ['target_url'];
+
     protected static function booted()
     {
         static::addGlobalScope('organization', function ($query) {
@@ -60,11 +62,23 @@ class Alert extends Model
             return null;
         }
 
-        return match ($this->reference_type) {
-            CarRequest::class => route('car-requests.show', $this->reference_id),
-            'car' => route('cars.show', $this->reference_id),
-            'client' => route('clients.show', $this->reference_id),
+        $routeName = match ($this->reference_type) {
+            CarRequest::class => 'car-requests.show',
+            'car' => 'cars.show',
+            'client' => 'clients.show',
             default => null,
         };
+
+        if ($routeName === null) {
+            return null;
+        }
+
+        try {
+            return route($routeName, $this->reference_id);
+        } catch (\Throwable) {
+            // Si la ruta no existe o no hay contexto HTTP, devolvemos null
+            // y el front hace fallback a alerts.show.
+            return null;
+        }
     }
 }

@@ -13,11 +13,14 @@ class AlertController extends Controller
     public function index(Request $request): Response
     {
         $alerts = Alert::query()
-            ->when($request->input('type'), fn($q, $t) => $q->where('alert_type', $t))
-            ->when($request->input('resolved') !== null, fn($q, $r) => $q->where('resolved', $r === '1'))
+            ->when($request->input('type'), fn ($q, $t) => $q->where('alert_type', $t))
+            ->when($request->input('resolved') !== null, fn ($q, $r) => $q->where('resolved', $r === '1'))
             ->orderBy('created_at', 'desc')
             ->paginate(15)
             ->withQueryString();
+
+        // Asegurar que el accesorio target_url se serializa en cada item del paginator
+        $alerts->getCollection()->each->append('target_url');
 
         $types = ['car_stopped', 'client_no_contact', 'itv_pending', 'document_expired'];
 
@@ -30,6 +33,8 @@ class AlertController extends Controller
 
     public function show(Alert $alert): Response
     {
+        $alert->append('target_url');
+
         return Inertia::render('Alerts/Show', [
             'alert' => $alert,
         ]);
@@ -38,6 +43,7 @@ class AlertController extends Controller
     public function markResolved(Alert $alert): RedirectResponse
     {
         $alert->markAsResolved();
+
         return redirect()->route('alerts.index')
             ->with('success', 'Alert marked as resolved.');
     }
@@ -45,6 +51,7 @@ class AlertController extends Controller
     public function destroy(Alert $alert): RedirectResponse
     {
         $alert->delete();
+
         return redirect()->route('alerts.index')
             ->with('success', 'Alert deleted successfully.');
     }

@@ -40,7 +40,7 @@ const referenceLabel = (refType) => {
 
         <div class="py-8">
             <div class="mx-auto max-w-3xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <PageHeader :title="t('alerts.details')" :subtitle="`${typeLabel(alert.alert_type)} · ${referenceLabel(alert.reference_type)} #${alert.reference_id}`">
+                <PageHeader :title="t('alerts.details')" :subtitle="`${typeLabel(alert.alert_type)} · #${alert.reference_id}`">
                     <template #actions>
                         <Link v-if="alert.target_url" :href="alert.target_url" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
                             <EyeIcon class="h-4 w-4" />

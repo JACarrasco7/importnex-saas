@@ -85,7 +85,7 @@ const confirmDelete = () => {
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center gap-2">
                                     <Badge variant="red">{{ typeLabel(alert.alert_type) }}</Badge>
-                                    <span class="text-sm text-gray-500">{{ referenceLabel(alert.reference_type) }} #{{ alert.reference_id }}</span>
+                                    <span class="text-sm text-gray-500">#{{ alert.reference_id }}</span>
                                 </div>
                                 <p class="mt-1 text-sm text-gray-900">{{ alert.message }}</p>
                                 <p class="mt-1 text-xs text-gray-400">{{ date(alert.created_at) }}</p>
