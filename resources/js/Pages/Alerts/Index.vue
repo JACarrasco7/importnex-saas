@@ -13,6 +13,19 @@ import { useFormat } from '@/Composables/useFormat';
 const { t } = useTranslations();
 const { date } = useFormat();
 
+const typeLabel = (type) => {
+    const key = `alerts.alert_types.${type}`;
+    const value = t(key);
+    return value === key ? type : value;
+};
+
+const referenceLabel = (refType) => {
+    const key = `alerts.reference_types.${refType}`;
+    const value = t(key);
+    if (value !== key) return value;
+    return (refType || '').split('\\').pop() || refType;
+};
+
 const props = defineProps({
     alerts: Object,
     filters: Object,
@@ -71,8 +84,8 @@ const confirmDelete = () => {
                             </div>
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center gap-2">
-                                    <Badge variant="red">{{ alert.alert_type }}</Badge>
-                                    <span class="text-sm text-gray-500">{{ alert.reference_type }} #{{ alert.reference_id }}</span>
+                                    <Badge variant="red">{{ typeLabel(alert.alert_type) }}</Badge>
+                                    <span class="text-sm text-gray-500">{{ referenceLabel(alert.reference_type) }} #{{ alert.reference_id }}</span>
                                 </div>
                                 <p class="mt-1 text-sm text-gray-900">{{ alert.message }}</p>
                                 <p class="mt-1 text-xs text-gray-400">{{ date(alert.created_at) }}</p>
@@ -81,7 +94,7 @@ const confirmDelete = () => {
                                 <button v-if="!alert.resolved" @click="askResolve(alert)" class="rounded-md bg-emerald-50 p-1.5 text-emerald-600 hover:bg-emerald-100" title="Resolve">
                                     <CheckIcon class="h-4 w-4" />
                                 </button>
-                                <Link :href="route('alerts.show', alert.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-estoril-50 hover:text-estoril-600" title="View">
+                                <Link :href="alert.target_url || route('alerts.show', alert.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-estoril-50 hover:text-estoril-600" :title="t('alerts.view_resource')">
                                     <EyeIcon class="h-4 w-4" />
                                 </Link>
                                 <button @click="askDelete(alert)" class="rounded-md p-1.5 text-gray-400 hover:bg-rose-50 hover:text-rose-600" title="Delete">

@@ -49,4 +49,22 @@ class Alert extends Model
             'resolved_at' => now(),
         ]);
     }
+
+    /**
+     * URL de la página real del recurso referenciado (si existe ruta).
+     * Permite que "Ver" lleve directo al recurso en vez del detalle genérico.
+     */
+    public function getTargetUrlAttribute(): ?string
+    {
+        if (! $this->reference_id) {
+            return null;
+        }
+
+        return match ($this->reference_type) {
+            CarRequest::class => route('car-requests.show', $this->reference_id),
+            'car' => route('cars.show', $this->reference_id),
+            'client' => route('clients.show', $this->reference_id),
+            default => null,
+        };
+    }
 }
