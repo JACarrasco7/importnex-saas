@@ -81,7 +81,10 @@ const submit = () => {
                         <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-900">{{ t('car_request_form.section_contact') }}</h3>
                         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('car_request_form.field_name') }}</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    {{ t('car_request_form.field_name') }}
+                                    <span class="ml-0.5 text-rose-600" aria-hidden="true">*</span>
+                                </label>
                                 <input
                                     v-model="form.name"
                                     type="text"
