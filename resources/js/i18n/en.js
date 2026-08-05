@@ -1371,7 +1371,8 @@ export default {
     marketing: {
         title: 'Car Marketing',
         subtitle: 'Generate and manage ads for all your channels',
-    },
+            registered_vehicles: "Registered vehicles",
+},
     templates: {
         title: 'Templates',
         subtitle: ':count reusable messages',

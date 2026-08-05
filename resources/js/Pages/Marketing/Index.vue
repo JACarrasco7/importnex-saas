@@ -67,7 +67,7 @@ function getStatusBadge(content) {
                 <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
                     <div class="rounded-xl bg-white p-4 ring-1 ring-gray-200">
                         <div class="text-2xl font-bold text-estoril-600">{{ stats.total_cars }}</div>
-                        <div class="text-xs text-gray-500">Coches registrados</div>
+                        <div class="text-xs text-gray-500">{{ t('marketing.registered_vehicles') }}</div>
                     </div>
                     <div class="rounded-xl bg-white p-4 ring-1 ring-gray-200">
                         <div class="text-2xl font-bold text-emerald-600">{{ stats.with_content }}</div>
