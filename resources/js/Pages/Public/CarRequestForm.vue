@@ -10,6 +10,9 @@ const props = defineProps({
 
 const { t } = useTranslations();
 
+const currentYear = new Date().getFullYear();
+const yearOptions = Array.from({ length: 15 }, (_, i) => currentYear - i);
+
 const form = useForm({
     name: '',
     email: '',
@@ -32,6 +35,7 @@ const form = useForm({
     color: '',
     requirements: '',
     notes: '',
+    website: '', // honeypot field
 });
 
 const fuelTypes = ['Diesel', 'Gasolina', 'Híbrido', 'Híbrido enchufable', 'Eléctrico', 'Gas'];
@@ -40,9 +44,16 @@ const bodyTypes = ['Berlina', 'SUV', 'Compacto', 'Monovolumen', 'Coupe', 'Cabrio
 const engineTypes = ['3 cilindros', '4 cilindros', '5 cilindros', '6 cilindros', '8 cilindros', 'Eléctrico'];
 const colors = ['Negro', 'Blanco', 'Gris', 'Plata', 'Azul', 'Rojo', 'Beige', 'Marrón', 'Verde'];
 
+const submitting = ref(false);
+
 const submit = () => {
+    if (submitting.value) return;
+    submitting.value = true;
     form.post(route('public.car-request.store', props.organization.slug), {
         preserveState: false,
+        onFinish: () => {
+            submitting.value = false;
+        },
     });
 };
 </script>
@@ -168,7 +179,7 @@ const submit = () => {
                                 </label>
                                 <select v-model="form.year_min" required class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600">
                                     <option value="">{{ t('car_request_form.select_option') }}</option>
-                                    <option v-for="year in 2027" :key="year" :value="2028 - year">{{ 2028 - year }}</option>
+                                    <option v-for="year in yearOptions" :key="year" :value="year">{{ year }}</option>
                                 </select>
                                 <p v-if="form.errors.year_min" class="mt-1 text-sm text-rose-600">{{ form.errors.year_min }}</p>
                             </div>
@@ -179,7 +190,7 @@ const submit = () => {
                                 </label>
                                 <select v-model="form.year_max" required class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600">
                                     <option value="">{{ t('car_request_form.select_option') }}</option>
-                                    <option v-for="year in 2027" :key="year" :value="2028 - year">{{ 2028 - year }}</option>
+                                    <option v-for="year in yearOptions" :key="year" :value="year">{{ year }}</option>
                                 </select>
                                 <p v-if="form.errors.year_max" class="mt-1 text-sm text-rose-600">{{ form.errors.year_max }}</p>
                             </div>
@@ -393,13 +404,29 @@ const submit = () => {
                         </p>
                         <button
                             type="submit"
-                            :disabled="form.processing"
+                            :disabled="form.processing || submitting"
                             class="inline-flex items-center gap-2 rounded-lg bg-estoril-700 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-estoril-800 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            <CheckCircleIcon v-if="!form.processing" class="h-5 w-5" />
-                            <span v-if="form.processing">{{ t('car_request_form.sending') }}</span>
+                            <svg v-if="form.processing || submitting" class="h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <CheckCircleIcon v-else class="h-5 w-5" />
+                            <span v-if="form.processing || submitting">{{ t('car_request_form.sending') }}</span>
                             <span v-else>{{ t('car_request_form.submit') }}</span>
                         </button>
+                    </div>
+
+                    <!-- Honeypot anti-spam field (hidden from real users) -->
+                    <div class="absolute -left-[9999px] opacity-0" aria-hidden="true">
+                        <label for="website">Website (do not fill)</label>
+                        <input
+                            id="website"
+                            v-model="form.website"
+                            type="text"
+                            tabindex="-1"
+                            autocomplete="off"
+                        />
                     </div>
                 </form>
             </div>

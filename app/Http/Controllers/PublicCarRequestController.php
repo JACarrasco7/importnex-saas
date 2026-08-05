@@ -8,6 +8,7 @@ use App\Models\Organization;
 use App\Models\Alert;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
 class PublicCarRequestController extends Controller
@@ -38,14 +39,28 @@ class PublicCarRequestController extends Controller
             ->where('is_public', true)
             ->firstOrFail();
 
+        // Honeypot anti-spam: if the hidden field is filled, it's a bot
+        if ($request->filled('website')) {
+            Log::warning('Car request honeypot triggered', [
+                'organization_id' => $organization->id,
+                'ip' => $request->ip(),
+            ]);
+            // Fake success to confuse the bot
+            return redirect()
+                ->route('public.car-request.success', ['slug' => $slug])
+                ->with('success', '¡Solicitud recibida! Te contactaremos pronto.');
+        }
+
+        $currentYear = (int) date('Y');
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|max:255',
-            'phone' => 'required|string|max:50',
+            'phone' => ['required', 'string', 'min:9', 'max:50', 'regex:/^[0-9\s\+\-\(\)]+$/'],
             'brand' => 'required|string|max:100',
             'model' => 'required|string|max:100',
-            'year_min' => 'required|integer|min:1990|max:2027',
-            'year_max' => ['required', 'integer', 'min:1990', 'max:2027', function ($attribute, $value, $fail) use ($request) {
+            'year_min' => "required|integer|min:1990|max:{$currentYear}",
+            'year_max' => ["required", "integer", "min:1990", "max:{$currentYear}", function ($attribute, $value, $fail) use ($request) {
                 if ($request->filled('year_min') && (int) $value < (int) $request->input('year_min')) {
                     $fail('El año máximo no puede ser menor que el año mínimo.');
                 }
@@ -72,6 +87,11 @@ class PublicCarRequestController extends Controller
             'color' => 'required|string|max:50',
             'requirements' => 'required|string|max:2000',
             'notes' => 'nullable|string|max:2000',
+        ], [
+            'phone.regex' => 'El teléfono solo puede contener números, espacios, +, -, paréntesis.',
+            'phone.min' => 'El teléfono debe tener al menos 9 caracteres.',
+            'year_min.max' => "El año no puede ser superior a {$currentYear}.",
+            'year_max.max' => "El año no puede ser superior a {$currentYear}.",
         ]);
 
         if ($validator->fails()) {
@@ -83,18 +103,25 @@ class PublicCarRequestController extends Controller
         $data = $validator->validated();
         $data['organization_id'] = $organization->id;
         $data['status'] = 'pending';
+        // Remove honeypot field before save
+        unset($data['website']);
 
-        // Try to link to existing client by contact_info (JSON: {email, phone})
-        if (!empty($data['email']) || !empty($data['phone'])) {
-            $query = Client::where('organization_id', $organization->id);
-
-            if (!empty($data['email'])) {
-                $query->where(function ($q) use ($data) {
+        // Try to link to existing client by email (more reliable than phone)
+        if (!empty($data['email'])) {
+            $client = Client::where('organization_id', $organization->id)
+                ->where(function ($q) use ($data) {
+                    // Search in JSON contact_info field
                     $q->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(contact_info, '$.email')) = ?", [$data['email']]);
-                });
-            }
+                })
+                ->first();
 
-            $client = $query->first();
+            if (!$client && !empty($data['phone'])) {
+                // Fallback: search by phone in JSON
+                $normalizedPhone = preg_replace('/[^0-9]/', '', $data['phone']);
+                $client = Client::where('organization_id', $organization->id)
+                    ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(contact_info, '$.phone')) LIKE ?", ['%' . substr($normalizedPhone, -9) . '%'])
+                    ->first();
+            }
 
             if ($client) {
                 $data['client_id'] = $client->id;

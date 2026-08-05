@@ -36,7 +36,9 @@ Route::post('stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])
 // URL: /request/{slug} — public form for clients to send car preferences
 Route::prefix('request/{slug}')->name('public.car-request.')->group(function () {
     Route::get('/', [PublicCarRequestController::class, 'index'])->name('index');
-    Route::post('/', [PublicCarRequestController::class, 'store'])->name('store');
+    Route::post('/', [PublicCarRequestController::class, 'store'])
+        ->middleware('throttle:5,10')
+        ->name('store');
     Route::get('/success', [PublicCarRequestController::class, 'success'])->name('success');
 });
 
