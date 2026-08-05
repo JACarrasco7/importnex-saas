@@ -17,6 +17,8 @@ const props = defineProps({
 
 const form = useForm({
     name: props.organization.name,
+    currency: props.organization.currency || 'EUR',
+    locale: props.organization.locale || 'es',
     ai_provider: props.organization.ai_provider || '',
     ai_model: props.organization.ai_model || '',
     ai_api_key: '',
@@ -99,6 +101,14 @@ async function detectModels() {
                         <FormField :label="t('organization.label_org_name')" required>
                             <input v-model="form.name" type="text" required :class="inputClass" />
                             <p v-if="form.errors.name" class="mt-1 text-sm text-red-600">{{ form.errors.name }}</p>
+                        </FormField>
+                        <FormField :label="t('organization.label_currency')" :help="t('organization.help_currency')">
+                            <select v-model="form.currency" :class="inputClass">
+                                <option value="EUR">EUR (€)</option>
+                                <option value="USD">USD ($)</option>
+                                <option value="GBP">GBP (£)</option>
+                            </select>
+                            <p v-if="form.errors.currency" class="mt-1 text-sm text-red-600">{{ form.errors.currency }}</p>
                         </FormField>
                     </FormSection>
 

@@ -1675,6 +1675,8 @@ export default {
         section_ai: 'Inteligencia Artificial',
         section_ai_desc: 'Cada organización elige el proveedor de IA que usará para verificación de vehículos, scraping de URLs y futuras funciones de IA.',
         label_org_name: 'Nombre de la organización',
+        label_currency: 'Moneda',
+        help_currency: 'Moneda utilizada para los valores monetarios en toda la plataforma.',
         label_ai_provider: 'Proveedor de IA',
         help_ai_provider: 'Elige qué proveedor ejecutará las tareas de IA para esta organización. Por defecto Anthropic Claude.',
         disabled_option: '— Desactivado —',

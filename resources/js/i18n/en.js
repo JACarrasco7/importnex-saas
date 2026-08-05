@@ -1160,6 +1160,8 @@ export default {
         section_ai: 'Artificial Intelligence',
         section_ai_desc: 'Each organization picks the AI provider it wants to use for car verification, URL scraping and any future AI features.',
         label_org_name: 'Organization name',
+        label_currency: 'Currency',
+        help_currency: 'Currency used for monetary values across the platform.',
         label_ai_provider: 'AI provider',
         help_ai_provider: 'Choose which vendor will run AI tasks for this organization. Defaults to Anthropic Claude.',
         disabled_option: '— Disabled —',

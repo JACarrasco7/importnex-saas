@@ -70,12 +70,18 @@ class OrganizationController extends Controller
 
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'currency' => ['nullable', Rule::in(['EUR', 'USD', 'GBP'])],
+            'locale' => ['nullable', Rule::in(['es', 'en'])],
             'ai_provider' => ['nullable', Rule::in(array_merge([''], array_column($registry->options(), 'key')))],
             'ai_model' => ['nullable', 'string', 'max:128'],
             'ai_api_key' => ['nullable', 'string', 'max:512'],
         ]);
 
-        $orgData = ['name' => $request->name];
+        $orgData = [
+            'name' => $request->name,
+            'currency' => $request->input('currency', 'EUR'),
+            'locale' => $request->input('locale', 'es'),
+        ];
         if ($request->filled('ai_provider')) {
             $orgData['ai_provider'] = $request->ai_provider;
             $orgData['ai_model'] = $request->ai_model ?: null;

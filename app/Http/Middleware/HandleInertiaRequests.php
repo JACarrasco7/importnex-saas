@@ -94,6 +94,12 @@ class HandleInertiaRequests extends Middleware
             'currentPlan' => $currentPlan,
             'locale' => $locale,
             'aiSettings' => $aiSettings,
-        ];
+            // Configuracion regional (moneda + locale) para formateo en el frontend.
+            // Por defecto EUR + es si la organizacion todavia no tiene valor.
+            'formatting' => [
+                'currency' => $organization?->currency ?? 'EUR',
+                'locale' => $organization?->locale ?? $locale,
+                'decimals' => 2,
+            ],
     }
 }
