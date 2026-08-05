@@ -9,13 +9,23 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
+    return redirect('/marketplace');
+});
+
+// Legacy welcome page (kept for internal links)
+Route::get('/welcome', function () {
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
     ]);
-});
+})->name('welcome');
+
+// Admin entry point — sends authenticated users to the dashboard
+Route::get('/admin', function () {
+    return redirect('/dashboard');
+})->name('admin');
 
 // Stripe webhook (must be outside auth/csrf middleware)
 Route::post('stripe/webhook', [StripeWebhookController::class, 'handleWebhook']);
