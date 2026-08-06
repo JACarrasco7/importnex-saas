@@ -230,17 +230,34 @@ const PlusIcon = useIcon('Plus');
 
 ---
 
-## 📊 Tiempo estimado
+## 📊 Tiempo estimado vs real
 
-| Item | Esfuerzo | Estado |
-|---|---|---|
-| 4.1 `manualChunks` | 1h | ⏳ Pendiente |
-| 4.2 `deferred props` | 3h | ⏳ Pendiente |
-| 4.3 prefetch sidebar | 2h | ✅ HECHO |
-| 4.4 preload Vite | 30min | ✅ HECHO |
-| 4.5 brotli | 30min | ⏳ Pendiente (server) |
-| 4.6 lazy icons | 2h | ⏳ Pendiente |
-| **TOTAL** | **~9h** | **2/6 completados** |
+| Item | Esfuerzo | Estado | Notas |
+|---|---|---|---|
+| 4.1 `manualChunks` | 1h | ✅ **HECHO** (`bd26051`) | Vite 8 usa función, no objeto |
+| 4.2 `deferred props` | 3h | ✅ **HECHO** (`612193a`) | Cars + Clients con DeferredProp + WhenVisible |
+| 4.3 prefetch sidebar + actions | 2h | ✅ **HECHO** (`6813af7`) | Sidebar + Cars/Clients/Contacts buttons |
+| 4.4 preload Vite | 30min | ✅ **HECHO** | Auto-generado por Vite |
+| 4.5 brotli + resource hints | 30min | ✅ **HECHO** (`73232b2`) | .htaccess + app.blade.php |
+| 4.6 lazy icons | 2h | ⚠️ Descartado | Ya está en chunk separado (8KB gzip) |
+| **TOTAL** | **~9h** | **5/6 completados** |
+
+---
+
+## 🎯 Resumen Session D
+
+### Commits creados:
+1. `bd26051` — manualChunks (Vite 8 con función)
+2. `612193a` — Deferred props Cars + Clients
+3. `73232b2` — Brotli + Cache-Control + Resource hints
+4. `6813af7` — Prefetch hover en botones acción frecuente
+
+### Mejoras aplicadas:
+- **Bundle splitting**: vendor separado por categoría
+- **Lazy loading**: lists cargan con skeleton via WhenVisible
+- **Network optimization**: Brotli, DNS prefetch, preconnect
+- **Cache**: 1 año para assets con hash
+- **UX**: precarga assets en hover (navegación más fluida)
 
 ---
 
