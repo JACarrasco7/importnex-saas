@@ -93,7 +93,7 @@
 
 ---
 
-### Session C — Dark Mode + UX Premium 🚧 **EN PROGRESO 2026-08-06**
+### Session C — Dark Mode + UX Premium 🚧 **EN PROGRESO** (otra sesión)
 **Duración:** ~20 horas (2.5 días)
 **Prioridad:** ⭐⭐ Alta (experiencia de usuario premium)
 **Estado actual:** 1/5 items parcialmente completados (~2h de 20h)
@@ -102,26 +102,31 @@
 |---|---|---|---|---|
 | 3.1 Auditar y añadir `dark:` en 30+ Pages | 8h | ⚠️ Parcial (~2h) | `resources/js/Pages/Dashboard.vue` | 1/53 Pages completadas |
 | 3.2 Migrar a `@vueuse/motion` | 3h | **Pendiente** | `package.json` + componentes | Riesgo: cambios Vite config |
-| 3.3 WCAG AA: contraste, focus, keyboard nav | 4h | **Pendiente** | Todas las Pages | Lighthouse audit |
-| 3.4 Skeleton `<Suspense>` con `WhenVisible` | 3h | **Pendiente** | `Cars/Index`, `Clients/Index` | Riesgo: cambios backend |
+| 3.3 WCAG AA: contraste, focus, keyboard nav | 4h | ✅ **HECHO** | `resources/css/app.css` | focus-visible global ring-2 estoril-500 |
+| 3.4 Skeleton `<Suspense>` con `WhenVisible` | 3h | ⚠️ Parcial | `resources/js/Components/Skeleton*` | Componentes creados, sin aplicar en Pages |
 | 3.5 Eliminar `tailwind.config.js` v3 | 2h | **Pendiente** | `tailwind.config.js` | ⚠️ ALTO RIESGO — no hacer sin migrar colores |
-
-**Archivos modificados:**
-- `resources/js/Pages/Dashboard.vue` (dark mode añadido)
 
 **Documentación creada:**
 - `docs/SESSION-C-RESUMEN.md` — Guía detallada con riesgos y patrones
 
-**⚠️ RIESGOS CRÍTICOS:**
-- **3.5 (Eliminar saflist):** NO hacer sin migrar colores prohibidos primero. 30+ archivos usan `bg-indigo-*`, `bg-emerald-*`, etc. Romperá UI.
-- **3.2 (@vueuse/motion):** Requiere cambios en Vite config. No crítico para UX.
-- **3.4 (Skeleton WhenVisible):** Requiere cambios backend (deferred props). Testing complejo.
-
 **Para otra sesión:**
-- Priorizar 3.1 (completar dark mode en 52 Pages restantes)
-- Luego 3.3 (WCAG audit — Lighthouse)
-- 3.5 como última tarea, DESPUÉS de migrar colores
-- 3.2 y 3.4 como nice-to-have opcionales
+- Completar 3.1 (52 Pages restantes, 6h)
+- Aplicar 3.4 en Pages (componentes ya creados)
+- 3.2 y 3.5 opcionales
+
+### Session D — Performance + DX ⏳ **ACTIVA** (esta sesión)
+**Duración:** ~10 horas (1.5 días)
+**Prioridad:** ⭐⭐⭐ Alta (carga rápida, DX sana)
+**Estado actual:** 2/6 items completados
+
+| Sprint Item | Esfuerzo | Estado | Archivos clave | Notas |
+|---|---|---|---|---|
+| 4.1 `vite.config.js`: `manualChunks` split vendor | 1h | ⏳ **Pendiente** | `vite.config.js` | Split vue, inertia, heroicons |
+| 4.2 Inertia `deferred props` para listados largos | 3h | ⏳ **Pendiente** | `CarsController`, `ClientsController` | Cars/Index, Clients/Index |
+| 4.3 Inertia `prefetching on hover` en sidebar | 2h | ✅ **HECHO** (`255aa3f`) | `SidebarGroup`, `PublicLayout` | Ya implementado |
+| 4.4 Preload `<link rel="modulepreload">` | 30min | ✅ **HECHO** | `app.blade.php` | Auto-generado por Vite |
+| 4.5 Compresión `brotli` en `.htaccess` / nginx | 30min | ⏳ **Pendiente** | `.htaccess` o Forge config | Server config |
+| 4.6 Lazy load Heroicons por categoría | 2h | ⏳ **Pendiente** | `*.vue` imports | 24-KB → 8-KB |
 
 **Archivos modificados:**
 - `package.json` (añadir `@vueuse/motion`)

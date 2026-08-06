@@ -3,7 +3,7 @@ import { computed } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import {
     BuildingOfficeIcon,
-    CarIcon,
+    TruckIcon,
     UserGroupIcon,
     CreditCardIcon,
     CheckCircleIcon,
@@ -36,7 +36,7 @@ const steps = computed(() => [
         title: t('onboarding.steps.first_vehicle', 'Añadir primer vehículo'),
         description: t('onboarding.steps.first_vehicle_desc', 'Importa o crea tu primer coche'),
         completed: props.progress?.step_first_vehicle_added ?? false,
-        icon: CarIcon,
+        icon: TruckIcon,
         action: route('cars.index'),
     },
     {

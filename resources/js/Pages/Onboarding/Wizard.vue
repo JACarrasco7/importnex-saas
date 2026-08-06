@@ -3,7 +3,6 @@ import { ref, computed, onMounted } from 'vue';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import {
     BuildingOfficeIcon,
-    CarIcon,
     UserGroupIcon,
     CreditCardIcon,
     CheckCircleIcon,
@@ -54,23 +53,33 @@ const advanceStep = () => {
 };
 
 const stepIcon = (step) => {
-    return match (step) {
-        1 => BuildingOfficeIcon,
-        2 => CarIcon,
-        3 => UserGroupIcon,
-        4 => CreditCardIcon,
-        default => CheckCircleIcon,
-    };
+    switch (step) {
+        case 1:
+            return BuildingOfficeIcon;
+        case 2:
+            return TruckIcon;
+        case 3:
+            return UserGroupIcon;
+        case 4:
+            return CreditCardIcon;
+        default:
+            return CheckCircleIcon;
+    }
 };
 
 const stepTitle = (step) => {
-    return match (step) {
-        1 => 'Organización creada',
-        2 => 'Primer vehículo añadido',
-        3 => 'Equipo invitado',
-        4 => 'Plan seleccionado',
-        default => 'Completado',
-    };
+    switch (step) {
+        case 1:
+            return 'Organización creada';
+        case 2:
+            return 'Primer vehículo añadido';
+        case 3:
+            return 'Equipo invitado';
+        case 4:
+            return 'Plan seleccionado';
+        default:
+            return 'Completado';
+    }
 };
 
 const goToDashboard = () => {
