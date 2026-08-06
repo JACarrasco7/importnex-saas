@@ -5,10 +5,6 @@
     "nightwatch": false,
     "sail": false,
     "skills": [
-        "infer-conventions",
-        "cashier-stripe-development",
-        "laravel-best-practices",
-        "tailwindcss-development",
-        "inertia-vue-development"
+        "laravel-best-practices"
     ]
 }

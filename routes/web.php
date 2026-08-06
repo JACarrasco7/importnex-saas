@@ -10,15 +10,13 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+// Landing — public marketing page (Welcome.vue, branded, hero + features)
+// When guest → renders the marketing landing. When authenticated → redirects to /dashboard.
 Route::get('/', function () {
-    return redirect('/marketplace');
-});
-
-// Admin landing — private intro page (login / register CTAs)
-Route::get('/admin', function () {
-    $user = Auth::user();
-    $org = $user?->organization
-        ?? Organization::orderBy('id')->first();
+    if (Auth::check()) {
+        return redirect('/dashboard');
+    }
+    $org = Organization::orderBy('id')->first();
 
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
@@ -27,6 +25,19 @@ Route::get('/admin', function () {
         'phpVersion' => PHP_VERSION,
         'organizationName' => $org?->name,
     ]);
+})->name('home');
+
+// Public pricing page (SEO + lead capture, no auth required)
+Route::get('/pricing', function () {
+    return Inertia::render('Public/PricingPublic', [
+        'plans' => config('subscription.plans'),
+        'currency' => config('subscription.default_currency', 'eur'),
+    ]);
+})->name('pricing');
+
+// Legacy admin landing (kept for backwards-compat, redirects to /)
+Route::get('/admin', function () {
+    return Auth::check() ? redirect('/dashboard') : redirect('/');
 })->name('admin');
 
 // Stripe webhook (must be outside auth/csrf middleware)

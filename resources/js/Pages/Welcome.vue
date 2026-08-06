@@ -34,7 +34,7 @@ const stats = [
         <!-- Header -->
         <header class="absolute inset-x-0 top-0 z-10">
             <nav class="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
-                <Link :href="route('admin')" class="flex items-center gap-2">
+                <Link :href="route('home')" class="flex items-center gap-2">
                     <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-estoril-600 to-estoril-800">
                         <TruckIcon class="h-5 w-5 text-white" />
                     </div>

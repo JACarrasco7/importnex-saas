@@ -10,6 +10,7 @@ import {
 import LocaleSelector from '@/Components/LocaleSelector.vue';
 import DarkModeToggle from '@/Components/DarkModeToggle.vue';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
+import WhatsAppFloat from '@/Components/WhatsAppFloat.vue';
 import { useTranslations } from '@/Composables/useTranslations';
 
 const { t } = useTranslations();
@@ -226,5 +227,8 @@ const close = () => { mobileOpen.value = false; };
                 </div>
             </div>
         </footer>
+
+        <!-- WhatsApp Float -->
+        <WhatsAppFloat />
     </div>
 </template>
