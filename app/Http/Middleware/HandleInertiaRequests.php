@@ -39,6 +39,7 @@ class HandleInertiaRequests extends Middleware
         $currentPlan = null;
         $locale = 'es';
         $aiSettings = null;
+        $onboardingShare = null;
 
         if ($user = $request->user()) {
             $pendingAlertsCount = Alert::where('organization_id', $user->organization_id)
