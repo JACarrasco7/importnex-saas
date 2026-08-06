@@ -18,53 +18,53 @@ const billingPeriod = ref('monthly');
 
 const plans = computed(() => [
     {
-        name: t('pricing.basic_plan'),
-        description: t('pricing.basic_desc'),
+        name: t('pricing_public.basic_plan'),
+        description: t('pricing_public.basic_desc'),
         price: 29,
         yearlyPrice: 290,
         features: [
-            t('pricing.basic_feature_1'),
-            t('pricing.basic_feature_2'),
-            t('pricing.basic_feature_3'),
-            t('pricing.basic_feature_4'),
-            t('pricing.basic_feature_5'),
+            t('pricing_public.basic_feature_1'),
+            t('pricing_public.basic_feature_2'),
+            t('pricing_public.basic_feature_3'),
+            t('pricing_public.basic_feature_4'),
+            t('pricing_public.basic_feature_5'),
         ],
-        cta: t('pricing.start_basic'),
+        cta: t('pricing_public.start_basic'),
         popular: false,
     },
     {
-        name: t('pricing.pro_plan'),
-        description: t('pricing.pro_desc'),
+        name: t('pricing_public.pro_plan'),
+        description: t('pricing_public.pro_desc'),
         price: 79,
         yearlyPrice: 790,
         features: [
-            t('pricing.pro_feature_1'),
-            t('pricing.pro_feature_2'),
-            t('pricing.pro_feature_3'),
-            t('pricing.pro_feature_4'),
-            t('pricing.pro_feature_5'),
-            t('pricing.pro_feature_6'),
-            t('pricing.pro_feature_7'),
+            t('pricing_public.pro_feature_1'),
+            t('pricing_public.pro_feature_2'),
+            t('pricing_public.pro_feature_3'),
+            t('pricing_public.pro_feature_4'),
+            t('pricing_public.pro_feature_5'),
+            t('pricing_public.pro_feature_6'),
+            t('pricing_public.pro_feature_7'),
         ],
-        cta: t('pricing.start_pro'),
+        cta: t('pricing_public.start_pro'),
         popular: true,
     },
     {
-        name: t('pricing.enterprise_plan'),
-        description: t('pricing.enterprise_desc'),
+        name: t('pricing_public.enterprise_plan'),
+        description: t('pricing_public.enterprise_desc'),
         price: 199,
         yearlyPrice: 1990,
         features: [
-            t('pricing.enterprise_feature_1'),
-            t('pricing.enterprise_feature_2'),
-            t('pricing.enterprise_feature_3'),
-            t('pricing.enterprise_feature_4'),
-            t('pricing.enterprise_feature_5'),
-            t('pricing.enterprise_feature_6'),
-            t('pricing.enterprise_feature_7'),
-            t('pricing.enterprise_feature_8'),
+            t('pricing_public.enterprise_feature_1'),
+            t('pricing_public.enterprise_feature_2'),
+            t('pricing_public.enterprise_feature_3'),
+            t('pricing_public.enterprise_feature_4'),
+            t('pricing_public.enterprise_feature_5'),
+            t('pricing_public.enterprise_feature_6'),
+            t('pricing_public.enterprise_feature_7'),
+            t('pricing_public.enterprise_feature_8'),
         ],
-        cta: t('pricing.contact_sales'),
+        cta: t('pricing_public.contact_sales'),
         popular: false,
     },
 ]);
@@ -77,7 +77,7 @@ const savings = computed(() => {
 </script>
 
 <template>
-    <Head :title="t('pricing.title')" />
+    <Head :title="t('pricing_public.title')" />
 
     <PublicLayout>
         <!-- Hero -->
@@ -89,13 +89,13 @@ const savings = computed(() => {
                 <div class="mx-auto max-w-3xl text-center">
                     <span class="inline-flex items-center gap-2 rounded-full bg-estoril-100 px-4 py-1.5 text-sm font-semibold text-estoril-800 ring-1 ring-estoril-200">
                         <SparklesIcon class="h-4 w-4" />
-                        {{ t('pricing.tagline') }}
+                        {{ t('pricing_public.tagline') }}
                     </span>
                     <h1 class="mt-6 text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl">
-                        {{ t('pricing.hero_title') }}
+                        {{ t('pricing_public.hero_title') }}
                     </h1>
                     <p class="mx-auto mt-5 max-w-2xl text-lg text-gray-600">
-                        {{ t('pricing.hero_desc') }}
+                        {{ t('pricing_public.hero_subtitle') }}
                     </p>
 
                     <!-- Toggle -->
@@ -104,7 +104,7 @@ const savings = computed(() => {
                             class="text-sm font-medium transition-colors"
                             :class="billingPeriod === 'monthly' ? 'text-gray-900' : 'text-gray-500'"
                         >
-                            {{ t('pricing.monthly') }}
+                            {{ t('pricing_public.monthly') }}
                         </span>
                         <button
                             type="button"
@@ -121,10 +121,10 @@ const savings = computed(() => {
                             class="text-sm font-medium transition-colors"
                             :class="billingPeriod === 'yearly' ? 'text-gray-900' : 'text-gray-500'"
                         >
-                            {{ t('pricing.yearly') }}
+                            {{ t('pricing_public.yearly') }}
                         </span>
                         <span v-if="billingPeriod === 'yearly'" class="ml-2 rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-800">
-                            {{ t('pricing.save_amount', { amount: savings }) }}%
+                            {{ t('pricing_public.save_amount', { amount: savings }) }}%
                         </span>
                     </div>
                 </div>
@@ -144,7 +144,7 @@ const savings = computed(() => {
                         <!-- Popular Badge -->
                         <div v-if="plan.popular" class="absolute -top-4 left-1/2 -translate-x-1/2">
                             <span class="inline-flex items-center rounded-full bg-estoril-600 px-4 py-1 text-xs font-semibold uppercase tracking-wide text-white shadow-sm">
-                                {{ t('pricing.most_popular') }}
+                                {{ t('pricing_public.most_popular') }}
                             </span>
                         </div>
 
@@ -164,7 +164,7 @@ const savings = computed(() => {
                                 €{{ billingPeriod === 'yearly' ? plan.yearlyPrice : plan.price }}
                             </span>
                             <span class="text-sm text-gray-500">
-                                /{{ billingPeriod === 'yearly' ? t('pricing.year') : t('pricing.month') }}
+                                /{{ billingPeriod === 'yearly' ? t('pricing_public.year') : t('pricing_public.month') }}
                             </span>
                         </div>
 
@@ -184,7 +184,7 @@ const savings = computed(() => {
 
                         <!-- CTA -->
                         <Link
-                            :href="plan.name === t('pricing.enterprise_plan') ? 'mailto:ventas@jjimportmotors.com' : route('register')"
+                            :href="plan.name === t('pricing_public.enterprise_plan') ? 'mailto:ventas@jjimportmotors.com' : route('register')"
                             class="mt-auto block w-full rounded-xl px-4 py-3 text-center text-sm font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-estoril-500 focus:ring-offset-2"
                             :class="plan.popular
                                 ? 'bg-estoril-600 text-white hover:bg-estoril-700'
@@ -203,41 +203,41 @@ const savings = computed(() => {
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="mx-auto max-w-3xl text-center">
                     <h2 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
-                        {{ t('pricing.faq_title') }}
+                        {{ t('pricing_public.faq_title') }}
                     </h2>
                     <p class="mt-4 text-gray-600 dark:text-gray-400">
-                        {{ t('pricing.faq_desc') }}
+                        {{ t('pricing_public.faq_desc') }}
                     </p>
                 </div>
 
                 <div class="mt-12 mx-auto max-w-3xl space-y-6">
                     <details class="group rounded-lg bg-white p-6 shadow-sm dark:bg-asphalt-800">
                         <summary class="flex cursor-pointer items-center justify-between text-gray-900 dark:text-white">
-                            <span class="font-medium">{{ t('pricing.faq_q1') }}</span>
+                            <span class="font-medium">{{ t('pricing_public.faq_q1') }}</span>
                             <XMarkIcon class="h-5 w-5 transition group-open:rotate-45" />
                         </summary>
                         <p class="mt-4 text-gray-600 dark:text-gray-400">
-                            {{ t('pricing.faq_a1') }}
+                            {{ t('pricing_public.faq_a1') }}
                         </p>
                     </details>
 
                     <details class="group rounded-lg bg-white p-6 shadow-sm dark:bg-asphalt-800">
                         <summary class="flex cursor-pointer items-center justify-between text-gray-900 dark:text-white">
-                            <span class="font-medium">{{ t('pricing.faq_q2') }}</span>
+                            <span class="font-medium">{{ t('pricing_public.faq_q2') }}</span>
                             <XMarkIcon class="h-5 w-5 transition group-open:rotate-45" />
                         </summary>
                         <p class="mt-4 text-gray-600 dark:text-gray-400">
-                            {{ t('pricing.faq_a2') }}
+                            {{ t('pricing_public.faq_a2') }}
                         </p>
                     </details>
 
                     <details class="group rounded-lg bg-white p-6 shadow-sm dark:bg-asphalt-800">
                         <summary class="flex cursor-pointer items-center justify-between text-gray-900 dark:text-white">
-                            <span class="font-medium">{{ t('pricing.faq_q3') }}</span>
+                            <span class="font-medium">{{ t('pricing_public.faq_q3') }}</span>
                             <XMarkIcon class="h-5 w-5 transition group-open:rotate-45" />
                         </summary>
                         <p class="mt-4 text-gray-600 dark:text-gray-400">
-                            {{ t('pricing.faq_a3') }}
+                            {{ t('pricing_public.faq_a3') }}
                         </p>
                     </details>
                 </div>
@@ -249,17 +249,17 @@ const savings = computed(() => {
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="rounded-2xl bg-gradient-to-r from-estoril-600 to-estoril-800 px-6 py-12 sm:px-12 sm:py-16 text-center">
                     <h2 class="text-3xl font-bold text-white sm:text-4xl">
-                        {{ t('pricing.cta_title') }}
+                        {{ t('pricing_public.cta_title') }}
                     </h2>
                     <p class="mt-4 text-lg text-estoril-100">
-                        {{ t('pricing.cta_desc') }}
+                        {{ t('pricing_public.cta_subtitle') }}
                     </p>
                     <div class="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
                         <Link
                             :href="route('register')"
                             class="inline-flex items-center gap-2 rounded-xl bg-white px-8 py-3.5 text-base font-semibold text-estoril-700 shadow-sm transition hover:bg-estoril-50"
                         >
-                            {{ t('pricing.start_free_trial') }}
+                            {{ t('pricing_public.start_free_trial') }}
                             <ArrowRightIcon class="h-4 w-4" />
                         </Link>
                         <a
@@ -267,7 +267,7 @@ const savings = computed(() => {
                             class="inline-flex items-center gap-2 rounded-xl bg-estoril-700 px-8 py-3.5 text-base font-semibold text-white ring-1 ring-white/20 transition hover:bg-estoril-800"
                         >
                             <TruckIcon class="h-5 w-5" />
-                            {{ t('pricing.contact_sales') }}
+                            {{ t('pricing_public.contact_sales') }}
                         </a>
                     </div>
                 </div>
