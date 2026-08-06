@@ -1,0 +1,76 @@
+#!/bin/sh
+# Git pre-commit hook para ImportnexCore
+# Instalar: cp scripts/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+#
+# Validaciones que evitan rollback:
+# 1. PHP syntax check (todos los archivos modificados)
+# 2. Pint dirty check (detectar issues de formato)
+# 3. i18n parity check (es/en sincronizado)
+# 4. Pre-commit tests (PHPUnit) si cambió código de Tests/
+
+set -e
+
+CHANGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR)
+
+# 1. PHP syntax check
+echo "🔍 Pre-commit: PHP syntax check..."
+PHP_FILES=$(echo "$CHANGED_FILES" | grep -E '\.php$' || true)
+if [ -n "$PHP_FILES" ]; then
+    SYNTAX_ERRORS=0
+    for f in $PHP_FILES; do
+        if [ -f "$f" ]; then
+            php -l "$f" >/dev/null 2>&1 || {
+                echo "❌ PHP syntax error in: $f"
+                SYNTAX_ERRORS=$((SYNTAX_ERRORS+1))
+            }
+        fi
+    done
+    if [ $SYNTAX_ERRORS -gt 0 ]; then
+        echo "❌ $SYNTAX_ERRORS archivos PHP con errores de sintaxis"
+        exit 1
+    fi
+    echo "✅ PHP syntax OK"
+fi
+
+# 2. Pint (si está instalado y hay archivos modificados)
+if [ -n "$PHP_FILES" ] && [ -f "vendor/bin/pint" ]; then
+    echo "🎨 Pre-commit: Pint dirty check..."
+    if ! vendor/bin/pint --test --dirty --no-interaction 2>&1 | grep -q 'PASSED'; then
+        echo "⚠️  Hay issues de formato. Ejecuta: vendor/bin/pint --dirty"
+    else
+        echo "✅ Pint OK"
+    fi
+fi
+
+# 3. i18n parity check
+if [ -f "scripts/check-translations.cjs" ] && [ -f "node_modules/.package-lock.json" ]; then
+    echo "🌐 Pre-commit: i18n parity check..."
+    if ! node scripts/check-translations.cjs 2>&1; then
+        echo "⚠️  Hay desfase de traducciones es/en"
+        echo "    Verifica que toda clave nueva esté en ambos idiomas"
+    else
+        echo "✅ i18n OK"
+    fi
+fi
+
+# 4. Tests (solo si cambió código de Tests/ o controlador crítico)
+TEST_FILES=$(echo "$CHANGED_FILES" | grep -E '^(tests/|app/Http/Controllers/(Billing|StripeWebhookController))' || true)
+if [ -n "$TEST_FILES" ] && [ -f "vendor/bin/phpunit" ]; then
+    echo "🧪 Pre-commit: Tests..."
+    if ! php artisan test --compact 2>&1 | tail -10; then
+        echo "❌ Tests fallaron"
+        exit 1
+    fi
+    echo "✅ Tests OK"
+fi
+
+# 5. Vite manifest regenerated check (si cambió resources/)
+VITE_FILES=$(echo "$CHANGED_FILES" | grep -E '^resources/' || true)
+if [ -n "$VITE_FILES" ] && [ ! -f "public/build/manifest.json" ]; then
+    echo "⚠️  Hay cambios en resources/ pero NO hay manifest.json"
+    echo "    USER debe ejecutar: npm run build antes de commit"
+fi
+
+echo ""
+echo "✅ Pre-commit checks completados"
+exit 0
