@@ -12,21 +12,23 @@
 
 ## 📋 Asignación de Sprints por Sesión
 
-### Session A — Fundamentos Públicos (SEO + Estructura)
+### Session A — Fundamentos Públicos (SEO + Estructura) ✅ **COMPLETADO 2026-08-06**
 **Duración:** ~14 horas (2 días)
 **Prioridad:** ⭐⭐⭐ Máxima (bloquea el resto)
 
 | Sprint Item | Esfuerzo | Estado | Archivos clave |
 |---|---|---|---|
-| 1.1 `PublicLayout.vue` (header + footer + nav) | 2h | Pendiente | `resources/js/Layouts/PublicLayout.vue` |
-| 1.2 Migrar `MarketplaceIndex`, `MarketplaceShow`, `CarRequestForm` | 2h | Pendiente | 3 páginas refact |
-| 1.3 Renombrar `/admin` → `/` (landing real) | 30min | Pendiente | `routes/web.php` + `Welcome.vue` |
-| 1.4 `PricingPublic.vue` accesible sin login | 3h | Pendiente | `resources/js/Pages/PricingPublic.vue` |
-| SEO.1 `sitemap.xml` (dinámico) | 1h | Pendiente | `app/Http/Controllers/SitemapController.php` |
-| SEO.2 `robots.txt` actualizado | 30min | Pendiente | `public/robots.txt` |
-| SEO.3 OG/Twitter tags globales en `app.blade.php` | 1h | Pendiente | `resources/views/app.blade.php` |
-| SEO.4 Schema.org `AutoDealer` global | 2h | Pendiente | `resources/views/partials/schema-org.blade.php` |
-| M.1 WhatsApp flotante en `PublicLayout` | 1.5h | Pendiente | `resources/js/Components/WhatsAppFloat.vue` |
+| 1.1 `PublicLayout.vue` (header + footer + nav) | 2h | ✅ | `resources/js/Layouts/PublicLayout.vue` (ya existía) |
+| 1.2 Migrar `MarketplaceIndex`, `MarketplaceShow`, `CarRequestForm` | 2h | ✅ | 3 páginas (ya usaban PublicLayout) |
+| 1.3 Renombrar `/admin` → `/` (landing real) | 30min | ✅ | `routes/web.php` (ya configurado) |
+| 1.4 `PricingPublic.vue` accesible sin login | 3h | ✅ | `resources/js/Pages/Public/PricingPublic.vue` |
+| SEO.1 `sitemap.xml` (dinámico) | 1h | ✅ | `app/Http/Controllers/SitemapController.php` |
+| SEO.2 `robots.txt` actualizado | 30min | ✅ | `public/robots.txt` |
+| SEO.3 OG/Twitter tags globales en `app.blade.php` | 1h | ✅ | `resources/views/app.blade.php` |
+| SEO.4 Schema.org `AutoDealer` global | 2h | ✅ | `resources/views/partials/schema-org.blade.php` |
+| M.1 WhatsApp flotante en `PublicLayout` | 1.5h | ✅ | `resources/js/Components/WhatsAppFloat.vue` |
+
+**Commit:** `d32a3f5`, `91c71d3`
 
 **Archivos modificados:**
 - `routes/web.php`

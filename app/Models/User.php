@@ -39,6 +39,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsTo(Organization::class);
     }
 
+    public function onboardingProgress()
+    {
+        return $this->hasOne(UserOnboardingProgress::class);
+    }
+
     public function scopeFromOrganization($query, $organizationId)
     {
         return $query->where('organization_id', $organizationId);

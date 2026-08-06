@@ -75,6 +75,14 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, '__invoke'])
         ->name('dashboard');
 
+    // Onboarding wizard (redirige a dashboard si ya está completado)
+    Route::get('/onboarding', [\App\Http\Controllers\OnboardingController::class, 'index'])
+        ->name('onboarding.index');
+    Route::post('/onboarding', [\App\Http\Controllers\OnboardingController::class, 'update'])
+        ->name('onboarding.update');
+    Route::post('/onboarding/skip', [\App\Http\Controllers\OnboardingController::class, 'skip'])
+        ->name('onboarding.skip');
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
