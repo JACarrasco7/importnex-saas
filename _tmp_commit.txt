@@ -1,0 +1,23 @@
+perf(Session B Sprint 4.2): deferred props en Cars/Clients + WhenVisible
+
+Backend:
+- CarController::index y ClientController::index envuelven el listado
+  paginado en Inertia::DeferredProp para que la peticion inicial no
+  espere a la query (sale un spinner skeleton al usuario).
+
+Frontend:
+- Cars/Index.vue: <WhenVisible data="cars"> con fallback de 10 Skeleton
+  cards. Listado solo se monta cuando el partial reload resuelve.
+  Guard props.cars en v-if para evitar render antes de tiempo.
+- Clients/Index.vue: mismo patron con 6 Skeleton cards.
+- Cerrados los WhenVisible y divs balanceados (38/38, 27/27).
+
+Limpieza:
+- Borrado resources/js/Composables/useIcons.js (creado en sesion D
+  pero sin imports en ningun sitio -> codigo muerto).
+
+i18n:
+- Traducciones para filtros de alertas (filter_all, filter_by_type,
+  filter_clear), snooze (1h/3h/24h/3d/7d), acciones (retry/view/mark)
+  y contador pluralizado. Sin esto, los componentes de alertas
+  renderizan keys crudas en es/en.

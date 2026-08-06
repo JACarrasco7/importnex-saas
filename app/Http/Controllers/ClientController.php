@@ -6,6 +6,7 @@ use App\Models\Client;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Inertia\DeferredProp;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -14,9 +15,9 @@ class ClientController extends Controller
     public function index(Request $request): Response
     {
         $clients = Client::query()
-            ->when($request->input('status'), fn($q, $s) => $q->where('status', $s))
-            ->when($request->input('search'), function($q, $s) {
-                $q->where(function($sub) use ($s) {
+            ->when($request->input('status'), fn ($q, $s) => $q->where('status', $s))
+            ->when($request->input('search'), function ($q, $s) {
+                $q->where(function ($sub) use ($s) {
                     $sub->where('name', 'like', "%$s%")
                         ->orWhere('contact_info', 'like', "%$s%");
                 });
@@ -28,7 +29,7 @@ class ClientController extends Controller
         $statuses = ['New', 'Briefing', 'Quote sent', 'Negotiating', 'Order signed', 'In process', 'Delivered'];
 
         return Inertia::render('Clients/Index', [
-            'clients' => $clients,
+            'clients' => DeferredProp::make(fn () => $clients),
             'statuses' => $statuses,
             'filters' => $request->only(['status', 'search']),
         ]);
@@ -70,6 +71,7 @@ class ClientController extends Controller
     public function show(Client $client): Response
     {
         $client->load(['cars', 'contactLogs', 'contacts']);
+
         return Inertia::render('Clients/Show', [
             'client' => $client,
         ]);
@@ -103,6 +105,7 @@ class ClientController extends Controller
     public function destroy(Client $client): RedirectResponse
     {
         $client->delete();
+
         return redirect()->route('clients.index')
             ->with('success', 'Client deleted successfully.');
     }

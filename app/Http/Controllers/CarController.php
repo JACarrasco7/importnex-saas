@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Imports\CarsImport;
 use App\Models\Car;
 use App\Models\Client;
-use App\Imports\CarsImport;
 use App\Services\Scraping\CarScrapingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Inertia\DeferredProp;
 use Inertia\Inertia;
 use Inertia\Response;
 use Maatwebsite\Excel\Facades\Excel;
@@ -19,10 +20,10 @@ class CarController extends Controller
     public function index(Request $request): Response
     {
         $cars = Car::query()
-            ->when($request->input('status'), fn($q, $s) => $q->where('status', $s))
-            ->when($request->input('traffic_light'), fn($q, $t) => $q->where('traffic_light', $t))
-            ->when($request->input('search'), function($q, $s) {
-                $q->where(function($sub) use ($s) {
+            ->when($request->input('status'), fn ($q, $s) => $q->where('status', $s))
+            ->when($request->input('traffic_light'), fn ($q, $t) => $q->where('traffic_light', $t))
+            ->when($request->input('search'), function ($q, $s) {
+                $q->where(function ($sub) use ($s) {
                     $sub->where('brand', 'like', "%$s%")
                         ->orWhere('model', 'like', "%$s%")
                         ->orWhere('vin', 'like', "%$s%");
@@ -36,7 +37,7 @@ class CarController extends Controller
         $lights = ['green', 'amber', 'red', 'neutral'];
 
         return Inertia::render('Cars/Index', [
-            'cars' => $cars,
+            'cars' => DeferredProp::make(fn () => $cars),
             'statuses' => $statuses,
             'lights' => $lights,
             'filters' => $request->only(['status', 'traffic_light', 'search']),
@@ -78,6 +79,7 @@ class CarController extends Controller
     public function create(): Response
     {
         $clients = Client::select('id', 'name')->get();
+
         return Inertia::render('Cars/Create', [
             'clients' => $clients,
         ]);
@@ -158,25 +160,25 @@ class CarController extends Controller
 
         $milestonesProgress = [
             'completed' => $checklistMilestones->where('completed', true)->count(),
-            'total'     => $checklistMilestones->count(),
+            'total' => $checklistMilestones->count(),
         ];
 
         $inspectionsProgress = [
             'completed' => $checklistInspections->where('completed', true)->count(),
-            'total'     => $checklistInspections->count(),
+            'total' => $checklistInspections->count(),
         ];
 
         return Inertia::render('Cars/Show', [
             'car' => $car,
             'derived' => [
-                'total_cost'           => $car->calculateTotalCost(),
-                'iedmt'                => $car->calculateIEDMT(),
-                'research_gaps'        => $car->researchGaps,
-                'comparables_stats'    => $car->comparablesStats,
-                'milestones_progress'  => $milestonesProgress,
+                'total_cost' => $car->calculateTotalCost(),
+                'iedmt' => $car->calculateIEDMT(),
+                'research_gaps' => $car->researchGaps,
+                'comparables_stats' => $car->comparablesStats,
+                'milestones_progress' => $milestonesProgress,
                 'inspections_progress' => $inspectionsProgress,
                 'inspections_by_section' => $inspectionsBySection,
-                'documents_by_group'   => $documentsByGroup,
+                'documents_by_group' => $documentsByGroup,
             ],
         ]);
     }
@@ -184,17 +186,18 @@ class CarController extends Controller
     private function docGroupLabel(string $group): string
     {
         return match ($group) {
-            'seller_origin'      => 'Seller / Country of origin',
+            'seller_origin' => 'Seller / Country of origin',
             'purchase_transport' => 'Purchase & transport',
-            'spain_procedures'   => 'Spain procedures',
-            'ai_reports'         => 'AI briefing reports',
-            default              => ucfirst(str_replace('_', ' ', $group)),
+            'spain_procedures' => 'Spain procedures',
+            'ai_reports' => 'AI briefing reports',
+            default => ucfirst(str_replace('_', ' ', $group)),
         };
     }
 
     public function edit(Car $car): Response
     {
         $clients = Client::select('id', 'name')->get();
+
         return Inertia::render('Cars/Edit', [
             'car' => $car,
             'clients' => $clients,

@@ -1,12 +1,13 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { Head, Link, router, useForm } from '@inertiajs/vue3';
+import { Head, Link, router, useForm, WhenVisible } from '@inertiajs/vue3';
 import { MagnifyingGlassIcon, PlusIcon, Squares2X2Icon, ArrowUpTrayIcon, PencilIcon, EyeIcon, TrashIcon, SparklesIcon } from '@heroicons/vue/24/outline';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Badge from '@/Components/Badge.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import EmptyState from '@/Components/EmptyState.vue';
 import ConfirmDialog from '@/Components/ConfirmDialog.vue';
+import Skeleton from '@/Components/Skeleton.vue';
 import { useFormat } from '@/Composables/useFormat';
 import { useTranslations } from '@/Composables/useTranslations';
 
@@ -27,27 +28,29 @@ const { currency, statusVariant, trafficLightVariant } = useFormat();
 const { t } = useTranslations();
 
 const tabs = computed(() => {
+    const carsData = props.cars?.data || [];
+    const total = props.cars?.total || 0;
     // Order statuses by typical workflow
     const statusOrder = ['Located', 'Valuing', 'Offered', 'Reserved', 'Purchased', 'In_transit', 'Processing', 'Pending review', 'Verifying', 'Delivered', 'Discarded'];
     const ordered = statusOrder.filter(s => props.statuses.includes(s));
     const remaining = props.statuses.filter(s => !ordered.includes(s));
     return [
-        { id: 'all', label: t('common.all'), count: props.cars.total },
+        { id: 'all', label: t('common.all'), count: total },
         ...ordered.map(status => ({
             id: status,
             label: status,
-            count: props.cars.data?.filter(c => c.status === status).length || 0
+            count: carsData.filter(c => c.status === status).length || 0
         })),
         ...remaining.map(status => ({
             id: status,
             label: status,
-            count: props.cars.data?.filter(c => c.status === status).length || 0
+            count: carsData.filter(c => c.status === status).length || 0
         }))
     ];
 });
 
 const stats = computed(() => {
-    const cars = props.cars.data || [];
+    const cars = props.cars?.data || [];
     return {
         green: cars.filter(c => c.traffic_light === 'green').length,
         amber: cars.filter(c => c.traffic_light === 'amber').length,
@@ -57,7 +60,8 @@ const stats = computed(() => {
 });
 
 const filteredCars = computed(() => {
-    let result = props.cars.data || [];
+    const carsData = props.cars?.data || [];
+    let result = carsData;
     if (currentTab.value !== 'all') {
         result = result.filter(c => c.status === currentTab.value);
     }
@@ -218,12 +222,19 @@ const confirmDelete = () => {
                 </div>
 
                 <!-- Cards Grid -->
-                <div v-if="filteredCars.length > 0" class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                    <div
-                        v-for="car in filteredCars"
-                        :key="car.id"
-                        class="group relative overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-200 transition-all hover:shadow-md hover:ring-gray-300 dark:bg-asphalt-800 dark:ring-asphalt-700 dark:hover:ring-asphalt-600"
-                    >
+                <WhenVisible data="cars">
+                    <template #fallback>
+                        <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                            <Skeleton v-for="i in 10" :key="i" class="h-48" />
+                        </div>
+                    </template>
+
+                    <div v-if="props.cars && filteredCars.length > 0" class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                        <div
+                            v-for="car in filteredCars"
+                            :key="car.id"
+                            class="group relative overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-200 transition-all hover:shadow-md hover:ring-gray-300 dark:bg-asphalt-800 dark:ring-asphalt-700 dark:hover:ring-asphalt-600"
+                        >
                         <Link :href="route('cars.show', car.id)" class="block">
                             <div v-if="car.photos && car.photos.length > 0" class="aspect-video overflow-hidden bg-gray-100">
                                 <img :src="car.photos[0]" :alt="t('cars.marketplace_brand_model', { brand: car.brand, model: car.model })" class="h-full w-full object-cover transition-transform group-hover:scale-105" loading="lazy" />
@@ -284,16 +295,17 @@ const confirmDelete = () => {
                             </div>
                         </div>
                     </div>
-                </div>
+                    </div>
 
-                <EmptyState
-                    v-else
-                    icon="🚗"
+                    <EmptyState
+                        v-else-if="props.cars"
+                        icon="🚗"
                     :title="t('cars.no_cars_found')"
                     :description="t('cars.no_cars_found_desc')"
                     :primary-action="{ text: t('cars.add_first_car'), route: route('cars.create') }"
                     :secondary-action="{ text: t('cars.import_csv', 'Importar CSV'), route: route('cars.import') }"
-                />
+                    />
+                </WhenVisible>
             </div>
         </div>
 

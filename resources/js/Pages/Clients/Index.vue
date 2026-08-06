@@ -1,12 +1,13 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, Link, router, WhenVisible } from '@inertiajs/vue3';
 import { MagnifyingGlassIcon, PlusIcon, EyeIcon, PencilIcon, TrashIcon, UserIcon } from '@heroicons/vue/24/outline';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Badge from '@/Components/Badge.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import EmptyState from '@/Components/EmptyState.vue';
 import ConfirmDialog from '@/Components/ConfirmDialog.vue';
+import Skeleton from '@/Components/Skeleton.vue';
 import { useFormat } from '@/Composables/useFormat';
 import { useTranslations } from '@/Composables/useTranslations';
 
@@ -152,7 +153,14 @@ const confirmDelete = () => {
                 </div>
 
                 <!-- Cards Grid -->
-                <div v-if="filteredClients.length > 0" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <WhenVisible data="clients">
+                    <template #fallback>
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                            <Skeleton v-for="i in 6" :key="i" class="h-40" />
+                        </div>
+                    </template>
+
+                <div v-if="props.clients && filteredClients.length > 0" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <div
                         v-for="client in filteredClients"
                         :key="client.id"
@@ -203,14 +211,15 @@ const confirmDelete = () => {
                     </div>
                 </div>
 
-                <EmptyState
-                    v-else
-                    icon="👥"
-                    :title="t('cars.no_clients_found')"
-                    :description="t('cars.no_clients_found_desc')"
-                    :primary-action="{ text: t('cars.add_first_client'), route: route('clients.create') }"
-                    :secondary-action="{ text: t('cars.view_marketplace', 'Ver Marketplace'), route: route('marketplace.index') }"
-                />
+                    <EmptyState
+                        v-else-if="props.clients"
+                        icon="👥"
+                        :title="t('cars.no_clients_found')"
+                        :description="t('cars.no_clients_found_desc')"
+                        :primary-action="{ text: t('cars.add_first_client'), route: route('clients.create') }"
+                        :secondary-action="{ text: t('cars.view_marketplace', 'Ver Marketplace'), route: route('marketplace.index') }"
+                    />
+                </WhenVisible>
             </div>
         </div>
 
