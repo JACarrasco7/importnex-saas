@@ -61,6 +61,10 @@ const confirmDelete = () => {
         onSuccess: () => { showDelete.value = false; alertToAct.value = null; },
     });
 };
+
+const markAllRead = () => {
+    router.post(route('alerts.mark-all-read'), {}, { preserveScroll: true });
+};
 </script>
 
 <template>

@@ -1553,6 +1553,7 @@ export default {
         empty_description: "No hay alertas pendientes. Tu flota está funcionando sin problemas.",
         showing_keyword: "Mostrando",
         to_keyword: "al",
+        mark_all_read: "Marcar todas como leídas",
 },
     subscription: {
         title: 'Suscripción',

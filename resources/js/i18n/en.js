@@ -1038,6 +1038,7 @@ export default {
         empty_description: "No pending alerts. Your fleet is running smoothly.",
         showing_keyword: "Showing",
         to_keyword: "to",
+        mark_all_read: "Mark all as read",
 },
     subscription: {
         title: 'Subscription',
