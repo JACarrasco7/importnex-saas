@@ -11,10 +11,10 @@ class SitemapController extends Controller
     public function index(): Response
     {
         $cars = Car::query()
-            ->where('published', true)
-            ->whereNotNull('published_at')
-            ->orderBy('published_at', 'desc')
-            ->get(['id', 'published_at', 'updated_at']);
+            ->where('is_marketplace', true)
+            ->orderBy('updated_at', 'desc')
+            ->limit(500)
+            ->get(['id', 'updated_at']);
 
         return response()->view('sitemap', [
             'cars' => $cars,
