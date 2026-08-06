@@ -179,26 +179,26 @@ const confirmDelete = () => {
 
                 <!-- Quick Stats -->
                 <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                    <div class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.total_value') }}</div>
-                        <div class="mt-1 text-2xl font-bold text-gray-900">{{ currency(stats.totalValue) }}</div>
+                    <div class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700">
+                        <div class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ t('cars.total_value') }}</div>
+                        <div class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">{{ currency(stats.totalValue) }}</div>
                     </div>
-                    <div class="rounded-xl bg-emerald-50 p-4 shadow-sm ring-1 ring-emerald-200">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-emerald-700">{{ t('cars.light_green') }}</div>
-                        <div class="mt-1 text-2xl font-bold text-emerald-600">{{ stats.green }}</div>
+                    <div class="rounded-xl bg-emerald-50 p-4 shadow-sm ring-1 ring-emerald-200 dark:bg-emerald-900/20 dark:ring-emerald-800">
+                        <div class="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">{{ t('cars.light_green') }}</div>
+                        <div class="mt-1 text-2xl font-bold text-emerald-600 dark:text-emerald-400">{{ stats.green }}</div>
                     </div>
-                    <div class="rounded-xl bg-amber-50 p-4 shadow-sm ring-1 ring-amber-200">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-amber-700">{{ t('cars.light_amber') }}</div>
-                        <div class="mt-1 text-2xl font-bold text-amber-600">{{ stats.amber }}</div>
+                    <div class="rounded-xl bg-amber-50 p-4 shadow-sm ring-1 ring-amber-200 dark:bg-amber-900/20 dark:ring-amber-800">
+                        <div class="text-xs font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-400">{{ t('cars.light_amber') }}</div>
+                        <div class="mt-1 text-2xl font-bold text-amber-600 dark:text-amber-400">{{ stats.amber }}</div>
                     </div>
-                    <div class="rounded-xl bg-red-50 p-4 shadow-sm ring-1 ring-red-200">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-red-700">{{ t('cars.light_red') }}</div>
-                        <div class="mt-1 text-2xl font-bold text-red-600">{{ stats.red }}</div>
+                    <div class="rounded-xl bg-red-50 p-4 shadow-sm ring-1 ring-red-200 dark:bg-red-900/20 dark:ring-red-800">
+                        <div class="text-xs font-semibold uppercase tracking-wider text-red-700 dark:text-red-400">{{ t('cars.light_red') }}</div>
+                        <div class="mt-1 text-2xl font-bold text-red-600 dark:text-red-400">{{ stats.red }}</div>
                     </div>
                 </div>
 
                 <!-- Tabs -->
-                <div class="border-b border-gray-200">
+                <div class="border-b border-gray-200 dark:border-asphalt-700">
                     <nav class="-mb-px flex gap-8 overflow-x-auto">
                         <button
                             v-for="tab in tabs"
@@ -207,12 +207,12 @@ const confirmDelete = () => {
                             :class="[
                                 'whitespace-nowrap border-b-2 px-1 py-4 text-sm font-semibold transition-colors',
                                 currentTab === tab.id
-                                    ? 'border-estoril-600 text-estoril-600'
-                                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                                    ? 'border-estoril-600 text-estoril-600 dark:text-estoril-400'
+                                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
                             ]"
                         >
                             {{ tab.label }}
-                            <span v-if="tab.count > 0" class="ml-2 rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">{{ tab.count }}</span>
+                            <span v-if="tab.count > 0" class="ml-2 rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600 dark:bg-asphalt-700 dark:text-gray-300">{{ tab.count }}</span>
                         </button>
                     </nav>
                 </div>
@@ -222,7 +222,7 @@ const confirmDelete = () => {
                     <div
                         v-for="car in filteredCars"
                         :key="car.id"
-                        class="group relative overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-200 transition-all hover:shadow-md hover:ring-gray-300"
+                        class="group relative overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-200 transition-all hover:shadow-md hover:ring-gray-300 dark:bg-asphalt-800 dark:ring-asphalt-700 dark:hover:ring-asphalt-600"
                     >
                         <Link :href="route('cars.show', car.id)" class="block">
                             <div v-if="car.photos && car.photos.length > 0" class="aspect-video overflow-hidden bg-gray-100">

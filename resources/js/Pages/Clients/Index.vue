@@ -105,34 +105,34 @@ const confirmDelete = () => {
                 </PageHeader>
 
                 <!-- Filters -->
-                <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
+                <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700">
                     <div class="p-4">
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">{{ t('cars.search') }}</label>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">{{ t('cars.search') }}</label>
                         <div class="relative">
                             <MagnifyingGlassIcon class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                            <input v-model="search" type="text" :placeholder="t('cars.filter_clients_placeholder')" class="block w-full rounded-lg border-gray-300 pl-9 text-sm focus:border-estoril-500 focus:ring-estoril-500" />
+                            <input v-model="search" type="text" :placeholder="t('cars.filter_clients_placeholder')" class="block w-full rounded-lg border-gray-300 pl-9 text-sm focus:border-estoril-500 focus:ring-estoril-500 dark:border-asphalt-600 dark:bg-asphalt-700 dark:text-white dark:placeholder-gray-500" />
                         </div>
                     </div>
                 </div>
 
                 <!-- Quick Stats -->
                 <div class="grid grid-cols-3 gap-4 sm:grid-cols-3">
-                    <div class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.total_label') }}</div>
-                        <div class="mt-1 text-2xl font-bold text-gray-900">{{ stats.total }}</div>
+                    <div class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700">
+                        <div class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ t('cars.total_label') }}</div>
+                        <div class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">{{ stats.total }}</div>
                     </div>
-                    <div class="rounded-xl bg-estoril-50 p-4 shadow-sm ring-1 ring-estoril-200">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-estoril-700">{{ t('cars.active_label') }}</div>
-                        <div class="mt-1 text-2xl font-bold text-estoril-600">{{ stats.active }}</div>
+                    <div class="rounded-xl bg-estoril-50 p-4 shadow-sm ring-1 ring-estoril-200 dark:bg-estoril-900/20 dark:ring-estoril-800">
+                        <div class="text-xs font-semibold uppercase tracking-wider text-estoril-700 dark:text-estoril-400">{{ t('cars.active_label') }}</div>
+                        <div class="mt-1 text-2xl font-bold text-estoril-600 dark:text-estoril-400">{{ stats.active }}</div>
                     </div>
-                    <div class="rounded-xl bg-amber-50 p-4 shadow-sm ring-1 ring-amber-200">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-amber-700">{{ t('cars.leads') }}</div>
-                        <div class="mt-1 text-2xl font-bold text-amber-600">{{ stats.leads }}</div>
+                    <div class="rounded-xl bg-amber-50 p-4 shadow-sm ring-1 ring-amber-200 dark:bg-amber-900/20 dark:ring-amber-800">
+                        <div class="text-xs font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-400">{{ t('cars.leads') }}</div>
+                        <div class="mt-1 text-2xl font-bold text-amber-600 dark:text-amber-400">{{ stats.leads }}</div>
                     </div>
                 </div>
 
                 <!-- Tabs -->
-                <div class="border-b border-gray-200">
+                <div class="border-b border-gray-200 dark:border-asphalt-700">
                     <nav class="-mb-px flex gap-8 overflow-x-auto">
                         <button
                             v-for="tab in tabs"
@@ -141,12 +141,12 @@ const confirmDelete = () => {
                             :class="[
                                 'whitespace-nowrap border-b-2 px-1 py-4 text-sm font-semibold transition-colors',
                                 currentTab === tab.id
-                                    ? 'border-estoril-600 text-estoril-600'
-                                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                                    ? 'border-estoril-600 text-estoril-600 dark:text-estoril-400'
+                                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
                             ]"
                         >
                             {{ tab.label }}
-                            <span v-if="tab.count > 0" class="ml-2 rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">{{ tab.count }}</span>
+                            <span v-if="tab.count > 0" class="ml-2 rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600 dark:bg-asphalt-700 dark:text-gray-300">{{ tab.count }}</span>
                         </button>
                     </nav>
                 </div>
@@ -156,7 +156,7 @@ const confirmDelete = () => {
                     <div
                         v-for="client in filteredClients"
                         :key="client.id"
-                        class="group relative overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-200 transition-all hover:shadow-md hover:ring-gray-300"
+                        class="group relative overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-200 transition-all hover:shadow-md hover:ring-gray-300 dark:bg-asphalt-800 dark:ring-asphalt-700 dark:hover:ring-asphalt-600"
                     >
                         <div class="p-5">
                             <div class="flex items-start justify-between gap-3">
