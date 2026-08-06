@@ -75,6 +75,14 @@ const confirmDelete = () => {
             <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
                 <PageHeader :title="t('alerts.title')" :subtitle="`${alerts.total || 0} ${filter === 'pending' ? t('alerts.subtitle_pending') : t('alerts.subtitle_all')}`">
                     <template #actions>
+                        <button
+                            v-if="alerts.total > 0 && filter === 'pending'"
+                            @click="markAllRead"
+                            class="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-1.5 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                        >
+                            <CheckIcon class="h-4 w-4" />
+                            {{ t('alerts.mark_all_read') }}
+                        </button>
                         <div class="inline-flex rounded-lg bg-white p-1 shadow-sm ring-1 ring-gray-200">
                             <button @click="filter = 'pending'" :class="['rounded-md px-3 py-1.5 text-sm font-semibold transition', filter === 'pending' ? 'bg-estoril-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-50']">{{ t('alerts.filter_pending') }}</button>
                             <button @click="filter = 'all'" :class="['rounded-md px-3 py-1.5 text-sm font-semibold transition', filter === 'all' ? 'bg-estoril-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-50']">{{ t('common.all') }}</button>

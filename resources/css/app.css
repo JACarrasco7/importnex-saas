@@ -2,6 +2,8 @@
 @plugin "@tailwindcss/forms";
 @plugin "@tailwindcss/typography";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
     --color-estoril-50: #eef1fa;
     --color-estoril-100: #dce3f5;
@@ -35,9 +37,99 @@
     --color-platinum-700: #6e7075;
     --color-platinum-800: #525459;
     --color-platinum-900: #383a3e;
+
+    --animate-fade-in: fade-in 0.2s ease-out;
+    --animate-fade-out: fade-out 0.15s ease-in;
+    --animate-slide-up: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    --animate-slide-down: slide-down 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    --animate-shimmer: shimmer 2s infinite linear;
+    --animate-pulse-soft: pulse-soft 2s infinite ease-in-out;
 }
 
-/* Pre-Tailwind v4 dark variants (compatibility with existing classes) */
+@keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+@keyframes fade-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+@keyframes slide-up {
+    from { transform: translateY(8px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+@keyframes slide-down {
+    from { transform: translateY(-8px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+@keyframes pulse-soft {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+@utility skeleton {
+    background: linear-gradient(
+        90deg,
+        color-mix(in oklab, var(--color-asphalt-200) 50%, transparent) 0%,
+        color-mix(in oklab, var(--color-asphalt-100) 80%, transparent) 50%,
+        color-mix(in oklab, var(--color-asphalt-200) 50%, transparent) 100%
+    );
+    background-size: 200% 100%;
+    animation: var(--animate-shimmer);
+    border-radius: 0.375rem;
+}
+
 @layer base {
-    /* Tailwind v4 enables color-mix by default */
+    html {
+        scroll-behavior: smooth;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+        @apply bg-white text-asphalt-800 antialiased;
+    }
+
+    .dark body {
+        @apply bg-asphalt-900 text-asphalt-100;
+    }
+
+    :focus-visible {
+        @apply outline-none ring-2 ring-estoril-500 ring-offset-2 ring-offset-white dark:ring-offset-asphalt-900;
+    }
+
+    *::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+    *::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    *::-webkit-scrollbar-thumb {
+        @apply bg-asphalt-300 dark:bg-asphalt-700 rounded-full;
+    }
+    *::-webkit-scrollbar-thumb:hover {
+        @apply bg-asphalt-400 dark:bg-asphalt-600;
+    }
+}
+
+@layer components {
+    .card-premium {
+        @apply rounded-xl border border-asphalt-200/60 bg-white shadow-sm transition
+               hover:shadow-md dark:border-asphalt-700/60 dark:bg-asphalt-800/60 dark:backdrop-blur;
+    }
+
+    .link-underline {
+        @apply relative inline-block after:absolute after:bottom-0 after:left-0 after:h-px
+               after:w-0 after:bg-current after:transition-all after:duration-300
+               hover:after:w-full;
+    }
+
+    .text-gradient {
+        @apply bg-gradient-to-r from-estoril-600 to-estoril-400 bg-clip-text text-transparent;
+    }
 }

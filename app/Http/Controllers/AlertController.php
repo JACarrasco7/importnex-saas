@@ -56,4 +56,63 @@ class AlertController extends Controller
         return redirect()->route('alerts.index')
             ->with('success', 'Alert deleted successfully.');
     }
+
+    /**
+     * Endpoint ligero para polling del badge y toasts in-app.
+     * Devuelve count + últimas 5 alertas pendientes. Pensado para
+     * llamarse cada 30s desde el cliente sin WebSockets.
+     */
+    public function pending(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $org = $request->user()?->organization;
+        if (! $org) {
+            return response()->json(['count' => 0, 'latest_id' => null, 'recent' => []]);
+        }
+
+        $alerts = Alert::query()
+            ->where('organization_id', $org->id)
+            ->where('resolved', false)
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        // Asegurar que target_url viaja (util para el toast link)
+        $alerts->each->append('target_url');
+
+        return response()->json([
+            'count' => $alerts->count(),
+            'latest_id' => $alerts->first()?->id,
+            'recent' => $alerts->map(fn ($a) => [
+                'id' => $a->id,
+                'alert_type' => $a->alert_type,
+                'reference_type' => $a->reference_type,
+                'reference_id' => $a->reference_id,
+                'message' => $a->message,
+                'target_url' => $a->target_url,
+                'created_at' => $a->created_at?->toIso8601String(),
+            ]),
+        ]);
+    }
+
+    /**
+     * Marca todas las alertas pendientes del org como resueltas.
+     * Pensado para el botón "Marcar todas como leídas" del inbox.
+     */
+    public function markAllRead(Request $request): RedirectResponse
+    {
+        $org = $request->user()?->organization;
+        if (! $org) {
+            return back()->with('error', 'No organization.');
+        }
+
+        $updated = Alert::query()
+            ->where('organization_id', $org->id)
+            ->where('resolved', false)
+            ->update([
+                'resolved' => true,
+                'resolved_at' => now(),
+            ]);
+
+        return back()->with('success', "{$updated} alert(s) marked as resolved.");
+    }
 }

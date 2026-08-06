@@ -33,8 +33,11 @@ import FlashMessage from '@/Components/FlashMessage.vue';
 import UpgradeBanner from '@/Components/UpgradeBanner.vue';
 import LocaleSelector from '@/Components/LocaleSelector.vue';
 import SidebarGroup from '@/Components/SidebarGroup.vue';
+import NotificationToaster from '@/Components/NotificationToaster.vue';
+import DarkModeToggle from '@/Components/DarkModeToggle.vue';
 import { useTranslations } from '@/Composables/useTranslations';
 import { useFormat } from '@/Composables/useFormat';
+import { useNotificationPolling } from '@/Composables/useNotificationPolling';
 
 const { t } = useTranslations();
 
@@ -49,6 +52,20 @@ onClickOutside(userMenuRef, () => {
 
 const pendingAlerts = computed(() => page.props?.pending_alerts_count ?? 0);
 const pendingCarRequests = computed(() => page.props?.pending_car_requests_count ?? 0);
+
+// Polling reactivo: el badge se actualiza solo, y emite toasts in-app.
+// Usa /alerts/pending.json (endpoint ligero, sin paginacion).
+const {
+    count: liveAlertCount,
+    newCount: newAlertCount,
+    toasts: alertToasts,
+    markSeen: markAlertsSeen,
+    dismissToast: dismissAlertToast,
+} = useNotificationPolling({ intervalMs: 30000 });
+
+// Sincronizar el badge del topbar: usa el valor live si difiere del prop
+// (ej: tras navegar a otra pagina sin full reload)
+const visibleAlertCount = computed(() => Math.max(liveAlertCount.value, pendingAlerts.value));
 const userName = computed(() => page.props?.auth?.user?.name || 'User');
 const userEmail = computed(() => page.props?.auth?.user?.email || '');
 const user = computed(() => page.props?.auth?.user);
@@ -130,16 +147,16 @@ const navGroups = computed(() => [
 </script>
 
 <template>
-    <div class="min-h-screen bg-gray-50">
+    <div class="min-h-screen bg-gray-50 dark:bg-asphalt-900">
         <!-- Mobile sidebar backdrop -->
         <div v-if="sidebarOpen" class="fixed inset-0 z-40 bg-gray-900/60 backdrop-blur-sm lg:hidden" @click="sidebarOpen = false"></div>
 
         <!-- Sidebar -->
-        <aside :class="['fixed inset-y-0 left-0 z-50 w-64 transform bg-white shadow-xl ring-1 ring-gray-200 transition-transform lg:translate-x-0', sidebarOpen ? 'translate-x-0' : '-translate-x-full']">
-            <div class="flex h-16 items-center justify-between px-6 border-b border-gray-200">
+        <aside :class="['fixed inset-y-0 left-0 z-50 w-64 transform bg-white shadow-xl ring-1 ring-gray-200 transition-transform dark:bg-asphalt-800 dark:ring-asphalt-700 lg:translate-x-0', sidebarOpen ? 'translate-x-0' : '-translate-x-full']">
+            <div class="flex h-16 items-center justify-between px-6 border-b border-gray-200 dark:border-asphalt-700">
                 <Link :href="route('dashboard')" class="flex items-center gap-2">
                     <ApplicationLogo class="h-8 w-auto fill-current text-estoril-600" />
-                    <span class="text-lg font-bold text-gray-900">Importnex</span>
+                    <span class="text-lg font-bold text-gray-900 dark:text-white">Importnex</span>
                 </Link>
                 <button @click="sidebarOpen = false" class="rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 lg:hidden">
                     <XMarkIcon class="h-5 w-5" />
@@ -168,10 +185,20 @@ const navGroups = computed(() => [
         <!-- Main content -->
         <div class="lg:pl-64">
             <!-- Top bar -->
-            <header class="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-gray-200 bg-white/80 px-4 backdrop-blur sm:px-6 lg:px-8">
+            <header class="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-gray-200 bg-white/80 px-4 backdrop-blur dark:border-asphalt-700 dark:bg-asphalt-900/80 sm:px-6 lg:px-8">
                 <div class="flex items-center gap-3">
                     <button @click="sidebarOpen = true" class="rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 lg:hidden">
                         <Bars3Icon class="h-5 w-5" />
+                    </button>
+                    <button
+                        type="button"
+                        @click="$dispatch('command-palette:open')"
+                        class="hidden md:inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5 text-sm text-gray-500 transition hover:bg-gray-100 dark:border-asphalt-700 dark:bg-asphalt-800 dark:text-asphalt-400 dark:hover:bg-asphalt-700"
+                        :aria-label="t('common.search') ?? 'Buscar'"
+                    >
+                        <span class="text-xs">🔍</span>
+                        <span>Buscar...</span>
+                        <kbd class="ml-2 rounded border border-gray-300 bg-white px-1.5 py-0.5 text-[10px] font-mono dark:border-asphalt-600 dark:bg-asphalt-900">⌘K</kbd>
                     </button>
                     <div v-if="$slots.header" class="hidden sm:block">
                         <slot name="header" />
@@ -179,10 +206,31 @@ const navGroups = computed(() => [
                 </div>
 
                 <div class="flex items-center gap-2">
+                    <DarkModeToggle />
                     <LocaleSelector class="hidden sm:block" />
-                    <Link :href="route('alerts.index')" class="relative rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700">
-                        <BellIcon class="h-5 w-5" />
-                        <span v-if="pendingAlerts > 0" class="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white"></span>
+                    <Link
+                        :href="route('alerts.index')"
+                        @click="markAlertsSeen()"
+                        class="relative inline-flex items-center justify-center rounded-full p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-estoril-300"
+                        :aria-label="t('alerts.title')"
+                    >
+                        <BellIcon class="h-5 w-5" :class="newAlertCount > 0 ? 'animate-wiggle' : ''" />
+                        <Transition
+                            enter-active-class="transition duration-200 ease-out"
+                            enter-from-class="opacity-0 scale-50"
+                            enter-to-class="opacity-100 scale-100"
+                            leave-active-class="transition duration-150 ease-in"
+                            leave-from-class="opacity-100 scale-100"
+                            leave-to-class="opacity-0 scale-50"
+                        >
+                            <span
+                                v-if="visibleAlertCount > 0"
+                                class="absolute -right-0.5 -top-0.5 flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold leading-none text-white ring-2 ring-white"
+                                :class="newAlertCount > 0 ? 'animate-pop-in ring-rose-300' : ''"
+                            >
+                                {{ visibleAlertCount > 99 ? '99+' : visibleAlertCount }}
+                            </span>
+                        </Transition>
                     </Link>
 
                     <div class="relative" ref="userMenuRef">
@@ -250,6 +298,9 @@ const navGroups = computed(() => [
     <!-- Floating AI chat widget is mounted globally via resources/js/aiChatLauncher.js
          (mounted by app.js). Putting it inline here caused Vite to tree-shake
          the import in production builds. -->
+
+    <!-- Toaster global de alertas (polling reactivo, no requiere WebSockets) -->
+    <NotificationToaster :toasts="alertToasts" :on-dismiss="dismissAlertToast" />
 </template>
 
 

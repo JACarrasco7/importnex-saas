@@ -74,10 +74,24 @@ export default {
             animation: {
                 'fade-in': 'fadeIn 0.2s ease-in-out',
                 'slide-up': 'slideUp 0.3s ease-out',
+                'wiggle': 'wiggle 0.6s ease-in-out',
+                'pop-in': 'popIn 0.25s ease-out',
             },
             keyframes: {
                 fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
                 slideUp: { '0%': { transform: 'translateY(10px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } },
+                wiggle: {
+                    '0%, 100%': { transform: 'rotate(0deg)' },
+                    '20%': { transform: 'rotate(-12deg)' },
+                    '40%': { transform: 'rotate(10deg)' },
+                    '60%': { transform: 'rotate(-6deg)' },
+                    '80%': { transform: 'rotate(4deg)' },
+                },
+                popIn: {
+                    '0%': { transform: 'scale(0.5)', opacity: '0' },
+                    '60%': { transform: 'scale(1.15)', opacity: '1' },
+                    '100%': { transform: 'scale(1)', opacity: '1' },
+                },
             },
         },
     },

@@ -96,11 +96,11 @@ const planKeys = Object.keys(props.plans);
                             <ul class="mt-6 space-y-2">
                                 <li class="flex items-center gap-2 text-sm">
                                     <CheckIcon class="h-4 w-4 text-emerald-500" />
-                                    <span class="text-gray-700">{{ t('subscription.n_vehicles', { count: plans[key].cars_limit }) }}</span>
+                                    <span class="text-gray-700">{{ plans[key].cars_limit }} cars</span>
                                 </li>
                                 <li class="flex items-center gap-2 text-sm">
                                     <CheckIcon class="h-4 w-4 text-emerald-500" />
-                                    <span class="text-gray-700">{{ t('subscription.n_clients', { count: plans[key].clients_limit }) }}</span>
+                                    <span class="text-gray-700">{{ plans[key].clients_limit }} clients</span>
                                 </li>
                             </ul>
 
@@ -131,20 +131,20 @@ const planKeys = Object.keys(props.plans);
                 <div v-if="subscription && !on_trial" class="overflow-hidden rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
                     <div class="flex items-center justify-between">
                         <div>
-                            <h3 class="text-base font-semibold text-gray-900">{{ t('subscription.actions_title') }}</h3>
-                            <p class="mt-1 text-sm text-gray-500">{{ t('subscription.actions_desc') }}</p>
+                            <h3 class="text-base font-semibold text-gray-900">Subscription actions</h3>
+                            <p class="mt-1 text-sm text-gray-500">Manage your recurring subscription</p>
                         </div>
                         <div class="flex gap-2">
                             <form v-if="subscription.status === 'active'" method="POST" :action="route('subscriptions.cancel')" class="inline">
                                 <input type="hidden" name="_token" :value="$page.props.csrfToken" />
                                 <button type="submit" class="rounded-lg bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-100">
-                                    {{ t('subscription.cancel_subscription') }}
+                                    Cancelar suscripción
                                 </button>
                             </form>
                             <form v-else method="POST" :action="route('subscriptions.resume')" class="inline">
                                 <input type="hidden" name="_token" :value="$page.props.csrfToken" />
                                 <button type="submit" class="rounded-lg bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-100">
-                                    {{ t('subscription.resume_subscription') }}
+                                    Resume subscription
                                 </button>
                             </form>
                         </div>

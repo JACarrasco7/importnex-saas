@@ -15,7 +15,6 @@ class Organization extends Model
     protected $fillable = [
         'name', 'slug', 'logo', 'is_public', 'plan', 'is_owner', 'stripe_id', 'trial_ends_at', 'subscribed_at', 'payment_failed_at',
         'ai_provider', 'ai_model', 'ai_api_key',
-        'currency', 'locale',
     ];
 
     protected $casts = [
