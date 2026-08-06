@@ -68,7 +68,7 @@ const copyMarketplaceUrl = async () => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight dark:text-white">
                 {{ organization?.name || t('nav.dashboard') }}
             </h2>
         </template>
@@ -133,15 +133,15 @@ const copyMarketplaceUrl = async () => {
 
                 <!-- Traffic Lights + Total Cost -->
                 <div class="grid grid-cols-1 gap-5 lg:grid-cols-3">
-                    <div class="lg:col-span-2 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
-                        <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+                    <div class="lg:col-span-2 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-600">
+                        <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-asphalt-700">
                             <div>
-                                <h3 class="text-base font-semibold text-gray-900">{{ t('dashboard.traffic_title') }}</h3>
-                                <p class="text-sm text-gray-500">{{ t('dashboard.traffic_subtitle') }}</p>
+                                <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ t('dashboard.traffic_title') }}</h3>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ t('dashboard.traffic_subtitle') }}</p>
                             </div>
                             <ChartBarIcon class="h-5 w-5 text-gray-400" />
                         </div>
-                        <div class="grid grid-cols-4 divide-x divide-gray-200">
+                        <div class="grid grid-cols-4 divide-x divide-gray-200 dark:divide-asphalt-700">
                             <div v-for="key in lightKeys" :key="key" class="p-6 text-center">
                                 <div class="mx-auto mb-3 h-10 w-10 rounded-full ring-4" :class="{
                                     'bg-emerald-500 ring-emerald-100': key === 'green',
@@ -149,8 +149,8 @@ const copyMarketplaceUrl = async () => {
                                     'bg-rose-500 ring-rose-100': key === 'red',
                                     'bg-gray-400 ring-gray-100': key === 'neutral',
                                 }"></div>
-                                <div class="text-2xl font-bold text-gray-900">{{ trafficLights[key] || 0 }}</div>
-                                <div class="mt-1 text-xs font-medium uppercase tracking-wide text-gray-500">{{ key }}</div>
+                                <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ trafficLights[key] || 0 }}</div>
+                                <div class="mt-1 text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ key }}</div>
                                 <div v-if="totalTraffic > 0" class="mt-1 text-xs text-gray-400">
                                     {{ Math.round((trafficLights[key] / totalTraffic) * 100) }}%
                                 </div>
@@ -173,30 +173,30 @@ const copyMarketplaceUrl = async () => {
                 </div>
 
                 <!-- Recent Cars -->
-                <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
-                    <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+                <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-600">
+                    <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-asphalt-700">
                         <div>
-                            <h3 class="text-base font-semibold text-gray-900">{{ t('dashboard.recent_title') }}</h3>
-                            <p class="text-sm text-gray-500">{{ t('dashboard.recent_subtitle') }}</p>
+                            <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ t('dashboard.recent_title') }}</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ t('dashboard.recent_subtitle') }}</p>
                         </div>
-                        <Link :href="route('cars.index')" class="inline-flex items-center gap-1 text-sm font-semibold text-estoril-600 hover:text-estoril-500">
+                        <Link :href="route('cars.index')" class="inline-flex items-center gap-1 text-sm font-semibold text-estoril-600 hover:text-estoril-500 dark:text-estoril-400 dark:hover:text-estoril-300">
                             {{ t('dashboard.recent_view_all') }}
                             <ArrowRightIcon class="h-4 w-4" />
                         </Link>
                     </div>
                     <div v-if="recentCars.length > 0" class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-asphalt-700">
+                            <thead class="bg-gray-50 dark:bg-asphalt-700">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('dashboard.recent_col_vehicle') }}</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('dashboard.recent_col_year') }}</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('dashboard.recent_col_status') }}</th>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('dashboard.recent_col_health') }}</th>
-                                    <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('dashboard.recent_col_purchase') }}</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ t('dashboard.recent_col_vehicle') }}</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ t('dashboard.recent_col_year') }}</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ t('dashboard.recent_col_status') }}</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ t('dashboard.recent_col_health') }}</th>
+                                    <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ t('dashboard.recent_col_purchase') }}</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-200">
-                                <tr v-for="car in recentCars" :key="car.id" class="hover:bg-gray-50">
+                            <tbody class="divide-y divide-gray-200 dark:divide-asphalt-700">
+                                <tr v-for="car in recentCars" :key="car.id" class="hover:bg-gray-50 dark:hover:bg-asphalt-700">
                                     <td class="px-6 py-4">
                                         <Link :href="route('cars.show', car.id)" class="font-medium text-gray-900 hover:text-estoril-600">
                                             {{ car.brand }} {{ car.model }}
@@ -219,22 +219,22 @@ const copyMarketplaceUrl = async () => {
 
                 <!-- Quick Links -->
                 <div>
-                    <h3 class="mb-4 text-base font-semibold text-gray-900">{{ t('dashboard.quick_title') }}</h3>
+                    <h3 class="mb-4 text-base font-semibold text-gray-900 dark:text-white">{{ t('dashboard.quick_title') }}</h3>
                     <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
                         <Link
                             v-for="link in quickLinks"
                             :key="link.label"
                             :href="route(link.route)"
-                            class="group flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-gray-200 transition hover:shadow-md hover:ring-estoril-300"
+                            class="group flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-gray-200 transition hover:shadow-md hover:ring-estoril-300 dark:bg-asphalt-800 dark:ring-asphalt-700"
                         >
-                            <div :class="['flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl', `bg-${link.color}-50 group-hover:bg-${link.color}-100`]">
-                                <component :is="link.icon" class="h-5 w-5" :class="`text-${link.color}-600`" />
+                            <div :class="['flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl', `bg-${link.color}-50 group-hover:bg-${link.color}-100 dark:bg-${link.color}-900/40`]">
+                                <component :is="link.icon" class="h-5 w-5" :class="`text-${link.color}-600 dark:text-${link.color}-300`" />
                             </div>
                             <div class="flex-1 min-w-0">
-                                <p class="text-sm font-semibold text-gray-900">{{ link.label }}</p>
-                                <p class="text-xs text-gray-500">{{ link.description }}</p>
+                                <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ link.label }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ link.description }}</p>
                             </div>
-                            <ArrowRightIcon class="h-4 w-4 text-gray-400 transition group-hover:translate-x-1 group-hover:text-estoril-600" />
+                            <ArrowRightIcon class="h-4 w-4 text-gray-400 transition group-hover:translate-x-1 group-hover:text-estoril-600 dark:text-gray-500 dark:group-hover:text-estoril-300" />
                         </Link>
                     </div>
                 </div>

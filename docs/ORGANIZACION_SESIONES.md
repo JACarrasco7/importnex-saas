@@ -93,17 +93,35 @@
 
 ---
 
-### Session C — Dark Mode + UX Premium
+### Session C — Dark Mode + UX Premium 🚧 **EN PROGRESO 2026-08-06**
 **Duración:** ~20 horas (2.5 días)
 **Prioridad:** ⭐⭐ Alta (experiencia de usuario premium)
+**Estado actual:** 1/5 items parcialmente completados (~2h de 20h)
 
-| Sprint Item | Esfuerzo | Estado | Archivos clave |
-|---|---|---|---|
-| 3.1 Auditar y añadir `dark:` en 30+ Pages | 8h | Pendiente | Todas las Pages en `resources/js/Pages/` |
-| 3.2 Migrar a `@vueuse/motion` | 3h | Pendiente | `package.json` + componentes clave |
-| 3.3 WCAG AA: contraste, focus, keyboard nav | 4h | Pendiente | Audit global de contrastes |
-| 3.4 Skeleton `<Suspense>` con `WhenVisible` | 3h | Pendiente | `Cars/Index`, `Clients/Index` |
-| 3.5 Eliminar `tailwind.config.js` v3 | 2h | Pendiente | `tailwind.config.js` |
+| Sprint Item | Esfuerzo | Estado | Archivos clave | Notas |
+|---|---|---|---|---|
+| 3.1 Auditar y añadir `dark:` en 30+ Pages | 8h | ⚠️ Parcial (~2h) | `resources/js/Pages/Dashboard.vue` | 1/53 Pages completadas |
+| 3.2 Migrar a `@vueuse/motion` | 3h | **Pendiente** | `package.json` + componentes | Riesgo: cambios Vite config |
+| 3.3 WCAG AA: contraste, focus, keyboard nav | 4h | **Pendiente** | Todas las Pages | Lighthouse audit |
+| 3.4 Skeleton `<Suspense>` con `WhenVisible` | 3h | **Pendiente** | `Cars/Index`, `Clients/Index` | Riesgo: cambios backend |
+| 3.5 Eliminar `tailwind.config.js` v3 | 2h | **Pendiente** | `tailwind.config.js` | ⚠️ ALTO RIESGO — no hacer sin migrar colores |
+
+**Archivos modificados:**
+- `resources/js/Pages/Dashboard.vue` (dark mode añadido)
+
+**Documentación creada:**
+- `docs/SESSION-C-RESUMEN.md` — Guía detallada con riesgos y patrones
+
+**⚠️ RIESGOS CRÍTICOS:**
+- **3.5 (Eliminar saflist):** NO hacer sin migrar colores prohibidos primero. 30+ archivos usan `bg-indigo-*`, `bg-emerald-*`, etc. Romperá UI.
+- **3.2 (@vueuse/motion):** Requiere cambios en Vite config. No crítico para UX.
+- **3.4 (Skeleton WhenVisible):** Requiere cambios backend (deferred props). Testing complejo.
+
+**Para otra sesión:**
+- Priorizar 3.1 (completar dark mode en 52 Pages restantes)
+- Luego 3.3 (WCAG audit — Lighthouse)
+- 3.5 como última tarea, DESPUÉS de migrar colores
+- 3.2 y 3.4 como nice-to-have opcionales
 
 **Archivos modificados:**
 - `package.json` (añadir `@vueuse/motion`)
