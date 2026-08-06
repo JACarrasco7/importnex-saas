@@ -183,7 +183,14 @@ const confirmDelete = () => {
                     </div>
                 </div>
 
-                <EmptyState v-else icon="📇" :title="t('cars.no_contacts_found')" :description="t('cars.no_contacts_found_desc')" :action-text="t('cars.add_first_contact')" :action-route="route('contacts.create')" />
+                <EmptyState
+                    v-else
+                    icon="📇"
+                    :title="t('cars.no_contacts_found')"
+                    :description="t('cars.no_contacts_found_desc')"
+                    :primary-action="{ text: t('cars.add_first_contact'), route: route('contacts.create') }"
+                    :secondary-action="{ text: t('cars.view_marketplace', 'Ver Marketplace'), route: route('marketplace.index') }"
+                />
             </div>
         </div>
 

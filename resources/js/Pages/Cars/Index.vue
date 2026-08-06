@@ -286,7 +286,14 @@ const confirmDelete = () => {
                     </div>
                 </div>
 
-                <EmptyState v-else icon="🚗" :title="t('cars.no_cars_found')" :description="t('cars.no_cars_found_desc')" :action-text="t('cars.add_first_car')" :action-route="route('cars.create')" />
+                <EmptyState
+                    v-else
+                    icon="🚗"
+                    :title="t('cars.no_cars_found')"
+                    :description="t('cars.no_cars_found_desc')"
+                    :primary-action="{ text: t('cars.add_first_car'), route: route('cars.create') }"
+                    :secondary-action="{ text: t('cars.import_csv', 'Importar CSV'), route: route('cars.import') }"
+                />
             </div>
         </div>
 
