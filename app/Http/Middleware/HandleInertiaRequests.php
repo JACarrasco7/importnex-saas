@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Models\Alert;
 use App\Models\CarRequest;
+use App\Models\UserOnboardingProgress;
 use App\Services\Ai\AiProviderRegistry;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -47,6 +48,21 @@ class HandleInertiaRequests extends Middleware
             $pendingCarRequestsCount = CarRequest::where('organization_id', $user->organization_id)
                 ->where('status', 'pending')
                 ->count();
+
+            // Onboarding progress (Sprint 2.1) — null when missing or completed.
+            $onboardingProgress = UserOnboardingProgress::where('user_id', $user->id)->first();
+            $onboardingShare = $onboardingProgress && ! $onboardingProgress->is_completed
+                ? [
+                    'step_organization_created' => (bool) $onboardingProgress->step_organization_created,
+                    'step_first_vehicle_added' => (bool) $onboardingProgress->step_first_vehicle_added,
+                    'step_team_invited' => (bool) $onboardingProgress->step_team_invited,
+                    'step_plan_selected' => (bool) $onboardingProgress->step_plan_selected,
+                    'current_step' => (int) $onboardingProgress->current_step,
+                    'progress' => $onboardingProgress->progress ?? 0,
+                    'is_completed' => false,
+                    'skipped_at' => $onboardingProgress->skipped_at?->toIso8601String(),
+                ]
+                : null;
 
             $organization = $user->organization;
             if ($organization) {
@@ -94,6 +110,7 @@ class HandleInertiaRequests extends Middleware
             'currentPlan' => $currentPlan,
             'locale' => $locale,
             'aiSettings' => $aiSettings,
+            'onboardingProgress' => $onboardingShare,
             // Configuracion regional (moneda + locale) para formateo en el frontend.
             // Por defecto EUR + es si la organizacion todavia no tiene valor.
             'formatting' => [
