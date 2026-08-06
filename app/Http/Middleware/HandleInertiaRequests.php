@@ -101,5 +101,6 @@ class HandleInertiaRequests extends Middleware
                 'locale' => $organization?->locale ?? $locale,
                 'decimals' => 2,
             ],
+        ];
     }
 }
