@@ -2,16 +2,16 @@
 
 namespace Database\Seeders;
 
-use App\Models\Organization;
-use App\Models\User;
 use App\Models\Car;
-use App\Models\Client;
-use App\Models\Contact;
 use App\Models\CarChecklist;
 use App\Models\CarDocument;
 use App\Models\CarExpense;
 use App\Models\CarPhoto;
+use App\Models\Client;
 use App\Models\ClientContactLog;
+use App\Models\Contact;
+use App\Models\Organization;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -19,6 +19,23 @@ class DemoDataSeeder extends Seeder
 {
     public function run(): void
     {
+        // HARD GUARD: nunca correr en produccion. Triple check (env + APP_ENV + APP_DEBUG).
+        if (app()->environment('production')) {
+            $this->command?->warn('DemoDataSeeder skipped in production.');
+
+            return;
+        }
+        if (config('app.env') === 'production') {
+            $this->command?->warn('DemoDataSeeder skipped (app.env=production).');
+
+            return;
+        }
+        if (! config('app.debug')) {
+            $this->command?->warn('DemoDataSeeder skipped (APP_DEBUG=false).');
+
+            return;
+        }
+
         $org = Organization::firstOrCreate(
             ['name' => 'JJ Import Motors'],
             [
@@ -98,7 +115,7 @@ class DemoDataSeeder extends Seeder
             ]);
         }
 
-        $this->command->info('✅ Demo data seeded for ' . $org->name);
+        $this->command->info('✅ Demo data seeded for '.$org->name);
         $this->command->info('   - 6 cars, 8 clients, 12 contacts, 16 contact logs');
         $this->command->info('   - Login: owner@jjimportmotors.com / Importnex2026!');
     }
