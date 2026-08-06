@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { TruckIcon, CheckCircleIcon, DocumentArrowDownIcon } from '@heroicons/vue/24/outline';
+import PublicLayout from '@/Layouts/PublicLayout.vue';
 import { useTranslations } from '@/Composables/useTranslations';
 
 const props = defineProps({
@@ -61,8 +62,9 @@ const submit = () => {
 <template>
     <Head :title="t('car_request_form.title')" />
 
-    <div class="min-h-screen bg-gradient-to-br from-estoril-50 via-white to-platinum-100">
-        <div class="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
+    <PublicLayout>
+        <div class="bg-gradient-to-br from-estoril-50 via-white to-platinum-100">
+            <div class="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
             <!-- Header -->
             <div class="mb-10 text-center">
                 <div v-if="organization.logo" class="mx-auto mb-6 h-20 w-20 overflow-hidden rounded-2xl bg-white shadow-lg">
@@ -448,5 +450,6 @@ const submit = () => {
                 <span class="hidden sm:inline">Folleto</span>
             </a>
         </div>
-    </div>
+        </div>
+    </PublicLayout>
 </template>

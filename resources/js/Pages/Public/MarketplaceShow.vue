@@ -11,6 +11,7 @@ import {
 } from '@heroicons/vue/24/outline';
 import MapaLeaflet from '@/Components/MapaLeaflet.vue';
 import Badge from '@/Components/Badge.vue';
+import PublicLayout from '@/Layouts/PublicLayout.vue';
 import { useFormat } from '@/Composables/useFormat';
 import { useTranslations } from '@/Composables/useTranslations';
 
@@ -85,18 +86,7 @@ const marketPosition = computed(() => {
 <template>
     <Head :title="t('cars.marketplace_brand_model_title', { brand: car.brand, model: car.model })" />
 
-    <div class="min-h-screen bg-gradient-to-br from-platinum-100 via-white to-estoril-50">
-        <!-- Public header -->
-        <header class="border-b border-gray-200 bg-white/80 backdrop-blur">
-            <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-                <Link :href="route('marketplace.index')" class="flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-gray-900">
-                    <ArrowLeftIcon class="h-4 w-4" />
-                    {{ t('marketplace_show.back_to_marketplace') }}
-                </Link>
-                <a :href="route('login')" class="text-sm font-semibold text-gray-700 hover:text-gray-900">{{ t('marketplace_show.sign_in') }}</a>
-            </div>
-        </header>
-
+    <PublicLayout>
         <div class="py-8">
             <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
                 <!-- Header -->
@@ -345,11 +335,5 @@ const marketPosition = computed(() => {
                 </div>
             </div>
         </div>
-
-        <footer class="mt-12 border-t border-gray-200 bg-white py-6">
-            <div class="mx-auto max-w-7xl px-4 text-center text-sm text-gray-500 sm:px-6 lg:px-8">
-                &copy; {{ new Date().getFullYear() }} Importnex. {{ t('marketplace_show.footer_rights') }}
-            </div>
-        </footer>
-    </div>
+    </PublicLayout>
 </template>

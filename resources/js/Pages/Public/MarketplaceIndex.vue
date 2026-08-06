@@ -21,6 +21,7 @@ import {
     BoltIcon,
 } from '@heroicons/vue/24/outline';
 import Badge from '@/Components/Badge.vue';
+import PublicLayout from '@/Layouts/PublicLayout.vue';
 import { useFormat } from '@/Composables/useFormat';
 import { useTranslations } from '@/Composables/useTranslations';
 
@@ -106,30 +107,7 @@ const howItWorks = computed(() => [
 <template>
     <Head :title="t('marketplace.title')" />
 
-    <div class="min-h-screen bg-white">
-        <!-- Public header -->
-        <header class="sticky top-0 z-40 border-b border-gray-200 bg-white/90 backdrop-blur">
-            <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-                <Link :href="route('marketplace.index')" class="flex items-center gap-2">
-                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-estoril-600 to-estoril-800 shadow-sm">
-                        <ShieldCheckIcon class="h-5 w-5 text-white" />
-                    </span>
-                    <div>
-                        <p class="text-base font-bold leading-tight text-gray-900">{{ t('marketplace.brand') }}</p>
-                        <p class="text-[11px] leading-tight text-gray-500">{{ t('marketplace.brand_sub') }}</p>
-                    </div>
-                </Link>
-                <nav class="flex items-center gap-3">
-                    <a :href="locale === 'es' ? '#catalogo' : '#catalog'" class="hidden text-sm font-medium text-gray-700 hover:text-gray-900 sm:inline">{{ t('marketplace.section_catalog') }}</a>
-                    <a :href="locale === 'es' ? '#como-funciona' : '#how-it-works'" class="hidden text-sm font-medium text-gray-700 hover:text-gray-900 sm:inline">{{ t('marketplace.section_how_it_works') }}</a>
-                    <a href="#contacto" class="inline-flex items-center gap-1.5 rounded-lg bg-gray-900 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-800">
-                        <PhoneIcon class="h-4 w-4" />
-                        {{ t('marketplace.cta_contact') }}
-                    </a>
-                </nav>
-            </div>
-        </header>
-
+    <PublicLayout>
         <!-- HERO -->
         <section class="relative overflow-hidden bg-gradient-to-br from-estoril-100 via-estoril-50 to-platinum-200">
             <div class="absolute -top-40 -right-40 h-[28rem] w-[28rem] rounded-full bg-estoril-300/60 blur-3xl"></div>
@@ -448,26 +426,6 @@ const howItWorks = computed(() => [
             </div>
         </section>
 
-        <!-- Footer -->
-        <footer class="border-t border-gray-200 bg-gray-50 py-8">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div class="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
-                    <div class="flex items-center gap-2">
-                        <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-estoril-600 to-estoril-800">
-                            <ShieldCheckIcon class="h-4 w-4 text-white" />
-                        </span>
-                        <span class="text-sm font-semibold text-gray-900">{{ t('marketplace.brand') }}</span>
-                    </div>
-                    <div class="flex items-center gap-4">
-                        <Link :href="route('admin')" class="text-xs font-medium text-gray-500 hover:text-estoril-700">{{ t('marketplace.footer_admin_link') }}</Link>
-                        <p class="text-xs text-gray-500">
-                            {{ t('marketplace.footer_copy').replace(':year', new Date().getFullYear()) }}
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </footer>
-
         <!-- Floating download button for JJ Import Motors folleto -->
         <div class="fixed bottom-6 right-6 z-40">
             <a
@@ -479,5 +437,5 @@ const howItWorks = computed(() => [
                 <span class="hidden sm:inline">{{ t('marketplace.folleto') }}</span>
             </a>
         </div>
-    </div>
+    </PublicLayout>
 </template>
