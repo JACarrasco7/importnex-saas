@@ -46,6 +46,7 @@ const close = () => { mobileOpen.value = false; };
                         v-for="link in navLinks"
                         :key="link.href"
                         :href="link.href"
+                        prefetch="hover"
                         class="text-sm font-medium text-gray-700 transition hover:text-estoril-700 dark:text-gray-200 dark:hover:text-estoril-300"
                     >
                         {{ link.label }}
