@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Alert;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -12,24 +13,60 @@ class AlertController extends Controller
 {
     public function index(Request $request): Response
     {
-        $alerts = Alert::query()
-            ->when($request->input('type'), fn ($q, $t) => $q->where('alert_type', $t))
-            ->when($request->input('resolved') !== null, fn ($q, $r) => $q->where('resolved', $r === '1'))
-            ->when($request->input('filter') === 'pending', fn ($q) => $q->where('resolved', false))
+        $filter = $request->input('filter', 'pending');
+        $typeFilter = $request->input('type');
+
+        $query = Alert::query()
+            ->when($typeFilter, fn ($q, $t) => $q->where('alert_type', $t))
+            ->when($filter === 'pending', fn ($q) => $q->active())
+            ->when($filter === 'snoozed', fn ($q) => $q->snoozed())
+            ->when($filter === 'resolved', fn ($q) => $q->resolved())
             ->orderBy('created_at', 'desc')
             ->paginate(15)
             ->withQueryString();
 
-        // Asegurar que el accesorio target_url se serializa en cada item del paginator
-        $alerts->getCollection()->each->append('target_url');
+        $query->getCollection()->each->append('target_url');
 
-        $types = ['car_stopped', 'client_no_contact', 'itv_pending', 'document_expired'];
+        // Tipos presentes en BD (sin N+1): agrupamos por alert_type y contamos
+        $typesAvailable = Alert::query()
+            ->selectRaw('alert_type, COUNT(*) as count')
+            ->groupBy('alert_type')
+            ->orderByDesc('count')
+            ->pluck('count', 'alert_type')
+            ->toArray();
+
+        // Contadores por filtro (badge por sección)
+        $counts = [
+            'pending' => Alert::query()->active()->count(),
+            'snoozed' => Alert::query()->snoozed()->count(),
+            'resolved' => Alert::query()->resolved()->count(),
+        ];
 
         return Inertia::render('Alerts/Index', [
-            'alerts' => $alerts,
-            'types' => $types,
+            'alerts' => $query,
+            'types' => array_keys($typesAvailable),
+            'typesAvailable' => $typesAvailable,
+            'counts' => $counts,
             'filters' => $request->only(['type', 'resolved', 'filter']),
         ]);
+    }
+
+    public function snooze(Request $request, Alert $alert): RedirectResponse
+    {
+        $request->validate([
+            'hours' => ['required', 'integer', 'min:1', 'max:168'], // max 7 días
+        ]);
+
+        $alert->snooze((int) $request->input('hours'));
+
+        return back()->with('success', "Alert snoozed for {$request->input('hours')}h.");
+    }
+
+    public function unsnooze(Alert $alert): RedirectResponse
+    {
+        $alert->unsnooze();
+
+        return back()->with('success', 'Alert reactivated.');
     }
 
     public function show(Alert $alert): Response
@@ -62,7 +99,7 @@ class AlertController extends Controller
      * Devuelve count + últimas 5 alertas pendientes. Pensado para
      * llamarse cada 30s desde el cliente sin WebSockets.
      */
-    public function pending(Request $request): \Illuminate\Http\JsonResponse
+    public function pending(Request $request): JsonResponse
     {
         $org = $request->user()?->organization;
         if (! $org) {
@@ -71,7 +108,7 @@ class AlertController extends Controller
 
         $alerts = Alert::query()
             ->where('organization_id', $org->id)
-            ->where('resolved', false)
+            ->active()
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get();
@@ -107,7 +144,7 @@ class AlertController extends Controller
 
         $updated = Alert::query()
             ->where('organization_id', $org->id)
-            ->where('resolved', false)
+            ->active()
             ->update([
                 'resolved' => true,
                 'resolved_at' => now(),

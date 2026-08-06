@@ -9,9 +9,16 @@ class Alert extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['organization_id', 'alert_type', 'reference_type', 'reference_id', 'message', 'resolved', 'resolved_at'];
+    protected $fillable = ['organization_id', 'alert_type', 'reference_type', 'reference_id', 'message', 'resolved', 'resolved_at', 'snoozed_until'];
 
-    protected $casts = ['resolved' => 'boolean', 'resolved_at' => 'datetime'];
+    protected function casts(): array
+    {
+        return [
+            'resolved' => 'boolean',
+            'resolved_at' => 'datetime',
+            'snoozed_until' => 'datetime',
+        ];
+    }
 
     protected $appends = ['target_url'];
 
@@ -42,6 +49,36 @@ class Alert extends Model
     public function scopeResolved($query)
     {
         return $query->where('resolved', true);
+    }
+
+    public function scopeActive($query)
+    {
+        // Pendientes y no pospuestas (o pospuestas pero ya caducadas)
+        return $query
+            ->where('resolved', false)
+            ->where(function ($q) {
+                $q->whereNull('snoozed_until')->orWhere('snoozed_until', '<=', now());
+            });
+    }
+
+    public function scopeSnoozed($query)
+    {
+        return $query->where('resolved', false)->where('snoozed_until', '>', now());
+    }
+
+    public function isSnoozed(): bool
+    {
+        return $this->snoozed_until !== null && $this->snoozed_until->isFuture();
+    }
+
+    public function snooze(int $hours): void
+    {
+        $this->update(['snoozed_until' => now()->addHours($hours)]);
+    }
+
+    public function unsnooze(): void
+    {
+        $this->update(['snoozed_until' => null]);
     }
 
     public function markAsResolved()
