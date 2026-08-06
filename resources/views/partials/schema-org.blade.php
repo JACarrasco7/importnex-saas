@@ -1,7 +1,7 @@
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "AutoDealer",
+  "@@context": "https://schema.org",
+  "@@type": "AutoDealer",
   "name": "JJ Import Motors",
   "description": "Plataforma profesional de importación de vehículos con verificación AI. Ayudamos a dealers y particulares a importar coches de Alemania de forma segura.",
   "url": "{{ config('app.url') }}",
@@ -9,7 +9,7 @@
   "telephone": "+34 600 000 000",
   "email": "hola@jjimportmotors.com",
   "address": {
-    "@type": "PostalAddress",
+    "@@type": "PostalAddress",
     "streetAddress": "",
     "addressLocality": "",
     "addressRegion": "",
@@ -18,7 +18,7 @@
   },
   "openingHoursSpecification": [
     {
-      "@type": "OpeningHoursSpecification",
+      "@@type": "OpeningHoursSpecification",
       "dayOfWeek": [
         "Monday",
         "Tuesday",
@@ -36,13 +36,13 @@
     "https://twitter.com/jjimportmotors"
   ],
   "potentialAction": {
-    "@type": "SearchAction",
+    "@@type": "SearchAction",
     "target": {
-      "@type": "EntryPoint",
+      "@@type": "EntryPoint",
       "urlTemplate": "{{ config('app.url') }}/marketplace?q={search_term_string}"
     },
     "query-input": {
-      "@type": "PropertyValueSpecification",
+      "@@type": "PropertyValueSpecification",
       "valueRequired": true,
       "valueName": "search_term_string"
     }
