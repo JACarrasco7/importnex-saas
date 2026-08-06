@@ -3055,4 +3055,21 @@ export default {
         placeholder_power_max: "ej. 200",
         select_option: "— Selecciona —",
 },
+    public: {
+        nav: {
+            pricing: 'Precios',
+            open_menu: 'Abrir menú',
+            close_menu: 'Cerrar menú',
+        },
+        footer: {
+            product: 'Producto',
+            company: 'Empresa',
+            legal: 'Legal',
+            about: 'Sobre nosotros',
+            privacy: 'Privacidad',
+            terms: 'Términos',
+            rights: 'Todos los derechos reservados.',
+        },
+        whatsapp_label: 'Contactar por WhatsApp',
+    },
 };

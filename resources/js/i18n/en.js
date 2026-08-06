@@ -1766,4 +1766,21 @@ export default {
         guide_faq6_q: 'Can I ask Claude to reuse information from a car I already evaluated?',
         guide_faq6_a: 'Yes — if it is the same model, much of the research (breakdowns, reliability, homologation...) is already saved and Claude reuses it automatically, making it clear what is new and what is recycled.',
 },
+    public: {
+        nav: {
+            pricing: 'Pricing',
+            open_menu: 'Open menu',
+            close_menu: 'Close menu',
+        },
+        footer: {
+            product: 'Product',
+            company: 'Company',
+            legal: 'Legal',
+            about: 'About us',
+            privacy: 'Privacy',
+            terms: 'Terms',
+            rights: 'All rights reserved.',
+        },
+        whatsapp_label: 'Contact via WhatsApp',
+    },
 };
