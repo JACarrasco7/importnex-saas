@@ -198,14 +198,13 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::get('/ai/chat', [\App\Http\Controllers\AiChatController::class, 'index'])->name('ai.chat');
     Route::post('/ai/chat', [\App\Http\Controllers\AiChatController::class, 'send'])->name('ai.chat.send');
 
-    // Alerts
+    // Alerts — específicas primero para no ser interceptadas por {alert}
     Route::get('/alerts', [\App\Http\Controllers\AlertController::class, 'index'])->name('alerts.index');
+    Route::get('/alerts/pending.json', [\App\Http\Controllers\AlertController::class, 'pending'])->name('alerts.pending');
+    Route::post('/alerts/mark-all-read', [\App\Http\Controllers\AlertController::class, 'markAllRead'])->name('alerts.mark-all-read');
     Route::get('/alerts/{alert}', [\App\Http\Controllers\AlertController::class, 'show'])->name('alerts.show');
     Route::patch('/alerts/{alert}/mark-resolved', [\App\Http\Controllers\AlertController::class, 'markResolved'])->name('alerts.mark-resolved');
     Route::delete('/alerts/{alert}', [\App\Http\Controllers\AlertController::class, 'destroy'])->name('alerts.destroy');
-    // Polling ligero para badge + toasts in-app (no usa Echo/Reverb, evita BD pesada)
-    Route::get('/alerts/pending.json', [\App\Http\Controllers\AlertController::class, 'pending'])->name('alerts.pending');
-    Route::post('/alerts/mark-all-read', [\App\Http\Controllers\AlertController::class, 'markAllRead'])->name('alerts.mark-all-read');
 
     // Message Templates
     Route::get('/message-templates', [\App\Http\Controllers\MessageTemplateController::class, 'index'])->name('message-templates.index');
