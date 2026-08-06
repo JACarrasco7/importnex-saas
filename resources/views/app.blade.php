@@ -27,8 +27,20 @@
         <meta property="twitter:image" content="{{ config('app.url') }}/img/og-image.jpg">
 
         <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
+        <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+
+        <!-- DNS prefetch para recursos externos (reduce latencia DNS) -->
+        <link rel="dns-prefetch" href="//fonts.bunny.net">
+        <link rel="dns-prefetch" href="//api.stripe.com">
+        <link rel="dns-prefetch" href="//m.stripe.network">
+
+        <!-- Preconnect Stripe (pagos, necesario en flujo de checkout) -->
+        <link rel="preconnect" href="https://api.stripe.com" crossorigin>
+        <link rel="preconnect" href="https://m.stripe.network" crossorigin>
+
+        <!-- Preconnect Unsplash si marketplace usa fotos externas -->
+        <link rel="preconnect" href="https://images.unsplash.com" crossorigin>
 
         <!-- Scripts -->
         @routes
