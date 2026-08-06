@@ -6,6 +6,26 @@
 
         <title inertia>{{ config('app.name', 'Laravel') }}</title>
 
+        <!-- SEO Meta Tags -->
+        <meta name="description" content="JJ Import Motors — Plataforma profesional de importación de vehículos con verificación AI. Ahorra tiempo y evita fraudes en la importación de coches de Alemania.">
+        <meta name="keywords" content="importar coches, importación vehículos, coches de Alemania, verificación AI, dealer importador, marketplace vehículos">
+        <meta name="author" content="JJ Import Motors">
+
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="{{ config('app.url') }}">
+        <meta property="og:title" content="{{ config('app.name', 'JJ Import Motors') }}">
+        <meta property="og:description" content="Plataforma profesional de importación de vehículos con verificación AI. Ahorra tiempo y evita fraudes.">
+        <meta property="og:image" content="{{ config('app.url') }}/img/og-image.jpg">
+        <meta property="og:locale" content="{{ str_replace('_', '-', app()->getLocale()) }}">
+
+        <!-- Twitter -->
+        <meta property="twitter:card" content="summary_large_image">
+        <meta property="twitter:url" content="{{ config('app.url') }}">
+        <meta property="twitter:title" content="{{ config('app.name', 'JJ Import Motors') }}">
+        <meta property="twitter:description" content="Plataforma profesional de importación de vehículos con verificación AI.">
+        <meta property="twitter:image" content="{{ config('app.url') }}/img/og-image.jpg">
+
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
@@ -21,6 +41,9 @@
                 window.Ziggy.baseUrl = '{{ config('app.url') }}';
             </script>
         @endif
+
+        <!-- Schema.org AutoDealer -->
+        @include('partials.schema-org')
     </head>
     <body class="font-sans antialiased">
         @inertia

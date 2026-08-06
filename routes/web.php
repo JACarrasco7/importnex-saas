@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\PublicCarRequestController;
 use App\Models\Organization;
@@ -34,6 +35,9 @@ Route::get('/pricing', function () {
         'currency' => config('subscription.default_currency', 'eur'),
     ]);
 })->name('pricing');
+
+// Sitemap.xml (SEO — referenced by robots.txt)
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
 // Legacy admin landing (kept for backwards-compat, redirects to /)
 Route::get('/admin', function () {

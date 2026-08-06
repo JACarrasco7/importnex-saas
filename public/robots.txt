@@ -1,2 +1,27 @@
+# robots.txt para JJ Import Motors
+# Actualizado: 2026-08-06
+
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /cars
+Disallow: /clients
+Disallow: /contacts
+Disallow: /organizations
+Disallow: /subscriptions
+Disallow: /billing
+Disallow: /finance
+Disallow: /trips
+Disallow: /ai
+Disallow: /alerts
+Disallow: /settings
+Disallow: /profile
+Disallow: /storage/
+Disallow: /vendor/
+
+# Sitemap
+Sitemap: https://jjimportmotors.on-forge.com/sitemap.xml
+
+# Crawl-delay (opcional)
+Crawl-delay: 1
