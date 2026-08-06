@@ -47,33 +47,47 @@
 
 ---
 
-### Session B — Onboarding + Experiencia Primer Usuario
+### Session B — Onboarding + Experiencia Primer Usuario 🚧 **EN PROGRESO 2026-08-06**
 **Duración:** ~19 horas (2.5 días)
 **Prioridad:** ⭐⭐ Alta (afecta activation rate D0-D7)
+**Estado actual:** 3/6 items completados (~9h de 19h)
 
 | Sprint Item | Esfuerzo | Estado | Archivos clave |
 |---|---|---|---|
-| 2.1 `OnboardingController` + migration | 3h | Pendiente | `database/migrations/*_user_onboarding_progress.php` |
-| 2.2 `OnboardingWizard.vue` 4 pasos | 6h | Pendiente | `resources/js/Pages/Onboarding/Wizard.vue` |
-| 2.3 `OnboardingChecklist.vue` en dashboard | 3h | Pendiente | `resources/js/Components/OnboardingChecklist.vue` |
-| 2.4 Empty states con doble CTA | 2h | Pendiente | `Cars/Index`, `Clients/Index`, `Contacts/Index` |
-| 2.5 Email bienvenida + recordatorio D3, D7 | 3h | Pendiente | `resources/views/mail/onboarding/*` |
-| 2.6 `DatabaseSeeder` datos ejemplo | 2h | Pendiente | `database/seeders/OnboardingSeeder.php` |
+| 2.1 `OnboardingController` + migration | 3h | ✅ **HECHO** | `database/migrations/*_user_onboarding_progress.php`, `app/Http/Controllers/OnboardingController.php` |
+| 2.2 `OnboardingWizard.vue` 4 pasos | 6h | ✅ **HECHO** | `resources/js/Pages/Onboarding/Wizard.vue` |
+| 2.3 `OnboardingChecklist.vue` en dashboard | 3h | ✅ **HECHO** | `resources/js/Components/OnboardingChecklist.vue` |
+| 2.4 Empty states con doble CTA | 2h | **Pendiente** | `Cars/Index`, `Clients/Index`, `Contacts/Index` |
+| 2.5 Email bienvenida + recordatorio D3, D7 | 3h | **Pendiente** | `resources/views/mail/onboarding/*` |
+| 2.6 `DatabaseSeeder` datos ejemplo | 2h | **Pendiente** | `database/seeders/OnboardingSeeder.php` |
 
-**Archivos modificados:**
-- `database/migrations/*_user_onboarding_progress.php` (nuevo)
-- `app/Http/Controllers/OnboardingController.php` (nuevo)
-- `app/Models/UserOnboardingProgress.php` (nuevo)
-- `resources/js/Pages/Onboarding/Wizard.vue` (nuevo)
-- `resources/js/Components/OnboardingChecklist.vue` (nuevo)
-- `resources/js/Pages/Cars/Index.vue`
-- `resources/js/Pages/Clients/Index.vue`
-- `resources/js/Pages/Contacts/Index.vue`
-- `resources/views/mail/onboarding/welcome.blade.php` (nuevo)
-- `resources/views/mail/onboarding/reminder-d3.blade.php` (nuevo)
-- `resources/views/mail/onboarding/reminder-d7.blade.php` (nuevo)
-- `database/seeders/OnboardingSeeder.php` (nuevo)
-- `routes/web.php` (añadir `/onboarding`)
+**Archivos ya creados/modificados:**
+- `database/migrations/2026_08_06_204013_create_user_onboarding_progress_table.php` ✅
+- `app/Models/UserOnboardingProgress.php` ✅
+- `app/Http/Controllers/OnboardingController.php` ✅
+- `app/Models/User.php` (relación onboardingProgress) ✅
+- `routes/web.php` (rutas /onboarding) ✅
+- `resources/js/Pages/Onboarding/Wizard.vue` ✅
+- `resources/js/Components/OnboardingChecklist.vue` ✅
+
+**Archivos pendientes de crear:**
+- `resources/views/mail/onboarding/welcome.blade.php`
+- `resources/views/mail/onboarding/reminder-d3.blade.php`
+- `resources/views/mail/onboarding/reminder-d7.blade.php`
+- `database/seeders/OnboardingSeeder.php`
+
+**Archivos pendientes de modificar:**
+- `resources/js/Pages/Cars/Index.vue` (añadir empty state)
+- `resources/js/Pages/Clients/Index.vue` (añadir empty state)
+- `resources/js/Pages/Contacts/Index.vue` (añadir empty state)
+- `resources/js/Pages/Dashboard.vue` (integrar OnboardingChecklist)
+
+**Para otra sesión:**
+- ❌ NO tocar Session C (Dark Mode + UX Premium) — ~20h
+- ❌ NO tocar Session D (Performance + DX) — ~9.5h
+- ❌ NO tocar Session E (Billing UX + Dunning) — ~16h
+- ❌ NO tocar Session F, G, H (Marketplace) — ~50h
+- ❌ NO tocar Session I (Notificaciones avanzadas) — ~32h
 
 **Entregable:** Flujo completo de onboarding 4 pasos + checklist persistente + seeders para trial inmediato.
 
