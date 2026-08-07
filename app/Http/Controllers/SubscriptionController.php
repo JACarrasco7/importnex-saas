@@ -72,6 +72,14 @@ class SubscriptionController extends Controller
                 ->with('success', 'Ya tienes este plan activo.');
         }
 
+        $billingCycle = $request->input('billing_cycle', 'monthly');
+        if (! in_array($billingCycle, ['monthly', 'annual'], true)) {
+            $billingCycle = 'monthly';
+        }
+        $priceId = $billingCycle === 'annual' && ! empty($plans[$plan]['stripe_price_annual_id'])
+            ? $plans[$plan]['stripe_price_annual_id']
+            : $plans[$plan]['stripe_price_id'] ?? $plan;
+
         $paymentMethodId = $request->paymentMethodId;
 
         if (! $paymentMethodId) {
@@ -86,7 +94,7 @@ class SubscriptionController extends Controller
         }
 
         try {
-            $org->newSubscription('main', $plan)
+            $org->newSubscription('main', $priceId)
                 ->trialDays(config('subscription.trial_days'))
                 ->create($paymentMethodId);
 
@@ -103,6 +111,7 @@ class SubscriptionController extends Controller
             Log::error('Subscription create failed', [
                 'organization_id' => $org->id,
                 'plan' => $plan,
+                'billing_cycle' => $billingCycle,
                 'error' => $e->getMessage(),
             ]);
 
@@ -144,13 +153,22 @@ class SubscriptionController extends Controller
             return redirect()->route('subscriptions.cancel');
         }
 
+        $billingCycle = $request->input('billing_cycle', 'monthly');
+        if (! in_array($billingCycle, ['monthly', 'annual'], true)) {
+            $billingCycle = 'monthly';
+        }
+        $priceId = $billingCycle === 'annual' && ! empty($plans[$newPlan]['stripe_price_annual_id'])
+            ? $plans[$newPlan]['stripe_price_annual_id']
+            : $plans[$newPlan]['stripe_price_id'] ?? $newPlan;
+
         try {
-            $subscription->swap($newPlan);
+            $subscription->swap($priceId);
             $org->update(['plan' => $newPlan]);
         } catch (\Throwable $e) {
             Log::error('Subscription swap failed', [
                 'organization_id' => $org->id,
                 'new_plan' => $newPlan,
+                'billing_cycle' => $billingCycle,
                 'error' => $e->getMessage(),
             ]);
 

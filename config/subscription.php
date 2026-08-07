@@ -21,10 +21,8 @@ return [
                 'webhook_notifications' => false,
                 'weekly_digest' => false,
             ],
-            // Override these in .env with real Stripe price IDs once products
-            // are created in Stripe dashboard. Also set lookup_key = 'starter'
-            // on the price so webhooks resolve correctly.
             'stripe_price_id' => env('STRIPE_PRICE_STARTER'),
+            'stripe_price_annual_id' => env('STRIPE_PRICE_STARTER_ANNUAL'),
             'stripe_lookup_key' => 'starter',
         ],
         'pro' => [
@@ -47,6 +45,7 @@ return [
                 'weekly_digest' => true,
             ],
             'stripe_price_id' => env('STRIPE_PRICE_PRO'),
+            'stripe_price_annual_id' => env('STRIPE_PRICE_PRO_ANNUAL'),
             'stripe_lookup_key' => 'pro',
         ],
         'enterprise' => [
@@ -69,6 +68,7 @@ return [
                 'weekly_digest' => true,
             ],
             'stripe_price_id' => env('STRIPE_PRICE_ENTERPRISE'),
+            'stripe_price_annual_id' => env('STRIPE_PRICE_ENTERPRISE_ANNUAL'),
             'stripe_lookup_key' => 'enterprise',
         ],
     ],

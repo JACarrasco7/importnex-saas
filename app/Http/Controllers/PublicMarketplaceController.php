@@ -17,10 +17,13 @@ class PublicMarketplaceController extends Controller
      */
     private const FILTER_RULES = [
         'search' => ['nullable', 'string', 'max:200'],
+        'brand' => ['nullable', 'string', 'max:50'],
+        'deal' => ['nullable', 'boolean'],
         'verdict' => ['nullable', 'string', 'in:Buy,Buy if price drops,Doubtful,Discard'],
         'traffic_light' => ['nullable', 'string', 'in:green,amber,red,neutral'],
         'min_price' => ['nullable', 'numeric', 'min:0', 'max:9999999'],
         'max_price' => ['nullable', 'numeric', 'min:0', 'max:9999999'],
+        'mileage' => ['nullable', 'numeric', 'min:0', 'max:9999999'],
         'year_min' => ['nullable', 'integer', 'min:1900', 'max:2100'],
         'year_max' => ['nullable', 'integer', 'min:1900', 'max:2100'],
         'fuel' => ['nullable', 'string', 'max:50'],
@@ -61,10 +64,16 @@ class PublicMarketplaceController extends Controller
                         ->orWhere('vin', 'like', "%$s%");
                 });
             })
+            ->when($filters['brand'] ?? null, fn ($q, $b) => $q->where('brand', $b))
+            ->when(
+                $filters['deal'] ?? false,
+                fn ($q) => $q->whereNotNull('estimated_saving')->where('estimated_saving', '>', 0)
+            )
             ->when($filters['verdict'] ?? null, fn ($q, $v) => $q->where('verdict', $v))
             ->when($filters['traffic_light'] ?? null, fn ($q, $tl) => $q->where('traffic_light', $tl))
             ->when(isset($filters['min_price']), fn ($q, $p) => $q->where('purchase_price', '>=', $p))
             ->when(isset($filters['max_price']), fn ($q, $p) => $q->where('purchase_price', '<=', $p))
+            ->when(isset($filters['mileage']), fn ($q, $m) => $q->where('mileage', '<=', $m))
             ->when(isset($filters['year_min']), fn ($q, $y) => $q->whereRaw('SUBSTRING(year, -4) >= ?', [$y]))
             ->when(isset($filters['year_max']), fn ($q, $y) => $q->whereRaw('SUBSTRING(year, -4) <= ?', [$y]))
             ->when(isset($filters['fuel']), fn ($q, $f) => $q->where('fuel', $f))
@@ -90,6 +99,7 @@ class PublicMarketplaceController extends Controller
             ->whereIn('verdict', ['Buy', 'Buy if price drops']);
 
         $filterOptions = [
+            'brands' => (clone $publicCarsBase)->whereNotNull('brand')->where('brand', '!=', '')->distinct()->orderBy('brand')->pluck('brand')->all(),
             'fuels' => (clone $publicCarsBase)->whereNotNull('fuel')->where('fuel', '!=', '')->distinct()->orderBy('fuel')->pluck('fuel')->all(),
             'transmissions' => (clone $publicCarsBase)->whereNotNull('transmission')->where('transmission', '!=', '')->distinct()->orderBy('transmission')->pluck('transmission')->all(),
             'doors' => (clone $publicCarsBase)->whereNotNull('doors')->distinct()->orderBy('doors')->pluck('doors')->all(),
@@ -108,8 +118,8 @@ class PublicMarketplaceController extends Controller
             'lights' => $lights,
             'requestUrl' => $requestUrl,
             'filters' => array_intersect_key($filters, array_flip([
-                'search', 'verdict', 'traffic_light', 'min_price', 'max_price', 'year_min', 'year_max',
-                'fuel', 'transmission', 'doors', 'color',
+                'search', 'brand', 'deal', 'verdict', 'traffic_light', 'min_price', 'max_price',
+                'mileage', 'year_min', 'year_max', 'fuel', 'transmission', 'doors', 'color',
             ])),
             'filterBounds' => $filterBounds,
             'filterOptions' => $filterOptions,
