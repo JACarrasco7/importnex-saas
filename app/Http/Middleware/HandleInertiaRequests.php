@@ -119,6 +119,50 @@ class HandleInertiaRequests extends Middleware
                 'locale' => $organization?->locale ?? $locale,
                 'decimals' => 2,
             ],
+            // Billing dunning context (Sprint 5.3): shared so DunningBanner can show
+            // a one-place alert when the organization's last invoice failed.
+            'billingDunning' => $user
+                ? $this->resolveBillingDunningContext($user)
+                : null,
+        ];
+    }
+
+    /**
+     * Resolve the billing/dunning context for the current user.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function resolveBillingDunningContext($user): ?array
+    {
+        $organization = $user->organization;
+        if (! $organization) {
+            return null;
+        }
+
+        $subscription = $organization->subscription();
+        if (! $subscription) {
+            return null;
+        }
+
+        $paymentFailed = method_exists($subscription, 'hasIncompletePayment')
+            ? $subscription->hasIncompletePayment()
+            : false;
+
+        $paymentFailedAt = null;
+        if ($paymentFailed) {
+            $latest = $subscription->latestInvoice();
+            if ($latest && $latest->status === 'open') {
+                $paymentFailedAt = $latest->created_at?->toIso8601String();
+            }
+        }
+
+        return [
+            'payment_failed' => $paymentFailed,
+            'payment_failed_at' => $paymentFailedAt,
+            'on_grace_period' => method_exists($subscription, 'onGracePeriod')
+                ? $subscription->onGracePeriod()
+                : false,
+            'plan_name' => $subscription->type ?? $organization->plan,
         ];
     }
 }
