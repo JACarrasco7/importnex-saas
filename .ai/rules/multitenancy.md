@@ -37,6 +37,14 @@ $cars = Car::all();
 $cars = Car::query()->get(); // sin where
 ```
 
+## Global scopes: NO usar en multi-tenant
+
+**Lección aprendida (2026-08-07):** NO añadir `static::addGlobalScope('organization', ...)` en modelos. Causas:
+- En queue workers / jobs / commands `auth()->user()` es null → leak silencioso de TODAS las orgs.
+- Dificulta testing y scopes explícitos.
+
+**Patrón actual**: cada controller/observer valida explícitamente con `where('organization_id', $org->id)` o helpers privados como `AlertController::authorizeAlertAccess()`.
+
 ## Validación con scope
 
 ```php

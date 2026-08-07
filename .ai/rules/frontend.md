@@ -19,10 +19,11 @@
 - **`Deferred` prop** para datos pesados (carga diferida).
 - **`WhenVisible`** para infinite scroll.
 - **`Link prefetch`** on hover (`:prefetch="true"`).
-- **NUNCA** `axios` o `fetch` directos para llamadas Inertia (usar `useForm` o `router`).
+- **Para llamadas Inertia**: `useForm` o `router.post/visit/get`. **NUNCA** axios/fetch directo.
+- **Excepción legítima de fetch**: endpoints no-Inertia como `/newsletter/subscribe` (rate limit + JSON response). Usar `fetch` con `headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }`.
 - **Head** para `<title>` y meta tags.
 
-## Tailwind v4 (CSS-first)
+## Tailwind v4 (CSS-first) — v3 deprecations migradas 2026-08-07
 
 - **Paleta en `app.css @theme`** — NO `tailwind.config.js`.
 - **`@custom-variant dark (&:where(.dark, .dark *))`** ya configurado.
@@ -30,6 +31,7 @@
 - **Tokens semánticos:** `bg-estoril-700`, `text-asphalt-900`, `border-platinum-400`.
 - **Custom utilities:** `card-premium`, `text-gradient`, `link-underline` (definidas en app.css).
 - **Animaciones:** `animate-[fade-in_0.2s_ease-out]`, etc. (claves en `@theme`).
+- **Migración v3 → v4 (NO REVERTIR)**: usar `bg-linear-to-*` (NO `bg-gradient-to-*`), `shrink-0` (NO `flex-shrink-0`), `aspect-X/Y` (NO `aspect-[X/Y]`).
 
 ## i18n
 

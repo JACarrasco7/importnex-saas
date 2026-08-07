@@ -98,6 +98,41 @@ description: Checklist obligatorio de autoauditoría después de cada implementa
 - **Detectado:** 2026-08-06 (1250 missing).
 - **Prevención:** Hook pre-commit valida (Sprint G.3).
 
+### Trampa 7: Componente Vue usa icono que NO está importado
+- **Síntoma:** Sección se renderiza vacía o crashea en runtime.
+- **Causa:** `<component :is="SomeIcon" />` con `SomeIcon` no importado.
+- **Fix:** Añadir al import existente: `import { FooIcon } from '@heroicons/vue/24/outline';`.
+- **Detectado:** 2026-08-07 (Welcome.vue: `MapPinIcon`, `ClipboardDocumentCheckIcon`, `CurrencyEuroIcon`).
+- **Prevención:** Antes de usar un icono en template, verificar import.
+
+### Trampa 8: Global scope multi-tenant rompe jobs/queue workers
+- **Síntoma:** En `php artisan command`, `Job::dispatch()` o `Queue::work()`, queries devuelven datos de TODAS las orgs.
+- **Causa:** `static::addGlobalScope('organization', fn() => auth()->user()->organization_id)` — en contexto sin auth, falla.
+- **Fix:** Quitar global scope. Filtrar explícitamente en cada query con helper o middleware.
+- **Detectado:** 2026-08-07 (Alert::booted eliminado, AlertController ahora valida con `authorizeAlertAccess`).
+- **Prevención:** NUNCA añadir global scope basado en `auth()->user()`. Validar manualmente.
+
+### Trampa 9: Backend ignora parámetro del frontend
+- **Síntoma:** UI muestra toggle/control pero el backend hace caso omiso.
+- **Causa:** Frontend envía parámetro nuevo (ej: `billing_cycle=annual`) pero controller usa valor hardcoded.
+- **Fix:** Validar `request->input('param')` en controller y aplicar lógica correspondiente.
+- **Detectado:** 2026-08-07 (Subscriptions/Index.vue toggle anual era decorativo — fix: `SubscriptionController` ahora lee `billing_cycle` y elige `stripe_price_annual_id`).
+- **Prevención:** Al añadir controles en frontend, verificar que backend los respete. Tests Feature cubriendo el flujo.
+
+### Trampa 10: Pluralización declarada pero no implementada
+- **Síntoma:** Vue renderiza literal `[object Object]` o `{_one:..., _other:...}`.
+- **Causa:** es.js usa `{_one, _other}` pero `t()` no parsea objetos.
+- **Fix:** Implementar pluralización en `t()` con detección de count.
+- **Detectado:** 2026-08-07 (soportado tras audit en `useTranslations.js`).
+- **Prevención:** Si usas plurales, verificar que `t()` soporte el formato.
+
+### Trampa 11: Clases Tailwind v3 obsoletas
+- **Síntoma:** Build warning `class does not exist` en consola navegador.
+- **Causa:** `bg-gradient-to-br` (v3) → debe ser `bg-linear-to-br` (v4).
+- **Fix:** Migrar con script regex. Otras: `flex-shrink-0` → `shrink-0`, `aspect-[X/Y]` → `aspect-X/Y`.
+- **Detectado:** 2026-08-07 (106 ocurrencias migradas en 40 archivos).
+- **Prevención:** Solo escribir clases v4 desde el inicio. Ver [frontend.md](rules/frontend.md).
+
 ---
 
 ## 📝 Plantilla de memoria (encontrar y guardar)

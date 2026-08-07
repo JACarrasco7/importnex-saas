@@ -50,6 +50,7 @@ public function handle(Request $request): Response
 - **Vitalicio = `is_owner=true`** en organizations (no flag separado).
 - **Plan ilimitado bypassa** `PlanLimitMiddleware`.
 - **Basic, Pro, Enterprise** — config en `config/subscription.php`.
+- **Billing cycle (mensual/anual)**: cada plan tiene `stripe_price_id` (mensual) y `stripe_price_annual_id` (anual). `SubscriptionController@create/swap` lee `billing_cycle` del request y usa el price ID correcto. STRIPE_PRICE_*_ANNUAL en `.env` requerido para toggle.
 
 ## Trial
 

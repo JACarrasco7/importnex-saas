@@ -34,8 +34,15 @@ Definidos en `resources/css/app.css @theme`. NO `tailwind.config.js`.
 ## Componentes premium
 
 - **`.card-premium`** — `rounded-xl border shadow-sm hover:shadow-md`.
-- **`.text-gradient`** — `bg-gradient-to-r from-estoril-600 to-estoril-400 bg-clip-text text-transparent`.
+- **`.text-gradient`** — `bg-linear-to-r from-estoril-600 to-estoril-400 bg-clip-text text-transparent` (migrado de `bg-gradient-to-r` a v4).
 - **`.link-underline`** — `relative inline-block after:absolute ... hover:after:w-full`.
+
+## Componentes marketplace v1 (2026-08-07)
+
+- **`<WishlistButton :car="car" />`** — Heart icon toggle. Persiste en localStorage.
+- **`<CompareBar />`** — Bottom bar flotante. Aparece cuando wishlist tiene ≥1 item. Botón "Comparar" → `/marketplace/compare?ids=`.
+- **`<FinancingCalculator :price :currency :locale />`** — Sliders reactivos. Calcula cuota mensual con interés compuesto.
+- **`<NewsletterPopup />`** — Modal 30s delay + 30 días localStorage cooldown. POST real a `/newsletter/subscribe`.
 
 ## Dark mode
 

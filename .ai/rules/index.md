@@ -27,9 +27,9 @@ Una o dos líneas explicando la regla. Sin ensayos.
 | `**/*.{php,vue,js}` | No instalar dependencias sin aprobar | [no-deps-without-approval.md](no-deps-without-approval.md) |
 | `resources/js/**,resources/views/**` | Paleta JJ Import Motors obligatoria | [brand-jj-import-motors.md](brand-jj-import-motors.md) |
 | `package.json,vite.config.js` | Usuario lanza `npm run build` | [no-frontend-build.md](no-frontend-build.md) |
-| `app/Http/Middleware/*` | Multi-tenancy vía `organization_id` | [multitenancy-org.md](multitenancy-org.md) |
+| `app/Http/Middleware/*,app/Models/**` | Multi-tenancy vía `organization_id` (sin global scopes) | [multitenancy-org.md](multitenancy-org.md) |
 | `app/Http/Controllers/**,app/Services/**` | Backend Laravel 13 / PHP 8.5 | [backend.md](backend.md) |
-| `resources/js/**,resources/css/**` | Frontend Vue 3 + Tailwind v4 | [frontend.md](frontend.md) |
+| `resources/js/**,resources/css/**` | Frontend Vue 3 + Tailwind v4 (v3 deprecations NO) | [frontend.md](frontend.md) |
 | `app/Services/Billing/**,config/subscription.php` | Cashier + Stripe webhooks idempotentes | [billing.md](billing.md) |
 | `database/migrations/**` | Multi-tenancy isolation | [multitenancy.md](multitenancy.md) |
 | `resources/lang/**,resources/js/i18n/**` | Paridad es/en i18n | [i18n.md](i18n.md) |
@@ -37,6 +37,8 @@ Una o dos líneas explicando la regla. Sin ensayos.
 | `resources/css/**,resources/js/Components/**` | Design system JJ Import Motors | [design-system.md](design-system.md) |
 | `tests/Feature/**,tests/Unit/**` | PHPUnit 13 + SQLite :memory: | [testing.md](testing.md) |
 | `database/migrations/**,database/factories/**` | Migraciones + factories seguras | [migrations.md](migrations.md) |
+| `app/Models/Alert.php,app/Observers/AlertObserver.php,app/Services/Alert*Dispatcher.php` | Sistema notificaciones multi-canal | [notifications.md](notifications.md) |
+| `app/Http/Controllers/PublicMarketplaceController.php,resources/js/Pages/Public/**` | Marketplace público — engagement features | [marketplace.md](marketplace.md) |
 | `**/*.{php,vue,js,md}` | Search hygiene: no bucles de búsqueda | [search-hygiene.md](search-hygiene.md) |
 
 ## 📊 Reglas Sprint G (sistema IA)
