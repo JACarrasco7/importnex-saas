@@ -95,7 +95,7 @@ class PublicMarketplaceController extends Controller
      *
      * GET /marketplace/{car}
      */
-    public function show(Car $car): Response
+    public function show(Request $request, Car $car): Response
     {
         // Verify this car should be publicly visible
         if (! $car->organization || ! $car->organization->is_public ||
@@ -105,15 +105,24 @@ class PublicMarketplaceController extends Controller
             abort(404);
         }
 
+        // Marketplace item 7: contador de vistas con deduplicación por sesión.
+        // Una sesión (cookie mc-viewed-{car_id}) cuenta 1 vez; misma sesión no infla.
+        $cookieName = 'mc-viewed-' . $car->id;
+        if (! $request->cookie($cookieName)) {
+            $car->increment('marketplace_views');
+            cookie()->queue(cookie($cookieName, '1', 60 * 24)); // 24h
+        }
+
         $car->load(['photos', 'organization']);
 
         // Pre-compute derived data for the enriched valuation UI
-        $car->researchGaps;       // touch accessor
-        $car->comparablesStats;    // touch accessor
-        $car->calculateTotalCost(); // touch method
+        $car->researchGaps;
+        $car->comparablesStats;
+        $car->calculateTotalCost();
 
         return Inertia::render('Public/MarketplaceShow', [
             'car' => $car,
+            'shareUrl' => $request->fullUrl(),
             'derived' => [
                 'total_cost' => $car->calculateTotalCost(),
                 'iedmt' => $car->calculateIEDMT(),
