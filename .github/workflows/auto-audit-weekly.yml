@@ -1,0 +1,78 @@
+name: Auto-Audit Weekly
+
+on:
+  schedule:
+    # Cada lunes a las 9:00 UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  auto-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+
+      - name: Composer install
+        run: composer install --no-dev --no-interaction
+
+      - name: Full Memory Analysis
+        run: |
+          php scripts/memory-manager.php full-analysis > weekly-report.txt 2>&1
+          php scripts/memory-manager.php regenerate-context
+          php scripts/memory-manager.php auto-changelog --since=$(date -d '7 days ago' +%Y-%m-%d) > docs/CHANGELOG.draft.md
+
+      - name: Acceptance Rate
+        run: php scripts/memory-manager.php acceptance-rate
+
+      - name: Compress oversized skills
+        run: |
+          for skill in .ai/skills/*/SKILL.md; do
+              size=$(wc -c < "$skill")
+              if [ "$size" -gt 100000 ]; then
+                  name=$(basename "$(dirname "$skill")")
+                  echo "Compressing oversized skill: $name ($size bytes)"
+                  php scripts/memory-manager.php compress-skill "$name"
+              fi
+          done
+
+      - name: Validate docs
+        run: |
+          # Cada migration debe tener nota en docs/MIGRATIONS.md
+          missing=0
+          for mig in database/migrations/*.php; do
+              name=$(basename "$mig")
+              if ! grep -q "$name" docs/MIGRATIONS.md 2>/dev/null; then
+                  echo "⚠️  Migration sin doc: $name"
+                  missing=$((missing+1))
+              fi
+          done
+          echo "Migrations sin documentar: $missing"
+
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: auto-audit-weekly
+          path: |
+            weekly-report.txt
+            docs/CHANGELOG.draft.md
+            .ai/memory/
+
+      - name: Commit auto-updates (if changes)
+        run: |
+          git config user.name "Auto-Audit Bot"
+          git config user.email "bot@importnexcore.local"
+          git add -A
+          if git diff --staged --quiet; then
+              echo "No changes to commit"
+          else
+              git commit -m "chore(auto-audit): weekly memory analysis + context regen"
+              git push origin master
+          fi

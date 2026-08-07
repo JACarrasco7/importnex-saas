@@ -29,6 +29,7 @@ use App\Http\Controllers\PublicCarRequestController;
 use App\Http\Controllers\PublicMarketplaceController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\StripeWebhookController;
+use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\TripPlannerController;
 use App\Http\Controllers\ValuationImportController;
@@ -264,6 +265,13 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
 
 // Locale update (available for all users, including guests)
 Route::put('/locale', [LocaleController::class, 'update'])->name('locale.update');
+
+// N6: Push subscriptions (Web Push API). Requiere auth.
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::post('/push/subscribe', [PushSubscriptionController::class, 'store'])->name('push.subscribe');
+    Route::delete('/push/subscribe', [PushSubscriptionController::class, 'destroy'])->name('push.unsubscribe');
+    Route::get('/push/vapid-public-key', [PushSubscriptionController::class, 'vapidKey'])->name('push.vapid-key');
+});
 
 // JJ Import Motors folleto PDF
 Route::get('/jj-import/folleto', [JJImportFolletoController::class, 'download'])->name('jj-import.folleto');
