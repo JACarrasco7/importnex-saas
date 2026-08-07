@@ -65,7 +65,7 @@ const cardBrandIcon = (brand) => {
                 <!-- No Stripe -->
                 <div v-if="!hasStripeId" class="overflow-hidden rounded-2xl border border-amber-200 bg-amber-50 p-6">
                     <div class="flex items-start gap-4">
-                        <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-amber-100">
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100">
                             <ExclamationCircleIcon class="h-6 w-6 text-amber-600" />
                         </div>
                         <div class="flex-1">
@@ -131,7 +131,7 @@ const cardBrandIcon = (brand) => {
                                 <h3 class="text-base font-semibold text-gray-900">{{ t('cars.metodo_de_pago') }}</h3>
                             </div>
                             <div v-if="paymentMethod" class="p-6">
-                                <div class="rounded-xl bg-gradient-to-br from-gray-900 to-estoril-900 p-5 text-white shadow-lg">
+                                <div class="rounded-xl bg-linear-to-br from-gray-900 to-estoril-900 p-5 text-white shadow-lg">
                                     <div class="flex items-center justify-between">
                                         <component :is="cardBrandIcon(paymentMethod.brand)" class="h-6 w-6" />
                                         <span class="text-xs font-semibold uppercase tracking-wider">{{ paymentMethod.brand }}</span>

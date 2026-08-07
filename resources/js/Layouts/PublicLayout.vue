@@ -34,7 +34,7 @@ const close = () => { mobileOpen.value = false; };
         <header class="sticky top-0 z-30 border-b border-gray-200/70 bg-white/80 backdrop-blur-md dark:border-asphalt-700/60 dark:bg-asphalt-900/80">
             <nav class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
                 <Link :href="user ? route('dashboard') : '/'" class="flex items-center gap-2.5" @click="close">
-                    <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-estoril-600 to-estoril-800 shadow-sm">
+                    <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-estoril-600 to-estoril-800 shadow-sm">
                         <TruckIcon class="h-5 w-5 text-white" />
                     </div>
                     <span class="text-lg font-bold tracking-tight text-gray-900 dark:text-white">JJ Import Motors</span>
@@ -147,7 +147,7 @@ const close = () => { mobileOpen.value = false; };
                 <div class="grid grid-cols-2 gap-8 md:grid-cols-4">
                     <div class="col-span-2 md:col-span-1">
                         <div class="flex items-center gap-2.5">
-                            <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-estoril-600 to-estoril-800">
+                            <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-estoril-600 to-estoril-800">
                                 <TruckIcon class="h-5 w-5 text-white" />
                             </div>
                             <span class="text-lg font-bold text-gray-900 dark:text-white">JJ Import Motors</span>

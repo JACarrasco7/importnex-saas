@@ -149,19 +149,19 @@ function apply() {
                 <!-- Status banners -->
                 <div v-if="car.status === 'Pending review' && aiAnalysis" class="overflow-hidden rounded-2xl border border-amber-200 bg-amber-50 p-4">
                     <div class="flex items-start gap-3">
-                        <ExclamationTriangleIcon class="h-5 w-5 flex-shrink-0 text-amber-600" />
+                        <ExclamationTriangleIcon class="h-5 w-5 shrink-0 text-amber-600" />
                         <p class="text-sm text-amber-900">AI verification completed. Review the suggestions and pick which fields to apply — existing values are left intact unless you tick them.</p>
                     </div>
                 </div>
                 <div v-else-if="car.status === 'Verifying'" class="overflow-hidden rounded-2xl border border-blue-200 bg-blue-50 p-4">
                     <div class="flex items-start gap-3">
-                        <InformationCircleIcon class="h-5 w-5 flex-shrink-0 text-blue-600" />
+                        <InformationCircleIcon class="h-5 w-5 shrink-0 text-blue-600" />
                         <p class="text-sm text-blue-900">{{ t('cars.verification_in_progress') }}</p>
                     </div>
                 </div>
                 <div v-else class="overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 p-6">
                     <div class="flex items-start gap-3">
-                        <SparklesIcon class="h-5 w-5 flex-shrink-0 text-estoril-600" />
+                        <SparklesIcon class="h-5 w-5 shrink-0 text-estoril-600" />
                         <div>
                             <p class="text-sm text-gray-900">This car has not been verified yet. Send it to the configured AI for analysis.</p>
                             <form method="POST" :action="route('cars.verify-sync', car.id)" class="mt-4">
@@ -179,14 +179,14 @@ function apply() {
                 <div v-if="car.valuation || car.recommendation" class="space-y-6">
                     <FormSection v-if="car.valuation" title="Valuation">
                         <div class="flex items-start gap-3">
-                            <ChartBarIcon class="h-5 w-5 flex-shrink-0 text-estoril-600" />
+                            <ChartBarIcon class="h-5 w-5 shrink-0 text-estoril-600" />
                             <p class="text-sm text-gray-900">{{ car.valuation }}</p>
                         </div>
                     </FormSection>
 
                     <FormSection v-if="car.recommendation" title="Recommendation">
                         <div class="flex items-start gap-3">
-                            <LightBulbIcon class="h-5 w-5 flex-shrink-0 text-estoril-600" />
+                            <LightBulbIcon class="h-5 w-5 shrink-0 text-estoril-600" />
                             <p class="text-sm text-gray-900">{{ car.recommendation }}</p>
                         </div>
                     </FormSection>
@@ -194,7 +194,7 @@ function apply() {
                     <FormSection v-if="car.red_flags?.length" title="Red flags">
                         <ul class="space-y-2">
                             <li v-for="flag in car.red_flags" :key="flag" class="flex items-start gap-2 rounded-lg bg-rose-50 p-3">
-                                <FlagIcon class="h-4 w-4 flex-shrink-0 text-rose-600" />
+                                <FlagIcon class="h-4 w-4 shrink-0 text-rose-600" />
                                 <span class="text-sm text-rose-900">{{ flag }}</span>
                             </li>
                         </ul>
@@ -203,7 +203,7 @@ function apply() {
                     <FormSection v-if="car.tips?.length" title="Tips">
                         <ul class="space-y-2">
                             <li v-for="tip in car.tips" :key="tip" class="flex items-start gap-2 rounded-lg bg-emerald-50 p-3">
-                                <CheckCircleIcon class="h-4 w-4 flex-shrink-0 text-emerald-600" />
+                                <CheckCircleIcon class="h-4 w-4 shrink-0 text-emerald-600" />
                                 <span class="text-sm text-emerald-900">{{ tip }}</span>
                             </li>
                         </ul>

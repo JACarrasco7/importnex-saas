@@ -66,7 +66,7 @@ const inputClass = 'block w-full rounded-lg border-gray-300 pl-10 text-sm shadow
                     >
                         <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
                             <div class="flex items-start gap-4">
-                                <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-rose-50">
+                                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-50">
                                     <ExclamationTriangleIcon class="h-6 w-6 text-rose-600" />
                                 </div>
                                 <div class="flex-1">

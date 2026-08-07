@@ -63,7 +63,7 @@ const submit = () => {
     <Head :title="t('car_request_form.title')" />
 
     <PublicLayout>
-        <div class="bg-gradient-to-br from-estoril-50 via-white to-platinum-100">
+        <div class="bg-linear-to-br from-estoril-50 via-white to-platinum-100">
             <div class="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
             <!-- Header -->
             <div class="mb-10 text-center">

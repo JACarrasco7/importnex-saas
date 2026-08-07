@@ -126,7 +126,7 @@ function featureValueDisplay(value) {
 
     <PublicLayout>
         <!-- Hero -->
-        <section class="relative overflow-hidden bg-gradient-to-br from-estoril-50 via-white to-platinum-100 py-20 sm:py-28">
+        <section class="relative overflow-hidden bg-linear-to-br from-estoril-50 via-white to-platinum-100 py-20 sm:py-28">
             <div class="absolute -top-40 -right-40 h-[28rem] w-[28rem] rounded-full bg-estoril-300/60 blur-3xl"></div>
             <div class="absolute -bottom-40 -left-40 h-[28rem] w-[28rem] rounded-full bg-platinum-400/50 blur-3xl"></div>
 
@@ -220,7 +220,7 @@ function featureValueDisplay(value) {
                                 :key="feature"
                                 class="flex items-start gap-3"
                             >
-                                <CheckIcon class="h-5 w-5 flex-shrink-0 text-green-600" />
+                                <CheckIcon class="h-5 w-5 shrink-0 text-green-600" />
                                 <span class="text-sm text-gray-600 dark:text-gray-400">
                                     {{ feature }}
                                 </span>
@@ -351,7 +351,7 @@ function featureValueDisplay(value) {
         <!-- CTA -->
         <section class="py-16">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div class="rounded-2xl bg-gradient-to-r from-estoril-600 to-estoril-800 px-6 py-12 sm:px-12 sm:py-16 text-center">
+                <div class="rounded-2xl bg-linear-to-r from-estoril-600 to-estoril-800 px-6 py-12 sm:px-12 sm:py-16 text-center">
                     <h2 class="text-3xl font-bold text-white sm:text-4xl">
                         {{ t('pricing_public.cta_title') }}
                     </h2>

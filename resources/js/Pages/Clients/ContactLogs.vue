@@ -118,7 +118,7 @@ const inputClass = 'block w-full rounded-lg border-gray-300 text-sm shadow-sm fo
                     <EmptyState v-if="!logs?.data?.length" icon="💬" :title="t('cars.no_contact_logs_yet')" :description="t('cars.no_contact_logs_desc')" />
                     <div v-else class="divide-y divide-gray-200">
                         <div v-for="log in logs.data" :key="log.id" class="flex items-start gap-4 px-6 py-4 hover:bg-gray-50">
-                            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-estoril-50">
+                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-estoril-50">
                                 <component :is="channelIcon(log.channel)" class="h-5 w-5 text-estoril-600" />
                             </div>
                             <div class="flex-1 min-w-0">

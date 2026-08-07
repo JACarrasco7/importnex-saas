@@ -1,12 +1,12 @@
 <template>
     <div
         v-if="visible"
-        class="overflow-hidden rounded-2xl border border-rose-300 bg-gradient-to-r from-rose-50 to-red-50 p-4 shadow-sm dark:border-rose-800 dark:from-rose-950/40 dark:to-red-950/40"
+        class="overflow-hidden rounded-2xl border border-rose-300 bg-linear-to-r from-rose-50 to-red-50 p-4 shadow-sm dark:border-rose-800 dark:from-rose-950/40 dark:to-red-950/40"
         role="alert"
         aria-live="polite"
     >
         <div class="flex items-start gap-4">
-            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-rose-100 dark:bg-rose-900/60">
+            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-100 dark:bg-rose-900/60">
                 <ExclamationTriangleIcon class="h-5 w-5 text-rose-600 dark:text-rose-300" />
             </div>
             <div class="flex-1 min-w-0">
@@ -21,7 +21,7 @@
                     <time :datetime="paymentFailedAt">{{ formattedDate }}</time>
                 </p>
             </div>
-            <div class="flex flex-shrink-0 items-center gap-2">
+            <div class="flex shrink-0 items-center gap-2">
                 <Link
                     :href="route('billing.portal')"
                     class="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-asphalt-900"

@@ -361,7 +361,7 @@ function renderPreview() {
                                 :key="i"
                                 class="flex items-start gap-2 rounded-lg bg-amber-50 p-3"
                             >
-                                <PhotoIcon class="h-4 w-4 flex-shrink-0 text-amber-600" />
+                                <PhotoIcon class="h-4 w-4 shrink-0 text-amber-600" />
                                 <span class="flex-1 text-sm text-amber-900">{{ tip }}</span>
                                 <button @click="removeTip(i)" class="text-amber-600 hover:text-amber-800">
                                     <XMarkIcon class="h-4 w-4" />

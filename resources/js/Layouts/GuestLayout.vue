@@ -5,9 +5,9 @@ import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 </script>
 
 <template>
-    <div class="flex min-h-screen bg-gradient-to-br from-slate-50 via-white to-estoril-50">
+    <div class="flex min-h-screen bg-linear-to-br from-slate-50 via-white to-estoril-50">
         <!-- Left side: marketing -->
-        <div class="hidden lg:flex lg:w-1/2 flex-col justify-between bg-gradient-to-br from-estoril-700 to-estoril-900 p-12 text-white">
+        <div class="hidden lg:flex lg:w-1/2 flex-col justify-between bg-linear-to-br from-estoril-700 to-estoril-900 p-12 text-white">
             <Link href="/" class="flex items-center gap-2">
                 <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 backdrop-blur">
                     <TruckIcon class="h-5 w-5 text-white" />

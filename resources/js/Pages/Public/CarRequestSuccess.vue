@@ -13,7 +13,7 @@ const { t } = useTranslations();
 <template>
     <Head :title="t('car_request_success.title')" />
 
-    <div class="min-h-screen bg-gradient-to-br from-estoril-50 via-white to-platinum-100">
+    <div class="min-h-screen bg-linear-to-br from-estoril-50 via-white to-platinum-100">
         <div class="mx-auto max-w-2xl px-4 py-16 sm:px-6 lg:px-8">
             <div class="overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-gray-200">
                 <div class="px-8 py-12 text-center">

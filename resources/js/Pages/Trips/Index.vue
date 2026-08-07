@@ -59,7 +59,7 @@ const { currency, statusVariant } = useFormat();
                         </div>
                         <div v-if="trip.recommendation" class="border-b border-gray-200 bg-blue-50 px-6 py-3">
                             <div class="flex items-start gap-2">
-                                <LightBulbIcon class="h-5 w-5 flex-shrink-0 text-blue-600" />
+                                <LightBulbIcon class="h-5 w-5 shrink-0 text-blue-600" />
                                 <p class="text-sm text-blue-900">{{ trip.recommendation }}</p>
                             </div>
                         </div>

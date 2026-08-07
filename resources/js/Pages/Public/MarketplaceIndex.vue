@@ -23,6 +23,8 @@ import {
     GiftIcon,
 } from '@heroicons/vue/24/outline';
 import Badge from '@/Components/Badge.vue';
+import WishlistButton from '@/Components/WishlistButton.vue';
+import CompareBar from '@/Components/CompareBar.vue';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import { useFormat } from '@/Composables/useFormat';
 import { useTranslations } from '@/Composables/useTranslations';
@@ -228,7 +230,7 @@ onMounted(() => {
 
     <PublicLayout>
         <!-- HERO -->
-        <section class="relative overflow-hidden bg-gradient-to-br from-estoril-100 via-estoril-50 to-platinum-200">
+        <section class="relative overflow-hidden bg-linear-to-br from-estoril-100 via-estoril-50 to-platinum-200">
             <div class="absolute -top-40 -right-40 h-[28rem] w-[28rem] rounded-full bg-estoril-300/60 blur-3xl"></div>
             <div class="absolute -bottom-40 -left-40 h-[28rem] w-[28rem] rounded-full bg-platinum-400/50 blur-3xl"></div>
             <div class="absolute left-1/2 top-1/4 h-80 w-80 -translate-x-1/2 rounded-full bg-estoril-500/20 blur-3xl"></div>
@@ -313,7 +315,7 @@ onMounted(() => {
                 </div>
                 <div class="mt-12 grid grid-cols-1 gap-6 md:grid-cols-3">
                     <div v-for="item in howItWorks" :key="item.step" class="relative rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 transition hover:-translate-y-0.5 hover:shadow-md">
-                        <span class="absolute -top-4 left-6 flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-estoril-600 to-estoril-800 text-sm font-bold text-white shadow-md shadow-estoril-700/30">
+                        <span class="absolute -top-4 left-6 flex h-9 w-9 items-center justify-center rounded-full bg-linear-to-br from-estoril-600 to-estoril-800 text-sm font-bold text-white shadow-md shadow-estoril-700/30">
                             {{ item.step }}
                         </span>
                         <h3 class="mt-3 text-lg font-semibold text-gray-900">{{ item.title }}</h3>
@@ -439,14 +441,14 @@ onMounted(() => {
 
                 <!-- Cars grid -->
                 <div v-if="filteredCars.length > 0" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                    <Link
+                    <div
                         v-for="car in filteredCars"
                         :key="car.id"
-                        :href="route('marketplace.show', car.id)"
                         class="group relative flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:ring-estoril-300"
                     >
+                        <Link :href="route('marketplace.show', car.id)" class="flex flex-1 flex-col">
                         <!-- Photo -->
-                        <div class="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-asphalt-200 to-gray-300">
+                        <div class="relative aspect-[16/10] overflow-hidden bg-linear-to-br from-asphalt-200 to-gray-300">
                             <img
                                 v-if="car.photos && car.photos.length > 0"
                                 :src="car.photos[0].startsWith('http') ? car.photos[0] : `/storage/${car.photos[0]}`"
@@ -455,7 +457,7 @@ onMounted(() => {
                                 loading="lazy"
                             />
                             <div v-else class="flex h-full items-center justify-center text-6xl text-gray-400">🚗</div>
-                            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-asphalt-900/60 via-transparent to-transparent opacity-50 transition group-hover:opacity-80"></div>
+                            <div class="pointer-events-none absolute inset-0 bg-linear-to-t from-asphalt-900/60 via-transparent to-transparent opacity-50 transition group-hover:opacity-80"></div>
 
                             <!-- Badges -->
                             <div class="absolute left-3 top-3">
@@ -522,7 +524,12 @@ onMounted(() => {
                                 </span>
                             </div>
                         </div>
-                    </Link>
+                        </Link>
+                        <!-- Wishlist + Compare (fuera del Link para no anidar) -->
+                        <div class="flex items-center justify-end gap-2 border-t border-gray-100 bg-gray-50 px-4 py-2">
+                            <WishlistButton :car="car" />
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Empty state -->
@@ -543,7 +550,7 @@ onMounted(() => {
         </section>
 
         <!-- CTA / Contacto -->
-        <section id="contacto" class="bg-gradient-to-br from-asphalt-900 to-estoril-900 py-16">
+        <section id="contacto" class="bg-linear-to-br from-asphalt-900 to-estoril-900 py-16">
             <div class="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
                 <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">
                     {{ t('marketplace.section_contact') }}
@@ -650,7 +657,7 @@ onMounted(() => {
                         <XMarkIcon class="h-4 w-4" />
                     </button>
                     <div class="flex items-start gap-3">
-                        <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-estoril-100 text-estoril-700">
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-estoril-100 text-estoril-700">
                             <GiftIcon class="h-5 w-5" />
                         </div>
                         <div class="flex-1">
@@ -682,5 +689,8 @@ onMounted(() => {
                 </div>
             </Transition>
         </Teleport>
+
+        <!-- Compare bar (Marketplace-3.8) -->
+        <CompareBar />
     </PublicLayout>
 </template>

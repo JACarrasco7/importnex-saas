@@ -63,7 +63,7 @@ const onDrop = (column) => {
                         @dragover="onDragOver($event, column)"
                         @dragleave="onDragLeave"
                         @drop="onDrop(column)"
-                        :class="['flex-shrink-0 w-72 rounded-2xl p-3 transition', dragOverColumn === column.key ? 'bg-estoril-100 ring-2 ring-estoril-400' : 'bg-gray-100']">
+                        :class="['shrink-0 w-72 rounded-2xl p-3 transition', dragOverColumn === column.key ? 'bg-estoril-100 ring-2 ring-estoril-400' : 'bg-gray-100']">
                         <div class="flex items-center justify-between px-2 py-2">
                             <h3 class="text-sm font-semibold text-gray-700">{{ column.label }}</h3>
                             <span class="rounded-full bg-gray-300 px-2 py-0.5 text-xs font-semibold text-gray-700">

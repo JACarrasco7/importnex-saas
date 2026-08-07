@@ -167,4 +167,33 @@ class PublicMarketplaceController extends Controller
             ],
         ]);
     }
+
+    /**
+     * Vista comparativa de hasta 4 coches lado a lado.
+     *
+     * GET /marketplace/compare?ids=1,2,3
+     */
+    public function compare(Request $request): Response
+    {
+        $ids = $request->input('ids', '');
+        $idsArray = array_filter(array_map('trim', explode(',', $ids)), fn ($id) => is_numeric($id) && (int) $id > 0);
+        $idsArray = array_slice(array_unique(array_map('intval', $idsArray)), 0, 4);
+
+        $cars = collect();
+        if (! empty($idsArray)) {
+            $cars = Car::query()
+                ->whereHas('organization', fn ($q) => $q->where('is_public', true))
+                ->where('is_marketplace', true)
+                ->whereIn('status', ['Delivered'])
+                ->whereIn('verdict', ['Buy', 'Buy if price drops'])
+                ->whereIn('id', $idsArray)
+                ->with(['photos', 'organization'])
+                ->get();
+        }
+
+        return Inertia::render('Public/MarketplaceCompare', [
+            'cars' => $cars,
+            'requestedIds' => $idsArray,
+        ]);
+    }
 }

@@ -1,7 +1,7 @@
 <template>
-    <div v-if="visibleResources.length > 0" class="overflow-hidden rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 p-4">
+    <div v-if="visibleResources.length > 0" class="overflow-hidden rounded-2xl border border-amber-200 bg-linear-to-r from-amber-50 to-orange-50 p-4">
         <div class="flex items-start gap-4">
-            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-amber-100">
+            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100">
                 <ExclamationTriangleIcon class="h-5 w-5 text-amber-600" />
             </div>
             <div class="flex-1 min-w-0">
@@ -21,7 +21,7 @@
                     </div>
                 </div>
             </div>
-            <Link :href="route('subscriptions.index')" class="inline-flex flex-shrink-0 items-center gap-2 rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-amber-500">
+            <Link :href="route('subscriptions.index')" class="inline-flex shrink-0 items-center gap-2 rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-amber-500">
                 Upgrade
                 <ArrowRightIcon class="h-3 w-3" />
             </Link>

@@ -69,12 +69,12 @@ const skipOnboarding = () => {
 </script>
 
 <template>
-    <div v-if="progress && !isCompleted" class="bg-gradient-to-br from-estoril-50 to-platinum-50 rounded-xl border border-estoril-200 p-6 dark:from-asphalt-800 dark:to-asphalt-700 dark:border-asphalt-600">
+    <div v-if="progress && !isCompleted" class="bg-linear-to-br from-estoril-50 to-platinum-50 rounded-xl border border-estoril-200 p-6 dark:from-asphalt-800 dark:to-asphalt-700 dark:border-asphalt-600">
         <!-- Header -->
         <div class="mb-6">
             <div class="flex items-start justify-between">
                 <div class="flex items-start gap-3">
-                    <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-estoril-100">
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-estoril-100">
                         <SparklesIcon class="h-5 w-5 text-estoril-600" />
                     </div>
                     <div>
@@ -104,7 +104,7 @@ const skipOnboarding = () => {
                 </div>
                 <div class="h-2 bg-gray-200 rounded-full overflow-hidden dark:bg-asphalt-700">
                     <div
-                        class="h-full bg-gradient-to-r from-estoril-600 to-estoril-800 transition-all duration-500 ease-out"
+                        class="h-full bg-linear-to-r from-estoril-600 to-estoril-800 transition-all duration-500 ease-out"
                         :style="{ width: `${progressPercent}%` }"
                     />
                 </div>
@@ -124,7 +124,7 @@ const skipOnboarding = () => {
             >
                 <div class="flex items-center gap-3 p-3">
                     <div
-                        class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full"
+                        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
                         :class="{
                             'bg-green-100': step.completed,
                             'bg-estoril-100': !step.completed,

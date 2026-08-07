@@ -8,7 +8,7 @@
         leave-to-class="opacity-0"
     >
         <div v-if="show" :class="['pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-xl p-4 shadow-lg ring-1', classes]">
-            <div class="flex-shrink-0">
+            <div class="shrink-0">
                 <component :is="iconComponent" class="h-5 w-5" :class="iconClass" aria-hidden="true" />
             </div>
             <div class="flex-1 pt-0.5">
@@ -17,7 +17,7 @@
                     <slot>{{ message }}</slot>
                 </p>
             </div>
-            <button v-if="dismissible" type="button" class="flex-shrink-0 rounded-md p-1 text-gray-400 hover:text-gray-600" @click="$emit('close')">
+            <button v-if="dismissible" type="button" class="shrink-0 rounded-md p-1 text-gray-400 hover:text-gray-600" @click="$emit('close')">
                 <XMarkIcon class="h-4 w-4" />
             </button>
         </div>

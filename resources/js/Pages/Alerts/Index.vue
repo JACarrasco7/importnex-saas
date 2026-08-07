@@ -280,7 +280,7 @@ const inlineActions = (alert) => {
                         </button>
                         <div v-if="!collapsedGroups.has(groupType)" class="divide-y divide-gray-200 dark:divide-gray-700">
                             <div v-for="alert in groupAlerts" :key="alert.id" class="flex items-start gap-4 px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700/30">
-                                <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-rose-50 dark:bg-rose-900/30">
+                                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-50 dark:bg-rose-900/30">
                                     <BellIcon class="h-5 w-5 text-rose-600 dark:text-rose-400" />
                                 </div>
                                 <div class="flex-1 min-w-0">
@@ -309,7 +309,7 @@ const inlineActions = (alert) => {
                 <div v-else class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 dark:bg-gray-800 dark:ring-gray-700">
                     <div v-if="alerts.data.length > 0" class="divide-y divide-gray-200 dark:divide-gray-700">
                         <div v-for="alert in alerts.data" :key="alert.id" class="flex items-start gap-4 px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700/30">
-                            <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-rose-50 dark:bg-rose-900/30">
+                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-50 dark:bg-rose-900/30">
                                 <BellIcon class="h-5 w-5 text-rose-600 dark:text-rose-400" />
                             </div>
                             <div class="flex-1 min-w-0">

@@ -26,7 +26,7 @@
                     >
                         <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
                             <div class="flex items-start gap-4">
-                                <div :class="['flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl', iconBg]">
+                                <div :class="['flex h-10 w-10 shrink-0 items-center justify-center rounded-xl', iconBg]">
                                     <component :is="iconComponent" class="h-6 w-6" :class="iconColor" />
                                 </div>
                                 <div class="flex-1">

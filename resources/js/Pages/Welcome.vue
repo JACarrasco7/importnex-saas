@@ -59,12 +59,12 @@ const toggleFaq = (idx) => {
 <template>
     <Head :title="t('app.title')" />
 
-    <div class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-estoril-50">
+    <div class="min-h-screen bg-linear-to-br from-slate-50 via-white to-estoril-50">
         <!-- Header -->
         <header class="absolute inset-x-0 top-0 z-10">
             <nav class="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
                 <Link :href="route('home')" class="flex items-center gap-2">
-                    <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-estoril-600 to-estoril-800">
+                    <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-estoril-600 to-estoril-800">
                         <TruckIcon class="h-5 w-5 text-white" />
                     </div>
                     <span class="text-xl font-bold text-gray-900">{{ organizationName || t('app.title') }}</span>
@@ -95,7 +95,7 @@ const toggleFaq = (idx) => {
                 </span>
                 <h1 class="mt-8 text-5xl font-bold tracking-tight text-gray-900 sm:text-6xl lg:text-7xl">
                     {{ t('welcome.run_business') }}
-                    <span class="block bg-gradient-to-r from-estoril-600 to-estoril-600 bg-clip-text text-transparent">{{ t('welcome.on_autopilot') }}</span>
+                    <span class="block bg-linear-to-r from-estoril-600 to-estoril-600 bg-clip-text text-transparent">{{ t('welcome.on_autopilot') }}</span>
                 </h1>
                 <p class="mx-auto mt-6 max-w-2xl text-lg text-gray-600">
                     {{ t('welcome.importnex_description') }}
@@ -160,7 +160,7 @@ const toggleFaq = (idx) => {
                     <div v-for="(step, idx) in steps" :key="idx" v-motion :initial="{ opacity: 0, scale: 0.95 }" :enter="{ opacity: 1, scale: 1, transition: { delay: idx * 150, duration: 500 } }" class="relative">
                         <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
                             <div class="flex items-center gap-4">
-                                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-estoril-600 to-estoril-800 text-white font-bold">
+                                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-linear-to-br from-estoril-600 to-estoril-800 text-white font-bold">
                                     {{ idx + 1 }}
                                 </div>
                                 <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-estoril-50">
@@ -219,8 +219,8 @@ const toggleFaq = (idx) => {
                             :aria-expanded="openFaq === idx"
                         >
                             <span class="text-sm font-semibold text-gray-900">{{ faq.question }}</span>
-                            <PlusIcon v-if="openFaq !== idx" class="h-5 w-5 text-gray-400 flex-shrink-0" />
-                            <MinusIcon v-else class="h-5 w-5 text-estoril-600 flex-shrink-0" />
+                            <PlusIcon v-if="openFaq !== idx" class="h-5 w-5 text-gray-400 shrink-0" />
+                            <MinusIcon v-else class="h-5 w-5 text-estoril-600 shrink-0" />
                         </button>
                         <Transition
                             enter-active-class="transition-all duration-300 ease-out"
@@ -242,7 +242,7 @@ const toggleFaq = (idx) => {
         <!-- CTA -->
         <section class="py-20">
             <div class="mx-auto max-w-5xl px-6">
-                <div class="overflow-hidden rounded-3xl bg-gradient-to-r from-estoril-700 to-estoril-900 px-8 py-12 text-center shadow-2xl sm:px-12">
+                <div class="overflow-hidden rounded-3xl bg-linear-to-r from-estoril-700 to-estoril-900 px-8 py-12 text-center shadow-2xl sm:px-12">
                     <h2 class="text-3xl font-bold text-white sm:text-4xl">{{ t('welcome.ready_to_scale') }}</h2>
                     <p class="mt-4 text-lg text-estoril-100">{{ t('welcome.free_trial') }}</p>
                     <Link :href="route('register')" class="mt-8 inline-flex items-center gap-2 rounded-lg bg-white px-6 py-3 text-base font-semibold text-estoril-700 shadow hover:bg-estoril-50">

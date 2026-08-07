@@ -173,7 +173,7 @@ const navGroups = computed(() => [
                     :items="group.items"
                 />
 
-                <div class="mt-auto rounded-xl bg-gradient-to-br from-estoril-600 to-estoril-800 p-4 text-white">
+                <div class="mt-auto rounded-xl bg-linear-to-br from-estoril-600 to-estoril-800 p-4 text-white">
                     <p class="text-sm font-semibold">{{ t('nav.need_more_features') }}</p>
                     <p class="mt-1 text-xs text-estoril-100">{{ t('nav.upgrade_message') }}</p>
                     <Link :href="route('subscriptions.index')" class="mt-3 inline-flex w-full items-center justify-center rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-estoril-700 hover:bg-estoril-50">
@@ -236,7 +236,7 @@ const navGroups = computed(() => [
 
                     <div class="relative" ref="userMenuRef">
                         <button @click="userMenuOpen = !userMenuOpen" class="flex items-center gap-2 rounded-full p-1 text-sm hover:bg-gray-100">
-                            <span class="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-estoril-600 to-estoril-800 text-xs font-semibold text-white">
+                            <span class="flex h-8 w-8 items-center justify-center rounded-full bg-linear-to-br from-estoril-600 to-estoril-800 text-xs font-semibold text-white">
                                 {{ initials(userName) }}
                             </span>
                             <span class="hidden md:block text-sm font-medium text-gray-700">{{ userName }}</span>

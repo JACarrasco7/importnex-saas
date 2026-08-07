@@ -238,7 +238,7 @@ const onDocKeyChange = () => {
 
                 <!-- IEDMT estimation warning (permanent, per plan) -->
                 <div class="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
-                    <ExclamationTriangleIcon class="h-5 w-5 flex-shrink-0 text-amber-600" />
+                    <ExclamationTriangleIcon class="h-5 w-5 shrink-0 text-amber-600" />
                     <div class="text-sm text-amber-900">
                         <p class="font-semibold">{{ t('cars.iedmt_estimate') }}</p>
                         <p class="mt-1 text-amber-800">
@@ -324,7 +324,7 @@ const onDocKeyChange = () => {
                             <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-green-700">A favor ({{ car.pros?.length || 0 }})</h4>
                             <ul v-if="car.pros?.length" class="space-y-2">
                                 <li v-for="(pro, i) in car.pros" :key="i" class="flex items-start gap-2 rounded-lg border border-green-200 bg-green-50 p-3">
-                                    <CheckCircleIcon class="mt-0.5 h-4 w-4 flex-shrink-0 text-green-600" />
+                                    <CheckCircleIcon class="mt-0.5 h-4 w-4 shrink-0 text-green-600" />
                                     <div class="flex-1">
                                         <p class="text-sm text-gray-900">{{ pro.text }}</p>
                                         <span class="mt-1 inline-block text-xs font-medium uppercase text-green-700">{{ pro.weight }}</span>
@@ -337,7 +337,7 @@ const onDocKeyChange = () => {
                             <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-red-700">En contra ({{ car.cons?.length || 0 }})</h4>
                             <ul v-if="car.cons?.length" class="space-y-2">
                                 <li v-for="(con, i) in car.cons" :key="i" class="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3">
-                                    <XCircleIcon class="mt-0.5 h-4 w-4 flex-shrink-0 text-red-600" />
+                                    <XCircleIcon class="mt-0.5 h-4 w-4 shrink-0 text-red-600" />
                                     <div class="flex-1">
                                         <p class="text-sm text-gray-900">{{ con.text }}</p>
                                         <span class="mt-1 inline-block text-xs font-medium uppercase text-red-700">{{ con.weight }}</span>
@@ -356,7 +356,7 @@ const onDocKeyChange = () => {
                                 :class="aspect.missing ? 'border-dashed border-gray-300 bg-gray-50' : 'border-gray-200 bg-white'">
                                 <div class="flex items-start justify-between gap-2">
                                     <p class="text-sm font-medium text-gray-900">{{ aspect.label }}</p>
-                                    <component v-if="!aspect.missing" :is="ratingIcon(aspect.rating)" class="h-4 w-4 flex-shrink-0"
+                                    <component v-if="!aspect.missing" :is="ratingIcon(aspect.rating)" class="h-4 w-4 shrink-0"
                                         :class="{
                                             'text-green-600': aspect.rating === 'favorable',
                                             'text-red-600': aspect.rating === 'unfavorable',
@@ -447,7 +447,7 @@ const onDocKeyChange = () => {
                         <ul class="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
                             <li v-for="m in car.checklists?.filter(c => c.kind === 'milestone') || []" :key="m.id"
                                 class="flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-3">
-                                <button @click="toggleMilestone(m)" type="button" class="flex-shrink-0">
+                                <button @click="toggleMilestone(m)" type="button" class="shrink-0">
                                     <CheckCircleIcon v-if="m.completed" class="h-5 w-5 text-green-600" />
                                     <MinusCircleIcon v-else class="h-5 w-5 text-gray-400" />
                                 </button>
@@ -482,7 +482,7 @@ const onDocKeyChange = () => {
                                 </button>
                                 <ul v-if="expandedSections[section.section]" class="divide-y divide-gray-100 border-t border-gray-200">
                                     <li v-for="item in section.items" :key="item.id" class="flex items-start gap-3 px-4 py-2 hover:bg-gray-50">
-                                        <button @click="toggleInspection(item)" type="button" class="mt-0.5 flex-shrink-0">
+                                        <button @click="toggleInspection(item)" type="button" class="mt-0.5 shrink-0">
                                             <CheckCircleIcon v-if="item.completed" class="h-5 w-5 text-green-600" />
                                             <MinusCircleIcon v-else class="h-5 w-5 text-gray-400" />
                                         </button>
@@ -528,7 +528,7 @@ const onDocKeyChange = () => {
                             <ul class="divide-y divide-gray-200 rounded-lg border border-gray-200">
                                 <li v-for="doc in g.items" :key="doc.id" class="flex items-center justify-between px-4 py-3 hover:bg-gray-50">
                                     <div class="flex items-center gap-3 min-w-0 flex-1">
-                                        <DocumentIcon class="h-8 w-8 flex-shrink-0 text-gray-400" />
+                                        <DocumentIcon class="h-8 w-8 shrink-0 text-gray-400" />
                                         <div class="min-w-0 flex-1">
                                             <p class="font-medium text-gray-900 truncate">{{ doc.name }}</p>
                                             <p class="text-xs text-gray-500">{{ doc.doc_key }} · {{ doc.doc_type }}</p>
@@ -589,7 +589,7 @@ const onDocKeyChange = () => {
                 </div>
 
                 <!-- Assigned Client -->
-                <div v-if="car.client" class="overflow-hidden rounded-2xl bg-gradient-to-br from-blue-50 to-estoril-50 shadow-sm ring-1 ring-blue-200">
+                <div v-if="car.client" class="overflow-hidden rounded-2xl bg-linear-to-br from-blue-50 to-estoril-50 shadow-sm ring-1 ring-blue-200">
                     <div class="border-b border-blue-200 px-6 py-4 flex items-center gap-2">
                         <UserCircleIcon class="h-5 w-5 text-blue-600" />
                         <h3 class="text-base font-semibold text-gray-900">Assigned Client</h3>

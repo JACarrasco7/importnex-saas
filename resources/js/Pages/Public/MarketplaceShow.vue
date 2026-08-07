@@ -17,6 +17,8 @@ import MapaLeaflet from '@/Components/MapaLeaflet.vue';
 import Badge from '@/Components/Badge.vue';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import ShareCar from '@/Components/ShareCar.vue';
+import WishlistButton from '@/Components/WishlistButton.vue';
+import FinancingCalculator from '@/Components/FinancingCalculator.vue';
 import { useFormat } from '@/Composables/useFormat';
 import { useTranslations } from '@/Composables/useTranslations';
 
@@ -208,9 +210,15 @@ const marketPosition = computed(() => {
         <div class="py-8">
             <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
                 <!-- Header -->
-                <div class="border-b border-gray-200 pb-4">
-                    <h1 class="text-3xl font-bold text-gray-900">{{ car.brand }} {{ car.model }}</h1>
-                    <p class="mt-1 text-sm text-gray-500">{{ t('marketplace_show.vin_label') }} {{ car.vin || t('marketplace.not_available') }}</p>
+                <div class="flex items-start justify-between border-b border-gray-200 pb-4">
+                    <div class="flex-1">
+                        <h1 class="text-3xl font-bold text-gray-900">{{ car.brand }} {{ car.model }}</h1>
+                        <p class="mt-1 text-sm text-gray-500">{{ t('marketplace_show.vin_label') }} {{ car.vin || t('marketplace.not_available') }}</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <WishlistButton :car="car" />
+                        <ShareCar :car="car" :url="shareUrl" />
+                    </div>
                 </div>
 
                 <!-- Status bar -->
@@ -222,7 +230,7 @@ const marketPosition = computed(() => {
 
                 <!-- IEDMT estimation warning -->
                 <div class="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
-                    <ExclamationTriangleIcon class="h-5 w-5 flex-shrink-0 text-amber-600" />
+                    <ExclamationTriangleIcon class="h-5 w-5 shrink-0 text-amber-600" />
                     <div class="text-sm text-amber-900">
                         <p class="font-semibold">{{ t('marketplace_show.iedmt_warning_title') }}</p>
                         <p class="mt-1 text-amber-800">
@@ -268,6 +276,14 @@ const marketPosition = computed(() => {
                     </div>
                 </div>
 
+                <!-- Financing calculator (Marketplace-3.15) -->
+                <FinancingCalculator
+                    v-if="car.purchase_price"
+                    :price="Number(car.purchase_price)"
+                    :currency="currency(undefined)"
+                    :locale="$page.props.locale || 'es'"
+                />
+
                 <!-- Investigation -->
                 <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
@@ -305,7 +321,7 @@ const marketPosition = computed(() => {
                             <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-estoril-800">{{ t('marketplace_show.in_favor', { count: car.pros?.length || 0 }) }}</h4>
                             <ul v-if="car.pros?.length" class="space-y-2">
                                 <li v-for="(pro, i) in car.pros" :key="i" class="flex items-start gap-2 rounded-lg border border-estoril-200 bg-estoril-50 p-3">
-                                    <CheckCircleIcon class="mt-0.5 h-4 w-4 flex-shrink-0 text-estoril-700" />
+                                    <CheckCircleIcon class="mt-0.5 h-4 w-4 shrink-0 text-estoril-700" />
                                     <div class="flex-1">
                                         <p class="text-sm text-gray-900">{{ pro.text }}</p>
                                         <span class="mt-1 inline-block text-xs font-medium uppercase text-estoril-800">{{ pro.weight }}</span>
@@ -318,7 +334,7 @@ const marketPosition = computed(() => {
                             <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-red-700">{{ t('marketplace_show.against', { count: car.cons?.length || 0 }) }}</h4>
                             <ul v-if="car.cons?.length" class="space-y-2">
                                 <li v-for="(con, i) in car.cons" :key="i" class="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3">
-                                    <XCircleIcon class="mt-0.5 h-4 w-4 flex-shrink-0 text-red-600" />
+                                    <XCircleIcon class="mt-0.5 h-4 w-4 shrink-0 text-red-600" />
                                     <div class="flex-1">
                                         <p class="text-sm text-gray-900">{{ con.text }}</p>
                                         <span class="mt-1 inline-block text-xs font-medium uppercase text-red-700">{{ con.weight }}</span>
@@ -337,7 +353,7 @@ const marketPosition = computed(() => {
                                 :class="aspect.missing ? 'border-dashed border-gray-300 bg-gray-50' : 'border-gray-200 bg-white'">
                                 <div class="flex items-start justify-between gap-2">
                                     <p class="text-sm font-medium text-gray-900">{{ aspect.label }}</p>
-                                    <component v-if="!aspect.missing" :is="ratingIcon(aspect.rating)" class="h-4 w-4 flex-shrink-0"
+                                    <component v-if="!aspect.missing" :is="ratingIcon(aspect.rating)" class="h-4 w-4 shrink-0"
                                         :class="{
                                             'text-estoril-700': aspect.rating === 'favorable',
                                             'text-red-600': aspect.rating === 'unfavorable',

@@ -95,7 +95,7 @@ const goToCarsIndex = () => {
     <Head :title="t('onboarding.title', 'Bienvenido a JJ Import Motors')" />
 
     <AuthenticatedLayout>
-        <div class="min-h-screen bg-gradient-to-br from-estoril-50 via-white to-platinum-100 dark:from-asphalt-900 dark:via-asphalt-900 dark:to-asphalt-800 py-12">
+        <div class="min-h-screen bg-linear-to-br from-estoril-50 via-white to-platinum-100 dark:from-asphalt-900 dark:via-asphalt-900 dark:to-asphalt-800 py-12">
             <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
                 <!-- Header -->
                 <div class="mb-8 flex items-center justify-between">
@@ -125,7 +125,7 @@ const goToCarsIndex = () => {
                     </div>
                     <div class="h-2 bg-gray-200 rounded-full overflow-hidden dark:bg-asphalt-700">
                         <div
-                            class="h-full bg-gradient-to-r from-estoril-600 to-estoril-800 transition-all duration-500 ease-out"
+                            class="h-full bg-linear-to-r from-estoril-600 to-estoril-800 transition-all duration-500 ease-out"
                             :style="{ width: `${progressPercent}%` }"
                         />
                     </div>
@@ -245,7 +245,7 @@ const goToCarsIndex = () => {
                         <p class="text-gray-600 dark:text-gray-400 mb-6">
                             Estás usando el plan <span class="font-semibold">{{ stepData?.currentPlan || 'trial' }}</span>. Elige el plan que mejor se adapte a tu negocio.
                         </p>
-                        <div class="bg-gradient-to-r from-estoril-50 to-platinum-50 rounded-lg p-4 text-sm dark:from-asphalt-700 dark:to-asphalt-800 mb-6">
+                        <div class="bg-linear-to-r from-estoril-50 to-platinum-50 rounded-lg p-4 text-sm dark:from-asphalt-700 dark:to-asphalt-800 mb-6">
                             <p class="text-gray-700 dark:text-gray-300">
                                 🎁 <strong>Tu trial dura 14 días</strong>. No se requiere tarjeta de crédito.
                             </p>

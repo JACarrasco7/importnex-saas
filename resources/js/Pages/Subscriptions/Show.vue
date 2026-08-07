@@ -35,7 +35,7 @@ const { t } = useTranslations();
                     </template>
                 </PageHeader>
 
-                <div class="overflow-hidden rounded-2xl bg-gradient-to-br from-estoril-700 to-estoril-900 p-6 text-white shadow-lg">
+                <div class="overflow-hidden rounded-2xl bg-linear-to-br from-estoril-700 to-estoril-900 p-6 text-white shadow-lg">
                     <p class="text-sm font-medium text-estoril-100">Monthly price</p>
                     <p class="mt-2 text-5xl font-bold tracking-tight">{{ currency(planData.price) }}</p>
                     <p class="mt-2 text-sm text-estoril-100">Billed monthly</p>

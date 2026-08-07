@@ -303,7 +303,7 @@ async function detectModels() {
                                     <button
                                         type="button"
                                         @click.prevent="form.notification_preferences[type] = !form.notification_preferences[type]"
-                                        :class="['relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-estoril-500 focus:ring-offset-2',
+                                        :class="['relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-estoril-500 focus:ring-offset-2',
                                             form.notification_preferences[type] ? 'bg-estoril-600' : 'bg-gray-200']">
                                         <span :class="['inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
                                             form.notification_preferences[type] ? 'translate-x-5' : 'translate-x-0']" />
@@ -315,7 +315,7 @@ async function detectModels() {
                         <!-- N6: Push notifications (Web Push API) -->
                         <div class="mt-6 rounded-lg border border-gray-200 p-4">
                             <div class="flex items-start gap-3">
-                                <DevicePhoneMobileIcon class="h-5 w-5 flex-shrink-0 text-gray-400 mt-0.5" />
+                                <DevicePhoneMobileIcon class="h-5 w-5 shrink-0 text-gray-400 mt-0.5" />
                                 <div class="flex-1">
                                     <p class="text-sm font-medium text-gray-900">
                                         {{ t('organization.notifications.push_label', { default: 'Notificaciones push en el navegador' }) }}
@@ -341,7 +341,7 @@ async function detectModels() {
                                     type="button"
                                     @click="pushSubscribed ? unsubscribePush() : subscribePush()"
                                     :disabled="pushLoading"
-                                    :class="['inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-xs font-semibold transition flex-shrink-0',
+                                    :class="['inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-xs font-semibold transition shrink-0',
                                         pushSubscribed
                                             ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                             : 'bg-estoril-600 text-white hover:bg-estoril-500',

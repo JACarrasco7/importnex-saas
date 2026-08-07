@@ -123,7 +123,7 @@ watch(() => props.price, (newPrice) => {
         </div>
 
         <!-- Resultado -->
-        <div class="mt-6 space-y-2 rounded-lg bg-gradient-to-br from-estoril-50 to-estoril-100 p-4 dark:from-estoril-900/20 dark:to-estoril-800/20">
+        <div class="mt-6 space-y-2 rounded-lg bg-linear-to-br from-estoril-50 to-estoril-100 p-4 dark:from-estoril-900/20 dark:to-estoril-800/20">
             <div class="flex items-center justify-between">
                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Cuota mensual</span>
                 <span class="text-2xl font-bold text-estoril-700 dark:text-estoril-400">{{ formatCurrency(monthlyPayment) }}</span>

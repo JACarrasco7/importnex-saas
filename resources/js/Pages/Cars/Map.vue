@@ -60,10 +60,10 @@ const buildMarkerText = (cluster) => {
                                 <li v-for="car in cluster.cars" :key="car.id">
                                     <Link :href="route('cars.show', car.id)" class="flex items-center justify-between gap-2 rounded-lg bg-gray-50 px-3 py-2 hover:bg-estoril-50 hover:text-estoril-700">
                                         <span class="flex items-center gap-2 truncate">
-                                            <TruckIcon class="h-3.5 w-3.5 flex-shrink-0 text-gray-400" />
+                                            <TruckIcon class="h-3.5 w-3.5 shrink-0 text-gray-400" />
                                             <span class="truncate text-sm">{{ car.brand }} {{ car.model }}</span>
                                         </span>
-                                        <span :class="['h-2 w-2 flex-shrink-0 rounded-full', { 'bg-emerald-500': car.traffic_light === 'green', 'bg-amber-500': car.traffic_light === 'amber', 'bg-rose-500': car.traffic_light === 'red', 'bg-gray-400': car.traffic_light === 'neutral' }]"></span>
+                                        <span :class="['h-2 w-2 shrink-0 rounded-full', { 'bg-emerald-500': car.traffic_light === 'green', 'bg-amber-500': car.traffic_light === 'amber', 'bg-rose-500': car.traffic_light === 'red', 'bg-gray-400': car.traffic_light === 'neutral' }]"></span>
                                     </Link>
                                 </li>
                             </ul>

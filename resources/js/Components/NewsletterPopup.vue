@@ -3,10 +3,51 @@ import { ref, onMounted } from 'vue';
 import { XMarkIcon } from '@heroicons/vue/24/outline';
 
 const show = ref(false);
+const email = ref('');
+const submitting = ref(false);
+const submitted = ref(false);
+const errorMsg = ref('');
 
 const close = () => {
     show.value = false;
     localStorage.setItem('newsletter-popup-dismissed', Date.now().toString());
+};
+
+const submit = async () => {
+    if (!email.value || submitting.value) return;
+    submitting.value = true;
+    errorMsg.value = '';
+
+    try {
+        const resp = await fetch('/newsletter/subscribe', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: JSON.stringify({
+                email: email.value,
+                source: 'marketplace_popup',
+                locale: document.documentElement.lang || 'es',
+            }),
+        });
+
+        const data = await resp.json().catch(() => ({}));
+
+        if (resp.ok && data.success) {
+            submitted.value = true;
+            setTimeout(close, 2000);
+        } else if (resp.status === 429) {
+            errorMsg.value = data.message || 'Demasiados intentos, prueba en un minuto.';
+        } else {
+            errorMsg.value = data.message || 'No se pudo suscribir. Inténtalo de nuevo.';
+        }
+    } catch (e) {
+        errorMsg.value = 'Error de conexión. Inténtalo de nuevo.';
+    } finally {
+        submitting.value = false;
+    }
 };
 
 onMounted(() => {
@@ -64,21 +105,32 @@ onMounted(() => {
                             </p>
 
                             <!-- Form -->
-                            <form @submit.prevent="close" class="space-y-4">
+                            <form v-if="!submitted" @submit.prevent="submit" class="space-y-4">
                                 <input
+                                    v-model="email"
                                     type="email"
                                     placeholder="Tu email"
                                     required
-                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-estoril-500 focus:ring-estoril-500"
+                                    :disabled="submitting"
+                                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-estoril-500 focus:ring-estoril-500 disabled:opacity-50"
                                 />
 
                                 <button
                                     type="submit"
-                                    class="w-full bg-estoril-600 text-white py-3 rounded-lg font-semibold hover:bg-estoril-500 transition-colors"
+                                    :disabled="submitting || !email"
+                                    class="w-full bg-estoril-600 text-white py-3 rounded-lg font-semibold hover:bg-estoril-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    Suscribirme gratis
+                                    {{ submitting ? 'Enviando...' : 'Suscribirme gratis' }}
                                 </button>
+
+                                <p v-if="errorMsg" class="text-xs text-rose-600">{{ errorMsg }}</p>
                             </form>
+
+                            <!-- Success state -->
+                            <div v-else class="rounded-lg bg-emerald-50 border border-emerald-200 p-4">
+                                <p class="text-sm font-semibold text-emerald-700">¡Suscripción exitosa!</p>
+                                <p class="mt-1 text-xs text-emerald-600">Te hemos añadido a nuestra newsletter.</p>
+                            </div>
 
                             <!-- Legal text -->
                             <p class="mt-4 text-xs text-gray-500">

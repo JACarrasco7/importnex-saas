@@ -30,15 +30,15 @@
                                 </h2>
                                 <ul class="mt-3 space-y-2 text-sm text-gray-700 dark:text-gray-300">
                                     <li class="flex items-start gap-2">
-                                        <CheckIcon class="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-500" />
+                                        <CheckIcon class="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
                                         <span>{{ t('subscription.cancel_keep_access', 'Mantienes acceso completo a todas las funciones') }}</span>
                                     </li>
                                     <li class="flex items-start gap-2">
-                                        <CheckIcon class="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-500" />
+                                        <CheckIcon class="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
                                         <span>{{ t('subscription.cancel_no_charge', 'No se realizarán más cargos a tu tarjeta') }}</span>
                                     </li>
                                     <li class="flex items-start gap-2">
-                                        <CheckIcon class="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-500" />
+                                        <CheckIcon class="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
                                         <span>{{ t('subscription.cancel_reactivate_anytime', 'Puedes reactivar en cualquier momento') }}</span>
                                     </li>
                                 </ul>
@@ -51,15 +51,15 @@
                                 </h2>
                                 <ul class="mt-3 space-y-2 text-sm text-gray-700 dark:text-gray-300">
                                     <li class="flex items-start gap-2">
-                                        <XMarkIcon class="mt-0.5 h-4 w-4 flex-shrink-0 text-rose-500" />
+                                        <XMarkIcon class="mt-0.5 h-4 w-4 shrink-0 text-rose-500" />
                                         <span>{{ t('subscription.cancel_lose_features', 'Pierdes acceso a funciones premium (verificación AI, integraciones)') }}</span>
                                     </li>
                                     <li class="flex items-start gap-2">
-                                        <XMarkIcon class="mt-0.5 h-4 w-4 flex-shrink-0 text-rose-500" />
+                                        <XMarkIcon class="mt-0.5 h-4 w-4 shrink-0 text-rose-500" />
                                         <span>{{ t('subscription.cancel_lose_limits', 'Los límites vuelven al plan Free (3 coches, 1 usuario)') }}</span>
                                     </li>
                                     <li class="flex items-start gap-2">
-                                        <InformationCircleIcon class="mt-0.5 h-4 w-4 flex-shrink-0 text-blue-500" />
+                                        <InformationCircleIcon class="mt-0.5 h-4 w-4 shrink-0 text-blue-500" />
                                         <span>{{ t('subscription.cancel_data_safe', 'Tus datos se conservan 30 días por si decides volver') }}</span>
                                     </li>
                                 </ul>

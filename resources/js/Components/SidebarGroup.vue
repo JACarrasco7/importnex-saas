@@ -36,7 +36,7 @@ const hasActiveChild = computed(() => {
                 hasActiveChild ? 'bg-estoril-50/50 text-estoril-700' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
             ]"
         >
-            <component v-if="icon" :is="icon" :class="['h-5 w-5 flex-shrink-0', hasActiveChild ? 'text-estoril-600' : 'text-gray-400']" />
+            <component v-if="icon" :is="icon" :class="['h-5 w-5 shrink-0', hasActiveChild ? 'text-estoril-600' : 'text-gray-400']" />
             <span class="flex-1 text-left text-sm">{{ title }}</span>
             <ChevronRightIcon :class="['h-4 w-4 transition-transform', open ? 'rotate-90' : '']" />
         </button>
@@ -50,7 +50,7 @@ const hasActiveChild = computed(() => {
                 rel="noopener"
                 class="flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm font-semibold text-estoril-700 transition hover:bg-estoril-50"
             >
-                <component :is="item.icon" class="h-4 w-4 flex-shrink-0 text-estoril-600" />
+                <component :is="item.icon" class="h-4 w-4 shrink-0 text-estoril-600" />
                 <span class="flex-1">{{ item.name }}</span>
                 <ArrowTopRightOnSquareIcon class="h-3.5 w-3.5 text-estoril-500" />
             </a>
@@ -64,7 +64,7 @@ const hasActiveChild = computed(() => {
                     isActive(item) ? 'bg-estoril-50 text-estoril-700 font-semibold' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
                 ]"
             >
-                <component :is="item.icon" :class="['h-4 w-4 flex-shrink-0', isActive(item) ? 'text-estoril-600' : 'text-gray-400']" />
+                <component :is="item.icon" :class="['h-4 w-4 shrink-0', isActive(item) ? 'text-estoril-600' : 'text-gray-400']" />
                 <span class="flex-1">{{ item.name }}</span>
                 <span
                     v-if="item.badge && item.badge > 0"

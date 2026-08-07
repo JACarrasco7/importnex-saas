@@ -91,10 +91,10 @@ const copyMarketplaceUrl = async () => {
                 </PageHeader>
 
                 <!-- Public Marketplace CTA -->
-                <div class="overflow-hidden rounded-2xl bg-gradient-to-br from-estoril-600 via-estoril-700 to-estoril-900 p-6 shadow-lg sm:p-8">
+                <div class="overflow-hidden rounded-2xl bg-linear-to-br from-estoril-600 via-estoril-700 to-estoril-900 p-6 shadow-lg sm:p-8">
                     <div class="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                         <div class="flex items-start gap-4">
-                            <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-white/20 backdrop-blur">
+                            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/20 backdrop-blur">
                                 <ShoppingBagIcon class="h-6 w-6 text-white" />
                             </div>
                             <div>
@@ -158,7 +158,7 @@ const copyMarketplaceUrl = async () => {
                         </div>
                     </div>
 
-                    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-estoril-700 to-estoril-900 p-6 text-white shadow-lg">
+                    <div class="relative overflow-hidden rounded-2xl bg-linear-to-br from-estoril-700 to-estoril-900 p-6 text-white shadow-lg">
                         <BanknotesIcon class="absolute right-4 top-4 h-12 w-12 text-white/20" />
                         <p class="text-sm font-medium text-estoril-100">{{ t('dashboard.invested_title') }}</p>
                         <p class="mt-2 text-4xl font-bold tracking-tight">{{ currency(stats.total_cars_cost) }}</p>
@@ -227,7 +227,7 @@ const copyMarketplaceUrl = async () => {
                             :href="route(link.route)"
                             class="group flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-gray-200 transition hover:shadow-md hover:ring-estoril-300 dark:bg-asphalt-800 dark:ring-asphalt-700"
                         >
-                            <div :class="['flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl', `bg-${link.color}-50 group-hover:bg-${link.color}-100 dark:bg-${link.color}-900/40`]">
+                            <div :class="['flex h-10 w-10 shrink-0 items-center justify-center rounded-xl', `bg-${link.color}-50 group-hover:bg-${link.color}-100 dark:bg-${link.color}-900/40`]">
                                 <component :is="link.icon" class="h-5 w-5" :class="`text-${link.color}-600 dark:text-${link.color}-300`" />
                             </div>
                             <div class="flex-1 min-w-0">

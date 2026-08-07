@@ -38,7 +38,7 @@
             <h5 class="text-xs font-semibold text-gray-500 mb-1">Tips para fotos</h5>
             <ul class="text-xs text-gray-600 space-y-1">
                 <li v-for="(tip, i) in form.photo_tips.slice(0, 2)" :key="i" class="flex items-start gap-1">
-                    <CameraIcon class="h-3 w-3 flex-shrink-0 mt-0.5" />
+                    <CameraIcon class="h-3 w-3 shrink-0 mt-0.5" />
                     {{ tip }}
                 </li>
             </ul>
@@ -46,7 +46,7 @@
 
         <!-- Botón -->
         <div class="pt-3 border-t border-gray-100">
-            <button class="w-full inline-flex justify-center items-center gap-2 rounded-lg bg-gradient-to-r from-pink-500 to-red-500 px-4 py-2 text-sm font-semibold text-white hover:opacity-90">
+            <button class="w-full inline-flex justify-center items-center gap-2 rounded-lg bg-linear-to-r from-pink-500 to-red-500 px-4 py-2 text-sm font-semibold text-white hover:opacity-90">
                 <HeartIcon class="h-4 w-4" />
                 Guardar
             </button>

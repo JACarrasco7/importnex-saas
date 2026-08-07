@@ -10,12 +10,12 @@
     >
         <div
             v-if="visible"
-            class="overflow-hidden rounded-2xl border border-amber-300 bg-gradient-to-r from-amber-50 to-orange-50 p-4 shadow-sm dark:border-amber-800 dark:from-amber-950/40 dark:to-orange-950/40"
+            class="overflow-hidden rounded-2xl border border-amber-300 bg-linear-to-r from-amber-50 to-orange-50 p-4 shadow-sm dark:border-amber-800 dark:from-amber-950/40 dark:to-orange-950/40"
             role="status"
             aria-live="polite"
         >
             <div class="flex items-start gap-4">
-                <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/60">
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/60">
                     <RocketLaunchIcon class="h-5 w-5 text-amber-600 dark:text-amber-300" />
                 </div>
                 <div class="flex-1 min-w-0">
@@ -35,7 +35,7 @@
                         {{ usage }} / {{ limit }} ({{ Math.round(percentage) }}%)
                     </p>
                 </div>
-                <div class="flex flex-shrink-0 items-center gap-2">
+                <div class="flex shrink-0 items-center gap-2">
                     <button
                         type="button"
                         @click="dismiss"

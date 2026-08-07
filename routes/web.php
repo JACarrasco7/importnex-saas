@@ -90,6 +90,7 @@ Route::prefix('request/{slug}')->name('public.car-request.')->group(function () 
 // URL: /marketplace — public browsable marketplace of verified cars
 Route::prefix('marketplace')->name('marketplace.')->group(function () {
     Route::get('/', [PublicMarketplaceController::class, 'index'])->name('index');
+    Route::get('/compare', [PublicMarketplaceController::class, 'compare'])->name('compare');
     Route::get('/{car}', [PublicMarketplaceController::class, 'show'])->name('show');
 });
 

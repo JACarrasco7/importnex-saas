@@ -45,7 +45,7 @@ const inputClass = 'block w-full rounded-lg border-gray-300 pl-10 text-sm shadow
 
             <div v-if="mustVerifyEmail && user.email_verified_at === null" class="rounded-lg bg-amber-50 p-3 ring-1 ring-amber-200">
                 <div class="flex items-start gap-2">
-                    <ExclamationCircleIcon class="h-5 w-5 flex-shrink-0 text-amber-600" />
+                    <ExclamationCircleIcon class="h-5 w-5 shrink-0 text-amber-600" />
                     <p class="text-sm text-amber-900">
                         {{ t('profile.email_unverified') }}
                         <Link :href="route('verification.send')" method="post" as="button" class="font-semibold text-amber-700 underline hover:text-amber-800">

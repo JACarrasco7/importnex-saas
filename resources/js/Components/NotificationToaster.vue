@@ -55,7 +55,7 @@ const typeLabel = (type) => {
                 :class="['pointer-events-auto flex items-start gap-3 rounded-xl border p-4 shadow-lg ring-1 ring-black/5', variantClass(toast.alert_type)]"
                 role="status"
             >
-                <component :is="typeIcon(toast.alert_type)" class="mt-0.5 h-5 w-5 flex-shrink-0" />
+                <component :is="typeIcon(toast.alert_type)" class="mt-0.5 h-5 w-5 shrink-0" />
                 <div class="flex-1 min-w-0">
                     <p class="text-xs font-semibold uppercase tracking-wider opacity-75">
                         {{ typeLabel(toast.alert_type) }}
@@ -76,7 +76,7 @@ const typeLabel = (type) => {
                 <button
                     type="button"
                     @click="onDismiss(toast.toastId)"
-                    class="flex-shrink-0 rounded p-1 opacity-60 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                    class="shrink-0 rounded p-1 opacity-60 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-offset-2"
                     :aria-label="t('common.close')"
                 >
                     <XMarkIcon class="h-4 w-4" />

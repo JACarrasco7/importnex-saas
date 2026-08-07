@@ -7,7 +7,7 @@
 
         <!-- Video mockup -->
         <div class="relative mb-3">
-            <div class="aspect-video w-full rounded-lg bg-gradient-to-br from-estoril-900 to-pink-800 flex items-center justify-center">
+            <div class="aspect-video w-full rounded-lg bg-linear-to-br from-estoril-900 to-pink-800 flex items-center justify-center">
                 <PlayIcon class="h-12 w-12 text-white opacity-50" />
             </div>
             <div class="absolute bottom-3 right-3 flex items-center gap-1 bg-black/70 px-2 py-1 rounded">
@@ -38,7 +38,7 @@
             <h5 class="text-xs font-semibold text-gray-500 mb-1">Tips para el video</h5>
             <ul class="text-xs text-gray-600 space-y-1">
                 <li v-for="(tip, i) in form.photo_tips.slice(0, 2)" :key="i" class="flex items-start gap-1">
-                    <CameraIcon class="h-3 w-3 flex-shrink-0 mt-0.5" />
+                    <CameraIcon class="h-3 w-3 shrink-0 mt-0.5" />
                     {{ tip }}
                 </li>
             </ul>
