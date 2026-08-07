@@ -48,18 +48,56 @@ const yearMax = computed(() => props.filterBounds?.year?.max ?? new Date().getFu
 const requestHref = computed(() => props.requestUrl || '#contacto');
 
 const search = ref(props.filters?.search || '');
-const brandFilter = ref('');
-const dealFilter = ref(false);
+const brandFilter = ref(props.filters?.brand || '');
+const dealFilter = ref(props.filters?.deal === '1' || props.filters?.deal === 'true');
 const minPrice = ref(props.filters?.min_price || '');
 const maxPrice = ref(props.filters?.max_price || '');
 const mileageFilter = ref(props.filters?.mileage || '');
-// Marketplace item 2: filtros extendidos (combustible, cambio, puertas, color)
 const fuelFilter = ref(props.filters?.fuel || '');
 const transmissionFilter = ref(props.filters?.transmission || '');
 const doorsFilter = ref(props.filters?.doors || '');
 const colorFilter = ref(props.filters?.color || '');
 
+// Marketplace-3.10: Sincronizar filtros con URL (compartible)
+const syncToUrl = () => {
+    const params = new URLSearchParams();
+    if (search.value) params.set('search', search.value);
+    if (brandFilter.value) params.set('brand', brandFilter.value);
+    if (dealFilter.value) params.set('deal', '1');
+    if (minPrice.value) params.set('min_price', minPrice.value);
+    if (maxPrice.value) params.set('max_price', maxPrice.value);
+    if (mileageFilter.value) params.set('mileage', mileageFilter.value);
+    if (fuelFilter.value) params.set('fuel', fuelFilter.value);
+    if (transmissionFilter.value) params.set('transmission', transmissionFilter.value);
+    if (doorsFilter.value) params.set('doors', doorsFilter.value);
+    if (colorFilter.value) params.set('color', colorFilter.value);
+
+    const qs = params.toString();
+    const url = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
+    window.history.replaceState({}, '', url);
+};
+
+const resetFilters = () => {
+    search.value = '';
+    brandFilter.value = '';
+    dealFilter.value = false;
+    minPrice.value = '';
+    maxPrice.value = '';
+    mileageFilter.value = '';
+    fuelFilter.value = '';
+    transmissionFilter.value = '';
+    doorsFilter.value = '';
+    colorFilter.value = '';
+    syncToUrl();
+};
+
 const { currency, verdictVariant, trafficLightVariant } = useFormat();
+
+// Watchers para sincronizar URL en cada cambio
+import { watch } from 'vue';
+watch([search, brandFilter, dealFilter, minPrice, maxPrice, mileageFilter, fuelFilter, transmissionFilter, doorsFilter, colorFilter], () => {
+    syncToUrl();
+}, { flush: 'post' });
 
 // Marcas disponibles en el catálogo actual
 const brands = computed(() => {
@@ -579,6 +617,13 @@ onMounted(() => {
                         <input v-model="dealFilter" type="checkbox" class="rounded border-gray-300 text-estoril-600" />
                         {{ t('marketplace.filter_deals_only', { default: 'Ofertas' }) }}
                     </label>
+                    <button
+                        v-if="search || brandFilter || dealFilter || minPrice || maxPrice || mileageFilter || fuelFilter || transmissionFilter || doorsFilter || colorFilter"
+                        @click="resetFilters"
+                        class="rounded-md px-2 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-50"
+                    >
+                        Limpiar
+                    </button>
                 </div>
             </div>
         </Transition>

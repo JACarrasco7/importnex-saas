@@ -10,7 +10,7 @@ use Laravel\Cashier\Billable;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasFactory, Notifiable, Billable;
+    use Billable, HasFactory, Notifiable;
 
     protected $fillable = [
         'name',
@@ -19,6 +19,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'organization_id',
         'role',
         'locale',
+        'notification_preferences',
+        'notification_channels',
     ];
 
     protected $hidden = [
@@ -31,7 +33,23 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'notification_preferences' => 'array',
+            'notification_channels' => 'array',
         ];
+    }
+
+    public function isAlertTypeEnabled(string $alertType): bool
+    {
+        $prefs = $this->notification_preferences ?? [];
+
+        return ($prefs[$alertType] ?? true) === true;
+    }
+
+    public function isChannelEnabled(string $channel): bool
+    {
+        $channels = $this->notification_channels ?? ['email', 'push'];
+
+        return in_array($channel, $channels, true);
     }
 
     public function organization()
@@ -51,7 +69,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function pushSubscriptions()
     {
-        return $this->hasMany(\App\Models\PushSubscription::class);
+        return $this->hasMany(PushSubscription::class);
     }
 
     public function scopeOwner($query)
