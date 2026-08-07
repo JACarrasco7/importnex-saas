@@ -33,6 +33,7 @@ const props = defineProps({
     filters: Object,
     requestUrl: String,
     filterBounds: { type: Object, default: () => ({ price: { min: 0, max: 9999999 }, year: { min: 1900, max: new Date().getFullYear() + 1 } }) },
+    filterOptions: { type: Object, default: () => ({ fuels: [], transmissions: [], doors: [], colors: [] }) },
 });
 
 const { t, locale } = useTranslations();
@@ -52,6 +53,11 @@ const dealFilter = ref(false);
 const minPrice = ref(props.filters?.min_price || '');
 const maxPrice = ref(props.filters?.max_price || '');
 const mileageFilter = ref(props.filters?.mileage || '');
+// Marketplace item 2: filtros extendidos (combustible, cambio, puertas, color)
+const fuelFilter = ref(props.filters?.fuel || '');
+const transmissionFilter = ref(props.filters?.transmission || '');
+const doorsFilter = ref(props.filters?.doors || '');
+const colorFilter = ref(props.filters?.color || '');
 
 const { currency, verdictVariant, trafficLightVariant } = useFormat();
 
@@ -94,6 +100,19 @@ const filteredCars = computed(() => {
             (c.brand && c.brand.toLowerCase().includes(term)) ||
             (c.model && c.model.toLowerCase().includes(term))
         );
+    }
+    // Filtros extendidos (Marketplace item 2)
+    if (fuelFilter.value) {
+        result = result.filter(c => c.fuel === fuelFilter.value);
+    }
+    if (transmissionFilter.value) {
+        result = result.filter(c => c.transmission === transmissionFilter.value);
+    }
+    if (doorsFilter.value !== '' && doorsFilter.value !== null) {
+        result = result.filter(c => Number(c.doors) === Number(doorsFilter.value));
+    }
+    if (colorFilter.value) {
+        result = result.filter(c => c.color === colorFilter.value);
     }
     return result;
 });
@@ -281,7 +300,7 @@ onMounted(() => {
                 </div>
 
                 <!-- Filters -->
-                <div class="grid grid-cols-1 gap-3 rounded-2xl bg-gray-50 p-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div class="grid grid-cols-1 gap-3 rounded-2xl bg-gray-50 p-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
                     <div class="sm:col-span-2 lg:col-span-2">
                         <label class="mb-1.5 block text-xs font-semibold text-gray-700">{{ t('marketplace.filter_search') }}</label>
                         <div class="relative">
@@ -306,6 +325,36 @@ onMounted(() => {
                         <div class="flex gap-2">
                             <input v-model.number="mileageFilter" type="number" :min="0" :max="priceMax" step="1000" :placeholder="t('marketplace.filter_mileage_placeholder')" class="block w-full rounded-lg border-gray-200 text-sm focus:border-estoril-600 focus:ring-estoril-600" />
                         </div>
+                    </div>
+
+                    <!-- Marketplace item 2: filtros extendidos -->
+                    <div class="lg:col-span-1">
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-700">{{ t('marketplace.filter_fuel', 'Combustible') }}</label>
+                        <select v-model="fuelFilter" class="block w-full rounded-lg border-gray-200 text-sm focus:border-estoril-600 focus:ring-estoril-600">
+                            <option value="">{{ t('marketplace.filter_all', 'Todos') }}</option>
+                            <option v-for="f in props.filterOptions.fuels" :key="f" :value="f">{{ f }}</option>
+                        </select>
+                    </div>
+                    <div class="lg:col-span-1">
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-700">{{ t('marketplace.filter_transmission', 'Cambio') }}</label>
+                        <select v-model="transmissionFilter" class="block w-full rounded-lg border-gray-200 text-sm focus:border-estoril-600 focus:ring-estoril-600">
+                            <option value="">{{ t('marketplace.filter_all', 'Todos') }}</option>
+                            <option v-for="tr in props.filterOptions.transmissions" :key="tr" :value="tr">{{ tr }}</option>
+                        </select>
+                    </div>
+                    <div class="lg:col-span-1">
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-700">{{ t('marketplace.filter_doors', 'Puertas') }}</label>
+                        <select v-model="doorsFilter" class="block w-full rounded-lg border-gray-200 text-sm focus:border-estoril-600 focus:ring-estoril-600">
+                            <option value="">{{ t('marketplace.filter_all', 'Todos') }}</option>
+                            <option v-for="d in props.filterOptions.doors" :key="d" :value="d">{{ d }}</option>
+                        </select>
+                    </div>
+                    <div class="lg:col-span-1">
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-700">{{ t('marketplace.filter_color', 'Color') }}</label>
+                        <select v-model="colorFilter" class="block w-full rounded-lg border-gray-200 text-sm focus:border-estoril-600 focus:ring-estoril-600">
+                            <option value="">{{ t('marketplace.filter_all', 'Todos') }}</option>
+                            <option v-for="c in props.filterOptions.colors" :key="c" :value="c">{{ c }}</option>
+                        </select>
                     </div>
                 </div>
 

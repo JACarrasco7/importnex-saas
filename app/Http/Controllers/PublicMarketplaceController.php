@@ -23,6 +23,10 @@ class PublicMarketplaceController extends Controller
         'max_price' => ['nullable', 'numeric', 'min:0', 'max:9999999'],
         'year_min' => ['nullable', 'integer', 'min:1900', 'max:2100'],
         'year_max' => ['nullable', 'integer', 'min:1900', 'max:2100'],
+        'fuel' => ['nullable', 'string', 'max:50'],
+        'transmission' => ['nullable', 'string', 'max:50'],
+        'doors' => ['nullable', 'integer', 'min:2', 'max:7'],
+        'color' => ['nullable', 'string', 'max:30'],
     ];
 
     /**
@@ -63,6 +67,10 @@ class PublicMarketplaceController extends Controller
             ->when(isset($filters['max_price']), fn ($q, $p) => $q->where('purchase_price', '<=', $p))
             ->when(isset($filters['year_min']), fn ($q, $y) => $q->whereRaw('SUBSTRING(year, -4) >= ?', [$y]))
             ->when(isset($filters['year_max']), fn ($q, $y) => $q->whereRaw('SUBSTRING(year, -4) <= ?', [$y]))
+            ->when(isset($filters['fuel']), fn ($q, $f) => $q->where('fuel', $f))
+            ->when(isset($filters['transmission']), fn ($q, $t) => $q->where('transmission', $t))
+            ->when(isset($filters['doors']), fn ($q, $d) => $q->where('doors', $d))
+            ->when(isset($filters['color']), fn ($q, $c) => $q->where('color', $c))
             ->orderBy('created_at', 'desc')
             ->paginate(12)
             ->withQueryString();
@@ -71,6 +79,22 @@ class PublicMarketplaceController extends Controller
 
         $verdicts = Car::VERDICTS;
         $lights = ['green', 'amber', 'red', 'neutral'];
+
+        // Marketplace item 2: opciones unicas para selects de filtros extendidos.
+        // Se calculan SOLO del conjunto publico (no de toda la BD) para no mostrar
+        // valores que el visitante nunca vera en el listado.
+        $publicCarsBase = Car::query()
+            ->whereHas('organization', fn ($q) => $q->where('is_public', true))
+            ->where('is_marketplace', true)
+            ->whereIn('status', ['Delivered'])
+            ->whereIn('verdict', ['Buy', 'Buy if price drops']);
+
+        $filterOptions = [
+            'fuels' => (clone $publicCarsBase)->whereNotNull('fuel')->where('fuel', '!=', '')->distinct()->orderBy('fuel')->pluck('fuel')->all(),
+            'transmissions' => (clone $publicCarsBase)->whereNotNull('transmission')->where('transmission', '!=', '')->distinct()->orderBy('transmission')->pluck('transmission')->all(),
+            'doors' => (clone $publicCarsBase)->whereNotNull('doors')->distinct()->orderBy('doors')->pluck('doors')->all(),
+            'colors' => (clone $publicCarsBase)->whereNotNull('color')->where('color', '!=', '')->distinct()->orderBy('color')->pluck('color')->all(),
+        ];
 
         $requestUrl = null;
         $publicOrg = Organization::where('is_public', true)->first();
@@ -85,8 +109,10 @@ class PublicMarketplaceController extends Controller
             'requestUrl' => $requestUrl,
             'filters' => array_intersect_key($filters, array_flip([
                 'search', 'verdict', 'traffic_light', 'min_price', 'max_price', 'year_min', 'year_max',
+                'fuel', 'transmission', 'doors', 'color',
             ])),
             'filterBounds' => $filterBounds,
+            'filterOptions' => $filterOptions,
         ]);
     }
 
