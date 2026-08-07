@@ -233,6 +233,7 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::patch('/alerts/{alert}/mark-resolved', [AlertController::class, 'markResolved'])->name('alerts.mark-resolved');
     Route::post('/alerts/{alert}/snooze', [AlertController::class, 'snooze'])->name('alerts.snooze');
     Route::delete('/alerts/{alert}/snooze', [AlertController::class, 'unsnooze'])->name('alerts.unsnooze');
+    Route::post('/alerts/preferences/{alertType}', [AlertController::class, 'togglePreference'])->name('alerts.toggle-preference');
     Route::delete('/alerts/{alert}', [AlertController::class, 'destroy'])->name('alerts.destroy');
 
     // Message Templates

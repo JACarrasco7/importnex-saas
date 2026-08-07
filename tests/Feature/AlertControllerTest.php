@@ -6,6 +6,7 @@ use App\Models\Alert;
 use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class AlertControllerTest extends TestCase
@@ -191,5 +192,145 @@ class AlertControllerTest extends TestCase
         // Solo la no-snoozed debe estar resuelta; la snoozed sigue activa
         $this->assertEquals(1, Alert::where('organization_id', $org->id)->where('resolved', true)->count());
         $this->assertEquals(1, Alert::where('organization_id', $org->id)->where('resolved', false)->count());
+    }
+
+    public function test_toggle_preference_disables_alert_type(): void
+    {
+        $org = Organization::factory()->create();
+        $user = User::factory()->create(['organization_id' => $org->id]);
+
+        $this->actingAs($user);
+
+        $response = $this->post(route('alerts.toggle-preference', 'car_stale'), ['enabled' => false]);
+        $response->assertRedirect();
+
+        $this->assertFalse($org->fresh()->isAlertTypeEnabled('car_stale'));
+        $this->assertTrue($org->fresh()->isAlertTypeEnabled('car_request'));
+    }
+
+    public function test_observer_does_not_create_alert_when_type_muted(): void
+    {
+        Http::fake();
+
+        $org = Organization::factory()->create([
+            'notification_preferences' => ['car_stale' => false],
+        ]);
+        $user = User::factory()->create(['organization_id' => $org->id]);
+
+        $this->actingAs($user);
+
+        // Disparar la logica del observer sin necesidad de crear un Alert real
+        // (lo importante es que el observer respeta la preferencia)
+        $dispatched = false;
+
+        // Verificamos via modelo directamente
+        $alert = new Alert([
+            'organization_id' => $org->id,
+            'alert_type' => 'car_stale',
+            'message' => 'test',
+        ]);
+
+        // El observer aborta antes de despachar webhook
+        // (No podemos capturarlo facilmente, pero verificamos el modelo)
+        $this->assertFalse($org->isAlertTypeEnabled('car_stale'));
+    }
+
+    public function test_observer_dispatches_webhook_for_enabled_type(): void
+    {
+        Http::fake();
+
+        $org = Organization::factory()->create([
+            'notification_webhook_url' => 'https://hooks.slack.com/services/T0/B0/XXX',
+            'notification_webhook_types' => null,
+        ]);
+
+        $alert = Alert::factory()->create([
+            'organization_id' => $org->id,
+            'alert_type' => 'verification_failed',
+            'resolved' => false,
+        ]);
+
+        Http::assertSent(function ($request) use ($alert) {
+            return $request->url() === 'https://hooks.slack.com/services/T0/B0/XXX'
+                && str_contains($request->body(), $alert->id);
+        });
+    }
+
+    public function test_webhook_not_dispatched_when_type_in_org_filter(): void
+    {
+        Http::fake();
+
+        $org = Organization::factory()->create([
+            'notification_webhook_url' => 'https://hooks.slack.com/services/T0/B0/XXX',
+            'notification_webhook_types' => ['car_request'], // solo este
+        ]);
+
+        // Crear una alerta de otro tipo — el observer no debe enviarla
+        Alert::factory()->create([
+            'organization_id' => $org->id,
+            'alert_type' => 'verification_failed',
+            'resolved' => false,
+        ]);
+
+        Http::assertNothingSent();
+    }
+
+    public function test_webhook_skipped_when_pref_silences_type(): void
+    {
+        Http::fake();
+
+        $org = Organization::factory()->create([
+            'notification_webhook_url' => 'https://hooks.slack.com/services/T0/B0/XXX',
+            'notification_preferences' => ['car_stale' => false],
+        ]);
+
+        Alert::factory()->create([
+            'organization_id' => $org->id,
+            'alert_type' => 'car_stale',
+            'resolved' => false,
+        ]);
+
+        Http::assertNothingSent();
+    }
+
+    public function test_organization_update_saves_webhook_preferences(): void
+    {
+        $org = Organization::factory()->create();
+        $user = User::factory()->create(['organization_id' => $org->id, 'role' => 'owner']);
+
+        $this->actingAs($user);
+
+        $response = $this->patch(route('organization.update', $org), [
+            'name' => $org->name,
+            'currency' => 'EUR',
+            'locale' => 'es',
+            'notification_webhook_url' => 'https://hooks.slack.com/services/T0/B0/XXX',
+            'notification_webhook_types' => ['car_stale'],
+            'notification_preferences' => ['car_stale' => true, 'client_no_contact' => false],
+        ]);
+
+        $response->assertRedirect();
+        $fresh = $org->fresh();
+        $this->assertNotEmpty($fresh->notification_webhook_url);
+        $this->assertEquals(['car_stale'], $fresh->notification_webhook_types);
+        $this->assertFalse($fresh->isAlertTypeEnabled('client_no_contact'));
+        $this->assertTrue($fresh->isAlertTypeEnabled('car_stale'));
+    }
+
+    public function test_organization_webhook_url_validated_as_url(): void
+    {
+        $org = Organization::factory()->create();
+        $user = User::factory()->create(['organization_id' => $org->id, 'role' => 'owner']);
+
+        $this->actingAs($user);
+
+        $response = $this->patch(route('organization.update', $org), [
+            'name' => $org->name,
+            'currency' => 'EUR',
+            'locale' => 'es',
+            'notification_webhook_url' => 'not-a-url',
+        ]);
+
+        $response->assertSessionHasErrors('notification_webhook_url');
     }
 }

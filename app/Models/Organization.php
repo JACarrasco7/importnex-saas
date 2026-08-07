@@ -15,6 +15,7 @@ class Organization extends Model
     protected $fillable = [
         'name', 'slug', 'logo', 'is_public', 'plan', 'is_owner', 'stripe_id', 'trial_ends_at', 'subscribed_at', 'payment_failed_at',
         'ai_provider', 'ai_model', 'ai_api_key',
+        'notification_webhook_url', 'notification_webhook_types', 'notification_preferences',
     ];
 
     protected $casts = [
@@ -24,7 +25,36 @@ class Organization extends Model
         'is_public' => 'boolean',
         'is_owner' => 'boolean',
         'ai_api_key' => 'encrypted',
+        'notification_webhook_url' => 'encrypted',
+        'notification_webhook_types' => 'array',
+        'notification_preferences' => 'array',
     ];
+
+    protected $hidden = ['ai_api_key', 'notification_webhook_url'];
+
+    // Tipos de alerta que la organización quiere silenciar.
+    // Configurado vía /organization/{org}/edit > Notification preferences.
+    public function isAlertTypeEnabled(string $alertType): bool
+    {
+        $prefs = $this->notification_preferences ?? [];
+
+        return ($prefs[$alertType] ?? true) === true;
+    }
+
+    public function webhookEnabledFor(string $alertType): bool
+    {
+        if (empty($this->notification_webhook_url)) {
+            return false;
+        }
+        $types = $this->notification_webhook_types;
+
+        // null/[] = enviar todos los tipos (los que pasen isAlertTypeEnabled).
+        if (empty($types)) {
+            return true;
+        }
+
+        return in_array($alertType, $types, true);
+    }
 
     public const OWNER_UNLIMITED = PHP_INT_MAX;
 
@@ -32,8 +62,6 @@ class Organization extends Model
     {
         return (bool) $this->is_owner;
     }
-
-    protected $hidden = ['ai_api_key'];
 
     protected static function booted(): void
     {

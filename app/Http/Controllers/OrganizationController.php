@@ -75,6 +75,13 @@ class OrganizationController extends Controller
             'ai_provider' => ['nullable', Rule::in(array_merge([''], array_column($registry->options(), 'key')))],
             'ai_model' => ['nullable', 'string', 'max:128'],
             'ai_api_key' => ['nullable', 'string', 'max:512'],
+            // N7: webhook (Slack/Discord/Teams)
+            'notification_webhook_url' => ['nullable', 'url', 'max:512'],
+            'notification_webhook_types' => ['nullable', 'array'],
+            'notification_webhook_types.*' => ['string', 'max:64'],
+            // N8: preferencias por tipo (map alert_type => bool)
+            'notification_preferences' => ['nullable', 'array'],
+            'notification_preferences.*' => ['boolean'],
         ]);
 
         $orgData = [
@@ -82,6 +89,21 @@ class OrganizationController extends Controller
             'currency' => $request->input('currency', 'EUR'),
             'locale' => $request->input('locale', 'es'),
         ];
+
+        // N7: webhook — save empty string as null to avoid storing ''
+        if ($request->has('notification_webhook_url')) {
+            $orgData['notification_webhook_url'] = $request->filled('notification_webhook_url')
+                ? $request->input('notification_webhook_url')
+                : null;
+        }
+        if ($request->has('notification_webhook_types')) {
+            $orgData['notification_webhook_types'] = $request->input('notification_webhook_types') ?: null;
+        }
+        // N8: preferencias — merge para no perder tipos nuevos
+        if ($request->has('notification_preferences')) {
+            $existing = $organization->notification_preferences ?? [];
+            $orgData['notification_preferences'] = array_merge($existing, $request->input('notification_preferences') ?: []);
+        }
         if ($request->filled('ai_provider')) {
             $orgData['ai_provider'] = $request->ai_provider;
             $orgData['ai_model'] = $request->ai_model ?: null;

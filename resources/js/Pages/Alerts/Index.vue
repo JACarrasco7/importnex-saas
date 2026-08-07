@@ -47,6 +47,8 @@ const props = defineProps({
     types: Array,
     typesAvailable: Object,
     counts: Object,
+    allAlertTypes: Array,
+    disabledAlertTypes: Array,
 });
 
 const groupByType = ref(false);
@@ -55,6 +57,16 @@ const collapsedGroups = ref(new Set());
 const validFilters = ['pending', 'snoozed', 'resolved', 'all'];
 const filter = ref(validFilters.includes(props.filters?.filter) ? props.filters.filter : 'pending');
 const typeFilter = ref(props.filters?.type || '');
+
+// Tipos silenciados via /organization/edit > Notifications (N8)
+const disabledSet = computed(() => new Set(props.disabledAlertTypes || []));
+const isMuted = (type) => disabledSet.value.has(type);
+const allTypes = computed(() => props.allAlertTypes || []);
+
+const togglePreference = (type) => {
+    const currentlyEnabled = !isMuted(type);
+    router.post(route('alerts.toggle-preference', type), { enabled: !currentlyEnabled }, { preserveScroll: true });
+};
 
 watch([filter, typeFilter], () => {
     router.get(
@@ -222,6 +234,36 @@ const inlineActions = (alert) => {
                     >
                         {{ typeLabel(type) }}
                         <span class="ml-1 rounded-full bg-white/20 px-1.5 text-[10px] font-bold">{{ count }}</span>
+                    </button>
+                </div>
+
+                <!-- Tipos silenciados (N8):列出 los muted + botón reactivar -->
+                <div v-if="allTypes.some(t => isMuted(t))" class="flex flex-wrap items-center gap-2 rounded-xl border border-dashed border-gray-300 bg-gray-50 p-3 dark:border-gray-600 dark:bg-gray-900/40">
+                    <BellIcon class="h-4 w-4 text-gray-400" />
+                    <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ t('alerts.muted_types', { default: 'Silenciados' }) }}:</span>
+                    <button
+                        v-for="type in allTypes.filter(t => isMuted(t))"
+                        :key="type"
+                        @click="togglePreference(type)"
+                        class="inline-flex items-center gap-1 rounded-full bg-gray-200 px-3 py-1 text-xs font-semibold text-gray-600 line-through hover:bg-estoril-100 hover:text-estoril-700 hover:no-underline dark:bg-gray-700 dark:text-gray-400"
+                        :title="t('alerts.unmute_type', { default: 'Reactivar este tipo' })"
+                    >
+                        {{ typeLabel(type) }}
+                        <span class="ml-1 text-[10px] no-underline">+</span>
+                    </button>
+                </div>
+
+                <div v-if="filter === 'pending' && allTypes.length" class="flex flex-wrap items-center gap-2 rounded-xl bg-white px-3 py-2 text-xs text-gray-500 shadow-sm ring-1 ring-gray-200 dark:bg-gray-800 dark:ring-gray-700">
+                    <span>{{ t('alerts.mute_type_help', { default: 'Silencia un tipo activo:' }) }}</span>
+                    <button
+                        v-for="type in allTypes.filter(t => !isMuted(t))"
+                        :key="type"
+                        @click="togglePreference(type)"
+                        class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold text-gray-500 hover:bg-rose-100 hover:text-rose-700 dark:hover:bg-rose-900/30"
+                        :title="t('alerts.mute_type', { default: 'Silenciar este tipo' })"
+                    >
+                        {{ typeLabel(type) }}
+                        <span class="text-[10px]">🔕</span>
                     </button>
                 </div>
 

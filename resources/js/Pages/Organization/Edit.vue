@@ -1,7 +1,15 @@
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ref } from 'vue';
-import { ArrowLeftIcon, CheckIcon, KeyIcon, CpuChipIcon, MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
+import { ref, computed } from 'vue';
+import {
+    ArrowLeftIcon,
+    CheckIcon,
+    KeyIcon,
+    CpuChipIcon,
+    MagnifyingGlassIcon,
+    BellIcon,
+    BoltIcon,
+} from '@heroicons/vue/24/outline';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import FormSection from '@/Components/FormSection.vue';
@@ -15,6 +23,19 @@ const props = defineProps({
     aiProviders: { type: Array, default: () => [] },
 });
 
+const alertTypes = [
+    'car_request',
+    'car_stale',
+    'client_no_contact',
+    'verification_failed',
+    'verification_completed',
+];
+
+const initialPrefs = { ...(props.organization.notification_preferences || {}) };
+for (const k of alertTypes) {
+    if (!(k in initialPrefs)) initialPrefs[k] = true;
+}
+
 const form = useForm({
     name: props.organization.name,
     currency: props.organization.currency || 'EUR',
@@ -22,7 +43,14 @@ const form = useForm({
     ai_provider: props.organization.ai_provider || '',
     ai_model: props.organization.ai_model || '',
     ai_api_key: '',
+    notification_webhook_url: props.organization.notification_webhook_url || '',
+    notification_webhook_types: props.organization.notification_webhook_types || [],
+    notification_preferences: initialPrefs,
 });
+
+const allSelected = computed(() => alertTypes.every((k) => form.notification_preferences[k]));
+const enableAll = () => { for (const k of alertTypes) form.notification_preferences[k] = true; };
+const disableAll = () => { for (const k of alertTypes) form.notification_preferences[k] = false; };
 
 const detecting = ref(false);
 const detectedModels = ref([]);
@@ -180,6 +208,58 @@ async function detectModels() {
                                 <span v-if="!organization.ai_api_key" class="ml-2 inline-flex items-center rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">{{ t('organization.no_key_yet') }}</span>
                             </div>
                         </div>
+                    </FormSection>
+
+                    <FormSection :title="t('organization.notifications.title', { default: 'Notificaciones' })"
+                                 :subtitle="t('organization.notifications.subtitle', { default: 'Configura qué alertas recibes y por dónde (in-app, email, webhook).' })">
+                        <!-- Webhook (N7) -->
+                        <FormField
+                            :label="t('organization.notifications.webhook_label', { default: 'Webhook URL (Slack / Discord / Teams)' })"
+                            :help="t('organization.notifications.webhook_help', { default: 'Las alertas se env\u00edan como POST JSON. Usa https://hooks.slack.com/services/... o la URL equivalente de Discord/Teams.' })">
+                            <div class="relative">
+                                <BoltIcon class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                                <input
+                                    v-model="form.notification_webhook_url"
+                                    type="url"
+                                    autocomplete="off"
+                                    spellcheck="false"
+                                    :placeholder="t('organization.notifications.webhook_placeholder', { default: 'https://hooks.slack.com/services/T0.../B0.../XXX' })"
+                                    :class="[inputClass, 'pl-10']" />
+                            </div>
+                            <p v-if="form.errors.notification_webhook_url" class="mt-1 text-sm text-red-600">{{ form.errors.notification_webhook_url }}</p>
+                        </FormField>
+
+                        <FormField
+                            :label="t('organization.notifications.prefs_label', { default: 'Tipos de alerta' })"
+                            :help="t('organization.notifications.prefs_help', { default: 'Silencia los tipos que ya no te aportan valor. Las alertas silenciadas no aparecen en /alerts y no se env\u00edan al webhook.' })">
+                            <div class="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2">
+                                <span class="text-xs text-gray-500">{{ t('organization.notifications.bulk_label', { default: 'Todos / Ninguno' }) }}</span>
+                                <div class="flex gap-1">
+                                    <button type="button" @click="enableAll" class="rounded-md px-2 py-1 text-xs font-semibold text-estoril-700 hover:bg-estoril-100">
+                                        {{ t('organization.notifications.enable_all', { default: 'Activar' }) }}
+                                    </button>
+                                    <button type="button" @click="disableAll" class="rounded-md px-2 py-1 text-xs font-semibold text-rose-700 hover:bg-rose-100">
+                                        {{ t('organization.notifications.disable_all', { default: 'Silenciar todo' }) }}
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="mt-2 divide-y divide-gray-100 rounded-lg ring-1 ring-gray-200">
+                                <label v-for="type in alertTypes" :key="type" class="flex cursor-pointer items-center justify-between px-4 py-3 hover:bg-gray-50">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900">{{ t(`alerts.alert_types.${type}`) }}</p>
+                                        <p class="text-xs text-gray-500">{{ t(`organization.notifications.prefs.${type}`, { default: '' }) }}</p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        @click.prevent="form.notification_preferences[type] = !form.notification_preferences[type]"
+                                        :class="['relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-estoril-500 focus:ring-offset-2',
+                                            form.notification_preferences[type] ? 'bg-estoril-600' : 'bg-gray-200']">
+                                        <span :class="['inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
+                                            form.notification_preferences[type] ? 'translate-x-5' : 'translate-x-0']" />
+                                    </button>
+                                </label>
+                            </div>
+                        </FormField>
                     </FormSection>
 
                     <div class="flex items-center justify-end gap-3 rounded-2xl bg-gray-50 px-6 py-4 ring-1 ring-gray-200">

@@ -15,19 +15,27 @@ class AlertController extends Controller
     {
         $filter = $request->input('filter', 'pending');
         $typeFilter = $request->input('type');
+        $org = $request->user()?->organization;
+
+        // N8: Filtrar por preferencias del org (null prefs = todo activo)
+        $allTypes = ['car_request', 'car_stale', 'client_no_contact', 'verification_failed', 'verification_completed'];
+        $disabledTypes = [];
+        if ($org) {
+            $disabledTypes = array_values(array_filter($allTypes, fn ($t) => ! $org->isAlertTypeEnabled($t)));
+        }
 
         $query = Alert::query()
             ->when($typeFilter, fn ($q, $t) => $q->where('alert_type', $t))
             ->when($filter === 'pending', fn ($q) => $q->active())
             ->when($filter === 'snoozed', fn ($q) => $q->snoozed())
             ->when($filter === 'resolved', fn ($q) => $q->resolved())
+            ->when($filter === 'pending' && $disabledTypes, fn ($q) => $q->whereNotIn('alert_type', $disabledTypes))
             ->orderBy('created_at', 'desc')
             ->paginate(15)
             ->withQueryString();
 
         $query->getCollection()->each->append('target_url');
 
-        // Tipos presentes en BD (sin N+1): agrupamos por alert_type y contamos
         $typesAvailable = Alert::query()
             ->selectRaw('alert_type, COUNT(*) as count')
             ->groupBy('alert_type')
@@ -35,9 +43,13 @@ class AlertController extends Controller
             ->pluck('count', 'alert_type')
             ->toArray();
 
-        // Contadores por filtro (badge por sección)
+        // Filtrar chips de tipo a los no silenciados
+        if ($disabledTypes) {
+            $typesAvailable = array_diff_key($typesAvailable, array_flip($disabledTypes));
+        }
+
         $counts = [
-            'pending' => Alert::query()->active()->count(),
+            'pending' => Alert::query()->active()->when($disabledTypes, fn ($q) => $q->whereNotIn('alert_type', $disabledTypes))->count(),
             'snoozed' => Alert::query()->snoozed()->count(),
             'resolved' => Alert::query()->resolved()->count(),
         ];
@@ -48,6 +60,8 @@ class AlertController extends Controller
             'typesAvailable' => $typesAvailable,
             'counts' => $counts,
             'filters' => $request->only(['type', 'resolved', 'filter']),
+            'allAlertTypes' => $allTypes,
+            'disabledAlertTypes' => $disabledTypes,
         ]);
     }
 
@@ -67,6 +81,31 @@ class AlertController extends Controller
         $alert->unsnooze();
 
         return back()->with('success', 'Alert reactivated.');
+    }
+
+    /**
+     * Toggle de preferencia de notificación por tipo (N8).
+     * Pensado para un switch inline en /alerts ("silenciar este tipo").
+     */
+    public function togglePreference(Request $request, string $alertType): RedirectResponse
+    {
+        $request->validate([
+            'enabled' => ['required', 'boolean'],
+        ]);
+
+        $org = $request->user()?->organization;
+        if (! $org) {
+            abort(403, 'No organization.');
+        }
+
+        $prefs = $org->notification_preferences ?? [];
+        $prefs[$alertType] = (bool) $request->input('enabled');
+
+        $org->update(['notification_preferences' => $prefs]);
+
+        return back()->with('success', $request->boolean('enabled')
+            ? "Notifications enabled for {$alertType}."
+            : "Notifications muted for {$alertType}.");
     }
 
     public function show(Alert $alert): Response
