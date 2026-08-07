@@ -51,6 +51,77 @@ const ratingIcon = (r) => ({
     favorable: CheckCircleIcon, neutral: MinusCircleIcon, unfavorable: XCircleIcon,
 }[r] || MinusCircleIcon);
 
+// SEO: OG + Schema.org Vehicle (Marketplace-1 items 13+14)
+const seoTitle = computed(() =>
+    `${props.car?.brand ?? ''} ${props.car?.model ?? ''} ${props.car?.year ?? ''} — JJ Import Motors`.trim()
+);
+const seoDescription = computed(() => {
+    const c = props.car;
+    if (!c) return t('cars.marketplace_brand_model', { brand: '', model: '' });
+    const parts = [
+        c.brand,
+        c.model,
+        c.year,
+        c.mileage ? `${(c.mileage / 1000).toFixed(0)}k km` : null,
+        c.fuel,
+        c.transmission,
+    ].filter(Boolean);
+    return parts.join(' · ');
+});
+const seoImage = computed(() => {
+    const first = props.car?.photos?.[0] ?? null;
+    if (!first) return null;
+    if (first.startsWith('http')) return first;
+    return `${window.location.origin}${first}`;
+});
+const seoUrl = computed(() => `${window.location.origin}${route('marketplace.show', props.car?.id)}`);
+
+const vehicleJsonLd = computed(() => {
+    const c = props.car;
+    if (!c) return null;
+    const data = {
+        '@context': 'https://schema.org',
+        '@type': 'Vehicle',
+        name: `${c.brand} ${c.model}`.trim(),
+        brand: { '@type': 'Brand', name: c.brand },
+        model: c.model,
+        vehicleModelDate: String(c.year ?? ''),
+        vehicleConfiguration: c.transmission ?? undefined,
+        fuelType: c.fuel ?? undefined,
+        vehicleSeatingCapacity: c.seats ?? undefined,
+        numberOfDoors: c.doors ?? undefined,
+        color: c.color ?? undefined,
+        mileageFromOdometer: c.mileage
+            ? { '@type': 'QuantitativeValue', value: c.mileage, unitCode: 'KMT' }
+            : undefined,
+        vehicleEngine: c.cv
+            ? { '@type': 'EngineSpecification', enginePower: { '@type': 'QuantitativeValue', value: c.cv, unitCode: 'HP' } }
+            : undefined,
+        emissionsCO2: c.co2
+            ? { '@type': 'QuantitativeValue', value: c.co2, unitCode: 'GR' }
+            : undefined,
+        description: c.description ?? seoDescription.value,
+        image: seoImage.value ?? undefined,
+        url: seoUrl.value,
+        offers: c.purchase_price
+            ? {
+                '@type': 'Offer',
+                price: c.purchase_price,
+                priceCurrency: props.car?.organization?.currency ?? 'EUR',
+                availability: 'https://schema.org/InStock',
+                url: seoUrl.value,
+                seller: {
+                    '@type': 'AutoDealer',
+                    name: 'JJ Import Motors',
+                    url: window.location.origin,
+                },
+            }
+            : undefined,
+    };
+    // Quitar claves undefined (JSON.stringify las omite pero las defino explicitamente)
+    return JSON.stringify(data);
+});
+
 const researchAspectLabels = {
     common_issues: t('marketplace_show.aspect_common_issues'),
     recalls: t('marketplace_show.aspect_recalls'),
@@ -84,9 +155,29 @@ const marketPosition = computed(() => {
 </script>
 
 <template>
-    <Head :title="t('cars.marketplace_brand_model_title', { brand: car.brand, model: car.model })" />
+    <Head :title="seoTitle">
+        <!-- Open Graph dinamico (Item 14: OG meta tags por coche) -->
+        <meta property="og:type" content="website" />
+        <meta property="og:url" :content="seoUrl" />
+        <meta property="og:title" :content="seoTitle" />
+        <meta property="og:description" :content="seoDescription" />
+        <meta v-if="seoImage" property="og:image" :content="seoImage" />
+        <meta property="og:locale" content="es_ES" />
+        <meta property="og:site_name" content="JJ Import Motors" />
 
-    <PublicLayout>
+        <!-- Twitter Card -->
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" :content="seoTitle" />
+        <meta name="twitter:description" :content="seoDescription" />
+        <meta v-if="seoImage" name="twitter:image" :content="seoImage" />
+
+        <!-- SEO clasico -->
+        <meta name="description" :content="seoDescription" />
+        <link rel="canonical" :href="seoUrl" />
+    </Head>
+
+    <PublicLayout>        <!-- SEO Schema.org Vehicle (Item 13: Schema.org Vehicle + Offer por coche) -->
+        <script v-if="vehicleJsonLd" type="application/ld+json" v-html="vehicleJsonLd" />
         <div class="py-8">
             <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
                 <!-- Header -->
