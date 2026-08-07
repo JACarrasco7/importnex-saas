@@ -20,7 +20,7 @@ class WeeklyAlertDigestCommandTest extends TestCase
 
         $org = Organization::factory()->create();
         $user = User::factory()->create(['organization_id' => $org->id, 'role' => 'owner', 'email' => 'owner@test.com']);
-        Alert::factory()->create(['organization_id' => $org->id, 'resolved' => false]);
+        Alert::factory()->createQuietly(['organization_id' => $org->id, 'resolved' => false]);
 
         $this->artisan('alerts:send-weekly-digest --dry-run')
             ->expectsOutputToContain('1 organizations')
