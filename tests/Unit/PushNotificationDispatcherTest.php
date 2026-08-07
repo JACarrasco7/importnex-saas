@@ -2,7 +2,6 @@
 
 use App\Models\Alert;
 use App\Models\Organization;
-use App\Models\User;
 use App\Services\PushNotificationDispatcher;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
@@ -19,10 +18,8 @@ class PushNotificationDispatcherTest extends TestCase
             'onesignal_api_key' => null,
         ]);
 
-        $user = User::factory()->create(['organization_id' => $org->id]);
         $alert = Alert::factory()->create([
             'organization_id' => $org->id,
-            'user_id' => $user->id,
             'alert_type' => 'verification_failed',
         ]);
 
@@ -41,10 +38,8 @@ class PushNotificationDispatcherTest extends TestCase
             'notification_preferences' => ['verification_failed' => false],
         ]);
 
-        $user = User::factory()->create(['organization_id' => $org->id]);
         $alert = Alert::factory()->create([
             'organization_id' => $org->id,
-            'user_id' => $user->id,
             'alert_type' => 'verification_failed',
         ]);
 
@@ -62,13 +57,10 @@ class PushNotificationDispatcherTest extends TestCase
             'onesignal_api_key' => 'test-api-key',
         ]);
 
-        $user = User::factory()->create(['organization_id' => $org->id]);
         $alert = Alert::factory()->create([
             'organization_id' => $org->id,
-            'user_id' => $user->id,
             'alert_type' => 'verification_failed',
             'message' => 'Test notification message',
-            'target_url' => 'https://example.com/alert/1',
         ]);
 
         Http::fake([
@@ -101,10 +93,8 @@ class PushNotificationDispatcherTest extends TestCase
                 'onesignal_api_key' => 'test-api-key',
             ]);
 
-            $user = User::factory()->create(['organization_id' => $org->id]);
             $alert = Alert::factory()->create([
                 'organization_id' => $org->id,
-                'user_id' => $user->id,
                 'alert_type' => $type,
             ]);
 
@@ -117,9 +107,6 @@ class PushNotificationDispatcherTest extends TestCase
             Http::assertSent(function ($request) use ($expectedTitle) {
                 return $request['headings']['es'] === $expectedTitle;
             });
-
-            // Reset para el siguiente test
-            Http::reset();
         }
     }
 }
