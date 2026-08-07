@@ -8,10 +8,27 @@
             ]
         },
         "playwright": {
-            "command": "npx",
+            "command": "cmd",
             "args": [
-                "-y",
-                "@microsoft/mcp-server-playwright"
+                "/c", "npx", "-y", "@microsoft/mcp-server-playwright"
+            ]
+        },
+        "memory": {
+            "command": "cmd",
+            "args": [
+                "/c", "npx", "-y", "@modelcontextprotocol/server-memory"
+            ]
+        },
+        "sequential-thinking": {
+            "command": "cmd",
+            "args": [
+                "/c", "npx", "-y", "@modelcontextprotocol/server-sequential-thinking"
+            ]
+        },
+        "serena": {
+            "command": "cmd",
+            "args": [
+                "/c", "npx", "-y", "@oraios/serena"
             ]
         }
     }
