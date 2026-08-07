@@ -35,6 +35,7 @@
         "@headlessui/vue": "^1.7.23",
         "@heroicons/vue": "^2.2.0",
         "@vueuse/core": "^14.4.0",
+        "@vueuse/motion": "^3.0.3",
         "axios": "^1.13.0",
         "dayjs": "^1.11.21",
         "leaflet": "^1.9.4"

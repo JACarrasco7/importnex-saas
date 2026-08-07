@@ -2,16 +2,15 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios';
 
 /**
- * Composable para gestionar suscripciones Web Push en el cliente.
+ * Composable para gestionar suscripciones Web Push vía OneSignal.
  *
- * Flujo:
- *  1. Comprobar si el navegador soporta Push API y service workers.
- *  2. Pedir permiso al usuario (button-triggered, nunca auto-prompt).
- *  3. Registrar el service worker (/sw.js).
- *  4. Subscribirse vía PushManager con la VAPID key del backend.
- *  5. Enviar la suscripción al backend (POST /push/subscribe).
+ * OneSignal maneja VAPID, service worker y suscripciones internamente.
+ * El frontend solo necesita:
+ *   1. Inicializar el SDK con el app_id
+ *   2. Pedir permiso al usuario (button-triggered)
+ *   3. OneSignal gestiona el resto (SW, suscripción, notificaciones)
  *
- * Si VAPID no está configurado en backend (response.enabled=false),
+ * Si OneSignal no está configurado (response.enabled=false),
  * el composable degrada gracefully: UI muestra "no disponible" sin error.
  */
 export function usePushNotifications() {
@@ -34,7 +33,7 @@ export function usePushNotifications() {
     async function checkVapid() {
         try {
             const r = await axios.get('/push/vapid-public-key');
-            if (r.data?.enabled && r.data?.public_key) {
+            if (r.data?.enabled && r.data?.app_id) {
                 enabled.value = true;
                 vapidConfigured.value = true;
             } else {
@@ -46,11 +45,40 @@ export function usePushNotifications() {
         }
     }
 
-    function urlBase64ToUint8Array(base64String) {
-        const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-        const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-        const rawData = window.atob(base64);
-        return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
+    async function initOneSignal() {
+        if (!window.OneSignal) {
+            lastError.value = 'OneSignal SDK not loaded';
+            return false;
+        }
+
+        try {
+            await checkVapid();
+            if (!enabled.value) {
+                return false;
+            }
+
+            await window.OneSignal.init({
+                appId: (await axios.get('/push/vapid-public-key')).data.app_id,
+                allowLocalhost: true,
+                autoRegister: false,
+                notifyButton: {
+                    enable: false,
+                },
+                promptOptions: {
+                    // No auto-prompt — user triggers via button
+                    slidedown: {
+                        enabled: false,
+                    },
+                },
+            });
+
+            const sub = await window.OneSignal.getSubscription();
+            subscribed.value = sub?.toSubscription || false;
+            permission.value = Notification.permission;
+        } catch (e) {
+            lastError.value = e?.message || 'OneSignal init failed';
+            return false;
+        }
     }
 
     async function subscribe() {
@@ -67,26 +95,26 @@ export function usePushNotifications() {
                 return false;
             }
 
-            const perm = await Notification.requestPermission();
-            permission.value = perm;
-            if (perm !== 'granted') {
+            if (!window.OneSignal) {
+                lastError.value = 'OneSignal SDK not loaded';
+                return false;
+            }
+
+            await window.OneSignal.showNativePrompt();
+            permission.value = Notification.permission;
+
+            if (permission.value !== 'granted') {
                 lastError.value = 'Permiso denegado';
                 return false;
             }
 
-            const reg = await navigator.serviceWorker.register('/sw.js');
-            await navigator.serviceWorker.ready;
+            const sub = await window.OneSignal.getSubscription();
+            if (sub?.toSubscription) {
+                subscribed.value = true;
+                return true;
+            }
 
-            const r = await axios.get('/push/vapid-public-key');
-            const key = r.data.public_key;
-            const sub = await reg.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: urlBase64ToUint8Array(key),
-            });
-
-            await axios.post('/push/subscribe', sub.toJSON());
-            subscribed.value = true;
-            return true;
+            return false;
         } catch (e) {
             lastError.value = e?.response?.data?.message || e.message;
             return false;
@@ -98,13 +126,8 @@ export function usePushNotifications() {
     async function unsubscribe() {
         loading.value = true;
         try {
-            const reg = await navigator.serviceWorker.getRegistration('/sw.js');
-            if (reg) {
-                const sub = await reg.pushManager.getSubscription();
-                if (sub) {
-                    await axios.delete('/push/subscribe', { data: { endpoint: sub.endpoint } });
-                    await sub.unsubscribe();
-                }
+            if (window.OneSignal) {
+                await window.OneSignal.removeSubscription();
             }
             subscribed.value = false;
             return true;
@@ -118,15 +141,7 @@ export function usePushNotifications() {
 
     async function init() {
         if (!supported.value) return;
-        try {
-            const reg = await navigator.serviceWorker.getRegistration('/sw.js');
-            if (reg) {
-                const sub = await reg.pushManager.getSubscription();
-                subscribed.value = !!sub;
-            }
-        } catch (e) {
-            // silent
-        }
+        await initOneSignal();
     }
 
     return {

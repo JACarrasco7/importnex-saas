@@ -3,22 +3,19 @@
 namespace App\Services;
 
 use App\Models\Alert;
-use App\Models\PushSubscription;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Despacha una push notification a las suscripciones del usuario afectado.
+ * Despacha notificaciones push vía OneSignal.
  *
- * Implementación actual: registra el payload en el log. Esto es el hook de
- * integración con `minishlink/web-push` (u otra librería VAPID-compatible)
- * que se enchufa cuando se apruebe la dependencia.
+ * OneSignal maneja push web, push móvil, email y SMS desde una sola API.
+ * Las suscripciones se gestionan en el frontend vía OneSignal SDK (Web SDK).
  *
- * Pasos para activarlo de verdad:
- *   1. composer require minishlink/web-push
- *   2. php artisan vendor:publish --tag=laravel-vapor-web-push-config
- *   3. Generar claves VAPID: php artisan web-push:vapid
- *   4. Añadir VAPID_PUBLIC_KEY y VAPID_PRIVATE_KEY a .env
- *   5. Sustituir el cuerpo de sendToSubscription() por WebPush::sendNotification().
+ * Configuración en .env:
+ *   ONESIGNAL_APP_ID=
+ *   ONESIGNAL_REST_API_KEY=
+ *   ONESIGNAL_API_URL=https://api.onesignal.com
  */
 class PushNotificationDispatcher
 {
@@ -34,19 +31,43 @@ class PushNotificationDispatcher
             return;
         }
 
-        // Buscar suscripciones de los usuarios del org
-        $subscriptions = PushSubscription::query()
-            ->whereIn('user_id', $org->users()->pluck('id'))
-            ->get();
+        $appId = config('services.onesignal.app_id');
+        $apiKey = config('services.onesignal.rest_api_key');
 
-        if ($subscriptions->isEmpty()) {
+        if (! $appId || ! $apiKey) {
+            Log::warning('[onesignal] Push notification skipped — credentials not configured', [
+                'alert_id' => $alert->id,
+                'alert_type' => $alert->alert_type,
+            ]);
+
             return;
         }
 
         $payload = self::buildPayload($alert);
 
-        foreach ($subscriptions as $sub) {
-            self::sendToSubscription($sub, $payload, $alert);
+        $response = Http::withHeaders([
+            'Authorization' => "Basic {$apiKey}",
+            'Content-Type' => 'application/json',
+        ])->post(config('services.onesignal.api_url', 'https://api.onesignal.com').'/notifications', [
+            'app_id' => $appId,
+            'included_segments' => ['Active Users'],
+            'headings' => ['en' => $payload['title'], 'es' => $payload['title']],
+            'contents' => ['en' => $payload['body'], 'es' => $payload['body']],
+            'data' => [
+                'alert_id' => $alert->id,
+                'alert_type' => $alert->alert_type,
+                'url' => $payload['url'],
+            ],
+            'web_url' => $payload['url'],
+            'app_url' => $payload['url'],
+        ]);
+
+        if ($response->failed()) {
+            Log::error('[onesignal] Push notification failed', [
+                'alert_id' => $alert->id,
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
         }
     }
 
@@ -71,17 +92,5 @@ class PushNotificationDispatcher
             'alert_type' => $alert->alert_type,
             'alert_id' => $alert->id,
         ];
-    }
-
-    private static function sendToSubscription(PushSubscription $sub, array $payload, Alert $alert): void
-    {
-        // Hook actual: log. Reemplazar cuando se apruebe la lib de web-push.
-        Log::info('[push:dry-run] Would send push notification', [
-            'subscription_id' => $sub->id,
-            'endpoint_preview' => substr($sub->endpoint, 0, 80),
-            'payload' => $payload,
-        ]);
-
-        $sub->update(['last_seen_at' => now()]);
     }
 }

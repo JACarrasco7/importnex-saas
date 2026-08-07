@@ -59,19 +59,23 @@ class PushSubscriptionController extends Controller
 
     /**
      * GET /push/vapid-public-key
-     * Devuelve la clave pública VAPID para que el service worker la use.
-     * Stub por ahora — se enchufa cuando se apruebe la dep.
+     * Devuelve la configuración de OneSignal para que el frontend inicialice el SDK.
+     * OneSignal maneja VAPID internamente — no necesitamos exponer claves.
      */
     public function vapidKey(): JsonResponse
     {
-        $key = config('services.vapid.public_key');
-        if (! $key) {
+        $appId = config('services.onesignal.app_id');
+        if (! $appId) {
             return response()->json([
                 'enabled' => false,
-                'message' => 'VAPID not configured yet. Push notifications will be a no-op until minishlink/web-push is installed.',
+                'message' => 'OneSignal not configured yet. Push notifications will be a no-op until ONESIGNAL_APP_ID is set.',
             ], 200);
         }
 
-        return response()->json(['enabled' => true, 'public_key' => $key]);
+        return response()->json([
+            'enabled' => true,
+            'app_id' => $appId,
+            'api_url' => config('services.onesignal.api_url', 'https://api.onesignal.com'),
+        ]);
     }
 }

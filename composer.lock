@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a686a537cf7a5bd97466552ca432ab98",
+    "content-hash": "59281372e08bbb483a2ee03e33ed5e51",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -3439,6 +3439,59 @@
                 }
             ],
             "time": "2026-02-16T23:10:27+00:00"
+        },
+        {
+            "name": "onesignal/onesignal-php-api",
+            "version": "5.11.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/OneSignal/onesignal-php-api.git",
+                "reference": "1c11082e1fae86ba444120054d22f211178d62d9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/OneSignal/onesignal-php-api/zipball/1c11082e1fae86ba444120054d22f211178d62d9",
+                "reference": "1c11082e1fae86ba444120054d22f211178d62d9",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "ext-json": "*",
+                "ext-mbstring": "*",
+                "guzzlehttp/guzzle": "^7.3",
+                "guzzlehttp/psr7": "^1.7 || ^2.0",
+                "php": "^7.3 || ^8.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "onesignal\\client\\": "lib/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "authors": [
+                {
+                    "name": "OneSignal developers",
+                    "homepage": "https://onesignal.com"
+                }
+            ],
+            "description": "A powerful way to send personalized messages at scale and build effective customer engagement strategies. Learn more at onesignal.com",
+            "homepage": "https://onesignal.com",
+            "keywords": [
+                "api",
+                "onesignal",
+                "php",
+                "rest",
+                "sdk"
+            ],
+            "support": {
+                "issues": "https://github.com/OneSignal/onesignal-php-api/issues",
+                "source": "https://github.com/OneSignal/onesignal-php-api/tree/v5.11.1"
+            },
+            "time": "2026-07-29T19:15:11+00:00"
         },
         {
             "name": "phpoffice/phpspreadsheet",

@@ -1,6 +1,6 @@
 #!/bin/sh
 # Progressive Disclosure script for Agent Skills open standard
-# 
+#
 # Según el Agent Skills spec (agentskills.io):
 #   Fase 1 - Discovery: solo nombre + description
 #   Fase 2 - Activation: todo el SKILL.md
@@ -23,7 +23,7 @@ for skill_md in $SKILL_DIR/*/SKILL.md; do
     if [ -f "$skill_md" ]; then
         name=$(head -30 "$skill_md" | grep -m1 "^name:" | sed 's/^name: *//')
         desc=$(head -30 "$skill_md" | grep -m1 "^description:" | sed 's/^description: *//')
-        
+
         echo "## \`$name\`" >> "$DISCOVERY_CACHE"
         echo "" >> "$DISCOVERY_CACHE"
         echo "$desc" >> "$DISCOVERY_CACHE"
