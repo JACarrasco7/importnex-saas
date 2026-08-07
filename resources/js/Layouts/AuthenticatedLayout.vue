@@ -31,6 +31,7 @@ import {
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import FlashMessage from '@/Components/FlashMessage.vue';
 import UpgradeBanner from '@/Components/UpgradeBanner.vue';
+import DunningBanner from '@/Components/DunningBanner.vue';
 import LocaleSelector from '@/Components/LocaleSelector.vue';
 import SidebarGroup from '@/Components/SidebarGroup.vue';
 import NotificationToaster from '@/Components/NotificationToaster.vue';
@@ -281,6 +282,14 @@ const navGroups = computed(() => [
             <div v-if="$page.props.flash?.success || $page.props.flash?.error" class="space-y-2 px-4 pt-4 sm:px-6 lg:px-8">
                 <FlashMessage v-if="$page.props.flash?.success" type="success" :message="$page.props.flash.success" />
                 <FlashMessage v-if="$page.props.flash?.error" type="error" :message="$page.props.flash.error" />
+            </div>
+
+            <!-- Dunning banner (payment failed) - shown above plan limit banner -->
+            <div v-if="$page.props.payment_failed || $page.props.payment_failed_at" class="px-4 pt-4 sm:px-6 lg:px-8">
+                <DunningBanner
+                    :payment-failed="!!$page.props.payment_failed"
+                    :payment-failed-at="$page.props.payment_failed_at"
+                />
             </div>
 
             <!-- Plan limit upgrade banner -->
