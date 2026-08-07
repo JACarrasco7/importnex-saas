@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Alert;
+use App\Services\AlertEmailDispatcher;
 use App\Services\AlertWebhookDispatcher;
 use App\Services\PushNotificationDispatcher;
 use Illuminate\Support\Facades\Log;
@@ -46,6 +47,13 @@ class AlertObserver
                 PushNotificationDispatcher::dispatch($alert);
             } catch (\Throwable $e) {
                 Log::warning('Push dispatch failed', ['alert_id' => $alert->id, 'error' => $e->getMessage()]);
+            }
+
+            // Email notifications.
+            try {
+                AlertEmailDispatcher::dispatch($alert);
+            } catch (\Throwable $e) {
+                Log::warning('Email dispatch failed', ['alert_id' => $alert->id, 'error' => $e->getMessage()]);
             }
         } catch (\Throwable $e) {
             Log::warning('AlertObserver failed', [
