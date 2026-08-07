@@ -37,6 +37,7 @@ Una o dos líneas explicando la regla. Sin ensayos.
 | `resources/css/**,resources/js/Components/**` | Design system JJ Import Motors | [design-system.md](design-system.md) |
 | `tests/Feature/**,tests/Unit/**` | PHPUnit 13 + SQLite :memory: | [testing.md](testing.md) |
 | `database/migrations/**,database/factories/**` | Migraciones + factories seguras | [migrations.md](migrations.md) |
+| `**/*.{php,vue,js,md}` | Search hygiene: no bucles de búsqueda | [search-hygiene.md](search-hygiene.md) |
 
 ## 📊 Reglas Sprint G (sistema IA)
 

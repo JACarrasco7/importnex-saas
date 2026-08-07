@@ -49,6 +49,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $query->where('organization_id', $organizationId);
     }
 
+    public function pushSubscriptions()
+    {
+        return $this->hasMany(\App\Models\PushSubscription::class);
+    }
+
     public function scopeOwner($query)
     {
         return $query->where('role', 'owner');

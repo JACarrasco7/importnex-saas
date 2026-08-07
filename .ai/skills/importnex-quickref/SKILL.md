@@ -138,3 +138,19 @@ curl.exe -s -o /dev/null -w "%{http_code}\n" https://jjimportmotors.on-forge.com
 | `importnex-ai-chat` | SSE streaming, providers, rate limit |
 | `importnex-design-system` | Tokens, dark mode, animaciones, WCAG |
 | `importnex-tests-phpunit` | Tests, RefreshDatabase, Mockery |
+| `importnex-anti-loop` | Búsqueda fallida: no repetir, fallback 3 intentos |
+
+---
+
+## 🔍 Regla anti-loop (búsquedas)
+
+Si `grep_search`/`file_search` devuelve **"No matches found"**:
+
+1. **NO** repetir el mismo patrón ni `includeIgnoredFiles:true` a ciegas.
+2. Máximo **3 intentos** con estrategias distintas:
+   - `file_search` con glob amplio: `**/Nombre*`
+   - `list_dir` del directorio padre
+   - Simplificar regex
+3. Si 3 intentos fallan → **preguntar al usuario**. STOP.
+4. `includeIgnoredFiles:true` solo si sabes que está en vendor/node_modules.
+5. Preferir `file_search` (rutas, barato) sobre `grep` (contenido, caro).

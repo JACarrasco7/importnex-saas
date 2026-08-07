@@ -34,6 +34,7 @@
         <link rel="dns-prefetch" href="//fonts.bunny.net">
         <link rel="dns-prefetch" href="//api.stripe.com">
         <link rel="dns-prefetch" href="//m.stripe.network">
+        <link rel="dns-prefetch" href="//cdn.onesignal.com">
 
         <!-- Preconnect Stripe (pagos, necesario en flujo de checkout) -->
         <link rel="preconnect" href="https://api.stripe.com" crossorigin>
@@ -41,6 +42,12 @@
 
         <!-- Preconnect Unsplash si marketplace usa fotos externas -->
         <link rel="preconnect" href="https://images.unsplash.com" crossorigin>
+
+        <!-- Preconnect OneSignal (notificaciones push) -->
+        <link rel="preconnect" href="https://cdn.onesignal.com" crossorigin>
+
+        <!-- OneSignal SDK -->
+        <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async></script>
 
         <!-- Scripts -->
         @routes
