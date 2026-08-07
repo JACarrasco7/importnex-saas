@@ -2,8 +2,12 @@ import { ref, computed, watch } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import en from '@/i18n/en.js';
 import es from '@/i18n/es.js';
+import { en as enPricingCompare, es as esPricingCompare } from '@/i18n/pricing-comparison.js';
 
-const messages = { en, es };
+const messages = {
+    en: { ...en, ...enPricingCompare },
+    es: { ...es, ...esPricingCompare },
+};
 const cache = ref({});
 
 /**
