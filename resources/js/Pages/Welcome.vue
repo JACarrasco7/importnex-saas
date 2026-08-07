@@ -1,6 +1,8 @@
 ﻿<script setup>
+import { ref } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
-import { TruckIcon, UsersIcon, MapIcon, ChartBarIcon, SparklesIcon, ArrowRightIcon, CheckIcon } from '@heroicons/vue/24/outline';
+import { vMotion } from '@vueuse/motion';
+import { TruckIcon, UsersIcon, MapIcon, ChartBarIcon, SparklesIcon, ArrowRightIcon, CheckIcon, PlusIcon, MinusIcon } from '@heroicons/vue/24/outline';
 import { useTranslations } from '@/Composables/useTranslations';
 
 const { t } = useTranslations();
@@ -25,6 +27,33 @@ const stats = [
     { value: '3x', label: t('welcome.turnover') },
     { value: '24/7', label: t('welcome.ai_assistance') },
 ];
+
+const steps = [
+    { icon: MapPinIcon, title: t('welcome.step1_title'), description: t('welcome.step1_desc') },
+    { icon: ClipboardDocumentCheckIcon, title: t('welcome.step2_title'), description: t('welcome.step2_desc') },
+    { icon: CurrencyEuroIcon, title: t('welcome.step3_title'), description: t('welcome.step3_desc') },
+];
+
+const testimonials = [
+    { name: t('welcome.testimonial1_name'), role: t('welcome.testimonial1_role'), quote: t('welcome.testimonial1_quote'), avatar: 'CM' },
+    { name: t('welcome.testimonial2_name'), role: t('welcome.testimonial2_role'), quote: t('welcome.testimonial2_quote'), avatar: 'LG' },
+    { name: t('welcome.testimonial3_name'), role: t('welcome.testimonial3_role'), quote: t('welcome.testimonial3_quote'), avatar: 'RS' },
+];
+
+const brands = ['Audi', 'BMW', 'Mercedes-Benz', 'Volkswagen', 'Tesla', 'Porsche', 'Land Rover', 'Volvo'];
+
+const faqs = [
+    { question: t('welcome.faq1_q'), answer: t('welcome.faq1_a') },
+    { question: t('welcome.faq2_q'), answer: t('welcome.faq2_a') },
+    { question: t('welcome.faq3_q'), answer: t('welcome.faq3_a') },
+    { question: t('welcome.faq4_q'), answer: t('welcome.faq4_a') },
+    { question: t('welcome.faq5_q'), answer: t('welcome.faq5_a') },
+];
+
+const openFaq = ref(null);
+const toggleFaq = (idx) => {
+    openFaq.value = openFaq.value === idx ? null : idx;
+};
 </script>
 
 <template>
@@ -102,12 +131,109 @@ const stats = [
                     <p class="mt-4 text-lg text-gray-600">{{ t('welcome.built_for') }}</p>
                 </div>
                 <div class="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                    <div v-for="feat in features" :key="feat.title" class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 transition hover:shadow-md hover:ring-estoril-200">
+                    <div
+                        v-for="(feat, idx) in features"
+                        :key="feat.title"
+                        v-motion
+                        :initial="{ opacity: 0, y: 20 }"
+                        :enter="{ opacity: 1, y: 0, transition: { delay: idx * 100, duration: 400 } }"
+                        class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 transition hover:shadow-md hover:ring-estoril-200 hover:-translate-y-1 cursor-pointer"
+                    >
                         <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-estoril-50">
                             <component :is="feat.icon" class="h-5 w-5 text-estoril-600" />
                         </div>
                         <h3 class="mt-4 text-base font-semibold text-gray-900">{{ feat.title }}</h3>
                         <p class="mt-2 text-sm text-gray-600">{{ feat.description }}</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- How it works -->
+        <section class="bg-slate-50/50 py-20">
+            <div class="mx-auto max-w-7xl px-6">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">{{ t('welcome.how_it_works_title') }}</h2>
+                    <p class="mt-4 text-lg text-gray-600">{{ t('welcome.how_it_works_subtitle') }}</p>
+                </div>
+                <div class="mt-16 grid gap-8 md:grid-cols-3">
+                    <div v-for="(step, idx) in steps" :key="idx" v-motion :initial="{ opacity: 0, scale: 0.95 }" :enter="{ opacity: 1, scale: 1, transition: { delay: idx * 150, duration: 500 } }" class="relative">
+                        <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
+                            <div class="flex items-center gap-4">
+                                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-estoril-600 to-estoril-800 text-white font-bold">
+                                    {{ idx + 1 }}
+                                </div>
+                                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-estoril-50">
+                                    <component :is="step.icon" class="h-6 w-6 text-estoril-600" />
+                                </div>
+                            </div>
+                            <h3 class="mt-4 text-lg font-semibold text-gray-900">{{ step.title }}</h3>
+                            <p class="mt-2 text-sm text-gray-600">{{ step.description }}</p>
+                        </div>
+                        <div v-if="idx < steps.length - 1" class="absolute top-1/2 -right-4 hidden h-px w-8 bg-gray-300 md:block"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Social proof: logos + testimonials -->
+        <section class="py-20">
+            <div class="mx-auto max-w-7xl px-6">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">{{ t('welcome.brands_trust') }}</h2>
+                </div>
+                <div class="mt-12 grid grid-cols-2 gap-6 sm:grid-cols-4 lg:grid-cols-8">
+                    <div v-for="brand in brands" :key="brand" class="flex items-center justify-center rounded-lg bg-white p-4 shadow-sm ring-1 ring-gray-200 text-sm font-bold text-gray-400">
+                        {{ brand }}
+                    </div>
+                </div>
+
+                <div class="mt-16 grid gap-6 md:grid-cols-3">
+                    <div v-for="(testimonial, idx) in testimonials" :key="testimonial.name" v-motion :initial="{ opacity: 0, y: 30 }" :enter="{ opacity: 1, y: 0, transition: { delay: idx * 120, duration: 500 } }" class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 hover:shadow-md transition">
+                        <div class="flex items-center gap-3">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-estoril-600 text-white font-semibold">
+                                {{ testimonial.avatar }}
+                            </div>
+                            <div>
+                                <p class="text-sm font-semibold text-gray-900">{{ testimonial.name }}</p>
+                                <p class="text-xs text-gray-500">{{ testimonial.role }}</p>
+                            </div>
+                        </div>
+                        <p class="mt-4 text-sm text-gray-700 italic">"{{ testimonial.quote }}"</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ -->
+        <section class="bg-slate-50/50 py-20">
+            <div class="mx-auto max-w-3xl px-6">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">{{ t('welcome.faq_title') }}</h2>
+                </div>
+                <div class="mt-12 space-y-3">
+                    <div v-for="(faq, idx) in faqs" :key="idx" class="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-200">
+                        <button
+                            @click="toggleFaq(idx)"
+                            class="flex w-full items-center justify-between px-6 py-4 text-left transition hover:bg-gray-50"
+                            :aria-expanded="openFaq === idx"
+                        >
+                            <span class="text-sm font-semibold text-gray-900">{{ faq.question }}</span>
+                            <PlusIcon v-if="openFaq !== idx" class="h-5 w-5 text-gray-400 flex-shrink-0" />
+                            <MinusIcon v-else class="h-5 w-5 text-estoril-600 flex-shrink-0" />
+                        </button>
+                        <Transition
+                            enter-active-class="transition-all duration-300 ease-out"
+                            enter-from-class="max-h-0 opacity-0"
+                            enter-to-class="max-h-96 opacity-100"
+                            leave-active-class="transition-all duration-200 ease-in"
+                            leave-from-class="max-h-96 opacity-100"
+                            leave-to-class="max-h-0 opacity-0"
+                        >
+                            <div v-if="openFaq === idx" class="overflow-hidden border-t border-gray-100 px-6 py-4 text-sm text-gray-600">
+                                {{ faq.answer }}
+                            </div>
+                        </Transition>
                     </div>
                 </div>
             </div>
