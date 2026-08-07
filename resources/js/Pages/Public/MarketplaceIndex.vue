@@ -30,9 +30,16 @@ const props = defineProps({
     verdicts: Array,
     filters: Object,
     requestUrl: String,
+    filterBounds: { type: Object, default: () => ({ price: { min: 0, max: 9999999 }, year: { min: 1900, max: new Date().getFullYear() + 1 } }) },
 });
 
 const { t, locale } = useTranslations();
+
+// Bounds para validación HTML5 (vienen del backend, item 1)
+const priceMin = computed(() => props.filterBounds?.price?.min ?? 0);
+const priceMax = computed(() => props.filterBounds?.price?.max ?? 9999999);
+const yearMin = computed(() => props.filterBounds?.year?.min ?? 1900);
+const yearMax = computed(() => props.filterBounds?.year?.max ?? new Date().getFullYear() + 1);
 
 // Enlace al formulario público de solicitud (fallback: sección de contacto)
 const requestHref = computed(() => props.requestUrl || '#contacto');
@@ -235,14 +242,14 @@ const howItWorks = computed(() => [
                     <div class="lg:col-span-1">
                         <label class="mb-1.5 block text-xs font-semibold text-gray-700">{{ t('marketplace.filter_budget') }}</label>
                         <div class="flex gap-2">
-                            <input v-model.number="minPrice" type="number" min="0" step="500" :placeholder="t('marketplace.filter_budget_min')" class="block w-full rounded-lg border-gray-200 text-sm focus:border-estoril-600 focus:ring-estoril-600" />
-                            <input v-model.number="maxPrice" type="number" min="0" step="500" :placeholder="t('marketplace.filter_budget_max')" class="block w-full rounded-lg border-gray-200 text-sm focus:border-estoril-600 focus:ring-estoril-600" />
+                            <input v-model.number="minPrice" type="number" :min="priceMin" :max="priceMax" step="500" :placeholder="t('marketplace.filter_budget_min')" class="block w-full rounded-lg border-gray-200 text-sm focus:border-estoril-600 focus:ring-estoril-600" />
+                            <input v-model.number="maxPrice" type="number" :min="priceMin" :max="priceMax" step="500" :placeholder="t('marketplace.filter_budget_max')" class="block w-full rounded-lg border-gray-200 text-sm focus:border-estoril-600 focus:ring-estoril-600" />
                         </div>
                     </div>
                     <div class="lg:col-span-1">
                         <label class="mb-1.5 block text-xs font-semibold text-gray-700">{{ t('marketplace.filter_mileage') }}</label>
                         <div class="flex gap-2">
-                            <input v-model.number="mileageFilter" type="number" min="0" step="1000" :placeholder="t('marketplace.filter_mileage_placeholder')" class="block w-full rounded-lg border-gray-200 text-sm focus:border-estoril-600 focus:ring-estoril-600" />
+                            <input v-model.number="mileageFilter" type="number" :min="0" :max="priceMax" step="1000" :placeholder="t('marketplace.filter_mileage_placeholder')" class="block w-full rounded-lg border-gray-200 text-sm focus:border-estoril-600 focus:ring-estoril-600" />
                         </div>
                     </div>
                 </div>
