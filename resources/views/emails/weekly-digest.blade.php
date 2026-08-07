@@ -79,22 +79,27 @@
                                 </h2>
                                 @foreach($recentAlerts as $alert)
                                     @php
-                                        $typeLabel = match($alert->alert_type) {
+                                        // Soporte tanto para Eloquent models como para arrays
+                                        $type = is_array($alert) ? ($alert['alert_type'] ?? null) : $alert->alert_type;
+                                        $message = is_array($alert) ? ($alert['message'] ?? '') : $alert->message;
+                                        $createdAt = is_array($alert) ? (isset($alert['created_at']) ? \Illuminate\Support\Carbon::parse($alert['created_at']) : null) : $alert->created_at;
+                                        $targetUrl = is_array($alert) ? ($alert['target_url'] ?? null) : $alert->target_url;
+                                        $typeLabel = match($type) {
                                             'car_request' => $isEs ? 'Solicitud de vehículo' : 'Car request',
                                             'car_stale' => $isEs ? 'Vehículo sin actividad' : 'Stale car',
                                             'client_no_contact' => $isEs ? 'Cliente sin contacto' : 'Client no contact',
                                             'verification_failed' => $isEs ? 'Verificación fallida' : 'Verification failed',
                                             'verification_completed' => $isEs ? 'Verificación completada' : 'Verification completed',
-                                            default => $alert->alert_type,
+                                            default => (string) $type,
                                         };
                                     @endphp
                                     <div style="border-left:3px solid #1A306D;background-color:#f9fafb;padding:12px 16px;margin-bottom:8px;border-radius:0 6px 6px 0;">
                                         <p style="margin:0 0 4px;font-size:13px;font-weight:600;color:#1A306D;">{{ $typeLabel }}</p>
-                                        <p style="margin:0;font-size:13px;color:#374151;">{{ $alert->message }}</p>
+                                        <p style="margin:0;font-size:13px;color:#374151;">{{ $message }}</p>
                                         <p style="margin:4px 0 0;font-size:11px;color:#9ca3af;">
-                                            {{ $alert->created_at->diffForHumans() }}
-                                            @if($alert->target_url)
-                                                · <a href="{{ $alert->target_url }}" style="color:#1A306D;">{{ $isEs ? 'Ver' : 'View' }}</a>
+                                            {{ $createdAt ? $createdAt->diffForHumans() : '' }}
+                                            @if($targetUrl)
+                                                · <a href="{{ $targetUrl }}" style="color:#1A306D;">{{ $isEs ? 'Ver' : 'View' }}</a>
                                             @endif
                                         </p>
                                     </div>

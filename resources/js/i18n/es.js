@@ -1731,6 +1731,13 @@ export default {
             bulk_label: 'Acciones rápidas',
             enable_all: 'Activar todo',
             disable_all: 'Silenciar todo',
+            push_label: 'Notificaciones push en el navegador',
+            push_unsupported: 'Tu navegador no soporta Web Push.',
+            push_not_configured: 'Push no está configurado en el servidor todavía.',
+            push_active: 'Recibirás un aviso del navegador aunque no estés en la app.',
+            push_inactive: 'Activa para recibir avisos del navegador.',
+            push_enable: 'Activar',
+            push_disable: 'Desactivar',
             prefs: {
                 car_request: 'Solicitudes que llegan desde el formulario público.',
                 car_stale: 'Vehículos sin actividad reciente.',

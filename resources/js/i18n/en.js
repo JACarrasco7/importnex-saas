@@ -1216,6 +1216,13 @@ export default {
             bulk_label: 'Bulk actions',
             enable_all: 'Enable all',
             disable_all: 'Mute all',
+            push_label: 'Browser push notifications',
+            push_unsupported: 'Your browser does not support Web Push.',
+            push_not_configured: 'Push is not configured on the server yet.',
+            push_active: 'You will receive browser alerts even when the app is closed.',
+            push_inactive: 'Turn on to receive browser alerts.',
+            push_enable: 'Enable',
+            push_disable: 'Disable',
             prefs: {
                 car_request: 'Requests coming from the public form.',
                 car_stale: 'Cars without recent activity.',

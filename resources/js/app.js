@@ -8,6 +8,15 @@ import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import ToastContainer from '@/Components/ToastContainer.vue';
 import CommandPalette from '@/Components/CommandPalette.vue';
 
+// N6: registrar service worker para Web Push
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(() => {
+            // silent — el push no es bloqueante
+        });
+    });
+}
+
 const appName = import.meta.env.VITE_APP_NAME || 'JJ Import Motors';
 
 createInertiaApp({

@@ -78,7 +78,7 @@ class SendWeeklyAlertDigest extends Command
             }
 
             try {
-                Mail::to($owner->email)->send(new WeeklyAlertDigest($org, $stats, $recentAlerts->toArray(), $locale));
+                Mail::to($owner->email)->send(new WeeklyAlertDigest($org, $stats, $recentAlerts, $locale));
                 $sent++;
             } catch (\Throwable $e) {
                 $this->error("  ! Failed for {$org->name}: {$e->getMessage()}");

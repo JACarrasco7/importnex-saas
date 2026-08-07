@@ -1,0 +1,13 @@
+## We couldn't process your payment
+
+Hola {{ $organization->name }},
+
+Tu pago de **{{ $plan->name }}** ({{ $plan->price }}€/mes) no se ha podido procesar.
+
+**No te preocupes**, tu cuenta sigue activa. Tienes **7 días** para actualizar tu método de pago.
+
+👉 [Actualizar método de pago]({{ route('billing.portal') }})
+
+Si necesitas ayuda, responde a este email.
+
+— JJ Import Motors

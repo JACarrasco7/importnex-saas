@@ -4,21 +4,20 @@ namespace App\Mail;
 
 use App\Models\Organization;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class WeeklyAlertDigest extends Mailable implements ShouldQueue
+class WeeklyAlertDigest extends Mailable
 {
     use Queueable, SerializesModels;
 
     public function __construct(
         public Organization $organization,
         public array $stats,
-        public array $recentAlerts,
-        public string $locale = 'es',
+        public $recentAlerts,
+        public $locale = 'es',
     ) {}
 
     public function envelope(): Envelope

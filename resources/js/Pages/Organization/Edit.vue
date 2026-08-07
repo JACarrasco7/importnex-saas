@@ -1,6 +1,6 @@
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import {
     ArrowLeftIcon,
     CheckIcon,
@@ -9,14 +9,30 @@ import {
     MagnifyingGlassIcon,
     BellIcon,
     BoltIcon,
+    DevicePhoneMobileIcon,
 } from '@heroicons/vue/24/outline';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import FormSection from '@/Components/FormSection.vue';
 import FormField from '@/Components/FormField.vue';
 import { useTranslations } from '@/Composables/useTranslations';
+import { usePushNotifications } from '@/Composables/usePushNotifications';
 
 const { t } = useTranslations();
+
+const {
+    supported: pushSupported,
+    permission: pushPermission,
+    subscribed: pushSubscribed,
+    enabled: pushEnabled,
+    loading: pushLoading,
+    lastError: pushError,
+    init: initPush,
+    subscribe: subscribePush,
+    unsubscribe: unsubscribePush,
+} = usePushNotifications();
+
+onMounted(() => initPush());
 
 const props = defineProps({
     organization: Object,
@@ -260,6 +276,47 @@ async function detectModels() {
                                 </label>
                             </div>
                         </FormField>
+
+                        <!-- N6: Push notifications (Web Push API) -->
+                        <div class="mt-6 rounded-lg border border-gray-200 p-4">
+                            <div class="flex items-start gap-3">
+                                <DevicePhoneMobileIcon class="h-5 w-5 flex-shrink-0 text-gray-400 mt-0.5" />
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium text-gray-900">
+                                        {{ t('organization.notifications.push_label', { default: 'Notificaciones push en el navegador' }) }}
+                                    </p>
+                                    <p class="mt-1 text-xs text-gray-500">
+                                        <template v-if="!pushSupported">
+                                            {{ t('organization.notifications.push_unsupported', { default: 'Tu navegador no soporta Web Push.' }) }}
+                                        </template>
+                                        <template v-else-if="!pushEnabled">
+                                            {{ t('organization.notifications.push_not_configured', { default: 'Push no está configurado en el servidor todavía (admin debe instalar minishlink/web-push).' }) }}
+                                        </template>
+                                        <template v-else-if="pushSubscribed">
+                                            {{ t('organization.notifications.push_active', { default: 'Recibirás un aviso del navegador aunque no estés en la app.' }) }}
+                                        </template>
+                                        <template v-else>
+                                            {{ t('organization.notifications.push_inactive', { default: 'Activa para recibir avisos del navegador.' }) }}
+                                        </template>
+                                    </p>
+                                    <p v-if="pushError" class="mt-2 text-xs text-rose-600">{{ pushError }}</p>
+                                </div>
+                                <button
+                                    v-if="pushSupported && pushEnabled"
+                                    type="button"
+                                    @click="pushSubscribed ? unsubscribePush() : subscribePush()"
+                                    :disabled="pushLoading"
+                                    :class="['inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-xs font-semibold transition flex-shrink-0',
+                                        pushSubscribed
+                                            ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                            : 'bg-estoril-600 text-white hover:bg-estoril-500',
+                                        pushLoading ? 'opacity-50' : '']">
+                                    {{ pushSubscribed
+                                        ? t('organization.notifications.push_disable', { default: 'Desactivar' })
+                                        : t('organization.notifications.push_enable', { default: 'Activar' }) }}
+                                </button>
+                            </div>
+                        </div>
                     </FormSection>
 
                     <div class="flex items-center justify-end gap-3 rounded-2xl bg-gray-50 px-6 py-4 ring-1 ring-gray-200">
