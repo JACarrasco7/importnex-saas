@@ -30,7 +30,7 @@ const progressPercent = computed(() => props.progress?.progress || 0);
 const loading = ref(false);
 
 const skipOnboarding = () => {
-    if (confirm('¿Seguro que quieres saltar el onboarding? Puedes completarlo más tarde desde el dashboard.')) {
+    if (confirm(t('onboarding.skip_confirm', '¿Seguro que quieres saltar el onboarding? Puedes completarlo más tarde desde el dashboard.'))) {
         loading.value = true;
         router.post(route('onboarding.skip'), {}, {
             onFinish: () => {

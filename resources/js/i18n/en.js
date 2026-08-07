@@ -1059,7 +1059,7 @@ export default {
         action_retry: "Retry",
         action_view: "View resource",
         action_mark_resolved: "Mark resolved",
-        count_short: "{count} alert | {count} alerts",
+        count_short: { _one: ":count alert", _other: ":count alerts" },
 },
     subscription: {
         title: 'Subscription',
