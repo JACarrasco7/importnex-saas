@@ -240,17 +240,30 @@ const dismiss = () => {
 
 ---
 
-## 📊 Tiempo estimado
+## 📊 Progreso Session E
 
-| Item | Esfuerzo | Estado |
-|---|---|---|
-| 5.1 Tabla comparativa | 3h | ⏳ Pendiente |
-| 5.2 Toggle anual | 2h | ⏳ Pendiente |
-| 5.3 Banner dunning (integrar) | 2h | ⏳ Pendiente |
-| 5.4 Emails ES | 4h | ⏳ Pendiente |
-| 5.5 Cancel honest page | 2h | ⏳ Pendiente |
-| 5.6 UpgradePrompt | 3h | ⏳ Pendiente |
-| **TOTAL** | **~16h** | **1/6 (parcial)** |
+| Item | Esfuerzo | Estado | Commit |
+|---|---|---|---|
+| 5.1 Tabla comparativa | 3h | ⏳ Pendiente | — |
+| 5.2 Toggle anual | 2h | ⏳ Pendiente | — |
+| 5.3 Banner dunning (integrar) | 2h | ✅ **HECHO** | `ebd4490` |
+| 5.4 Emails ES | 4h | ⏳ Pendiente | — |
+| 5.5 Cancel honest page | 2h | ✅ **HECHO** | `7864916` |
+| 5.6 UpgradePrompt | 3h | ✅ **HECHO** | `7864916` |
+| **TOTAL** | **~16h** | **3/6 hechos** | **~7h invertidas** |
+
+### Commits creados:
+1. `ebd4490` — Integrar DunningBanner en Dashboard + HandleInertiaRequests billingDunning
+2. `7864916` — Cancel page honesta + UpgradePrompt contextual
+
+### Mejoras aplicadas:
+- **DunningBanner**: visible solo cuando payment_failed (no molestar a usuarios sanos)
+- **Cancel page**: timeline claro (7d grace, 30d data), reduce churn por confusión
+- **UpgradePrompt**: trigger al 90% del límite, dismiss 7d localStorage, captación expansion revenue
+
+### Para otra sesión:
+- 5.1 + 5.2 (tabla comparativa + toggle anual) — alta conversión
+- 5.4 (emails transaccionales ES) — dunning suave vía email
 
 ---
 
