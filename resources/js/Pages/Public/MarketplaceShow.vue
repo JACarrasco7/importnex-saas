@@ -429,18 +429,72 @@ const marketPosition = computed(() => {
                     </div>
                 </div>
 
-                <!-- Photos (read-only gallery) -->
+                <!-- Photos (read-only gallery with lightbox) -->
                 <div v-if="car.photos?.length" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
-                    <div class="border-b border-gray-200 px-6 py-4">
+                    <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4">
                         <h3 class="text-base font-semibold text-gray-900">{{ t('marketplace_show.section_photos') }}</h3>
+                        <div class="flex items-center gap-3 text-xs text-gray-500">
+                            <span v-if="car.marketplace_views" class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-1">
+                                <EyeIcon class="h-3 w-3" />
+                                {{ car.marketplace_views }} {{ t('marketplace_show.views_label', { default: 'visitas' }) }}
+                            </span>
+                            <ShareCar :car="car" :share-url="shareUrl" />
+                        </div>
                     </div>
                     <div class="grid grid-cols-2 gap-3 p-6 md:grid-cols-4">
-                        <a v-for="photo in car.photos" :key="photo.id" :href="`/storage/${photo.url}`" target="_blank" rel="noopener" class="group relative overflow-hidden rounded-lg">
+                        <button
+                            v-for="(photo, i) in car.photos"
+                            :key="photo.id"
+                            type="button"
+                            @click="openLightbox(i)"
+                            class="group relative overflow-hidden rounded-lg">
                             <img :src="`/storage/${photo.url}`" :alt="photo.photo_type" class="h-32 w-full object-cover transition group-hover:scale-105" loading="lazy" />
                             <span class="absolute bottom-2 left-2 rounded bg-black/70 px-2 py-0.5 text-xs text-white">{{ photo.photo_type }}</span>
-                        </a>
+                            <span class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition group-hover:opacity-100">
+                                <span class="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-gray-900">{{ t('marketplace_show.zoom', { default: 'Ver grande' }) }}</span>
+                            </span>
+                        </button>
                     </div>
                 </div>
+
+                <!-- Lightbox (Marketplace item 6) -->
+                <Teleport to="body">
+                    <div
+                        v-if="lightboxOpen"
+                        class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+                        @click.self="closeLightbox">
+                        <button
+                            type="button"
+                            @click="closeLightbox"
+                            class="absolute right-4 top-4 rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
+                            :aria-label="t('marketplace_show.close_lightbox', { default: 'Cerrar' })">
+                            <XMarkIcon class="h-6 w-6" />
+                        </button>
+                        <button
+                            v-if="car.photos?.length > 1"
+                            type="button"
+                            @click="prevPhoto"
+                            class="absolute left-4 rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
+                            :aria-label="t('marketplace_show.prev', { default: 'Anterior' })">
+                            <ChevronLeftIcon class="h-6 w-6" />
+                        </button>
+                        <button
+                            v-if="car.photos?.length > 1"
+                            type="button"
+                            @click="nextPhoto"
+                            class="absolute right-4 rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
+                            :aria-label="t('marketplace_show.next', { default: 'Siguiente' })">
+                            <ChevronRightIcon class="h-6 w-6" />
+                        </button>
+                        <div class="relative max-h-full max-w-5xl">
+                            <img
+                                :src="`/storage/${car.photos[lightboxIndex]?.url}`"
+                                :alt="car.photos[lightboxIndex]?.photo_type"
+                                class="max-h-[85vh] max-w-full rounded object-contain" />
+                            <p class="mt-2 text-center text-sm text-white">{{ lightboxIndex + 1 }} / {{ car.photos.length }}</p>
+                        </div>
+                    </div>
+                </Teleport>
 
                 <!-- Notes (read-only) -->
                 <div v-if="car.notes" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">

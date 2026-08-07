@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import {
     MagnifyingGlassIcon,
@@ -19,6 +19,8 @@ import {
     MapPinIcon,
     CalendarDaysIcon,
     BoltIcon,
+    XMarkIcon,
+    GiftIcon,
 } from '@heroicons/vue/24/outline';
 import Badge from '@/Components/Badge.vue';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
@@ -109,6 +111,59 @@ const howItWorks = computed(() => [
     { step: '2', title: t('marketplace.step2_title'), description: t('marketplace.step2_desc') },
     { step: '3', title: t('marketplace.step3_title'), description: t('marketplace.step3_desc') },
 ]);
+
+// Marketplace item 3: sticky filter bar — detecta cuando la barra entra en scroll
+const scrolledPastHero = ref(false);
+const onScroll = () => { scrolledPastHero.value = window.scrollY > 380; };
+onMounted(() => { window.addEventListener('scroll', onScroll, { passive: true }); });
+onUnmounted(() => { window.removeEventListener('scroll', onScroll); });
+
+// Marketplace item 12: Newsletter popup suave con lead magnet.
+// Trigger: 30s en pagina o 50% scroll. Visible solo una vez por localStorage.
+const showNewsletter = ref(false);
+const newsletterEmail = ref('');
+const newsletterSubmitted = ref(false);
+const newsletterError = ref('');
+const triggerNewsletter = () => {
+    if (typeof window === 'undefined') return;
+    if (localStorage.getItem('mc-newsletter-seen')) return;
+    localStorage.setItem('mc-newsletter-seen', '1');
+    showNewsletter.value = true;
+};
+const closeNewsletter = () => { showNewsletter.value = false; };
+const submitNewsletter = async () => {
+    if (!newsletterEmail.value || !newsletterEmail.value.includes('@')) {
+        newsletterError.value = 'Email inválido';
+        return;
+    }
+    newsletterError.value = '';
+    try {
+        const r = await window.axios.post('/newsletter/subscribe', {
+            email: newsletterEmail.value,
+            locale,
+            source: 'marketplace_popup',
+        });
+        if (r.data?.success) {
+            newsletterSubmitted.value = true;
+            setTimeout(() => { showNewsletter.value = false; }, 2500);
+        }
+    } catch (e) {
+        newsletterError.value = e.response?.data?.message || 'Error';
+    }
+};
+onMounted(() => {
+    let scrollTriggered = false;
+    const onScroll50 = () => {
+        if (scrollTriggered) return;
+        const max = document.documentElement.scrollHeight - window.innerHeight;
+        if (max > 0 && window.scrollY / max >= 0.5) {
+            scrollTriggered = true;
+            triggerNewsletter();
+        }
+    };
+    window.addEventListener('scroll', onScroll50, { passive: true });
+    setTimeout(() => { if (!scrollTriggered) triggerNewsletter(); }, 30000);
+});
 </script>
 
 <template>
@@ -444,5 +499,94 @@ const howItWorks = computed(() => [
                 <span class="hidden sm:inline">{{ t('marketplace.folleto') }}</span>
             </a>
         </div>
+
+        <!-- Marketplace item 3: Sticky filter bar (visible al hacer scroll) -->
+        <Transition
+            enter-active-class="transition duration-200 ease-out"
+            enter-from-class="opacity-0 -translate-y-2"
+            enter-to-class="opacity-100 translate-y-0"
+            leave-active-class="transition duration-150 ease-in"
+            leave-from-class="opacity-100 translate-y-0"
+            leave-to-class="opacity-0 -translate-y-2">
+            <div
+                v-if="scrolledPastHero"
+                class="fixed left-0 right-0 top-0 z-30 border-b border-gray-200 bg-white/95 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-white/80">
+                <div class="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2 sm:px-6 lg:px-8">
+                    <MagnifyingGlassIcon class="h-4 w-4 text-gray-400" />
+                    <input
+                        v-model="search"
+                        type="search"
+                        :placeholder="t('marketplace.search_placeholder_short', { default: 'Buscar marca o modelo…' })"
+                        class="flex-1 rounded-md border-0 bg-transparent text-sm focus:outline-none focus:ring-0"
+                    />
+                    <select v-model="brandFilter" class="rounded-md border-0 bg-transparent text-sm">
+                        <option value="">{{ t('marketplace.filter_all_brands') }}</option>
+                        <option v-for="b in brands" :key="b" :value="b">{{ b }}</option>
+                    </select>
+                    <span class="hidden text-sm text-gray-500 sm:inline">
+                        {{ filteredCars.length }} / {{ cars.data?.length || 0 }}
+                    </span>
+                    <label class="flex cursor-pointer items-center gap-2 text-xs font-medium text-gray-700">
+                        <input v-model="dealFilter" type="checkbox" class="rounded border-gray-300 text-estoril-600" />
+                        {{ t('marketplace.filter_deals_only', { default: 'Ofertas' }) }}
+                    </label>
+                </div>
+            </div>
+        </Transition>
+
+        <!-- Marketplace item 12: Newsletter popup suave con lead magnet -->
+        <Teleport to="body">
+            <Transition
+                enter-active-class="transition duration-300 ease-out"
+                enter-from-class="opacity-0 translate-y-4"
+                enter-to-class="opacity-100 translate-y-0"
+                leave-active-class="transition duration-200 ease-in"
+                leave-from-class="opacity-100 translate-y-0"
+                leave-to-class="opacity-0 translate-y-4">
+                <div
+                    v-if="showNewsletter"
+                    class="fixed bottom-4 right-4 z-40 w-full max-w-sm rounded-2xl bg-white p-5 shadow-2xl ring-1 ring-gray-200"
+                    role="dialog"
+                    aria-modal="false">
+                    <button
+                        type="button"
+                        @click="closeNewsletter"
+                        class="absolute right-2 top-2 rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                        :aria-label="t('marketplace.newsletter_close', { default: 'Cerrar' })">
+                        <XMarkIcon class="h-4 w-4" />
+                    </button>
+                    <div class="flex items-start gap-3">
+                        <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-estoril-100 text-estoril-700">
+                            <GiftIcon class="h-5 w-5" />
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm font-semibold text-gray-900">
+                                {{ t('marketplace.newsletter_title', { default: '5 veh\u00edculos verificados al mes en tu inbox' }) }}
+                            </p>
+                            <p class="mt-1 text-xs text-gray-500">
+                                {{ t('marketplace.newsletter_desc', { default: 'Recibe solo los coches con veredicto Buy o Buy if price drops. Sin spam, baja cuando quieras.' }) }}
+                            </p>
+                            <form v-if="!newsletterSubmitted" @submit.prevent="submitNewsletter" class="mt-3 flex flex-col gap-1">
+                                <div class="flex gap-2">
+                                    <input
+                                        v-model="newsletterEmail"
+                                        type="email"
+                                        required
+                                        :placeholder="t('marketplace.newsletter_email_placeholder', { default: 'tu@email.com' })"
+                                        class="flex-1 rounded-md border-gray-300 text-sm shadow-sm focus:border-estoril-500 focus:ring-estoril-500" />
+                                    <button type="submit" class="rounded-md bg-estoril-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-estoril-500">
+                                        {{ t('marketplace.newsletter_cta', { default: 'Suscribirme' }) }}
+                                    </button>
+                                </div>
+                                <p v-if="newsletterError" class="text-[11px] text-rose-600">{{ newsletterError }}</p>
+                            </form>
+                            <p v-else class="mt-3 text-xs font-semibold text-emerald-700">
+                                ✓ {{ t('marketplace.newsletter_thanks', { default: '¡Listo! Te avisamos.' }) }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </Transition>
+        </Teleport>
     </PublicLayout>
 </template>

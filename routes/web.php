@@ -30,6 +30,7 @@ use App\Http\Controllers\PublicMarketplaceController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\PushSubscriptionController;
+use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\TripPlannerController;
 use App\Http\Controllers\ValuationImportController;
@@ -275,5 +276,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 // JJ Import Motors folleto PDF
 Route::get('/jj-import/folleto', [JJImportFolletoController::class, 'download'])->name('jj-import.folleto');
+
+// Marketplace item 12: newsletter public (sin auth, con rate limit)
+Route::post('/newsletter/subscribe', [\App\Http\Controllers\NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
+Route::delete('/newsletter/unsubscribe', [\App\Http\Controllers\NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
 
 require __DIR__.'/auth.php';

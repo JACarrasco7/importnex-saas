@@ -107,7 +107,7 @@ class PublicMarketplaceController extends Controller
 
         // Marketplace item 7: contador de vistas con deduplicación por sesión.
         // Una sesión (cookie mc-viewed-{car_id}) cuenta 1 vez; misma sesión no infla.
-        $cookieName = 'mc-viewed-' . $car->id;
+        $cookieName = 'mc-viewed-'.$car->id;
         if (! $request->cookie($cookieName)) {
             $car->increment('marketplace_views');
             cookie()->queue(cookie($cookieName, '1', 60 * 24)); // 24h

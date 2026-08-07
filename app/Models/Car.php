@@ -59,17 +59,17 @@ class Car extends Model
     public const STATUSES = [
         'Located', 'Valuing', 'Offered', 'Reserved', 'Purchased',
         'In_transit', 'Processing', 'Pending review', 'Verifying',
-        'Delivered', 'Discarded'
+        'Delivered', 'Discarded',
     ];
 
     public const ACTIVE_STATUSES = [
         'Located', 'Valuing', 'Offered', 'Reserved', 'Purchased',
-        'In_transit', 'Processing'
+        'In_transit', 'Processing',
     ];
 
     public const KANBAN_STATUSES = [
         'Located', 'Valuing', 'Offered', 'Reserved', 'Purchased',
-        'In_transit', 'Processing', 'Delivered'
+        'In_transit', 'Processing', 'Delivered',
     ];
 
     public const CURRENT_SCHEMA_VERSION = 1;
@@ -135,7 +135,9 @@ class Car extends Model
 
     public function calculateIEDMT()
     {
-        if (!$this->co2) return 0;
+        if (! $this->co2) {
+            return 0;
+        }
 
         $coefficients = [1.00, 0.84, 0.68, 0.57, 0.47, 0.39, 0.33, 0.28, 0.24, 0.19, 0.14, 0.10];
         $currentYear = (int) date('Y');
@@ -180,6 +182,7 @@ class Car extends Model
                 $gaps[] = $aspect;
             }
         }
+
         return $gaps;
     }
 
@@ -201,6 +204,7 @@ class Car extends Model
             }
             if (is_numeric($raw)) {
                 $prices[] = (float) $raw;
+
                 continue;
             }
             if (preg_match('/(\d[\d\.]*)/', (string) $raw, $m)) {
@@ -210,6 +214,7 @@ class Car extends Model
         if (empty($prices)) {
             return ['avg' => null, 'min' => null, 'max' => null, 'count' => 0];
         }
+
         return [
             'avg' => array_sum($prices) / count($prices),
             'min' => min($prices),
