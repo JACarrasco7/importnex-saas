@@ -147,5 +147,13 @@ export function useFormat() {
             const map = { green: 'green', amber: 'amber', red: 'red', neutral: 'gray' };
             return map[color] || 'gray';
         },
+        verdictVariant: (verdict) => {
+            const map = {
+                positive: 'green', good: 'green', excellent: 'green',
+                neutral: 'amber', fair: 'amber', normal: 'amber',
+                negative: 'red', poor: 'red', bad: 'red', fail: 'red',
+            };
+            return map[verdict?.toLowerCase()] || 'gray';
+        },
     };
 }

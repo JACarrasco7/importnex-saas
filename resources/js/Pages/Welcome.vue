@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { vMotion } from '@vueuse/motion';
-import { TruckIcon, UsersIcon, MapIcon, ChartBarIcon, SparklesIcon, ArrowRightIcon, CheckIcon, PlusIcon, MinusIcon } from '@heroicons/vue/24/outline';
+import { TruckIcon, UsersIcon, MapIcon, ChartBarIcon, SparklesIcon, ArrowRightIcon, CheckIcon, PlusIcon, MinusIcon, MapPinIcon, ClipboardDocumentCheckIcon, CurrencyEuroIcon } from '@heroicons/vue/24/outline';
 import { useTranslations } from '@/Composables/useTranslations';
 
 const { t } = useTranslations();

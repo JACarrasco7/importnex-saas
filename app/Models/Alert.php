@@ -22,15 +22,14 @@ class Alert extends Model
 
     protected $appends = ['target_url'];
 
-    protected static function booted()
-    {
-        static::addGlobalScope('organization', function ($query) {
-            if (auth()->check() && auth()->user()->organization_id) {
-                $query->where('organization_id', auth()->user()->organization_id);
-            }
-        });
-    }
-
+    /**
+     * No añadimos global scope por organization_id aquí porque:
+     * - En queue workers / commands / jobs `auth()->user()` es null → leak
+     * - El middleware `organization` y los controllers ya filtran explícitamente
+     * - Polling de /alerts/pending.json ya pasa organization_id
+     *
+     * Toda query debe incluir `where('organization_id', $orgId)` explícitamente.
+     */
     public function organization()
     {
         return $this->belongsTo(Organization::class);

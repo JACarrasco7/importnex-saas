@@ -67,6 +67,7 @@ class AlertController extends Controller
 
     public function snooze(Request $request, Alert $alert): RedirectResponse
     {
+        $this->authorizeAlertAccess($request, $alert);
         $request->validate([
             'hours' => ['required', 'integer', 'min:1', 'max:168'], // max 7 días
         ]);
@@ -76,8 +77,9 @@ class AlertController extends Controller
         return back()->with('success', "Alert snoozed for {$request->input('hours')}h.");
     }
 
-    public function unsnooze(Alert $alert): RedirectResponse
+    public function unsnooze(Request $request, Alert $alert): RedirectResponse
     {
+        $this->authorizeAlertAccess($request, $alert);
         $alert->unsnooze();
 
         return back()->with('success', 'Alert reactivated.');
@@ -108,8 +110,9 @@ class AlertController extends Controller
             : "Notifications muted for {$alertType}.");
     }
 
-    public function show(Alert $alert): Response
+    public function show(Request $request, Alert $alert): Response
     {
+        $this->authorizeAlertAccess($request, $alert);
         $alert->append('target_url');
 
         return Inertia::render('Alerts/Show', [
@@ -117,20 +120,34 @@ class AlertController extends Controller
         ]);
     }
 
-    public function markResolved(Alert $alert): RedirectResponse
+    public function markResolved(Request $request, Alert $alert): RedirectResponse
     {
+        $this->authorizeAlertAccess($request, $alert);
         $alert->markAsResolved();
 
         return redirect()->route('alerts.index')
             ->with('success', 'Alert marked as resolved.');
     }
 
-    public function destroy(Alert $alert): RedirectResponse
+    public function destroy(Request $request, Alert $alert): RedirectResponse
     {
+        $this->authorizeAlertAccess($request, $alert);
         $alert->delete();
 
         return redirect()->route('alerts.index')
             ->with('success', 'Alert deleted successfully.');
+    }
+
+    /**
+     * Verifica que el alert pertenece a la organización del usuario autenticado.
+     * Antes se hacía implícitamente vía global scope; ahora es explícito.
+     */
+    private function authorizeAlertAccess(Request $request, Alert $alert): void
+    {
+        $org = $request->user()?->organization;
+        if (! $org || $alert->organization_id !== $org->id) {
+            abort(404);
+        }
     }
 
     /**

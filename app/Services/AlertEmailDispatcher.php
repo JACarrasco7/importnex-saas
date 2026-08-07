@@ -25,13 +25,15 @@ class AlertEmailDispatcher
         }
 
         // Obtener usuarios activos con email de esta organización
+        // N8: filtrar también por preferencias (canal email + tipo de alerta)
         $recipients = $org->users()
             ->whereNotNull('email')
             ->where(function ($q) {
                 $q->where('role', 'owner')
                     ->orWhere('email_verified_at', '!=', null);
             })
-            ->get();
+            ->get()
+            ->filter(fn ($user) => $user->isChannelEnabled('email') && $user->isAlertTypeEnabled($alert->alert_type));
 
         if ($recipients->isEmpty()) {
             return;

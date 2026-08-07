@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { XMarkIcon } from '@heroicons/vue/24/outline';
 
 const show = ref(false);

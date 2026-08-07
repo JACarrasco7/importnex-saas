@@ -34,8 +34,13 @@ class AlertObserverTest extends TestCase
             'alert_type' => 'car_stale',
         ]);
 
-        // Verificar que se despacharon webhook y email
-        Http::assertSent(fn ($request) => true);
+        // Verificar que se despachó webhook con payload correcto
+        Http::assertSent(function ($request) use ($alert) {
+            $payload = $request->data();
+
+            return $request->url() === 'https://webhook.site/test'
+                && ($payload['alert_type'] ?? null) === $alert->alert_type;
+        });
         Mail::assertSentCount(1);
     }
 

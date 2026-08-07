@@ -2,7 +2,6 @@ import { ref, computed, watch } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import es from '@/i18n/es.js';
 import en from '@/i18n/en.js';
-import es from '@/i18n/es.js';
 
 const messages = {
     en,
@@ -88,8 +87,43 @@ export function useTranslations() {
             }
         }
 
+        // Soporte pluralización: si el valor es objeto con "_one" / "_other", pick según count
+        if (typeof value === 'object' && value !== null) {
+            if (replacements.count !== undefined) {
+                const n = replacements.count;
+                const isPlural = n !== 1;
+                if (isPlural && value._other) {
+                    value = value._other;
+                } else if (!isPlural && value._one) {
+                    value = value._one;
+                } else if (value._other) {
+                    value = value._other;
+                } else {
+                    return typeof fallback === 'string' ? fallback : key;
+                }
+            } else {
+                // Sin count: intentar _other como default
+                value = value._other || value._one || Object.values(value)[0] || key;
+                if (typeof value !== 'string') {
+                    return typeof fallback === 'string' ? fallback : key;
+                }
+            }
+        }
+
         if (typeof value !== 'string') {
             return typeof fallback === 'string' ? fallback : key;
+        }
+
+        // Soporte Laravel-style pipes: "one|other|plural" según count
+        if (value.includes('|') && replacements.count !== undefined) {
+            const parts = value.split('|').map(s => s.trim());
+            const n = replacements.count;
+            // Estilo Laravel: índice basado en count (1=singular, 2=plural, 0=zero)
+            let idx;
+            if (n === 0) idx = 0;
+            else if (n === 1) idx = 1;
+            else idx = Math.min(2, parts.length - 1);
+            value = parts[idx] || parts[0];
         }
 
         return value.replace(/:(\w+)/g, (m, name) =>

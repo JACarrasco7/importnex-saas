@@ -19,6 +19,7 @@ let initialized = false;
 function load() {
     if (initialized) return;
     initialized = true;
+    if (typeof window === 'undefined') return;
     try {
         const stored = localStorage.getItem(STORAGE_KEY);
         if (stored) {
@@ -34,6 +35,7 @@ function load() {
 }
 
 function save() {
+    if (typeof window === 'undefined') return;
     try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(wishlist.value));
     } catch (e) {
