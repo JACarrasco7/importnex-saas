@@ -1,8 +1,8 @@
 <template>
-    <div class="relative inline-block" data-test="share-car">
+    <div ref="rootRef" class="relative inline-block" data-test="share-car">
         <button
             type="button"
-            @click="open = !open"
+            @click="toggle"
             class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-estoril-500 dark:border-asphalt-700 dark:bg-asphalt-800 dark:text-gray-200 dark:hover:bg-asphalt-700"
             :aria-expanded="open"
             :aria-haspopup="true"
@@ -10,7 +10,7 @@
         >
             <ShareIcon class="h-4 w-4" />
             {{ t('share.label', 'Compartir') }}
-            <ChevronDownIcon class="h-3 w-3" :class="open ? 'rotate-180' : ''" />
+            <ChevronDownIcon class="h-3 w-3 transition-transform" :class="open ? 'rotate-180' : ''" />
         </button>
 
         <Transition
@@ -23,7 +23,6 @@
         >
             <div
                 v-if="open"
-                v-on-click-outside="() => (open = false)"
                 class="absolute right-0 z-20 mt-2 w-56 origin-top-right rounded-xl bg-white shadow-lg ring-1 ring-black/5 focus:outline-none dark:bg-asphalt-800 dark:ring-asphalt-700"
                 role="menu"
             >
@@ -65,7 +64,11 @@
                         class="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-asphalt-700"
                         role="menuitem"
                     >
-                        <component :is="copied ? CheckIcon : LinkIcon" class="h-4 w-4" :class="copied ? 'text-emerald-600' : 'text-gray-500'" />
+                        <component
+                            :is="copied ? CheckIcon : LinkIcon"
+                            class="h-4 w-4"
+                            :class="copied ? 'text-emerald-600' : 'text-gray-500'"
+                        />
                         <span>{{ copied ? t('share.copied', 'Enlace copiado') : t('share.copy', 'Copiar enlace') }}</span>
                     </button>
                 </div>
@@ -76,7 +79,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { vOnClickOutside } from '@vueuse/components';
+import { onClickOutside } from '@vueuse/core';
 import {
     ShareIcon,
     ChevronDownIcon,
@@ -95,25 +98,41 @@ const props = defineProps({
 const { t } = useTranslations();
 const open = ref(false);
 const copied = ref(false);
+const rootRef = ref(null);
+
+onClickOutside(rootRef, () => {
+    open.value = false;
+});
+
+function toggle() {
+    open.value = !open.value;
+}
 
 const carUrl = computed(() => {
     if (typeof window === 'undefined') return '';
     return `${window.location.origin}${window.location.pathname}`;
 });
 
-const carTitle = computed(() => `${props.car?.brand ?? ''} ${props.car?.model ?? ''} ${props.car?.year ?? ''}`.trim());
+const carTitle = computed(
+    () => `${props.car?.brand ?? ''} ${props.car?.model ?? ''} ${props.car?.year ?? ''}`.trim()
+);
 
 const shareMessage = computed(() => {
-    const lines = [
+    const price = props.car?.purchase_price
+        ? new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(props.car.purchase_price)
+        : '';
+    const mileage = props.car?.mileage ? `${(props.car.mileage / 1000).toFixed(0)}k km` : '';
+    return [
         t('share.whatsapp_intro', 'Hola! Me interesa este coche:'),
         '',
         carTitle.value,
-        props.car?.mileage ? `· ${(props.car.mileage / 1000).toFixed(0)}k km` : '',
-        props.car?.purchase_price ? `· ${new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(props.car.purchase_price)}` : '',
+        mileage ? `· ${mileage}` : '',
+        price ? `· ${price}` : '',
         '',
         carUrl.value,
-    ];
-    return lines.filter(Boolean).join('\n');
+    ]
+        .filter(Boolean)
+        .join('\n');
 });
 
 const whatsappUrl = computed(
@@ -133,7 +152,6 @@ async function copyLink() {
         setTimeout(() => (copied.value = false), 2000);
         open.value = false;
     } catch {
-        // Fallback para navegadores sin clipboard API
         window.prompt(t('share.copy_prompt', 'Copia este enlace'), carUrl.value);
         open.value = false;
     }
