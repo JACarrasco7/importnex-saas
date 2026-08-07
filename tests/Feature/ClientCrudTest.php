@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
-use App\Models\Organization;
 use App\Models\Client;
+use App\Models\Organization;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -55,7 +55,9 @@ class ClientCrudTest extends TestCase
         $response->assertStatus(200);
         $response->assertInertia(fn ($page) => $page
             ->component('Clients/Index')
-            ->has('clients')
+            ->loadDeferredProps('default', fn ($prop) => $prop
+                ->has('clients')
+            )
         );
     }
 

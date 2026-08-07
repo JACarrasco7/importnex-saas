@@ -6,7 +6,6 @@ use App\Models\Client;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use Inertia\DeferredProp;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -29,7 +28,7 @@ class ClientController extends Controller
         $statuses = ['New', 'Briefing', 'Quote sent', 'Negotiating', 'Order signed', 'In process', 'Delivered'];
 
         return Inertia::render('Clients/Index', [
-            'clients' => DeferredProp::make(fn () => $clients),
+            'clients' => Inertia::defer(fn () => $clients),
             'statuses' => $statuses,
             'filters' => $request->only(['status', 'search']),
         ]);

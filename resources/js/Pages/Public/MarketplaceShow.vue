@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, ref, onMounted, onUnmounted } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import {
     ArrowLeftIcon,
@@ -8,12 +8,39 @@ import {
     XCircleIcon,
     MinusCircleIcon,
     LinkIcon,
+    EyeIcon,
+    ChevronLeftIcon,
+    ChevronRightIcon,
+    XMarkIcon,
 } from '@heroicons/vue/24/outline';
 import MapaLeaflet from '@/Components/MapaLeaflet.vue';
 import Badge from '@/Components/Badge.vue';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
+import ShareCar from '@/Components/ShareCar.vue';
 import { useFormat } from '@/Composables/useFormat';
 import { useTranslations } from '@/Composables/useTranslations';
+
+// Marketplace item 6: Lightbox state
+const lightboxOpen = ref(false);
+const lightboxIndex = ref(0);
+const openLightbox = (i) => { lightboxIndex.value = i; lightboxOpen.value = true; };
+const closeLightbox = () => { lightboxOpen.value = false; };
+const nextPhoto = () => {
+    if (!props.car?.photos?.length) return;
+    lightboxIndex.value = (lightboxIndex.value + 1) % props.car.photos.length;
+};
+const prevPhoto = () => {
+    if (!props.car?.photos?.length) return;
+    lightboxIndex.value = (lightboxIndex.value - 1 + props.car.photos.length) % props.car.photos.length;
+};
+const onKeydown = (e) => {
+    if (!lightboxOpen.value) return;
+    if (e.key === 'Escape') closeLightbox();
+    else if (e.key === 'ArrowRight') nextPhoto();
+    else if (e.key === 'ArrowLeft') prevPhoto();
+};
+onMounted(() => { window.addEventListener('keydown', onKeydown); });
+onUnmounted(() => { window.removeEventListener('keydown', onKeydown); });
 
 const props = defineProps({
     car: Object,

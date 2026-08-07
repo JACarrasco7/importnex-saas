@@ -10,7 +10,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use Inertia\DeferredProp;
 use Inertia\Inertia;
 use Inertia\Response;
 use Maatwebsite\Excel\Facades\Excel;
@@ -37,7 +36,7 @@ class CarController extends Controller
         $lights = ['green', 'amber', 'red', 'neutral'];
 
         return Inertia::render('Cars/Index', [
-            'cars' => DeferredProp::make(fn () => $cars),
+            'cars' => Inertia::defer(fn () => $cars),
             'statuses' => $statuses,
             'lights' => $lights,
             'filters' => $request->only(['status', 'traffic_light', 'search']),

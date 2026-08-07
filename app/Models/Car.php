@@ -20,7 +20,7 @@ class Car extends Model
         'status', 'url_link', 'traffic_light', 'valuation', 'recommendation',
         'description', 'equipment', 'tips', 'red_flags',
         'research', 'pros', 'cons',
-        'is_marketplace',
+        'is_marketplace', 'marketplace_views',
         'verdict', 'verdict_confidence', 'verdict_reasoning', 'verdict_changes', 'verdict_at',
         'market_avg', 'market_min', 'market_max', 'estimated_saving',
         'research_source', 'schema_version',
@@ -43,6 +43,7 @@ class Car extends Model
         'market_avg' => 'decimal:2', 'market_min' => 'decimal:2',
         'market_max' => 'decimal:2', 'estimated_saving' => 'decimal:2',
         'schema_version' => 'integer',
+        'marketplace_views' => 'integer',
     ];
 
     public const VERDICTS = ['Buy', 'Buy if price drops', 'Doubtful', 'Discard'];
