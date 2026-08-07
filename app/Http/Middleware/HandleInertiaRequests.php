@@ -95,6 +95,10 @@ class HandleInertiaRequests extends Middleware
                       'es';
         }
 
+        // Billing dunning context (Sprint 5.3): shared so DunningBanner can show
+        // a one-place alert when the organization's last invoice failed.
+        $billingDunning = $user ? $this->resolveBillingDunningContext($user) : null;
+
         return [
             ...parent::share($request),
             'auth' => [
@@ -119,11 +123,10 @@ class HandleInertiaRequests extends Middleware
                 'locale' => $organization?->locale ?? $locale,
                 'decimals' => 2,
             ],
-            // Billing dunning context (Sprint 5.3): shared so DunningBanner can show
-            // a one-place alert when the organization's last invoice failed.
-            'billingDunning' => $user
-                ? $this->resolveBillingDunningContext($user)
-                : null,
+            'billingDunning' => $billingDunning,
+            // Flat props for layouts that read $page.props.payment_failed directly.
+            'payment_failed' => $billingDunning['payment_failed'] ?? false,
+            'payment_failed_at' => $billingDunning['payment_failed_at'] ?? null,
         ];
     }
 

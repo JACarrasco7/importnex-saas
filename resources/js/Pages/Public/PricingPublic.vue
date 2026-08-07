@@ -74,6 +74,51 @@ const savings = computed(() => {
     const yearlyTotal = plans.value.reduce((sum, p) => sum + p.yearlyPrice, 0);
     return baseTotal - yearlyTotal;
 });
+
+const comparisonFeatures = computed(() => [
+    {
+        group: t('pricing_compare.group_inventory', {}, 'Inventario'),
+        items: [
+            { key: 'cars', label: t('pricing_compare.feat.cars', {}, 'Vehículos en catálogo'), values: { basic: '50', pro: '500', enterprise: t('pricing_compare.unlimited', {}, 'Ilimitado') } },
+            { key: 'photos', label: t('pricing_compare.feat.photos', {}, 'Fotos por vehículo'), values: { basic: '5', pro: '20', enterprise: t('pricing_compare.unlimited', {}, 'Ilimitado') } },
+            { key: 'valuation', label: t('pricing_compare.feat.valuation', {}, 'Paquete de valoración PDF'), values: { basic: false, pro: true, enterprise: true } },
+            { key: 'kanban', label: t('pricing_compare.feat.kanban', {}, 'Vista Kanban'), values: { basic: true, pro: true, enterprise: true } },
+        ],
+    },
+    {
+        group: t('pricing_compare.group_crm', {}, 'CRM y clientes'),
+        items: [
+            { key: 'clients', label: t('pricing_compare.feat.clients', {}, 'Clientes en CRM'), values: { basic: '50', pro: '500', enterprise: t('pricing_compare.unlimited', {}, 'Ilimitado') } },
+            { key: 'contacts', label: t('pricing_compare.feat.contacts', {}, 'Contactos'), values: { basic: '100', pro: '1000', enterprise: t('pricing_compare.unlimited', {}, 'Ilimitado') } },
+            { key: 'marketplace', label: t('pricing_compare.feat.marketplace', {}, 'Marketplace público'), values: { basic: true, pro: true, enterprise: true } },
+            { key: 'whatsapp', label: t('pricing_compare.feat.whatsapp', {}, 'Integración WhatsApp'), values: { basic: false, pro: true, enterprise: true } },
+        ],
+    },
+    {
+        group: t('pricing_compare.group_advanced', {}, 'Funciones avanzadas'),
+        items: [
+            { key: 'ai', label: t('pricing_compare.feat.ai_verification', {}, 'Verificación con IA'), values: { basic: false, pro: true, enterprise: true } },
+            { key: 'map', label: t('pricing_compare.feat.map', {}, 'Mapa interactivo'), values: { basic: false, pro: true, enterprise: true } },
+            { key: 'finance', label: t('pricing_compare.feat.finance', {}, 'Módulo Finanzas'), values: { basic: false, pro: false, enterprise: true } },
+            { key: 'trips', label: t('pricing_compare.feat.trips', {}, 'Módulo Viajes'), values: { basic: false, pro: true, enterprise: true } },
+            { key: 'webhooks', label: t('pricing_compare.feat.webhooks', {}, 'Webhooks salientes'), values: { basic: false, pro: false, enterprise: true } },
+        ],
+    },
+    {
+        group: t('pricing_compare.group_support', {}, 'Soporte y formación'),
+        items: [
+            { key: 'support', label: t('pricing_compare.feat.support', {}, 'Soporte'), values: { basic: t('pricing_compare.support_email', {}, 'Email'), pro: t('pricing_compare.support_priority', {}, 'Email prioritario'), enterprise: t('pricing_compare.support_dedicated', {}, 'Soporte dedicado 24/7') } },
+            { key: 'sla', label: t('pricing_compare.feat.sla', {}, 'SLA garantizado (24h)'), values: { basic: false, pro: false, enterprise: true } },
+            { key: 'training', label: t('pricing_compare.feat.training', {}, 'Formación personalizada'), values: { basic: false, pro: false, enterprise: true } },
+        ],
+    },
+]);
+
+function featureValueDisplay(value) {
+    if (value === true) return { type: 'check' };
+    if (value === false) return { type: 'cross' };
+    return { type: 'text', text: value };
+}
 </script>
 
 <template>
@@ -193,6 +238,65 @@ const savings = computed(() => {
                             {{ plan.cta }}
                             <ArrowRightIcon v-if="plan.popular" class="ml-2 inline-block h-4 w-4" />
                         </Link>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Comparison Table -->
+        <section class="bg-white py-16 sm:py-24 dark:bg-asphalt-900">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto max-w-3xl text-center">
+                    <h2 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+                        {{ t('pricing_compare.compare_title', {}, 'Compara los planes') }}
+                    </h2>
+                    <p class="mt-4 text-gray-600 dark:text-gray-400">
+                        {{ t('pricing_compare.compare_subtitle', {}, 'Detalle completo de lo que incluye cada plan.') }}
+                    </p>
+                </div>
+
+                <div class="mt-12 space-y-12">
+                    <div v-for="group in comparisonFeatures" :key="group.group">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            {{ group.group }}
+                        </h3>
+
+                        <div class="mt-4 space-y-3 md:hidden">
+                            <div v-for="item in group.items" :key="item.key" class="rounded-lg border border-gray-200 bg-white p-4 dark:border-asphalt-700 dark:bg-asphalt-800">
+                                <div class="text-sm font-medium text-gray-900 dark:text-white">{{ item.label }}</div>
+                                <div class="mt-2 grid grid-cols-3 gap-2 text-center text-xs">
+                                    <div v-for="plan in plans" :key="plan.name">
+                                        <div class="text-[10px] uppercase text-gray-500">{{ plan.name }}</div>
+                                        <div class="mt-1 text-sm font-semibold text-gray-900 dark:text-white">
+                                            <template v-if="featureValueDisplay(item.values[plan.key]).type === 'check'"><CheckIcon class="mx-auto h-5 w-5 text-green-600" /></template>
+                                            <template v-else-if="featureValueDisplay(item.values[plan.key]).type === 'cross'"><XMarkIcon class="mx-auto h-5 w-5 text-gray-300" /></template>
+                                            <template v-else>{{ featureValueDisplay(item.values[plan.key]).text }}</template>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 hidden overflow-hidden rounded-xl ring-1 ring-gray-200 dark:ring-asphalt-700 md:block">
+                            <table class="min-w-full divide-y divide-gray-200 dark:divide-asphalt-700">
+                                <thead class="bg-gray-50 dark:bg-asphalt-800">
+                                    <tr>
+                                        <th class="py-3 pl-6 pr-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ t('pricing_compare.feature_label', {}, 'Característica') }}</th>
+                                        <th v-for="plan in plans" :key="plan.name" class="px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400" :class="plan.popular ? 'bg-estoril-50 text-estoril-700 dark:bg-estoril-900/20 dark:text-estoril-300' : ''">{{ plan.name }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200 bg-white dark:divide-asphalt-700 dark:bg-asphalt-900">
+                                    <tr v-for="item in group.items" :key="item.key">
+                                        <td class="py-4 pl-6 pr-3 text-sm font-medium text-gray-900 dark:text-white">{{ item.label }}</td>
+                                        <td v-for="plan in plans" :key="plan.name" class="px-3 py-4 text-center text-sm text-gray-600 dark:text-gray-300" :class="plan.popular ? 'bg-estoril-50/40 dark:bg-estoril-900/10' : ''">
+                                            <template v-if="featureValueDisplay(item.values[plan.key]).type === 'check'"><CheckIcon class="mx-auto h-5 w-5 text-green-600" /></template>
+                                            <template v-else-if="featureValueDisplay(item.values[plan.key]).type === 'cross'"><XMarkIcon class="mx-auto h-5 w-5 text-gray-300" /></template>
+                                            <template v-else><span class="font-semibold">{{ featureValueDisplay(item.values[plan.key]).text }}</span></template>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>

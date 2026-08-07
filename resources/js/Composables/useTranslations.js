@@ -64,11 +64,14 @@ export function useTranslations() {
     watch(locale, () => init());
 
     /**
-     * t('nav.dashboard', { count: 5 })
+     * t('nav.dashboard', { count: 5 }, 'Dashboard')
      * Soporta dot-notation y placeholders :name.
+     * Si la clave no existe y fallback es un string, lo devuelve.
      */
-    function t(key, replacements = {}) {
-        if (!ready.value && !messages.value) return key;
+    function t(key, replacements = {}, fallback = null) {
+        if (!ready.value && !messages.value) {
+            return typeof fallback === 'string' ? fallback : key;
+        }
 
         const keys = key.split('.');
         let value = messages.value;
@@ -77,11 +80,13 @@ export function useTranslations() {
             if (value && typeof value === 'object' && k in value) {
                 value = value[k];
             } else {
-                return key;
+                return typeof fallback === 'string' ? fallback : key;
             }
         }
 
-        if (typeof value !== 'string') return key;
+        if (typeof value !== 'string') {
+            return typeof fallback === 'string' ? fallback : key;
+        }
 
         return value.replace(/:(\w+)/g, (m, name) =>
             name in replacements ? replacements[name] : m

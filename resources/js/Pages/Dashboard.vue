@@ -22,7 +22,6 @@ import Badge from '@/Components/Badge.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import EmptyState from '@/Components/EmptyState.vue';
 import OnboardingChecklist from '@/Components/OnboardingChecklist.vue';
-import DunningBanner from '@/Components/DunningBanner.vue';
 import { useFormat } from '@/Composables/useFormat';
 import { useTranslations } from '@/Composables/useTranslations';
 
@@ -76,13 +75,6 @@ const copyMarketplaceUrl = async () => {
 
         <div class="py-8">
             <div class="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8">
-                <!-- Billing dunning (Sprint 5.3): visible only when last payment failed -->
-                <DunningBanner
-                    v-if="$page.props.billingDunning?.payment_failed"
-                    :payment-failed="$page.props.billingDunning.payment_failed"
-                    :payment-failed-at="$page.props.billingDunning.payment_failed_at"
-                />
-
                 <!-- Onboarding checklist (Sprint 2.1) -->
                 <OnboardingChecklist v-if="$page.props.onboardingProgress" :progress="$page.props.onboardingProgress" />
 
