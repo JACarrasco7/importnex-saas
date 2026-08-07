@@ -241,6 +241,7 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
 
     // Subscriptions
     Route::get('/subscriptions', [SubscriptionController::class, 'index'])->name('subscriptions.index');
+    Route::get('/subscriptions/cancel-page', [SubscriptionController::class, 'cancelPage'])->name('subscriptions.cancel-page');
     Route::get('/subscriptions/{plan}', [SubscriptionController::class, 'show'])->name('subscriptions.show');
     Route::post('/subscriptions/{plan}/create', [SubscriptionController::class, 'create'])->name('subscriptions.create');
     Route::post('/subscriptions/{plan}/swap', [SubscriptionController::class, 'swap'])->name('subscriptions.swap');

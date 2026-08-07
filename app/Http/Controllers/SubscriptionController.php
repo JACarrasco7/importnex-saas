@@ -161,6 +161,15 @@ class SubscriptionController extends Controller
             ->with('success', 'Plan actualizado correctamente.');
     }
 
+    public function cancelPage(Request $request): Response
+    {
+        $org = $request->user()->organization;
+
+        return Inertia::render('Subscriptions/Cancel', [
+            'subscription' => $org ? $org->subscription('main') : null,
+        ]);
+    }
+
     public function cancel(Request $request): RedirectResponse
     {
         $org = $request->user()->organization;
