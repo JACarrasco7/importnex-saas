@@ -1,0 +1,101 @@
+[
+    {
+        "date": "2026-08-06",
+        "sprint": "A-F",
+        "issue": "Skills duplicadas (.github/skills/ + .claude/skills/) consumían doble contexto",
+        "symptom": "Contexto inflado, IA recibía skills duplicadas",
+        "cause": "Boost skills instaladas por defecto en .claude/skills/ + mi copia manual en .github/skills/",
+        "fix": "Eliminar .github/skills/ (consolidar en .claude/skills/)",
+        "prevention_rule": "Solo UN directorio de skills (.claude/skills/). .github/skills/ es solo para skills custom que NO son Boost.",
+        "affected_files": [".github/skills/"],
+        "severity": "medium"
+    },
+    {
+        "date": "2026-08-06",
+        "sprint": "A",
+        "issue": "laravel/boost en require rompía composer install --no-dev",
+        "symptom": "Producción sin Boost instalado al usar --no-dev",
+        "cause": "Boost no es dependencia de runtime, es solo dev tool",
+        "fix": "Mover laravel/boost a require-dev",
+        "prevention_rule": "Solo deps de runtime en require, tools de dev en require-dev",
+        "affected_files": ["composer.json"],
+        "severity": "low"
+    },
+    {
+        "date": "2026-08-06",
+        "sprint": "B-G",
+        "issue": "PricingPublic.vue en Pages/ en lugar de Pages/Public/",
+        "symptom": "HTTP 500 en /pricing: Unable to locate file in Vite manifest",
+        "cause": "Archivo creado en directorio heredado, no en Public/",
+        "fix": "Mover archivo a Pages/Public/ + nueva ruta",
+        "prevention_rule": "Tras añadir página nueva a Public/, siempre grep manifest.json",
+        "affected_files": ["resources/js/Pages/PricingPublic.vue", "routes/web.php"],
+        "severity": "high"
+    },
+    {
+        "date": "2026-08-06",
+        "sprint": "G",
+        "issue": "SitemapController usaba campos published/published_at inexistentes",
+        "symptom": "HTTP 500 SQLSTATE Column not found en /sitemap.xml",
+        "cause": "Query asumía schema de cars que no coincide con realidad",
+        "fix": "Usar is_marketplace y updated_at (campos reales)",
+        "prevention_rule": "Verificar schema con php artisan tinker antes de escribir query",
+        "affected_files": ["app/Http/Controllers/SitemapController.php"],
+        "severity": "high"
+    },
+    {
+        "date": "2026-08-06",
+        "sprint": "G",
+        "issue": "schema-org.blade.php con @type en JSON-LD",
+        "symptom": "HTTP 500 en TODAS las páginas Inertia: syntax error expecting endif",
+        "cause": "Blade interpreta @context, @type como directivas",
+        "fix": "Escapar como @@context, @@type (7 ocurrencias)",
+        "prevention_rule": "grep '@\\(type\\|context\\)' en .blade.php antes de crear",
+        "affected_files": ["resources/views/partials/schema-org.blade.php"],
+        "severity": "critical"
+    },
+    {
+        "date": "2026-08-06",
+        "sprint": "H",
+        "issue": "9 vulnerabilidades en phpoffice/phpspreadsheet 1.30.0 (transitiva de maatwebsite/excel)",
+        "symptom": "composer audit reporta 2 CRITICAL (SSRF/RCE), 5 HIGH, 2 MEDIUM",
+        "cause": "maatwebsite/excel 3.1.68 fija phpoffice/phpspreadsheet ^1.30.0 (limitación upstream)",
+        "fix": "No actualizable hasta que maatwebsite adopte phpspreadsheet 5.x",
+        "prevention_rule": "Vetar uploads de Excel no autenticados en producción hasta update upstream. Monitorear changelog maatwebsite.",
+        "affected_files": ["composer.lock"],
+        "severity": "critical"
+    },
+    {
+        "date": "2026-08-06",
+        "sprint": "H",
+        "issue": "i18n desincronizado: 1250 claves en en.js sin contraparte en es.js",
+        "symptom": "Posibles keynotfounderror en producción",
+        "cause": "Cambios en en.js sin traducción correspondiente a es.js",
+        "fix": "Pendiente — necesidad crear script sync bidireccional",
+        "prevention_rule": "check-translations.cjs en hook pre-commit (ya implementado Sprint G.3)",
+        "affected_files": ["resources/js/i18n/en.js", "resources/js/i18n/es.js"],
+        "severity": "medium"
+    },
+    {
+        "date": "2026-08-06",
+        "sprint": "G",
+        "issue": "autoprefixer redundante con Tailwind v4",
+        "symptom": "9 paquetes npm innecesarios (autoprefixer + transitivos)",
+        "cause": "PostCSS config mantenido de Tailwind v3",
+        "fix": "Remover autoprefixer de postcss.config.js + npm uninstall",
+        "prevention_rule": "Tailwind v4 integra autoprefixer, no declararlo de nuevo",
+        "affected_files": ["postcss.config.js", "package.json"],
+        "severity": "low"
+    },
+    {
+        "date": "2026-08-06",
+        "sprint": "H",
+        "issue": "No ejecutaba npm run build antes de commit",
+        "symptom": "Vite manifest desactualizado en producción",
+        "cause": "IA no lanza build (regla de proyecto), USER olvida",
+        "fix": "Pre-commit hook valida manifest.json existe",
+        "prevention_rule": "Commit sin manifest = alerta, no bloqueo (USER maneja flujo)",
+        "affected_files": [".githooks/pre-commit"],
+        "severity": "medium"
+    }
+]

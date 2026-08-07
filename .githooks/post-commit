@@ -1,0 +1,40 @@
+#!/bin/sh
+# Git post-commit hook para ImportnexCore
+# Se ejecuta DESPUÉS de un commit exitoso.
+# Imprime recordatorios de autoauditoría y verifica sprints activas.
+
+set +e  # No fallar el flujo del commit si el recordatorio tiene problemas
+
+# 1. Mensaje recordatorio
+echo ""
+echo "📋 POST-COMMIT — Recordatorios de autoauditoría:"
+echo ""
+echo "  [ ] ¿Actualizaste .ai/memory/findings.json si encontraste fallo?"
+echo "  [ ] ¿Añadiste trampa a .ai/AUDITORIA-POST-IMPLEMENTACION.md?"
+echo "  [ ] ¿Actualizaste .ai/rules/{dominio}.md con la nueva regla?"
+echo "  [ ] ¿Tests nuevos añadidos antes de cerrar feature?"
+echo ""
+
+# 2. Si es push a master, verificar sprint activo
+BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+if [ "$BRANCH" = "master" ] || [ "$BRANCH" = "main" ]; then
+    echo "🌿 Estás en master. Antes de push:"
+    echo ""
+    echo "  [ ] git push origin master"
+    echo "  [ ] ssh forge ... pull + build + caches"
+    echo "  [ ] curl 6 rutas prod"
+    echo "  [ ] php artisan migrate --pretend (si hay migration nueva)"
+    echo ""
+fi
+
+# 3. Listar próximos pasos útiles
+SPRINT_COUNT=$(git log --oneline --since="1 month ago" 2>/dev/null | wc -l | tr -d ' ')
+echo "📊 Esta semana llevas $SPRINT_COUNT commits."
+echo ""
+
+# 4. Acceptance rate reminder
+echo "🎯 Acceptance rate mide: outputs generados vs outputs editados por humano."
+echo "   Target: >= 80%. Ver docs/ia-metrics.md para tracking."
+echo ""
+
+exit 0
