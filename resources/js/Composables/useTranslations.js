@@ -1,5 +1,6 @@
 import { ref, computed, watch } from 'vue';
 import { usePage } from '@inertiajs/vue3';
+import es from '@/i18n/es.js';
 import en from '@/i18n/en.js';
 import es from '@/i18n/es.js';
 
@@ -106,25 +107,27 @@ export function useTranslations() {
  *
  * Devuelve siempre árbol para que t() recorra dot-notation uniformemente.
  */
-function normalize(input, locale) {
+function normalize(input) {
     if (!input) return {};
 
-    // Si ya es árbol (módulo JS), devolvemos tal cual
     const firstKey = Object.keys(input)[0];
-    if (firstKey && firstKey.includes('.')) {
-        const tree = {};
-        for (const flatKey in input) {
-            const parts = flatKey.split('.');
-            let cur = tree;
-            for (let i = 0; i < parts.length - 1; i++) {
-                cur[parts[i]] = cur[parts[i]] || {};
-                cur = cur[parts[i]];
-            }
-            cur[parts[parts.length - 1]] = input[flatKey];
-        }
-        return tree;
+    if (!firstKey) return input;
+
+    // Si ya es árbol (módulo JS), devolvemos tal cual
+    if (!firstKey.includes('.')) {
+        return input;
     }
 
-    // Si ya es árbol, devolver
-    return input;
+    // Si es plano (con dots en keys), convertir a árbol
+    const tree = {};
+    for (const flatKey in input) {
+        const parts = flatKey.split('.');
+        let cur = tree;
+        for (let i = 0; i < parts.length - 1; i++) {
+            cur[parts[i]] = cur[parts[i]] || {};
+            cur = cur[parts[i]];
+        }
+        cur[parts[parts.length - 1]] = input[flatKey];
+    }
+    return tree;
 }

@@ -22,7 +22,7 @@ export default {
         no: 'No',
         success: 'Éxito',
         error: 'Error',
-        inventory_count: ':count vehículos en su flota',
+        inventory_count: { _one: ':count vehículo en su flota', _other: ':count vehículos en su flota' },
         recent_activity: 'Actividad Reciente',
         quick_actions: 'Acciones Rápidas',
     },
@@ -1574,7 +1574,7 @@ export default {
         action_retry: "Reintentar",
         action_view: "Ver recurso",
         action_mark_resolved: "Marcar resuelta",
-        count_short: "{count} alerta | {count} alertas",
+        count_short: { _one: ":count alerta", _other: ":count alertas" },
 },
     subscription: {
         title: 'Suscripción',
@@ -1609,7 +1609,7 @@ export default {
         actions_desc: "Gestiona tu suscripción recurrente",
         cancel_subscription: "Cancelar suscripción",
         resume_subscription: "Reanudar suscripción",
-        n_vehicles: ":count vehículos",
+        n_vehicles: { _one: ":count vehículo", _other: ":count vehículos" },
         n_clients: ":count clientes",
         // Features de planes
         features: {
@@ -1924,7 +1924,7 @@ export default {
         by_status: "Por estado",
         last_6_months: "Últimos 6 meses",
         no_data_yet: "Aún no hay datos.",
-        n_cars: ":count vehículos",
+        n_cars: { _one: ":count vehículo", _other: ":count vehículos" },
 },
     trips: {
         title: 'Planificador de Viajes',
