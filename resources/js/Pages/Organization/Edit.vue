@@ -59,6 +59,8 @@ const form = useForm({
     ai_provider: props.organization.ai_provider || '',
     ai_model: props.organization.ai_model || '',
     ai_api_key: '',
+    onesignal_app_id: props.organization.onesignal_app_id || '',
+    onesignal_api_key: '',
     notification_webhook_url: props.organization.notification_webhook_url || '',
     notification_webhook_types: props.organization.notification_webhook_types || [],
     notification_preferences: initialPrefs,
@@ -228,6 +230,39 @@ async function detectModels() {
 
                     <FormSection :title="t('organization.notifications.title', { default: 'Notificaciones' })"
                                  :subtitle="t('organization.notifications.subtitle', { default: 'Configura qué alertas recibes y por dónde (in-app, email, webhook).' })">
+                        <!-- OneSignal (push web + móvil + email + SMS) -->
+                        <FormField
+                            :label="t('organization.notifications.onesignal_label', { default: 'OneSignal App ID' })"
+                            :help="t('organization.notifications.onesignal_help', { default: 'Configura tu cuenta de OneSignal para enviar push web, push móvil, email y SMS. Encuentra tu App ID en OneSignal → Settings → Keys & IDs.' })">
+                            <div class="relative">
+                                <BellIcon class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                                <input
+                                    v-model="form.onesignal_app_id"
+                                    type="text"
+                                    autocomplete="off"
+                                    spellcheck="false"
+                                    :placeholder="t('organization.notifications.onesignal_placeholder', { default: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' })"
+                                    :class="[inputClass, 'pl-10']" />
+                            </div>
+                            <p v-if="form.errors.onesignal_app_id" class="mt-1 text-sm text-red-600">{{ form.errors.onesignal_app_id }}</p>
+                        </FormField>
+
+                        <FormField
+                            :label="t('organization.notifications.onesignal_api_key_label', { default: 'OneSignal REST API Key' })"
+                            :help="t('organization.notifications.onesignal_api_key_help', { default: 'Clave API de OneSignal (Settings → Keys & IDs → REST API Key). Se encripta en la base de datos.' })">
+                            <div class="relative">
+                                <KeyIcon class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                                <input
+                                    v-model="form.onesignal_api_key"
+                                    type="password"
+                                    autocomplete="off"
+                                    spellcheck="false"
+                                    :placeholder="t('organization.notifications.onesignal_api_key_placeholder', { default: 'REST API Key' })"
+                                    :class="[inputClass, 'pl-10']" />
+                            </div>
+                            <p v-if="form.errors.onesignal_api_key" class="mt-1 text-sm text-red-600">{{ form.errors.onesignal_api_key }}</p>
+                        </FormField>
+
                         <!-- Webhook (N7) -->
                         <FormField
                             :label="t('organization.notifications.webhook_label', { default: 'Webhook URL (Slack / Discord / Teams)' })"

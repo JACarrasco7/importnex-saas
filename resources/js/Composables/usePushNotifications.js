@@ -57,8 +57,11 @@ export function usePushNotifications() {
                 return false;
             }
 
+            const r = await axios.get('/push/vapid-public-key');
+            const appId = r.data.app_id;
+
             await window.OneSignal.init({
-                appId: (await axios.get('/push/vapid-public-key')).data.app_id,
+                appId: appId,
                 allowLocalhost: true,
                 autoRegister: false,
                 notifyButton: {

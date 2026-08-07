@@ -75,6 +75,9 @@ class OrganizationController extends Controller
             'ai_provider' => ['nullable', Rule::in(array_merge([''], array_column($registry->options(), 'key')))],
             'ai_model' => ['nullable', 'string', 'max:128'],
             'ai_api_key' => ['nullable', 'string', 'max:512'],
+            // OneSignal (push web + móvil + email + SMS)
+            'onesignal_app_id' => ['nullable', 'string', 'max:255'],
+            'onesignal_api_key' => ['nullable', 'string', 'max:512'],
             // N7: webhook (Slack/Discord/Teams)
             'notification_webhook_url' => ['nullable', 'url', 'max:512'],
             'notification_webhook_types' => ['nullable', 'array'],
@@ -89,6 +92,18 @@ class OrganizationController extends Controller
             'currency' => $request->input('currency', 'EUR'),
             'locale' => $request->input('locale', 'es'),
         ];
+
+        // OneSignal — save empty string as null
+        if ($request->has('onesignal_app_id')) {
+            $orgData['onesignal_app_id'] = $request->filled('onesignal_app_id')
+                ? $request->input('onesignal_app_id')
+                : null;
+        }
+        if ($request->has('onesignal_api_key')) {
+            $orgData['onesignal_api_key'] = $request->filled('onesignal_api_key')
+                ? $request->input('onesignal_api_key')
+                : null;
+        }
 
         // N7: webhook — save empty string as null to avoid storing ''
         if ($request->has('notification_webhook_url')) {

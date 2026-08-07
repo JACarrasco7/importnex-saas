@@ -16,6 +16,7 @@ class Organization extends Model
         'name', 'slug', 'logo', 'is_public', 'plan', 'is_owner', 'stripe_id', 'trial_ends_at', 'subscribed_at', 'payment_failed_at',
         'ai_provider', 'ai_model', 'ai_api_key',
         'notification_webhook_url', 'notification_webhook_types', 'notification_preferences',
+        'onesignal_app_id', 'onesignal_api_key',
     ];
 
     protected $casts = [
@@ -28,9 +29,10 @@ class Organization extends Model
         'notification_webhook_url' => 'encrypted',
         'notification_webhook_types' => 'array',
         'notification_preferences' => 'array',
+        'onesignal_api_key' => 'encrypted',
     ];
 
-    protected $hidden = ['ai_api_key', 'notification_webhook_url'];
+    protected $hidden = ['ai_api_key', 'notification_webhook_url', 'onesignal_api_key'];
 
     // Tipos de alerta que la organización quiere silenciar.
     // Configurado vía /organization/{org}/edit > Notification preferences.
@@ -125,6 +127,11 @@ class Organization extends Model
     public function hasAiConfigured(): bool
     {
         return ! empty($this->ai_provider) && ! empty($this->ai_api_key);
+    }
+
+    public function hasOneSignalConfigured(): bool
+    {
+        return ! empty($this->onesignal_app_id) && ! empty($this->onesignal_api_key);
     }
 
     public function carRequests()

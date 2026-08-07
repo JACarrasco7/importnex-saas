@@ -10,12 +10,11 @@ use Illuminate\Support\Facades\Log;
  * Despacha notificaciones push vía OneSignal.
  *
  * OneSignal maneja push web, push móvil, email y SMS desde una sola API.
- * Las suscripciones se gestionan en el frontend vía OneSignal SDK (Web SDK).
+ * Las credenciales se configuran POR ORGANIZACIÓN (onesignal_app_id + onesignal_api_key).
  *
- * Configuración en .env:
- *   ONESIGNAL_APP_ID=
- *   ONESIGNAL_REST_API_KEY=
- *   ONESIGNAL_API_URL=https://api.onesignal.com
+ * Configuración por organización:
+ *   Organization::onesignal_app_id
+ *   Organization::onesignal_api_key (encrypted)
  */
 class PushNotificationDispatcher
 {
@@ -31,13 +30,11 @@ class PushNotificationDispatcher
             return;
         }
 
-        $appId = config('services.onesignal.app_id');
-        $apiKey = config('services.onesignal.rest_api_key');
-
-        if (! $appId || ! $apiKey) {
-            Log::warning('[onesignal] Push notification skipped — credentials not configured', [
+        // OneSignal configurado por organización
+        if (! $org->hasOneSignalConfigured()) {
+            Log::info('[onesignal] Push notification skipped — org has not configured OneSignal', [
                 'alert_id' => $alert->id,
-                'alert_type' => $alert->alert_type,
+                'organization_id' => $org->id,
             ]);
 
             return;
@@ -46,10 +43,10 @@ class PushNotificationDispatcher
         $payload = self::buildPayload($alert);
 
         $response = Http::withHeaders([
-            'Authorization' => "Basic {$apiKey}",
+            'Authorization' => "Basic {$org->onesignal_api_key}",
             'Content-Type' => 'application/json',
-        ])->post(config('services.onesignal.api_url', 'https://api.onesignal.com').'/notifications', [
-            'app_id' => $appId,
+        ])->post('https://api.onesignal.com/notifications', [
+            'app_id' => $org->onesignal_app_id,
             'included_segments' => ['Active Users'],
             'headings' => ['en' => $payload['title'], 'es' => $payload['title']],
             'contents' => ['en' => $payload['body'], 'es' => $payload['body']],
@@ -65,6 +62,7 @@ class PushNotificationDispatcher
         if ($response->failed()) {
             Log::error('[onesignal] Push notification failed', [
                 'alert_id' => $alert->id,
+                'organization_id' => $org->id,
                 'status' => $response->status(),
                 'body' => $response->body(),
             ]);

@@ -93,7 +93,8 @@ class PushSubscriptionTest extends TestCase
 
     public function test_vapid_key_returns_disabled_when_not_configured(): void
     {
-        $user = User::factory()->create();
+        $org = Organization::factory()->create();
+        $user = User::factory()->create(['organization_id' => $org->id]);
         $this->actingAs($user);
 
         $response = $this->getJson(route('push.vapid-key'));
@@ -103,10 +104,11 @@ class PushSubscriptionTest extends TestCase
 
     public function test_vapid_key_returns_onesignal_config_when_configured(): void
     {
-        config()->set('services.onesignal.app_id', 'test-app-id-123');
-        config()->set('services.onesignal.rest_api_key', 'test-api-key');
-
-        $user = User::factory()->create();
+        $org = Organization::factory()->create([
+            'onesignal_app_id' => 'test-app-id-123',
+            'onesignal_api_key' => 'test-api-key',
+        ]);
+        $user = User::factory()->create(['organization_id' => $org->id]);
         $this->actingAs($user);
 
         $response = $this->getJson(route('push.vapid-key'));
