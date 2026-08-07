@@ -331,10 +331,10 @@ const onDocKeyChange = () => {
                                     </div>
                                 </li>
                             </ul>
-                            <p v-else class="text-sm italic text-gray-500">Sin puntos a favor.</p>
+                            <p v-else class="text-sm italic text-gray-500">{{ t('cars.no_pros') }}</p>
                         </div>
                         <div>
-                            <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-red-700">En contra ({{ car.cons?.length || 0 }})</h4>
+                            <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-red-700">{{ t('cars.cons_label', { count: car.cons?.length || 0 }) }}</h4>
                             <ul v-if="car.cons?.length" class="space-y-2">
                                 <li v-for="(con, i) in car.cons" :key="i" class="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3">
                                     <XCircleIcon class="mt-0.5 h-4 w-4 shrink-0 text-red-600" />
@@ -344,7 +344,7 @@ const onDocKeyChange = () => {
                                     </div>
                                 </li>
                             </ul>
-                            <p v-else class="text-sm italic text-gray-500">Sin puntos en contra.</p>
+                            <p v-else class="text-sm italic text-gray-500">{{ t('cars.no_cons') }}</p>
                         </div>
                     </div>
 

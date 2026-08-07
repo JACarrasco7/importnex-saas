@@ -71,11 +71,11 @@ function getStatusBadge(content) {
                     </div>
                     <div class="rounded-xl bg-white p-4 ring-1 ring-gray-200">
                         <div class="text-2xl font-bold text-emerald-600">{{ stats.with_content }}</div>
-                        <div class="text-xs text-gray-500">Con anuncios</div>
+                        <div class="text-xs text-gray-500">{{ t('marketing.with_ads') }}</div>
                     </div>
                     <div class="rounded-xl bg-white p-4 ring-1 ring-gray-200">
                         <div class="text-2xl font-bold text-blue-600">{{ stats.published }}</div>
-                        <div class="text-xs text-gray-500">Publicados</div>
+                        <div class="text-xs text-gray-500">{{ t('marketing.published') }}</div>
                     </div>
                     <div class="rounded-xl bg-white p-4 ring-1 ring-gray-200">
                         <div class="text-2xl font-bold text-amber-600">{{ stats.drafts }}</div>

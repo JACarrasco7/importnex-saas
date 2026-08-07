@@ -230,7 +230,7 @@ const goToCarsIndex = () => {
                         </div>
                         <div class="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                             <SparklesIcon class="h-5 w-5 text-estoril-600" />
-                            <span>Este paso es opcional</span>
+                            <span>{{ t('onboarding.optional_step') }}</span>
                         </div>
                     </div>
 
@@ -240,19 +240,17 @@ const goToCarsIndex = () => {
                             <CreditCardIcon class="h-10 w-10 text-estoril-600" />
                         </div>
                         <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                            Selecciona tu plan
+                            {{ t('onboarding.select_plan_title') }}
                         </h3>
                         <p class="text-gray-600 dark:text-gray-400 mb-6">
-                            Estás usando el plan <span class="font-semibold">{{ stepData?.currentPlan || 'trial' }}</span>. Elige el plan que mejor se adapte a tu negocio.
+                            {{ t('onboarding.select_plan_desc', { plan: stepData?.currentPlan || 'trial' }) }}
                         </p>
                         <div class="bg-linear-to-r from-estoril-50 to-platinum-50 rounded-lg p-4 text-sm dark:from-asphalt-700 dark:to-asphalt-800 mb-6">
-                            <p class="text-gray-700 dark:text-gray-300">
-                                🎁 <strong>Tu trial dura 14 días</strong>. No se requiere tarjeta de crédito.
-                            </p>
+                            <p class="text-gray-700 dark:text-gray-300" v-html="t('onboarding.trial_banner')"></p>
                         </div>
                         <div class="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                             <SparklesIcon class="h-5 w-5 text-estoril-600" />
-                            <span>Puedes cambiar de plan en cualquier momento</span>
+                            <span>{{ t('onboarding.change_anytime') }}</span>
                         </div>
                     </div>
 

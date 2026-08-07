@@ -25,6 +25,7 @@ import PreviewWallapop from '@/Components/PreviewWallapop.vue';
 import PreviewTikTok from '@/Components/PreviewTikTok.vue';
 import PreviewInstagram from '@/Components/PreviewInstagram.vue';
 import PreviewFacebook from '@/Components/PreviewFacebook.vue';
+import { useTranslations } from '@/Composables/useTranslations';
 
 const props = defineProps({
     car: Object,
@@ -32,6 +33,7 @@ const props = defineProps({
 });
 
 const { formatCurrency } = useFormat();
+const { t } = useTranslations();
 
 const CHANNELS = [
     { key: 'milanuncios', label: 'Milanuncios', icon: '🛒', type: 'portal' },
@@ -261,8 +263,8 @@ function renderPreview() {
                     <!-- Generate Button -->
                     <div class="flex items-center justify-between rounded-xl bg-white p-4 ring-1 ring-gray-200">
                         <div>
-                            <h3 class="font-semibold text-gray-900">Canal: {{ channelLabel(activeChannel) }}</h3>
-                            <p class="text-xs text-gray-500">Genera contenido optimizado con IA para este canal</p>
+                            <h3 class="font-semibold text-gray-900">{{ t('marketing.channel_label', { channel: channelLabel(activeChannel) }) }}</h3>
+                            <p class="text-xs text-gray-500">{{ t('marketing.generate_help') }}</p>
                         </div>
                         <button
                             @click="generate"
@@ -271,7 +273,7 @@ function renderPreview() {
                         >
                             <SparklesIcon v-if="generating" class="h-4 w-4 animate-spin" />
                             <SparklesIcon v-else class="h-4 w-4" />
-                            {{ generating ? 'Generando…' : 'Generar con IA' }}
+                            {{ generating ? t('marketing.generating') : t('marketing.generate_ai') }}
                         </button>
                         <button
                             @click="togglePreview"
