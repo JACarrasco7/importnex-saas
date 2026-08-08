@@ -321,7 +321,7 @@ const onDocKeyChange = () => {
                     <!-- Balance pros / cons -->
                     <div v-if="(car.pros?.length || car.cons?.length)" class="grid grid-cols-1 gap-6 p-6 md:grid-cols-2">
                         <div>
-                            <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-green-700">A favor ({{ car.pros?.length || 0 }})</h4>
+                            <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-green-700">{{ t('cars.pros_label', { count: car.pros?.length || 0 }) }}</h4>
                             <ul v-if="car.pros?.length" class="space-y-2">
                                 <li v-for="(pro, i) in car.pros" :key="i" class="flex items-start gap-2 rounded-lg border border-green-200 bg-green-50 p-3">
                                     <CheckCircleIcon class="mt-0.5 h-4 w-4 shrink-0 text-green-600" />
@@ -467,7 +467,7 @@ const onDocKeyChange = () => {
                             <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-700">
                                 Inspección ({{ derived?.inspections_progress?.completed || 0 }} / {{ derived?.inspections_progress?.total || 0 }})
                             </h4>
-                            <span class="text-xs text-gray-500">Acepta o rechaza lo que aplique</span>
+                            <span class="text-xs text-gray-500">{{ t('cars.apply_what_relevant') }}</span>
                         </div>
                         <div class="space-y-2">
                             <div v-for="section in derived?.inspections_by_section || []" :key="section.section" class="rounded-lg border border-gray-200">
@@ -510,7 +510,7 @@ const onDocKeyChange = () => {
                     <div class="p-6 space-y-4">
                         <form @submit.prevent="submitDocuments" class="grid grid-cols-1 gap-3 rounded-xl bg-gray-50 p-4 sm:grid-cols-4">
                             <select v-model="docForm.doc_key" @change="onDocKeyChange" class="rounded-lg border-gray-300 text-sm focus:border-estoril-500 focus:ring-estoril-500">
-                                <option value="">Document type…</option>
+                                <option value="">{{ t('cars.document_type_placeholder') }}</option>
                                 <optgroup v-for="g in derived?.documents_by_group || []" :key="g.group" :label="g.label">
                                     <option v-for="d in g.items" :key="d.id" :value="d.doc_key">{{ d.name }}</option>
                                 </optgroup>
@@ -592,7 +592,7 @@ const onDocKeyChange = () => {
                 <div v-if="car.client" class="overflow-hidden rounded-2xl bg-linear-to-br from-blue-50 to-estoril-50 shadow-sm ring-1 ring-blue-200">
                     <div class="border-b border-blue-200 px-6 py-4 flex items-center gap-2">
                         <UserCircleIcon class="h-5 w-5 text-blue-600" />
-                        <h3 class="text-base font-semibold text-gray-900">Assigned Client</h3>
+                        <h3 class="text-base font-semibold text-gray-900">{{ t('cars.assigned_client') }}</h3>
                     </div>
                     <div class="grid grid-cols-1 gap-4 p-6 sm:grid-cols-4">
                         <div>
@@ -628,7 +628,7 @@ const onDocKeyChange = () => {
                 <!-- Expenses -->
                 <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4">
-                        <h3 class="text-base font-semibold text-gray-900">Expenses vs Estimated</h3>
+                        <h3 class="text-base font-semibold text-gray-900">{{ t('cars.expenses_vs_estimated') }}</h3>
                     </div>
                     <div v-if="car.expenses?.length" class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">

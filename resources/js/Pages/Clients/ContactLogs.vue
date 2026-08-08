@@ -67,11 +67,11 @@ const inputClass = 'block w-full rounded-lg border-gray-300 text-sm shadow-sm fo
 </script>
 
 <template>
-    <Head :title="`Contact logs: ${client.name}`" />
+    <Head :title="t('clients.contact_logs_title', { name: client.name })" />
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Contact logs: {{ client.name }}</h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ t('clients.contact_logs_title', { name: client.name }) }}</h2>
         </template>
 
         <div class="py-8">

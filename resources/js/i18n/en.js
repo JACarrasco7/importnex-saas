@@ -979,6 +979,9 @@ export default {
         edit_action: "Edit",
         list_view: "List view",
         review_ai_suggestions: "Review & apply AI suggestions",
+    not_verified_yet: 'This car has not been verified yet. Send it to the configured AI for analysis.',
+    ai_suggestions: 'AI suggestions',
+    select_all_with_proposal: 'Select all with proposal',
 },
     onboarding: {
         skip: 'Skip onboarding',
@@ -1002,6 +1005,7 @@ export default {
     clients: {
         title: 'Clients',
         add: 'Add Client',
+        contact_logs_title: 'Contact Logs: :name',
         no_clients: 'No clients yet',
         create_first: 'Create your first client',
         contact_logs: 'Contact Logs',
@@ -1668,6 +1672,10 @@ export default {
         no_cons: 'No points against.',
         pros_label: 'In favor (:count)',
         cons_label: 'Against (:count)',
+        apply_what_relevant: 'Accept or reject what applies',
+        document_type_placeholder: 'Document type…',
+        assigned_client: 'Assigned Client',
+        expenses_vs_estimated: 'Expenses vs Estimated',
         nine_research_aspects: '9 research aspects',
         not_yet_investigated: 'Not yet investigated.',
         source: 'Source',

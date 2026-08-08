@@ -163,7 +163,7 @@ function apply() {
                     <div class="flex items-start gap-3">
                         <SparklesIcon class="h-5 w-5 shrink-0 text-estoril-600" />
                         <div>
-                            <p class="text-sm text-gray-900">This car has not been verified yet. Send it to the configured AI for analysis.</p>
+                            <p class="text-sm text-gray-900">{{ t('cars.not_verified_yet') }}</p>
                             <form method="POST" :action="route('cars.verify-sync', car.id)" class="mt-4">
                                 <input type="hidden" name="_token" :value="$page.props.csrfToken" />
                                 <button type="submit" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
@@ -247,7 +247,7 @@ function apply() {
                     <div class="w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-gray-200 flex flex-col">
                         <header class="flex items-center justify-between gap-3 border-b border-gray-200 px-6 py-4">
                             <div>
-                                <h3 class="text-base font-semibold text-gray-900">AI suggestions</h3>
+                                <h3 class="text-base font-semibold text-gray-900">{{ t('cars.ai_suggestions') }}</h3>
                                 <p class="text-xs text-gray-500">Select which fields to apply. Untouched fields stay as they are.</p>
                             </div>
                             <button @click="showModal = false" type="button" class="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
@@ -258,7 +258,7 @@ function apply() {
                         <div class="flex items-center justify-between gap-3 border-b border-gray-200 bg-gray-50 px-6 py-2.5 text-xs text-gray-600">
                             <span>{{ selectedCount }} selected</span>
                             <div class="flex items-center gap-2">
-                                <button type="button" @click="toggleAll(true)" class="rounded border border-gray-300 px-2.5 py-1 font-semibold hover:bg-gray-100">Select all with proposal</button>
+                                <button type="button" @click="toggleAll(true)" class="rounded border border-gray-300 px-2.5 py-1 font-semibold hover:bg-gray-100">{{ t('cars.select_all_with_proposal') }}</button>
                                 <button type="button" @click="toggleAll(false)" class="rounded border border-gray-300 px-2.5 py-1 font-semibold hover:bg-gray-100">Clear</button>
                             </div>
                         </div>
