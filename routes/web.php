@@ -17,6 +17,7 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FinanceController;
+use App\Http\Controllers\HealthController;
 use App\Http\Controllers\JJImportFolletoController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\MarketingController;
@@ -72,6 +73,11 @@ Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap')
 Route::get('/admin', function () {
     return Auth::check() ? redirect('/dashboard') : redirect('/');
 })->name('admin');
+
+// Health check endpoints (uptime monitoring, k8s probes)
+Route::get('/health', [HealthController::class, 'index'])->name('health');
+Route::get('/health/live', [HealthController::class, 'live'])->name('health.live');
+Route::get('/health/ready', [HealthController::class, 'ready'])->name('health.ready');
 
 // PWA static files (manifest, sw.js) — Laravel doesn't serve public/* in testing
 // We expose them via routes so feature tests can verify them. In production,
