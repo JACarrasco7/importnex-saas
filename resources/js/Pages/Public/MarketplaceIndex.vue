@@ -26,6 +26,7 @@ import {
 import Badge from '@/Components/Badge.vue';
 import WishlistButton from '@/Components/WishlistButton.vue';
 import CompareBar from '@/Components/CompareBar.vue';
+import LazyImage from '@/Components/LazyImage.vue';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import { useFormat } from '@/Composables/useFormat';
 import { useTranslations } from '@/Composables/useTranslations';
@@ -453,14 +454,14 @@ onMounted(() => {
                         class="group relative flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:ring-estoril-300"
                     >
                         <Link :href="route('marketplace.show', car.id)" class="flex flex-1 flex-col">
-                        <!-- Photo -->
+                        <!-- Photo (LazyImage for performance) -->
                         <div class="relative aspect-[16/10] overflow-hidden bg-linear-to-br from-asphalt-200 to-gray-300">
-                            <img
+                            <LazyImage
                                 v-if="car.photos && car.photos.length > 0"
                                 :src="car.photos[0].startsWith('http') ? car.photos[0] : `/storage/${car.photos[0]}`"
                                 :alt="t('cars.marketplace_brand_model', { brand: car.brand, model: car.model })"
-                                class="h-full w-full object-cover transition duration-700 group-hover:scale-110"
-                                loading="lazy"
+                                ratio="aspect-[16/10]"
+                                fit="object-cover group-hover:scale-110 transition duration-700"
                             />
                             <div v-else class="flex h-full items-center justify-center text-6xl text-gray-400">🚗</div>
                             <div class="pointer-events-none absolute inset-0 bg-linear-to-t from-asphalt-900/60 via-transparent to-transparent opacity-50 transition group-hover:opacity-80"></div>

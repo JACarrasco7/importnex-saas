@@ -6,6 +6,7 @@ import {
     ArrowRightIcon,
 } from '@heroicons/vue/24/outline';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
+import LazyImage from '@/Components/LazyImage.vue';
 import { useFormat } from '@/Composables/useFormat';
 import { useTranslations } from '@/Composables/useTranslations';
 
@@ -73,7 +74,7 @@ const rows = computed(() => [
                                 <th v-for="car in cars" :key="car.id" class="px-4 py-4 text-center">
                                     <Link :href="route('marketplace.show', car.id)" class="block">
                                         <div class="aspect-video overflow-hidden rounded-lg bg-gray-100">
-                                            <img v-if="car.photos && car.photos.length > 0" :src="car.photos[0].url || car.photos[0]" :alt="car.brand + ' ' + car.model" class="h-full w-full object-cover" />
+                                            <LazyImage v-if="car.photos && car.photos.length > 0" :src="car.photos[0].url || car.photos[0]" :alt="car.brand + ' ' + car.model" ratio="aspect-video" fit="object-cover" />
                                             <div v-else class="flex h-full items-center justify-center">
                                                 <span class="text-3xl">🚗</span>
                                             </div>

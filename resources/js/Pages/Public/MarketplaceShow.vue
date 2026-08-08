@@ -18,6 +18,7 @@ import Badge from '@/Components/Badge.vue';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import ShareCar from '@/Components/ShareCar.vue';
 import WishlistButton from '@/Components/WishlistButton.vue';
+import LazyImage from '@/Components/LazyImage.vue';
 import FinancingCalculator from '@/Components/FinancingCalculator.vue';
 import { useFormat } from '@/Composables/useFormat';
 import { useTranslations } from '@/Composables/useTranslations';
@@ -464,7 +465,11 @@ const marketPosition = computed(() => {
                             type="button"
                             @click="openLightbox(i)"
                             class="group relative overflow-hidden rounded-lg">
-                            <img :src="`/storage/${photo.url}`" :alt="photo.photo_type" class="h-32 w-full object-cover transition group-hover:scale-105" loading="lazy" />
+                            <LazyImage
+                                :src="`/storage/${photo.url}`"
+                                :alt="photo.photo_type || ''"
+                                ratio="aspect-[4/3]"
+                                fit="object-cover transition group-hover:scale-105" />
                             <span class="absolute bottom-2 left-2 rounded bg-black/70 px-2 py-0.5 text-xs text-white">{{ photo.photo_type }}</span>
                             <span class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition group-hover:opacity-100">
                                 <span class="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-gray-900">{{ t('marketplace_show.zoom', { default: 'Ver grande' }) }}</span>
@@ -503,10 +508,12 @@ const marketPosition = computed(() => {
                             <ChevronRightIcon class="h-6 w-6" />
                         </button>
                         <div class="relative max-h-full max-w-5xl">
-                            <img
+                            <LazyImage
                                 :src="`/storage/${car.photos[lightboxIndex]?.url}`"
-                                :alt="car.photos[lightboxIndex]?.photo_type"
-                                class="max-h-[85vh] max-w-full rounded object-contain" />
+                                :alt="car.photos[lightboxIndex]?.photo_type || ''"
+                                ratio="aspect-auto"
+                                fit="max-h-[85vh] max-w-full rounded object-contain"
+                                :root-margin="'500px'" />
                             <p class="mt-2 text-center text-sm text-white">{{ lightboxIndex + 1 }} / {{ car.photos.length }}</p>
                         </div>
                     </div>
