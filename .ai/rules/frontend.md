@@ -13,6 +13,10 @@
 - **`watch()` / `watchEffect()`** con cuidado (memoria si no cleanup).
 - **Refs**: `ref()` para primitivos, `reactive()` para objetos grandes.
 - **Composable > utility** cuando hay >5 utilities en una línea.
+- **Iconos en template** (`<XxxIcon />`): SIEMPRE verificar import en `<script setup>`. Trampa detectada 2026-08-07 (C1): Welcome.vue usaba `MapPinIcon` sin import.
+- **Lifecycle hooks** (`onMounted`, `onUnmounted`, `watch`): SIEMPRE importar explícitamente. Trampa H3 detectada: NewsletterPopup.vue usaba `onMounted` sin import.
+- **API browser** (`localStorage`, `window`): SIEMPRE `if (typeof window === 'undefined') return;` para SSR-safety. Trampa H7 detectada.
+- **Strings hardcoded**: SIEMPRE usar `t()`. Antes de commit Vue, grep `[A-Z][a-zA-Z]+ [a-z]+` en template para detectar hardcoded strings.
 
 ## Inertia v3
 

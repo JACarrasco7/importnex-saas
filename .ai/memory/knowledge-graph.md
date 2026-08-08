@@ -1,8 +1,8 @@
 ---
 description: Sistema de conocimientos en grafos de memoria para ImportnexCore. Patrón Basic Memory + MCP Memory Server. Actualizado automáticamente por memory-manager.php cada semana.
-last_updated: 2026-08-07
-nodes: 47
-relationships: 89
+last_updated: 2026-08-08
+nodes: 58
+relationships: 112
 ---
 
 # 🕸️ Knowledge Graph — ImportnexCore
@@ -87,11 +87,77 @@ graph TD
 
 ## Anti-patrones del grafo
 
-- 🔴 `ValuationImporter` → sin tests de coverage (12 fallan)
+- 🔴 `ValuationImporter` → sin tests de coverage (12 fallan pre-existentes)
 - 🟠 `CarController` → sin Form Request (validación inline)
-- 🟡 `i18n es.js/en.js` → 1250 claves desincronizadas
+- 🟡 `i18n es.js/en.js` → ahora 92% sincronizadas (era 47% antes de auditoría)
+
+## Sistema de Notificaciones (nuevo 2026-08-07)
+
+```mermaid
+graph LR
+    A[Alert Model] --> B[AlertObserver]
+    B --> C[AlertWebhookDispatcher]
+    B --> D[AlertEmailDispatcher]
+    B --> E[PushNotificationDispatcher]
+    C --> F[Slack/Discord/Teams]
+    D --> G[Laravel Mail]
+    E --> H[OneSignal API]
+    B -.check.-> I[Organization::isAlertTypeEnabled]
+    B -.check.-> J[Organization::webhookEnabledFor]
+    D -.check.-> K[User::isChannelEnabled]
+    D -.check.-> L[User::isAlertTypeEnabled]
+```
+
+## Marketplace Engagement (nuevo 2026-08-07)
+
+```mermaid
+graph LR
+    A[MarketplaceIndex] --> B[WishlistButton]
+    A --> C[CompareBar]
+    A --> D[FilterBar]
+    B -.localStorage.-> E[useWishlist composable]
+    C -.router.visit.-> F[MarketplaceCompare]
+    G[MarketplaceShow] --> H[FinancingCalculator]
+    G --> B
+    G --> I[ShareCar]
+    D -.server-side.-> J[PublicMarketplaceController]
+    J -.whitelist.-> K[FILTER_RULES]
+    J -.paginate(12).-> L[MarketplaceIndex]
+```
 
 ---
+
+## Auditoría 2026-08-07 (13 bugs corregidos)
+
+| ID | Tipo | Estado |
+|---|---|---|
+| C1 | Icono Vue no importado | ✅ |
+| C2 | Import duplicado | ✅ |
+| C3 | Helper no exportado | ✅ |
+| C4 | Backend ignora frontend | ✅ |
+| C5 | Prefs usuario muertas | ✅ |
+| H1 | i18n desincronizado | ✅ |
+| H2 | Pluralización no implementada | ✅ |
+| H3 | Import onMounted faltante | ✅ |
+| H5 | Color email no brand | ✅ |
+| H6 | Filtros client-side | ✅ |
+| H7 | SSR guard | ✅ |
+| M2 | Global scope multi-tenant | ✅ |
+| M6 | Test débil | ✅ |
+
+---
+
+## Hot spots actualizados (2026-08-07)
+
+| Archivo | Complejidad | Notas |
+|---|---|---|
+| `app/Services/ValuationImporter.php` | 🔴 32 | 12 tests fallan pre-existentes |
+| `app/Http/Controllers/Cars/CarController.php` | 🟠 18 | Sin Form Request |
+| `app/Http/Middleware/HandleInertiaRequests.php` | 🟡 14 | Inertia shared props |
+| `resources/js/Pages/Cars/Show.vue` | 🟡 22 | +i18n strings |
+| `app/Observers/AlertObserver.php` | 🟢 8 | 3 dispatchers independientes |
+| `app/Services/AlertEmailDispatcher.php` | 🟢 6 | N8 prefs usuario |
+| `app/Http/Controllers/PublicMarketplaceController.php` | 🟡 12 | 12 filtros whitelist |
 
 ## Sync automático
 

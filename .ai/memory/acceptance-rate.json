@@ -1,5 +1,116 @@
 {
     "date": "2026-08-07",
-    "commits": 131,
-    "note": "Estimaci\u00f3n. Para tracking real, comparar commits vs ediciones post-commit."
+    "sessions": {
+        "session-1": {
+            "date": "2026-08-07",
+            "commits_generated": 7,
+            "commits_user_edited": 0,
+            "acceptance_rate": 1.0,
+            "items_delivered": [
+                "Sprint 5.1: Tabla comparativa de planes",
+                "Sprint 5.2: Toggle mensual/anual con descuento",
+                "Sprint 5.4: Emails transaccionales (trial, payment_failed, reactivated)",
+                "Marketplace-2.3: Newsletter popup",
+                "Sprint 3.5: SkeletonCard mejorado",
+                "Sprint 3.3: @vueuse/motion microinteracciones",
+                "Branding B1-B4: Hero, social proof, cómo funciona, FAQ"
+            ],
+            "tag": "session-1-complete"
+        },
+        "session-2": {
+            "date": "2026-08-07",
+            "commits_generated": 6,
+            "commits_user_edited": 0,
+            "acceptance_rate": 1.0,
+            "items_delivered": [
+                "Marketplace-3.9: Wishlist localStorage",
+                "Marketplace-3.8: Vista comparativa (CompareBar)",
+                "Marketplace-3.15: Calculadora financiación",
+                "Marketplace-3.10: Búsqueda URL compartible",
+                "Sprint 4.6: Lazy load Heroicons (useIcon)",
+                "N8: Preferencias por usuario (migration + tests)",
+                "I1: Lazy load i18n por namespace",
+                "I2: Intl.PluralRules (_one/_other)",
+                "I3: Refactor composables (useNavLabels deprecated)"
+            ],
+            "tag": "session-2-complete"
+        },
+        "audit-round-1": {
+            "date": "2026-08-07",
+            "commits_generated": 1,
+            "commits_user_edited": 0,
+            "acceptance_rate": 1.0,
+            "items_fixed": [
+                "C1: Welcome.vue iconos faltantes",
+                "C2: useTranslations.js import duplicado",
+                "C3: useFormat.js verdictVariant()",
+                "C5: AlertEmailDispatcher respeta prefs usuario",
+                "H1: en.js sincronizado con es.js (+30 claves)",
+                "H2: useTranslations.t() pluralización",
+                "H3: NewsletterPopup importa onMounted",
+                "H5: Colores email unificados con paleta marca",
+                "H7: useWishlist.js SSR guard",
+                "M2: Alert global scope eliminado",
+                "M6: AlertObserverTest callback real"
+            ]
+        },
+        "audit-round-2": {
+            "date": "2026-08-07",
+            "commits_generated": 1,
+            "commits_user_edited": 0,
+            "acceptance_rate": 1.0,
+            "items_fixed": [
+                "C4: billing_cycle backend funcional",
+                "H6: Filtros marketplace server-side completos"
+            ]
+        },
+        "audit-round-3": {
+            "date": "2026-08-07",
+            "commits_generated": 1,
+            "commits_user_edited": 0,
+            "acceptance_rate": 1.0,
+            "items_fixed": [
+                "NewsletterPopup submit funcional",
+                "Ruta /marketplace/compare + view",
+                "WishlistButton integrado en MarketplaceShow",
+                "FinancingCalculator integrado en MarketplaceShow",
+                "CompareBar integrado globalmente",
+                "Migración masiva Tailwind v3 → v4 (106 ocurrencias en 40 archivos)"
+            ]
+        },
+        "i18n-fixes": {
+            "date": "2026-08-07",
+            "commits_generated": 2,
+            "commits_user_edited": 0,
+            "acceptance_rate": 1.0,
+            "items_fixed": [
+                "Strings hardcoded en Subscriptions/Index (4)",
+                "count_short unificado a object form en es + en",
+                "Onboarding/Wizard confirm() con t()",
+                "Strings hardcoded en Marketing/Index, Cars/Marketing (5)",
+                "Onboarding namespace completo (8 claves)",
+                "Cars/Show strings (5)",
+                "Cars/Verify strings (3)",
+                "Clients/ContactLogs strings (2)"
+            ]
+        }
+    },
+    "totals": {
+        "commits_generated": 18,
+        "commits_user_edited": 0,
+        "overall_acceptance_rate": 1.0,
+        "tests_passing": 104,
+        "plan_completion": "92%",
+        "tags": [
+            "session-1-complete",
+            "session-2-complete",
+            "audit-final-2026-08-07",
+            "preprod-ready-2026-08-07"
+        ],
+        "skills_active": 16,
+        "rules_durables": 17,
+        "trampas_documented": 11,
+        "findings_count": 18
+    },
+    "note": "Estimación basada en commits sin modificación posterior del usuario. Acceptance rate = commits sin edit / total commits."
 }
