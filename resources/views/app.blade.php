@@ -6,6 +6,17 @@
 
         <title inertia>{{ config('app.name', 'Laravel') }}</title>
 
+        <!-- Critical CSS inline (above-the-fold styles) — improves FCP/LCP -->
+        <style>
+            *,*::before,*::after{box-sizing:border-box}
+            html{-webkit-text-size-adjust:100%;tab-size:4;font-family:Figtree,ui-sans-serif,system-ui,sans-serif;line-height:1.5}
+            body{margin:0;line-height:inherit;background:#fff;color:#111827}
+            h1,h2,h3,h4,h5,h6,p,figure,blockquote,dl,dd{margin:0}
+            .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0}
+            .min-h-screen{min-height:100vh}
+            .bg-linear-to-br{background-image:linear-gradient(to bottom right,var(--tw-gradient-stops))}
+        </style>
+
         <!-- SEO Meta Tags -->
         <meta name="description" content="JJ Import Motors — Plataforma profesional de importación de vehículos con verificación AI. Ahorra tiempo y evita fraudes en la importación de coches de Alemania.">
         <meta name="keywords" content="importar coches, importación vehículos, coches de Alemania, verificación AI, dealer importador, marketplace vehículos">

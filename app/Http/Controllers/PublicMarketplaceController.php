@@ -51,7 +51,15 @@ class PublicMarketplaceController extends Controller
             'year' => ['min' => 1900, 'max' => (int) date('Y') + 1],
         ];
 
+        // Performance: select only fields rendered in cards (not SELECT *)
+        // Photos and organization are eager-loaded below to avoid N+1.
         $cars = Car::query()
+            ->select([
+                'id', 'brand', 'model', 'version', 'year', 'mileage',
+                'fuel', 'transmission', 'purchase_price', 'status',
+                'traffic_light', 'verdict', 'estimated_saving', 'city',
+                'organization_id', 'created_at', 'updated_at',
+            ])
             ->whereHas('organization', function ($query) {
                 $query->where('is_public', true);
             })
@@ -85,7 +93,11 @@ class PublicMarketplaceController extends Controller
             ->paginate(12)
             ->withQueryString();
 
-        $cars->load(['photos', 'organization']);
+        // Eager-load only photo fields used in cards (id + url + photo_type)
+        $cars->load([
+            'photos:id,car_id,url,photo_type,is_primary,order',
+            'organization:id,name,slug,is_public',
+        ]);
 
         $verdicts = Car::VERDICTS;
         $lights = ['green', 'amber', 'red', 'neutral'];
@@ -156,7 +168,10 @@ class PublicMarketplaceController extends Controller
             cookie()->queue(cookie($cookieName, '1', 60 * 24)); // 24h
         }
 
-        $car->load(['photos', 'organization']);
+        $car->load([
+            'photos:id,car_id,url,photo_type,is_primary,order',
+            'organization:id,name,slug,is_public',
+        ]);
 
         // Pre-compute derived data for the enriched valuation UI
         $car->researchGaps;
