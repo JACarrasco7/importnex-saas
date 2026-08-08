@@ -4,8 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Car;
 use App\Models\CarDocument;
-use Illuminate\Http\Request;
+use App\Support\CarDocumentDefinitions;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -21,6 +22,11 @@ class CarDocumentController extends Controller
 
     public function store(Request $request, Car $car): RedirectResponse
     {
+        // Backwards-compat: accept either doc_key (new) or doc_type (legacy)
+        if (! $request->has('doc_key') && $request->has('doc_type')) {
+            $request->merge(['doc_key' => $request->input('doc_type')]);
+        }
+
         $request->validate([
             'documents.*' => 'required|file|mimes:pdf,doc,docx,xls,xlsx|max:10240',
             'doc_key' => 'required|string',
@@ -31,10 +37,10 @@ class CarDocumentController extends Controller
         $customName = $request->input('name');
 
         // Get document definition from CarDocumentDefinitions
-        $definitions = app(\App\Support\CarDocumentDefinitions::class)->all();
+        $definitions = app(CarDocumentDefinitions::class)->all();
         $docDef = collect($definitions)->firstWhere('key', $docKey);
 
-        if (!$docDef) {
+        if (! $docDef) {
             return back()->withErrors(['doc_key' => 'Document type not recognized.']);
         }
 
@@ -71,7 +77,7 @@ class CarDocumentController extends Controller
 
         $disk = Storage::disk('public');
 
-        if (!$disk->exists($document->url)) {
+        if (! $disk->exists($document->url)) {
             abort(404);
         }
 
@@ -82,7 +88,7 @@ class CarDocumentController extends Controller
             return $disk->response($document->url);
         }
 
-        return $disk->download($document->url, $document->name . '.' . $extension);
+        return $disk->download($document->url, $document->name.'.'.$extension);
     }
 
     public function destroy(Car $car, CarDocument $document): RedirectResponse

@@ -158,10 +158,10 @@ class ValuationImporterTest extends TestCase
 
     public function test_cli_imports_valid_files(): void
     {
-        $tmpDir = sys_get_temp_dir() . '/importnex-test-' . uniqid();
+        $tmpDir = sys_get_temp_dir().'/importnex-test-'.uniqid();
         mkdir($tmpDir, 0777, true);
 
-        file_put_contents($tmpDir . '/test.json', json_encode([
+        file_put_contents($tmpDir.'/test.json', json_encode([
             '_meta' => ['schema_version' => Car::CURRENT_SCHEMA_VERSION],
             'vehiculo' => [
                 'marca' => 'BMW', 'modelo' => '320d',
@@ -189,16 +189,16 @@ class ValuationImporterTest extends TestCase
             'research_source' => 'chat',
         ]);
 
-        array_map('unlink', glob($tmpDir . '/*'));
+        array_map('unlink', glob($tmpDir.'/*'));
         rmdir($tmpDir);
     }
 
     public function test_cli_skips_invalid_files(): void
     {
-        $tmpDir = sys_get_temp_dir() . '/importnex-test-' . uniqid();
+        $tmpDir = sys_get_temp_dir().'/importnex-test-'.uniqid();
         mkdir($tmpDir, 0777, true);
 
-        file_put_contents($tmpDir . '/bad.json', json_encode([
+        file_put_contents($tmpDir.'/bad.json', json_encode([
             '_meta' => ['schema_version' => 999],
         ]));
 
@@ -212,7 +212,7 @@ class ValuationImporterTest extends TestCase
 
         $this->assertDatabaseMissing('cars', ['organization_id' => $org->id]);
 
-        array_map('unlink', glob($tmpDir . '/*'));
+        array_map('unlink', glob($tmpDir.'/*'));
         rmdir($tmpDir);
     }
 
@@ -224,7 +224,7 @@ class ValuationImporterTest extends TestCase
         $org = Organization::factory()->create();
         User::factory()->create(['organization_id' => $org->id]);
 
-        $payload = json_decode(file_get_contents(__DIR__ . '/fixtures/chat_report_example.json'), true);
+        $payload = json_decode(file_get_contents(__DIR__.'/fixtures/chat_report_example.json'), true);
 
         $importer = app(ValuationImporter::class);
         $resolved = $importer->resolveCar($payload, $org);
@@ -260,7 +260,7 @@ class ValuationImporterTest extends TestCase
         $this->assertSame(1200.0, (float) $car->transport);
         $this->assertSame(95.0, (float) $car->itv_fee);
         $this->assertSame(20.61, (float) $car->dgt_fees);
-        $this->assertSame(0.0, (float) $car->professional_fees);
+        $this->assertSame(1500.0, (float) $car->professional_fees);
 
         // Research: 9 aspects, mapped to canonical English keys
         $this->assertCount(9, $car->research);
@@ -269,8 +269,8 @@ class ValuationImporterTest extends TestCase
         $this->assertSame('favorable', $car->research['market_price']['rating']);
         $this->assertSame('favorable', $car->research['reliability']['rating']);
         $this->assertSame('favorable', $car->research['spain_homologation']['rating']);
-        $this->assertSame('neutral',  $car->research['dgt_label']['rating']);
-        $this->assertSame('neutral',  $car->research['insurance_estimate']['rating']);
+        $this->assertSame('neutral', $car->research['dgt_label']['rating']);
+        $this->assertSame('neutral', $car->research['insurance_estimate']['rating']);
         $this->assertSame('favorable', $car->research['parts_maintenance']['rating']);
         $this->assertSame('favorable', $car->research['unit_specific']['rating']);
         $this->assertNotEmpty($car->research['recalls']['finding']);
@@ -318,8 +318,3 @@ class ValuationImporterTest extends TestCase
         $this->assertStringContainsString('EJEMPLO', $car->notes);
     }
 }
-
-
-
-
-

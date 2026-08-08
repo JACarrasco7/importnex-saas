@@ -5,7 +5,9 @@ namespace Tests\Unit\Services\Scraping;
 use App\Models\Organization;
 use App\Services\Scraping\CarScrapingService;
 use App\Services\Scraping\GenericAiExtractor;
+use Illuminate\Support\Facades\Http;
 use Mockery;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class CarScrapingServiceTest extends TestCase
@@ -30,12 +32,12 @@ class CarScrapingServiceTest extends TestCase
         $service = new CarScrapingService($extractor);
 
         if ($body !== null) {
-            \Illuminate\Support\Facades\Http::fake([
-                '*' => \Illuminate\Support\Facades\Http::response($body, 200),
+            Http::fake([
+                '*' => Http::response($body, 200),
             ]);
         } else {
-            \Illuminate\Support\Facades\Http::fake([
-                '*' => \Illuminate\Support\Facades\Http::response('', 500),
+            Http::fake([
+                '*' => Http::response('', 500),
             ]);
         }
 
@@ -50,6 +52,7 @@ class CarScrapingServiceTest extends TestCase
             'ai_provider' => 'mistral',
             'ai_api_key' => 'mock-key',
         ]);
+
         return $org;
     }
 
@@ -125,12 +128,12 @@ class CarScrapingServiceTest extends TestCase
             'data' => ['brand' => 'Cached'],
         ]);
 
-        \Illuminate\Support\Facades\Http::fake([
-            '*' => \Illuminate\Support\Facades\Http::response('<html/>', 200),
+        Http::fake([
+            '*' => Http::response('<html/>', 200),
         ]);
 
         $service = new CarScrapingService($extractor);
-        $url = 'https://mobile.de/cache-' . uniqid();
+        $url = 'https://mobile.de/cache-'.uniqid();
         $org = $this->makeOrg();
 
         $first = $service->scrape($url, $org);
@@ -157,6 +160,7 @@ class CarScrapingServiceTest extends TestCase
     /**
      * @dataProvider spanishPortalProvider
      */
+    #[DataProvider('spanishPortalProvider')]
     public function test_accepts_spanish_portals(string $url, string $expectedHost): void
     {
         $service = $this->makeService([
@@ -165,7 +169,7 @@ class CarScrapingServiceTest extends TestCase
         ]);
 
         $result = $service->scrape($url, $this->makeOrg());
-        $this->assertTrue($result['success'], "Failed for {$expectedHost}: " . json_encode($result));
+        $this->assertTrue($result['success'], "Failed for {$expectedHost}: ".json_encode($result));
         $this->assertEquals('Seat', $result['data']['brand']);
     }
 
@@ -173,12 +177,12 @@ class CarScrapingServiceTest extends TestCase
     {
         return [
             'autoscout24.es' => ['https://www.autoscout24.es/anuncios/seat-ibiza', 'autoscout24.es'],
-            'coches.com'     => ['https://www.coches.com/seat-ibiza-12345.htm', 'coches.com'],
-            'milanuncios'    => ['https://www.milanuncios.com/seat-ibiza', 'milanuncios.com'],
-            'wallapop'       => ['https://www.wallapop.com/item/seat-ibiza-12345', 'wallapop.com'],
-            'coches.net'     => ['https://www.coches.net/seat-ibiza', 'coches.net'],
-            'autovit.ro'     => ['https://www.autovit.ro/seat-ibiza', 'autovit.ro'],
-            'olx.ro'         => ['https://www.olx.ro/oferta/seat-ibiza-ID123ABC.html', 'olx.ro'],
+            'coches.com' => ['https://www.coches.com/seat-ibiza-12345.htm', 'coches.com'],
+            'milanuncios' => ['https://www.milanuncios.com/seat-ibiza', 'milanuncios.com'],
+            'wallapop' => ['https://www.wallapop.com/item/seat-ibiza-12345', 'wallapop.com'],
+            'coches.net' => ['https://www.coches.net/seat-ibiza', 'coches.net'],
+            'autovit.ro' => ['https://www.autovit.ro/seat-ibiza', 'autovit.ro'],
+            'olx.ro' => ['https://www.olx.ro/oferta/seat-ibiza-ID123ABC.html', 'olx.ro'],
         ];
     }
 }

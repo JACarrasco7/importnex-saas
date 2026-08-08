@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Car;
 use App\Models\CarExpense;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -48,9 +49,15 @@ class FinanceController extends Controller
         });
 
         // Monthly series (last 6 months of cars created)
+        // Cross-DB safe: strftime works in SQLite/PostgreSQL, but production uses MySQL where DATE_FORMAT is preferred.
+        // Detect driver and pick appropriate function.
+        $monthExpr = DB::connection()->getDriverName() === 'mysql'
+            ? 'DATE_FORMAT(created_at, "%Y-%m")'
+            : "strftime('%Y-%m', created_at)";
+
         $monthly = Car::where('organization_id', $orgId)
             ->where('created_at', '>=', now()->subMonths(6))
-            ->selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, COUNT(*) as count, SUM(purchase_price) as total')
+            ->selectRaw("$monthExpr as month, COUNT(*) as count, SUM(purchase_price) as total")
             ->groupBy('month')
             ->orderBy('month')
             ->get();

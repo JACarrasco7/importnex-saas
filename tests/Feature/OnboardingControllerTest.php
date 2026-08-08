@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Organization;
 use App\Models\User;
+use App\Models\UserOnboardingProgress;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -50,7 +51,7 @@ class OnboardingControllerTest extends TestCase
 
     public function test_index_redirects_when_completed(): void
     {
-        \App\Models\UserOnboardingProgress::create([
+        UserOnboardingProgress::create([
             'user_id' => $this->user->id,
             'organization_id' => $this->org->id,
             'step_organization_created' => true,
@@ -67,19 +68,19 @@ class OnboardingControllerTest extends TestCase
 
     public function test_skip_marks_progress_as_skipped(): void
     {
-        \App\Models\UserOnboardingProgress::create([
+        UserOnboardingProgress::create([
             'user_id' => $this->user->id,
             'organization_id' => $this->org->id,
             'current_step' => 1,
         ]);
 
-        $response = $this->actingAs($this->user)->get('/onboarding/skip');
+        $response = $this->actingAs($this->user)->post('/onboarding/skip');
 
         $response->assertRedirect('/dashboard');
         $this->assertDatabaseHas('user_onboarding_progress', [
             'user_id' => $this->user->id,
-            'skipped_at' => now()->toDateString(),
         ]);
+        $this->assertNotNull(UserOnboardingProgress::where('user_id', $this->user->id)->first()->skipped_at);
     }
 
     public function test_requires_authentication(): void

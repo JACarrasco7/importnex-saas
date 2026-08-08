@@ -2,10 +2,10 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
-use App\Models\Organization;
 use App\Models\Car;
 use App\Models\CarDocument;
+use App\Models\Organization;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -49,7 +49,7 @@ class CarDocumentTest extends TestCase
             'documents' => [$file],
         ]);
 
-        $response->assertSessionHasErrors('doc_type');
+        $response->assertSessionHasErrors('doc_key');
     }
 
     public function test_validates_file_format(): void
