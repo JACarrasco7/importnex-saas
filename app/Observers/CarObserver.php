@@ -2,9 +2,12 @@
 
 namespace App\Observers;
 
+use App\Http\Controllers\SitemapController;
 use App\Models\Car;
 use App\Models\CarChecklist;
 use App\Models\CarDocument;
+use App\Support\CarChecklistDefinitions;
+use App\Support\CarDocumentDefinitions;
 
 class CarObserver
 {
@@ -36,12 +39,35 @@ class CarObserver
             $ratio <= 1.05 => 'amber',
             default => 'red',
         };
+
+        // Flush sitemap cache if marketplace visibility changed.
+        if ($car->isDirty('is_marketplace')) {
+            SitemapController::flush();
+        }
     }
 
     public function created(Car $car): void
     {
         $this->seedChecklist($car);
         $this->seedDocuments($car);
+
+        if ($car->is_marketplace) {
+            SitemapController::flush();
+        }
+    }
+
+    public function updated(Car $car): void
+    {
+        if ($car->wasChanged('is_marketplace')) {
+            SitemapController::flush();
+        }
+    }
+
+    public function deleted(Car $car): void
+    {
+        if ($car->is_marketplace) {
+            SitemapController::flush();
+        }
     }
 
     private function shouldRecalculateTrafficLight(Car $car): bool
@@ -54,12 +80,13 @@ class CarObserver
                 return true;
             }
         }
+
         return false;
     }
 
     private function seedChecklist(Car $car): void
     {
-        $definitions = app(\App\Support\CarChecklistDefinitions::class);
+        $definitions = app(CarChecklistDefinitions::class);
         $now = now();
         $rows = [];
         foreach ($definitions->all() as $def) {
@@ -82,7 +109,7 @@ class CarObserver
 
     private function seedDocuments(Car $car): void
     {
-        $definitions = app(\App\Support\CarDocumentDefinitions::class);
+        $definitions = app(CarDocumentDefinitions::class);
         $now = now();
         $rows = [];
         foreach ($definitions->all() as $def) {
