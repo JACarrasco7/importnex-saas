@@ -19,6 +19,9 @@
 - **Comandos** auto-register (no map manual).
 - **Casts** en método `casts()`, NO propiedad `$casts`.
 - **Form Requests** para validación compleja (>3 reglas).
+  - `authorize()`: SIEMPRE validar tenant scoping en Update requests (`car->organization_id === user->organization_id`).
+  - `attributes()`: SIEMPRE traducir nombres de campos al español (marca, modelo, año, etc.) para mensajes de error claros.
+  - `rules()`: incluir TODOS los campos del `$fillable`, no solo los required. Trampa detectada 2026-08-08 (S6.1): omitir campos de arrays JSON (`pros`, `cons`, `tips`, `equipment`) hace que `validated()` no los devuelva y `$model->update()` los ignore.
 - **Policies** > Gate::define inline.
 - **Resources** para APIs > array manual.
 - **Named routes** para TODOS los `route()`.

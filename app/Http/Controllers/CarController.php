@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreCarRequest;
+use App\Http\Requests\UpdateCarRequest;
 use App\Imports\CarsImport;
 use App\Models\Car;
 use App\Models\Client;
@@ -9,7 +11,6 @@ use App\Services\Scraping\CarScrapingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 use Maatwebsite\Excel\Facades\Excel;
@@ -84,41 +85,15 @@ class CarController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreCarRequest $request): RedirectResponse
     {
         $org = auth()->user()->organization;
         if ($org->limitReached('cars')) {
             return back()->with('error', "You've reached your plan's car limit. Please upgrade your subscription.");
         }
 
-        $request->validate([
-            'brand' => 'required|string|max:255',
-            'model' => 'required|string|max:255',
-            'year' => ['required', 'string', 'max:10', 'regex:/^\d{2}\/\d{4}$/'],
-            'fuel' => 'required|string|max:255',
-            'transmission' => 'required|string|max:255',
-            'purchase_price' => 'required|numeric|min:0',
-            'status' => ['required', Rule::in(Car::STATUSES)],
-            'traffic_light' => ['required', Rule::in(['green', 'amber', 'red', 'neutral'])],
-            'client_id' => ['nullable', Rule::exists('clients', 'id')->where('organization_id', auth()->user()->organization_id)],
-        ]);
-
         Car::create([
-            ...$request->only([
-                'brand', 'model', 'version', 'year', 'mileage', 'fuel', 'transmission',
-                'cv', 'displacement', 'co2', 'consumption', 'owners', 'doors',
-                'seats', 'euro_norm', 'color', 'itv_date', 'purchase_price', 'new_price',
-                'manual_tax_base', 'boe_confirmed', 'transport', 'itv_fee', 'coc_fee',
-                'dgt_fees', 'professional_fees', 'deposit', 'vin', 'vat_scenario', 'seller',
-                'city', 'lat', 'lng', 'status', 'url_link', 'traffic_light',
-                'valuation', 'recommendation', 'description', 'equipment',
-                'tips', 'red_flags', 'comparables_list', 'fotos_json', 'notes',
-                'research', 'pros', 'cons',
-                'is_marketplace',
-                'verdict', 'verdict_confidence', 'verdict_reasoning', 'verdict_changes',
-                'market_avg', 'market_min', 'market_max', 'estimated_saving',
-                'client_id',
-            ]),
+            ...$request->validated(),
             'organization_id' => auth()->user()->organization_id,
         ]);
 
@@ -203,35 +178,9 @@ class CarController extends Controller
         ]);
     }
 
-    public function update(Request $request, Car $car): RedirectResponse
+    public function update(UpdateCarRequest $request, Car $car): RedirectResponse
     {
-        $request->validate([
-            'brand' => 'required|string|max:255',
-            'model' => 'required|string|max:255',
-            'year' => ['required', 'string', 'max:10', 'regex:/^\d{2}\/\d{4}$/'],
-            'fuel' => 'required|string|max:255',
-            'transmission' => 'required|string|max:255',
-            'client_id' => ['nullable', Rule::exists('clients', 'id')->where('organization_id', auth()->user()->organization_id)],
-            'purchase_price' => 'required|numeric|min:0',
-            'status' => ['required', Rule::in(Car::STATUSES)],
-            'traffic_light' => ['required', Rule::in(['green', 'amber', 'red', 'neutral'])],
-        ]);
-
-        $car->update($request->only([
-            'brand', 'model', 'version', 'year', 'mileage', 'fuel', 'transmission',
-            'cv', 'displacement', 'co2', 'consumption', 'owners', 'doors',
-            'seats', 'euro_norm', 'color', 'itv_date', 'purchase_price', 'new_price',
-            'manual_tax_base', 'boe_confirmed', 'transport', 'itv_fee', 'coc_fee',
-            'dgt_fees', 'professional_fees', 'deposit', 'vin', 'vat_scenario', 'seller',
-            'city', 'lat', 'lng', 'status', 'url_link', 'traffic_light',
-            'valuation', 'recommendation', 'description', 'equipment',
-            'tips', 'red_flags', 'comparables_list', 'fotos_json', 'notes',
-            'research', 'pros', 'cons',
-            'is_marketplace',
-            'verdict', 'verdict_confidence', 'verdict_reasoning', 'verdict_changes',
-            'market_avg', 'market_min', 'market_max', 'estimated_saving',
-            'client_id',
-        ]));
+        $car->update($request->validated());
 
         return redirect()->route('cars.index')
             ->with('success', 'Car updated successfully.');
