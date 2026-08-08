@@ -14,6 +14,7 @@ import {
     ClockIcon,
     BanknotesIcon,
     ArrowRightIcon,
+    ArrowUpIcon,
     SparklesIcon,
     DocumentArrowDownIcon,
     MapPinIcon,
@@ -176,6 +177,11 @@ const scrolledPastHero = ref(false);
 const onScroll = () => { scrolledPastHero.value = window.scrollY > 380; };
 onMounted(() => { window.addEventListener('scroll', onScroll, { passive: true }); });
 onUnmounted(() => { window.removeEventListener('scroll', onScroll); });
+
+const scrollToTop = () => {
+    if (typeof window === 'undefined') return;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+};
 
 // Marketplace item 12: Newsletter popup suave con lead magnet.
 // Trigger: 30s en pagina o 50% scroll. Visible solo una vez por localStorage.
@@ -604,6 +610,7 @@ onMounted(() => {
             leave-to-class="opacity-0 -translate-y-2">
             <div
                 v-if="scrolledPastHero"
+                data-testid="sticky-filter-bar"
                 class="fixed left-0 right-0 top-0 z-30 border-b border-gray-200 bg-white/95 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-white/80">
                 <div class="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2 sm:px-6 lg:px-8">
                     <MagnifyingGlassIcon class="h-4 w-4 text-gray-400" />
@@ -630,6 +637,15 @@ onMounted(() => {
                         class="rounded-md px-2 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-50"
                     >
                         Limpiar
+                    </button>
+                    <button
+                        @click="scrollToTop"
+                        type="button"
+                        data-testid="sticky-filter-scroll-top"
+                        class="rounded-md p-1 text-gray-500 hover:bg-gray-100 hover:text-estoril-700"
+                        :aria-label="t('marketplace.back_to_top', { default: 'Volver arriba' })"
+                        :title="t('marketplace.back_to_top', { default: 'Volver arriba' })">
+                        <ArrowUpIcon class="h-4 w-4" />
                     </button>
                 </div>
             </div>
