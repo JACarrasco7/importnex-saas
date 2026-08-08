@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Car;
 use App\Models\Organization;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -92,19 +93,25 @@ class PublicMarketplaceController extends Controller
         // Marketplace item 2: opciones unicas para selects de filtros extendidos.
         // Se calculan SOLO del conjunto publico (no de toda la BD) para no mostrar
         // valores que el visitante nunca vera en el listado.
-        $publicCarsBase = Car::query()
-            ->whereHas('organization', fn ($q) => $q->where('is_public', true))
-            ->where('is_marketplace', true)
-            ->whereIn('status', ['Delivered'])
-            ->whereIn('verdict', ['Buy', 'Buy if price drops']);
+        //
+        // Cache 5 min: las opciones de filtro (brands/fuels/colors) cambian solo
+        // cuando se anade/quita un coche publico. Antes se ejecutaban 5 queries
+        // DISTINCT en cada request, ahora se cachean en Cache::remember().
+        $filterOptions = Cache::remember('marketplace.filter_options', now()->addMinutes(5), function () {
+            $publicCarsBase = Car::query()
+                ->whereHas('organization', fn ($q) => $q->where('is_public', true))
+                ->where('is_marketplace', true)
+                ->whereIn('status', ['Delivered'])
+                ->whereIn('verdict', ['Buy', 'Buy if price drops']);
 
-        $filterOptions = [
-            'brands' => (clone $publicCarsBase)->whereNotNull('brand')->where('brand', '!=', '')->distinct()->orderBy('brand')->pluck('brand')->all(),
-            'fuels' => (clone $publicCarsBase)->whereNotNull('fuel')->where('fuel', '!=', '')->distinct()->orderBy('fuel')->pluck('fuel')->all(),
-            'transmissions' => (clone $publicCarsBase)->whereNotNull('transmission')->where('transmission', '!=', '')->distinct()->orderBy('transmission')->pluck('transmission')->all(),
-            'doors' => (clone $publicCarsBase)->whereNotNull('doors')->distinct()->orderBy('doors')->pluck('doors')->all(),
-            'colors' => (clone $publicCarsBase)->whereNotNull('color')->where('color', '!=', '')->distinct()->orderBy('color')->pluck('color')->all(),
-        ];
+            return [
+                'brands' => (clone $publicCarsBase)->whereNotNull('brand')->where('brand', '!=', '')->distinct()->orderBy('brand')->pluck('brand')->all(),
+                'fuels' => (clone $publicCarsBase)->whereNotNull('fuel')->where('fuel', '!=', '')->distinct()->orderBy('fuel')->pluck('fuel')->all(),
+                'transmissions' => (clone $publicCarsBase)->whereNotNull('transmission')->where('transmission', '!=', '')->distinct()->orderBy('transmission')->pluck('transmission')->all(),
+                'doors' => (clone $publicCarsBase)->whereNotNull('doors')->distinct()->orderBy('doors')->pluck('doors')->all(),
+                'colors' => (clone $publicCarsBase)->whereNotNull('color')->where('color', '!=', '')->distinct()->orderBy('color')->pluck('color')->all(),
+            ];
+        });
 
         $requestUrl = null;
         $publicOrg = Organization::where('is_public', true)->first();

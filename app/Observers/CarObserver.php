@@ -8,6 +8,7 @@ use App\Models\CarChecklist;
 use App\Models\CarDocument;
 use App\Support\CarChecklistDefinitions;
 use App\Support\CarDocumentDefinitions;
+use Illuminate\Support\Facades\Cache;
 
 class CarObserver
 {
@@ -43,6 +44,7 @@ class CarObserver
         // Flush sitemap cache if marketplace visibility changed.
         if ($car->isDirty('is_marketplace')) {
             SitemapController::flush();
+            Cache::forget('marketplace.filter_options');
         }
     }
 
@@ -53,6 +55,7 @@ class CarObserver
 
         if ($car->is_marketplace) {
             SitemapController::flush();
+            Cache::forget('marketplace.filter_options');
         }
     }
 
@@ -60,6 +63,7 @@ class CarObserver
     {
         if ($car->wasChanged('is_marketplace')) {
             SitemapController::flush();
+            Cache::forget('marketplace.filter_options');
         }
     }
 
@@ -67,6 +71,7 @@ class CarObserver
     {
         if ($car->is_marketplace) {
             SitemapController::flush();
+            Cache::forget('marketplace.filter_options');
         }
     }
 
