@@ -102,7 +102,7 @@ Route::post('stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])
 Route::prefix('request/{slug}')->name('public.car-request.')->group(function () {
     Route::get('/', [PublicCarRequestController::class, 'index'])->name('index');
     Route::post('/', [PublicCarRequestController::class, 'store'])
-        ->middleware('throttle:5,10')
+        ->middleware('throttle:api-heavy')
         ->name('store');
     Route::get('/success', [PublicCarRequestController::class, 'success'])->name('success');
 });
@@ -155,7 +155,7 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
         ->name('cars.store');
     Route::post('/cars/import', [CarController::class, 'import'])->name('cars.import');
     Route::post('/cars/scrape-url', [CarController::class, 'scrapeUrl'])
-        ->middleware('throttle:30,1')
+        ->middleware('throttle:api-read')
         ->name('cars.scrape-url');
     Route::get('/cars/{car}', [CarController::class, 'show'])->name('cars.show');
     Route::get('/cars/{car}/edit', [CarController::class, 'edit'])->name('cars.edit');
