@@ -21,16 +21,16 @@ use App\Http\Controllers\JJImportFolletoController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\MarketingController;
 use App\Http\Controllers\MessageTemplateController;
+use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\PaqueteValoracionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicCarRequestController;
 use App\Http\Controllers\PublicMarketplaceController;
+use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\StripeWebhookController;
-use App\Http\Controllers\PushSubscriptionController;
-use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\TripPlannerController;
 use App\Http\Controllers\ValuationImportController;
@@ -72,6 +72,21 @@ Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap')
 Route::get('/admin', function () {
     return Auth::check() ? redirect('/dashboard') : redirect('/');
 })->name('admin');
+
+// PWA static files (manifest, sw.js) — Laravel doesn't serve public/* in testing
+// We expose them via routes so feature tests can verify them. In production,
+// these are served directly by the web server (faster).
+Route::get('/manifest.json', function () {
+    return response()->json(json_decode(file_get_contents(public_path('manifest.json')), true), 200)
+        ->header('Content-Type', 'application/manifest+json');
+})->name('pwa.manifest');
+
+Route::get('/sw.js', function () {
+    return response(file_get_contents(public_path('sw.js')), 200, [
+        'Content-Type' => 'application/javascript',
+        'Service-Worker-Allowed' => '/',
+    ]);
+})->name('pwa.sw');
 
 // Stripe webhook (must be outside auth/csrf middleware)
 Route::post('stripe/webhook', [StripeWebhookController::class, 'handleWebhook']);
@@ -279,7 +294,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::get('/jj-import/folleto', [JJImportFolletoController::class, 'download'])->name('jj-import.folleto');
 
 // Marketplace item 12: newsletter public (sin auth, con rate limit)
-Route::post('/newsletter/subscribe', [\App\Http\Controllers\NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
-Route::delete('/newsletter/unsubscribe', [\App\Http\Controllers\NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
+Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
+Route::delete('/newsletter/unsubscribe', [NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
 
 require __DIR__.'/auth.php';

@@ -30,6 +30,14 @@
         <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
+        <!-- PWA -->
+        <link rel="manifest" href="/manifest.json">
+        <meta name="theme-color" content="#1A306D">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        <meta name="apple-mobile-web-app-title" content="JJ Imports">
+        <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+
         <!-- DNS prefetch para recursos externos (reduce latencia DNS) -->
         <link rel="dns-prefetch" href="//fonts.bunny.net">
         <link rel="dns-prefetch" href="//api.stripe.com">
@@ -48,6 +56,17 @@
 
         <!-- OneSignal SDK -->
         <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async></script>
+
+        <!-- Service Worker registration -->
+        <script>
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/sw.js')
+                        .then(reg => console.log('[PWA] Service Worker registered:', reg.scope))
+                        .catch(err => console.warn('[PWA] Service Worker registration failed:', err));
+                });
+            }
+        </script>
 
         <!-- Scripts -->
         @routes
