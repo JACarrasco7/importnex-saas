@@ -24,6 +24,7 @@ use App\Http\Controllers\MarketingController;
 use App\Http\Controllers\MessageTemplateController;
 use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\OnboardingController;
+use App\Http\Controllers\OpenApiController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\PaqueteValoracionController;
 use App\Http\Controllers\ProfileController;
@@ -78,6 +79,9 @@ Route::get('/admin', function () {
 Route::get('/health', [HealthController::class, 'index'])->name('health');
 Route::get('/health/live', [HealthController::class, 'live'])->name('health.live');
 Route::get('/health/ready', [HealthController::class, 'ready'])->name('health.ready');
+
+// OpenAPI specification (machine-readable API docs)
+Route::get('/openapi.json', [OpenApiController::class, 'json'])->name('openapi.json');
 
 // PWA static files (manifest, sw.js) — Laravel doesn't serve public/* in testing
 // We expose them via routes so feature tests can verify them. In production,
