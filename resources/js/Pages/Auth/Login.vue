@@ -29,7 +29,7 @@ const inputClass = 'block w-full rounded-lg border-gray-300 pl-10 text-sm text-g
 
         <div class="mb-8">
             <h2 class="text-2xl font-bold text-gray-900 dark:text-white">{{ t('auth.login') }} {{ t('app.title') }}</h2>
-            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ t('auth.login') }} {{ t('app.title') }} {{ t('auth.remember_me') }}</p>
+            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ t('auth.login_subtitle') }}</p>
         </div>
 
         <form @submit.prevent="submit" class="space-y-5">
@@ -63,7 +63,7 @@ const inputClass = 'block w-full rounded-lg border-gray-300 pl-10 text-sm text-g
             </button>
 
             <p class="text-center text-sm text-gray-600 dark:text-gray-400">
-                {{ t('auth.register') }}?
+                {{ t('auth.no_account') }}
                 <Link :href="route('register')" class="font-semibold text-estoril-600 hover:text-estoril-500 dark:text-estoril-300">{{ t('auth.register') }}</Link>
             </p>
         </form>

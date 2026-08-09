@@ -46,6 +46,8 @@ export default {
         new_password: 'Nueva contraseña',
         send_reset_link: 'Enviar enlace para restablecer contraseña',
         confirm: 'Confirmar',
+        login_subtitle: 'Accede a tu cuenta para gestionar tu negocio',
+        no_account: '¿No tienes una cuenta?',
     },
     nav: {
         overview: 'Resumen',

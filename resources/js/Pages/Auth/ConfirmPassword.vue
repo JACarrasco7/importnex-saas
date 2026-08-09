@@ -11,7 +11,7 @@ const form = useForm({ password: '' });
 
 const submit = () => form.post(route('password.confirm'), { onFinish: () => form.reset() });
 
-const inputClass = 'block w-full rounded-lg border-gray-300 pl-10 text-sm shadow-sm focus:border-estoril-500 focus:ring-estoril-500';
+const inputClass = 'block w-full rounded-lg border-gray-300 pl-10 text-sm text-gray-900 shadow-sm focus:border-estoril-500 focus:ring-estoril-500 dark:border-asphalt-600 dark:bg-asphalt-800 dark:text-white';
 </script>
 
 <template>
@@ -19,11 +19,11 @@ const inputClass = 'block w-full rounded-lg border-gray-300 pl-10 text-sm shadow
 
     <GuestLayout>
         <div class="mb-8">
-            <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50">
-                <ShieldCheckIcon class="h-6 w-6 text-amber-600" />
+            <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 dark:bg-amber-900/30">
+                <ShieldCheckIcon class="h-6 w-6 text-amber-600 dark:text-amber-300" />
             </div>
-            <h2 class="text-center text-2xl font-bold text-gray-900">{{ t('auth.confirm_password') }}</h2>
-            <p class="mt-2 text-center text-sm text-gray-600">{{ t('auth.confirm_password_desc') }}</p>
+            <h2 class="text-center text-2xl font-bold text-gray-900 dark:text-white">{{ t('auth.confirm_password') }}</h2>
+            <p class="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">{{ t('auth.confirm_password_desc') }}</p>
         </div>
 
         <form @submit.prevent="submit" class="space-y-5">

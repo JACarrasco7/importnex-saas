@@ -21,7 +21,7 @@ const form = useForm({
 
 const submit = () => form.post(route('password.store'), { onFinish: () => form.reset('password', 'password_confirmation') });
 
-const inputClass = 'block w-full rounded-lg border-gray-300 pl-10 text-sm shadow-sm focus:border-estoril-500 focus:ring-estoril-500';
+const inputClass = 'block w-full rounded-lg border-gray-300 pl-10 text-sm text-gray-900 shadow-sm focus:border-estoril-500 focus:ring-estoril-500 dark:border-asphalt-600 dark:bg-asphalt-800 dark:text-white';
 </script>
 
 <template>
@@ -29,8 +29,8 @@ const inputClass = 'block w-full rounded-lg border-gray-300 pl-10 text-sm shadow
 
     <GuestLayout>
         <div class="mb-8">
-            <h2 class="text-2xl font-bold text-gray-900">{{ t('auth.reset_password') }}</h2>
-            <p class="mt-1 text-sm text-gray-600">{{ t('auth.choose_new_password') }}</p>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">{{ t('auth.reset_password') }}</h2>
+            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ t('auth.choose_new_password') }}</p>
         </div>
 
         <form @submit.prevent="submit" class="space-y-5">

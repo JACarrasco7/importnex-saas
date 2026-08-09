@@ -46,6 +46,8 @@ export default {
         new_password: 'New password',
         send_reset_link: 'Email password reset link',
         confirm: 'Confirm',
+        login_subtitle: 'Log in to manage your business',
+        no_account: "Don't have an account?",
     },
     nav: {
         overview: 'Overview',

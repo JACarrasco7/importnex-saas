@@ -13,7 +13,7 @@ const form = useForm({ email: '' });
 
 const submit = () => form.post(route('password.email'));
 
-const inputClass = 'block w-full rounded-lg border-gray-300 pl-10 text-sm shadow-sm focus:border-estoril-500 focus:ring-estoril-500';
+const inputClass = 'block w-full rounded-lg border-gray-300 pl-10 text-sm text-gray-900 shadow-sm focus:border-estoril-500 focus:ring-estoril-500 dark:border-asphalt-600 dark:bg-asphalt-800 dark:text-white';
 </script>
 
 <template>
@@ -21,11 +21,11 @@ const inputClass = 'block w-full rounded-lg border-gray-300 pl-10 text-sm shadow
 
     <GuestLayout>
         <div class="mb-8">
-            <h2 class="text-2xl font-bold text-gray-900">{{ t('auth.forgot_password') }}</h2>
-            <p class="mt-2 text-sm text-gray-600">{{ t('auth.forgot_password_desc') }}</p>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">{{ t('auth.forgot_password') }}</h2>
+            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">{{ t('auth.forgot_password_desc') }}</p>
         </div>
 
-        <div v-if="status" class="mb-4 rounded-lg bg-emerald-50 p-3 text-sm font-medium text-emerald-700 ring-1 ring-emerald-200">
+        <div v-if="status" class="mb-4 rounded-lg bg-emerald-50 p-3 text-sm font-medium text-emerald-700 ring-1 ring-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:ring-emerald-800">
             {{ status }}
         </div>
 
@@ -42,9 +42,9 @@ const inputClass = 'block w-full rounded-lg border-gray-300 pl-10 text-sm shadow
                 {{ form.processing ? t('app.loading') : t('auth.send_reset_link') }}
             </button>
 
-            <p class="text-center text-sm text-gray-600">
-                {{ t('auth.login') }}?
-                <Link :href="route('login')" class="font-semibold text-estoril-600 hover:text-estoril-500">{{ t('auth.login') }}</Link>
+            <p class="text-center text-sm text-gray-600 dark:text-gray-400">
+                {{ t('auth.no_account') }}
+                <Link :href="route('login')" class="font-semibold text-estoril-600 hover:text-estoril-500 dark:text-estoril-300">{{ t('auth.login') }}</Link>
             </p>
         </form>
     </GuestLayout>

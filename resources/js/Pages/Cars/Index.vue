@@ -131,7 +131,7 @@ const confirmDelete = () => {
 
         <div class="py-8">
             <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <PageHeader :title="t('nav.inventory')" :subtitle="t('app.inventory_count', { count: cars.total || 0 })">
+                <PageHeader :title="t('nav.inventory')" :subtitle="t('app.inventory_count', { count: props.cars?.total || 0 })">
                     <template #actions>
                         <Link :href="route('cars.kanban')" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             <Squares2X2Icon class="h-4 w-4" />
