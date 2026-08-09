@@ -88,6 +88,7 @@
         scroll-behavior: smooth;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
         color-scheme: light;
     }
 
@@ -101,6 +102,11 @@
 
     html.dark body {
         @apply bg-asphalt-900 text-asphalt-100;
+    }
+
+    ::selection {
+        background-color: var(--color-estoril-600);
+        color: #fff;
     }
 
     :focus-visible {
@@ -136,5 +142,11 @@
 
     .text-gradient {
         @apply bg-gradient-to-r from-estoril-600 to-estoril-400 bg-clip-text text-transparent;
+    }
+
+    /* Superficie glass reutilizable: cards y paneles con blur sutil */
+    .glass-surface {
+        @apply bg-white/80 shadow-sm ring-1 ring-asphalt-200/50 backdrop-blur
+               dark:bg-asphalt-800/80 dark:ring-asphalt-700/60;
     }
 }

@@ -25,9 +25,9 @@ const requestHref = computed(
 );
 
 const navLinks = computed(() => [
-    { label: t('marketplace.nav_catalog', 'Catálogo'), href: route('marketplace.index') },
-    { label: t('marketplace.nav_how', 'Cómo funciona'), href: route('marketplace.index') + '#how-it-works' },
-    { label: t('marketplace.nav_contact', 'Contacto'), href: route('marketplace.index') + '#contacto' },
+    { label: t('marketplace.nav_catalog', {}, 'Catálogo'), href: route('marketplace.index') },
+    { label: t('marketplace.nav_how', {}, 'Cómo funciona'), href: route('marketplace.index') + '#how-it-works' },
+    { label: t('marketplace.nav_contact', {}, 'Contacto'), href: route('marketplace.index') + '#contacto' },
 ]);
 
 const close = () => { mobileOpen.value = false; };
@@ -66,7 +66,7 @@ const close = () => { mobileOpen.value = false; };
                         :href="requestHref"
                         class="inline-flex items-center gap-1 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-estoril-500"
                     >
-                        {{ t('marketplace.nav_request', 'Solicita tu coche') }}
+                        {{ t('marketplace.nav_request', {}, 'Solicita tu coche') }}
                         <ChevronRightIcon class="h-4 w-4" />
                     </Link>
                 </div>
@@ -75,7 +75,7 @@ const close = () => { mobileOpen.value = false; };
                 <button
                     type="button"
                     class="md:hidden rounded-lg p-2 text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-asphalt-800"
-                    :aria-label="mobileOpen ? t('public.nav.close_menu', 'Cerrar menú') : t('public.nav.open_menu', 'Abrir menú')"
+                    :aria-label="mobileOpen ? t('public.nav.close_menu', {}, 'Cerrar menú') : t('public.nav.open_menu', {}, 'Abrir menú')"
                     :aria-expanded="mobileOpen"
                     @click="mobileOpen = !mobileOpen"
                 >
@@ -110,7 +110,7 @@ const close = () => { mobileOpen.value = false; };
                             class="rounded-lg bg-estoril-600 px-3 py-2 text-center text-sm font-semibold text-white"
                             @click="close"
                         >
-                            {{ t('marketplace.nav_request', 'Solicita tu coche') }}
+                            {{ t('marketplace.nav_request', {}, 'Solicita tu coche') }}
                         </Link>
                         <div class="mt-2 flex items-center justify-between gap-2 px-3">
                             <LocaleSelector />
@@ -138,34 +138,34 @@ const close = () => { mobileOpen.value = false; };
                             <span class="text-lg font-bold text-gray-900 dark:text-white">{{ orgName }}</span>
                         </div>
                         <p class="mt-3 text-sm text-gray-600 dark:text-gray-400">
-                            {{ t('marketplace.footer_tagline', 'Vehículos verificados importados desde Alemania, listos para ti.') }}
+                            {{ t('marketplace.footer_tagline', {}, 'Vehículos verificados importados desde Alemania, listos para ti.') }}
                         </p>
                     </div>
                     <div>
                         <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-white">
-                            {{ t('marketplace.footer_catalog', 'Catálogo') }}
+                            {{ t('marketplace.footer_catalog', {}, 'Catálogo') }}
                         </h3>
                         <ul class="mt-3 space-y-2 text-sm">
                             <li>
                                 <Link :href="route('marketplace.index')" class="text-gray-600 hover:text-estoril-700 dark:text-gray-400 dark:hover:text-estoril-300">
-                                    {{ t('marketplace.nav_catalog', 'Catálogo') }}
+                                    {{ t('marketplace.nav_catalog', {}, 'Catálogo') }}
                                 </Link>
                             </li>
                             <li>
                                 <Link :href="route('marketplace.index') + '#how-it-works'" class="text-gray-600 hover:text-estoril-700 dark:text-gray-400 dark:hover:text-estoril-300">
-                                    {{ t('marketplace.nav_how', 'Cómo funciona') }}
+                                    {{ t('marketplace.nav_how', {}, 'Cómo funciona') }}
                                 </Link>
                             </li>
                             <li>
                                 <Link :href="route('marketplace.index') + '#contacto'" class="text-gray-600 hover:text-estoril-700 dark:text-gray-400 dark:hover:text-estoril-300">
-                                    {{ t('marketplace.nav_contact', 'Contacto') }}
+                                    {{ t('marketplace.nav_contact', {}, 'Contacto') }}
                                 </Link>
                             </li>
                         </ul>
                     </div>
                     <div>
                         <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-white">
-                            {{ t('marketplace.footer_contact', 'Contacto') }}
+                            {{ t('marketplace.footer_contact', {}, 'Contacto') }}
                         </h3>
                         <ul class="mt-3 space-y-2 text-sm">
                             <li>
@@ -187,7 +187,7 @@ const close = () => { mobileOpen.value = false; };
                     </div>
                     <div>
                         <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-white">
-                            {{ t('marketplace.footer_legal', 'Legal') }}
+                            {{ t('marketplace.footer_legal', {}, 'Legal') }}
                         </h3>
                         <ul class="mt-3 space-y-2 text-sm">
                             <li>
@@ -208,7 +208,7 @@ const close = () => { mobileOpen.value = false; };
                         © {{ new Date().getFullYear() }} {{ orgName }}. {{ t('public.footer.rights', 'Todos los derechos reservados.') }}
                     </p>
                     <Link :href="route('pricing')" class="hover:text-estoril-700 dark:hover:text-estoril-300">
-                        {{ t('marketplace.footer_saas', '¿Eres importador? Conoce la plataforma') }}
+                        {{ t('marketplace.footer_saas', {}, '¿Eres importador? Conoce la plataforma') }}
                     </Link>
                 </div>
             </div>

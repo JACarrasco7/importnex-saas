@@ -245,11 +245,11 @@ onMounted(() => {
             <div class="absolute right-16 bottom-24 h-32 w-32 rounded-full bg-asphalt-300/30 blur-2xl dark:bg-asphalt-700/30"></div>
             <div class="absolute left-1/3 top-10 h-16 w-16 rounded-full bg-platinum-300/50 blur-xl dark:bg-platinum-800/30"></div>
 
-            <!-- Ola decorativa inferior -->
+            <!-- Ola decorativa inferior (se adapta a dark) -->
             <div class="pointer-events-none absolute bottom-0 left-0 right-0">
                 <svg class="h-12 w-full sm:h-16" viewBox="0 0 1440 80" preserveAspectRatio="none" aria-hidden="true">
-                    <path d="M0,40 C240,80 480,0 720,30 C960,60 1200,10 1440,40 L1440,80 L0,80 Z" fill="#ffffff" fill-opacity="0.7"></path>
-                    <path d="M0,60 C260,90 520,20 760,50 C1000,80 1240,40 1440,60 L1440,80 L0,80 Z" fill="#1A306D" fill-opacity="0.12"></path>
+                    <path d="M0,40 C240,80 480,0 720,30 C960,60 1200,10 1440,40 L1440,80 L0,80 Z" class="fill-white/70 transition-colors duration-300 dark:fill-asphalt-900/70"></path>
+                    <path d="M0,60 C260,90 520,20 760,50 C1000,80 1240,40 1440,60 L1440,80 L0,80 Z" class="fill-estoril-700/10"></path>
                 </svg>
             </div>
 
@@ -269,9 +269,9 @@ onMounted(() => {
                         {{ t('marketplace.description') }}
                     </p>
                     <div class="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                        <a href="#catalogo" class="inline-flex items-center gap-2 rounded-xl bg-estoril-700 px-7 py-3.5 text-base font-semibold text-white shadow-lg shadow-estoril-700/20 transition hover:-translate-y-0.5 hover:bg-estoril-800 hover:shadow-xl">
+                        <a href="#catalogo" class="group inline-flex items-center gap-2 rounded-xl bg-linear-to-br from-estoril-700 to-estoril-900 px-7 py-3.5 text-base font-semibold text-white shadow-lg shadow-estoril-700/25 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-estoril-700/30">
                             {{ t('marketplace.cta_primary') }}
-                            <ArrowRightIcon class="h-4 w-4" />
+                            <ArrowRightIcon class="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
                         </a>
                         <a href="#contacto" class="inline-flex items-center gap-2 rounded-xl bg-white px-7 py-3.5 text-base font-semibold text-gray-900 shadow-sm ring-1 ring-gray-200 transition hover:bg-gray-50 hover:ring-estoril-300 dark:bg-asphalt-800 dark:text-white dark:ring-asphalt-600 dark:hover:bg-asphalt-700">
                             <PhoneIcon class="h-4 w-4" />
@@ -500,19 +500,19 @@ onMounted(() => {
                             </div>
 
                             <dl class="mt-4 grid grid-cols-3 gap-2">
-                                <div class="rounded-lg bg-gray-50 px-2 py-2 text-center dark:bg-asphalt-700">
+                                <div class="rounded-lg bg-gray-50 px-2 py-2 text-center ring-1 ring-inset ring-gray-100 transition-colors duration-300 dark:bg-asphalt-700/60 dark:ring-asphalt-600/50">
                                     <dt class="flex items-center justify-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                                         <CalendarDaysIcon class="h-3 w-3" /> {{ t('marketplace.specs_year') }}
                                     </dt>
                                     <dd class="mt-0.5 text-sm font-semibold text-gray-900 dark:text-white">{{ car.year }}</dd>
                                 </div>
-                                <div class="rounded-lg bg-gray-50 px-2 py-2 text-center dark:bg-asphalt-700">
+                                <div class="rounded-lg bg-gray-50 px-2 py-2 text-center ring-1 ring-inset ring-gray-100 transition-colors duration-300 dark:bg-asphalt-700/60 dark:ring-asphalt-600/50">
                                     <dt class="flex items-center justify-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                                         <BoltIcon class="h-3 w-3" /> {{ t('marketplace.specs_km') }}
                                     </dt>
                                     <dd class="mt-0.5 text-sm font-semibold text-gray-900 dark:text-white">{{ car.mileage ? (car.mileage / 1000).toFixed(0) + 'k' : t('marketplace.not_available') }}</dd>
                                 </div>
-                                <div class="rounded-lg bg-gray-50 px-2 py-2 text-center dark:bg-asphalt-700">
+                                <div class="rounded-lg bg-gray-50 px-2 py-2 text-center ring-1 ring-inset ring-gray-100 transition-colors duration-300 dark:bg-asphalt-700/60 dark:ring-asphalt-600/50">
                                     <dt class="flex items-center justify-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                                         {{ t('marketplace.specs_fuel') }}
                                     </dt>
@@ -523,7 +523,7 @@ onMounted(() => {
                             <div class="mt-4 flex items-end justify-between gap-3 border-t border-gray-100 pt-4 dark:border-asphalt-700">
                                 <div class="min-w-0">
                                     <p class="text-xs text-gray-500 dark:text-gray-400">{{ t('marketplace.price_from') }}</p>
-                                    <p class="truncate text-2xl font-extrabold tracking-tight text-estoril-800">{{ currency(car.purchase_price) }}</p>
+                                    <p class="truncate text-2xl font-extrabold tracking-tight text-estoril-800 transition-colors dark:text-estoril-300">{{ currency(car.purchase_price) }}</p>
                                 </div>
                                 <span class="inline-flex shrink-0 items-center gap-1 rounded-full bg-estoril-700 px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm transition group-hover:bg-estoril-800">
                                     {{ t('marketplace.view_report') }}
