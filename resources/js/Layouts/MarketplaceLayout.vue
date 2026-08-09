@@ -9,7 +9,6 @@ import {
 } from '@heroicons/vue/24/outline';
 import LocaleSelector from '@/Components/LocaleSelector.vue';
 import DarkModeToggle from '@/Components/DarkModeToggle.vue';
-import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import WhatsAppFloat from '@/Components/WhatsAppFloat.vue';
 import { useTranslations } from '@/Composables/useTranslations';
 
@@ -17,13 +16,18 @@ const { t } = useTranslations();
 const page = usePage();
 
 const mobileOpen = ref(false);
-const user = computed(() => page.props?.auth?.user ?? null);
 
-// Layout del SaaS (plataforma de gestion para importadores): landing + pricing.
-// El marketplace publico de coches usa MarketplaceLayout.vue (separado).
+// Contexto del marketplace publico (compartido desde HandleInertiaRequests).
+const marketplace = computed(() => page.props.marketplace ?? {});
+const orgName = computed(() => marketplace.value.orgName || 'JJ Import Motors');
+const requestHref = computed(
+    () => marketplace.value.requestUrl || route('marketplace.index') + '#contacto',
+);
+
 const navLinks = computed(() => [
-    { label: t('public.nav.home', 'Inicio'), href: '/' },
-    { label: t('public.nav.pricing', 'Precios'), href: route('pricing') },
+    { label: t('marketplace.nav_catalog', 'Catálogo'), href: route('marketplace.index') },
+    { label: t('marketplace.nav_how', 'Cómo funciona'), href: route('marketplace.index') + '#how-it-works' },
+    { label: t('marketplace.nav_contact', 'Contacto'), href: route('marketplace.index') + '#contacto' },
 ]);
 
 const close = () => { mobileOpen.value = false; };
@@ -34,11 +38,11 @@ const close = () => { mobileOpen.value = false; };
         <!-- Header sticky -->
         <header class="sticky top-0 z-30 border-b border-gray-200/70 bg-white/80 backdrop-blur-md dark:border-asphalt-700/60 dark:bg-asphalt-900/80">
             <nav class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-                <Link :href="user ? route('dashboard') : '/'" class="flex items-center gap-2.5" @click="close">
+                <Link :href="route('marketplace.index')" class="flex items-center gap-2.5" @click="close">
                     <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-estoril-600 to-estoril-800 shadow-sm">
                         <TruckIcon class="h-5 w-5 text-white" />
                     </div>
-                    <span class="text-lg font-bold tracking-tight text-gray-900 dark:text-white">JJ Import Motors</span>
+                    <span class="text-lg font-bold tracking-tight text-gray-900 dark:text-white">{{ orgName }}</span>
                 </Link>
 
                 <!-- Desktop nav -->
@@ -55,27 +59,16 @@ const close = () => { mobileOpen.value = false; };
                 </div>
 
                 <!-- Right actions -->
-                <div class="hidden items-center gap-2 md:flex">
+                <div class="hidden items-center gap-3 md:flex">
                     <LocaleSelector />
                     <DarkModeToggle />
-                    <template v-if="user">
-                        <Link :href="route('dashboard')" class="rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-estoril-500">
-                            {{ t('nav.dashboard') }}
-                        </Link>
-                    </template>
-                    <template v-else>
-                        <Link :href="route('login')" class="text-sm font-semibold text-gray-700 hover:text-gray-900 dark:text-gray-200">
-                            {{ t('auth.login') }}
-                        </Link>
-                        <Link
-                            v-if="$page.props.canRegister ?? true"
-                            :href="route('register')"
-                            class="inline-flex items-center gap-1 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-estoril-500"
-                        >
-                            {{ t('welcome.start_trial') }}
-                            <ChevronRightIcon class="h-4 w-4" />
-                        </Link>
-                    </template>
+                    <Link
+                        :href="requestHref"
+                        class="inline-flex items-center gap-1 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-estoril-500"
+                    >
+                        {{ t('marketplace.nav_request', 'Solicita tu coche') }}
+                        <ChevronRightIcon class="h-4 w-4" />
+                    </Link>
                 </div>
 
                 <!-- Mobile burger -->
@@ -113,21 +106,12 @@ const close = () => { mobileOpen.value = false; };
                         </Link>
                         <div class="my-2 border-t border-gray-200 dark:border-asphalt-700" />
                         <Link
-                            v-if="user"
-                            :href="route('dashboard')"
+                            :href="requestHref"
                             class="rounded-lg bg-estoril-600 px-3 py-2 text-center text-sm font-semibold text-white"
                             @click="close"
                         >
-                            {{ t('nav.dashboard') }}
+                            {{ t('marketplace.nav_request', 'Solicita tu coche') }}
                         </Link>
-                        <template v-else>
-                            <Link :href="route('login')" class="rounded-lg px-3 py-2 text-center text-sm font-semibold text-gray-700 dark:text-gray-200" @click="close">
-                                {{ t('auth.login') }}
-                            </Link>
-                            <Link :href="route('register')" class="rounded-lg bg-estoril-600 px-3 py-2 text-center text-sm font-semibold text-white" @click="close">
-                                {{ t('welcome.start_trial') }}
-                            </Link>
-                        </template>
                         <div class="mt-2 flex items-center justify-between gap-2 px-3">
                             <LocaleSelector />
                             <DarkModeToggle />
@@ -151,44 +135,39 @@ const close = () => { mobileOpen.value = false; };
                             <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-estoril-600 to-estoril-800">
                                 <TruckIcon class="h-5 w-5 text-white" />
                             </div>
-                            <span class="text-lg font-bold text-gray-900 dark:text-white">JJ Import Motors</span>
+                            <span class="text-lg font-bold text-gray-900 dark:text-white">{{ orgName }}</span>
                         </div>
                         <p class="mt-3 text-sm text-gray-600 dark:text-gray-400">
-                            {{ t('welcome.ai_powered') }}
+                            {{ t('marketplace.footer_tagline', 'Vehículos verificados importados desde Alemania, listos para ti.') }}
                         </p>
                     </div>
                     <div>
                         <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-white">
-                            {{ t('public.footer.product', 'Producto') }}
+                            {{ t('marketplace.footer_catalog', 'Catálogo') }}
                         </h3>
                         <ul class="mt-3 space-y-2 text-sm">
                             <li>
-                                <Link :href="route('pricing')" class="text-gray-600 hover:text-estoril-700 dark:text-gray-400 dark:hover:text-estoril-300">
-                                    {{ t('public.nav.pricing', 'Precios') }}
-                                </Link>
-                            </li>
-                            <li>
-                                <Link v-if="user" :href="route('dashboard')" class="text-gray-600 hover:text-estoril-700 dark:text-gray-400 dark:hover:text-estoril-300">
-                                    {{ t('nav.dashboard') }}
-                                </Link>
-                            </li>
-                            <li>
                                 <Link :href="route('marketplace.index')" class="text-gray-600 hover:text-estoril-700 dark:text-gray-400 dark:hover:text-estoril-300">
-                                    {{ t('public.nav.view_marketplace', 'Ver marketplace de coches') }}
+                                    {{ t('marketplace.nav_catalog', 'Catálogo') }}
+                                </Link>
+                            </li>
+                            <li>
+                                <Link :href="route('marketplace.index') + '#how-it-works'" class="text-gray-600 hover:text-estoril-700 dark:text-gray-400 dark:hover:text-estoril-300">
+                                    {{ t('marketplace.nav_how', 'Cómo funciona') }}
+                                </Link>
+                            </li>
+                            <li>
+                                <Link :href="route('marketplace.index') + '#contacto'" class="text-gray-600 hover:text-estoril-700 dark:text-gray-400 dark:hover:text-estoril-300">
+                                    {{ t('marketplace.nav_contact', 'Contacto') }}
                                 </Link>
                             </li>
                         </ul>
                     </div>
                     <div>
                         <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-white">
-                            {{ t('public.footer.company', 'Empresa') }}
+                            {{ t('marketplace.footer_contact', 'Contacto') }}
                         </h3>
                         <ul class="mt-3 space-y-2 text-sm">
-                            <li>
-                                <Link :href="route('marketplace.index') + '#about'" class="text-gray-600 hover:text-estoril-700 dark:text-gray-400 dark:hover:text-estoril-300">
-                                    {{ t('public.footer.about', 'Sobre nosotros') }}
-                                </Link>
-                            </li>
                             <li>
                                 <a href="mailto:hola@jjimportmotors.com" class="text-gray-600 hover:text-estoril-700 dark:text-gray-400 dark:hover:text-estoril-300">
                                     hola@jjimportmotors.com
@@ -208,7 +187,7 @@ const close = () => { mobileOpen.value = false; };
                     </div>
                     <div>
                         <h3 class="text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-white">
-                            {{ t('public.footer.legal', 'Legal') }}
+                            {{ t('marketplace.footer_legal', 'Legal') }}
                         </h3>
                         <ul class="mt-3 space-y-2 text-sm">
                             <li>
@@ -224,13 +203,17 @@ const close = () => { mobileOpen.value = false; };
                         </ul>
                     </div>
                 </div>
-                <div class="mt-10 border-t border-gray-200 pt-6 text-xs text-gray-500 dark:border-asphalt-700 dark:text-gray-400">
-                    © {{ new Date().getFullYear() }} JJ Import Motors. {{ t('public.footer.rights', 'Todos los derechos reservados.') }}
+                <div class="mt-10 flex flex-col items-center justify-between gap-2 border-t border-gray-200 pt-6 text-xs text-gray-500 dark:border-asphalt-700 dark:text-gray-400 sm:flex-row">
+                    <p>
+                        © {{ new Date().getFullYear() }} {{ orgName }}. {{ t('public.footer.rights', 'Todos los derechos reservados.') }}
+                    </p>
+                    <Link :href="route('pricing')" class="hover:text-estoril-700 dark:hover:text-estoril-300">
+                        {{ t('marketplace.footer_saas', '¿Eres importador? Conoce la plataforma') }}
+                    </Link>
                 </div>
             </div>
         </footer>
 
-        <!-- WhatsApp Float -->
         <WhatsAppFloat />
     </div>
 </template>

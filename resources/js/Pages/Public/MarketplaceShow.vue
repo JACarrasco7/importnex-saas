@@ -15,7 +15,7 @@ import {
 } from '@heroicons/vue/24/outline';
 import MapaLeaflet from '@/Components/MapaLeaflet.vue';
 import Badge from '@/Components/Badge.vue';
-import PublicLayout from '@/Layouts/PublicLayout.vue';
+import MarketplaceLayout from '@/Layouts/MarketplaceLayout.vue';
 import ShareCar from '@/Components/ShareCar.vue';
 import WishlistButton from '@/Components/WishlistButton.vue';
 import LazyImage from '@/Components/LazyImage.vue';
@@ -206,7 +206,7 @@ const marketPosition = computed(() => {
         <link rel="canonical" :href="seoUrl" />
     </Head>
 
-    <PublicLayout>        <!-- SEO Schema.org Vehicle (Item 13: Schema.org Vehicle + Offer por coche) -->
+    <MarketplaceLayout>        <!-- SEO Schema.org Vehicle (Item 13: Schema.org Vehicle + Offer por coche) -->
         <script v-if="vehicleJsonLd" type="application/ld+json" v-html="vehicleJsonLd" />
         <div class="py-8">
             <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
@@ -530,5 +530,5 @@ const marketPosition = computed(() => {
                 </div>
             </div>
         </div>
-    </PublicLayout>
+    </MarketplaceLayout>
 </template>

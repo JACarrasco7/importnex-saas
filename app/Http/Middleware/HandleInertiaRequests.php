@@ -4,9 +4,11 @@ namespace App\Http\Middleware;
 
 use App\Models\Alert;
 use App\Models\CarRequest;
+use App\Models\Organization;
 use App\Models\UserOnboardingProgress;
 use App\Services\Ai\AiProviderRegistry;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -99,6 +101,25 @@ class HandleInertiaRequests extends Middleware
         // a one-place alert when the organization's last invoice failed.
         $billingDunning = $user ? $this->resolveBillingDunningContext($user) : null;
 
+        // Contexto del marketplace publico de coches (web del importador).
+        // Solo se resuelve para visitantes (guests) y se cachea 5 min.
+        // El MarketplaceLayout lo usa para la marca, el CTA de solicitud y
+        // la separacion con el SaaS (landing, pricing, auth).
+        $marketplaceContext = null;
+        if (! $user) {
+            $marketplaceContext = Cache::remember('marketplace.context', 300, function () {
+                $org = Organization::where('is_public', true)->first();
+
+                return [
+                    'orgName' => $org?->name ?? 'JJ Import Motors',
+                    'orgSlug' => $org?->slug,
+                    'requestUrl' => $org?->slug
+                        ? route('public.car-request.index', ['slug' => $org->slug])
+                        : null,
+                ];
+            });
+        }
+
         return [
             ...parent::share($request),
             'auth' => [
@@ -127,6 +148,8 @@ class HandleInertiaRequests extends Middleware
             // Flat props for layouts that read $page.props.payment_failed directly.
             'payment_failed' => $billingDunning['payment_failed'] ?? false,
             'payment_failed_at' => $billingDunning['payment_failed_at'] ?? null,
+            // Web publica de coches (marketplace) — separada del SaaS.
+            'marketplace' => $marketplaceContext,
         ];
     }
 

@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { TruckIcon, CheckCircleIcon, DocumentArrowDownIcon } from '@heroicons/vue/24/outline';
-import PublicLayout from '@/Layouts/PublicLayout.vue';
+import MarketplaceLayout from '@/Layouts/MarketplaceLayout.vue';
 import { useTranslations } from '@/Composables/useTranslations';
 
 const props = defineProps({
@@ -62,7 +62,7 @@ const submit = () => {
 <template>
     <Head :title="t('car_request_form.title')" />
 
-    <PublicLayout>
+    <MarketplaceLayout>
         <div class="bg-linear-to-br from-estoril-50 via-white to-platinum-100 transition-colors duration-300 dark:from-asphalt-900 dark:via-asphalt-900 dark:to-asphalt-800">
             <div class="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
             <!-- Header -->
@@ -451,5 +451,5 @@ const submit = () => {
             </a>
         </div>
         </div>
-    </PublicLayout>
+    </MarketplaceLayout>
 </template>

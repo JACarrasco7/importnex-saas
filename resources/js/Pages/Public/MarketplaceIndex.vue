@@ -27,7 +27,7 @@ import Badge from '@/Components/Badge.vue';
 import WishlistButton from '@/Components/WishlistButton.vue';
 import CompareBar from '@/Components/CompareBar.vue';
 import LazyImage from '@/Components/LazyImage.vue';
-import PublicLayout from '@/Layouts/PublicLayout.vue';
+import MarketplaceLayout from '@/Layouts/MarketplaceLayout.vue';
 import { useFormat } from '@/Composables/useFormat';
 import { useTranslations } from '@/Composables/useTranslations';
 
@@ -235,7 +235,7 @@ onMounted(() => {
 <template>
     <Head :title="t('marketplace.title')" />
 
-    <PublicLayout>
+    <MarketplaceLayout>
         <!-- HERO -->
         <section class="relative overflow-hidden bg-linear-to-br from-estoril-100 via-estoril-50 to-platinum-200 dark:from-asphalt-900 dark:via-asphalt-900 dark:to-asphalt-800">
             <div class="absolute -top-40 -right-40 h-[28rem] w-[28rem] rounded-full bg-estoril-300/60 blur-3xl dark:bg-estoril-900/30"></div>
@@ -709,5 +709,5 @@ onMounted(() => {
 
         <!-- Compare bar (Marketplace-3.8) -->
         <CompareBar />
-    </PublicLayout>
+    </MarketplaceLayout>
 </template>

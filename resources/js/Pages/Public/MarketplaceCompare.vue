@@ -5,7 +5,7 @@ import {
     ScaleIcon,
     ArrowRightIcon,
 } from '@heroicons/vue/24/outline';
-import PublicLayout from '@/Layouts/PublicLayout.vue';
+import MarketplaceLayout from '@/Layouts/MarketplaceLayout.vue';
 import LazyImage from '@/Components/LazyImage.vue';
 import { useFormat } from '@/Composables/useFormat';
 import { useTranslations } from '@/Composables/useTranslations';
@@ -36,7 +36,7 @@ const rows = computed(() => [
 <template>
     <Head :title="t('marketplace.compare.title', { default: 'Comparar vehículos' })" />
 
-    <PublicLayout>
+    <MarketplaceLayout>
         <div class="py-12">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <!-- Header -->
@@ -107,5 +107,5 @@ const rows = computed(() => [
                 </div>
             </div>
         </div>
-    </PublicLayout>
+    </MarketplaceLayout>
 </template>
