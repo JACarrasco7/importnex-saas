@@ -17,7 +17,8 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
     });
 }
 
-const appName = import.meta.env.VITE_APP_NAME || 'JJ Import Motors';
+const rawAppName = import.meta.env.VITE_APP_NAME;
+const appName = rawAppName && rawAppName !== 'Laravel' ? rawAppName : 'JJ Import Motors';
 
 createInertiaApp({
     title: (title) => `${title} · ${appName}`,

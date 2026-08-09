@@ -2,7 +2,7 @@
 // Maneja push notifications (Web Push API) y notifica al usuario.
 // También cachea assets estáticos para mejorar TTI offline.
 
-const CACHE_NAME = 'jj-import-v1';
+const CACHE_NAME = 'jj-import-v2';
 const PRECACHE_URLS = ['/', '/marketplace', '/pricing'];
 
 // Install: pre-cachear páginas críticas
