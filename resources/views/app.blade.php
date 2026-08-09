@@ -14,7 +14,6 @@
             h1,h2,h3,h4,h5,h6,p,figure,blockquote,dl,dd{margin:0}
             .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0}
             .min-h-screen{min-height:100vh}
-            .bg-linear-to-br{background-image:linear-gradient(to bottom right,var(--tw-gradient-stops))}
         </style>
 
         <!-- SEO Meta Tags -->
