@@ -237,13 +237,13 @@ onMounted(() => {
 
     <PublicLayout>
         <!-- HERO -->
-        <section class="relative overflow-hidden bg-linear-to-br from-estoril-100 via-estoril-50 to-platinum-200">
-            <div class="absolute -top-40 -right-40 h-[28rem] w-[28rem] rounded-full bg-estoril-300/60 blur-3xl"></div>
-            <div class="absolute -bottom-40 -left-40 h-[28rem] w-[28rem] rounded-full bg-platinum-400/50 blur-3xl"></div>
-            <div class="absolute left-1/2 top-1/4 h-80 w-80 -translate-x-1/2 rounded-full bg-estoril-500/20 blur-3xl"></div>
-            <div class="absolute left-10 top-24 h-24 w-24 rounded-full bg-estoril-400/40 blur-2xl"></div>
-            <div class="absolute right-16 bottom-24 h-32 w-32 rounded-full bg-asphalt-300/30 blur-2xl"></div>
-            <div class="absolute left-1/3 top-10 h-16 w-16 rounded-full bg-platinum-300/50 blur-xl"></div>
+        <section class="relative overflow-hidden bg-linear-to-br from-estoril-100 via-estoril-50 to-platinum-200 dark:from-asphalt-900 dark:via-asphalt-900 dark:to-asphalt-800">
+            <div class="absolute -top-40 -right-40 h-[28rem] w-[28rem] rounded-full bg-estoril-300/60 blur-3xl dark:bg-estoril-900/30"></div>
+            <div class="absolute -bottom-40 -left-40 h-[28rem] w-[28rem] rounded-full bg-platinum-400/50 blur-3xl dark:bg-platinum-900/30"></div>
+            <div class="absolute left-1/2 top-1/4 h-80 w-80 -translate-x-1/2 rounded-full bg-estoril-500/20 blur-3xl dark:bg-estoril-900/30"></div>
+            <div class="absolute left-10 top-24 h-24 w-24 rounded-full bg-estoril-400/40 blur-2xl dark:bg-estoril-800/30"></div>
+            <div class="absolute right-16 bottom-24 h-32 w-32 rounded-full bg-asphalt-300/30 blur-2xl dark:bg-asphalt-700/30"></div>
+            <div class="absolute left-1/3 top-10 h-16 w-16 rounded-full bg-platinum-300/50 blur-xl dark:bg-platinum-800/30"></div>
 
             <!-- Ola decorativa inferior -->
             <div class="pointer-events-none absolute bottom-0 left-0 right-0">
@@ -258,14 +258,14 @@ onMounted(() => {
 
             <div class="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8 lg:py-28">
                 <div class="mx-auto max-w-3xl text-center">
-                    <span class="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-1.5 text-sm font-semibold text-estoril-800 shadow-sm ring-1 ring-estoril-200 backdrop-blur">
-                        <SparklesIcon class="h-4 w-4 text-estoril-600" />
+                    <span class="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-1.5 text-sm font-semibold text-estoril-800 shadow-sm ring-1 ring-estoril-200 backdrop-blur dark:bg-asphalt-800/80 dark:text-estoril-300 dark:ring-asphalt-600">
+                        <SparklesIcon class="h-4 w-4 text-estoril-600 dark:text-estoril-400" />
                         {{ t('marketplace.tagline') }}
                     </span>
-                    <h1 class="mt-6 text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl">
+                    <h1 class="mt-6 text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl dark:text-white">
                         {{ t('marketplace.hero_title') }}
                     </h1>
-                    <p class="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-gray-600">
+                    <p class="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-gray-600 dark:text-gray-400">
                         {{ t('marketplace.description') }}
                     </p>
                     <div class="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -273,7 +273,7 @@ onMounted(() => {
                             {{ t('marketplace.cta_primary') }}
                             <ArrowRightIcon class="h-4 w-4" />
                         </a>
-                        <a href="#contacto" class="inline-flex items-center gap-2 rounded-xl bg-white px-7 py-3.5 text-base font-semibold text-gray-900 shadow-sm ring-1 ring-gray-200 transition hover:bg-gray-50 hover:ring-estoril-300">
+                        <a href="#contacto" class="inline-flex items-center gap-2 rounded-xl bg-white px-7 py-3.5 text-base font-semibold text-gray-900 shadow-sm ring-1 ring-gray-200 transition hover:bg-gray-50 hover:ring-estoril-300 dark:bg-asphalt-800 dark:text-white dark:ring-asphalt-600 dark:hover:bg-asphalt-700">
                             <PhoneIcon class="h-4 w-4" />
                             {{ t('marketplace.cta_secondary') }}
                         </a>
@@ -281,31 +281,31 @@ onMounted(() => {
 
                     <!-- Stats strip -->
                     <div class="mt-12 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                        <div class="flex items-center gap-3 rounded-2xl bg-white/80 px-4 py-4 text-left shadow-sm ring-1 ring-estoril-200 backdrop-blur">
+                        <div class="flex items-center gap-3 rounded-2xl bg-white/80 px-4 py-4 text-left shadow-sm ring-1 ring-estoril-200 backdrop-blur dark:bg-asphalt-800/80 dark:ring-asphalt-600">
                             <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-estoril-600 shadow-md shadow-estoril-600/30">
                                 <ShieldCheckIcon class="h-6 w-6 text-white" />
                             </div>
                             <div>
-                                <p class="text-2xl font-extrabold text-estoril-800">9</p>
-                                <p class="text-xs font-medium text-gray-600">{{ t('marketplace.stat_points') }}</p>
+                                <p class="text-2xl font-extrabold text-estoril-800 dark:text-estoril-300">9</p>
+                                <p class="text-xs font-medium text-gray-600 dark:text-gray-400">{{ t('marketplace.stat_points') }}</p>
                             </div>
                         </div>
-                        <div class="flex items-center gap-3 rounded-2xl bg-white/80 px-4 py-4 text-left shadow-sm ring-1 ring-estoril-200 backdrop-blur">
+                        <div class="flex items-center gap-3 rounded-2xl bg-white/80 px-4 py-4 text-left shadow-sm ring-1 ring-estoril-200 backdrop-blur dark:bg-asphalt-800/80 dark:ring-asphalt-600">
                             <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-estoril-700 shadow-md shadow-estoril-700/30">
                                 <ChartBarIcon class="h-6 w-6 text-white" />
                             </div>
                             <div>
-                                <p class="text-2xl font-extrabold text-estoril-800">100%</p>
-                                <p class="text-xs font-medium text-gray-600">{{ t('marketplace.stat_price') }}</p>
+                                <p class="text-2xl font-extrabold text-estoril-800 dark:text-estoril-300">100%</p>
+                                <p class="text-xs font-medium text-gray-600 dark:text-gray-400">{{ t('marketplace.stat_price') }}</p>
                             </div>
                         </div>
-                        <div class="flex items-center gap-3 rounded-2xl bg-white/80 px-4 py-4 text-left shadow-sm ring-1 ring-estoril-200 backdrop-blur">
+                        <div class="flex items-center gap-3 rounded-2xl bg-white/80 px-4 py-4 text-left shadow-sm ring-1 ring-estoril-200 backdrop-blur dark:bg-asphalt-800/80 dark:ring-asphalt-600">
                             <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-asphalt-700 shadow-md shadow-asphalt-700/30">
                                 <TruckIcon class="h-6 w-6 text-white" />
                             </div>
                             <div>
-                                <p class="text-2xl font-extrabold text-estoril-800">🇪🇸</p>
-                                <p class="text-xs font-medium text-gray-600">{{ t('marketplace.stat_import') }}</p>
+                                <p class="text-2xl font-extrabold text-estoril-800 dark:text-estoril-300">🇪🇸</p>
+                                <p class="text-xs font-medium text-gray-600 dark:text-gray-400">{{ t('marketplace.stat_import') }}</p>
                             </div>
                         </div>
                     </div>
@@ -314,91 +314,91 @@ onMounted(() => {
         </section>
 
         <!-- HOW IT WORKS -->
-        <section :id="locale === 'es' ? 'como-funciona' : 'how-it-works'" class="border-y border-gray-200 bg-gray-50 py-16">
+        <section :id="locale === 'es' ? 'como-funciona' : 'how-it-works'" class="border-y border-gray-200 bg-gray-50 py-16 dark:border-asphalt-700 dark:bg-asphalt-800">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="mx-auto max-w-2xl text-center">
-                    <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">{{ t('marketplace.section_how_it_works') }}</h2>
-                    <p class="mt-3 text-base text-gray-600">{{ t('marketplace.section_how_it_works_desc') }}</p>
+                    <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">{{ t('marketplace.section_how_it_works') }}</h2>
+                    <p class="mt-3 text-base text-gray-600 dark:text-gray-400">{{ t('marketplace.section_how_it_works_desc') }}</p>
                 </div>
                 <div class="mt-12 grid grid-cols-1 gap-6 md:grid-cols-3">
-                    <div v-for="item in howItWorks" :key="item.step" class="relative rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 transition hover:-translate-y-0.5 hover:shadow-md">
+                    <div v-for="item in howItWorks" :key="item.step" class="relative rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 transition hover:-translate-y-0.5 hover:shadow-md dark:bg-asphalt-800 dark:ring-asphalt-700">
                         <span class="absolute -top-4 left-6 flex h-9 w-9 items-center justify-center rounded-full bg-linear-to-br from-estoril-600 to-estoril-800 text-sm font-bold text-white shadow-md shadow-estoril-700/30">
                             {{ item.step }}
                         </span>
-                        <h3 class="mt-3 text-lg font-semibold text-gray-900">{{ item.title }}</h3>
-                        <p class="mt-2 text-sm text-gray-600">{{ item.description }}</p>
+                        <h3 class="mt-3 text-lg font-semibold text-gray-900 dark:text-white">{{ item.title }}</h3>
+                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">{{ item.description }}</p>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- CATALOG -->
-        <section :id="locale === 'es' ? 'catalogo' : 'catalog'" class="py-16">
+        <section :id="locale === 'es' ? 'catalogo' : 'catalog'" class="bg-white py-16 transition-colors duration-300 dark:bg-asphalt-900">
             <div class="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8">
                 <div class="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end">
                     <div>
-                        <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">{{ t('marketplace.section_catalog') }}</h2>
-                        <p class="mt-2 text-sm text-gray-600">{{ t('marketplace.catalog_desc').replace(':count', cars.total || 0) }}</p>
+                        <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">{{ t('marketplace.section_catalog') }}</h2>
+                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">{{ t('marketplace.catalog_desc').replace(':count', cars.total || 0) }}</p>
                     </div>
-                    <a :href="requestHref" class="inline-flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800">
+                    <a :href="requestHref" class="inline-flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200">
                         <PhoneIcon class="h-4 w-4" />
                         {{ t('marketplace.cta_request_notify') }}
                     </a>
                 </div>
 
                 <!-- Filters -->
-                <div class="grid grid-cols-1 gap-3 rounded-2xl bg-gray-50 p-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+                <div class="grid grid-cols-1 gap-3 rounded-2xl bg-gray-50 p-4 transition-colors duration-300 dark:bg-asphalt-800/70 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
                     <div class="sm:col-span-2 lg:col-span-2">
-                        <label class="mb-1.5 block text-xs font-semibold text-gray-700">{{ t('marketplace.filter_search') }}</label>
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-300">{{ t('marketplace.filter_search') }}</label>
                         <div class="relative">
-                            <MagnifyingGlassIcon class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                            <MagnifyingGlassIcon class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                             <input
                                 v-model="search"
                                 type="text"
                                 :placeholder="t('marketplace.filter_search_placeholder')"
-                                class="block w-full rounded-lg border-gray-200 pl-9 text-sm focus:border-estoril-600 focus:ring-estoril-600"
+                                class="block w-full rounded-lg border-gray-200 pl-9 text-sm focus:border-estoril-600 focus:ring-estoril-600 dark:border-asphalt-600 dark:bg-asphalt-800 dark:text-white dark:placeholder-gray-500"
                             />
                         </div>
                     </div>
                     <div class="lg:col-span-1">
-                        <label class="mb-1.5 block text-xs font-semibold text-gray-700">{{ t('marketplace.filter_budget') }}</label>
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-300">{{ t('marketplace.filter_budget') }}</label>
                         <div class="flex gap-2">
-                            <input v-model.number="minPrice" type="number" :min="priceMin" :max="priceMax" step="500" :placeholder="t('marketplace.filter_budget_min')" class="block w-full rounded-lg border-gray-200 text-sm focus:border-estoril-600 focus:ring-estoril-600" />
-                            <input v-model.number="maxPrice" type="number" :min="priceMin" :max="priceMax" step="500" :placeholder="t('marketplace.filter_budget_max')" class="block w-full rounded-lg border-gray-200 text-sm focus:border-estoril-600 focus:ring-estoril-600" />
+                            <input v-model.number="minPrice" type="number" :min="priceMin" :max="priceMax" step="500" :placeholder="t('marketplace.filter_budget_min')" class="block w-full rounded-lg border-gray-200 text-sm focus:border-estoril-600 focus:ring-estoril-600 dark:border-asphalt-600 dark:bg-asphalt-800 dark:text-white dark:placeholder-gray-500" />
+                            <input v-model.number="maxPrice" type="number" :min="priceMin" :max="priceMax" step="500" :placeholder="t('marketplace.filter_budget_max')" class="block w-full rounded-lg border-gray-200 text-sm focus:border-estoril-600 focus:ring-estoril-600 dark:border-asphalt-600 dark:bg-asphalt-800 dark:text-white dark:placeholder-gray-500" />
                         </div>
                     </div>
                     <div class="lg:col-span-1">
-                        <label class="mb-1.5 block text-xs font-semibold text-gray-700">{{ t('marketplace.filter_mileage') }}</label>
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-300">{{ t('marketplace.filter_mileage') }}</label>
                         <div class="flex gap-2">
-                            <input v-model.number="mileageFilter" type="number" :min="0" :max="priceMax" step="1000" :placeholder="t('marketplace.filter_mileage_placeholder')" class="block w-full rounded-lg border-gray-200 text-sm focus:border-estoril-600 focus:ring-estoril-600" />
+                            <input v-model.number="mileageFilter" type="number" :min="0" :max="priceMax" step="1000" :placeholder="t('marketplace.filter_mileage_placeholder')" class="block w-full rounded-lg border-gray-200 text-sm focus:border-estoril-600 focus:ring-estoril-600 dark:border-asphalt-600 dark:bg-asphalt-800 dark:text-white dark:placeholder-gray-500" />
                         </div>
                     </div>
 
                     <!-- Marketplace item 2: filtros extendidos -->
                     <div class="lg:col-span-1">
-                        <label class="mb-1.5 block text-xs font-semibold text-gray-700">{{ t('marketplace.filter_fuel', 'Combustible') }}</label>
-                        <select v-model="fuelFilter" class="block w-full rounded-lg border-gray-200 text-sm focus:border-estoril-600 focus:ring-estoril-600">
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-300">{{ t('marketplace.filter_fuel', 'Combustible') }}</label>
+                        <select v-model="fuelFilter" class="block w-full rounded-lg border-gray-200 text-sm focus:border-estoril-600 focus:ring-estoril-600 dark:border-asphalt-600 dark:bg-asphalt-800 dark:text-white">
                             <option value="">{{ t('marketplace.filter_all', 'Todos') }}</option>
                             <option v-for="f in props.filterOptions.fuels" :key="f" :value="f">{{ f }}</option>
                         </select>
                     </div>
                     <div class="lg:col-span-1">
-                        <label class="mb-1.5 block text-xs font-semibold text-gray-700">{{ t('marketplace.filter_transmission', 'Cambio') }}</label>
-                        <select v-model="transmissionFilter" class="block w-full rounded-lg border-gray-200 text-sm focus:border-estoril-600 focus:ring-estoril-600">
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-300">{{ t('marketplace.filter_transmission', 'Cambio') }}</label>
+                        <select v-model="transmissionFilter" class="block w-full rounded-lg border-gray-200 text-sm focus:border-estoril-600 focus:ring-estoril-600 dark:border-asphalt-600 dark:bg-asphalt-800 dark:text-white">
                             <option value="">{{ t('marketplace.filter_all', 'Todos') }}</option>
                             <option v-for="tr in props.filterOptions.transmissions" :key="tr" :value="tr">{{ tr }}</option>
                         </select>
                     </div>
                     <div class="lg:col-span-1">
-                        <label class="mb-1.5 block text-xs font-semibold text-gray-700">{{ t('marketplace.filter_doors', 'Puertas') }}</label>
-                        <select v-model="doorsFilter" class="block w-full rounded-lg border-gray-200 text-sm focus:border-estoril-600 focus:ring-estoril-600">
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-300">{{ t('marketplace.filter_doors', 'Puertas') }}</label>
+                        <select v-model="doorsFilter" class="block w-full rounded-lg border-gray-200 text-sm focus:border-estoril-600 focus:ring-estoril-600 dark:border-asphalt-600 dark:bg-asphalt-800 dark:text-white">
                             <option value="">{{ t('marketplace.filter_all', 'Todos') }}</option>
                             <option v-for="d in props.filterOptions.doors" :key="d" :value="d">{{ d }}</option>
                         </select>
                     </div>
                     <div class="lg:col-span-1">
-                        <label class="mb-1.5 block text-xs font-semibold text-gray-700">{{ t('marketplace.filter_color', 'Color') }}</label>
-                        <select v-model="colorFilter" class="block w-full rounded-lg border-gray-200 text-sm focus:border-estoril-600 focus:ring-estoril-600">
+                        <label class="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-300">{{ t('marketplace.filter_color', 'Color') }}</label>
+                        <select v-model="colorFilter" class="block w-full rounded-lg border-gray-200 text-sm focus:border-estoril-600 focus:ring-estoril-600 dark:border-asphalt-600 dark:bg-asphalt-800 dark:text-white">
                             <option value="">{{ t('marketplace.filter_all', 'Todos') }}</option>
                             <option v-for="c in props.filterOptions.colors" :key="c" :value="c">{{ c }}</option>
                         </select>
@@ -413,7 +413,7 @@ onMounted(() => {
                             'rounded-full px-4 py-2 text-sm font-medium transition',
                             brandFilter === ''
                                 ? 'bg-estoril-700 text-white shadow-sm'
-                                : 'bg-white text-gray-700 ring-1 ring-gray-200 hover:bg-estoril-50 hover:text-estoril-700',
+                                : 'bg-white text-gray-700 ring-1 ring-gray-200 hover:bg-estoril-50 hover:text-estoril-700 dark:bg-asphalt-800 dark:text-gray-300 dark:ring-asphalt-600 dark:hover:bg-asphalt-700',
                         ]"
                     >
                         {{ t('marketplace.filter_all_brands') }}
@@ -426,19 +426,19 @@ onMounted(() => {
                             'rounded-full px-4 py-2 text-sm font-medium transition',
                             brandFilter === b
                                 ? 'bg-estoril-700 text-white shadow-sm'
-                                : 'bg-white text-gray-700 ring-1 ring-gray-200 hover:bg-estoril-50 hover:text-estoril-700',
+                                : 'bg-white text-gray-700 ring-1 ring-gray-200 hover:bg-estoril-50 hover:text-estoril-700 dark:bg-asphalt-800 dark:text-gray-300 dark:ring-asphalt-600 dark:hover:bg-asphalt-700',
                         ]"
                     >
                         {{ b }}
                     </button>
-                    <span class="mx-1 hidden h-5 w-px bg-gray-300 sm:block"></span>
+                    <span class="mx-1 hidden h-5 w-px bg-gray-300 dark:bg-asphalt-600 sm:block"></span>
                     <button
                         @click="dealFilter = !dealFilter"
                         :class="[
                             'inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition',
                             dealFilter
                                 ? 'bg-amber-500 text-white shadow-sm'
-                                : 'bg-amber-50 text-amber-700 ring-1 ring-amber-200 hover:bg-amber-100',
+                                : 'bg-amber-50 text-amber-700 ring-1 ring-amber-200 hover:bg-amber-100 dark:bg-amber-900/30 dark:text-amber-300 dark:ring-amber-800',
                         ]"
                     >
                         <SparklesIcon class="h-4 w-4" />
@@ -451,11 +451,11 @@ onMounted(() => {
                     <div
                         v-for="car in filteredCars"
                         :key="car.id"
-                        class="group relative flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:ring-estoril-300"
+                        class="group relative flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:ring-estoril-300 dark:bg-asphalt-800 dark:ring-asphalt-700"
                     >
                         <Link :href="route('marketplace.show', car.id)" class="flex flex-1 flex-col">
                         <!-- Photo (LazyImage for performance) -->
-                        <div class="relative aspect-[16/10] overflow-hidden bg-linear-to-br from-asphalt-200 to-gray-300">
+                        <div class="relative aspect-[16/10] overflow-hidden bg-linear-to-br from-asphalt-200 to-gray-300 dark:from-asphalt-700 dark:to-asphalt-600">
                             <LazyImage
                                 v-if="car.photos && car.photos.length > 0"
                                 :src="car.photos[0].startsWith('http') ? car.photos[0] : `/storage/${car.photos[0]}`"
@@ -463,7 +463,7 @@ onMounted(() => {
                                 ratio="aspect-[16/10]"
                                 fit="object-cover group-hover:scale-110 transition duration-700"
                             />
-                            <div v-else class="flex h-full items-center justify-center text-6xl text-gray-400">🚗</div>
+                            <div v-else class="flex h-full items-center justify-center text-6xl text-gray-400 dark:text-gray-500">🚗</div>
                             <div class="pointer-events-none absolute inset-0 bg-linear-to-t from-asphalt-900/60 via-transparent to-transparent opacity-50 transition group-hover:opacity-80"></div>
 
                             <!-- Badges -->
@@ -492,37 +492,37 @@ onMounted(() => {
                         <div class="flex flex-1 flex-col p-5">
                             <div class="flex items-start justify-between gap-2">
                                 <div class="min-w-0 flex-1">
-                                    <h3 class="truncate text-lg font-bold text-gray-900 transition group-hover:text-estoril-800">
+                                    <h3 class="truncate text-lg font-bold text-gray-900 transition group-hover:text-estoril-800 dark:text-white dark:group-hover:text-estoril-300">
                                         {{ car.brand }} {{ car.model }}
                                     </h3>
-                                    <p v-if="car.version" class="truncate text-sm text-gray-500">{{ car.version }}</p>
+                                    <p v-if="car.version" class="truncate text-sm text-gray-500 dark:text-gray-400">{{ car.version }}</p>
                                 </div>
                             </div>
 
                             <dl class="mt-4 grid grid-cols-3 gap-2">
-                                <div class="rounded-lg bg-gray-50 px-2 py-2 text-center">
-                                    <dt class="flex items-center justify-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
+                                <div class="rounded-lg bg-gray-50 px-2 py-2 text-center dark:bg-asphalt-700">
+                                    <dt class="flex items-center justify-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                                         <CalendarDaysIcon class="h-3 w-3" /> {{ t('marketplace.specs_year') }}
                                     </dt>
-                                    <dd class="mt-0.5 text-sm font-semibold text-gray-900">{{ car.year }}</dd>
+                                    <dd class="mt-0.5 text-sm font-semibold text-gray-900 dark:text-white">{{ car.year }}</dd>
                                 </div>
-                                <div class="rounded-lg bg-gray-50 px-2 py-2 text-center">
-                                    <dt class="flex items-center justify-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
+                                <div class="rounded-lg bg-gray-50 px-2 py-2 text-center dark:bg-asphalt-700">
+                                    <dt class="flex items-center justify-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                                         <BoltIcon class="h-3 w-3" /> {{ t('marketplace.specs_km') }}
                                     </dt>
-                                    <dd class="mt-0.5 text-sm font-semibold text-gray-900">{{ car.mileage ? (car.mileage / 1000).toFixed(0) + 'k' : t('marketplace.not_available') }}</dd>
+                                    <dd class="mt-0.5 text-sm font-semibold text-gray-900 dark:text-white">{{ car.mileage ? (car.mileage / 1000).toFixed(0) + 'k' : t('marketplace.not_available') }}</dd>
                                 </div>
-                                <div class="rounded-lg bg-gray-50 px-2 py-2 text-center">
-                                    <dt class="flex items-center justify-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
+                                <div class="rounded-lg bg-gray-50 px-2 py-2 text-center dark:bg-asphalt-700">
+                                    <dt class="flex items-center justify-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                                         {{ t('marketplace.specs_fuel') }}
                                     </dt>
-                                    <dd class="mt-0.5 truncate text-sm font-semibold text-gray-900">{{ car.fuel || t('marketplace.not_available') }}</dd>
+                                    <dd class="mt-0.5 truncate text-sm font-semibold text-gray-900 dark:text-white">{{ car.fuel || t('marketplace.not_available') }}</dd>
                                 </div>
                             </dl>
 
-                            <div class="mt-4 flex items-end justify-between gap-3 border-t border-gray-100 pt-4">
+                            <div class="mt-4 flex items-end justify-between gap-3 border-t border-gray-100 pt-4 dark:border-asphalt-700">
                                 <div class="min-w-0">
-                                    <p class="text-xs text-gray-500">{{ t('marketplace.price_from') }}</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ t('marketplace.price_from') }}</p>
                                     <p class="truncate text-2xl font-extrabold tracking-tight text-estoril-800">{{ currency(car.purchase_price) }}</p>
                                 </div>
                                 <span class="inline-flex shrink-0 items-center gap-1 rounded-full bg-estoril-700 px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm transition group-hover:bg-estoril-800">
@@ -533,19 +533,19 @@ onMounted(() => {
                         </div>
                         </Link>
                         <!-- Wishlist + Compare (fuera del Link para no anidar) -->
-                        <div class="flex items-center justify-end gap-2 border-t border-gray-100 bg-gray-50 px-4 py-2">
+                        <div class="flex items-center justify-end gap-2 border-t border-gray-100 bg-gray-50 px-4 py-2 dark:border-asphalt-700 dark:bg-asphalt-800">
                             <WishlistButton :car="car" />
                         </div>
                     </div>
                 </div>
 
                 <!-- Empty state -->
-                <div v-else class="rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 p-12 text-center">
-                    <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-estoril-100">
-                        <SparklesIcon class="h-8 w-8 text-estoril-700" />
+                <div v-else class="rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 p-12 text-center dark:border-asphalt-700 dark:bg-asphalt-800">
+                    <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-estoril-100 dark:bg-estoril-900/40">
+                        <SparklesIcon class="h-8 w-8 text-estoril-700 dark:text-estoril-300" />
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900">{{ t('marketplace.no_cars_title') }}</h3>
-                    <p class="mx-auto mt-2 max-w-md text-sm text-gray-600">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ t('marketplace.no_cars_title') }}</h3>
+                    <p class="mx-auto mt-2 max-w-md text-sm text-gray-600 dark:text-gray-400">
                         {{ t('marketplace.no_cars_desc') }}
                     </p>
                     <a :href="requestHref" class="mt-6 inline-flex items-center gap-2 rounded-lg bg-estoril-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-estoril-800">
@@ -612,30 +612,30 @@ onMounted(() => {
             <div
                 v-if="scrolledPastHero"
                 data-testid="sticky-filter-bar"
-                class="fixed left-0 right-0 top-0 z-30 border-b border-gray-200 bg-white/95 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-white/80">
+                class="fixed left-0 right-0 top-0 z-30 border-b border-gray-200 bg-white/95 shadow-sm backdrop-blur transition-colors duration-300 supports-[backdrop-filter]:bg-white/80 dark:border-asphalt-700 dark:bg-asphalt-900/95 dark:supports-[backdrop-filter]:bg-asphalt-900/80">
                 <div class="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2 sm:px-6 lg:px-8">
                     <MagnifyingGlassIcon class="h-4 w-4 text-gray-400" />
                     <input
                         v-model="search"
                         type="search"
                         :placeholder="t('marketplace.search_placeholder_short', { default: 'Buscar marca o modelo…' })"
-                        class="flex-1 rounded-md border-0 bg-transparent text-sm focus:outline-none focus:ring-0"
+                        class="flex-1 rounded-md border-0 bg-transparent text-sm text-gray-900 focus:outline-none focus:ring-0 dark:text-white"
                     />
-                    <select v-model="brandFilter" class="rounded-md border-0 bg-transparent text-sm">
+                    <select v-model="brandFilter" class="rounded-md border-0 bg-transparent text-sm text-gray-900 dark:text-white">
                         <option value="">{{ t('marketplace.filter_all_brands') }}</option>
                         <option v-for="b in brands" :key="b" :value="b">{{ b }}</option>
                     </select>
                     <span class="hidden text-sm text-gray-500 sm:inline">
                         {{ filteredCars.length }} / {{ cars.data?.length || 0 }}
                     </span>
-                    <label class="flex cursor-pointer items-center gap-2 text-xs font-medium text-gray-700">
-                        <input v-model="dealFilter" type="checkbox" class="rounded border-gray-300 text-estoril-600" />
+                    <label class="flex cursor-pointer items-center gap-2 text-xs font-medium text-gray-700 dark:text-gray-200">
+                        <input v-model="dealFilter" type="checkbox" class="rounded border-gray-300 text-estoril-600 dark:border-asphalt-600 dark:bg-asphalt-800" />
                         {{ t('marketplace.filter_deals_only', { default: 'Ofertas' }) }}
                     </label>
                     <button
                         v-if="search || brandFilter || dealFilter || minPrice || maxPrice || mileageFilter || fuelFilter || transmissionFilter || doorsFilter || colorFilter"
                         @click="resetFilters"
-                        class="rounded-md px-2 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-50"
+                        class="rounded-md px-2 py-1 text-xs font-semibold text-rose-600 transition hover:bg-rose-50 dark:hover:bg-asphalt-800"
                     >
                         Limpiar
                     </button>
@@ -643,7 +643,7 @@ onMounted(() => {
                         @click="scrollToTop"
                         type="button"
                         data-testid="sticky-filter-scroll-top"
-                        class="rounded-md p-1 text-gray-500 hover:bg-gray-100 hover:text-estoril-700"
+                        class="rounded-md p-1 text-gray-500 transition hover:bg-gray-100 hover:text-estoril-700 dark:text-gray-400 dark:hover:bg-asphalt-800 dark:hover:text-estoril-300"
                         :aria-label="t('marketplace.back_to_top', { default: 'Volver arriba' })"
                         :title="t('marketplace.back_to_top', { default: 'Volver arriba' })">
                         <ArrowUpIcon class="h-4 w-4" />
@@ -663,25 +663,25 @@ onMounted(() => {
                 leave-to-class="opacity-0 translate-y-4">
                 <div
                     v-if="showNewsletter"
-                    class="fixed bottom-4 right-4 z-40 w-full max-w-sm rounded-2xl bg-white p-5 shadow-2xl ring-1 ring-gray-200"
+                    class="fixed bottom-4 right-4 z-40 w-full max-w-sm rounded-2xl bg-white p-5 shadow-2xl ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700"
                     role="dialog"
                     aria-modal="false">
                     <button
                         type="button"
                         @click="closeNewsletter"
-                        class="absolute right-2 top-2 rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                        class="absolute right-2 top-2 rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:text-gray-400 dark:hover:bg-asphalt-700 dark:hover:text-gray-300"
                         :aria-label="t('marketplace.newsletter_close', { default: 'Cerrar' })">
                         <XMarkIcon class="h-4 w-4" />
                     </button>
                     <div class="flex items-start gap-3">
-                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-estoril-100 text-estoril-700">
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-estoril-100 text-estoril-700 dark:bg-estoril-900/40 dark:text-estoril-300">
                             <GiftIcon class="h-5 w-5" />
                         </div>
                         <div class="flex-1">
-                            <p class="text-sm font-semibold text-gray-900">
+                            <p class="text-sm font-semibold text-gray-900 dark:text-white">
                                 {{ t('marketplace.newsletter_title', { default: '5 veh\u00edculos verificados al mes en tu inbox' }) }}
                             </p>
-                            <p class="mt-1 text-xs text-gray-500">
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                                 {{ t('marketplace.newsletter_desc', { default: 'Recibe solo los coches con veredicto Buy o Buy if price drops. Sin spam, baja cuando quieras.' }) }}
                             </p>
                             <form v-if="!newsletterSubmitted" @submit.prevent="submitNewsletter" class="mt-3 flex flex-col gap-1">
@@ -691,14 +691,14 @@ onMounted(() => {
                                         type="email"
                                         required
                                         :placeholder="t('marketplace.newsletter_email_placeholder', { default: 'tu@email.com' })"
-                                        class="flex-1 rounded-md border-gray-300 text-sm shadow-sm focus:border-estoril-500 focus:ring-estoril-500" />
+                                        class="flex-1 rounded-md border-gray-300 text-sm shadow-sm focus:border-estoril-500 focus:ring-estoril-500 dark:border-asphalt-600 dark:bg-asphalt-800 dark:text-white" />
                                     <button type="submit" class="rounded-md bg-estoril-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-estoril-500">
                                         {{ t('marketplace.newsletter_cta', { default: 'Suscribirme' }) }}
                                     </button>
                                 </div>
                                 <p v-if="newsletterError" class="text-[11px] text-rose-600">{{ newsletterError }}</p>
                             </form>
-                            <p v-else class="mt-3 text-xs font-semibold text-emerald-700">
+                            <p v-else class="mt-3 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
                                 ✓ {{ t('marketplace.newsletter_thanks', { default: '¡Listo! Te avisamos.' }) }}
                             </p>
                         </div>

@@ -1,0 +1,21 @@
+{
+  "items": [
+    {
+      "source_url": "https://www.autouncle.de/es/enlace-externo/autoscout24private/224516733/413607328",
+      "price": 13500,
+      "year": 2014,
+      "km": 102000,
+      "verdict": "descartar",
+      "discard_reason": "Performance Paket: embrague Sachs, catalizador deportivo HJS, downpipe homologado, limitador subido a 270 km/h, limitador rally. Ademas motor de sustitucion montado a los 75.000 km."
+    },
+    {
+      "source_url": "https://es.wallapop.com/item/opel-astra-2014-1237709652",
+      "price": 20000,
+      "year": 2014,
+      "km": 85000,
+      "mercado": "ES",
+      "verdict": "descartar",
+      "discard_reason": "Declara Stage 2 en su descripcion. Excluida de la muestra de comparables."
+    }
+  ]
+}

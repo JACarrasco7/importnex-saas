@@ -1,0 +1,721 @@
+{
+  "slug": "JJ_Import_Motors_AstraJ_OPC_09ago2026",
+  "titulo": "Opel Astra J GTC OPC 2.0 Turbo 280 CV",
+  "pie_pagina": "JJ Import Motors · Astra J GTC OPC",
+  "fecha": "9 de agosto de 2026",
+  "subtitulo": "Informe de valoración e importación · JJ Import Motors · Medido en vivo el 9 de agosto de 2026<br>Filtros: gasolina · cambio manual · matriculación desde 2014 · máximo 140.000 km · Todas las cifras enlazan a su fuente",
+  "resumen": "<strong>El candidato de 13.500 € que este informe recomendaba ha quedado DESCARTADO al leer el anuncio original.</strong> Declara un «Performance Paket» con embrague deportivo Sachs, catalizador deportivo HJS, <strong>downpipe homologado</strong>, <strong>limitador de velocidad subido a 270 km/h</strong> y limitador rally. Y algo que no estaba en ningún agregador: <strong>lleva un motor de sustitución montado a los 75.000 km</strong> porque el original falló.<br><br>Entra en su lugar un <strong>Nov 2015 con 99.303 km a 13.000 €</strong>: más nuevo, menos kilómetros, <strong>Euro 6</strong>, dos propietarios, ITV alemana pasada hasta enero de 2027 y cuero total. Sale más barato puesto en Huelva que el anterior.",
+  "fuentes": [
+    {
+      "nombre": "Wallapop",
+      "perfil": "Particular y profesional · peso ALTO",
+      "filtros": "keywords «opel astra opc» · category_ids 100",
+      "url": "https://es.wallapop.com/app/search?keywords=opel%20astra%20opc&category_ids=100",
+      "resultado": "52 anuncios<br>7 Astra J OPC",
+      "uso": "Referencia principal de precio particular. Extractor nuevo: ahora saca también la descripción completa y el nº de fotos"
+    },
+    {
+      "nombre": "Milanuncios",
+      "perfil": "Particular y profesional · peso ALTO",
+      "filtros": "s = «opel astra opc»",
+      "url": "https://www.milanuncios.com/coches-de-segunda-mano/?s=opel%20astra%20opc",
+      "resultado": "59 en total<br>41 por página<br>2 Astra J OPC",
+      "uso": "Suelo del mercado. Extractor nuevo por JSON: precio al contado separado del financiado, y fecha de publicación"
+    },
+    {
+      "nombre": "Coches.net",
+      "perfil": "Concesionario · peso ALTO",
+      "filtros": "gama Opel Astra, sin filtro de versión posible por URL",
+      "url": "https://www.coches.net/opel/astra/segunda-mano/",
+      "resultado": "2.576 Astra<br>35 por página",
+      "uso": "Extractor reescrito sobre <code>__INITIAL_PROPS__</code>: tasación española, etiqueta DGT, fecha de publicación y valoración del vendedor. Ninguna unidad OPC en la muestra"
+    },
+    {
+      "nombre": "AutoScout24.es",
+      "perfil": "Concesionario · peso BAJO",
+      "filtros": "desde 2012 · 198-214 kW · gasolina",
+      "url": "https://www.autoscout24.es/lst/opel/astra?atype=C&desde=2012&powerfrom=198&powerto=214&powertype=kw&damaged_listing=exclude&fuel=B",
+      "resultado": "37 «ofertas»<br><strong>0 en España</strong>",
+      "uso": "Recuento de escasez. 11 DE · 6 NL · 2 BE · 1 LU · 0 ES"
+    },
+    {
+      "nombre": "AutoUncle",
+      "perfil": "Agregador alemán · peso ALTO",
+      "filtros": "f-gasolina · g-manual · min_year 2014 · max_km 140.000 · min_hp 250",
+      "url": "https://www.autouncle.de/es/coches-segunda-mano/Opel/Astra%20GTC/f-gasolina/g-manual?s%5Bmin_year%5D=2014&s%5Bmax_km%5D=140000&s%5Bmin_hp%5D=250",
+      "resultado": "13 anuncios<br>12 de 280 CV",
+      "uso": "Lado alemán completo: mobile.de + Autoscout24 + Kleinanzeigen + concesionarios. Trae días publicado y enlace al portal de origen"
+    },
+    {
+      "nombre": "AutoScout24.de — ficha de anuncio",
+      "perfil": "Detalle del anuncio alemán · peso CRÍTICO",
+      "filtros": "Ficha del candidato original, vía redirección de AutoUncle",
+      "url": "https://www.autouncle.de/es/enlace-externo/autoscout24private/224516733/413607328",
+      "resultado": "Descripción de 2.432 caracteres<br>64 extras estructurados",
+      "uso": "<strong>Aquí se cayó el candidato.</strong> `__NEXT_DATA__` da el texto libre entero, el equipamiento por categorías y si hay informe CARFAX"
+    },
+    {
+      "nombre": "Kleinanzeigen — ficha de anuncio",
+      "perfil": "Detalle del anuncio alemán",
+      "filtros": "Ficha del nuevo candidato, vía redirección de AutoUncle",
+      "url": "https://www.autouncle.de/es/enlace-externo/ebay/224165559/412924540",
+      "resultado": "Norma Euro, propietarios,<br>fecha de ITV y equipamiento",
+      "uso": "Datos que ningún agregador da: <strong>Euro 6, 2 propietarios, HU hasta 1/2027</strong>"
+    },
+    {
+      "nombre": "km77",
+      "perfil": "Ficha oficial de la versión",
+      "filtros": "Astra OPC 2.0 Turbo 280 CV Start&Stop (2012-2016)",
+      "url": "https://www.km77.com/coches/opel/astra/2011/gtc/opc/astra-opc2/datos",
+      "resultado": "PVP, CO₂, tipo",
+      "uso": "Base del IEDMT, emisiones oficiales, etiqueta DGT y ficha técnica"
+    },
+    {
+      "nombre": "BOE — Orden HAC/1501/2025",
+      "perfil": "Norma fiscal vigente",
+      "filtros": "Precios medios de venta y Anexo IV de coeficientes",
+      "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2025-26357",
+      "resultado": "En vigor 1-ene-2026",
+      "uso": "Coeficiente de antigüedad y método de cálculo del IEDMT"
+    },
+    {
+      "nombre": "KBA / prensa alemana — retiradas",
+      "perfil": "Campañas de revisión del fabricante",
+      "filtros": "Opel Astra J, campañas conocidas",
+      "url": "https://carwiki.de/opel-astra-bekannte-probleme-rueckrufe/",
+      "resultado": "136.830 unidades<br>llamadas a revisión en Alemania",
+      "uso": "<strong>Astra J 2010-2015 con cambio manual, freno de mano eléctrico y asistente de arranque en pendiente.</strong> El candidato cumple las tres condiciones"
+    },
+    {
+      "nombre": "Fichas técnicas alemanas",
+      "perfil": "Verificación cruzada del CO₂",
+      "filtros": "Astra J OPC 2.0 Turbo 280 CV",
+      "url": "https://www.auto-data.net/en/opel-astra-j-gtc-2.0-opc-280hp-turbo-ecotec-19558",
+      "resultado": "184-189 g/km NEDC",
+      "uso": "<strong>Cierra la duda del IEDMT</strong>: sea Euro 5 o Euro 6, sigue en la banda 160-199"
+    }
+  ],
+  "espana": {
+    "columnas": [
+      "precio",
+      "anio",
+      "km",
+      "vendedor",
+      "fuente",
+      "nota"
+    ],
+    "lectura": "8 unidades comparables · Puerta A en tramo «justo» (5-14)",
+    "excluidos": "Excluida del cómputo una novena unidad: 20.000 € · 2014 · 85.000 km · Wallapop, que declara «Stage 2» en su descripción. Preparada, no es comparable. En el informe del 8 de agosto estaba dentro y tiraba la mediana hacia abajo.",
+    "unidades": [
+      {
+        "precio": 11999,
+        "anio": 2012,
+        "km": 145000,
+        "vendedor": "Particular",
+        "fuente": "Wallapop",
+        "nota": "El más barato del país",
+        "url": "https://es.wallapop.com/item/opel-astra-opc-1264395381"
+      },
+      {
+        "precio": 15900,
+        "anio": 2013,
+        "km": 143000,
+        "vendedor": "Profesional",
+        "fuente": "Milanuncios",
+        "nota": "Vallirana (Barcelona) · garantía 12 meses · publicado el 5 de junio, 65 días en el mercado",
+        "url": "https://www.milanuncios.com/opel-de-segunda-mano/opel-astra-2-0-turbo-ss-opc-gtc-594789895.htm"
+      },
+      {
+        "precio": 17990,
+        "anio": 2012,
+        "km": 186000,
+        "vendedor": "Profesional",
+        "fuente": "Milanuncios",
+        "nota": "Las Palmas · garantía 12 meses · publicado el 6 de agosto",
+        "url": "https://www.milanuncios.com/opel-de-segunda-mano/opel-astra-2-0-turbo-ss-opc-gtc-608974588.htm"
+      },
+      {
+        "precio": 18900,
+        "anio": 2012,
+        "km": 131000,
+        "vendedor": "Particular",
+        "fuente": "Wallapop",
+        "nota": "Uso esporádico, siempre en garaje",
+        "url": "https://es.wallapop.com/item/opel-astra-j-opc-1252728678"
+      },
+      {
+        "precio": 19499,
+        "anio": 2014,
+        "km": 159000,
+        "vendedor": "Particular",
+        "fuente": "Wallapop",
+        "nota": "Pack Extreme",
+        "url": "https://es.wallapop.com/item/opel-astra-opc-1242626326"
+      },
+      {
+        "precio": 19990,
+        "anio": 2013,
+        "km": 142000,
+        "vendedor": "Particular",
+        "fuente": "Wallapop",
+        "nota": "<strong>Importado</strong>: «comprado hace 4 años en Opel Alemania»",
+        "url": "https://es.wallapop.com/item/opel-astra-opc-1275947355"
+      },
+      {
+        "precio": 22650,
+        "anio": 2014,
+        "km": 135000,
+        "vendedor": "Particular",
+        "fuente": "Wallapop",
+        "nota": "—",
+        "url": "https://es.wallapop.com/item/opel-astra-2014-1242617259"
+      },
+      {
+        "precio": 25000,
+        "anio": 2016,
+        "km": 33500,
+        "vendedor": "Particular",
+        "fuente": "Wallapop",
+        "nota": "Nacional, un propietario. Techo del mercado",
+        "url": "https://es.wallapop.com/item/opel-astra-2016-1283156405"
+      }
+    ]
+  },
+  "alemania": {
+    "columnas": [
+      "precio",
+      "tasacion",
+      "matriculacion",
+      "km",
+      "dias",
+      "portal",
+      "version"
+    ],
+    "lectura": "12 unidades de 280 CV · mediana 16.800 € · cuartil bajo 13.900 €",
+    "excluidos": "Excluido del cómputo un OPC de 14.490 € declarado con EDS, admisión Eventuri y downpipe. Preparado, con la homologación y la ITV española comprometidas.",
+    "unidades": [
+      {
+        "precio": 10950,
+        "tasacion": 12999,
+        "matriculacion": "May 2014",
+        "km": 129000,
+        "dias": 113,
+        "portal": "Kleinanzeigen",
+        "version": "Astra J OPC",
+        "url": "https://www.autouncle.de/es/d/217529060-usado-2014-opel-astra-gtc-opc-280-cv",
+        "url_portal": "https://www.autouncle.de/es/enlace-externo/ebay/217529060/402658824"
+      },
+      {
+        "precio": 13000,
+        "tasacion": null,
+        "matriculacion": "Nov 2015",
+        "km": 99303,
+        "dias": 16,
+        "portal": "Kleinanzeigen",
+        "version": "2.0 Turbo OPC",
+        "url": "https://www.autouncle.de/es/d/224165559-usado-2015-opel-astra-gtc-opc-280-cv",
+        "url_portal": "https://www.autouncle.de/es/enlace-externo/ebay/224165559/412924540"
+      },
+      {
+        "precio": 13500,
+        "tasacion": null,
+        "matriculacion": "Jul 2014",
+        "km": 102000,
+        "dias": 10,
+        "portal": "Autoscout24",
+        "version": "<strong>OPC · Olfen (NRW) · CANDIDATO</strong>",
+        "url": "https://www.autouncle.de/es/d/224516733-usado-2014-opel-astra-gtc-opc-280-cv"
+      },
+      {
+        "precio": 13900,
+        "tasacion": 16750,
+        "matriculacion": "Jul 2014",
+        "km": 101500,
+        "dias": 273,
+        "portal": "Kleinanzeigen",
+        "version": "2.0 Turbo OPC Performance",
+        "url": "https://www.autouncle.de/es/d/207099615-usado-2014-opel-astra-gtc-opc-280-cv",
+        "url_portal": "https://www.autouncle.de/es/enlace-externo/ebay/207099615/386368792"
+      },
+      {
+        "precio": 15555,
+        "tasacion": null,
+        "matriculacion": "2016",
+        "km": 53000,
+        "dias": 24,
+        "portal": "Kleinanzeigen",
+        "version": "OPC Turbo Navi Schalensitze Xenon",
+        "url": "https://www.autouncle.de/es/d/223578565-usado-2016-opel-astra-gtc-opc-280-cv",
+        "url_portal": "https://www.autouncle.de/es/enlace-externo/ebay/223578565/411868033"
+      },
+      {
+        "precio": 16500,
+        "tasacion": null,
+        "matriculacion": "Mar 2014",
+        "km": 48541,
+        "dias": 13,
+        "portal": "mobile.de",
+        "version": "Astra 2.0 OPC · Klappenauspuff",
+        "url": "https://www.autouncle.de/es/d/224296901-usado-2014-opel-astra-gtc-opc-280-cv",
+        "url_portal": "https://www.autouncle.de/es/enlace-externo/mobile/224296901/405805624"
+      },
+      {
+        "precio": 17100,
+        "tasacion": 19000,
+        "matriculacion": "2017",
+        "km": 115000,
+        "dias": 51,
+        "portal": "Kleinanzeigen",
+        "version": "OPC",
+        "url": "https://www.autouncle.de/es/d/221685033-usado-2017-opel-astra-gtc-opc-280-cv",
+        "url_portal": "https://www.autouncle.de/es/enlace-externo/ebay/221685033/408950083"
+      },
+      {
+        "precio": 17390,
+        "tasacion": null,
+        "matriculacion": "Sep 2017",
+        "km": 83020,
+        "dias": 44,
+        "portal": "Concesionario",
+        "version": "Astra J 2.0 OPC · Nappa · Bose · Xenon",
+        "url": "https://www.autouncle.de/es/d/222150737-usado-2017-opel-astra-gtc-opc-280-cv"
+      },
+      {
+        "precio": 17900,
+        "tasacion": null,
+        "matriculacion": "May 2016",
+        "km": 40000,
+        "dias": 42,
+        "portal": "Concesionario",
+        "version": "Astra J OPC 280PS · SHZ · Lenkradheizung",
+        "url": "https://www.autouncle.de/es/d/222316168-usado-2016-opel-astra-gtc-opc-280-cv",
+        "url_portal": "https://www.autouncle.de/es/enlace-externo/autoboerse-brands-de/222316168/412561033"
+      },
+      {
+        "precio": 18000,
+        "tasacion": 20900,
+        "matriculacion": "Dic 2015",
+        "km": 46251,
+        "dias": 74,
+        "portal": "Concesionario",
+        "version": "Astra J OPC",
+        "url": "https://www.autouncle.de/es/d/220108300-usado-2015-opel-astra-gtc-opc-280-cv",
+        "url_portal": "https://www.autouncle.de/es/enlace-externo/autoboerse-brands-de/220108300/414545915"
+      },
+      {
+        "precio": 19450,
+        "tasacion": null,
+        "matriculacion": "Dic 2017",
+        "km": 51220,
+        "dias": 33,
+        "portal": "Concesionario",
+        "version": "2.0 Turbo OPC",
+        "url": "https://www.autouncle.de/es/d/222828450-usado-2017-opel-astra-gtc-opc-280-cv"
+      },
+      {
+        "precio": 19890,
+        "tasacion": null,
+        "matriculacion": "May 2018",
+        "km": 78000,
+        "dias": 16,
+        "portal": "mobile.de",
+        "version": "Astra J OPC",
+        "url": "https://www.autouncle.de/es/d/224188744-usado-2018-opel-astra-gtc-opc-280-cv",
+        "url_portal": "https://www.autouncle.de/es/enlace-externo/mobile/224188744/412974711"
+      }
+    ]
+  },
+  "candidato": {
+    "ficha": {
+      "Unidad": "Opel Astra J GTC OPC 2.0 Turbo 280 CV · <strong>13.000 €</strong>",
+      "Matriculación": "Noviembre 2015 · 10,8 años",
+      "Kilómetros": "99.303 km · <strong>9.200 km/año</strong>, por debajo del umbral de 15.000",
+      "Ubicación": "Wittmund, Baja Sajonia — <span class='pill p-medio'>norte de Alemania</span>, lejos de la ruta habitual",
+      "Vendedor": "<strong>Particular</strong> · publicado el 24 de julio, 16 días · 108 visitas",
+      "Norma de emisiones": "<strong>Euro 6</strong> <span class='pill p-alto'>mejor que el descartado, que era Euro 5</span>",
+      "Propietarios": "<strong>2</strong>",
+      "ITV alemana (HU)": "<strong>Pasada hasta enero de 2027</strong>",
+      "Interior": "<strong>Vollleder</strong> — cuero total",
+      "Equipamiento que SÍ diferencia": "<strong>Cuero total</strong> (paquete de 2.183 € en la tarifa española) · <strong>Ajuste eléctrico de asientos</strong> — <span class='pill p-alto'>no existía en la tarifa española</span> · Sensores de aparcamiento · Asistente de luz de carretera · Lordosenstütze",
+      "Equipamiento que NO diferencia": "Navegador, sensor de lluvia, espejo electrocrómico, ESP, llantas de aleación, asientos deportivos, Start&amp;Stop, Isofix. <strong>Todo de serie en la versión</strong>, lo llevan también los comparables españoles. Prima cero",
+      "Cambio": "Manual de 6 velocidades — el OPC solo existe en manual, no penaliza",
+      "Lo que NO se sabe": "<strong>El anuncio no tiene texto libre del vendedor</strong>, solo la ficha de datos. Ni libro de mantenimiento, ni motivo de venta, ni declaración de siniestros. <strong>No es señal mala, es información que falta y hay que pedir.</strong>"
+    },
+    "enlaces": [
+      {
+        "que": "Anuncio original en Kleinanzeigen",
+        "url": "https://www.autouncle.de/es/enlace-externo/ebay/224165559/412924540"
+      },
+      {
+        "que": "Ficha en AutoUncle",
+        "url": "https://www.autouncle.de/es/d/224165559-usado-2015-opel-astra-gtc-opc-280-cv"
+      },
+      {
+        "que": "Búsqueda alemana completa",
+        "url": "https://www.autouncle.de/es/coches-segunda-mano/Opel/Astra%20GTC/f-gasolina/g-manual?s%5Bmin_year%5D=2014&s%5Bmax_km%5D=140000&s%5Bmin_hp%5D=250"
+      },
+      {
+        "que": "Ficha técnica y PVP en km77",
+        "url": "https://www.km77.com/coches/opel/astra/2011/gtc/opc/astra-opc2/datos"
+      }
+    ]
+  },
+  "comparable": {
+    "objetivo": "Objetivo: qué pagaría hoy un comprador español por <strong>un Astra J GTC OPC de 2014 con 102.000 km</strong>. Se proyecta cada unidad española sobre esa ficha exacta. El nombre de cada unidad enlaza a su anuncio.",
+    "formula": "Comparable = precio anunciado × (1 + 0,085 × años de diferencia) × (1 + 0,02 × (km_muestra − 102.000) / 10.000)",
+    "aviso": "<strong>Tres advertencias sobre esta tabla, y las tres van en nuestra contra.</strong><br><br><strong>1 · La dispersión es alta.</strong> Las proyecciones van de 15.246 a 24.584 €. Con 8 unidades entre 2012 y 2016 y kilometrajes de 33.500 a 186.000, la muestra es pequeña y heterogénea. El cuartil bajo, 18.666 €, es la cifra prudente.<br><br><strong>2 · El ajuste se invierte en los extremos.</strong> Fíjate en que el coche de 186.000 km proyecta a 24.584 €, la cifra más alta de las ocho, por encima del de 33.500 km. La fórmula extrapola fuera de su rango válido. <strong>Con el filtro de admisión que toca —±2 años y ±40 % de km— solo tres de las ocho unidades serían comparables de verdad.</strong> Se muestran las ocho por transparencia, pero el peso lo tienen las tres cercanas.<br><br><strong>3 · Todo esto son precios PEDIDOS, no precios de venta.</strong> Nuestro precio final es real. El profesional de Milanuncios lleva <strong>65 días</strong> a 15.900 € y no se va a vender a 15.900 €. Un descuento de negociación del 3-10 % según los días publicado bajaría el comparable, y con él el ahorro, entre 3 y 8 puntos. <strong>Pendiente de calibrar con ventas reales; mientras tanto, queda dicho.</strong>",
+    "filas": [
+      {
+        "origen": "11.999 € · Wallapop",
+        "anio": 2012,
+        "km": 145000,
+        "aj_anio": 17.0,
+        "aj_km": 8.6,
+        "proyectado": 15246,
+        "url": "https://es.wallapop.com/item/opel-astra-opc-1264395381"
+      },
+      {
+        "origen": "25.000 € · Wallapop",
+        "anio": 2016,
+        "km": 33500,
+        "aj_anio": -17.0,
+        "aj_km": -13.7,
+        "proyectado": 17907,
+        "url": "https://es.wallapop.com/item/opel-astra-2016-1283156405"
+      },
+      {
+        "origen": "15.900 € · Milanuncios profesional",
+        "anio": 2013,
+        "km": 143000,
+        "aj_anio": 8.5,
+        "aj_km": 8.2,
+        "proyectado": 18666,
+        "url": "https://www.milanuncios.com/opel-de-segunda-mano/opel-astra-2-0-turbo-ss-opc-gtc-594789895.htm"
+      },
+      {
+        "origen": "19.499 € · Wallapop",
+        "anio": 2014,
+        "km": 159000,
+        "aj_anio": 0.0,
+        "aj_km": 11.4,
+        "proyectado": 21722,
+        "url": "https://es.wallapop.com/item/opel-astra-opc-1242626326"
+      },
+      {
+        "origen": "18.900 € · Wallapop",
+        "anio": 2012,
+        "km": 131000,
+        "aj_anio": 17.0,
+        "aj_km": 5.8,
+        "proyectado": 23396,
+        "url": "https://es.wallapop.com/item/opel-astra-j-opc-1252728678"
+      },
+      {
+        "origen": "19.990 € · Wallapop",
+        "anio": 2013,
+        "km": 142000,
+        "aj_anio": 8.5,
+        "aj_km": 8.0,
+        "proyectado": 23424,
+        "url": "https://es.wallapop.com/item/opel-astra-opc-1275947355"
+      },
+      {
+        "origen": "22.650 € · Wallapop",
+        "anio": 2014,
+        "km": 135000,
+        "aj_anio": 0.0,
+        "aj_km": 6.6,
+        "proyectado": 24145,
+        "url": "https://es.wallapop.com/item/opel-astra-2014-1242617259"
+      },
+      {
+        "origen": "17.990 € · Milanuncios profesional",
+        "anio": 2012,
+        "km": 186000,
+        "aj_anio": 17.0,
+        "aj_km": 16.8,
+        "proyectado": 24584,
+        "url": "https://www.milanuncios.com/opel-de-segunda-mano/opel-astra-2-0-turbo-ss-opc-gtc-608974588.htm"
+      }
+    ]
+  },
+  "coste": {
+    "destino": "Huelva",
+    "lineas": [
+      {
+        "concepto": "Precio del anuncio en Alemania",
+        "importe": 13000.0,
+        "origen": "<a href='https://www.autouncle.de/es/enlace-externo/ebay/224165559/412924540'>Kleinanzeigen, 9 ago 2026</a>",
+        "certeza": "ok"
+      },
+      {
+        "concepto": "Transporte a Huelva <strong>desde Baja Sajonia</strong>",
+        "importe": 900.0,
+        "origen": "Tarifa suroeste. <strong>Está en el norte: conviene confirmar recargo</strong>",
+        "certeza": "est"
+      },
+      {
+        "concepto": "<strong>Matrícula de exportación alemana</strong> (<em>Ausfuhrkennzeichen</em>, 15 días) y seguro",
+        "importe": 114.0,
+        "origen": "Solo si viaja rodando; con camión no aplica",
+        "certeza": "ok"
+      },
+      {
+        "concepto": "ITV de importación, homologación y tasas de la DGT",
+        "importe": 115.0,
+        "origen": "Tasa DGT + ITV · sin reformas que homologar",
+        "certeza": "ok"
+      },
+      {
+        "concepto": "IEDMT (impuesto de matriculación)",
+        "importe": 476.65,
+        "origen": "<a href='https://www.boe.es/diario_boe/txt.php?id=BOE-A-2025-26357'>Orden HAC/1501/2025</a> · desarrollo abajo",
+        "certeza": "est"
+      }
+    ],
+    "honorarios": 1500.0,
+    "origen_honorarios": "Tarifa hasta 15.000 € de compra",
+    "iedmt_detalle": {
+      "desarrollo": "PVP completo (km77, tarifa 05/2015)                      37.600,00 EUR\n   28.757 EUR sin impuestos x 1,3075  (IVA 21 % + IEDMT 9,75 %)\n\nx coeficiente de antiguedad, 10,8 anios -> 17 %           6.392,00 EUR   valor de mercado\n- impuestos indirectos residuales  6.392 x 0,3075/1,3075  1.503,28 EUR   minoracion art. 69\n= BASE IMPONIBLE                                          4.888,72 EUR\n\nx tipo por CO2: 189 g/km -> banda 160-199 -> 9,75 %         476,65 EUR   IEDMT",
+      "escenarios": [
+        {
+          "caso": "Con minoración por matriculación previa en el extranjero",
+          "importe": 476.65,
+          "cuando": "Lo que corresponde"
+        },
+        {
+          "caso": "Sin minoración",
+          "importe": 623.22,
+          "cuando": "Si el gestor no la aplica"
+        },
+        {
+          "caso": "El descartado, de 2014",
+          "importe": 280.38,
+          "cuando": "Pagaba menos solo por ser dos años más viejo"
+        }
+      ],
+      "nota": "<strong>Este paga 476 € y el descartado pagaba 280 €, siendo el mismo coche.</strong> La diferencia es la edad: a los 12 años el coeficiente cae al 10 % y este todavía está en el 17 %. Es el precio de comprar más nuevo.<br><br><strong>La duda del CO₂ queda cerrada.</strong> Las fichas alemanas dan <strong>184-189 g/km NEDC</strong> para esta motorización, tanto en versión Euro 5 como Euro 6. Un coche de 2015 se homologó por NEDC —el WLTP no llegó hasta 2018—, así que <strong>se queda en la banda 160-199 y el tipo del 9,75 % es firme</strong>. No hay riesgo de salto a 14,75 %.<br><br><strong>Sensibilidad de honorarios:</strong> con 1.500 € el ahorro contra el cuartil bajo es del <strong>13,7 %</strong>; con 1.875 € baja al <strong>11,7 %</strong>; con 2.250 € cae al <strong>9,7 %</strong> y se sale del umbral del tramo."
+    }
+  },
+  "veredicto": {
+    "contra": [
+      {
+        "nombre": "Mediana proyectada",
+        "comparable": 22559,
+        "lectura": "Muy por encima del umbral"
+      },
+      {
+        "nombre": "Cuartil bajo proyectado",
+        "comparable": 18666,
+        "lectura": "Por encima del umbral del 12 %"
+      }
+    ],
+    "vendibilidad": {
+      "lectura": "Por encima del corte de 65",
+      "factores": [
+        {
+          "factor": "1 · Demanda del modelo",
+          "peso": 30,
+          "puntos": 22,
+          "estimado": true,
+          "justificacion": "El Astra es un nombre conocido y el OPC tiene seguidores. <strong>Primer dato duro de rotación</strong>: el profesional de Milanuncios lleva <strong>65 días publicado</strong> a 15.900 €. Con una sola observación no se puede puntuar; hace falta el índice de <code>publicationDate</code> por modelo",
+          "certeza": "est"
+        },
+        {
+          "factor": "2 · Escasez de la configuración",
+          "peso": 25,
+          "puntos": 25,
+          "justificacion": "8 unidades comparables en toda España. Tramo ≤20 → máximo. AutoScout24.es no tiene ninguna española",
+          "certeza": "ok"
+        },
+        {
+          "factor": "3 · Atractivo y contenido",
+          "peso": 20,
+          "puntos": 17,
+          "justificacion": "Coupé de 3 puertas, 280 CV, Recaro, llantas de 19&quot;, frenos de 355 mm. Deportivo conocido con carrocería poco común",
+          "certeza": "est"
+        },
+        {
+          "factor": "4 · Equipamiento sobre el estándar",
+          "peso": 15,
+          "puntos": 5,
+          "justificacion": "<strong>Solo puntúa lo que era opcional en la tarifa española:</strong> cuero total 3 (paquete de 2.183 €), sensores 1, y <strong>ajuste eléctrico de asientos 1</strong>, que en España <strong>ni siquiera se ofrecía</strong> — confirmado como campo estructurado en el anuncio alemán. Xenón, navegador y demás iban de serie: prima cero",
+          "certeza": "ok"
+        },
+        {
+          "factor": "5 · Kilómetros e historial",
+          "peso": 10,
+          "puntos": 6,
+          "justificacion": "9.200 km/año (3) · <strong>solo 2 propietarios</strong> (2) · <strong>ITV alemana pasada hasta enero de 2027</strong> (1). Falta el libro de mantenimiento, que no se puede saber sin preguntar",
+          "certeza": "ok"
+        }
+      ]
+    },
+    "casilla": "<p><strong>Casilla de la matriz: COMPRA PRIORITARIA</strong> — vendibilidad 75 sobre un corte de 65.</p><p><strong>El ahorro, dicho con la precisión que permite la muestra:</strong> entre un <strong>14 % y un 29 %</strong> según se compare contra el suelo del mercado o contra la mediana. Ocho comparables no dan para más decimales.</p><p>Contra el cuartil bajo sale <strong>13,7 %</strong>, por encima del 12 % que exige el tramo de 8.000-14.000 €. <strong>Tiene algo más de colchón que el descartado</strong>, pero no mucho: subir los honorarios a 2.250 € lo tira al 9,7 %.</p>"
+  },
+  "riesgos": [
+    {
+      "bandera": "Sin texto libre del vendedor",
+      "detalle": "El anuncio de Kleinanzeigen solo trae la ficha de datos: <strong>ni libro de mantenimiento, ni motivo de venta, ni declaración de siniestros</strong>. No es señal mala, es información que falta. <strong>Hay que preguntarlo por escrito antes de nada</strong>, y con el precedente del descartado, preguntar expresamente por preparaciones y por el motor",
+      "estado": "bloqueante",
+      "estado_texto": "Pendiente · bloqueante"
+    },
+    {
+      "bandera": "Llamada a revisión del fabricante",
+      "detalle": "Opel llamó a revisión <strong>136.830 unidades en Alemania</strong> de Astra J, Cascada y Zafira C fabricadas entre 2010 y 2015 <strong>con cambio manual, freno de mano eléctrico y asistente de arranque en pendiente</strong>: un fallo de software podía dar la impresión de freno de mano puesto. <strong>El candidato cumple las tres condiciones</strong> — su ficha lista «Feststellbremse elektrisch» y «Berganfahrassistent». <strong>Hay que confirmar con el bastidor si la campaña se le hizo</strong>",
+      "estado": "confirmar",
+      "estado_texto": "Confirmar con VIN"
+    },
+    {
+      "bandera": "Sin número de bastidor",
+      "detalle": "<strong>Es la pieza que más certeza compraría de un solo golpe.</strong> Con el VIN se puede verificar la campaña de revisión ante Opel, sacar historial con un servicio de terceros, y contrastar la ficha real contra lo que dice el anuncio. <strong>Sin VIN, todo lo que sabemos del coche es lo que el vendedor ha querido contar</strong> — y el candidato anterior demostró lo que eso vale",
+      "estado": "bloqueante",
+      "estado_texto": "Pedir siempre"
+    },
+    {
+      "bandera": "Está en el norte de Alemania",
+      "detalle": "Wittmund, Baja Sajonia. La tarifa de 900 € es de la zona suroeste. <strong>Confirmar recargo de transporte</strong>: cada 100 € extra son 0,5 puntos de ahorro",
+      "estado": "confirmar",
+      "estado_texto": "Confirmar tarifa"
+    },
+    {
+      "bandera": "Minoración del artículo 69",
+      "detalle": "Los 476,65 € asumen que se aplica la minoración de impuestos indirectos residuales. Si el gestor no la aplica, son 623,22 €",
+      "estado": "confirmar",
+      "estado_texto": "Confirmar con gestor"
+    },
+    {
+      "bandera": "El OPC rompe motores",
+      "detalle": "El coche descartado llevaba <strong>motor de sustitución montado a los 75.000 km</strong>. No es una anécdota: es el dato de fiabilidad más duro que ha salido de todo el barrido, y viene del propio vendedor. <strong>En este modelo hay que pedir siempre el historial del motor</strong>, y comunicárselo al cliente",
+      "estado": "confirmar",
+      "estado_texto": "Informar al cliente"
+    },
+    {
+      "bandera": "Modelo muy propenso a preparaciones",
+      "detalle": "En la muestra de hoy: uno alemán con downpipe y limitador tocado (descartado), otro alemán con Eventuri (descartado), uno español con Stage 2 (descartado). Un vendedor español anuncia el suyo como «<em>el único OPC con esos km sin ninguna modificación</em>». <strong>De 13 unidades alemanas, 2 iban preparadas: probabilidad de descarte del 15 %</strong>",
+      "estado": "declarado",
+      "estado_texto": "Dato para el ranking"
+    },
+    {
+      "bandera": "Regla 6 meses / 6.000 km",
+      "detalle": "10,8 años y 99.303 km. <strong>No aplica</strong> el 21 % de IVA español",
+      "estado": "descartado",
+      "estado_texto": "Descartado"
+    },
+    {
+      "bandera": "Etiqueta DGT",
+      "detalle": "Distintivo <strong>C</strong>. Sin restricciones en Huelva; sí en ZBE de Madrid y Barcelona en escenarios futuros",
+      "estado": "informativo",
+      "estado_texto": "Informativo"
+    },
+    {
+      "bandera": "Muestra española pequeña y de precios pedidos",
+      "detalle": "8 unidades, de las que solo 3 son comparables estrictos con el filtro de ±2 años y ±40 % de km. Y <strong>todos son precios pedidos, no de venta</strong>: el profesional de Milanuncios lleva 65 días a 15.900 €. Un descuento de negociación del 3-10 % bajaría el ahorro entre 3 y 8 puntos",
+      "estado": "declarado",
+      "estado_texto": "Declarado"
+    }
+  ],
+  "alternativas": [
+    "<strong>El caso del descartado, que merece quedar escrito.</strong> <a href='https://www.autouncle.de/es/d/224516733-usado-2014-opel-astra-gtc-opc-280-cv'>13.500 € · julio 2014 · 102.000 km</a>. Sobre el papel era el mejor: 10 días publicado, precio bajo, buen equipamiento. <strong>Ni AutoUncle ni AutoScout24 en su listado decían nada de esto.</strong> Hizo falta abrir el <a href='https://www.autouncle.de/es/enlace-externo/autoscout24private/224516733/413607328'>anuncio original</a> y leerlo entero:<br><br>«<em>Performance Paket: Sachs Sportkupplung · HJS Sportkatalysator · Downpipe eingetragen · Tempobegrenzer auf 270 KM/H geändert · Rally Begrenzer</em>»<br>«<em>Neuer Motor wurde bei 75.000 Km eingesetzt… der alte Motor brauchte nicht zurückgegeben werden</em>»<br>«<em>Privatverkauf ohne Gewährleistung und Rücknahme</em>»<br><br>Traducido: embrague deportivo, catalizador deportivo, <strong>downpipe</strong>, <strong>limitador subido a 270 km/h</strong>, limitador rally, y <strong>motor de sustitución montado a los 75.000 km porque el original se rompió</strong>. Venta particular sin garantía ni devolución.<br><br><strong>Por qué se cae:</strong> el downpipe y el catalizador deportivo comprometen la ITV y la homologación española; la centralita está tocada; y un motor de sustitución a 75.000 km significa que el kilometraje del cuadro no es el del motor y que este modelo rompe motores. <strong>Ofertar esto habría sido el falso positivo que la skill dice que hay que evitar a toda costa.</strong>",
+    "<strong>El argumento que no depende de ninguna fórmula.</strong> El Astra OPC más barato que hoy puede comprar un español con garantía cuesta <a href='https://www.milanuncios.com/opel-de-segunda-mano/opel-astra-2-0-turbo-ss-opc-gtc-594789895.htm'>15.900 €</a> — 2013, 143.000 km, profesional de Barcelona. El nuestro sale en <strong>16.106 €</strong>. Son <strong>206 € más</strong>, y a cambio el cliente se lleva <strong>dos años más nuevo, 43.700 km menos, Euro 6 en lugar de Euro 5 y solo dos propietarios</strong>. Dos coches reales, dos precios reales, ninguna fórmula que discutir. <strong>Lo que pierde:</strong> el de 15.900 € lleva doce meses de garantía de un profesional y el nuestro no. Esa garantía vale algo y el cliente tiene que ponerle precio.",
+    "<strong>Segunda opción si el candidato no convence:</strong> <a href='https://www.autouncle.de/es/d/224296901-usado-2014-opel-astra-gtc-opc-280-cv'>16.500 € · marzo 2014 · 48.541 km · mobile.de</a>. La mitad de kilómetros. Puesto en Huelva sale en 20.159 € con honorarios de 2.250 €: +10,6 % contra la mediana pero <strong>−8,0 % contra el cuartil bajo</strong>. Por margen no sale, pero es la unidad más vendible del listado. Casilla de <em>oferta de contenido</em>. <a href='https://www.autouncle.de/es/enlace-externo/mobile/224296901/405805624'>Anuncio original</a>"
+  ],
+  "acciones": [
+    "<strong>Escribir al vendedor</strong> y preguntar, en este orden: ¿tiene libro de mantenimiento sellado? ¿el motor es el original? ¿lleva alguna modificación —escape, admisión, centralita—? ¿por qué lo vende? <strong>Con el precedente del descartado, estas preguntas no son opcionales</strong>",
+    "<strong>Pedir el número de bastidor (VIN).</strong> Es lo que más certeza da por una sola pregunta: permite comprobar la llamada a revisión, sacar historial y verificar la ficha real frente al anuncio",
+    "Con el VIN, <strong>comprobar la campaña de revisión de Opel</strong> (Astra J 2010-2015, manual, freno eléctrico): si no se hizo, es trabajo pendiente que asume el comprador",
+    "Pedir fotos del interior y del vano motor. El cuero total y el asiento eléctrico son la mitad del argumento de venta",
+    "Confirmar el <strong>recargo de transporte desde Baja Sajonia</strong>",
+    "Confirmar con el gestor la minoración del artículo 69 y el valor del BOE para esta versión",
+    "Negociar. Es venta particular y lleva 16 días publicado: hay margen. Cada 500 € de rebaja son 2,7 puntos de ahorro",
+    "Solo si todo lo anterior sale limpio, publicar. Con vendibilidad 75 y 8 comparables en toda España, el gancho es la escasez"
+  ],
+  "pie": {
+    "fuentes_enlazadas": [
+      {
+        "nombre": "Wallapop",
+        "url": "https://es.wallapop.com/app/search?keywords=opel%20astra%20opc&category_ids=100"
+      },
+      {
+        "nombre": "Milanuncios",
+        "url": "https://www.milanuncios.com/coches-de-segunda-mano/?s=opel%20astra%20opc"
+      },
+      {
+        "nombre": "Coches.net",
+        "url": "https://www.coches.net/opel/astra/segunda-mano/"
+      },
+      {
+        "nombre": "AutoScout24.es",
+        "url": "https://www.autoscout24.es/lst/opel/astra?atype=C&desde=2012&powerfrom=198&powerto=214&powertype=kw&fuel=B"
+      },
+      {
+        "nombre": "AutoUncle",
+        "url": "https://www.autouncle.de/es/coches-segunda-mano/Opel/Astra%20GTC/f-gasolina/g-manual?s%5Bmin_year%5D=2014&s%5Bmax_km%5D=140000&s%5Bmin_hp%5D=250"
+      },
+      {
+        "nombre": "AutoScout24.de — ficha del descartado",
+        "url": "https://www.autouncle.de/es/enlace-externo/autoscout24private/224516733/413607328"
+      },
+      {
+        "nombre": "Kleinanzeigen — ficha del candidato",
+        "url": "https://www.autouncle.de/es/enlace-externo/ebay/224165559/412924540"
+      },
+      {
+        "nombre": "km77 — ficha oficial",
+        "url": "https://www.km77.com/coches/opel/astra/2011/gtc/opc/astra-opc2/datos"
+      },
+      {
+        "nombre": "BOE — Orden HAC/1501/2025",
+        "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2025-26357"
+      }
+    ],
+    "estimaciones": "El PVP de la tabla ministerial se sustituye por el de km77 · la demanda es una casilla razonada, no una medición · el comparable parte de 8 unidades, de las que solo 3 son estrictas · <strong>todos los precios españoles son pedidos, no de venta, y eso infla el ahorro entre 3 y 8 puntos sin cuantificar todavía</strong> · la minoración del artículo 69 está aplicada pero pendiente de confirmar con el gestor · <strong>el vendedor no ha dado texto libre y no hay VIN: el estado real del coche es desconocido</strong> · la tarifa de transporte es de zona suroeste y el coche está en el norte.<br><br><strong>Queda cerrado:</strong> el CO₂ y con él el tipo del IEDMT.",
+    "legal": "Este documento no constituye asesoramiento fiscal ni legal. Las cifras de impuestos deben confirmarse con el gestor antes de comprometerse con un cliente. JJ Import Motors ofrece un servicio de localización e importación bajo pedido; no dispone de stock propio. Los precios de los anuncios son los publicados en la fecha del informe y pueden haber cambiado."
+  },
+  "verificacion": {
+    "conteo": {
+      "ok": 9,
+      "est": 4,
+      "man": 6
+    },
+    "nota": "<strong>Cómo leer esto.</strong> Los seis puntos de arriba son todo lo que este informe <strong>no</strong> ha podido cerrar contra una fuente. Los tres primeros los cierra el vendedor contestando; el cuarto, un presupuesto de transporte; el quinto, tu gestor; el sexto no lo cierra nadie hasta que vendas coches y anotes a cuánto se cerraron de verdad.<br><br><strong>Todo lo que NO aparece en esta tabla está verificado y enlazado en el informe.</strong> Si un dato no tiene sello de COMPROBAR, es que hay una URL detrás que puedes clicar.",
+    "pendientes": [
+      {
+        "dato": "Estado real del coche",
+        "certeza": "no",
+        "accion": "<strong>Escribir al vendedor</strong> y preguntar por escrito: ¿libro de mantenimiento sellado? ¿motor original o de sustitución? ¿alguna modificación de escape, admisión o centralita? ¿por qué lo vende? <strong>El anuncio no tiene texto libre, así que no ha declarado nada de esto</strong>",
+        "impacto": "Si sale preparado o con motor cambiado, <strong>se cae</strong>, como el anterior"
+      },
+      {
+        "dato": "Número de bastidor (VIN)",
+        "certeza": "no",
+        "accion": "Pedirlo en el primer mensaje. <strong>Es lo que más certeza compra de una sola pregunta</strong>: permite verificar la campaña de revisión ante Opel, sacar historial con un servicio de terceros y contrastar la ficha real contra el anuncio",
+        "impacto": "Convierte tres «me fío» en tres comprobaciones"
+      },
+      {
+        "dato": "Campaña de revisión de Opel",
+        "certeza": "man",
+        "accion": "Con el VIN, comprobar en un servicio oficial Opel si se hizo la campaña de los <strong>136.830 Astra J 2010-2015 con cambio manual, freno de mano eléctrico y asistente de arranque en pendiente</strong>. El candidato cumple las tres condiciones",
+        "impacto": "Si no se hizo, es trabajo pendiente que hereda el comprador"
+      },
+      {
+        "dato": "Transporte desde Baja Sajonia",
+        "certeza": "est",
+        "accion": "<strong>Pedir presupuesto real.</strong> Los 900 € del desglose son tarifa de zona suroeste y el coche está en el norte de Alemania",
+        "impacto": "Cada 100 € de más son <strong>0,5 puntos</strong> menos de ahorro"
+      },
+      {
+        "dato": "Minoración del artículo 69",
+        "certeza": "est",
+        "accion": "Confirmar con el gestor que se aplica la minoración de impuestos indirectos residuales, y de paso el valor que la tabla del BOE asigna a esta versión",
+        "impacto": "Sin minoración el IEDMT pasa de <strong>476 a 623 €</strong>"
+      },
+      {
+        "dato": "Precio pedido frente a precio de venta",
+        "certeza": "est",
+        "accion": "<strong>No se puede cerrar hoy.</strong> Se cierra anotando, en cada coche que vendas, el precio que pedían, los días que llevaba publicado y a cuánto se cerró de verdad. Con veinte observaciones deja de ser estimación",
+        "impacto": "El ahorro real es probablemente <strong>3-8 puntos menor</strong> del que sale aquí"
+      }
+    ]
+  }
+}

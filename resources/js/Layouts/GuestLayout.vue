@@ -5,7 +5,7 @@ import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 </script>
 
 <template>
-    <div class="flex min-h-screen bg-linear-to-br from-slate-50 via-white to-estoril-50">
+    <div class="flex min-h-screen bg-linear-to-br from-slate-50 via-white to-estoril-50 transition-colors duration-300 dark:from-asphalt-900 dark:via-asphalt-900 dark:to-asphalt-800">
         <!-- Left side: marketing -->
         <div class="hidden lg:flex lg:w-1/2 flex-col justify-between bg-linear-to-br from-estoril-700 to-estoril-900 p-12 text-white">
             <Link href="/" class="flex items-center gap-2">
@@ -44,9 +44,9 @@ import ApplicationLogo from '@/Components/ApplicationLogo.vue';
                     <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-estoril-600">
                         <TruckIcon class="h-5 w-5 text-white" />
                     </div>
-                    <span class="text-xl font-bold text-gray-900">Importnex</span>
+                    <span class="text-xl font-bold text-gray-900 dark:text-white">Importnex</span>
                 </Link>
-                <div class="rounded-2xl bg-white px-8 py-10 shadow-xl ring-1 ring-gray-200">
+                <div class="rounded-2xl bg-white px-8 py-10 shadow-xl ring-1 ring-gray-200 transition-colors duration-300 dark:bg-asphalt-800 dark:ring-asphalt-700">
                     <slot />
                 </div>
             </div>

@@ -61,7 +61,7 @@ watch(() => props.price, (newPrice) => {
                         :min="10000"
                         :max="200000"
                         step="1000"
-                        class="flex-1"
+                        class="flex-1 accent-estoril-600 dark:accent-estoril-400"
                     />
                     <span class="w-24 text-right text-sm font-semibold text-gray-900 dark:text-white">{{ formatCurrency(principal) }}</span>
                 </div>
@@ -79,7 +79,7 @@ watch(() => props.price, (newPrice) => {
                         min="0"
                         max="50"
                         step="5"
-                        class="flex-1"
+                        class="flex-1 accent-estoril-600 dark:accent-estoril-400"
                     />
                     <span class="w-24 text-right text-sm font-semibold text-gray-900 dark:text-white">{{ formatCurrency(downPayment) }}</span>
                 </div>
@@ -97,7 +97,7 @@ watch(() => props.price, (newPrice) => {
                         min="12"
                         max="84"
                         step="12"
-                        class="flex-1"
+                        class="flex-1 accent-estoril-600 dark:accent-estoril-400"
                     />
                     <span class="w-24 text-right text-sm font-semibold text-gray-900 dark:text-white">{{ termMonths }} meses</span>
                 </div>
@@ -115,7 +115,7 @@ watch(() => props.price, (newPrice) => {
                         min="3"
                         max="12"
                         step="0.5"
-                        class="flex-1"
+                        class="flex-1 accent-estoril-600 dark:accent-estoril-400"
                     />
                     <span class="w-24 text-right text-sm font-semibold text-gray-900 dark:text-white">{{ annualRate.toFixed(1) }}%</span>
                 </div>

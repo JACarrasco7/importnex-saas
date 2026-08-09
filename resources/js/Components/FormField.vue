@@ -1,12 +1,12 @@
 <template>
     <div>
-        <label v-if="label" :for="id" class="mb-1 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+        <label v-if="label" :for="id" class="mb-1 block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
             {{ label }}
             <span v-if="required" class="text-rose-500">*</span>
         </label>
         <slot />
         <p v-if="error" class="mt-1 text-xs text-rose-600">{{ error }}</p>
-        <p v-else-if="hint" class="mt-1 text-xs text-gray-400">{{ hint }}</p>
+        <p v-else-if="hint" class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ hint }}</p>
     </div>
 </template>
 

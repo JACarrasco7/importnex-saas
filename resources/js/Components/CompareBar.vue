@@ -53,12 +53,12 @@ defineExpose({ features, items });
             leave-from-class="translate-y-0"
             leave-to-class="translate-y-full"
         >
-            <div v-if="count > 0" class="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-white shadow-2xl">
+            <div v-if="count > 0" class="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-white/95 shadow-2xl backdrop-blur dark:border-asphalt-700 dark:bg-asphalt-900/95">
                 <div class="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
                     <div class="flex items-center justify-between gap-4">
                         <div class="flex items-center gap-3">
                             <ScaleIcon class="h-5 w-5 text-estoril-600" />
-                            <span class="text-sm font-semibold text-gray-900">
+                            <span class="text-sm font-semibold text-gray-900 dark:text-white">
                                 {{ count }} {{ count === 1 ? 'coche' : 'coches' }} en comparador
                             </span>
                         </div>
@@ -67,12 +67,12 @@ defineExpose({ features, items });
                             <div
                                 v-for="item in items.slice(0, 4)"
                                 :key="item.id"
-                                class="flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-1.5"
+                                class="flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-1.5 dark:bg-asphalt-800"
                             >
-                                <span class="text-sm font-medium text-gray-900">{{ item.brand }} {{ item.model }}</span>
+                                <span class="text-sm font-medium text-gray-900 dark:text-white">{{ item.brand }} {{ item.model }}</span>
                                 <button
                                     @click="remove(item.id)"
-                                    class="rounded-full p-0.5 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
+                                    class="rounded-full p-0.5 text-gray-400 hover:bg-gray-200 hover:text-gray-600 dark:text-gray-400 dark:hover:bg-asphalt-700 dark:hover:text-gray-300"
                                     :aria-label="`Quitar ${item.brand} ${item.model}`"
                                 >
                                     <XMarkIcon class="h-3.5 w-3.5" />
@@ -83,7 +83,7 @@ defineExpose({ features, items });
                         <div class="flex items-center gap-2">
                             <button
                                 @click="clear"
-                                class="rounded-lg px-3 py-1.5 text-sm font-semibold text-gray-600 hover:bg-gray-100"
+                                class="rounded-lg px-3 py-1.5 text-sm font-semibold text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-asphalt-800"
                             >
                                 Limpiar
                             </button>

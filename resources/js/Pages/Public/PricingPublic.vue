@@ -126,20 +126,20 @@ function featureValueDisplay(value) {
 
     <PublicLayout>
         <!-- Hero -->
-        <section class="relative overflow-hidden bg-linear-to-br from-estoril-50 via-white to-platinum-100 py-20 sm:py-28">
+        <section class="relative overflow-hidden bg-linear-to-br from-estoril-50 via-white to-platinum-100 dark:from-asphalt-900 dark:via-asphalt-900 dark:to-asphalt-800 py-20 sm:py-28">
             <div class="absolute -top-40 -right-40 h-[28rem] w-[28rem] rounded-full bg-estoril-300/60 blur-3xl"></div>
             <div class="absolute -bottom-40 -left-40 h-[28rem] w-[28rem] rounded-full bg-platinum-400/50 blur-3xl"></div>
 
             <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="mx-auto max-w-3xl text-center">
-                    <span class="inline-flex items-center gap-2 rounded-full bg-estoril-100 px-4 py-1.5 text-sm font-semibold text-estoril-800 ring-1 ring-estoril-200">
+                    <span class="inline-flex items-center gap-2 rounded-full bg-estoril-100 px-4 py-1.5 text-sm font-semibold text-estoril-800 ring-1 ring-estoril-200 dark:bg-estoril-900/30 dark:text-estoril-300 dark:ring-estoril-800">
                         <SparklesIcon class="h-4 w-4" />
                         {{ t('pricing_public.tagline') }}
                     </span>
-                    <h1 class="mt-6 text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl">
+                    <h1 class="mt-6 text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl dark:text-white">
                         {{ t('pricing_public.hero_title') }}
                     </h1>
-                    <p class="mx-auto mt-5 max-w-2xl text-lg text-gray-600">
+                    <p class="mx-auto mt-5 max-w-2xl text-lg text-gray-600 dark:text-gray-400">
                         {{ t('pricing_public.hero_subtitle') }}
                     </p>
 
@@ -147,14 +147,14 @@ function featureValueDisplay(value) {
                     <div class="mt-8 flex items-center justify-center gap-4">
                         <span
                             class="text-sm font-medium transition-colors"
-                            :class="billingPeriod === 'monthly' ? 'text-gray-900' : 'text-gray-500'"
+                            :class="billingPeriod === 'monthly' ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'"
                         >
                             {{ t('pricing_public.monthly') }}
                         </span>
                         <button
                             type="button"
                             class="relative h-6 w-11 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-estoril-500 focus:ring-offset-2"
-                            :class="billingPeriod === 'yearly' ? 'bg-estoril-600' : 'bg-gray-300'"
+                            :class="billingPeriod === 'yearly' ? 'bg-estoril-600' : 'bg-gray-300 dark:bg-asphalt-700'"
                             @click="billingPeriod = billingPeriod === 'monthly' ? 'yearly' : 'monthly'"
                         >
                             <span
@@ -164,11 +164,11 @@ function featureValueDisplay(value) {
                         </button>
                         <span
                             class="text-sm font-medium transition-colors"
-                            :class="billingPeriod === 'yearly' ? 'text-gray-900' : 'text-gray-500'"
+                            :class="billingPeriod === 'yearly' ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'"
                         >
                             {{ t('pricing_public.yearly') }}
                         </span>
-                        <span v-if="billingPeriod === 'yearly'" class="ml-2 rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-800">
+                        <span v-if="billingPeriod === 'yearly'" class="ml-2 rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-800 dark:bg-green-900/30 dark:text-green-300">
                             {{ t('pricing_public.save_amount', { amount: savings }) }}%
                         </span>
                     </div>
@@ -208,7 +208,7 @@ function featureValueDisplay(value) {
                             <span class="text-4xl font-extrabold text-gray-900 dark:text-white">
                                 €{{ billingPeriod === 'yearly' ? plan.yearlyPrice : plan.price }}
                             </span>
-                            <span class="text-sm text-gray-500">
+                            <span class="text-sm text-gray-500 dark:text-gray-400">
                                 /{{ billingPeriod === 'yearly' ? t('pricing_public.year') : t('pricing_public.month') }}
                             </span>
                         </div>
@@ -318,7 +318,7 @@ function featureValueDisplay(value) {
                     <details class="group rounded-lg bg-white p-6 shadow-sm dark:bg-asphalt-800">
                         <summary class="flex cursor-pointer items-center justify-between text-gray-900 dark:text-white">
                             <span class="font-medium">{{ t('pricing_public.faq_q1') }}</span>
-                            <XMarkIcon class="h-5 w-5 transition group-open:rotate-45" />
+                            <XMarkIcon class="h-5 w-5 transition group-open:rotate-45 dark:text-gray-400" />
                         </summary>
                         <p class="mt-4 text-gray-600 dark:text-gray-400">
                             {{ t('pricing_public.faq_a1') }}
@@ -328,7 +328,7 @@ function featureValueDisplay(value) {
                     <details class="group rounded-lg bg-white p-6 shadow-sm dark:bg-asphalt-800">
                         <summary class="flex cursor-pointer items-center justify-between text-gray-900 dark:text-white">
                             <span class="font-medium">{{ t('pricing_public.faq_q2') }}</span>
-                            <XMarkIcon class="h-5 w-5 transition group-open:rotate-45" />
+                            <XMarkIcon class="h-5 w-5 transition group-open:rotate-45 dark:text-gray-400" />
                         </summary>
                         <p class="mt-4 text-gray-600 dark:text-gray-400">
                             {{ t('pricing_public.faq_a2') }}
@@ -338,7 +338,7 @@ function featureValueDisplay(value) {
                     <details class="group rounded-lg bg-white p-6 shadow-sm dark:bg-asphalt-800">
                         <summary class="flex cursor-pointer items-center justify-between text-gray-900 dark:text-white">
                             <span class="font-medium">{{ t('pricing_public.faq_q3') }}</span>
-                            <XMarkIcon class="h-5 w-5 transition group-open:rotate-45" />
+                            <XMarkIcon class="h-5 w-5 transition group-open:rotate-45 dark:text-gray-400" />
                         </summary>
                         <p class="mt-4 text-gray-600 dark:text-gray-400">
                             {{ t('pricing_public.faq_a3') }}

@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "field": "estado_real",
+      "label": "Estado real del coche",
+      "certainty": "no",
+      "action": "<strong>Escribir al vendedor</strong> y preguntar por escrito: ¿libro de mantenimiento sellado? ¿motor original o de sustitución? ¿alguna modificación de escape, admisión o centralita? ¿por qué lo vende? <strong>El anuncio no tiene texto libre, así que no ha declarado nada de esto</strong>",
+      "impact": "Si sale preparado o con motor cambiado, <strong>se cae</strong>, como el anterior"
+    },
+    {
+      "field": "vin",
+      "label": "Número de bastidor (VIN)",
+      "certainty": "no",
+      "action": "Pedirlo en el primer mensaje. <strong>Es lo que más certeza compra de una sola pregunta</strong>: permite verificar la campaña de revisión ante Opel, sacar historial con un servicio de terceros y contrastar la ficha real contra el anuncio",
+      "impact": "Convierte tres «me fío» en tres comprobaciones"
+    },
+    {
+      "field": "recall",
+      "label": "Campaña de revisión de Opel",
+      "certainty": "man",
+      "action": "Con el VIN, comprobar en un servicio oficial Opel si se hizo la campaña de los <strong>136.830 Astra J 2010-2015 con cambio manual, freno de mano eléctrico y asistente de arranque en pendiente</strong>. El candidato cumple las tres condiciones",
+      "impact": "Si no se hizo, es trabajo pendiente que hereda el comprador"
+    },
+    {
+      "field": "transporte",
+      "label": "Transporte desde Baja Sajonia",
+      "certainty": "est",
+      "action": "<strong>Pedir presupuesto real.</strong> Los 900 € del desglose son tarifa de zona suroeste y el coche está en el norte de Alemania",
+      "impact": "Cada 100 € de más son <strong>0,5 puntos</strong> menos de ahorro"
+    },
+    {
+      "field": "iedmt_minoracion",
+      "label": "Minoración del artículo 69",
+      "certainty": "est",
+      "action": "Confirmar con el gestor que se aplica la minoración de impuestos indirectos residuales, y de paso el valor que la tabla del BOE asigna a esta versión",
+      "impact": "Sin minoración el IEDMT pasa de <strong>476 a 623 €</strong>"
+    },
+    {
+      "field": "precio_pedido_vs_venta",
+      "label": "Precio pedido frente a precio de venta",
+      "certainty": "est",
+      "action": "<strong>No se puede cerrar hoy.</strong> Se cierra anotando, en cada coche que vendas, el precio que pedían, los días que llevaba publicado y a cuánto se cerró de verdad. Con veinte observaciones deja de ser estimación",
+      "impact": "El ahorro real es probablemente <strong>3-8 puntos menor</strong> del que sale aquí"
+    }
+  ]
+}

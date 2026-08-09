@@ -1,0 +1,367 @@
+{
+  "schema_version": 1,
+  "slug": "opel-astra-gtc-opc-280",
+  "make": "OPEL",
+  "model": "Astra",
+  "version": "GTC OPC 2.0 Turbo",
+  "power_cv": 280,
+  "fuel": "gasolina",
+  "gearbox": "manual",
+  "body": "coupe",
+  "year_from": 2012,
+  "year_to": 2018,
+  "spain_listings": [
+    {
+      "precio": 11999,
+      "anio": 2012,
+      "km": 145000,
+      "vendedor": "Particular",
+      "fuente": "Wallapop",
+      "nota": "El más barato del país",
+      "url": "https://es.wallapop.com/item/opel-astra-opc-1264395381"
+    },
+    {
+      "precio": 15900,
+      "anio": 2013,
+      "km": 143000,
+      "vendedor": "Profesional",
+      "fuente": "Milanuncios",
+      "nota": "Vallirana (Barcelona) · garantía 12 meses · publicado el 5 de junio, 65 días en el mercado",
+      "url": "https://www.milanuncios.com/opel-de-segunda-mano/opel-astra-2-0-turbo-ss-opc-gtc-594789895.htm"
+    },
+    {
+      "precio": 17990,
+      "anio": 2012,
+      "km": 186000,
+      "vendedor": "Profesional",
+      "fuente": "Milanuncios",
+      "nota": "Las Palmas · garantía 12 meses · publicado el 6 de agosto",
+      "url": "https://www.milanuncios.com/opel-de-segunda-mano/opel-astra-2-0-turbo-ss-opc-gtc-608974588.htm"
+    },
+    {
+      "precio": 18900,
+      "anio": 2012,
+      "km": 131000,
+      "vendedor": "Particular",
+      "fuente": "Wallapop",
+      "nota": "Uso esporádico, siempre en garaje",
+      "url": "https://es.wallapop.com/item/opel-astra-j-opc-1252728678"
+    },
+    {
+      "precio": 19499,
+      "anio": 2014,
+      "km": 159000,
+      "vendedor": "Particular",
+      "fuente": "Wallapop",
+      "nota": "Pack Extreme",
+      "url": "https://es.wallapop.com/item/opel-astra-opc-1242626326"
+    },
+    {
+      "precio": 19990,
+      "anio": 2013,
+      "km": 142000,
+      "vendedor": "Particular",
+      "fuente": "Wallapop",
+      "nota": "<strong>Importado</strong>: «comprado hace 4 años en Opel Alemania»",
+      "url": "https://es.wallapop.com/item/opel-astra-opc-1275947355"
+    },
+    {
+      "precio": 22650,
+      "anio": 2014,
+      "km": 135000,
+      "vendedor": "Particular",
+      "fuente": "Wallapop",
+      "nota": "—",
+      "url": "https://es.wallapop.com/item/opel-astra-2014-1242617259"
+    },
+    {
+      "precio": 25000,
+      "anio": 2016,
+      "km": 33500,
+      "vendedor": "Particular",
+      "fuente": "Wallapop",
+      "nota": "Nacional, un propietario. Techo del mercado",
+      "url": "https://es.wallapop.com/item/opel-astra-2016-1283156405"
+    }
+  ],
+  "spain_median": 22559,
+  "spain_q1": 18666,
+  "spain_floor": 15900,
+  "spain_count": 8,
+  "spain_strict_count": 3,
+  "germany_listings": [
+    {
+      "precio": 10950,
+      "tasacion": 12999,
+      "matriculacion": "May 2014",
+      "km": 129000,
+      "dias": 113,
+      "portal": "Kleinanzeigen",
+      "version": "Astra J OPC",
+      "url": "https://www.autouncle.de/es/d/217529060-usado-2014-opel-astra-gtc-opc-280-cv",
+      "url_portal": "https://www.autouncle.de/es/enlace-externo/ebay/217529060/402658824"
+    },
+    {
+      "precio": 13000,
+      "tasacion": null,
+      "matriculacion": "Nov 2015",
+      "km": 99303,
+      "dias": 16,
+      "portal": "Kleinanzeigen",
+      "version": "2.0 Turbo OPC",
+      "url": "https://www.autouncle.de/es/d/224165559-usado-2015-opel-astra-gtc-opc-280-cv",
+      "url_portal": "https://www.autouncle.de/es/enlace-externo/ebay/224165559/412924540"
+    },
+    {
+      "precio": 13500,
+      "tasacion": null,
+      "matriculacion": "Jul 2014",
+      "km": 102000,
+      "dias": 10,
+      "portal": "Autoscout24",
+      "version": "<strong>OPC · Olfen (NRW) · CANDIDATO</strong>",
+      "url": "https://www.autouncle.de/es/d/224516733-usado-2014-opel-astra-gtc-opc-280-cv"
+    },
+    {
+      "precio": 13900,
+      "tasacion": 16750,
+      "matriculacion": "Jul 2014",
+      "km": 101500,
+      "dias": 273,
+      "portal": "Kleinanzeigen",
+      "version": "2.0 Turbo OPC Performance",
+      "url": "https://www.autouncle.de/es/d/207099615-usado-2014-opel-astra-gtc-opc-280-cv",
+      "url_portal": "https://www.autouncle.de/es/enlace-externo/ebay/207099615/386368792"
+    },
+    {
+      "precio": 15555,
+      "tasacion": null,
+      "matriculacion": "2016",
+      "km": 53000,
+      "dias": 24,
+      "portal": "Kleinanzeigen",
+      "version": "OPC Turbo Navi Schalensitze Xenon",
+      "url": "https://www.autouncle.de/es/d/223578565-usado-2016-opel-astra-gtc-opc-280-cv",
+      "url_portal": "https://www.autouncle.de/es/enlace-externo/ebay/223578565/411868033"
+    },
+    {
+      "precio": 16500,
+      "tasacion": null,
+      "matriculacion": "Mar 2014",
+      "km": 48541,
+      "dias": 13,
+      "portal": "mobile.de",
+      "version": "Astra 2.0 OPC · Klappenauspuff",
+      "url": "https://www.autouncle.de/es/d/224296901-usado-2014-opel-astra-gtc-opc-280-cv",
+      "url_portal": "https://www.autouncle.de/es/enlace-externo/mobile/224296901/405805624"
+    },
+    {
+      "precio": 17100,
+      "tasacion": 19000,
+      "matriculacion": "2017",
+      "km": 115000,
+      "dias": 51,
+      "portal": "Kleinanzeigen",
+      "version": "OPC",
+      "url": "https://www.autouncle.de/es/d/221685033-usado-2017-opel-astra-gtc-opc-280-cv",
+      "url_portal": "https://www.autouncle.de/es/enlace-externo/ebay/221685033/408950083"
+    },
+    {
+      "precio": 17390,
+      "tasacion": null,
+      "matriculacion": "Sep 2017",
+      "km": 83020,
+      "dias": 44,
+      "portal": "Concesionario",
+      "version": "Astra J 2.0 OPC · Nappa · Bose · Xenon",
+      "url": "https://www.autouncle.de/es/d/222150737-usado-2017-opel-astra-gtc-opc-280-cv"
+    },
+    {
+      "precio": 17900,
+      "tasacion": null,
+      "matriculacion": "May 2016",
+      "km": 40000,
+      "dias": 42,
+      "portal": "Concesionario",
+      "version": "Astra J OPC 280PS · SHZ · Lenkradheizung",
+      "url": "https://www.autouncle.de/es/d/222316168-usado-2016-opel-astra-gtc-opc-280-cv",
+      "url_portal": "https://www.autouncle.de/es/enlace-externo/autoboerse-brands-de/222316168/412561033"
+    },
+    {
+      "precio": 18000,
+      "tasacion": 20900,
+      "matriculacion": "Dic 2015",
+      "km": 46251,
+      "dias": 74,
+      "portal": "Concesionario",
+      "version": "Astra J OPC",
+      "url": "https://www.autouncle.de/es/d/220108300-usado-2015-opel-astra-gtc-opc-280-cv",
+      "url_portal": "https://www.autouncle.de/es/enlace-externo/autoboerse-brands-de/220108300/414545915"
+    },
+    {
+      "precio": 19450,
+      "tasacion": null,
+      "matriculacion": "Dic 2017",
+      "km": 51220,
+      "dias": 33,
+      "portal": "Concesionario",
+      "version": "2.0 Turbo OPC",
+      "url": "https://www.autouncle.de/es/d/222828450-usado-2017-opel-astra-gtc-opc-280-cv"
+    },
+    {
+      "precio": 19890,
+      "tasacion": null,
+      "matriculacion": "May 2018",
+      "km": 78000,
+      "dias": 16,
+      "portal": "mobile.de",
+      "version": "Astra J OPC",
+      "url": "https://www.autouncle.de/es/d/224188744-usado-2018-opel-astra-gtc-opc-280-cv",
+      "url_portal": "https://www.autouncle.de/es/enlace-externo/mobile/224188744/412974711"
+    }
+  ],
+  "germany_median": 16800,
+  "germany_q1": 13900,
+  "germany_count": 12,
+  "rotation_days_median": 65,
+  "rotation_note": "Un solo dato: el profesional de Milanuncios lleva 65 dias. Insuficiente para puntuar.",
+  "pvp_new": 37600,
+  "co2": 189,
+  "co2_cycle": "NEDC",
+  "iedmt_rate": 0.0975,
+  "dgt_label": "C",
+  "standard_equipment": [
+    "Faros de xenon",
+    "Navegador Navi 950 IntelliLink",
+    "Climatizador bizona",
+    "Sensor de lluvia",
+    "Espejo interior electrocromatico",
+    "Llantas de aleacion 19",
+    "Asientos High Performance",
+    "Start&Stop",
+    "Isofix",
+    "Control de crucero",
+    "Diferencial autoblocante",
+    "Suspension FlexRide"
+  ],
+  "optional_equipment": [
+    {
+      "item": "Tapiceria de cuero Nappa",
+      "precio": 2183,
+      "nota": "Incluye asientos calefactables y reposabrazos trasero"
+    },
+    {
+      "item": "Sensores de aparcamiento",
+      "precio": 218
+    },
+    {
+      "item": "Llantas 20 OPC",
+      "precio": 639
+    },
+    {
+      "item": "Pack Panoramico OPC",
+      "precio": 416,
+      "nota": "Sustituye el Navi 950 por el Navi 650"
+    },
+    {
+      "item": "Pack Exterior OPC Extreme",
+      "precio": 853
+    },
+    {
+      "item": "Alarma",
+      "precio": 270
+    },
+    {
+      "item": "Ajuste electrico de asientos",
+      "precio": null,
+      "nota": "NO EXISTIA en la tarifa espanola. En Alemania si. Diferenciador"
+    }
+  ],
+  "known_issues": [
+    {
+      "item": "Rotura de motor",
+      "evidencia": "Una unidad alemana del barrido declara motor de sustitucion montado a los 75.000 km",
+      "certeza": "est"
+    }
+  ],
+  "recalls": [
+    {
+      "campana": "Software de freno de mano electrico",
+      "alcance": "136.830 unidades en Alemania · Astra J, Cascada y Zafira C 2010-2015 con cambio manual, freno de mano electrico y asistente de arranque en pendiente",
+      "fuente": "https://carwiki.de/opel-astra-bekannte-probleme-rueckrufe/",
+      "certeza": "ok"
+    }
+  ],
+  "modified_rate": 0.1538,
+  "modified_note": "2 de 13 unidades alemanas del barrido iban preparadas. Mas una espanola con Stage 2.",
+  "sources": [
+    {
+      "nombre": "Wallapop",
+      "url": "https://es.wallapop.com/app/search?keywords=opel%20astra%20opc&category_ids=100",
+      "filtros": "keywords «opel astra opc» · category_ids 100",
+      "resultado": "52 anuncios<br>7 Astra J OPC"
+    },
+    {
+      "nombre": "Milanuncios",
+      "url": "https://www.milanuncios.com/coches-de-segunda-mano/?s=opel%20astra%20opc",
+      "filtros": "s = «opel astra opc»",
+      "resultado": "59 en total<br>41 por página<br>2 Astra J OPC"
+    },
+    {
+      "nombre": "Coches.net",
+      "url": "https://www.coches.net/opel/astra/segunda-mano/",
+      "filtros": "gama Opel Astra, sin filtro de versión posible por URL",
+      "resultado": "2.576 Astra<br>35 por página"
+    },
+    {
+      "nombre": "AutoScout24.es",
+      "url": "https://www.autoscout24.es/lst/opel/astra?atype=C&desde=2012&powerfrom=198&powerto=214&powertype=kw&damaged_listing=exclude&fuel=B",
+      "filtros": "desde 2012 · 198-214 kW · gasolina",
+      "resultado": "37 «ofertas»<br><strong>0 en España</strong>"
+    },
+    {
+      "nombre": "AutoUncle",
+      "url": "https://www.autouncle.de/es/coches-segunda-mano/Opel/Astra%20GTC/f-gasolina/g-manual?s%5Bmin_year%5D=2014&s%5Bmax_km%5D=140000&s%5Bmin_hp%5D=250",
+      "filtros": "f-gasolina · g-manual · min_year 2014 · max_km 140.000 · min_hp 250",
+      "resultado": "13 anuncios<br>12 de 280 CV"
+    },
+    {
+      "nombre": "AutoScout24.de — ficha de anuncio",
+      "url": "https://www.autouncle.de/es/enlace-externo/autoscout24private/224516733/413607328",
+      "filtros": "Ficha del candidato original, vía redirección de AutoUncle",
+      "resultado": "Descripción de 2.432 caracteres<br>64 extras estructurados"
+    },
+    {
+      "nombre": "Kleinanzeigen — ficha de anuncio",
+      "url": "https://www.autouncle.de/es/enlace-externo/ebay/224165559/412924540",
+      "filtros": "Ficha del nuevo candidato, vía redirección de AutoUncle",
+      "resultado": "Norma Euro, propietarios,<br>fecha de ITV y equipamiento"
+    },
+    {
+      "nombre": "km77",
+      "url": "https://www.km77.com/coches/opel/astra/2011/gtc/opc/astra-opc2/datos",
+      "filtros": "Astra OPC 2.0 Turbo 280 CV Start&Stop (2012-2016)",
+      "resultado": "PVP, CO₂, tipo"
+    },
+    {
+      "nombre": "BOE — Orden HAC/1501/2025",
+      "url": "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2025-26357",
+      "filtros": "Precios medios de venta y Anexo IV de coeficientes",
+      "resultado": "En vigor 1-ene-2026"
+    },
+    {
+      "nombre": "KBA / prensa alemana — retiradas",
+      "url": "https://carwiki.de/opel-astra-bekannte-probleme-rueckrufe/",
+      "filtros": "Opel Astra J, campañas conocidas",
+      "resultado": "136.830 unidades<br>llamadas a revisión en Alemania"
+    },
+    {
+      "nombre": "Fichas técnicas alemanas",
+      "url": "https://www.auto-data.net/en/opel-astra-j-gtc-2.0-opc-280hp-turbo-ecotec-19558",
+      "filtros": "Astra J OPC 2.0 Turbo 280 CV",
+      "resultado": "184-189 g/km NEDC"
+    }
+  ],
+  "measured_at": "2026-08-09",
+  "expires_at": "2026-11-07"
+}

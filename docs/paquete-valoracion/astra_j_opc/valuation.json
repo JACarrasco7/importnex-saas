@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "model_report_slug": "opel-astra-gtc-opc-280",
+  "source_url": "https://www.autouncle.de/es/enlace-externo/ebay/224165559/412924540",
+  "source_portal": "Kleinanzeigen",
+  "seller_type": "private",
+  "price": 13000,
+  "year": 2015,
+  "month": 11,
+  "km": 99303,
+  "euro": "Euro 6",
+  "owners": 2,
+  "itv_until": "2027-01",
+  "location": "Wittmund, Baja Sajonia",
+  "cost_breakdown": [
+    {
+      "concepto": "Precio del anuncio en Alemania",
+      "importe": 13000.0,
+      "certeza": "ok",
+      "origen": "<a href='https://www.autouncle.de/es/enlace-externo/ebay/224165559/412924540'>Kleinanzeigen, 9 ago 2026</a>"
+    },
+    {
+      "concepto": "Transporte a Huelva <strong>desde Baja Sajonia</strong>",
+      "importe": 900.0,
+      "certeza": "est",
+      "origen": "Tarifa suroeste. <strong>Está en el norte: conviene confirmar recargo</strong>"
+    },
+    {
+      "concepto": "<strong>Matrícula de exportación alemana</strong> (<em>Ausfuhrkennzeichen</em>, 15 días) y seguro",
+      "importe": 114.0,
+      "certeza": "ok",
+      "origen": "Solo si viaja rodando; con camión no aplica"
+    },
+    {
+      "concepto": "ITV de importación, homologación y tasas de la DGT",
+      "importe": 115.0,
+      "certeza": "ok",
+      "origen": "Tasa DGT + ITV · sin reformas que homologar"
+    },
+    {
+      "concepto": "IEDMT (impuesto de matriculación)",
+      "importe": 476.65,
+      "certeza": "est",
+      "origen": "<a href='https://www.boe.es/diario_boe/txt.php?id=BOE-A-2025-26357'>Orden HAC/1501/2025</a> · desarrollo abajo"
+    }
+  ],
+  "fees": 1500.0,
+  "final_price": 16105.65,
+  "saving_vs_median": 6453.35,
+  "saving_vs_q1": 2560.35,
+  "saving_pct_range": [
+    13.7,
+    28.6
+  ],
+  "verdict": "compra_prioritaria",
+  "verdict_reasoning": "Vendibilidad 75 sobre corte 65. Ahorro entre 13,7 % y 28,6 % segun se compare contra suelo o mediana. Por encima del umbral del 12 % del tramo 8-14k, pero sin colchon: con honorarios de 2.250 EUR cae al 9,7 %.",
+  "sellability": 75,
+  "sellability_factors": [
+    {
+      "factor": "1 · Demanda del modelo",
+      "peso": 30,
+      "puntos": 22,
+      "certeza": "est"
+    },
+    {
+      "factor": "2 · Escasez de la configuración",
+      "peso": 25,
+      "puntos": 25,
+      "certeza": "ok"
+    },
+    {
+      "factor": "3 · Atractivo y contenido",
+      "peso": 20,
+      "puntos": 17,
+      "certeza": "est"
+    },
+    {
+      "factor": "4 · Equipamiento sobre el estándar",
+      "peso": 15,
+      "puntos": 5,
+      "certeza": "ok"
+    },
+    {
+      "factor": "5 · Kilómetros e historial",
+      "peso": 10,
+      "puntos": 6,
+      "certeza": "ok"
+    }
+  ]
+}

@@ -29,7 +29,7 @@ const close = () => { mobileOpen.value = false; };
 </script>
 
 <template>
-    <div class="min-h-screen bg-white text-gray-900 antialiased dark:bg-asphalt-900 dark:text-white">
+    <div class="min-h-screen bg-white text-gray-900 antialiased transition-colors duration-300 dark:bg-asphalt-900 dark:text-white">
         <!-- Header sticky -->
         <header class="sticky top-0 z-30 border-b border-gray-200/70 bg-white/80 backdrop-blur-md dark:border-asphalt-700/60 dark:bg-asphalt-900/80">
             <nav class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
@@ -142,7 +142,7 @@ const close = () => { mobileOpen.value = false; };
         </main>
 
         <!-- Footer -->
-        <footer class="border-t border-gray-200 bg-gray-50 dark:border-asphalt-700 dark:bg-asphalt-800/40">
+        <footer class="border-t border-gray-200 bg-gray-50/80 transition-colors duration-300 dark:border-asphalt-700 dark:bg-asphalt-800/50">
             <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
                 <div class="grid grid-cols-2 gap-8 md:grid-cols-4">
                     <div class="col-span-2 md:col-span-1">

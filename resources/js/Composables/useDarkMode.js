@@ -14,6 +14,7 @@ const isDark = ref(getInitial() === 'dark');
 function apply(value) {
     if (typeof document === 'undefined') return;
     document.documentElement.classList.toggle('dark', value);
+    document.documentElement.style.colorScheme = value ? 'dark' : 'light';
 }
 
 apply(isDark.value);

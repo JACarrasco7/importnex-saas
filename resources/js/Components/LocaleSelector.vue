@@ -41,13 +41,13 @@ async function changeLocale(newLocale) {
 </script>
 
 <template>
-    <div class="flex items-center space-x-1 bg-gray-100 dark:bg-gray-800 rounded-full p-1">
+    <div class="flex items-center space-x-1 rounded-full bg-gray-100 p-1 shadow-inner dark:bg-gray-800">
         <button
             :disabled="isSaving || locale === 'en'"
             @click="changeLocale('en')"
             class="px-3 py-1 text-sm font-medium rounded-full transition-colors"
             :class="{
-                'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow': locale === 'en',
+                'bg-white dark:bg-asphalt-700 text-blue-600 dark:text-blue-400 shadow': locale === 'en',
                 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100': locale !== 'en',
                 'opacity-50 cursor-not-allowed': isSaving,
             }"
@@ -60,7 +60,7 @@ async function changeLocale(newLocale) {
             @click="changeLocale('es')"
             class="px-3 py-1 text-sm font-medium rounded-full transition-colors"
             :class="{
-                'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow': locale === 'es',
+                'bg-white dark:bg-asphalt-700 text-blue-600 dark:text-blue-400 shadow': locale === 'es',
                 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100': locale !== 'es',
                 'opacity-50 cursor-not-allowed': isSaving,
             }"

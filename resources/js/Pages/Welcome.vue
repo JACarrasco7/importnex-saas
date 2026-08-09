@@ -59,7 +59,7 @@ const toggleFaq = (idx) => {
 <template>
     <Head :title="t('app.title')" />
 
-    <div class="min-h-screen bg-linear-to-br from-slate-50 via-white to-estoril-50">
+    <div class="min-h-screen bg-linear-to-br from-slate-50 via-white to-estoril-50 dark:from-asphalt-900 dark:via-asphalt-900 dark:to-asphalt-800">
         <!-- Header -->
         <header class="absolute inset-x-0 top-0 z-10">
             <nav class="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
@@ -67,14 +67,14 @@ const toggleFaq = (idx) => {
                     <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-estoril-600 to-estoril-800">
                         <TruckIcon class="h-5 w-5 text-white" />
                     </div>
-                    <span class="text-xl font-bold text-gray-900">{{ organizationName || t('app.title') }}</span>
+                    <span class="text-xl font-bold text-gray-900 dark:text-white">{{ organizationName || t('app.title') }}</span>
                 </Link>
                 <div class="flex items-center gap-3">
                     <Link v-if="$page.props.auth?.user" :href="route('dashboard')" class="rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
                         {{ t('nav.dashboard') }}
                     </Link>
                     <template v-else>
-                        <Link :href="route('login')" class="text-sm font-semibold text-gray-700 hover:text-gray-900">{{ t('auth.login') }}</Link>
+                        <Link :href="route('login')" class="text-sm font-semibold text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">{{ t('auth.login') }}</Link>
                         <Link v-if="canRegister" :href="route('register')" class="rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
                             {{ t('auth.register') }}
                         </Link>
@@ -93,11 +93,11 @@ const toggleFaq = (idx) => {
                     <SparklesIcon class="h-4 w-4" />
                     {{ t('welcome.ai_powered') }}
                 </span>
-                <h1 class="mt-8 text-5xl font-bold tracking-tight text-gray-900 sm:text-6xl lg:text-7xl">
+                <h1 class="mt-8 text-5xl font-bold tracking-tight text-gray-900 sm:text-6xl lg:text-7xl dark:text-white">
                     {{ t('welcome.run_business') }}
                     <span class="block bg-linear-to-r from-estoril-600 to-estoril-600 bg-clip-text text-transparent">{{ t('welcome.on_autopilot') }}</span>
                 </h1>
-                <p class="mx-auto mt-6 max-w-2xl text-lg text-gray-600">
+                <p class="mx-auto mt-6 max-w-2xl text-lg text-gray-600 dark:text-gray-400">
                     {{ t('welcome.importnex_description') }}
                 </p>
                 <div class="mt-10 flex items-center justify-center gap-4">
@@ -116,19 +116,19 @@ const toggleFaq = (idx) => {
 
                 <div class="mt-16 grid grid-cols-3 gap-8 sm:max-w-2xl mx-auto">
                     <div v-for="s in stats" :key="s.label" class="text-center">
-                        <p class="text-3xl font-bold text-estoril-600">{{ s.value }}</p>
-                        <p class="mt-1 text-sm text-gray-500">{{ s.label }}</p>
+                        <p class="text-3xl font-bold text-estoril-600 dark:text-estoril-400">{{ s.value }}</p>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ s.label }}</p>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- Features -->
-        <section class="py-20">
+        <section class="py-20 dark:bg-asphalt-900">
             <div class="mx-auto max-w-7xl px-6">
                 <div class="text-center">
-                    <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">{{ t('welcome.everything_you_need') }}</h2>
-                    <p class="mt-4 text-lg text-gray-600">{{ t('welcome.built_for') }}</p>
+                    <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">{{ t('welcome.everything_you_need') }}</h2>
+                    <p class="mt-4 text-lg text-gray-600 dark:text-gray-400">{{ t('welcome.built_for') }}</p>
                 </div>
                 <div class="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     <div
@@ -137,90 +137,90 @@ const toggleFaq = (idx) => {
                         v-motion
                         :initial="{ opacity: 0, y: 20 }"
                         :enter="{ opacity: 1, y: 0, transition: { delay: idx * 100, duration: 400 } }"
-                        class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 transition hover:shadow-md hover:ring-estoril-200 hover:-translate-y-1 cursor-pointer"
+                        class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 transition hover:shadow-md hover:ring-estoril-200 hover:-translate-y-1 cursor-pointer dark:bg-asphalt-800 dark:ring-asphalt-700"
                     >
-                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-estoril-50">
-                            <component :is="feat.icon" class="h-5 w-5 text-estoril-600" />
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-estoril-50 dark:bg-estoril-900/40">
+                            <component :is="feat.icon" class="h-5 w-5 text-estoril-600 dark:text-estoril-300" />
                         </div>
-                        <h3 class="mt-4 text-base font-semibold text-gray-900">{{ feat.title }}</h3>
-                        <p class="mt-2 text-sm text-gray-600">{{ feat.description }}</p>
+                        <h3 class="mt-4 text-base font-semibold text-gray-900 dark:text-white">{{ feat.title }}</h3>
+                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">{{ feat.description }}</p>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- How it works -->
-        <section class="bg-slate-50/50 py-20">
+        <section class="bg-slate-50/50 py-20 dark:bg-asphalt-800">
             <div class="mx-auto max-w-7xl px-6">
                 <div class="text-center">
-                    <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">{{ t('welcome.how_it_works_title') }}</h2>
-                    <p class="mt-4 text-lg text-gray-600">{{ t('welcome.how_it_works_subtitle') }}</p>
+                    <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">{{ t('welcome.how_it_works_title') }}</h2>
+                    <p class="mt-4 text-lg text-gray-600 dark:text-gray-400">{{ t('welcome.how_it_works_subtitle') }}</p>
                 </div>
                 <div class="mt-16 grid gap-8 md:grid-cols-3">
                     <div v-for="(step, idx) in steps" :key="idx" v-motion :initial="{ opacity: 0, scale: 0.95 }" :enter="{ opacity: 1, scale: 1, transition: { delay: idx * 150, duration: 500 } }" class="relative">
-                        <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
+                        <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700">
                             <div class="flex items-center gap-4">
                                 <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-linear-to-br from-estoril-600 to-estoril-800 text-white font-bold">
                                     {{ idx + 1 }}
                                 </div>
-                                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-estoril-50">
-                                    <component :is="step.icon" class="h-6 w-6 text-estoril-600" />
+                                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-estoril-50 dark:bg-estoril-900/40">
+                                    <component :is="step.icon" class="h-6 w-6 text-estoril-600 dark:text-estoril-300" />
                                 </div>
                             </div>
-                            <h3 class="mt-4 text-lg font-semibold text-gray-900">{{ step.title }}</h3>
-                            <p class="mt-2 text-sm text-gray-600">{{ step.description }}</p>
+                            <h3 class="mt-4 text-lg font-semibold text-gray-900 dark:text-white">{{ step.title }}</h3>
+                            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">{{ step.description }}</p>
                         </div>
-                        <div v-if="idx < steps.length - 1" class="absolute top-1/2 -right-4 hidden h-px w-8 bg-gray-300 md:block"></div>
+                        <div v-if="idx < steps.length - 1" class="absolute top-1/2 -right-4 hidden h-px w-8 bg-gray-300 md:block dark:bg-asphalt-600"></div>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- Social proof: logos + testimonials -->
-        <section class="py-20">
+        <section class="py-20 dark:bg-asphalt-900">
             <div class="mx-auto max-w-7xl px-6">
                 <div class="text-center">
-                    <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">{{ t('welcome.brands_trust') }}</h2>
+                    <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">{{ t('welcome.brands_trust') }}</h2>
                 </div>
                 <div class="mt-12 grid grid-cols-2 gap-6 sm:grid-cols-4 lg:grid-cols-8">
-                    <div v-for="brand in brands" :key="brand" class="flex items-center justify-center rounded-lg bg-white p-4 shadow-sm ring-1 ring-gray-200 text-sm font-bold text-gray-400">
+                    <div v-for="brand in brands" :key="brand" class="flex items-center justify-center rounded-lg bg-white p-4 shadow-sm ring-1 ring-gray-200 text-sm font-bold text-gray-400 dark:bg-asphalt-800 dark:ring-asphalt-700">
                         {{ brand }}
                     </div>
                 </div>
 
                 <div class="mt-16 grid gap-6 md:grid-cols-3">
-                    <div v-for="(testimonial, idx) in testimonials" :key="testimonial.name" v-motion :initial="{ opacity: 0, y: 30 }" :enter="{ opacity: 1, y: 0, transition: { delay: idx * 120, duration: 500 } }" class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 hover:shadow-md transition">
+                    <div v-for="(testimonial, idx) in testimonials" :key="testimonial.name" v-motion :initial="{ opacity: 0, y: 30 }" :enter="{ opacity: 1, y: 0, transition: { delay: idx * 120, duration: 500 } }" class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 hover:shadow-md transition dark:bg-asphalt-800 dark:ring-asphalt-700">
                         <div class="flex items-center gap-3">
                             <div class="flex h-10 w-10 items-center justify-center rounded-full bg-estoril-600 text-white font-semibold">
                                 {{ testimonial.avatar }}
                             </div>
                             <div>
-                                <p class="text-sm font-semibold text-gray-900">{{ testimonial.name }}</p>
-                                <p class="text-xs text-gray-500">{{ testimonial.role }}</p>
+                                <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ testimonial.name }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ testimonial.role }}</p>
                             </div>
                         </div>
-                        <p class="mt-4 text-sm text-gray-700 italic">"{{ testimonial.quote }}"</p>
+                        <p class="mt-4 text-sm text-gray-700 italic dark:text-gray-300">"{{ testimonial.quote }}"</p>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- FAQ -->
-        <section class="bg-slate-50/50 py-20">
+        <section class="bg-slate-50/50 py-20 dark:bg-asphalt-800">
             <div class="mx-auto max-w-3xl px-6">
                 <div class="text-center">
-                    <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">{{ t('welcome.faq_title') }}</h2>
+                    <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">{{ t('welcome.faq_title') }}</h2>
                 </div>
                 <div class="mt-12 space-y-3">
-                    <div v-for="(faq, idx) in faqs" :key="idx" class="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-200">
+                    <div v-for="(faq, idx) in faqs" :key="idx" class="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700">
                         <button
                             @click="toggleFaq(idx)"
-                            class="flex w-full items-center justify-between px-6 py-4 text-left transition hover:bg-gray-50"
+                            class="flex w-full items-center justify-between px-6 py-4 text-left transition hover:bg-gray-50 dark:hover:bg-asphalt-700"
                             :aria-expanded="openFaq === idx"
                         >
-                            <span class="text-sm font-semibold text-gray-900">{{ faq.question }}</span>
-                            <PlusIcon v-if="openFaq !== idx" class="h-5 w-5 text-gray-400 shrink-0" />
-                            <MinusIcon v-else class="h-5 w-5 text-estoril-600 shrink-0" />
+                            <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ faq.question }}</span>
+                            <PlusIcon v-if="openFaq !== idx" class="h-5 w-5 text-gray-400 dark:text-gray-500 shrink-0" />
+                            <MinusIcon v-else class="h-5 w-5 text-estoril-600 dark:text-estoril-300 shrink-0" />
                         </button>
                         <Transition
                             enter-active-class="transition-all duration-300 ease-out"
@@ -230,7 +230,7 @@ const toggleFaq = (idx) => {
                             leave-from-class="max-h-96 opacity-100"
                             leave-to-class="max-h-0 opacity-0"
                         >
-                            <div v-if="openFaq === idx" class="overflow-hidden border-t border-gray-100 px-6 py-4 text-sm text-gray-600">
+                            <div v-if="openFaq === idx" class="overflow-hidden border-t border-gray-100 px-6 py-4 text-sm text-gray-600 dark:border-asphalt-700 dark:text-gray-400">
                                 {{ faq.answer }}
                             </div>
                         </Transition>
@@ -253,8 +253,8 @@ const toggleFaq = (idx) => {
             </div>
         </section>
 
-        <footer class="border-t border-gray-200 bg-white py-8">
-            <div class="mx-auto max-w-7xl px-6 text-center text-sm text-gray-500">
+        <footer class="border-t border-gray-200 bg-white py-8 dark:border-asphalt-700 dark:bg-asphalt-900">
+            <div class="mx-auto max-w-7xl px-6 text-center text-sm text-gray-500 dark:text-gray-400">
                 © {{ new Date().getFullYear() }} {{ t('app.title') }}. {{ t('welcome.made_for') }}
             </div>
         </footer>

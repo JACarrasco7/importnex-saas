@@ -16,20 +16,20 @@ const form = useForm({ email: '', password: '', remember: false });
 
 const submit = () => form.post(route('login'), { onFinish: () => form.reset('password') });
 
-const inputClass = 'block w-full rounded-lg border-gray-300 pl-10 text-sm shadow-sm focus:border-estoril-500 focus:ring-estoril-500';
+const inputClass = 'block w-full rounded-lg border-gray-300 pl-10 text-sm text-gray-900 shadow-sm focus:border-estoril-500 focus:ring-estoril-500 dark:border-asphalt-600 dark:bg-asphalt-800 dark:text-white';
 </script>
 
 <template>
     <Head :title="t('auth.login')" />
 
     <GuestLayout>
-        <div v-if="status" class="mb-4 rounded-lg bg-emerald-50 p-3 text-sm font-medium text-emerald-700 ring-1 ring-emerald-200">
+        <div v-if="status" class="mb-4 rounded-lg bg-emerald-50 p-3 text-sm font-medium text-emerald-700 ring-1 ring-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:ring-emerald-800">
             {{ status }}
         </div>
 
         <div class="mb-8">
-            <h2 class="text-2xl font-bold text-gray-900">{{ t('auth.login') }} {{ t('app.title') }}</h2>
-            <p class="mt-1 text-sm text-gray-600">{{ t('auth.login') }} {{ t('app.title') }} {{ t('auth.remember_me') }}</p>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">{{ t('auth.login') }} {{ t('app.title') }}</h2>
+            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ t('auth.login') }} {{ t('app.title') }} {{ t('auth.remember_me') }}</p>
         </div>
 
         <form @submit.prevent="submit" class="space-y-5">
@@ -49,10 +49,10 @@ const inputClass = 'block w-full rounded-lg border-gray-300 pl-10 text-sm shadow
 
             <div class="flex items-center justify-between">
                 <label class="flex items-center gap-2">
-                    <input v-model="form.remember" type="checkbox" class="rounded border-gray-300 text-estoril-600 shadow-sm focus:ring-estoril-500" />
-                    <span class="text-sm text-gray-700">{{ t('auth.remember_me') }}</span>
+                    <input v-model="form.remember" type="checkbox" class="rounded border-gray-300 text-estoril-600 shadow-sm focus:ring-estoril-500 dark:border-asphalt-600 dark:bg-asphalt-800" />
+                    <span class="text-sm text-gray-700 dark:text-gray-300">{{ t('auth.remember_me') }}</span>
                 </label>
-                <Link v-if="canResetPassword" :href="route('password.request')" class="text-sm font-semibold text-estoril-600 hover:text-estoril-500">
+                <Link v-if="canResetPassword" :href="route('password.request')" class="text-sm font-semibold text-estoril-600 hover:text-estoril-500 dark:text-estoril-300">
                     {{ t('auth.forgot_password') }}
                 </Link>
             </div>
@@ -62,9 +62,9 @@ const inputClass = 'block w-full rounded-lg border-gray-300 pl-10 text-sm shadow
                 {{ form.processing ? t('app.loading') : t('auth.login') }}
             </button>
 
-            <p class="text-center text-sm text-gray-600">
+            <p class="text-center text-sm text-gray-600 dark:text-gray-400">
                 {{ t('auth.register') }}?
-                <Link :href="route('register')" class="font-semibold text-estoril-600 hover:text-estoril-500">{{ t('auth.register') }}</Link>
+                <Link :href="route('register')" class="font-semibold text-estoril-600 hover:text-estoril-500 dark:text-estoril-300">{{ t('auth.register') }}</Link>
             </p>
         </form>
     </GuestLayout>
