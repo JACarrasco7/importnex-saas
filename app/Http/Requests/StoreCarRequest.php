@@ -20,6 +20,20 @@ class StoreCarRequest extends FormRequest
     }
 
     /**
+     * Normaliza inputs antes de validar.
+     * - year: convierte '2020', '2020-01', '2020-01-01' -> '01/2020' (formato canónico).
+     */
+    protected function prepareForValidation(): void
+    {
+        $year = $this->input('year');
+
+        if (is_string($year) && preg_match('/^(\d{4})(-\d{2})?(-\d{2})?$/', $year, $m)) {
+            $normalized = '01/'.$m[1];
+            $this->merge(['year' => $normalized]);
+        }
+    }
+
+    /**
      * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
@@ -29,7 +43,8 @@ class StoreCarRequest extends FormRequest
         return [
             'brand' => ['required', 'string', 'max:255'],
             'model' => ['required', 'string', 'max:255'],
-            'year' => ['required', 'string', 'max:10', 'regex:/^\d{2}\/\d{4}$/'],
+            // Acepta MM/YYYY (canónico), YYYY, YYYY-MM, YYYY-MM-DD. Se normaliza en prepareForValidation().
+            'year' => ['required', 'string', 'max:10', 'regex:/^(\d{2}\/\d{4}|\d{4}(-\d{2})?(-\d{2})?)$/'],
             'fuel' => ['required', 'string', 'max:255'],
             'transmission' => ['required', 'string', 'max:255'],
             'purchase_price' => ['required', 'numeric', 'min:0'],
