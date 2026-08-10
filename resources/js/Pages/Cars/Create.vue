@@ -60,6 +60,18 @@ const scrapedPhotos = ref([]);
 
 const submit = () => form.post(route('cars.store'));
 
+// Auto-format year: '2020' or '01/2020' are accepted.
+// Backend (StoreCarRequest::prepareForValidation) normalises to MM/YYYY.
+const onYearInput = (event) => {
+    const raw = (event.target.value || '').replace(/[^\d/]/g, '');
+    // Pure year entered as 4 digits => prefix with '01/'
+    if (/^\d{4}$/.test(raw)) {
+        form.year = `01/${raw}`;
+        return;
+    }
+    form.year = raw;
+};
+
 const inputClass = 'block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-estoril-500 focus:ring-estoril-500';
 const labelClass = 'block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1';
 
@@ -269,8 +281,8 @@ const scrapeFromUrl = async () => {
                             <FormField :label="t('cars.field_version')" :error="form.errors.version">
                                 <input v-model="form.version" type="text" :class="inputClass" />
                             </FormField>
-                            <FormField :label="t('cars.field_year_format')" required :hint="t('cars.hint_year_example')">
-                                <input v-model="form.year" type="text" pattern="\d{2}/\d{4}" required :class="inputClass" placeholder="07/2020" />
+                            <FormField :label="t('cars.field_year_format')" required :hint="t('cars.hint_year_example')" :error="form.errors.year">
+                                <input v-model="form.year" @input="onYearInput" type="text" pattern="\d{2}/\d{4}" required maxlength="7" :class="inputClass" placeholder="07/2020" />
                             </FormField>
                             <FormField :label="t('cars.vin')" :error="form.errors.vin">
                                 <input v-model="form.vin" type="text" :class="[inputClass, 'font-mono']" />

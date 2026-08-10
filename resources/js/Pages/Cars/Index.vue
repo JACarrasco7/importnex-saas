@@ -137,7 +137,7 @@ const confirmDelete = () => {
                             <Squares2X2Icon class="h-4 w-4" />
                             {{ t('nav.kanban') }}
                         </Link>
-                        <Link :href="route('cars.import-valuation.create')" prefetch="hover" class="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500">
+                        <Link :href="route('cars.import-valuation.create')" class="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500">
                             <SparklesIcon class="h-4 w-4" />
                             {{ t('cars.upload_zip') }}
                         </Link>
