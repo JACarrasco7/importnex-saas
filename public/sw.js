@@ -2,8 +2,8 @@
 // Maneja push notifications (Web Push API) y notifica al usuario.
 // También cachea assets estáticos para mejorar TTI offline.
 
-const CACHE_NAME = 'jj-import-v2';
-const PRECACHE_URLS = ['/', '/marketplace', '/pricing'];
+const CACHE_NAME = 'jj-import-v3';
+const PRECACHE_URLS = ['/', '/offline', '/manifest.json'];
 
 // Install: pre-cachear páginas críticas
 self.addEventListener('install', (event) => {
@@ -23,22 +23,40 @@ self.addEventListener('activate', (event) => {
     self.clients.claim();
 });
 
-// Fetch: network-first, cache fallback para offline-tolerant
+// Fetch: network-first, cache fallback SOLO para offline-tolerant.
+// - Rutas autenticadas (/cars/*, /billing/*, /admin/*) NUNCA se cachean para evitar 404/503 servidos desde SW.
+// - Assets estáticos (/build/*, /img/*) sí se cachean.
+const NO_CACHE_PREFIXES = ['/cars', '/billing', '/admin', '/subscriptions', '/valuations', '/imports', '/clients', '/settings'];
+const STATIC_PREFIXES = ['/build/', '/img/', '/images/', '/fonts/'];
+const STATIC_EXACT = ['/', '/manifest.json', '/offline'];
+
 self.addEventListener('fetch', (event) => {
     if (event.request.method !== 'GET') return;
     const url = new URL(event.request.url);
     if (url.origin !== self.location.origin) return;
 
+    // Rutas autenticadas: pass-through directo, sin SW. Cualquier error 5xx será el real del servidor.
+    if (NO_CACHE_PREFIXES.some((p) => url.pathname.startsWith(p))) {
+        return;
+    }
+
+    // Solo cachear assets estáticos o páginas públicas conocidas.
+    const isStatic = STATIC_PREFIXES.some((p) => url.pathname.startsWith(p)) || STATIC_EXACT.includes(url.pathname);
+    if (!isStatic) {
+        return;
+    }
+
     event.respondWith(
-        fetch(event.request)
-            .then((response) => {
-                const clone = response.clone();
+        caches.match(event.request).then((cached) => {
+            if (cached) return cached;
+            return fetch(event.request).then((response) => {
                 if (response.ok && response.status === 200) {
+                    const clone = response.clone();
                     caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
                 }
                 return response;
-            })
-            .catch(() => caches.match(event.request).then((cached) => cached || new Response('Offline', { status: 503 })))
+            }).catch(() => caches.match('/offline').then((page) => page || new Response('Offline', { status: 503, headers: { 'Content-Type': 'text/plain' } })));
+        })
     );
 });
 
@@ -62,8 +80,8 @@ self.addEventListener('push', (event) => {
 
     const options = {
         body: payload.body,
-        icon: '/images/icon-192.png',
-        badge: '/images/badge-72.png',
+        icon: '/img/icon-192.png',
+        badge: '/img/icon-192.png',
         data: { url: payload.url, alert_type: payload.alert_type, alert_id: payload.alert_id },
         tag: 'alert-' + payload.alert_type,
         renotify: true,
