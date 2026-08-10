@@ -32,7 +32,7 @@
                             ref="inputRef"
                             v-model="query"
                             type="search"
-                            placeholder="Buscar páginas, coches, clientes..."
+                            placeholder="Buscar páginas, vehículos, clientes..."
                             class="flex-1 border-0 bg-transparent py-3 text-base text-asphalt-900 placeholder:text-asphalt-400 focus:outline-none focus:ring-0 dark:text-asphalt-50"
                             @keydown.down.prevent="move(1)"
                             @keydown.up.prevent="move(-1)"

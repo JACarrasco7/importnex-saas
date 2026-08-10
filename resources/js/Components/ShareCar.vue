@@ -6,7 +6,7 @@
             class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-estoril-500 dark:border-asphalt-700 dark:bg-asphalt-800 dark:text-gray-200 dark:hover:bg-asphalt-700"
             :aria-expanded="open"
             :aria-haspopup="true"
-            :aria-label="t('share.label', 'Compartir este coche')"
+            :aria-label="t('share.label', 'Compartir este vehículo')"
         >
             <ShareIcon class="h-4 w-4" />
             {{ t('share.label', 'Compartir') }}
@@ -123,7 +123,7 @@ const shareMessage = computed(() => {
         : '';
     const mileage = props.car?.mileage ? `${(props.car.mileage / 1000).toFixed(0)}k km` : '';
     return [
-        t('share.whatsapp_intro', 'Hola! Me interesa este coche:'),
+        t('share.whatsapp_intro', 'Hola! Me interesa este vehículo:'),
         '',
         carTitle.value,
         mileage ? `· ${mileage}` : '',

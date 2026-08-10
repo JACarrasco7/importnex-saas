@@ -3,7 +3,7 @@ import { ref, computed } from 'vue';
 /**
  * Wishlist con localStorage (sin login).
  *
- * Permite a visitantes guardar coches favoritos sin necesidad de autenticación.
+ * Permite a visitantes guardar vehículos favoritos sin necesidad de autenticación.
  * Los datos se persisten en localStorage con clave `importnex_wishlist`.
  *
  * Limitaciones:

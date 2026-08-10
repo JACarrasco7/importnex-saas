@@ -87,6 +87,11 @@ export function useTranslations() {
             }
         }
 
+        // Soporte arrays (listas traducibles, ej: options de selects)
+        if (Array.isArray(value)) {
+            return value;
+        }
+
         // Soporte pluralización: si el valor es objeto con "_one" / "_other", pick según count
         if (typeof value === 'object' && value !== null) {
             if (replacements.count !== undefined) {

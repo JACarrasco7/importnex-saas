@@ -199,7 +199,7 @@ const triggerNewsletter = () => {
 const closeNewsletter = () => { showNewsletter.value = false; };
 const submitNewsletter = async () => {
     if (!newsletterEmail.value || !newsletterEmail.value.includes('@')) {
-        newsletterError.value = 'Email inválido';
+        newsletterError.value = t('marketplace.newsletter_invalid_email');
         return;
     }
     newsletterError.value = '';
@@ -682,7 +682,7 @@ onMounted(() => {
                                 {{ t('marketplace.newsletter_title', { default: '5 veh\u00edculos verificados al mes en tu inbox' }) }}
                             </p>
                             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                {{ t('marketplace.newsletter_desc', { default: 'Recibe solo los coches con veredicto Buy o Buy if price drops. Sin spam, baja cuando quieras.' }) }}
+                                {{ t('marketplace.newsletter_desc', { default: 'Recibe solo los vehículos con veredicto Buy o Buy if price drops. Sin spam, baja cuando quieras.' }) }}
                             </p>
                             <form v-if="!newsletterSubmitted" @submit.prevent="submitNewsletter" class="mt-3 flex flex-col gap-1">
                                 <div class="flex gap-2">

@@ -275,7 +275,7 @@
                 <div class="qr-box">{!! $qr_svg !!}</div>
                 <div>
                     <div class="qr-tag">Escanea</div>
-                    <div class="qr-title">{{ $e->uno('QR_TEXTO') ?? '¿Otro coche? Escanea aquí' }}</div>
+                    <div class="qr-title">{{ $e->uno('QR_TEXTO') ?? '¿Otro vehículo? Escanea aquí' }}</div>
                     <div class="qr-desc">Formulario de solicitud directo desde tu móvil.</div>
                 </div>
             </div>

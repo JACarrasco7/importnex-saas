@@ -6,7 +6,7 @@ return [
     'crm' => 'CRM',
     'account' => 'Account',
     'dashboard' => 'Dashboard',
-    'cars' => 'Cars',
+    'cars' => 'Vehicles',
     'kanban' => 'Kanban',
     'map' => 'Map',
     'finance' => 'Finance',

@@ -56,7 +56,7 @@
                                     </li>
                                     <li class="flex items-start gap-2">
                                         <XMarkIcon class="mt-0.5 h-4 w-4 shrink-0 text-rose-500" />
-                                        <span>{{ t('subscription.cancel_lose_limits', 'Los límites vuelven al plan Free (3 coches, 1 usuario)') }}</span>
+                                        <span>{{ t('subscription.cancel_lose_limits', 'Los límites vuelven al plan Free (3 vehículos, 1 usuario)') }}</span>
                                     </li>
                                     <li class="flex items-start gap-2">
                                         <InformationCircleIcon class="mt-0.5 h-4 w-4 shrink-0 text-blue-500" />

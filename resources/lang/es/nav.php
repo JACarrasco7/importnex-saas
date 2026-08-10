@@ -4,7 +4,7 @@ return [
     'overview' => 'Resumen',
     'dashboard' => 'Panel de Control',
     'inventory' => 'Inventario',
-    'cars' => 'Autos',
+    'cars' => 'Vehículos',
     'kanban' => 'Kanban',
     'map' => 'Mapa',
     'finance' => 'Finanzas',

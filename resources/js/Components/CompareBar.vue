@@ -59,7 +59,7 @@ defineExpose({ features, items });
                         <div class="flex items-center gap-3">
                             <ScaleIcon class="h-5 w-5 text-estoril-600" />
                             <span class="text-sm font-semibold text-gray-900 dark:text-white">
-                                {{ count }} {{ count === 1 ? 'coche' : 'coches' }} en comparador
+                                {{ count }} {{ count === 1 ? 'vehículo' : 'vehículos' }} en comparador
                             </span>
                         </div>
 

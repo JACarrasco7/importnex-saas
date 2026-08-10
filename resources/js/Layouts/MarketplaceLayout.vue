@@ -66,7 +66,7 @@ const close = () => { mobileOpen.value = false; };
                         :href="requestHref"
                         class="inline-flex items-center gap-1 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-estoril-500"
                     >
-                        {{ t('marketplace.nav_request', {}, 'Solicita tu coche') }}
+                        {{ t('marketplace.nav_request', {}, 'Solicita tu vehículo') }}
                         <ChevronRightIcon class="h-4 w-4" />
                     </Link>
                 </div>
@@ -110,7 +110,7 @@ const close = () => { mobileOpen.value = false; };
                             class="rounded-lg bg-estoril-600 px-3 py-2 text-center text-sm font-semibold text-white"
                             @click="close"
                         >
-                            {{ t('marketplace.nav_request', {}, 'Solicita tu coche') }}
+                            {{ t('marketplace.nav_request', {}, 'Solicita tu vehículo') }}
                         </Link>
                         <div class="mt-2 flex items-center justify-between gap-2 px-3">
                             <LocaleSelector />

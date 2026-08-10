@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'title' => 'Car Requests',
+    'title' => 'Vehicle Requests',
     'back_to_list' => 'Back to Requests',
     'request_from' => 'Request from',
     'change_status' => 'Change Status',
@@ -10,7 +10,7 @@ return [
     'field_email' => 'Email',
     'field_phone' => 'Phone',
     'existing_client' => 'Existing Client',
-    'car_preferences' => 'Car Preferences',
+    'car_preferences' => 'Vehicle Preferences',
     'field_brand' => 'Brand',
     'field_model' => 'Model',
     'field_year' => 'Year',

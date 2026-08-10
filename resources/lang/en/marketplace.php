@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'title' => 'Verified Cars - Marketplace',
-    'tagline' => 'Cars investigated from Germany',
+    'title' => 'Verified Vehicles - Marketplace',
+    'tagline' => 'Vehicles investigated from Germany',
     'description' => 'Only cars with complete technical report: 9 investigation points, market comparables, and import procedures resolved.',
     'hero_title' => 'Your next car, already verified',
     'hero_subtitle' => 'Your next car, already verified',
@@ -40,8 +40,8 @@ return [
     'cta_whatsapp' => 'WhatsApp: 675 70 14 39',
     'cta_call' => 'Call now',
     'cta_email' => 'Email',
-    'footer_copy' => 'Importnex © :year. Cars investigated, valued and ready to deliver.',
-    'brand' => 'Verified Cars by Importnex',
+    'footer_copy' => 'Importnex © :year. Vehicles investigated, valued and ready to deliver.',
+    'brand' => 'Verified Vehicles by Importnex',
     'trust_verified' => 'Verified cars',
     'trust_verified_desc' => 'Each car passes 9 inspections before going to market.',
     'trust_investigated' => 'Investigated price',

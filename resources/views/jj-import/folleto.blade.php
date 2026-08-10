@@ -648,7 +648,7 @@
 
         <div class="hero">
             <span class="hero-eyebrow"><span class="pulse"></span>Importación Premium · Alemania → España</span>
-            <h1 class="h1-title">Tu coche ideal, <span class="accent">directo a la puerta de tu casa.</span></h1>
+            <h1 class="h1-title">Tu vehículo ideal, <span class="accent">directo a la puerta de tu casa.</span></h1>
             <p class="hero-subtitle">Nos encargamos de buscar, negociar y matricular tu vehículo desde Alemania con servicio 100% Llave en Mano.</p>
             <div class="sub-badges">
                 <div class="sub-badge"><span class="check"></span>Informes Objetivos</div>
@@ -665,7 +665,7 @@
                     </div>
                     <h3>INFORME TÉCNICO</h3>
                 </div>
-                <p>Investigamos a fondo el coche: mecánica, historial, recalls y comparables reales del mercado.</p>
+                <p>Investigamos a fondo el vehículo: mecánica, historial, recalls y comparables reales del mercado.</p>
             </div>
             <div class="card ahorro">
                 <div class="card-header">
@@ -694,7 +694,7 @@
                 <div class="step active">
                     <div class="step-badge">1</div>
                     <div class="step-title">Tus Datos</div>
-                    <div class="step-desc">Nos cuentas qué coche buscas</div>
+                    <div class="step-desc">Nos cuentas qué vehículo buscas</div>
                 </div>
                 <div class="step active">
                     <div class="step-badge">2</div>
@@ -778,7 +778,7 @@
                     {!! $qr_svg !!}
                 </div>
                 <div class="qr-content">
-                    <div class="qr-tag">Solicita tu coche</div>
+                    <div class="qr-tag">Solicita tu vehículo</div>
                     <div class="qr-title">Escanea para<br>empezar</div>
                     <div class="qr-desc">Rellena el formulario de solicitud directo desde tu móvil.</div>
                 </div>

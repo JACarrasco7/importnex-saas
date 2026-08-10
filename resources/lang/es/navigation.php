@@ -6,7 +6,7 @@ return [
     'crm' => 'CRM',
     'account' => 'Cuenta',
     'dashboard' => 'Panel de Control',
-    'cars' => 'Autos',
+    'cars' => 'Vehículos',
     'kanban' => 'Kanban',
     'map' => 'Mapa',
     'finance' => 'Finanzas',

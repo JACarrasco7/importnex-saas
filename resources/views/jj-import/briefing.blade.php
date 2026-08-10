@@ -410,7 +410,7 @@
                 </div>
 
                 <div class="desc-box">
-                    <div class="desc-label">Sobre este coche</div>
+                    <div class="desc-label">Sobre este vehículo</div>
                     <div class="desc-text">{{ $description }}</div>
                 </div>
 
@@ -453,7 +453,7 @@
                 </div>
                 <div>
                     <div class="qr-tag">Escanea para verlo</div>
-                    <div class="qr-title">Este coche, en la web</div>
+                    <div class="qr-title">Este vehículo, en la web</div>
                     <div class="qr-desc">Ficha completa, fotos e informe técnico desde tu móvil.</div>
                 </div>
             </div>

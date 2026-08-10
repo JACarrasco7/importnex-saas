@@ -7,7 +7,7 @@
 
         <!-- Tarjeta principal -->
         <div class="bg-gray-50 rounded-lg p-3 mb-3">
-            <!-- Imagen del coche -->
+            <!-- Imagen del vehículo -->
             <div class="aspect-video w-full rounded bg-gray-200 mb-2"></div>
 
             <!-- Título -->

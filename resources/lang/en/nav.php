@@ -4,7 +4,7 @@ return [
     'overview' => 'Overview',
     'dashboard' => 'Dashboard',
     'inventory' => 'Inventory',
-    'cars' => 'Cars',
+    'cars' => 'Vehicles',
     'kanban' => 'Kanban',
     'map' => 'Map',
     'finance' => 'Finance',

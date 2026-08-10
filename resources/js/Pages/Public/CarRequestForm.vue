@@ -39,11 +39,11 @@ const form = useForm({
     website: '', // honeypot field
 });
 
-const fuelTypes = ['Diesel', 'Gasolina', 'Híbrido', 'Híbrido enchufable', 'Eléctrico', 'Gas'];
-const transmissions = ['Manual', 'Automático'];
-const bodyTypes = ['Berlina', 'SUV', 'Compacto', 'Monovolumen', 'Coupe', 'Cabrio', 'Pickup', 'Familiar'];
-const engineTypes = ['3 cilindros', '4 cilindros', '5 cilindros', '6 cilindros', '8 cilindros', 'Eléctrico'];
-const colors = ['Negro', 'Blanco', 'Gris', 'Plata', 'Azul', 'Rojo', 'Beige', 'Marrón', 'Verde'];
+const fuelTypes = computed(() => t('cars.fuel_options'));
+const transmissions = computed(() => t('cars.transmission_options'));
+const bodyTypes = computed(() => t('cars.body_type_options'));
+const engineTypes = computed(() => t('cars.engine_type_options'));
+const colors = computed(() => t('cars.color_options'));
 
 const submitting = ref(false);
 
@@ -421,7 +421,7 @@ const submit = () => {
 
                     <!-- Honeypot anti-spam field (hidden from real users) -->
                     <div class="absolute -left-[9999px] opacity-0" aria-hidden="true">
-                        <label for="website">Website (do not fill)</label>
+                        <label for="website">{{ t('car_request_form.honeypot_label') }}</label>
                         <input
                             id="website"
                             v-model="form.website"
@@ -447,7 +447,7 @@ const submit = () => {
                 class="flex items-center gap-2 rounded-full bg-estoril-700 px-4 py-3 text-sm font-semibold text-white shadow-lg hover:bg-estoril-800 transition-colors"
             >
                 <DocumentArrowDownIcon class="h-5 w-5" />
-                <span class="hidden sm:inline">Folleto</span>
+                <span class="hidden sm:inline">{{ t('car_request_form.brochure_label') }}</span>
             </a>
         </div>
         </div>

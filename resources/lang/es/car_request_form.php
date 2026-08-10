@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'title' => 'Solicita tu coche',
+    'title' => 'Solicita tu vehículo',
     'subtitle' => 'Cuéntanos qué necesitas y buscaremos las mejores opciones para ti',
     'section_prefs' => 'Tus preferencias',
     'section_required_help' => 'Los campos marcados con * son obligatorios',

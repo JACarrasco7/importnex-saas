@@ -186,7 +186,7 @@ const marketPosition = computed(() => {
 
 <template>
     <Head :title="seoTitle">
-        <!-- Open Graph dinamico (Item 14: OG meta tags por coche) -->
+        <!-- Open Graph dinamico (Item 14: OG meta tags por vehículo) -->
         <meta property="og:type" content="website" />
         <meta property="og:url" :content="seoUrl" />
         <meta property="og:title" :content="seoTitle" />
@@ -206,7 +206,7 @@ const marketPosition = computed(() => {
         <link rel="canonical" :href="seoUrl" />
     </Head>
 
-    <MarketplaceLayout>        <!-- SEO Schema.org Vehicle (Item 13: Schema.org Vehicle + Offer por coche) -->
+    <MarketplaceLayout>        <!-- SEO Schema.org Vehicle (Item 13: Schema.org Vehicle + Offer por vehículo) -->
         <script v-if="vehicleJsonLd" type="application/ld+json" v-html="vehicleJsonLd" />
         <div class="py-8">
             <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">

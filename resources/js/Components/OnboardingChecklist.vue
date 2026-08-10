@@ -34,7 +34,7 @@ const steps = computed(() => [
     {
         id: 2,
         title: t('onboarding.steps.first_vehicle', 'Añadir primer vehículo'),
-        description: t('onboarding.steps.first_vehicle_desc', 'Importa o crea tu primer coche'),
+        description: t('onboarding.steps.first_vehicle_desc', 'Importa o crea tu primer vehículo'),
         completed: props.progress?.step_first_vehicle_added ?? false,
         icon: TruckIcon,
         action: route('cars.index'),

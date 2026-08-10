@@ -6,7 +6,7 @@ return [
     'inventory' => 'Inventory',
     'crm' => 'CRM',
     'account' => 'Account',
-    'cars' => 'Cars',
+    'cars' => 'Vehicles',
     'clients' => 'Clients',
     'contacts' => 'Contacts',
     'messages' => 'Messages',

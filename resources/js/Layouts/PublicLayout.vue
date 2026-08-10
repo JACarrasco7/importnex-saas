@@ -20,7 +20,7 @@ const mobileOpen = ref(false);
 const user = computed(() => page.props?.auth?.user ?? null);
 
 // Layout del SaaS (plataforma de gestion para importadores): landing + pricing.
-// El marketplace publico de coches usa MarketplaceLayout.vue (separado).
+// El marketplace publico de vehículos usa MarketplaceLayout.vue (separado).
 const navLinks = computed(() => [
     { label: t('public.nav.home', {}, 'Inicio'), href: '/' },
     { label: t('public.nav.pricing', {}, 'Precios'), href: route('pricing') },
@@ -174,7 +174,7 @@ const close = () => { mobileOpen.value = false; };
                             </li>
                             <li>
                                 <Link :href="route('marketplace.index')" class="text-gray-600 hover:text-estoril-700 dark:text-gray-400 dark:hover:text-estoril-300">
-                                    {{ t('public.nav.view_marketplace', {}, 'Ver marketplace de coches') }}
+                                    {{ t('public.nav.view_marketplace', {}, 'Ver marketplace de vehículos') }}
                                 </Link>
                             </li>
                         </ul>

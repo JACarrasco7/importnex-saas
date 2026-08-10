@@ -55,7 +55,7 @@ const rows = computed(() => [
                 <!-- Empty state -->
                 <div v-if="cars.length === 0" class="rounded-2xl bg-white p-12 text-center shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700">
                     <p class="text-gray-600 dark:text-gray-400">
-                        {{ t('marketplace.compare.empty', { default: 'No hay vehículos seleccionados. Vuelve al marketplace y selecciona los coches que quieres comparar.' }) }}
+                        {{ t('marketplace.compare.empty', { default: 'No hay vehículos seleccionados. Vuelve al marketplace y selecciona los vehículos que quieres comparar.' }) }}
                     </p>
                     <Link :href="route('marketplace.index')" class="mt-4 inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white hover:bg-estoril-500">
                         {{ t('marketplace.compare.go_back', { default: 'Ir al marketplace' }) }}
