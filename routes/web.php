@@ -161,10 +161,27 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::post('/cars/scrape-url', [CarController::class, 'scrapeUrl'])
         ->middleware('throttle:api-read')
         ->name('cars.scrape-url');
-    Route::get('/cars/{car}', [CarController::class, 'show'])->name('cars.show');
-    Route::get('/cars/{car}/edit', [CarController::class, 'edit'])->name('cars.edit');
-    Route::patch('/cars/{car}', [CarController::class, 'update'])->name('cars.update');
-    Route::delete('/cars/{car}', [CarController::class, 'destroy'])->name('cars.destroy');
+
+    // Valuation import (from chat report ZIP) — MUST be before /cars/{car} wildcard
+    // because 'import-valuation' would otherwise match {car}='import-valuation'
+    // and show() would 404 looking up a non-numeric id.
+    Route::get('/cars/import-valuation', [ValuationImportController::class, 'create'])
+        ->name('cars.import-valuation.create');
+    Route::post('/cars/import-valuation', [ValuationImportController::class, 'store'])
+        ->name('cars.import-valuation.store');
+
+    Route::get('/cars/{car}', [CarController::class, 'show'])
+        ->where('car', '[0-9]+')
+        ->name('cars.show');
+    Route::get('/cars/{car}/edit', [CarController::class, 'edit'])
+        ->where('car', '[0-9]+')
+        ->name('cars.edit');
+    Route::patch('/cars/{car}', [CarController::class, 'update'])
+        ->where('car', '[0-9]+')
+        ->name('cars.update');
+    Route::delete('/cars/{car}', [CarController::class, 'destroy'])
+        ->where('car', '[0-9]+')
+        ->name('cars.destroy');
 
     // Car Photos
     Route::post('/cars/{car}/photos', [CarPhotoController::class, 'store'])->name('cars.photos.store');
@@ -175,12 +192,6 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::post('/cars/{car}/documents', [CarDocumentController::class, 'store'])->name('cars.documents.store');
     Route::get('/cars/{car}/documents/{document}', [CarDocumentController::class, 'show'])->name('cars.documents.show');
     Route::delete('/cars/{car}/documents/{document}', [CarDocumentController::class, 'destroy'])->name('cars.documents.destroy');
-
-    // Valuation import (from chat report ZIP)
-    Route::get('/cars/import-valuation', [ValuationImportController::class, 'create'])
-        ->name('cars.import-valuation.create');
-    Route::post('/cars/import-valuation', [ValuationImportController::class, 'store'])
-        ->name('cars.import-valuation.store');
 
     // Car Checklist (toggle complete)
     Route::post('/cars/{car}/checklists/{checklist}/toggle', [CarChecklistController::class, 'toggle'])
