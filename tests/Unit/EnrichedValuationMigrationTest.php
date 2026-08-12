@@ -4,6 +4,7 @@ use App\Models\Car;
 use App\Models\Organization;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 class EnrichedValuationMigrationTest extends TestCase
@@ -117,6 +118,7 @@ class EnrichedValuationMigrationTest extends TestCase
     public function test_schema_version_default_is_1(): void
     {
         $car = Car::factory()->create();
+        $car->refresh();
         $this->assertEquals(1, $car->schema_version);
     }
 

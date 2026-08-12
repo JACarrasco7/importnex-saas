@@ -1,8 +1,15 @@
 <?php
 
+use App\Http\Middleware\EnsureHasOrganization;
+use App\Http\Middleware\EnsureOrganization;
+use App\Http\Middleware\ForceBaseUrl;
+use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\ImportToken;
+use App\Http\Middleware\PlanLimitMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -13,15 +20,16 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->web(append: [
-            \App\Http\Middleware\HandleInertiaRequests::class,
-            \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
-            \App\Http\Middleware\ForceBaseUrl::class,
+            HandleInertiaRequests::class,
+            AddLinkHeadersForPreloadedAssets::class,
+            ForceBaseUrl::class,
         ]);
 
         $middleware->alias([
-            'organization' => \App\Http\Middleware\EnsureOrganization::class,
-            'has.organization' => \App\Http\Middleware\EnsureHasOrganization::class,
-            'plan.limit' => \App\Http\Middleware\PlanLimitMiddleware::class,
+            'organization' => EnsureOrganization::class,
+            'has.organization' => EnsureHasOrganization::class,
+            'plan.limit' => PlanLimitMiddleware::class,
+            'import-token' => ImportToken::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

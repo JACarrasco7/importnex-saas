@@ -48,6 +48,7 @@ export default {
     marketplace: 'Marketplace',
     finance: 'Finanzas',
     trips: 'Viajes',
+    kpis: 'KPIs',
     clients: 'Clientes',
     contacts: 'Contactos',
     requests: 'Solicitudes',

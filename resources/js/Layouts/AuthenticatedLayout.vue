@@ -27,6 +27,7 @@ import {
     ShoppingBagIcon,
     ArrowTopRightOnSquareIcon,
     GlobeAltIcon,
+    ChartBarIcon,
 } from '@heroicons/vue/24/outline';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import FlashMessage from '@/Components/FlashMessage.vue';
@@ -91,6 +92,7 @@ const navGroups = computed(() => [
             { name: t('nav.map'), route: 'cars.map', icon: MapIcon },
             { name: t('nav.finance'), route: 'finance.index', icon: BanknotesIcon },
             { name: t('nav.trips'), route: 'trips.index', icon: CalendarDaysIcon },
+            { name: t('nav.kpis'), route: 'kpis.index', icon: ChartBarIcon },
             { name: t('nav.marketplace'), route: 'marketplace.index', icon: ShoppingBagIcon, external: true },
         ],
     },

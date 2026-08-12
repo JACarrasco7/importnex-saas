@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Car;
 use App\Models\Organization;
+use App\Support\UrlNormalizer;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -97,12 +98,41 @@ class ValuationImporter
     ];
 
     /**
-     * Validate structure and schema_version.
+     * §3.4 — Mapeo de traccion (chat JSON) → drivetrain (BD).
+     * Español/inglés/alemán → valores canónicos en inglés.
+     */
+    private const DRIVETRAIN_MAP = [
+        // Español
+        'delantera' => 'FWD', 'delantero' => 'FWD', 'tracción delantera' => 'FWD',
+        'trasera' => 'RWD', 'trasero' => 'RWD', 'tracción trasera' => 'RWD', 'propulsión' => 'RWD',
+        'total' => 'AWD', 'tracción total' => 'AWD', 'integral' => 'AWD', 'tracción integral' => 'AWD',
+        '4x4' => 'AWD', 'cuatro por cuatro' => 'AWD',
+        // Inglés (passthrough)
+        'fwd' => 'FWD', 'front' => 'FWD', 'front-wheel drive' => 'FWD',
+        'rwd' => 'RWD', 'rear' => 'RWD', 'rear-wheel drive' => 'RWD',
+        'awd' => 'AWD', 'all-wheel drive' => 'AWD', '4wd' => 'AWD', 'four-wheel drive' => 'AWD',
+        // Alemán (mobile.de)
+        'front' => 'FWD', 'heck' => 'RWD', 'allrad' => 'AWD',
+    ];
+
+    /**
+     * Validate structure, schema_version, required blocks and optional flujo.
+     *
+     * @param  array  $payload  The full JSON payload
+     * @param  string[]  $requiredBlocks  Top-level blocks that must be present (e.g. ['_meta','vehiculo','anuncio'])
+     * @param  string|null  $expectedFlujo  If set, _meta.flujo must match (for endpoints B/C). Null = don't check.
      *
      * @throws RuntimeException
      */
-    public function validate(array $payload): array
+    public function validate(array $payload, array $requiredBlocks = ['_meta'], ?string $expectedFlujo = null): array
     {
+        // §10.7 — validate minimum structure
+        foreach ($requiredBlocks as $block) {
+            if (! isset($payload[$block])) {
+                throw new RuntimeException("Missing required top-level block: '{$block}'");
+            }
+        }
+
         if (! isset($payload['_meta']['schema_version'])) {
             throw new RuntimeException('Missing _meta.schema_version');
         }
@@ -114,6 +144,18 @@ class ValuationImporter
                 $version,
                 self::SUPPORTED_SCHEMA_VERSION
             ));
+        }
+
+        // §10.6 — validate flujo if endpoint requires it (Flujo B/C)
+        if ($expectedFlujo !== null) {
+            $actualFlujo = $payload['_meta']['flujo'] ?? null;
+            if ($actualFlujo !== $expectedFlujo) {
+                throw new RuntimeException(sprintf(
+                    "Invalid _meta.flujo. Expected '%s', got '%s'.",
+                    $expectedFlujo,
+                    $actualFlujo ?? 'null'
+                ));
+            }
         }
 
         return $payload;
@@ -148,10 +190,8 @@ class ValuationImporter
 
         // Buscar por URL (segundo identificador fiable)
         if ($url && ! empty(trim($url))) {
-            $normalizedUrl = trim($url);
-            // Normalizar URL eliminando parámetros de tracking y trailing slash
-            $normalizedUrl = preg_replace('/[?#].*$/', '', $normalizedUrl);
-            $normalizedUrl = rtrim($normalizedUrl, '/');
+            // §2.1 — Usar helper reutilizable para normalizar URL
+            $normalizedUrl = UrlNormalizer::normalize($url);
 
             // También buscar con la URL normalizada en BD
             $car = Car::withoutGlobalScope('organization')
@@ -211,6 +251,44 @@ class ValuationImporter
         $c = $payload['costes'] ?? [];
         $m = $payload['mercado'] ?? [];
 
+        // §3.1 — co2_confirmado: warning en avisos
+        $avisos = $payload['avisos'] ?? [];
+        if (isset($v['co2_confirmado']) && $v['co2_confirmado'] === false) {
+            $avisos[] = 'CO₂ no confirmado por COC. El IEDMT puede variar significativamente.';
+            Log::info('ValuationImporter: CO₂ no confirmado', [
+                'marca' => $v['marca'] ?? null,
+                'modelo' => $v['modelo'] ?? null,
+                'co2_gkm' => $v['co2_gkm'] ?? null,
+            ]);
+        }
+
+        // §3.2 — comparables: filtrar los que no tienen URL
+        $comparablesOriginales = $m['comparables'] ?? [];
+        $comparablesFiltrados = array_values(array_filter(
+            $comparablesOriginales,
+            fn ($c) => ! empty($c['url'])
+        ));
+        $sinUrl = count($comparablesOriginales) - count($comparablesFiltrados);
+        if ($sinUrl > 0) {
+            Log::warning('ValuationImporter: comparables sin URL filtrados', [
+                'count' => $sinUrl,
+                'total_original' => count($comparablesOriginales),
+            ]);
+            $avisos[] = "{$sinUrl} comparables descartados por no tener URL.";
+            $m['comparables'] = $comparablesFiltrados;
+        }
+
+        // §3.3 — precio_objetivo obligatorio si recomendación es "Comprar si baja..."
+        $recomendacion = strtolower($vd['recomendacion'] ?? '');
+        if (str_contains($recomendacion, 'comprar si baja') && ! isset($vd['precio_objetivo'])) {
+            throw new RuntimeException(
+                'precio_objetivo es obligatorio cuando la recomendación es "Comprar si baja de precio"'
+            );
+        }
+
+        // Persistir avisos actualizados en payload para uso posterior
+        $payload['avisos'] = $avisos;
+
         $wasNew = ! $car->exists;
 
         DB::transaction(function () use ($car, $v, $a, $i, $b, $vd, $c, $m, $payload, $wasNew) {
@@ -223,6 +301,7 @@ class ValuationImporter
                 'vin' => $v['vin'] ?? null,
                 'fuel' => $this->translate($v['combustible'] ?? null, self::FUEL_MAP),
                 'transmission' => $this->translate($v['cambio'] ?? null, self::TRANSMISSION_MAP),
+                'drivetrain' => $this->translate($v['traccion'] ?? null, self::DRIVETRAIN_MAP),
                 'cv' => $v['potencia_cv'] ?? null,
                 'co2' => $v['co2_gkm'] ?? null,
                 'color' => $v['color_exterior'] ?? null,
@@ -282,7 +361,8 @@ class ValuationImporter
 
                 // Source
                 'research_source' => 'chat',
-                'schema_version' => self::SUPPORTED_SCHEMA_VERSION,
+                // §8 (auditoría) — guardar la versión real del payload, no hardcodear
+                'schema_version' => $payload['_meta']['schema_version'] ?? self::SUPPORTED_SCHEMA_VERSION,
 
                 // Notes: append everything that didn't map to a column
                 'notes' => $this->buildNotes($v, $c, $vd, $payload['avisos'] ?? [], $payload['fuentes'] ?? []),

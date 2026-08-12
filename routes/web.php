@@ -19,6 +19,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\JJImportFolletoController;
+use App\Http\Controllers\KpiController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\MarketingController;
 use App\Http\Controllers\MessageTemplateController;
@@ -129,6 +130,9 @@ Route::middleware('auth', 'has.organization')->group(function () {
 Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, '__invoke'])
         ->name('dashboard');
+
+    // Dashboard de KPIs del skill importacion-vehiculos (§3.8)
+    Route::get('/kpis', [KpiController::class, '__invoke'])->name('kpis.index');
 
     // Onboarding wizard (redirige a dashboard si ya está completado)
     Route::get('/onboarding', [OnboardingController::class, 'index'])

@@ -317,4 +317,190 @@ class ValuationImporterTest extends TestCase
         $this->assertStringContainsString('IEDMT is an estimate', $car->notes);
         $this->assertStringContainsString('EJEMPLO', $car->notes);
     }
+
+    /**
+     * §3.1 — co2_confirmado: false → warning en avisos
+     */
+    public function test_co2_not_confirmed_adds_warning_to_avisos(): void
+    {
+        $org = Organization::factory()->create();
+        $importer = app(ValuationImporter::class);
+        $car = Car::factory()->make(['organization_id' => $org->id]);
+
+        $payload = [
+            '_meta' => ['schema_version' => ValuationImporter::SUPPORTED_SCHEMA_VERSION, 'flujo' => 'A'],
+            'vehiculo' => [
+                'marca' => 'VW', 'modelo' => 'Golf', 'version' => 'GTI',
+                'anio' => 2018, 'km' => 50000, 'combustible' => 'Gasolina',
+                'cambio' => 'Automático', 'potencia_cv' => 245,
+                'co2_gkm' => 165, 'co2_confirmado' => false,
+            ],
+            'anuncio' => ['url' => 'https://example.com/ad-1', 'precio_publicado' => 28000],
+            'investigacion' => [],
+            'balance' => ['a_favor' => [], 'en_contra' => []],
+            'veredicto' => ['recomendacion' => 'Comprar', 'confianza' => 'media', 'razonamiento' => 'Test', 'precio_objetivo' => 26000, 'fecha' => '2026-08-12'],
+            'costes' => ['precio_coche' => 28000, 'pvp_nuevo' => 40000, 'transporte' => 900],
+            'mercado' => ['precio_medio' => 32000, 'comparables' => []],
+            'avisos' => ['Aviso previo'],
+        ];
+
+        $car = $importer->apply($car, $payload);
+
+        // El aviso de CO₂ no confirmado debería estar en notes (que es donde se persisten los avisos)
+        $this->assertStringContainsString('CO₂ no confirmado', $car->notes);
+        $this->assertStringContainsString('Aviso previo', $car->notes);
+    }
+
+    /**
+     * §3.2 — comparables sin URL se filtran y se avisa
+     */
+    public function test_comparables_without_url_are_filtered(): void
+    {
+        $org = Organization::factory()->create();
+        $importer = app(ValuationImporter::class);
+        $car = Car::factory()->make(['organization_id' => $org->id]);
+
+        $payload = [
+            '_meta' => ['schema_version' => ValuationImporter::SUPPORTED_SCHEMA_VERSION, 'flujo' => 'A'],
+            'vehiculo' => ['marca' => 'VW', 'modelo' => 'Golf', 'anio' => 2018, 'km' => 50000, 'combustible' => 'Gasolina', 'cambio' => 'Manual', 'potencia_cv' => 245, 'co2_gkm' => 165],
+            'anuncio' => ['url' => 'https://example.com/ad-1'],
+            'investigacion' => [],
+            'balance' => ['a_favor' => [], 'en_contra' => []],
+            'veredicto' => ['recomendacion' => 'Comprar', 'confianza' => 'media', 'razonamiento' => 'Test', 'precio_objetivo' => 26000, 'fecha' => '2026-08-12'],
+            'costes' => ['precio_coche' => 28000, 'pvp_nuevo' => 40000, 'transporte' => 900],
+            'mercado' => [
+                'precio_medio' => 32000,
+                'comparables' => [
+                    ['titulo' => 'Con URL', 'precio' => 32000, 'km' => 55000, 'url' => 'https://example.com/1', 'pais' => 'España'],
+                    ['titulo' => 'Sin URL', 'precio' => 31500, 'km' => 60000, 'pais' => 'España'],  // Sin URL
+                    ['titulo' => 'Con URL 2', 'precio' => 33000, 'km' => 50000, 'url' => 'https://example.com/2', 'pais' => 'España'],
+                ],
+            ],
+        ];
+
+        $car = $importer->apply($car, $payload);
+
+        // El aviso sobre comparables filtrados debería estar en notes
+        $this->assertStringContainsString('1 comparables descartados', $car->notes);
+    }
+
+    /**
+     * §3.3 — precio_objetivo obligatorio cuando recomendación es "Comprar si baja de precio"
+     */
+    public function test_precio_objetivo_required_when_buy_if_price_drops(): void
+    {
+        $org = Organization::factory()->create();
+        $importer = app(ValuationImporter::class);
+        $car = Car::factory()->make(['organization_id' => $org->id]);
+
+        $payload = [
+            '_meta' => ['schema_version' => ValuationImporter::SUPPORTED_SCHEMA_VERSION, 'flujo' => 'A'],
+            'vehiculo' => ['marca' => 'VW', 'modelo' => 'Golf', 'anio' => 2018, 'km' => 50000, 'combustible' => 'Gasolina', 'cambio' => 'Manual', 'potencia_cv' => 245, 'co2_gkm' => 165],
+            'anuncio' => ['url' => 'https://example.com/ad-1'],
+            'investigacion' => [],
+            'balance' => ['a_favor' => [], 'en_contra' => []],
+            'veredicto' => [
+                'recomendacion' => 'Comprar si baja de precio',
+                'confianza' => 'media',
+                'razonamiento' => 'Test',
+                // precio_objetivo INTENCIONADAMENTE OMITIDO
+                'fecha' => '2026-08-12',
+            ],
+            'costes' => ['precio_coche' => 28000, 'pvp_nuevo' => 40000],
+            'mercado' => ['precio_medio' => 32000, 'comparables' => []],
+        ];
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('precio_objetivo es obligatorio');
+
+        $importer->apply($car, $payload);
+    }
+
+    /**
+     * §3.4 — mapeo de traccion a drivetrain (FWD)
+     */
+    public function test_drivetrain_mapped_from_traccion_fwd(): void
+    {
+        $org = Organization::factory()->create();
+        $importer = app(ValuationImporter::class);
+        $car = Car::factory()->make(['organization_id' => $org->id]);
+
+        $payload = [
+            '_meta' => ['schema_version' => ValuationImporter::SUPPORTED_SCHEMA_VERSION, 'flujo' => 'A'],
+            'vehiculo' => [
+                'marca' => 'VW', 'modelo' => 'Golf', 'anio' => 2018, 'km' => 50000,
+                'combustible' => 'Gasolina', 'cambio' => 'Manual', 'potencia_cv' => 150,
+                'co2_gkm' => 120, 'traccion' => 'Delantera',
+            ],
+            'anuncio' => ['url' => 'https://example.com/ad-1'],
+            'investigacion' => [],
+            'balance' => ['a_favor' => [], 'en_contra' => []],
+            'veredicto' => ['recomendacion' => 'Comprar', 'confianza' => 'alta', 'razonamiento' => 'Test', 'precio_objetivo' => 20000, 'fecha' => '2026-08-12'],
+            'costes' => ['precio_coche' => 20000, 'pvp_nuevo' => 30000],
+            'mercado' => ['precio_medio' => 25000, 'comparables' => []],
+        ];
+
+        $car = $importer->apply($car, $payload);
+
+        $this->assertSame('FWD', $car->drivetrain);
+    }
+
+    /**
+     * §3.4 — mapeo de traccion a drivetrain (AWD)
+     */
+    public function test_drivetrain_mapped_from_traccion_awd(): void
+    {
+        $org = Organization::factory()->create();
+        $importer = app(ValuationImporter::class);
+        $car = Car::factory()->make(['organization_id' => $org->id]);
+
+        $payload = [
+            '_meta' => ['schema_version' => ValuationImporter::SUPPORTED_SCHEMA_VERSION, 'flujo' => 'A'],
+            'vehiculo' => [
+                'marca' => 'Audi', 'modelo' => 'A4', 'anio' => 2019, 'km' => 40000,
+                'combustible' => 'Diésel', 'cambio' => 'Automático', 'potencia_cv' => 190,
+                'co2_gkm' => 130, 'traccion' => 'tracción total',
+            ],
+            'anuncio' => ['url' => 'https://example.com/ad-2'],
+            'investigacion' => [],
+            'balance' => ['a_favor' => [], 'en_contra' => []],
+            'veredicto' => ['recomendacion' => 'Comprar', 'confianza' => 'alta', 'razonamiento' => 'Test', 'precio_objetivo' => 28000, 'fecha' => '2026-08-12'],
+            'costes' => ['precio_coche' => 28000, 'pvp_nuevo' => 45000],
+            'mercado' => ['precio_medio' => 35000, 'comparables' => []],
+        ];
+
+        $car = $importer->apply($car, $payload);
+
+        $this->assertSame('AWD', $car->drivetrain);
+    }
+
+    /**
+     * §3.4 — drivetrain null si no viene traccion
+     */
+    public function test_drivetrain_null_when_traccion_missing(): void
+    {
+        $org = Organization::factory()->create();
+        $importer = app(ValuationImporter::class);
+        $car = Car::factory()->make(['organization_id' => $org->id]);
+
+        $payload = [
+            '_meta' => ['schema_version' => ValuationImporter::SUPPORTED_SCHEMA_VERSION, 'flujo' => 'A'],
+            'vehiculo' => [
+                'marca' => 'Seat', 'modelo' => 'León', 'anio' => 2020, 'km' => 30000,
+                'combustible' => 'Gasolina', 'cambio' => 'Manual', 'potencia_cv' => 110,
+                'co2_gkm' => 115,
+                // sin 'traccion'
+            ],
+            'anuncio' => ['url' => 'https://example.com/ad-3'],
+            'investigacion' => [],
+            'balance' => ['a_favor' => [], 'en_contra' => []],
+            'veredicto' => ['recomendacion' => 'Comprar', 'confianza' => 'alta', 'razonamiento' => 'Test', 'precio_objetivo' => 15000, 'fecha' => '2026-08-12'],
+            'costes' => ['precio_coche' => 15000, 'pvp_nuevo' => 22000],
+            'mercado' => ['precio_medio' => 18000, 'comparables' => []],
+        ];
+
+        $car = $importer->apply($car, $payload);
+
+        $this->assertNull($car->drivetrain);
+    }
 }

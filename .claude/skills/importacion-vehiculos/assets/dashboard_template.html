@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>JJ Import Motors — Centro de operaciones</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js"></script>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, "Segoe UI", Arial, sans-serif; background: #F4F6F8; color: #22262B; }
+  header { background: #0B1F3A; color: white; padding: 16px 24px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  header h1 { font-size: 18px; margin: 0; }
+  header .gen { font-size: 12px; color: #AEB8C4; margin-left: auto; }
+  nav { display: flex; gap: 6px; padding: 12px 24px 0; background: #0B1F3A; flex-wrap: wrap; }
+  nav button { background: #14294C; color: #C7CDD4; border: none; border-radius: 8px 8px 0 0; padding: 9px 18px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  nav button.active { background: #F4F6F8; color: #0B1F3A; }
+  main { padding: 22px 24px 60px; max-width: 1400px; margin: 0 auto; }
+  .view { display: none; }
+  .view.active { display: block; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 18px; }
+  .card { background: white; border: 1px solid #E4E7EB; border-radius: 10px; padding: 12px 14px; }
+  .card .label { font-size: 11px; color: #5A6472; text-transform: uppercase; letter-spacing: .03em; }
+  .card .value { font-size: 20px; font-weight: 700; color: #0B1F3A; margin-top: 4px; }
+  .card.alert .value { color: #B3261E; }
+  .card.good .value { color: #1E7B34; }
+  .panel { background: white; border: 1px solid #E4E7EB; border-radius: 10px; padding: 16px; margin-bottom: 18px; }
+  .panel h2 { font-size: 14px; color: #0B1F3A; margin: 0 0 12px; }
+  #map { height: 560px; border-radius: 10px; }
+  .badge { display: inline-block; padding: 3px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+  .badge.ok, .badge.green { background: #C6EFCE; color: #1E7B34; }
+  .badge.warn, .badge.amber { background: #FFF2AC; color: #7A5B00; }
+  .badge.bad, .badge.red { background: #F8C9C4; color: #B3261E; }
+  .badge.neutral { background: #E4E7EB; color: #5A6472; }
+  a.link { color: #0B1F3A; text-decoration: underline; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #EBEEF1; }
+  th { color: #5A6472; font-size: 11px; text-transform: uppercase; letter-spacing: .03em; }
+  tr.clickable { cursor: pointer; }
+  tr.clickable:hover { background: #F8F9FA; }
+  .toolbar { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
+  .toolbar input, .toolbar select { border: 1px solid #E4E7EB; border-radius: 8px; padding: 7px 10px; font-size: 13px; }
+  .toolbar input[type=text] { flex: 1; min-width: 180px; }
+  button.primary { background: #E8590C; color: white; border: none; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  button.secondary { background: white; color: #5A6472; border: 1px solid #E4E7EB; border-radius: 8px; padding: 8px 16px; font-size: 13px; cursor: pointer; }
+  .kanban { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; }
+  .kcol { min-width: 200px; max-width: 220px; background: #EBEEF1; border-radius: 10px; padding: 8px; flex-shrink: 0; }
+  .kcol h3 { font-size: 12px; color: #0B1F3A; margin: 4px 6px 8px; text-transform: uppercase; letter-spacing: .03em; }
+  .kcard { background: white; border: 1px solid #E4E7EB; border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; font-size: 12px; cursor: pointer; }
+  .kcard .t { font-weight: 700; color: #0B1F3A; margin-bottom: 2px; }
+  .kcard .s { color: #5A6472; }
+  .charts-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 800px) { .charts-2col { grid-template-columns: 1fr; } }
+  .chart-wrap { position: relative; height: 280px; }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(11,31,58,.5); display: none; align-items: flex-start; justify-content: center; padding: 40px 16px; overflow-y: auto; z-index: 1000; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: white; border-radius: 12px; padding: 24px; max-width: 640px; width: 100%; }
+  .modal h2 { margin: 0 0 4px; color: #0B1F3A; font-size: 18px; }
+  .modal .meta { color: #5A6472; font-size: 12px; margin-bottom: 14px; }
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .detail-block { font-size: 13px; }
+  .detail-block .k { font-size: 11px; color: #5A6472; text-transform: uppercase; letter-spacing: .03em; margin-bottom: 3px; }
+  .detail-block ul { margin: 4px 0 0; padding-left: 18px; }
+  .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; }
+  .photo-grid img { width: 100%; height: 80px; object-fit: cover; border-radius: 6px; border: 1px solid #E4E7EB; cursor: pointer; }
+  .edit-note { background: #FFF2AC; color: #7A5B00; padding: 10px 14px; border-radius: 8px; font-size: 12px; margin-top: 14px; }
+  .trip-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+  .trip-item { display: flex; align-items: center; gap: 10px; font-size: 13px; padding: 6px 8px; border-radius: 6px; }
+  .trip-item:hover { background: #F4F6F8; }
+  .trip-group { background: white; border: 1px solid #E4E7EB; border-radius: 10px; padding: 14px; margin-bottom: 12px; }
+  .trip-group h3 { margin: 0 0 8px; font-size: 13px; color: #E8590C; }
+  .trip-group .stat { font-size: 12px; color: #5A6472; margin-bottom: 8px; }
+  .geo-note { font-size: 11px; color: #98A2AE; }
+  input[type=number].small { width: 80px; }
+  .close-x { position: absolute; top: 14px; right: 16px; cursor: pointer; color: #5A6472; font-size: 18px; background: none; border: none; }
+  .modal { position: relative; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>JJ Import Motors — Centro de operaciones</h1>
+    <div class="gen">Generado el __GENERATED_AT__ · Espejo de solo lectura de coches.json / clientes.json / contactos.json en Drive · La herramienta de edicion es el panel de Cowork (o pidelo por chat) — aqui solo se consulta</div>
+  </header>
+  <nav>
+    <button class="active" data-view="mapa" onclick="switchView('mapa')">Mapa</button>
+    <button data-view="viajes" onclick="switchView('viajes')">Organizar viaje</button>
+    <button data-view="kanban" onclick="switchView('kanban')">Coches (Kanban)</button>
+    <button data-view="clientes" onclick="switchView('clientes')">Clientes</button>
+    <button data-view="contactos" onclick="switchView('contactos')">Contactos</button>
+    <button data-view="finanzas" onclick="switchView('finanzas')">Finanzas</button>
+  </nav>
+  <main>
+
+    <div class="view active" id="view-mapa">
+      <div class="cards" id="cardsMapa"></div>
+      <div class="panel">
+        <h2>Ubicacion de los coches (mapa real, OpenStreetMap)</h2>
+        <div id="map"></div>
+        <div class="geo-note" id="geoNote" style="margin-top:8px;"></div>
+      </div>
+    </div>
+
+    <div class="view" id="view-viajes">
+      <div class="panel">
+        <h2>Organizar viaje de recogida</h2>
+        <div class="toolbar">
+          <label style="font-size:12px;color:#5A6472;">Punto de partida:</label>
+          <select id="tripBase"></select>
+          <label style="font-size:12px;color:#5A6472;">Agrupar coches a menos de</label>
+          <input type="number" id="tripRadius" class="small" value="150" /> km entre si
+          <button class="primary" onclick="calcularViajes()">Calcular agrupaciones</button>
+        </div>
+        <div class="trip-list" id="tripCandidates"></div>
+        <div id="tripGroups"></div>
+        <div class="panel" style="margin-top:6px;">
+          <h2 style="font-size:12px;">Coste estimado de combustible</h2>
+          <div class="toolbar">
+            <label style="font-size:12px;color:#5A6472;">EUR/km:</label>
+            <input type="number" id="costeKm" class="small" value="0.13" step="0.01" />
+            <label style="font-size:12px;color:#5A6472;">Peajes EUR/100km:</label>
+            <input type="number" id="peajeKm" class="small" value="6" step="0.5" />
+            <button class="secondary" onclick="calcularViajes()">Recalcular</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="view" id="view-kanban">
+      <div class="cards" id="cardsKanban"></div>
+      <div class="toolbar">
+        <input type="text" id="searchCoches" placeholder="Buscar marca, modelo, vendedor, ciudad..." oninput="renderKanban()" />
+      </div>
+      <div class="kanban" id="kanbanBoard"></div>
+    </div>
+
+    <div class="view" id="view-clientes">
+      <div class="cards" id="cardsClientes"></div>
+      <table>
+        <thead><tr><th>Estado</th><th>Nombre</th><th>Que busca</th><th>Presupuesto</th><th>Contacto</th><th>Ultimo contacto</th></tr></thead>
+        <tbody id="tablaClientes"></tbody>
+      </table>
+    </div>
+
+    <div class="view" id="view-contactos">
+      <div class="cards" id="cardsContactos"></div>
+      <div class="toolbar">
+        <input type="text" id="searchContactos" placeholder="Buscar nombre, ciudad, notas..." oninput="renderContactos()" />
+      </div>
+      <table>
+        <thead><tr><th>Nombre</th><th>Etiquetas</th><th>Telefono</th><th>Email</th><th>Ciudad</th></tr></thead>
+        <tbody id="tablaContactos"></tbody>
+      </table>
+    </div>
+
+    <div class="view" id="view-finanzas">
+      <div class="cards" id="cardsFinanzas"></div>
+      <div class="charts-2col">
+        <div class="panel"><h2>Honorarios por coche (activos)</h2><div class="chart-wrap"><canvas id="chartHonorarios"></canvas></div></div>
+        <div class="panel"><h2>Desglose de costes agregado</h2><div class="chart-wrap"><canvas id="chartCostes"></canvas></div></div>
+      </div>
+    </div>
+
+  </main>
+
+  <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+    <div class="modal" id="modalContent"></div>
+  </div>
+
+  <script id="data-coches" type="application/json">__COCHES_JSON__</script>
+  <script id="data-clientes" type="application/json">__CLIENTES_JSON__</script>
+  <script id="data-contactos" type="application/json">__CONTACTOS_JSON__</script>
+
+  <script>
+    const COCHES = JSON.parse(document.getElementById("data-coches").textContent || "[]");
+    const CLIENTES = JSON.parse(document.getElementById("data-clientes").textContent || "[]");
+    const CONTACTOS = JSON.parse(document.getElementById("data-contactos").textContent || "[]");
+    const ESTADOS_COCHE = ["Localizado","Valorando","Ofrecido","Reservado","Comprado","En transito","En tramites","Entregado","Descartado"];
+    const ESTADOS_ACTIVOS = ["Localizado","Valorando","Ofrecido","Reservado","Comprado","En transito","En tramites"];
+    const CIUDADES_FALLBACK = {
+      "madrid": [40.4168, -3.7038], "barcelona": [41.3874, 2.1686], "hamburgo": [53.5511, 9.9937],
+      "hamburg": [53.5511, 9.9937], "munich": [48.1351, 11.5820], "münchen": [48.1351, 11.5820],
+      "berlin": [52.5200, 13.4050], "frankfurt": [50.1109, 8.6821], "koln": [50.9375, 6.9603],
+      "köln": [50.9375, 6.9603], "stuttgart": [48.7758, 9.1829], "paris": [48.8566, 2.3522],
+      "milan": [45.4642, 9.1900], "milano": [45.4642, 9.1900], "amsterdam": [52.3676, 4.9041],
+      "bremen": [53.0793, 8.8017], "hannover": [52.3759, 9.7320], "quickborn": [53.7280, 9.9030],
+    };
+    const BASE_PUNTO = { nombre: "Madrid", lat: 40.4168, lng: -3.7038 };
+    const GEOCODE_CACHE_KEY = "jj_geocode_cache_v1";
+
+    function num(v) { const n = parseFloat(v); return isNaN(n) ? 0 : n; }
+    function money(v) {
+      if (v === null || v === undefined || v === "") return "-";
+      const n = parseFloat(v);
+      return isNaN(n) ? String(v) : n.toLocaleString("es-ES", { maximumFractionDigits: 0 }) + " EUR";
+    }
+    function esc(s) {
+      if (s === null || s === undefined) return "";
+      return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+    }
+    function costeTotal(c) { return num(c.precioCoche) + num(c.transporte) + num(c.itvImp) + num(c.coc) + num(c.tasas) + num(c.baseImpManual); }
+    function precioCliente(c) { return costeTotal(c) + num(c.honorarios); }
+    function haversineKm(lat1, lng1, lat2, lng2) {
+      const R = 6371, rad = Math.PI / 180;
+      const dLat = (lat2 - lat1) * rad, dLng = (lng2 - lng1) * rad;
+      const a = Math.sin(dLat/2)**2 + Math.cos(lat1*rad) * Math.cos(lat2*rad) * Math.sin(dLng/2)**2;
+      return 2 * R * Math.asin(Math.sqrt(a));
+    }
+    function badgeClassForEstadoCoche(estado) {
+      if (["Comprado","Entregado"].includes(estado)) return "ok";
+      if (estado === "Descartado") return "bad";
+      if (["Reservado","En tramites","En transito"].includes(estado)) return "warn";
+      return "neutral";
+    }
+    function badgeClassForSemaforo(s) {
+      if (s === "green") return "green"; if (s === "amber") return "amber"; if (s === "red") return "red";
+      return "neutral";
+    }
+    function parseFechaDMY(s) {
+      if (!s) return null;
+      const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s.trim());
+      if (!m) return null;
+      return new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1]));
+    }
+    function diasDesde(fechaStr) {
+      const f = parseFechaDMY(fechaStr);
+      if (!f) return null;
+      return Math.floor((new Date() - f) / 86400000);
+    }
+    const UMBRAL_DIAS_COCHE = 15;
+    const UMBRAL_DIAS_CLIENTE = 7;
+
+    // Checklist de fase (B1) — mismos items/umbrales que el panel de Cowork,
+    // aqui solo en modo lectura (para editar, usa el panel de Cowork o el chat).
+    const CHECKLIST_ITEMS = [
+      { key: "senalPagada", label: "Senal pagada" },
+      { key: "transporteContratado", label: "Transporte contratado" },
+      { key: "cocPedido", label: "COC pedido" },
+      { key: "itvHecha", label: "ITV hecha" },
+      { key: "iedmtPagado", label: "IEDMT pagado" },
+      { key: "matriculado", label: "Matriculado" },
+    ];
+    const ESTADO_CHECKLIST_REQUERIDO = {
+      "Comprado": ["senalPagada"],
+      "En transito": ["senalPagada", "transporteContratado"],
+      "En tramites": ["senalPagada", "transporteContratado", "cocPedido"],
+      "Entregado": ["senalPagada", "transporteContratado", "cocPedido", "itvHecha", "iedmtPagado", "matriculado"],
+    };
+    // Gastos reales vs. estimados (C1) — mismo desglose que el panel de
+    // Cowork, aqui solo en modo lectura (para editar, usa el panel de
+    // Cowork o el chat).
+    const GASTOS_REALES_ITEMS = [
+      { key: "transporte", label: "Transporte", estField: "transporte", realField: "transporteReal" },
+      { key: "itvImp", label: "ITV importacion", estField: "itvImp", realField: "itvImpReal" },
+      { key: "coc", label: "COC", estField: "coc", realField: "cocReal" },
+      { key: "tasas", label: "Tasas", estField: "tasas", realField: "tasasReal" },
+      { key: "iedmt", label: "IEDMT", estField: "baseImpManual", realField: "iedmtReal" },
+      { key: "senal", label: "Senal", estField: "senal", realField: "senalReal" },
+      { key: "honorarios", label: "Honorarios", estField: "honorarios", realField: "honorariosReal" },
+    ];
+    function tieneGastoReal(c) {
+      return GASTOS_REALES_ITEMS.some(it => c[it.realField] !== undefined && c[it.realField] !== null && c[it.realField] !== "");
+    }
+    function desviacionCoche(c) {
+      return GASTOS_REALES_ITEMS.reduce((s, it) => {
+        const r = c[it.realField];
+        if (r === undefined || r === null || r === "") return s;
+        return s + (num(r) - num(c[it.estField]));
+      }, 0);
+    }
+    function gastosRealesTablaHtml(c) {
+      const filas = GASTOS_REALES_ITEMS.map(it => {
+        const realVal = c[it.realField];
+        const tieneReal = realVal !== undefined && realVal !== null && realVal !== "";
+        const diff = tieneReal ? (num(realVal) - num(c[it.estField])) : null;
+        const diffHtml = diff === null ? '<span style="color:#98A2AE;">-</span>'
+          : `<span class="badge ${diff > 0 ? 'bad' : (diff < 0 ? 'ok' : 'neutral')}">${diff > 0 ? '+' : ''}${money(diff)}</span>`;
+        return `<tr>
+          <td style="padding:4px 6px;border-bottom:1px solid #EBEEF1;">${esc(it.label)}</td>
+          <td style="padding:4px 6px;border-bottom:1px solid #EBEEF1;">${money(c[it.estField])}</td>
+          <td style="padding:4px 6px;border-bottom:1px solid #EBEEF1;">${tieneReal ? money(realVal) : '<span style="color:#98A2AE;">-</span>'}</td>
+          <td style="padding:4px 6px;border-bottom:1px solid #EBEEF1;">${diffHtml}</td>
+        </tr>`;
+      }).join("");
+      return `<table style="width:100%;font-size:13px;border-collapse:collapse;">
+        <thead><tr>
+          <th style="text-align:left;padding:4px 6px;color:#5A6472;font-size:11px;text-transform:uppercase;">Concepto</th>
+          <th style="text-align:left;padding:4px 6px;color:#5A6472;font-size:11px;text-transform:uppercase;">Estimado</th>
+          <th style="text-align:left;padding:4px 6px;color:#5A6472;font-size:11px;text-transform:uppercase;">Real</th>
+          <th style="text-align:left;padding:4px 6px;color:#5A6472;font-size:11px;text-transform:uppercase;">Diferencia</th>
+        </tr></thead>
+        <tbody>${filas}</tbody>
+      </table>`;
+    }
+    function checklistFaltantes(c, estado) {
+      const requeridos = ESTADO_CHECKLIST_REQUERIDO[estado] || [];
+      const cl = c.checklist || {};
+      return CHECKLIST_ITEMS.filter(it => requeridos.includes(it.key) && !cl[it.key]).map(it => it.label);
+    }
+    function checklistProgreso(c) {
+      const cl = c.checklist || {};
+      return { done: CHECKLIST_ITEMS.filter(it => cl[it.key]).length, total: CHECKLIST_ITEMS.length };
+    }
+
+    // Plantillas de mensaje (B3) — mismo contenido que el panel de Cowork,
+    // extraido de la hoja "Plantillas de mensaje" del Excel maestro.
+    const PLANTILLAS_MENSAJE = [{"num":1,"titulo":"1. Contacto inicial con el vendedor","seccion":"COMPRA","variantes":[{"idioma":"Espaniol","tono":"Profesional","asunto":"Consulta sobre [VEHICULO] publicado en [PORTAL]","texto":"Buenos dias, soy [NOMBRE] y escribo desde Espania. Estoy interesado/a en su [VEHICULO], si continua disponible y libre de accidentes. Para avanzar con el proceso de importacion a Espania, podria enviarme la documentacion del vehiculo (permiso de circulacion, ficha tecnica, Certificado de Conformidad), el VIN y el historial de mantenimiento, junto con fotos adicionales, incluyendo los bajos? Quedo a la espera de su respuesta. Un saludo, [NOMBRE]."},{"idioma":"Espaniol","tono":"Distendido","asunto":"","texto":"Hola, soy [NOMBRE], desde Espania. Sigue disponible el [VEHICULO]? Me interesa para importarlo. Me puedes pasar el VIN, el historial de mantenimiento y unas fotos de los bajos? Gracias!"},{"idioma":"Ingles","tono":"Profesional","asunto":"Inquiry about the [VEHICULO] listed on [PORTAL]","texto":"Good morning, my name is [NOMBRE], writing from Spain. I'm interested in your [VEHICULO], if it's still available and accident-free. To proceed with the Spanish import process, could you send me the vehicle documents (registration certificate, technical data sheet, Certificate of Conformity), the VIN, and the service history, along with a few extra photos including the underbody? Looking forward to your reply. Best regards, [NOMBRE]."},{"idioma":"Ingles","tono":"Distendido","asunto":"","texto":"Hi, I'm [NOMBRE] from Spain. Is the [VEHICULO] still available? I'm looking to import it. Could you send me the VIN, service history, and a couple of underbody photos? Thanks!"},{"idioma":"Aleman","tono":"Profesional","asunto":"Anfrage zu Ihrem [VEHICULO]","texto":"Guten Tag, mein Name ist [NOMBRE], ich schreibe aus Spanien. Ich interessiere mich fuer Ihren [VEHICULO], sofern er noch verfuegbar und unfallfrei ist. Fuer die Einfuhr nach Spanien benoetige ich die Fahrzeugpapiere (Zulassungsbescheinigung Teil I & II, COC), die Fahrgestellnummer (VIN) sowie die Wartungshistorie, zusaetzlich einige Fotos, auch vom Unterboden. Ich freue mich auf Ihre Antwort. Mit freundlichen Gruessen, [NOMBRE]."},{"idioma":"Aleman","tono":"Distendido","asunto":"","texto":"Hallo, ich bin [NOMBRE] aus Spanien. Ist der [VEHICULO] noch zu haben? Ich moechte ihn nach Spanien importieren. Kannst du mir VIN, Wartungshistorie und ein paar Fotos vom Unterboden schicken? Danke!"}]},{"num":2,"titulo":"2. Pedir fotos / documentos adicionales","seccion":"COMPRA","variantes":[{"idioma":"Espaniol","tono":"Profesional","asunto":"Documentacion adicional para el [VEHICULO]","texto":"Gracias por la respuesta. Para completar la valoracion antes de viajar, seria posible recibir tambien el ultimo informe de inspeccion tecnica (ITV/TUV), el certificado de conformidad (COC) y un video corto del arranque en frio? Se lo agradezco de antemano."},{"idioma":"Espaniol","tono":"Distendido","asunto":"","texto":"Me puedes pasar tambien el ultimo informe de ITV/TUV y un video rapido de como arranca en frio? Asi lo tengo todo listo antes de ir. Gracias!"},{"idioma":"Ingles","tono":"Profesional","asunto":"Additional documents for the [VEHICULO]","texto":"Thank you for your reply. To complete my assessment before traveling, could you also send the latest roadworthiness/inspection report, the Certificate of Conformity (COC), and a short cold-start video? I appreciate it."},{"idioma":"Ingles","tono":"Distendido","asunto":"","texto":"Could you also send the latest inspection report and a quick video of the cold start? Just want everything ready before I travel. Thanks!"},{"idioma":"Aleman","tono":"Profesional","asunto":"Weitere Unterlagen zum [VEHICULO]","texto":"Vielen Dank fuer Ihre Antwort. Fuer meine Einschaetzung vor der Anreise waere es hilfreich, auch den letzten TUEV-Bericht, das COC sowie ein kurzes Video vom Kaltstart zu erhalten. Vielen Dank im Voraus."},{"idioma":"Aleman","tono":"Distendido","asunto":"","texto":"Kannst du mir noch den letzten TUEV-Bericht und ein kurzes Video vom Kaltstart schicken? Dann hab ich vor der Anreise alles parat. Danke!"}]},{"num":3,"titulo":"3. Confirmar cita para ver el coche","seccion":"COMPRA","variantes":[{"idioma":"Espaniol","tono":"Profesional","asunto":"Confirmacion de visita - [VEHICULO]","texto":"Me gustaria concretar una cita para ver el vehiculo en persona el [FECHA] sobre las [HORA]. Le confirmo que llegare con el pago listo para formalizar la compra el mismo dia si todo esta conforme. Le viene bien esa fecha?"},{"idioma":"Espaniol","tono":"Distendido","asunto":"","texto":"Oye, te viene bien que vaya a verlo el [FECHA] sobre las [HORA]? Voy con el pago listo por si cerramos ese mismo dia."},{"idioma":"Ingles","tono":"Profesional","asunto":"Visit confirmation - [VEHICULO]","texto":"I would like to arrange a visit to see the vehicle in person on [FECHA] around [HORA]. I can confirm I will have payment ready to complete the purchase that same day if everything checks out. Would that date work for you?"},{"idioma":"Ingles","tono":"Distendido","asunto":"","texto":"Would [FECHA] around [HORA] work for you to see the car? I'll have payment ready in case we close the deal that day."},{"idioma":"Aleman","tono":"Profesional","asunto":"Besichtigungstermin - [VEHICULO]","texto":"Ich wuerde das Fahrzeug gerne am [FECHA] gegen [HORA] persoenlich besichtigen. Bei positivem Eindruck kann ich den Kauf noch am selben Tag mit sofortiger Zahlung abschliessen. Passt Ihnen dieser Termin?"},{"idioma":"Aleman","tono":"Distendido","asunto":"","texto":"Passt es dir, wenn ich am [FECHA] gegen [HORA] vorbeikomme? Ich hab die Zahlung parat, falls wir gleich abschliessen."}]},{"num":4,"titulo":"4. Peticion de descuento","seccion":"COMPRA","variantes":[{"idioma":"Espaniol","tono":"Profesional","asunto":"","texto":"Gracias por la informacion. Estoy en disposicion de proceder con una transferencia inmediata esta misma semana, sin condiciones de financiacion ni demoras. Dado el kilometraje/historial, hay margen en el precio?"},{"idioma":"Espaniol","tono":"Distendido","asunto":"","texto":"Todo perfecto, gracias! Puedo pagar por transferencia instantanea esta semana, sin lios de financiacion. Hay algo de margen en el precio?"},{"idioma":"Ingles","tono":"Profesional","asunto":"","texto":"Thank you for the information. I'm ready to proceed with an immediate transfer this week - no financing conditions, no delays. Given the mileage/history, is there any flexibility on the price?"},{"idioma":"Ingles","tono":"Distendido","asunto":"","texto":"All good, thanks! I can pay by instant transfer this week, no financing hassle. Any room to move on the price?"},{"idioma":"Aleman","tono":"Profesional","asunto":"","texto":"Vielen Dank fuer die Informationen. Ich kann noch diese Woche eine Sofortueberweisung taetigen, ohne Finanzierung oder Verzoegerungen. Gibt es angesichts der Laufleistung/Historie noch Verhandlungsspielraum beim Preis?"},{"idioma":"Aleman","tono":"Distendido","asunto":"","texto":"Danke, alles klar! Ich kann diese Woche per Sofortueberweisung zahlen, keine Finanzierung noetig. Ist beim Preis noch etwas drin?"}]},{"num":5,"titulo":"5. Confirmar cierre y forma de pago","seccion":"COMPRA","variantes":[{"idioma":"Espaniol","tono":"Profesional","asunto":"Confirmacion de compra y forma de pago - [VEHICULO]","texto":"Confirmo que procederemos con la compra del [VEHICULO] por [PRECIO] EUR. El pago se realizara mediante transferencia SEPA instantanea el dia de la firma. Le agradeceria que tuviera preparado el contrato de compraventa y la documentacion indicada previamente."},{"idioma":"Espaniol","tono":"Distendido","asunto":"","texto":"Genial, cerramos entonces por [PRECIO]. Pago por transferencia instantanea el dia que firmemos. Tienes ya el contrato preparado?"},{"idioma":"Ingles","tono":"Profesional","asunto":"Purchase and payment confirmation - [VEHICULO]","texto":"I confirm we will proceed with the purchase of the [VEHICULO] for EUR [PRECIO]. Payment will be made via instant bank transfer on the day of signing. I'd appreciate it if you could have the sales contract and previously requested documents ready."},{"idioma":"Ingles","tono":"Distendido","asunto":"","texto":"Great, let's go ahead at EUR [PRECIO]. I'll pay by instant transfer on signing day. Do you have the contract ready?"},{"idioma":"Aleman","tono":"Profesional","asunto":"Kaufbestaetigung und Zahlungsweise - [VEHICULO]","texto":"Hiermit bestaetige ich den Kauf des [VEHICULO] zum Preis von [PRECIO] EUR. Die Zahlung erfolgt am Tag der Unterschrift per Sofortueberweisung. Ich waere dankbar, wenn Sie den Kaufvertrag und die zuvor angefragten Unterlagen bereithalten koennten."},{"idioma":"Aleman","tono":"Distendido","asunto":"","texto":"Super, dann machen wir's fuer [PRECIO] EUR fest. Zahlung per Sofortueberweisung am Tag der Unterschrift. Hast du den Vertrag schon fertig?"}]},{"num":6,"titulo":"6. Seguimiento si no responden","seccion":"COMPRA","variantes":[{"idioma":"Espaniol","tono":"Profesional","asunto":"Seguimiento - consulta sobre [VEHICULO]","texto":"Le escribi hace unos dias preguntando por el [VEHICULO] y no he tenido noticias. Sigue disponible el vehiculo? Quedo atento/a a su respuesta."},{"idioma":"Espaniol","tono":"Distendido","asunto":"","texto":"Hola de nuevo! Sigue disponible el coche? No he tenido respuesta y no quiero perder la oportunidad."},{"idioma":"Ingles","tono":"Profesional","asunto":"Follow-up - inquiry about the [VEHICULO]","texto":"I reached out a few days ago about the [VEHICULO] and haven't heard back. Is the vehicle still available? Looking forward to your reply."},{"idioma":"Ingles","tono":"Distendido","asunto":"","texto":"Hi again! Is the car still available? Haven't heard back and don't want to miss out."},{"idioma":"Aleman","tono":"Profesional","asunto":"Nachfrage - Ihr [VEHICULO]","texto":"Ich hatte vor einigen Tagen wegen des [VEHICULO] geschrieben und noch keine Rueckmeldung erhalten. Ist das Fahrzeug noch verfuegbar? Ich freue mich auf Ihre Antwort."},{"idioma":"Aleman","tono":"Distendido","asunto":"","texto":"Hallo nochmal! Ist der Wagen noch zu haben? Hab noch nichts gehoert und will die Chance nicht verpassen."}]},{"num":7,"titulo":"7. El coche ya se vendio - pedir avisen de otros","seccion":"COMPRA","variantes":[{"idioma":"Espaniol","tono":"Profesional","asunto":"","texto":"Gracias por avisarme. Si dispone de otro vehiculo similar (mismo modelo/motorizacion o equivalente) proximamente, le agradeceria que me lo hiciera saber."},{"idioma":"Espaniol","tono":"Distendido","asunto":"","texto":"Vaya, una pena! Si te entra algo parecido avisame porfa."},{"idioma":"Ingles","tono":"Profesional","asunto":"","texto":"Thank you for letting me know. If you come across a similar vehicle (same model/engine or equivalent) in the near future, I'd appreciate it if you could let me know."},{"idioma":"Ingles","tono":"Distendido","asunto":"","texto":"Ah, too bad! If something similar comes in, please let me know."},{"idioma":"Aleman","tono":"Profesional","asunto":"","texto":"Danke fuer die Info. Falls Sie demnaechst ein aehnliches Fahrzeug (gleiches Modell/Motorisierung oder vergleichbar) bekommen, waere ich fuer eine kurze Nachricht dankbar."},{"idioma":"Aleman","tono":"Distendido","asunto":"","texto":"Schade! Falls was Aehnliches reinkommt, sag mir gerne Bescheid."}]},{"num":8,"titulo":"8. Agradecimiento post-compra","seccion":"COMPRA","variantes":[{"idioma":"Espaniol","tono":"Profesional","asunto":"Gracias por la operacion - [VEHICULO]","texto":"Queria agradecerle de nuevo la atencion durante todo el proceso de compra del [VEHICULO]. Ha sido una experiencia muy positiva. Le deseo lo mejor y no dude en contactarme si surge algo relacionado con el vehiculo."},{"idioma":"Espaniol","tono":"Distendido","asunto":"","texto":"Muchas gracias por todo, ha sido un placer! Cualquier cosa me dices."},{"idioma":"Ingles","tono":"Profesional","asunto":"Thank you - [VEHICULO] purchase","texto":"I wanted to thank you again for your help throughout the purchase of the [VEHICULO]. It was a great experience. All the best, and please don't hesitate to reach out if anything comes up."},{"idioma":"Ingles","tono":"Distendido","asunto":"","texto":"Thanks so much for everything, it was a pleasure! Let me know if anything comes up."},{"idioma":"Aleman","tono":"Profesional","asunto":"Vielen Dank - Kauf [VEHICULO]","texto":"Ich moechte mich nochmals fuer die Unterstuetzung waehrend des gesamten Kaufprozesses des [VEHICULO] bedanken. Es war eine sehr positive Erfahrung. Alles Gute, und melden Sie sich gerne, falls etwas ist."},{"idioma":"Aleman","tono":"Distendido","asunto":"","texto":"Danke fuer alles, hat echt Spass gemacht! Meld dich, falls was ist."}]},{"num":9,"titulo":"9. Presentar el coche a un cliente interesado","seccion":"CLIENTE","variantes":[{"idioma":"Espaniol","tono":"Profesional","asunto":"Informacion sobre el [VEHICULO] para tu importacion","texto":"Gracias por tu interes. Este [VEHICULO] esta disponible para gestionar su importacion a tu nombre. Con [KM] km e historial de mantenimiento verificado, la documentacion de importacion queda completa y en regla desde el primer momento. Quedo a tu disposicion para resolver cualquier duda o concretar una visita."},{"idioma":"Espaniol","tono":"Distendido","asunto":"","texto":"Hola! Si, sigue disponible para importartelo. Es un [VEHICULO] con historial completo, y te lo dejo con toda la documentacion de importacion en regla desde el minuto uno. Quieres que quedemos para verlo?"},{"idioma":"Ingles","tono":"Profesional","asunto":"Information about the [VEHICULO] for your import","texto":"Thank you for your interest. This [VEHICULO] is available for me to manage its import in your name. With [KM] km and a verified service history, the import documentation will be complete and in order from day one. I'm happy to answer any questions or arrange a viewing."},{"idioma":"Ingles","tono":"Distendido","asunto":"","texto":"Hi! Yes, it's still available for me to import for you. It's a [VEHICULO] with full service history, and I'll hand it over with all the import paperwork in order from day one. Want to arrange a time to see it?"},{"idioma":"Aleman","tono":"Profesional","asunto":"Informationen zum [VEHICULO] fuer Ihre Einfuhr","texto":"Vielen Dank fuer Ihr Interesse. Dieser [VEHICULO] steht zur Verfuegung, damit ich die Einfuhr auf Ihren Namen abwickle. Mit [KM] km und nachweislich gepflegter Wartungshistorie ist die Einfuhrdokumentation von Anfang an vollstaendig und in Ordnung. Gerne beantworte ich weitere Fragen oder vereinbare einen Besichtigungstermin."},{"idioma":"Aleman","tono":"Distendido","asunto":"","texto":"Hallo! Ja, ich kann ihn fuer Sie einfuehren. Ein [VEHICULO] mit komplettem Serviceheft, und Sie bekommen ihn mit allen Einfuhrpapieren von Anfang an in Ordnung. Lust auf einen Besichtigungstermin?"}]},{"num":10,"titulo":"10. Negociar honorarios/precio con el cliente","seccion":"CLIENTE","variantes":[{"idioma":"Espaniol","tono":"Profesional","asunto":"","texto":"Entiendo tu interes en ajustar el precio. El importe todo incluido ya refleja el estado del vehiculo, los costes de importacion y mis honorarios de gestion. Puedo ofrecerte un pequenio ajuste de [AJUSTE] EUR si confirmas esta semana."},{"idioma":"Espaniol","tono":"Distendido","asunto":"","texto":"Te entiendo, pero el precio todo incluido ya esta ajustado con lo que cuesta traerlo legal y en regla, mas mis honorarios. Si confirmamos esta semana, te puedo hacer algo de hueco."},{"idioma":"Ingles","tono":"Profesional","asunto":"","texto":"I understand you'd like some flexibility on the price. The all-inclusive price already reflects the vehicle's condition, the import costs, and my service fee. I can offer a small adjustment of EUR [AJUSTE] if you confirm this week."},{"idioma":"Ingles","tono":"Distendido","asunto":"","texto":"I get it, but the all-inclusive price already accounts for everything it takes to import it properly, plus my fee. If we confirm this week I can knock a bit off."},{"idioma":"Aleman","tono":"Profesional","asunto":"","texto":"Ich verstehe Ihr Interesse an einem besseren Preis. Der Gesamtpreis beruecksichtigt bereits den Zustand des Fahrzeugs, die Einfuhrkosten und mein Servicehonorar. Bei einer Bestaetigung diese Woche kann ich Ihnen [AJUSTE] EUR entgegenkommen."},{"idioma":"Aleman","tono":"Distendido","asunto":"","texto":"Kann ich verstehen, aber der Gesamtpreis ist schon fair kalkuliert mit allem, was die Einfuhr kostet, plus meinem Honorar. Wenn wir diese Woche bestaetigen, geht noch etwas."}]},{"num":11,"titulo":"11. Confirmar visita con el cliente","seccion":"CLIENTE","variantes":[{"idioma":"Espaniol","tono":"Profesional","asunto":"Confirmacion de visita - [VEHICULO]","texto":"Perfecto, te espero el [FECHA] a las [HORA] en [LUGAR] para ver el vehiculo. Si necesitas indicaciones o tienes alguna pregunta antes de la visita, quedo a tu disposicion."},{"idioma":"Espaniol","tono":"Distendido","asunto":"","texto":"Vale, te espero el [FECHA] a las [HORA] en [LUGAR]. Cualquier cosa me avisas!"},{"idioma":"Ingles","tono":"Profesional","asunto":"Visit confirmation - [VEHICULO]","texto":"Perfect, I'll expect you on [FECHA] at [HORA] at [LUGAR] to see the vehicle. If you need directions or have any questions beforehand, feel free to reach out."},{"idioma":"Ingles","tono":"Distendido","asunto":"","texto":"Cool, see you on [FECHA] at [HORA] at [LUGAR]. Let me know if anything changes!"},{"idioma":"Aleman","tono":"Profesional","asunto":"Terminbestaetigung - [VEHICULO]","texto":"Sehr gerne, ich erwarte Sie am [FECHA] um [HORA] in [LUGAR] zur Besichtigung. Bei Fragen oder falls Sie eine Wegbeschreibung benoetigen, melden Sie sich gerne."},{"idioma":"Aleman","tono":"Distendido","asunto":"","texto":"Alles klar, bis [FECHA] um [HORA] in [LUGAR]. Sag Bescheid, falls sich was aendert!"}]},{"num":12,"titulo":"12. Cerrar la operacion de importacion con el cliente","seccion":"CLIENTE","variantes":[{"idioma":"Espaniol","tono":"Profesional","asunto":"Inicio de la gestion de importacion - [VEHICULO]","texto":"Confirmo el inicio de la gestion de importacion del [VEHICULO] por [PRECIO] EUR todo incluido (coche, importacion y honorarios). Matriculare el vehiculo a tu nombre y te facilitare toda la documentacion, incluida la de importacion, y el contrato de servicio para formalizarlo. Gracias por tu confianza."},{"idioma":"Espaniol","tono":"Distendido","asunto":"","texto":"Genial, arrancamos con la importacion por [PRECIO] (todo incluido)! Te paso toda la documentacion y el contrato de servicio para firmarlo. Gracias por la confianza!"},{"idioma":"Ingles","tono":"Profesional","asunto":"Import service start - [VEHICULO]","texto":"I confirm we'll start managing the import of the [VEHICULO] for EUR [PRECIO] all-inclusive (car, import, and service fee). The vehicle will be registered in your name, and I'll provide all documentation, including import papers, and the service agreement to finalize it. Thank you for your trust."},{"idioma":"Ingles","tono":"Distendido","asunto":"","texto":"Awesome, let's get the import started for EUR [PRECIO] (all-in)! I'll send over all the paperwork and the service agreement to sign. Thanks for trusting me with this!"},{"idioma":"Aleman","tono":"Profesional","asunto":"Beginn der Einfuhrabwicklung - [VEHICULO]","texto":"Hiermit bestaetige ich den Beginn der Einfuhrabwicklung fuer den [VEHICULO] zum Gesamtpreis von [PRECIO] EUR (Fahrzeug, Einfuhr und Servicehonorar). Das Fahrzeug wird auf Ihren Namen zugelassen. Ich stelle Ihnen alle Unterlagen, inklusive Einfuhrdokumente, sowie den Servicevertrag zur Verfuegung. Vielen Dank fuer Ihr Vertrauen."},{"idioma":"Aleman","tono":"Distendido","asunto":"","texto":"Super, dann starten wir die Einfuhr fuer [PRECIO] EUR (Gesamtpreis)! Ich schicke Ihnen alle Unterlagen und den Servicevertrag zum Unterschreiben. Danke fuers Vertrauen!"}]}];
+    function extraerPortal(url) {
+      if (!url) return "";
+      try { return new URL(url).hostname.replace(/^www\./, ""); } catch (e) { return ""; }
+    }
+    function resolverPlaceholders(texto, ctx) {
+      if (!texto) return "";
+      let out = texto;
+      Object.keys(ctx).forEach(k => { if (ctx[k]) out = out.split(`[${k}]`).join(ctx[k]); });
+      return out;
+    }
+    const MENSAJE_CTX = {};
+    function opcionesPlantillasHtml(seccion) {
+      return PLANTILLAS_MENSAJE.filter(t => t.seccion === seccion).map(t => `<option value="${t.num}">${esc(t.titulo)}</option>`).join("");
+    }
+    function mensajesSectionHtml(prefix, seccion, ctx) {
+      MENSAJE_CTX[prefix] = ctx;
+      const titulo = seccion === "COMPRA" ? "Mensajes al vendedor" : "Mensajes al cliente";
+      return `
+        <div class="detail-block" style="grid-column:1/-1;">
+          <div class="k">${titulo}</div>
+          <div class="toolbar" style="margin:6px 0;">
+            <select id="${prefix}Tpl" onchange="actualizarMensaje('${prefix}')">${opcionesPlantillasHtml(seccion)}</select>
+            <select id="${prefix}Idioma" onchange="actualizarMensaje('${prefix}')"><option value="Espaniol">Espaniol</option><option value="Ingles">Ingles</option><option value="Aleman">Aleman</option></select>
+            <select id="${prefix}Tono" onchange="actualizarMensaje('${prefix}')"><option value="Profesional">Profesional (email)</option><option value="Distendido">Distendido (WhatsApp)</option></select>
+          </div>
+          <div id="${prefix}Asunto" style="font-size:12px;color:#5A6472;margin-bottom:4px;"></div>
+          <textarea id="${prefix}Texto" readonly style="min-height:100px;width:100%;font-family:inherit;font-size:13px;padding:8px;border:1px solid #E4E7EB;border-radius:8px;"></textarea>
+          <div style="margin-top:8px;"><button class="secondary" onclick="copiarMensaje('${prefix}')">Copiar mensaje</button></div>
+        </div>`;
+    }
+    function actualizarMensaje(prefix) {
+      const num = parseInt(document.getElementById(prefix + "Tpl").value, 10);
+      const idioma = document.getElementById(prefix + "Idioma").value;
+      const tono = document.getElementById(prefix + "Tono").value;
+      const tpl = PLANTILLAS_MENSAJE.find(t => t.num === num);
+      if (!tpl) return;
+      const variante = tpl.variantes.find(v => v.idioma === idioma && v.tono === tono);
+      if (!variante) return;
+      const ctx = MENSAJE_CTX[prefix] || {};
+      document.getElementById(prefix + "Asunto").textContent = variante.asunto ? "Asunto: " + resolverPlaceholders(variante.asunto, ctx) : "";
+      document.getElementById(prefix + "Texto").value = resolverPlaceholders(variante.texto, ctx);
+    }
+    async function copiarMensaje(prefix) {
+      if (!document.getElementById(prefix + "Texto").value) actualizarMensaje(prefix);
+      const val = document.getElementById(prefix + "Texto").value;
+      try { await navigator.clipboard.writeText(val); }
+      catch (e) {
+        const ta = document.getElementById(prefix + "Texto");
+        ta.removeAttribute("readonly"); ta.focus(); ta.select();
+        try { document.execCommand("copy"); } catch (e2) { /* el usuario copia a mano */ }
+        ta.setAttribute("readonly", "readonly");
+      }
+    }
+
+    function switchView(v) {
+      document.querySelectorAll("nav button").forEach(b => b.classList.toggle("active", b.dataset.view === v));
+      document.querySelectorAll(".view").forEach(el => el.classList.toggle("active", el.id === "view-" + v));
+      if (v === "mapa" && map) setTimeout(() => map.invalidateSize(), 50);
+      if (v === "kanban") renderKanban();
+      if (v === "finanzas") renderFinanzas();
+      if (v === "viajes") initViajes();
+    }
+
+    // ---------- Geocodificacion (cliente, via navegador real -> sin restricciones de red) ----------
+    function loadGeoCache() {
+      try { return JSON.parse(localStorage.getItem(GEOCODE_CACHE_KEY) || "{}"); } catch (e) { return {}; }
+    }
+    function saveGeoCache(cache) { localStorage.setItem(GEOCODE_CACHE_KEY, JSON.stringify(cache)); }
+    function fallbackGeocode(ciudad) {
+      if (!ciudad) return null;
+      const key = ciudad.toLowerCase();
+      for (const nombre in CIUDADES_FALLBACK) {
+        if (key.includes(nombre)) return CIUDADES_FALLBACK[nombre];
+      }
+      return null;
+    }
+    async function geocodeCiudad(ciudad, cache) {
+      if (!ciudad) return null;
+      if (cache[ciudad]) return cache[ciudad];
+      const fb = fallbackGeocode(ciudad);
+      try {
+        const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(ciudad)}`, {
+          headers: { "Accept-Language": "es" },
+        });
+        const data = await r.json();
+        if (data && data[0]) {
+          const coords = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+          cache[ciudad] = coords;
+          saveGeoCache(cache);
+          return coords;
+        }
+      } catch (e) { /* sin red o bloqueado: usamos fallback */ }
+      if (fb) { cache[ciudad] = fb; saveGeoCache(cache); }
+      return fb;
+    }
+    async function resolveCoords() {
+      const cache = loadGeoCache();
+      let autoGeo = 0, sinGeo = [];
+      for (const c of COCHES) {
+        if (c.lat && c.lng) continue;
+        if (!c.ciudad) { sinGeo.push(c); continue; }
+        const coords = await geocodeCiudad(c.ciudad, cache);
+        if (coords) { c._lat = coords[0]; c._lng = coords[1]; c._autoGeo = true; autoGeo++; }
+        else sinGeo.push(c);
+      }
+      COCHES.forEach(c => { if (c.lat && c.lng) { c._lat = c.lat; c._lng = c.lng; } });
+      document.getElementById("geoNote").textContent = sinGeo.length
+        ? `${sinGeo.length} coche(s) sin ubicacion detectable: ${sinGeo.map(c => (c.marca||"")+" "+(c.modelo||"")).join(", ")}. Anade "ciudad" o lat/lng en su ficha (panel de Cowork).`
+        : (autoGeo ? `${autoGeo} ubicacion(es) geocodificada(s) automaticamente a partir de la ciudad.` : "");
+    }
+
+    // ---------- Mapa ----------
+    let map = null;
+    const markers = [];
+    function colorForEstado(estado) {
+      if (["Comprado","Entregado"].includes(estado)) return "#1E7B34";
+      if (estado === "Descartado") return "#98A2AE";
+      if (["Reservado","En tramites","En transito"].includes(estado)) return "#E8590C";
+      return "#0B1F3A";
+    }
+    function initMap() {
+      map = L.map("map").setView([BASE_PUNTO.lat, BASE_PUNTO.lng], 5);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 18, attribution: "&copy; OpenStreetMap contributors",
+      }).addTo(map);
+      L.marker([BASE_PUNTO.lat, BASE_PUNTO.lng], { title: "Base: " + BASE_PUNTO.nombre })
+        .addTo(map).bindPopup(`<b>Base: ${BASE_PUNTO.nombre}</b>`);
+      renderMarkers();
+    }
+    function renderMarkers() {
+      markers.forEach(m => map.removeLayer(m));
+      markers.length = 0;
+      const visibles = COCHES.filter(c => (c._lat && c._lng) && c.estado !== "Descartado");
+      visibles.forEach(c => {
+        const dist = Math.round(haversineKm(BASE_PUNTO.lat, BASE_PUNTO.lng, c._lat, c._lng) * 1.2);
+        const marker = L.circleMarker([c._lat, c._lng], {
+          radius: 9, color: colorForEstado(c.estado), fillColor: colorForEstado(c.estado), fillOpacity: 0.85, weight: 2,
+        }).addTo(map);
+        marker.bindPopup(`
+          <b>${esc(c.marca||"")} ${esc(c.modelo||"")}</b><br/>
+          ${esc(c.estado||"-")} · ${money(precioCliente(c))} todo incluido<br/>
+          ${esc(c.ciudad||"")} · ~${dist.toLocaleString("es-ES")} km desde ${BASE_PUNTO.nombre}<br/>
+          ${c.enlace ? `<a href="${esc(c.enlace)}" target="_blank">Ver anuncio</a>` : ""}
+          <div style="margin-top:6px;"><button onclick="openDetalle('${esc(c.id)}')" style="font-size:12px;cursor:pointer;">Ver ficha completa</button></div>
+        `);
+        marker.on("click", () => {});
+        markers.push(marker);
+      });
+      renderCardsMapa(visibles);
+    }
+    function renderCardsMapa(visibles) {
+      const rojos = COCHES.filter(c => c.semaforo === "red").length;
+      document.getElementById("cardsMapa").innerHTML = `
+        <div class="card"><div class="label">Coches localizados en el mapa</div><div class="value">${visibles.length}</div></div>
+        <div class="card"><div class="label">Total en seguimiento</div><div class="value">${COCHES.filter(c=>c.estado!=="Descartado").length}</div></div>
+        <div class="card alert"><div class="label">Semaforo rojo</div><div class="value">${rojos}</div></div>
+      `;
+    }
+
+    // ---------- Organizar viaje ----------
+    async function initViajes() {
+      const sel = document.getElementById("tripBase");
+      if (!sel.dataset.loaded) {
+        sel.innerHTML = `<option value="base">${BASE_PUNTO.nombre} (base)</option>` +
+          COCHES.filter(c => c._lat && c._lng).map(c => `<option value="${esc(c.id)}">${esc(c.marca||"")} ${esc(c.modelo||"")} (${esc(c.ciudad||"")})</option>`).join("");
+        sel.dataset.loaded = "1";
+      }
+    }
+    function puntoDePartida() {
+      const v = document.getElementById("tripBase").value;
+      if (v === "base" || !v) return { nombre: BASE_PUNTO.nombre, lat: BASE_PUNTO.lat, lng: BASE_PUNTO.lng };
+      const c = COCHES.find(x => x.id === v);
+      return { nombre: (c.marca||"")+" "+(c.modelo||""), lat: c._lat, lng: c._lng };
+    }
+    function agruparPorCercania(coches, radioKm) {
+      const restantes = [...coches];
+      const grupos = [];
+      while (restantes.length) {
+        const semilla = restantes.shift();
+        const grupo = [semilla];
+        for (let i = restantes.length - 1; i >= 0; i--) {
+          const d = haversineKm(semilla._lat, semilla._lng, restantes[i]._lat, restantes[i]._lng);
+          if (d <= radioKm) { grupo.push(restantes[i]); restantes.splice(i, 1); }
+        }
+        grupos.push(grupo);
+      }
+      return grupos;
+    }
+    function ordenarPorVecinoMasCercano(origen, puntos) {
+      const restantes = [...puntos];
+      const ruta = [];
+      let actual = origen;
+      while (restantes.length) {
+        let idx = 0, mejorDist = Infinity;
+        restantes.forEach((p, i) => {
+          const d = haversineKm(actual.lat ?? actual._lat, actual.lng ?? actual._lng, p._lat, p._lng);
+          if (d < mejorDist) { mejorDist = d; idx = i; }
+        });
+        const siguiente = restantes.splice(idx, 1)[0];
+        ruta.push(siguiente);
+        actual = { lat: siguiente._lat, lng: siguiente._lng };
+      }
+      return ruta;
+    }
+    async function distanciaReal(lat1, lng1, lat2, lng2) {
+      try {
+        const r = await fetch(`https://router.project-osrm.org/route/v1/driving/${lng1},${lat1};${lng2},${lat2}?overview=false`);
+        const data = await r.json();
+        if (data.routes && data.routes[0]) {
+          return { km: data.routes[0].distance / 1000, min: data.routes[0].duration / 60 };
+        }
+      } catch (e) { /* sin red / rate limit: usamos aproximacion */ }
+      const km = haversineKm(lat1, lng1, lat2, lng2) * 1.25;
+      return { km, min: km / 80 * 60 };
+    }
+    function googleMapsUrl(origen, paradas) {
+      const pts = [`${origen.lat},${origen.lng}`, ...paradas.map(p => `${p._lat},${p._lng}`)];
+      return "https://www.google.com/maps/dir/" + pts.map(encodeURIComponent).join("/");
+    }
+    async function calcularViajes() {
+      const radio = num(document.getElementById("tripRadius").value) || 150;
+      const costeKm = num(document.getElementById("costeKm").value) || 0.13;
+      const peajeKm = num(document.getElementById("peajeKm").value) || 6;
+      const candidatos = COCHES.filter(c => c._lat && c._lng && ["Localizado","Valorando","Ofrecido","Reservado","Comprado"].includes(c.estado));
+      const box = document.getElementById("tripCandidates");
+      if (!candidatos.length) { box.innerHTML = '<div style="color:#5A6472;font-size:13px;">No hay coches con ubicacion en estados activos todavia.</div>'; document.getElementById("tripGroups").innerHTML = ""; return; }
+      const grupos = agruparPorCercania(candidatos, radio);
+      box.innerHTML = `<div style="font-size:13px;color:#5A6472;margin-bottom:6px;">${candidatos.length} coche(s) localizables agrupados en ${grupos.length} viaje(s) posibles:</div>`;
+      const origen = puntoDePartida();
+      const groupsEl = document.getElementById("tripGroups");
+      groupsEl.innerHTML = '<div style="color:#5A6472;font-size:13px;">Calculando rutas...</div>';
+      let html = "";
+      for (let gi = 0; gi < grupos.length; gi++) {
+        const grupo = grupos[gi];
+        const ruta = ordenarPorVecinoMasCercano(origen, grupo);
+        let totalKm = 0, totalMin = 0;
+        let actual = origen;
+        const tramos = [];
+        for (const parada of ruta) {
+          const d = await distanciaReal(actual.lat ?? actual._lat, actual.lng ?? actual._lng, parada._lat, parada._lng);
+          tramos.push({ nombre: (parada.marca||"")+" "+(parada.modelo||""), km: d.km, min: d.min, id: parada.id });
+          totalKm += d.km; totalMin += d.min;
+          actual = { lat: parada._lat, lng: parada._lng };
+        }
+        const costeCombustible = totalKm * costeKm;
+        const costePeajes = totalKm / 100 * peajeKm;
+        html += `
+          <div class="trip-group">
+            <h3>Viaje ${gi+1} — ${grupo.length} coche(s), ${grupo.map(c=>c.ciudad||c.marca).join(" / ")}</h3>
+            <div class="stat">${Math.round(totalKm).toLocaleString("es-ES")} km · ~${Math.round(totalMin/60)} h de conduccion · combustible ~${money(costeCombustible)} · peajes ~${money(costePeajes)} · total ~${money(costeCombustible+costePeajes)}</div>
+            <table><thead><tr><th>Parada</th><th>Km desde anterior</th></tr></thead><tbody>
+              ${tramos.map(t => `<tr><td>${esc(t.nombre)}</td><td>${Math.round(t.km).toLocaleString("es-ES")} km</td></tr>`).join("")}
+            </tbody></table>
+            <div style="margin-top:10px;"><a class="link" href="${googleMapsUrl(origen, ruta)}" target="_blank">Abrir ruta en Google Maps &rarr;</a></div>
+          </div>`;
+      }
+      groupsEl.innerHTML = html;
+    }
+
+    // ---------- Kanban ----------
+    function renderKanban() {
+      const search = (document.getElementById("searchCoches").value || "").toLowerCase();
+      const filtrados = COCHES.filter(c => {
+        const t = `${c.marca||""} ${c.modelo||""} ${c.vendedor||""} ${c.ciudad||""}`.toLowerCase();
+        return !search || t.includes(search);
+      });
+      const activos = filtrados.filter(c => ESTADOS_ACTIVOS.includes(c.estado));
+      const parados = activos.filter(c => { const d = diasDesde(c.fechaCambioEstado); return d !== null && d >= UMBRAL_DIAS_COCHE; });
+      document.getElementById("cardsKanban").innerHTML = `
+        <div class="card"><div class="label">Coches activos</div><div class="value">${activos.length}</div></div>
+        <div class="card good"><div class="label">Ofrecidos</div><div class="value">${filtrados.filter(c=>c.estado==="Ofrecido").length}</div></div>
+        <div class="card"><div class="label">Honorarios previstos</div><div class="value">${money(activos.reduce((s,c)=>s+num(c.honorarios),0))}</div></div>
+        <div class="card ${parados.length ? 'alert' : ''}"><div class="label">Parados ${UMBRAL_DIAS_COCHE}+ dias</div><div class="value">${parados.length}</div></div>
+      `;
+      document.getElementById("kanbanBoard").innerHTML = ESTADOS_COCHE.map(estado => {
+        const cards = filtrados.filter(c => c.estado === estado).map(c => {
+          const dias = diasDesde(c.fechaCambioEstado);
+          const aviso = dias !== null && dias >= UMBRAL_DIAS_COCHE && ESTADOS_ACTIVOS.includes(estado);
+          const p = checklistProgreso(c);
+          const faltantes = checklistFaltantes(c, estado);
+          return `
+          <div class="kcard" onclick="openDetalle('${esc(c.id)}')">
+            <div class="t">${esc(c.marca||"")} ${esc(c.modelo||"")}</div>
+            <div class="s">${esc(String(c.anio||""))} · ${c.km ? Number(c.km).toLocaleString("es-ES")+" km" : "-"}</div>
+            <div class="s">${money(precioCliente(c))}</div>
+            <div class="s" style="margin-top:4px;"><span class="badge ${faltantes.length ? 'warn' : 'neutral'}" title="${faltantes.length ? 'Falta: '+esc(faltantes.join(', ')) : 'Al dia'}">Checklist ${p.done}/${p.total}</span></div>
+            ${dias !== null ? `<div class="s" style="margin-top:4px;"><span class="badge ${aviso ? 'warn' : 'neutral'}">${dias} dia(s) en este estado</span></div>` : ""}
+          </div>`;
+        }).join("");
+        return `<div class="kcol"><h3>${estado} (${filtrados.filter(c=>c.estado===estado).length})</h3>${cards || '<div style="font-size:11px;color:#98A2AE;padding:6px;">vacio</div>'}</div>`;
+      }).join("");
+    }
+
+    // ---------- Clientes ----------
+    function matchesForCliente(c) {
+      const pmax = num(c.presupuestoMax);
+      return COCHES.filter(x => ["Localizado","Valorando","Ofrecido"].includes(x.estado) && (!pmax || precioCliente(x) <= pmax * 1.05));
+    }
+    const ESTADOS_ACTIVOS_CLIENTE = ["Nuevo lead","Buscando opciones","Coche propuesto","Operacion en curso"];
+    function renderClientes() {
+      const sinContactar = CLIENTES.filter(c => {
+        if (!ESTADOS_ACTIVOS_CLIENTE.includes(c.estado)) return false;
+        const d = diasDesde(c.fechaUltimoContacto);
+        return d !== null && d >= UMBRAL_DIAS_CLIENTE;
+      });
+      document.getElementById("cardsClientes").innerHTML = `
+        <div class="card"><div class="label">Total clientes</div><div class="value">${CLIENTES.length}</div></div>
+        <div class="card"><div class="label">Nuevos leads</div><div class="value">${CLIENTES.filter(c=>c.estado==="Nuevo lead").length}</div></div>
+        <div class="card good"><div class="label">En curso</div><div class="value">${CLIENTES.filter(c=>c.estado==="Operacion en curso").length}</div></div>
+        <div class="card good"><div class="label">Cerrados</div><div class="value">${CLIENTES.filter(c=>c.estado==="Cerrado - vendido").length}</div></div>
+        <div class="card ${sinContactar.length ? 'alert' : ''}"><div class="label">Sin contactar ${UMBRAL_DIAS_CLIENTE}+ dias</div><div class="value">${sinContactar.length}</div></div>
+      `;
+      document.getElementById("tablaClientes").innerHTML = CLIENTES.map(c => {
+        const dias = diasDesde(c.fechaUltimoContacto);
+        const aviso = dias !== null && dias >= UMBRAL_DIAS_CLIENTE && ESTADOS_ACTIVOS_CLIENTE.includes(c.estado);
+        return `
+        <tr class="clickable" onclick="openDetalleCliente('${esc(c.id)}')">
+          <td><span class="badge neutral">${esc(c.estado||"-")}</span></td>
+          <td>${esc(c.nombre||"-")}</td>
+          <td>${esc(c.queBusca||"-")}</td>
+          <td>${money(c.presupuestoMin)} - ${money(c.presupuestoMax)}</td>
+          <td>${esc(c.contacto||"-")}</td>
+          <td>${dias !== null ? `<span class="badge ${aviso ? 'warn' : 'neutral'}">hace ${dias} dia(s)</span>` : '<span class="badge neutral">-</span>'}</td>
+        </tr>`;
+      }).join("") || `<tr><td colspan="6" style="color:#5A6472;">Sin clientes todavia.</td></tr>`;
+    }
+
+    // ---------- Contactos de negocio (concesionarios, ITV, transporte...) ----------
+    // Solo lectura aqui; se dan de alta desde el panel de Cowork (boton
+    // "+ Anadir contacto") o por chat con "sync_web_data.py contacto_negocio".
+    function renderContactos() {
+      const search = (document.getElementById("searchContactos").value || "").toLowerCase();
+      const filtrados = CONTACTOS.filter(c => {
+        const t = `${c.nombre||""} ${c.ciudad||""} ${c.notas||""}`.toLowerCase();
+        return !search || t.includes(search);
+      });
+      const porTag = {};
+      (CONTACTOS || []).forEach(c => (c.tags||[]).forEach(t => porTag[t] = (porTag[t]||0) + 1));
+      document.getElementById("cardsContactos").innerHTML = `
+        <div class="card"><div class="label">Total contactos</div><div class="value">${CONTACTOS.length}</div></div>
+        <div class="card"><div class="label">Concesionarios</div><div class="value">${porTag["Concesionario"]||0}</div></div>
+        <div class="card"><div class="label">Transportistas</div><div class="value">${porTag["Transportista"]||0}</div></div>
+        <div class="card"><div class="label">ITV / Revisores</div><div class="value">${porTag["ITV / Revisor"]||0}</div></div>
+      `;
+      document.getElementById("tablaContactos").innerHTML = filtrados.map(c => `
+        <tr>
+          <td>${esc(c.nombre||"-")}</td>
+          <td>${(c.tags||[]).map(t => `<span class="badge neutral">${esc(t)}</span>`).join(" ") || "-"}</td>
+          <td>${esc(c.telefono||"-")}</td>
+          <td>${esc(c.email||"-")}</td>
+          <td>${esc(c.ciudad||"-")}</td>
+        </tr>`).join("") || `<tr><td colspan="5" style="color:#5A6472;">Sin contactos todavia.</td></tr>`;
+    }
+
+    // ---------- Finanzas ----------
+    let chartHon = null, chartCostes = null;
+    function renderFinanzas() {
+      const activos = COCHES.filter(c => ESTADOS_ACTIVOS.includes(c.estado));
+      const comprados = COCHES.filter(c => ["Comprado","En transito","En tramites"].includes(c.estado));
+      const entregados = COCHES.filter(c => c.estado === "Entregado");
+      const conDatosReales = COCHES.filter(c => c.estado !== "Descartado" && tieneGastoReal(c));
+      const desviacionTotal = conDatosReales.reduce((s,c) => s + desviacionCoche(c), 0);
+      document.getElementById("cardsFinanzas").innerHTML = `
+        <div class="card"><div class="label">Operaciones activas</div><div class="value">${activos.length}</div></div>
+        <div class="card"><div class="label">Capital en compradas</div><div class="value">${money(comprados.reduce((s,c)=>s+costeTotal(c),0))}</div></div>
+        <div class="card good"><div class="label">Honorarios previstos</div><div class="value">${money(activos.reduce((s,c)=>s+num(c.honorarios),0))}</div></div>
+        <div class="card good"><div class="label">Honorarios cobrados</div><div class="value">${money(entregados.reduce((s,c)=>s+num(c.honorarios),0))}</div></div>
+        <div class="card ${desviacionTotal > 0 ? 'alert' : (desviacionTotal < 0 ? 'good' : '')}"><div class="label">Desviacion gastos reales (${conDatosReales.length} coche(s))</div><div class="value">${conDatosReales.length ? (desviacionTotal > 0 ? '+' : '') + money(desviacionTotal) : '-'}</div></div>
+      `;
+      if (chartHon) chartHon.destroy();
+      chartHon = new Chart(document.getElementById("chartHonorarios"), {
+        type: "bar",
+        data: { labels: activos.map(c => `${c.marca||""} ${c.modelo||""}`.trim()), datasets: [{ label: "Honorarios (EUR)", data: activos.map(c => num(c.honorarios)), backgroundColor: "#E8590C" }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } },
+      });
+      const suma = k => COCHES.filter(c => c.estado !== "Descartado").reduce((s, c) => s + num(c[k]), 0);
+      if (chartCostes) chartCostes.destroy();
+      chartCostes = new Chart(document.getElementById("chartCostes"), {
+        type: "doughnut",
+        data: { labels: ["Precio coches","Transporte","ITV importacion","COC","Tasas","IEDMT (manual)","Honorarios"],
+          datasets: [{ data: [suma("precioCoche"),suma("transporte"),suma("itvImp"),suma("coc"),suma("tasas"),suma("baseImpManual"),suma("honorarios")],
+            backgroundColor: ["#0B1F3A","#E8590C","#1E7B34","#7A5B00","#5A6472","#B3261E","#3B82C4"] }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom" } } },
+      });
+    }
+
+    // ---------- Modal detalle ----------
+    function closeModal() { document.getElementById("modalOverlay").classList.remove("open"); }
+    function openDetalle(id) {
+      const c = COCHES.find(x => x.id === id);
+      if (!c) return;
+      const cliente = c.clienteId ? CLIENTES.find(cl => cl.id === c.clienteId) : null;
+      const fotos = c.fotos || [];
+      const fotosHtml = fotos.length
+        ? `<div class="photo-grid">${fotos.map(f => `<img src="${esc(f)}" onclick="window.open('${esc(f)}','_blank')" />`).join("")}</div>`
+        : `<span style="color:#98A2AE;">Sin fotos todavia.</span>`;
+      const carpetaHtml = c.driveFolderId
+        ? `<a class="link" href="https://drive.google.com/drive/folders/${esc(c.driveFolderId)}" target="_blank">Abrir carpeta en Drive (fotos y documentos)</a>`
+        : `<span style="color:#98A2AE;">Sin carpeta de Drive todavia — creala desde el panel de Cowork.</span>`;
+      document.getElementById("modalContent").innerHTML = `
+        <button class="close-x" onclick="closeModal()">&times;</button>
+        <h2>${esc(c.marca||"")} ${esc(c.modelo||"")} ${esc(c.version||"")}</h2>
+        <div class="meta">${esc(String(c.anio||"-"))} · ${c.km ? Number(c.km).toLocaleString("es-ES")+" km" : "-"} · ${esc(c.combustible||"-")} · ${esc(c.vendedor||"-")} ${c.ciudad ? "· "+esc(c.ciudad) : ""}</div>
+        <div class="detail-block" style="margin-bottom:12px;"><div class="k">Fotos</div>${fotosHtml}</div>
+        <div class="detail-grid">
+          <div class="detail-block"><div class="k">Numeros</div>Precio: <b>${money(c.precioCoche)}</b><br/>Coste total: <b>${money(costeTotal(c))}</b><br/>Honorarios: <b>${money(c.honorarios)}</b><br/>Todo incluido: <b>${money(precioCliente(c))}</b></div>
+          <div class="detail-block"><div class="k">Estado</div><span class="badge ${badgeClassForEstadoCoche(c.estado)}">${esc(c.estado||"-")}</span> · Semaforo: <span class="badge ${badgeClassForSemaforo(c.semaforo)}">${esc(c.semaforo||"-")}</span></div>
+          <div class="detail-block"><div class="k">Valoracion</div>${esc(c.valoracion || c.recomendacion || "-")}</div>
+          <div class="detail-block"><div class="k">Banderas rojas</div>${c.banderasRojas && c.banderasRojas.length ? "<ul>"+c.banderasRojas.map(x=>`<li>${esc(x)}</li>`).join("")+"</ul>" : "-"}</div>
+          <div class="detail-block"><div class="k">Enlaces</div>
+            ${c.enlace ? `<a class="link" href="${esc(c.enlace)}" target="_blank">Anuncio</a><br/>` : ""}
+            ${c.enlaceFichaExcel ? `<a class="link" href="${esc(c.enlaceFichaExcel)}" target="_blank">Ficha Excel</a><br/>` : ""}
+            ${c.enlacePdf ? `<a class="link" href="${esc(c.enlacePdf)}" target="_blank">PDF resumen</a>` : ""}
+          </div>
+          <div class="detail-block"><div class="k">Cliente</div>${cliente ? esc(cliente.nombre) : "Sin cliente todavia"}</div>
+          <div class="detail-block"><div class="k">Carpeta de Drive</div>${carpetaHtml}</div>
+          <div class="detail-block"><div class="k">Checklist de fase</div><ul>${CHECKLIST_ITEMS.map(it => `<li>${(c.checklist||{})[it.key] ? "&#9989;" : "&#9744;"} ${esc(it.label)}</li>`).join("")}</ul></div>
+          <div class="detail-block" style="grid-column:1/-1;"><div class="k">Gastos reales vs. estimados</div>${gastosRealesTablaHtml(c)}</div>
+          ${mensajesSectionHtml("msgVendedor", "COMPRA", {
+            VEHICULO: `${c.marca||""} ${c.modelo||""}`.trim(),
+            PRECIO: c.precioCoche ? String(Math.round(num(c.precioCoche))) : "",
+            KM: c.km ? Number(c.km).toLocaleString("es-ES") : "",
+            PORTAL: extraerPortal(c.enlace),
+            NOMBRE: "JJ Import Motors",
+          })}
+        </div>
+        <div class="edit-note">Para cambiar el estado, honorarios, checklist o notas de este coche, usa el panel de Cowork o pideselo al chat — este archivo es una foto del momento en que se genero.</div>
+      `;
+      document.getElementById("modalOverlay").classList.add("open");
+      actualizarMensaje("msgVendedor");
+    }
+    function openDetalleCliente(id) {
+      const c = CLIENTES.find(x => x.id === id);
+      if (!c) return;
+      const sugerencias = matchesForCliente(c);
+      const cocheElegido = c.cocheElegido ? COCHES.find(x => x.id === c.cocheElegido) : null;
+      const cocheRef = cocheElegido || (c.cochesPropuestos && c.cochesPropuestos.length ? COCHES.find(x => x.id === c.cochesPropuestos[0].cocheId) : null);
+      // Historial de contacto (B4) — solo lectura aqui; se registra desde el
+      // panel de Cowork o por chat (ver SKILL.md).
+      const historial = (c.historial || []).slice().sort((a, b) => (parseFechaDMY(b.fecha) || 0) - (parseFechaDMY(a.fecha) || 0));
+      const historialHtml = historial.length
+        ? "<ul>" + historial.map(h => `<li><b>${esc(h.fecha)}</b> · ${esc(h.canal)} — ${esc(h.resumen) || '<span style="color:#98A2AE;">sin resumen</span>'}</li>`).join("") + "</ul>"
+        : '<span style="color:#98A2AE;">Sin contactos registrados todavia.</span>';
+      document.getElementById("modalContent").innerHTML = `
+        <button class="close-x" onclick="closeModal()">&times;</button>
+        <h2>${esc(c.nombre||"")}</h2>
+        <div class="meta">${esc(c.contacto||"-")} · Llego por: ${esc(c.comoLlego||"-")}</div>
+        <div class="detail-grid">
+          <div class="detail-block"><div class="k">Que busca</div>${esc(c.queBusca||"-")}<br/>Presupuesto: ${money(c.presupuestoMin)} - ${money(c.presupuestoMax)}</div>
+          <div class="detail-block"><div class="k">Notas</div>${esc(c.notas||"-")}</div>
+          <div class="detail-block" style="grid-column:1/-1;"><div class="k">Historial de contacto</div>${historialHtml}</div>
+        </div>
+        <div class="detail-block"><div class="k">Coches del inventario que encajan</div>
+          ${sugerencias.length ? "<ul>"+sugerencias.map(x=>`<li>${esc(x.marca)} ${esc(x.modelo)} — ${money(precioCliente(x))}</li>`).join("")+"</ul>" : "Ninguno ahora mismo."}
+        </div>
+        ${mensajesSectionHtml("msgCliente", "CLIENTE", {
+          VEHICULO: cocheRef ? `${cocheRef.marca||""} ${cocheRef.modelo||""}`.trim() : "",
+          PRECIO: cocheRef ? String(Math.round(precioCliente(cocheRef))) : "",
+          KM: cocheRef && cocheRef.km ? Number(cocheRef.km).toLocaleString("es-ES") : "",
+        })}
+        <div class="edit-note">Para proponerle un coche o cambiar su estado, usa el panel de Cowork o pideselo al chat.</div>
+      `;
+      document.getElementById("modalOverlay").classList.add("open");
+      actualizarMensaje("msgCliente");
+    }
+
+    // ---------- Init ----------
+    (async function init() {
+      await resolveCoords();
+      initMap();
+      renderKanban();
+      renderClientes();
+      renderContactos();
+    })();
+  </script>
+</body>
+</html>

@@ -122,6 +122,7 @@
     "confianza": "media",
     "razonamiento": "EJEMPLO ilustrativo del formato, no es una valoración real.",
     "que_cambiaria": "Confirmar el CO2 con el COC puede mover el impuesto.",
+    "precio_objetivo": 11800,
     "fecha": "29/07/2026"
   },
   "costes": {

@@ -11,7 +11,7 @@ class Car extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'brand', 'model', 'version', 'year', 'mileage', 'fuel', 'transmission',
+        'brand', 'model', 'version', 'year', 'mileage', 'fuel', 'transmission', 'drivetrain',
         'cv', 'displacement', 'co2', 'consumption', 'owners', 'doors',
         'seats', 'euro_norm', 'color', 'itv_date',
         'purchase_price', 'new_price', 'manual_tax_base', 'boe_confirmed',
@@ -139,18 +139,19 @@ class Car extends Model
             return 0;
         }
 
-        $coefficients = [1.00, 0.84, 0.68, 0.57, 0.47, 0.39, 0.33, 0.28, 0.24, 0.19, 0.14, 0.10];
+        $coefficients = config('iedmt.coeficientes_antiguedad');
         $currentYear = (int) date('Y');
         $carYear = (int) substr($this->year, -4);
-        $years = $currentYear - $carYear;
-        $index = min(max($years, 0), count($coefficients) - 1);
+        $years = max(0, $currentYear - $carYear);
+        $index = min($years, count($coefficients) - 1);
         $coefficient = $coefficients[$index];
 
+        $co2 = (int) $this->co2;
         $co2Pct = match (true) {
-            $this->co2 < 120 => 0.00,
-            $this->co2 < 160 => 0.0475,
-            $this->co2 < 200 => 0.0975,
-            default => 0.1475,
+            $co2 <= 120 => config('iedmt.tipos_co2.max_120'),
+            $co2 <= 159 => config('iedmt.tipos_co2.max_159'),
+            $co2 <= 199 => config('iedmt.tipos_co2.max_199'),
+            default => config('iedmt.tipos_co2.default'),
         };
 
         $taxBase = $this->boe_confirmed ? $this->new_price : $this->manual_tax_base;
