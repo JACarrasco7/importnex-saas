@@ -5,6 +5,19 @@ Todos los cambios notables en el skill `importacion-vehiculos` se documentarán 
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [2.4.1] - 2026-08-12 — Guía de uso para usuarios finales
+
+### 📚 docs/guias/
+- `README.md` — índice + diagrama de flujo del negocio (mermaid).
+- `01-primeros-pasos.md` — arranque, verificación sync, token budget.
+- `02-flujo-a-unidad.md` / `03-flujo-b-modelo.md` / `04-flujo-c-mercado.md`.
+- `05-informes.md` — leer informes + briefing PDF.
+- `06-cierre-venta.md` — registrar cierres (curl) + KPIs en `/kpis`.
+- `07-solucion-problemas.md` — FAQ y troubleshooting.
+- `ejemplos/` — casos reales Astra OPC + Tiguan (Flujo A), Golf GTI + scouting (B/C).
+
+---
+
 ## [2.4.0] - 2026-08-12 — Auditoría 3 (16 hallazgos, 100% resueltos)
 
 ### 🟠 Alto

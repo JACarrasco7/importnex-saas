@@ -407,7 +407,24 @@ py .claude/skills/importacion-vehiculos/scripts/verify_desktop_sync.py
 
 **Objetivo:** Documentación orientada al usuario de negocio (no técnico).
 
-**Estructura propuesta:**
+**✅ Implementado 2026-08-12:**
+
+```
+docs/guias/
+├── README.md                    ← Índice general (con diagrama de flujo del negocio)
+├── 01-primeros-pasos.md         ← Arranque + verificación sync + token budget
+├── 02-flujo-a-unidad.md         ← Guía evaluar un coche concreto
+├── 03-flujo-b-modelo.md         ← Guía investigar un modelo
+├── 04-flujo-c-mercado.md        ← Guía escanear mercado
+├── 05-informes.md               ← Cómo leer los informes + briefing PDF
+├── 06-cierre-venta.md           ← Registrar venta y KPIs (curl + dashboard)
+├── 07-solucion-problemas.md     ← FAQ y troubleshooting
+└── ejemplos/
+    ├── ejemplo-flujo-a.md       ← Casos reales Astra OPC (comprar) + Tiguan (descartar)
+    └── ejemplo-flujo-b-c.md     ← Golf GTI (modelo) + scouting deportivos (mercado)
+```
+
+**Estructura original propuesta (mantenida en esta sección como referencia histórica):**
 
 ```
 docs/guias/
@@ -1283,7 +1300,7 @@ php artisan scribe:generate
 
 **Documentación:**
 
-- [ ] Guía de uso creada (§4.1)
+- [x] Guía de uso creada (§4.1) ✅ Implementado en docs/guias/
 - [ ] CHANGELOG.md actualizado con nueva versión
 - [ ] Auditoría actualizada con resultados
 
@@ -1722,4 +1739,4 @@ Duration: 1.57s
 *Documento actualizado el 2026-08-12 tras implementar los 15 items accionables del audit + segunda auditoría (17 hallazgos) + tercera auditoría (16 hallazgos).*
 *Segunda auditoría: 17 de 17 resueltos (100%).*
 *Tercera auditoría: 16 de 16 resueltos (100%).*
-*Pendiente futuro: solo roadmap (guía de uso, migración en producción, pruebas con datos reales, KPIs con datos reales).*
+*Pendiente futuro: solo roadmap (migración en producción, pruebas con datos reales, KPIs con datos reales).*
