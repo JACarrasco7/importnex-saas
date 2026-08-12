@@ -53,7 +53,7 @@ const onDrop = (column) => {
                             {{ t('cars.list_view') }}
                         </Link>
                         <span class="rounded-lg bg-white px-4 py-2 text-sm text-gray-700 shadow-sm ring-1 ring-gray-200">
-                            <strong>{{ totalCars }}</strong> cars · <strong>{{ currency(totalValue) }}</strong>
+                            <strong>{{ totalCars }}</strong> {{ t('cars.cars') }} · <strong>{{ currency(totalValue) }}</strong>
                         </span>
                     </template>
                 </PageHeader>
@@ -65,7 +65,7 @@ const onDrop = (column) => {
                         @drop="onDrop(column)"
                         :class="['shrink-0 w-72 rounded-2xl p-3 transition', dragOverColumn === column.key ? 'bg-estoril-100 ring-2 ring-estoril-400' : 'bg-gray-100']">
                         <div class="flex items-center justify-between px-2 py-2">
-                            <h3 class="text-sm font-semibold text-gray-700">{{ column.label }}</h3>
+                            <h3 class="text-sm font-semibold text-gray-700">{{ t('cars.status.' + column.key) }}</h3>
                             <span class="rounded-full bg-gray-300 px-2 py-0.5 text-xs font-semibold text-gray-700">
                                 {{ column.cars.length }}
                             </span>
@@ -91,7 +91,7 @@ const onDrop = (column) => {
                                 </div>
                             </div>
                             <div v-if="!column.cars.length" class="rounded-lg border-2 border-dashed border-gray-300 p-4 text-center text-xs text-gray-400">
-                                Drop cars here
+                                {{ t('cars.drop_cars_here') }}
                             </div>
                         </div>
                     </div>

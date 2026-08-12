@@ -89,7 +89,6 @@ const DICT = [
     [/^VIN$/g, 'VIN'],
     [/^vip, dealer, transport$/g, 'vip, dealer, transport'],
     [/^General$/g, 'General'],
-    [/^Briefing PDF$/g, 'Briefing PDF'],
     [/^starter$/g, 'starter'],
     [/^No$/g, 'No'],
     [/^$5\/mes$/g, '$5/month'],

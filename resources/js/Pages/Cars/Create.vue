@@ -10,6 +10,8 @@ import { useTranslations } from '@/Composables/useTranslations';
 
 const { t } = useTranslations();
 
+const statusOptions = ['Located', 'Valuing', 'Offered', 'Reserved', 'Purchased', 'In_transit', 'Processing', 'Pending review', 'Verifying', 'Delivered', 'Discarded'];
+
 const props = defineProps({
     clients: Array,
 });
@@ -309,16 +311,12 @@ const scrapeFromUrl = async () => {
                             </FormField>
                             <FormField :label="t('cars.fuel')" required>
                                 <select v-model="form.fuel" required :class="inputClass">
-                                    <option>Diesel</option>
-                                    <option>Gasoline</option>
-                                    <option>Hybrid</option>
-                                    <option>{{ t('cars.electric') }}</option>
+                                    <option v-for="f in ['diesel','gasoline','hybrid','electric']" :key="f" :value="f">{{ t('cars.fuel_options.' + f) }}</option>
                                 </select>
                             </FormField>
                             <FormField :label="t('cars.transmission')" required>
                                 <select v-model="form.transmission" required :class="inputClass">
-                                    <option>Manual</option>
-                                    <option>Automatic</option>
+                                    <option v-for="tx in ['manual','automatic']" :key="tx" :value="tx">{{ t('cars.transmission_options.' + tx) }}</option>
                                 </select>
                             </FormField>
                             <FormField :label="t('cars.field_owners')">
@@ -374,10 +372,7 @@ const scrapeFromUrl = async () => {
                             </FormField>
                             <FormField :label="t('cars.status')">
                                 <select v-model="form.status" :class="inputClass">
-                                    <option>Located</option><option>Valuing</option><option>Offered</option>
-                                    <option>Reserved</option><option>Purchased</option><option>In_transit</option>
-                                    <option>Processing</option><option>Pending review</option><option>Verifying</option>
-                                    <option>Delivered</option><option>Discarded</option>
+                                    <option v-for="s in statusOptions" :key="s" :value="s">{{ t('cars.status.' + s) }}</option>
                                 </select>
                             </FormField>
                             <FormField :label="t('cars.traffic_light')">

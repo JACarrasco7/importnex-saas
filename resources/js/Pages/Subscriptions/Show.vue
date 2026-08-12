@@ -66,8 +66,8 @@ const { t } = useTranslations();
                                 <CheckIcon class="h-5 w-5 text-estoril-600" />
                             </div>
                             <div>
-                                <p class="text-sm font-semibold text-gray-900">All features</p>
-                                <p class="text-xs text-gray-500">Kanban, map, AI verification, finance & alerts</p>
+                                <p class="text-sm font-semibold text-gray-900">{{ t('subscription.all_features') }}</p>
+                                <p class="text-xs text-gray-500">{{ t('subscription.all_features_desc') }}</p>
                             </div>
                         </li>
                     </ul>

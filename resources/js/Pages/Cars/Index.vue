@@ -24,7 +24,7 @@ const currentTab = ref(props.filters?.status || 'all');
 const showDelete = ref(false);
 const carToDelete = ref(null);
 
-const { currency, statusVariant, trafficLightVariant } = useFormat();
+const { currency, statusLabel, statusVariant, trafficLightVariant } = useFormat();
 const { t } = useTranslations();
 
 const tabs = computed(() => {
@@ -38,12 +38,12 @@ const tabs = computed(() => {
         { id: 'all', label: t('common.all'), count: total },
         ...ordered.map(status => ({
             id: status,
-            label: status,
+            label: t(`cars.status.${status}`),
             count: carsData.filter(c => c.status === status).length || 0
         })),
         ...remaining.map(status => ({
             id: status,
-            label: status,
+            label: t(`cars.status.${status}`),
             count: carsData.filter(c => c.status === status).length || 0
         }))
     ];
@@ -162,7 +162,7 @@ const confirmDelete = () => {
                             <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">{{ t('cars.traffic_light') }}</label>
                             <select v-model="lightFilter" class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-500 focus:ring-estoril-500">
                                 <option value="">{{ t('common.all') }}</option>
-                                <option v-for="light in lights" :key="light" :value="light">{{ light }}</option>
+                                <option v-for="light in lights" :key="light" :value="light">{{ t('cars.light.' + light) }}</option>
                             </select>
                         </div>
                         <div>
@@ -188,15 +188,15 @@ const confirmDelete = () => {
                         <div class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">{{ currency(stats.totalValue) }}</div>
                     </div>
                     <div class="rounded-xl bg-emerald-50 p-4 shadow-sm ring-1 ring-emerald-200 dark:bg-emerald-900/20 dark:ring-emerald-800">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">{{ t('cars.light_green') }}</div>
+                        <div class="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">{{ t('cars.light.green') }}</div>
                         <div class="mt-1 text-2xl font-bold text-emerald-600 dark:text-emerald-400">{{ stats.green }}</div>
                     </div>
                     <div class="rounded-xl bg-amber-50 p-4 shadow-sm ring-1 ring-amber-200 dark:bg-amber-900/20 dark:ring-amber-800">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-400">{{ t('cars.light_amber') }}</div>
+                        <div class="text-xs font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-400">{{ t('cars.light.amber') }}</div>
                         <div class="mt-1 text-2xl font-bold text-amber-600 dark:text-amber-400">{{ stats.amber }}</div>
                     </div>
                     <div class="rounded-xl bg-red-50 p-4 shadow-sm ring-1 ring-red-200 dark:bg-red-900/20 dark:ring-red-800">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-red-700 dark:text-red-400">{{ t('cars.light_red') }}</div>
+                        <div class="text-xs font-semibold uppercase tracking-wider text-red-700 dark:text-red-400">{{ t('cars.light.red') }}</div>
                         <div class="mt-1 text-2xl font-bold text-red-600 dark:text-red-400">{{ stats.red }}</div>
                     </div>
                 </div>

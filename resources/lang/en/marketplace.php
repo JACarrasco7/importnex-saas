@@ -39,7 +39,7 @@ return [
     'section_contact_desc' => 'Tell us what you are looking for. We scan the German market weekly and send you options that fit you.',
     'cta_whatsapp' => 'WhatsApp: 675 70 14 39',
     'cta_call' => 'Call now',
-    'cta_email' => 'Email',
+    'cta_email' => 'Email us',
     'footer_copy' => 'Importnex © :year. Vehicles investigated, valued and ready to deliver.',
     'brand' => 'Verified Vehicles by Importnex',
     'trust_verified' => 'Verified cars',

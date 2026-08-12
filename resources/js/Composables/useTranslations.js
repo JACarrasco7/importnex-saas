@@ -3,7 +3,7 @@ import { usePage } from '@inertiajs/vue3';
 import es from '@/i18n/es.js';
 import en from '@/i18n/en.js';
 
-const messages = {
+const localeModules = {
     en,
     es,
 };
@@ -48,21 +48,25 @@ export function useTranslations() {
     const isEnglish = computed(() => locale.value === 'en');
     const isSpanish = computed(() => locale.value === 'es');
 
-    async function init() {
+    function init() {
         const loc = locale.value;
-        const result = await loadLocale(loc);
+        const fromServer = page.props.translations;
 
-        // Convierte dict plano (backend) o módulo anidado (frontend) en árbol
+        let result;
+        if (fromServer && Object.keys(fromServer).length > 0) {
+            result = fromServer;
+        } else {
+            const mod = localeModules[loc] || localeModules.en;
+            result = mod;
+        }
+
         messages.value = normalize(result, loc);
         ready.value = true;
     }
 
-    if (page.props.translations && Object.keys(page.props.translations).length > 0) {
-        messages.value = normalize(page.props.translations, locale.value);
-        ready.value = true;
-    } else {
-        init();
-    }
+    // Inicialización síncrona: el módulo JS se importa en el top-level del archivo,
+    // por lo que `messages[locale]` está disponible desde el primer tick.
+    init();
 
     watch(locale, () => init());
 
@@ -72,7 +76,7 @@ export function useTranslations() {
      * Si la clave no existe y fallback es un string, lo devuelve.
      */
     function t(key, replacements = {}, fallback = null) {
-        if (!ready.value && !messages.value) {
+        if (!ready.value) {
             return typeof fallback === 'string' ? fallback : key;
         }
 

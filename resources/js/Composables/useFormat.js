@@ -89,9 +89,17 @@ export function useFormat() {
         statusLabel: (t, status) => {
             if (!status) return '—';
             if (!t) return status;
-            const key = `cars.status.${status.toLowerCase().replace(/\s+/g, '_')}`;
+            // Normalizar a formato canónico (Located, In_transit, Pending review)
+            const canonical = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+            const key = `cars.status.${canonical}`;
             const label = t(key);
-            if (label === key) return status;
+            if (label === key) {
+                // Fallback: probar con clave original
+                const keyOrig = `cars.status.${status}`;
+                const labelOrig = t(keyOrig);
+                if (labelOrig !== keyOrig) return labelOrig;
+                return status;
+            }
             return label;
         },
         number: (value, decimals = 0) => {

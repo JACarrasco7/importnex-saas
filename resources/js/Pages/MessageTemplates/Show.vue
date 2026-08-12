@@ -7,6 +7,9 @@ import PageHeader from '@/Components/PageHeader.vue';
 import Badge from '@/Components/Badge.vue';
 import FormSection from '@/Components/FormSection.vue';
 import Toast from '@/Components/Toast.vue';
+import { useTranslations } from '@/Composables/useTranslations';
+
+const { t } = useTranslations();
 
 const props = defineProps({
     template: Object,

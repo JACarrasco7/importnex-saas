@@ -151,26 +151,6 @@ const formatFeature = (feature, plan) => {
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200">
-                            <!-- Límites -->
-                            <tr>
-                                <td class="py-4 px-6 text-sm text-gray-700 font-medium">Vehículos</td>
-                                <td v-for="key in planKeys" :key="key" class="py-4 px-6 text-center text-sm text-gray-900">
-                                    {{ plans[key].cars_limit.toLocaleString() }}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="py-4 px-6 text-sm text-gray-700 font-medium">Clientes</td>
-                                <td v-for="key in planKeys" :key="key" class="py-4 px-6 text-center text-sm text-gray-900">
-                                    {{ plans[key].clients_limit.toLocaleString() }}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="py-4 px-6 text-sm text-gray-700 font-medium">Contactos</td>
-                                <td v-for="key in planKeys" :key="key" class="py-4 px-6 text-center text-sm text-gray-900">
-                                    {{ plans[key].contacts_limit.toLocaleString() }}
-                                </td>
-                            </tr>
-
                             <!-- Features -->
                             <tr v-for="feature in features" :key="feature.key">
                                 <td class="py-4 px-6 text-sm text-gray-700 font-medium">

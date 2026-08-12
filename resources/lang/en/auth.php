@@ -4,7 +4,7 @@ return [
     'password' => [
         'reset' => 'Reset Password',
         'sent' => 'We have sent your password reset link to your email.',
-        'reset' => 'Your password has been reset.',
+        'throttled' => 'Please wait before retrying.',
     ],
     'reset_password' => 'Reset Password',
     'send_reset_link' => 'Send Password Reset Link',

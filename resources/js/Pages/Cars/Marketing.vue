@@ -225,9 +225,9 @@ function renderPreview() {
                             <ArrowLeftIcon class="h-4 w-4" />
                             {{ t('common.back') }}
                         </Link>
-                        <a :href="route('cars.marketing.briefing', car.id)" target="_blank" class="inline-flex items-center gap-2 rounded-lg bg-estoril-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-600">
+                        <a v-if="route('cars.dossier', { car: car.id })" :href="route('cars.dossier', { car: car.id })" target="_blank" class="inline-flex items-center gap-2 rounded-lg bg-estoril-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-600">
                             <DocumentIcon class="h-4 w-4" />
-                            {{ t('cars.briefing_pdf') }}
+                            {{ t('cars.dossier_pdf') }}
                         </a>
                     </template>
                 </PageHeader>

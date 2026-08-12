@@ -4,7 +4,7 @@ return [
     'password' => [
         'reset' => 'Restablecer contraseña',
         'sent' => 'Hemos enviado el enlace de restablecimiento de contraseña a tu correo electrónico.',
-        'reset' => 'Tu contraseña ha sido restablecida.',
+        'throttled' => 'Por favor espera antes de reintentar.',
     ],
     'reset_password' => 'Restablecer contraseña',
     'send_reset_link' => 'Enviar enlace para restablecer contraseña',

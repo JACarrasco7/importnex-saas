@@ -34,7 +34,7 @@ const props = defineProps({
     organization: Object,
 });
 
-const { currency, statusVariant, trafficLightVariant } = useFormat();
+const { currency, statusLabel, statusVariant, trafficLightVariant } = useFormat();
 
 const lightKeys = ['green', 'amber', 'red', 'neutral'];
 const totalTraffic = (props.trafficLights?.green || 0) + (props.trafficLights?.amber || 0) + (props.trafficLights?.red || 0) + (props.trafficLights?.neutral || 0);
