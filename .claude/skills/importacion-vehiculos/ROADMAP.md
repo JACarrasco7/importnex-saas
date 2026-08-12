@@ -13,7 +13,7 @@
 - [x] KPIs agregados: `/api/kpis` (histórico mensual) + dashboard web `/kpis`
 - [x] Filtros de marca/plataforma en dashboard KPIs (brand denormalizado en cierres)
 - [x] Backfill command: `skill:backfill-investigation-cache` (dry-run por defecto)
-- [x] Briefing PDF: `/api/cars/{car}/briefing-pdf`
+- [x] Dossier cliente: `/cars/{car}/dossier` (sustituye al briefing PDF deprecado)
 - [x] IEDMT en `config/iedmt.php` (single source of truth, Anexo IV corregido)
 - [x] `KpiCalculator` service (lógica KPIs unificada web/API)
 - [x] Test suite: 130+ tests, 500+ aserciones
@@ -81,7 +81,7 @@
 
 ## Lado Laravel (usuario)
 
-- [ ] Plantillas Blade para ficha publicitaria y briefing
+- [x] Plantillas Blade para ficha publicitaria, informe interno y dossier cliente
 - [ ] Los dos esqueletos en `empaquetar.py`
 - [ ] Campos `iva_deducible` y `ahorro_si_alta`
 - [ ] Validador regla 6/6.000

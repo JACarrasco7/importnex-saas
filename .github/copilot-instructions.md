@@ -18,7 +18,11 @@
 ## Dominio del proyecto
 
 **ImportnexCore** es una plataforma multi-tenant para **gestión de vehículos importados**.
-Organización se llama **JJ Import Motors** (importadora de vehículos).
+Organización se llama **JJ Import Motors** — servicio de búsqueda e importación de coches (desde Alemania y dentro de España).
+
+> ⚠️ **Modelo de negocio:** JJ Import Motors **NO compra** los coches ni mantiene stock. Solo **oferta el servicio** de búsqueda, importación y gestión, cobrando honorarios fijos. El cliente es quien compra el coche.
+>
+> 🏗️ **Rol de ImportnexCore (12-ago-2026):** es el **repositorio único y fuente de verdad** de los informes investigados por Claude. La investigación se hace en Claude (Desktop); el paquete (JSON + esqueletos + fotos) se sube aquí y Laravel genera y muestra los PDFs, dossier, folleto y galería. Todas las actualizaciones, iteraciones y nuevas versiones las gestiona Laravel. Claude no consulta lo subido: cada nuevo encargo se lanza como uno nuevo desde Claude.
 
 ### Conceptos de negocio (NO confundir)
 

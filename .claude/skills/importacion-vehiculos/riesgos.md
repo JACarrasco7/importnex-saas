@@ -20,6 +20,26 @@
 
 ---
 
+## 🚗 Motores gasolina 2016+ (compactos 5 puertas · bajo presupuesto)
+
+> **Añadido 12-ago-2026** (caso real: encargo 9.000 €, 2016+, +120cv, gasolina). Fiabilidad de motores habituales del segmento económico.
+
+| Motor | Modelos | Riesgo | Qué pedir |
+|---|---|---|---|
+| **1.2 PureTech 130** | Peugeot 308, Citroën C4 | Cadena en baño de aceite, elongación prematura (2014-2019) | Historial de mantenimiento |
+| **1.6 THP 165** | Peugeot 308 T9 | Cadena distribución, cambiar cada 80.000 km | Historial de cambio de cadena |
+| **1.0 EcoBoost 125/140** | Ford Focus Mk3/Mk4 | Correa de distribución (no cadena) + bomba de agua interna (pre-2018) | Revisar correa |
+| **1.5 EcoBoost 150** | Ford Focus | Mejor que el 1.0, sin riesgo grave | — |
+| **1.4 TSI (EA211) 125/150** | Seat León, VW Golf, Skoda Octavia | Sin riesgo de cadena grave (EA211 no es EA111) | — |
+| **1.5 TSI EVO 130** | León/Golf 2018+ | Algún caso de consumo de aceite | Nivel de aceite en revisión |
+| **1.3 TCe 130/140** | Renault Mégane IV | Correa en baño de aceite en versiones nuevas; 1.2 TCe (2016-2019) más simple | Ver cuál lleva cada año |
+| **1.4 T-GDI 140** | Hyundai i30, Kia Ceed | Sin problema documentado | — |
+| **1.0 VTEC Turbo 129** | Honda Civic Mk10 | Consumo de aceite en algunas unidades | Nivel en revisión |
+| **Skyactiv-G 122** | Mazda3 | Atmosférico, sin turbo, muy fiable | — |
+| **1.8 Hybrid 122** | Toyota Corolla/Auris | Fiable; es híbrido (cuenta como gasolina a efectos DGT) | — |
+
+---
+
 ## 🔍 Cómo verificar riesgos
 
 **Fuentes fiables:**

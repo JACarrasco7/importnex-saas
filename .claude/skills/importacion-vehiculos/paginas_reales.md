@@ -1,0 +1,296 @@
+# Páginas reales — estructura capturada (2026-08-12)
+
+> Estructura REAL de los 7 portales, capturada navegando el 12-ago-2026.
+> Para que Claude vaya directo a los datos sin explorar. Formato: qué ve en cada
+> captura y dónde exactamente. URLs verificadas funcionando.
+
+---
+
+## 🇩🇪 mobile.de — rey alemán ✅
+
+### URL verificada
+```
+https://www.mobile.de/fahrzeuge/search.html?dam=false&isSearchRequest=true&ms=<make>;<model>;<grp>;<desc>&s=Car&vc=Car&lang=de
+```
+
+### Al abrir (SIEMPRE)
+- **Modal cookies:** botón "Einverstanden" (aceptar todo) / "Ablehnen" (rechazar). Clic cualquiera y seguir.
+
+### Cabecera del listado
+- **Breadcrumb:** "1.519.613 Angebote" = total global (NO usar).
+- **`<h1>`:** "**X Angebote**" = total de la búsqueda (este SÍ).
+- **Filtros (cabecera, no columna):**
+  - Zahlungsart: **Kaufen** (dejar) / Leasen
+  - **Preis** (combobox von/bis, presets 500€…90.000€)
+  - **Erstzulassung** (combobox von/bis por año)
+  - **Kilometerstand** (combobox von/bis, 5.000…200.000 km)
+  - Botón "**N Angebote**" aplica y muestra recuento en vivo
+  - Chips expandibles: Standort · Kraftstoffart · Leistung · Fahrzeugtyp · Getriebe · E-Autos
+  - Secciones: Außenfarbe (checkboxes colores) · Qualitätssiegel · Klimatisierung · Ausstattung (Bluetooth/Bordcomputer/Navi/Schiebedach/HUD/Sitzheizung…) · **Anbieter** (Händler/Privatanbieter/Firmenfahrzeuge) · Händlerbewertung
+- **Filtro activo por defecto:** "Beschädigte Fahrzeuge: Nicht anzeigen" (oculta dañados). Para ver siniestros: botón "Entfernen".
+- **Chip "Leistung" (kW) — CRÍTICO para doble pasada:** expande el chip `Leistung` para filtrar por potencia (combobox von/bis en kW). Este campo es estructurado (del permiso de circulación) y NO falla como la variante de texto. Uso: búsqueda 2 por kW para encontrar topes de gama mal etiquetados (OPC/GTI/R/M...) → ver `playbook_filtrado.md` §Doble pasada.
+
+### Orden "Sortieren nach" (combobox)
+- **Preis (niedrigster zuerst)** ← el que usar para base
+- Preis (höchster zuerst) · Kilometerstand · Erstzulassung · Inserate (älteste/neueste zuerst = días publicado)
+
+### Tarjeta de anuncio
+```
+[NEU / Gesponsert / Top]              ← etiquetas (Gesponsert NO contar)
+TÍTULO: "Volkswagen Golf 7 GTI Clubsport..."
+PRECIO: "24.900 €" + sello: "Sehr guter Preis" / "Guter Preis" / "Hoher Preis"
+   · "€¹" = bruto (IVA incl) · "zzgl. MwSt." = neto (IVA aparte)
+   · "ggf. zzgl. Lieferkosten", "Lieferung möglich"
+DATOS: "[Unfallfrei • ] EZ MM/AAAA • km • kW (PS) • Combustible"
+   Ej: "EZ 04/2016 • 84.900 km • 265 kW (360 PS) • Benzin"
+TAGS (imagen+texto): "380PS Software", "2. Hand", "LED,RKam,PANO,Virtual", "TÜV&INSP. NEU+GARANTIE"
+VENDEDOR:
+   · Händler: nombre + "4.9 Sterne (96)" + "31275 Lehrte"
+   · Privatanbieter: "47805 Krefeld, Privatanbieter" (sin estrellas)
+BOTONES: Kontakt / Parken
+ENLACE ficha: /fahrzeuge/details.html?id=<id>
+```
+
+### Ficha (details.html?id=)
+Secciones a leer: **"Fahrzeugdaten"** (km, Erstzulassung, Leistung, Getriebe, Farbe, Schadstoffklasse, Anzahl Fahrzeughalter, **CO₂** si existe) · **"Ausstattung"** (equipamiento) · precio (bruto/neto) · advertencias "Unfallschaden", "Nicht unfallfrei", "NUR AN AUTOHÄNDLER".
+
+**Truco:** la URL con `ms=` NO filtra siempre (a veces muestra total). Más fiable usar el **buscador superior** o los filtros de cabecera.
+
+---
+
+## 🇩🇪 AutoScout24.de — verificación cruzada ✅
+
+### URL verificada
+```
+https://www.autoscout24.de/lst/volkswagen/golf/va_gti?fregfrom=<año>&atype=C
+```
+⚠️ **El slug `golf-gti` directo NO existe.** Para versiones: `/lst/<marca>/<modelo>/va_<version>`. Para BMW en .de: `1er 2er 3er 4er` (no `serie-1`).
+
+### Cabecera
+- **`<h1>`:** "**X Angebote für Volkswagen Golf Gti**" = total búsqueda.
+
+### Tarjeta de anuncio
+```
+TÍTULO: "Volkswagen Golf GTI | TCR DSG ACC Pano RearView..."
+[Merken]              ← favorito
+<nº días>             ← ¡días publicado visible! (28, 24, 9...)
+€ <precio>            ← "€ 27.840"
+Sello: "Sehr guter Preis" / "Fairer Preis" / "Ohne Preisbewertung"
+"Ab 397 € mtl. finanzieren"  ← financiación opcional
+"12/2019"             ← EZ MM/AAAA
+"38.359 km"
+"Benzin"
+"213 kW (290 PS)"
+Equipamiento (lista): Sitzheizung, Schiebedach, Panoramadach, Sportsitze...
+Vendedor: "Autohaus Steinböhmer GmbH" | "DE-33613 Bielefeld"
+```
+
+### Orden (combobox)
+Beste Ergebnisse · **Preis aufsteigend** (asc) · Preis absteigend · Neueste zuerst · Kilometerstand · Leistung · Erstzulassung.
+
+**Regla skill:** SOLO contar y validar hueco. NUNCA fijar precio de referencia.
+
+---
+
+## 🇩🇪 AutoUncle — joya días publicado ✅
+
+### URL verificada
+```
+https://www.autouncle.es/es/coches-segunda-mano/<Marca>/<Modelo>
+```
+⚠️ La URL con modelo incorrecto redirige (ej: "Golf GTI" cayó a "Golf I"). Si el H1 no cuadra, re-navega con el modelo exacto.
+
+### Cabecera
+- **`<h1>`:** "**<marca> <modelo>: resumen de N coches de ocasión en venta**" = total.
+- "**Mostrando 1 - N de N resultados**" bajo el listado.
+
+### Tarjeta de anuncio (datos completos)
+```
+[Usado (año)] <Marca> <Modelo> <CV>
+GLD <año>            ← antiguo timer (categoria)
+<año>
+<km> km
+<cilindrada>L <combustible>
+<carrocería>         ← Utilitario/Berlina/SUV...
+<cambio>             ← Manual/Automático
+<CV> CV (<kW> kW)
+[Detalles]
+€<precio>
+"Cambio de precio: X%"   ← variación % visible
+"Días en venta: N"        ← ¡ROTACIÓN visible! (factor 1 vendibilidad)
+Portal origen: "Catawiki"/"mobile.de"/"AS24"
+"<CP> <ciudad>"
+```
+
+### Orden (combobox, 15 opciones)
+Ofertas · **Precio nominal - Más barato** · Precio - Más alto · **Bajada de precio reciente** · **En venta - Más reciente/antiguo** (= días publicado) · Año · Kilometraje · Autonomía (EV).
+
+**Joyas únicas:** "Días en venta" (rotación directa), "Cambio de precio" (negociabilidad). Úsalo como **fuente primaria para rotación**.
+
+---
+
+## 🇩🇪 kleinanzeigen.de — chollos particulares ✅
+
+### URL verificada
+```
+https://www.kleinanzeigen.de/s-<marca>-<modelo>/k0
+```
+
+### Al abrir
+- **Modal cookies:** "Alle akzeptieren" / "Datenschutzeinstellungen". Clic "Alle akzeptieren".
+
+### Cabecera
+- **`<h1>`:** "**1 - 25 von N Ergebnissen für "<búsqueda>" in Deutschland**" = total.
+- Subfiltro: "Angebote (4.138)" vs "Gesuche (43)" → dejar en Angebote.
+
+### Tarjeta de anuncio
+```
+<edad días>           ← días publicado (al inicio)
+<CP> <ciudad>
+TÍTULO: "VW Golf 7 GTI Clubsport | Schalensitze..."
+DESCRIPCIÓN (preview)
+<precio actual> € | <precio anterior> €    ← ¡BAJADA DE PRECIO visible!
+<km> km | EZ MM/AAAA
+"VB"                  ← Verhandlungsbasis = negociable
+"Heute, 16:30"        ← fecha si reciente
+```
+
+### Orden (selector)
+**Neueste** · **Niedrigster Preis** · Höchster Preis.
+
+**Joyas:** precio actual vs anterior (bajada = margen negociable) + edad anuncio en días. Chollos de particulares (sin IVA recuperable).
+
+---
+
+## 🇪🇸 Coches.net — comparable español ✅
+
+### URL verificada (la antigua redirige a NOTICIAS)
+```
+✅ https://www.coches.net/segunda-mano/coches/<marca>-<modelo>
+❌ /<marca>-<modelo>-segunda-mano/ → REDIRIGE a /noticias/t/...
+```
+
+### Al abrir
+- **`<h1>`:** "259.015 Coches de segunda mano y ocasión" = total global (NO usar).
+- **Para recuento búsqueda:** filtrar y mirar contador tras aplicar.
+- **Errores React en consola:** ruido normal, la UI funciona.
+
+### Filtros (accesos rápidos)
+- **Combustible:** Diésel · Eléctrico · Gas · GLP · Gas natural · Gasolina · Híbrido · Híbrido enchufable.
+- **Carrocería:** 4x4 · Berlina · Cabrio · Coupé · Familiar · Monovolumen · Pick Up.
+- Atajos: particulares · 7 plazas · automáticos · hasta 1.000/2.000/.../10.000 € · colores · regiones.
+
+### Tarjeta de anuncio
+```
+TÍTULO: "AUDI Q2 S line 30 TDI"
+ETIQUETA PRECIO: "Buen precio" / "Precio justo"   ← priceRankIndicator VISIBLE
+PRECIO: "21.990 €"
+   · Financiado: "Financiado: 18.990 € · 251,90 €/mes*" → usar el CONTADO
+EXTRAS: "Garantía 1 año" · "IVA incluido" · "Reservable"
+DATOS: "Diesel | 2021 | 90.507 km | 116 cv | Madrid"
+VENDEDOR: "Profesional 4.2" (valoración) · "1/17" (foto/total) · botón "Comparar"
+```
+
+**Clave:** "Buen precio" = `4`, "Precio justo" = `3` (priceRankIndicator). Úsalo como señal. CV directo (no kW).
+**Doble pasada:** Coches.net muestra CV en la tarjeta (`116 cv`). Para topes de gama mal etiquetados, usar el filtro **"Potencia"** (en CV) además de la búsqueda por texto → ver `playbook_filtrado.md` §Doble pasada.
+
+---
+
+## 🇪🇸 Wallapop — chollos + scroll ✅
+
+### URL verificada
+```
+https://es.wallapop.com/search?category_id=100&keywords=<marca>%20<modelo>&order_by=<orden>
+```
+⚠️ `/app/search` redirige a `/search`. Órdenes URL: `most_relevance` · `price_asc` · `price_desc` · `newest` · `closest`.
+
+### Tarjeta (muy limpia)
+```
+TÍTULO: "Volkswagen Golf GTI Performance 2.0 TSI 230CV BMT"
+<año> · <km> km · <combustible> · <cv> cv
+€<precio>
+[Destacado]           ← patrocinado (no contar como señal de precio)
+```
+
+### Filtros
+Botón "Filtros" abre modal. Acepta cookies al cargar.
+
+**Patrón:** scroll infinito (`Page Down` hasta ~20-25 anuncios). Sin contador global visible. Anuncios incompletos → `man`.
+
+---
+
+## 🇪🇸 Milanuncios — contado/financiado ✅
+
+### URL verificada
+```
+https://www.milanuncios.com/coches-de-segunda-mano/?s=<marca>+<modelo>
+```
+
+### Cabecera
+- Contador visible: "**8.991 anuncios**" + "Ordenado por relevancia".
+
+### Tarjeta de anuncio
+```
+"Precio al contado (IVA Incluido)"       ← contado visible
+€<precio contado> | (opcional cuota)
+€<precio> | <MARCA - MODELO> | <km> kms | <año>
+```
+
+### Filtros
+Barra: Coches · Toda España · Precio · Todas las marcas. Botón "Filtros" abre modal.
+
+**Clave:** los financiados inflan el precio de catálogo → **usar siempre el contado**.
+
+---
+
+## 🏁 km77 — PVP y CO₂ ⚠️ INESTABLE
+
+### URL (cuando responde)
+```
+https://www.km77.com/coches/<marca>/<modelo>/<gama>/<version>/datos-tecnicos
+```
+
+### Estado 12-ago-2026
+- Devolvió **503 Backend fetch failed** y **504 Gateway timeout** (Varnish/Cloudflare). Servicio intermitente.
+
+### Si responde, leer
+- **PVP** (precio oficial)
+- **CO₂ (g/km)** → entrada IEDMT
+- **Consumo** (l/100 km o kWh/100 km)
+- **Etiqueta DGT** (CERO / ECO / C / B)
+- Tipo IEDMT (híbrido enchufable / eléctrico / gasolina)
+
+### Fallback si caído
+1. Reintentar 1-2 veces con pausa.
+2. **BOE Orden HAC/1501/2025** para CO₂ y tipo IEDMT oficial.
+3. **Estimación declarada:** marcar `co2_confirmado: false` y decirlo (anti-patrón A3).
+
+**NUNCA:** usar CO₂ de "otro modelo similar" o PVP de cabeza.
+
+---
+
+## 🎯 Mapa rápido de JOYAS por fuente
+
+| Joya | Fuente | Dónde |
+|---|---|---|
+| **Días publicado** | AutoUncle · AutoScout24 · kleinanzeigen | Tarjeta (número inicial / "Días en venta") |
+| **Cambio/bajada de precio** | AutoUncle (%) · kleinanzeigen (€ anterior) | Tarjeta |
+| **Etiqueta calidad precio** | mobile.de · AutoScout24 · Coches.net | "Sehr guter/Guter/Hoher Preis", "Buen precio/Precio justo" |
+| **Rotación histórica** | AutoUncle | "Días en venta" → mejor que `publicationDate` Coches.net |
+| **IVA (bruto/neto)** | mobile.de · Coches.net | "zzgl. MwSt." / "IVA incluido" / "Financiado vs contado" |
+| **Contado vs financiado** | Milanuncios · Coches.net | "Precio al contado" / "Financiado: X" |
+
+## 🚦 Orden de ataque por flujo
+
+**Flujo A (UNIDAD) y B (MODELO), Fase 1 — las 3 obligatorias:**
+1. **mobile.de** (buscador + filtro Preis/Kilometer) → base DE.
+2. **Coches.net** (`/segunda-mano/coches/<slug>`) → base ES + priceRankIndicator.
+3. **AutoUncle** → días publicado + bajada de precio (rotación/negociabilidad).
+
+**Fase 2 — las 4 restantes:**
+4. **AutoScout24.de** (`/lst/.../va_<version>`) → validar hueco DE (no fijar precio).
+5. **Wallapop** (`/search?category_id=100&keywords=...`) → chollos ES.
+6. **Milanuncios** (`?s=<modelo>`) → contado.
+7. **kleinanzeigen** (`/s-<slug>/k0`) → chollos particulares (precio anterior).
+
+**Flujo C (MERCADO):** solo las 3 de Fase 1 por modelo.

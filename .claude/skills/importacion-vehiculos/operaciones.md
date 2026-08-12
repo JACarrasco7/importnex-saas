@@ -5,6 +5,32 @@
 
 ---
 
+## 🏗️ DIVISIÓN DE TRABAJO DEFINITIVA (12-ago-2026)
+
+> **Investigación → Claude (Desktop). Almacenamiento y gestión → Laravel (importnexcore).**
+
+```
+1. 🔍 INVESTIGACIÓN → SOLO en Claude (Desktop). Navegación real, filtros, 7 fuentes.
+   └─ genera: informe MODELO / UNIDAD + dossier + esqueletos .txt [MARCADOR] + JSON
+
+2. 📦 SUBIR AL SISTEMA → el paquete ZIP se sube a Laravel (endpoint /api/import-valuation).
+   └─ Laravel (importnexcore) = REPOSITORIO ÚNICO y FUENTE DE VERDAD de:
+       ✓ informes (PDF por Blade+Browsershot) · ✓ imágenes/fotos · ✓ JSON · ✓ dossier · ✓ folleto
+
+3. 📊 VER / MOSTRAR / GESTIONAR / ACTUALIZAR → TODO desde el sistema Laravel.
+   └─ El sistema se encarga de las actualizaciones, iteraciones, nuevas versiones, etc.
+   └─ Claude NO consulta lo subido. Cuando el usuario quiere re-evaluar,
+       lanza un NUEVO encargo desde Claude.
+```
+
+**Reglas duras:**
+- La **investigación** (navegación/filtros) se hace en Claude Desktop — NO en VS Code (fricción con filtros, ver `memoria/retrospectiva.md`).
+- El **repositorio de informes/PDF/imágenes/JSON es Laravel**. Claude genera el paquete y lo SUBE; no lo mantiene local.
+- Para **ver un informe/PDF/fotos** → consultar el sistema Laravel (nunca regenerar desde cero si ya está subido).
+- Claude NO consulta Laravel para "revisar" o "iterar". Cada entrega al sistema es el final del ciclo para Claude.
+
+---
+
 ## ✅ Verificación de sincronización Desktop (ARRANQUE)
 
 > **Ejecutar SIEMPRE al inicio de cada sesión de investigación.** Detecta si faltan scripts críticos en `Desktop\JJImportMotors\laravel\` antes de que Claude invoque uno y falle a mitad de la sesión.
@@ -368,10 +394,15 @@ Ver `references/cell_map.md` para referencia rápida de dónde vive cada dato.
 
 1. Dices "busca Golf GTI para 25k".
 2. Claude detecta modelo+presupuesto → Flujo B. Fase 1 (3 fuentes).
-3. Si hueco ≥15% → Fase 2 (4 fuentes + top 5).
-4. Claude muestra informe MODELO + top 5 con enlaces.
-5. Si quieres profundizar en uno → convertir a Flujo A.
-6. Si quieres publicar → guardar snapshot en `informes/datos/<marca>/<modelo>/`.
+3. Si hueco ≥15% → **entregar INFORME TIPO MODELO (plantilla en SKILL.md) + top 5 con enlaces + checkpoint CP1**.
+4. Solo con OK del usuario → Fase 2 (4 fuentes restantes) para completar las 7.
+5. Claude muestra informe MODELO actualizado (7 fuentes) + top 5 con enlaces.
+6. Si quieres profundizar en uno → convertir a Flujo A.
+7. Si quieres publicar → guardar snapshot en `informes/datos/<marca>/<modelo>/`.
+
+> **Regla (12-ago-2026):** NUNCA saltar del resumen informal al "¿evalúo el candidato X?" sin entregar antes el INFORME TIPO MODELO + top 5 con enlaces + CP1. El usuario decide qué candidato profundizar (Flujo A), no Claude.
+
+> **⚡ MODO AUTOMÁTICO (12-ago-2026):** si el encargo llega COMPLETO (todos los críticos dados), la Fase 1 es automática y termina con el INFORME MODELO + top 5. El usuario elige candidato (NO Claude): "investiga el de X" → automático fotos + informe UNIDAD + dossier + ZIP. Si varios → comparativa antes. NO preguntar "¿qué candidato?", "¿continúo?", "¿descargo fotos?". Ver `SKILL.md` §MODO AUTOMÁTICO.
 
 #### Flujo C — Escanear mercado
 

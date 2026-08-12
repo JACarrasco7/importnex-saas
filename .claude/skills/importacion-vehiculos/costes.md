@@ -5,8 +5,11 @@
 
 ---
 
-## 💰 Fórmula del precio final
+## 💰 Fórmula del precio final (según ORIGEN)
 
+> **Regla (12-ago-2026):** el origen cambia TODOS los costes. Si el usuario no especifica origen, calcular **AMBAS variantes** y comparar dónde sale mejor (coste total puesto en Huelva).
+
+### 🇩🇪 Origen DE (importación)
 ```
 PRECIO FINAL = Precio anuncio DE
              + Transporte (900 € Huelva)
@@ -16,6 +19,35 @@ PRECIO FINAL = Precio anuncio DE
              + Honorarios (1.500-2.250 €)
 ```
 
+### 🇪🇸 Origen ES (compra nacional)
+```
+PRECIO FINAL = Precio anuncio ES
+             + Traslado local (0-300 €, según distancia)
+             + Gestoría / transferencia (~150 €)
+             + ITV en vigor (0 € si la tiene; ~50 € si toca)
+             + Honorarios (1.500-2.250 €)
+```
+> **SIN transporte DE, SIN ausfuhr, SIN ITV importación, SIN IEDMT.** El coche ES ya está matriculado y con impuestos pagados.
+
+### ⚖️ Comparativa DE vs ES (cuando origen no especificado)
+```
+Coste total DE = precio DE + 900 + 114 + 115 + IEDMT + honorarios
+Coste total ES = precio ES + traslado + gestoría + honorarios
+
+→ Elegir el menor. Si empatan (<300 €), preferir ES (menos riesgo: sin trámites de importación).
+```
+### 🎯 Techo de precio de búsqueda (desde presupuesto del cliente)
+
+> **Regla (12-ago-2026):** para FILTRAR (Flujo B/C), el techo del coche sale del presupuesto del cliente. **CONFIRMAR SIEMPRE por encargo si el presupuesto incluye o no los honorarios — no asumir.** Por defecto, "presupuesto total puesto en Huelva" = coche + logística + honorarios (todo incluido); se descuentan todos los costes conocidos del techo de búsqueda.
+
+```
+Techo coche DE = presupuesto − transporte 900 − ausfuhr 114 − ITV 115 − IEDMT − (honorarios SI los incluye)
+Techo coche ES = presupuesto − traslado − gestoría − (honorarios SI los incluye)
+
+Ej (encargo 9.000 €, 12-ago): el usuario pidió NO descontar los 1.500 € de honorarios → DE ≈ 7.700-7.900 € · ES ≈ 8.500-8.850 €
+```
+
+> ⚠️ **En el encargo del 12-ago (9.000 €) el usuario pidió no descontar honorarios del techo. Fue una decisión de ESE encargo, NO una regla general.** En cada encargo hay que confirmar si el presupuesto del cliente incluye o no los honorarios.
 **Peso del coste fijo según precio de compra:**
 
 | Compra | Peso coste fijo | Viabilidad |
@@ -59,6 +91,8 @@ IEDMT          = base imponible × tipo CO₂
 | ≥200 g/km | 14,75% |
 
 **Fuente del CO₂:** km77 (no estimar). Si no está en km77, consultar BOE o marcar `co2_confirmado: false` en el JSON.
+
+> **⚠️ Regla (12-ago-2026): NUNCA estimar el IEDMT "de oído".** Caso real: se estimó 700-1.200 € para un Astra OPC de 2012 y el cálculo real fue ~280 € (porque con >12 años el coeficiente cae a 10%). Siempre calcular con la tabla de coeficientes + CO₂ real, no con un rango mental. Si falta el CO₂, buscar en km77 antes de dar cifra.
 
 ---
 

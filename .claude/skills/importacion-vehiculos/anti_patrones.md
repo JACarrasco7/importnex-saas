@@ -15,6 +15,8 @@
 | **A4** | Veredicto sin cuartil bajo | "Si ahorro contra cuartil bajo es negativo, veredicto de margen es NO, aunque mediana diga SÍ." |
 | **A5** | Informe sin precio máximo | "Todo informe Flujo A incluye precio máximo de compra. Sin excepción." |
 | **A6** | Tabla sin enlaces | "Toda tabla de candidatos incluye columna ENLACE clickable. Si no hay URL, se construye desde el ID." |
+| **A7** | Cobertura incompleta | "Siempre se intentan las 7 fuentes. Con <7 NO hay cifras ni veredicto: informe PARCIAL + preguntar al usuario." |
+| **A8** | AutoScout24 como precio | "AutoScout24 NUNCA da precio de referencia (agrega feeds sin cribar). Solo para contar ofertas." |
 
 ---
 
@@ -39,22 +41,21 @@
 **Regla:** mobile.de es la fuente **PRINCIPAL** para Alemania. Si no aparece en la tabla de cobertura con estado OK o bloqueada+intentos documentados, NO se emite veredicto. Se marca informe como **PARCIAL** y se pide al usuario decidir.
 
 **Orden de reintento para mobile.de:**
-1. `www.mobile.de` (en lugar de `suchen.` o `m.`)
-2. `web_fetch` ficha individual (`/fahrzeuge/details.html?id=`)
-3. `web_fetch` listado
-4. Solo entonces: marcar bloqueada en la tabla con los 3 intentos
+1. `www.mobile.de` (en lugar de `suchen.` o `m.`) → recarga + espera
+2. Intentar de nuevo con 2-3 s de pausa (captcha transitorio)
+3. Solo entonces: marcar bloqueada en la tabla con los intentos documentados
 
 ---
 
 ### A3 — IEDMT sin fuente
 
-**Error típico:** Claudeestima CO₂ y PVP basándose en "modelos similares" o de cabeza.
+**Error típico:** Claude estima CO₂ y PVP basándose en "modelos similares" o de cabeza.
 
 **Regla:** El CO₂ y PVP deben venir de fuentes verificables:
 
 | Fuente | Cuándo |
 |---|---|
-| **km77.com** | SIEMPRE intentar primero. `web_fetch` sin navegador. |
+| **km77.com** | SIEMPRE intentar primero. Navegación normal (screenshot + lectura de la ficha de datos). |
 | **BOE** Orden HAC/1501/2025 | Si km77 no tiene esa versión exacta. |
 | **Estimación declarada** | Solo si 1 y 2 fallan. Marcar `co2_confirmado: false`. |
 
@@ -95,6 +96,22 @@ precio_max = comparable_objetivo × (1 − umbral)
 **Error típico:** Claude muestra una tabla de candidatos con precio/año/km pero sin URLs. El usuario tiene que buscar los anuncios manualmente.
 
 **Regla:** Toda tabla de candidatos lleva columna **ENLACE** clickable. Si la fuente no da URL directa, se construye desde el ID:
+
+---
+
+### A7 — Cobertura incompleta (12-ago-2026)
+
+**Error típico:** Se dan cifras y veredicto con solo 2-3 fuentes (ej. mobile.de + Coches.net) dejando Wallapop, Milanuncios, kleinanzeigen, AS24 sin mirar.
+
+**Regla:** Se intentan SIEMPRE las 7 fuentes (ni más ni menos). Si alguna falla, reintentar 1-2 veces y luego marcarla `bloqueada (intentos)`. Con <7 fuentes NO se dan cifras ni veredicto → informe **PARCIAL** + preguntar al usuario si continúa o acepta PARCIAL.
+
+---
+
+### A8 — AutoScout24 como precio (12-ago-2026)
+
+**Error típico:** Usar AutoScout24.de como referencia de precio. Agrega feeds de varios portales sin cribarlos → anuncios dañados/siniestrados y fechas mal etiquetadas se cuelan (caso real 12-ago: coche siniestrado a 2.499 € como "más barato").
+
+**Regla:** AutoScout24 **solo sirve para contar** ofertas (N uds). NUNCA para precio de referencia. Precio DE = mobile.de; precio ES = Coches.net.
 
 | Fuente | Construcción URL |
 |---|---|

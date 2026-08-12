@@ -1,31 +1,74 @@
-# Extractores, URLs y trampas técnicas
+# Extractores, URLs y navegación con computer use
 
-> Cargar cuando se necesite scrapear, debuggear un portal o construir URLs.
+> Cargar cuando se necesite navegar un portal, construir URLs o extraer datos.
+> **Método:** computer use de Claude (extensión de navegador). NO hay `fetch`,
+> `Runtime.evaluate`, `web_fetch` ni `browser_batch`. Lo único que existe es:
+> **ver (screenshot), clicar, escribir, tecla, scroll, esperar, zoom**.
+> Todo dato que no aparezca en la captura NO se puede leer → método degradado.
 > Adaptado a los **3 flujos** (A/B/C) y al **sistema de fases** (1=sondeo, 2=profunda) del SKILL.md.
 
 ---
 
-## 📋 Resumen por fuente, por flujo y por fase
+## 🛠️ Herramientas reales de computer use
 
-| Fuente | País | Método | Por pág | Joya oculta | A: Fase 1 | A: Fase 2 | B: Fase 1 | B: Fase 2 | C: Fase 1 |
-|---|---|---|---|---|---|---|---|---|---|
-| Coches.net | ES | `__INITIAL_PROPS__` | 35 | Tasación €, `publicationDate`, DGT, `priceDrop` | ✅ | ✅ | ✅ | ✅ | ✅ |
-| mobile.de | DE | `__INITIAL_STATE__['srp']` | var | Fichas con features, CO₂, propietarios | ✅ | ✅ | ✅ | ✅ | ✅ |
-| AutoUncle | DE | DOM `article` | 25 | Días publicado, portal origen, enlace real | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Wallapop | ES | DOM `[class*="RetrievalItemCard"]` | ~50 | Año, km, CV, descripción en tarjeta | ❌ | ✅ | ❌ | ✅ | ❌ |
-| Milanuncios | ES | `__INITIAL_PROPS__` | 41 | Contado vs financiado, fecha, descripción | ❌ | ✅ | ❌ | ✅ | ❌ |
-| AutoScout24.de | DE | `__NEXT_DATA__` | 20 | Solo contar. NUNCA referencia precio | ❌ | ✅ | ❌ | ✅ | ❌ |
-| kleinanzeigen.de | DE | (pendiente extractor propio) | — | Mezclado en AutoUncle | ❌ | ✅ | ❌ | ✅ | ❌ |
-| km77 | ES | `web_fetch` (sin navegador) | — | PVP, CO₂, tipo IEDMT, etiqueta DGT | Solo Flujo A | Solo Flujo A | — | — | — |
+| Acción | Uso | Truco |
+|---|---|---|
+| `screenshot` | Ver la página actual | **Siempre tras cada paso** (regla Anthropic) |
+| `left_click [x,y]` | Clic en coordenadas | Describir el elemento posicionalmente para precisión |
+| `type "texto"` | Escribir en un campo | Tras clic en el campo; Enter para buscar |
+| `key "ctrl+l"` | Atajos: focus URL, Tab, Enter, Escape | **Dropdowns y scroll: usa teclado** |
+| `scroll` | Bajar/subir con cantidad | Si no funciona → `Page Down` |
+| `wait` | Pausa entre acciones | Tras navegar (2-3 s) y tras clic en filtros |
+| `double_click` / `right_click` | Casos puntuales | — |
+| `zoom` | Ver región pequeña a resolución completa | Para precios/km diminutos o texto denso |
 
-> **Regla:** Las 3 fuentes obligatorias en Fase 1 son Coches.net, mobile.de, AutoUncle. Las 4 restantes (Wallapop, Milanuncios, AS24, kleinanzeigen) entran en Fase 2. **En Flujo C NO hay Fase 2** — solo las 3 de Fase 1 por modelo.
+**Regla de oro (documentada por Anthropic):** después de cada paso, captura y
+ evalúa si conseguiste el resultado. "¿Se aplicó el filtro? ¿Cargó la ficha?"
+ Si no → reintenta. Solo avanza cuando confirmas. Esto evita inventarse resultados.
+
+**Clics:** si fallan, di el elemento de forma posicional y/o haz zoom antes.
+
+---
+
+## 🧭 Patrón de trabajo (todas las fuentes)
+
+```
+1. Navegar a la URL (key ctrl+l → type → Enter)
+2. wait 2-3 s → screenshot (¿cargó? ¿cookie banner?)
+3. Aceptar cookies si aparecen (click posicional)
+4. Aplicar filtros con clics nativos → screenshot verificar
+5. Ordenar por precio → screenshot
+6. Leer tarjetas visibles (precio, año, km, CV, versión)
+7. Scroll / Page Down → leer más (hasta muestra suficiente)
+8. Abrir fichas top → screenshot por ficha → leer secciones
+9. Verificar con screenshot antes de registrar cualquier dato
+```
+
+NUNCA registres un dato que no hayas visto en una captura.
+
+---
+
+## 📋 Resumen por fuente
+
+| Fuente | País | Dato clave | A: F1 | A: F2 | B: F1 | B: F2 | C: F1 |
+|---|---|---|---|---|---|---|---|
+| Coches.net | ES | Mediana ES + tasación (visible en ficha) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| mobile.de | DE | Mediana DE + N uds + fichas | ✅ | ✅ | ✅ | ✅ | ✅ |
+| AutoUncle | DE | Días publicado + portal origen | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Wallapop | ES | Chollos + rotación | ❌ | ✅ | ❌ | ✅ | ❌ |
+| Milanuncios | ES | Contado vs financiado | ❌ | ✅ | ❌ | ✅ | ❌ |
+| AutoScout24.de | DE | Solo contar. NUNCA referencia precio | ❌ | ✅ | ❌ | ✅ | ❌ |
+| kleinanzeigen.de | DE | Chollos particulares (`VB`) | ❌ | ✅ | ❌ | ✅ | ❌ |
+| km77 | ES | PVP, CO₂, tipo IEDMT, etiqueta DGT | Solo Flujo A | Solo Flujo A | — | — | — |
+
+> **Regla:** Las 3 obligatorias en Fase 1 son Coches.net, mobile.de, AutoUncle. Las 4 restantes (Wallapop, Milanuncios, AS24, kleinanzeigen) entran en Fase 2. **En Flujo C NO hay Fase 2** — solo las 3 de Fase 1 por modelo.
 
 ---
 
 ## 🔗 URLs por fuente
 
 ```
-Coches.net   /<marca-slug>/<modelo-slug>/segunda-mano/?fr=<anio>&pf=<precioMin>&pg=<pagina>
+Coches.net   /segunda-mano/coches/<marca>-<modelo>?pg=<pagina>   ← formato REAL (verificado 12-ago)
 Milanuncios  /coches-de-segunda-mano/?s=<marca>%20<modelo>%20<version>
 Wallapop     /app/search?keywords=<marca>%20<modelo>%20<version>&category_ids=100
 AutoUncle    /es/coches-segunda-mano/<Marca>/<Modelo>/f-gasolina/g-manual
@@ -36,7 +79,61 @@ km77         /coches/<marca>/<modelo>/<anio-gama>/<carroceria>/<acabado>/<versio
 mobile.de    /fahrzeuge/search.html?...&lang=de  ← siempre lang=de
 ```
 
-**Tabla maestra de marcas:** `listFiltersOptions.vehicles` de Coches.net → 165 marcas con IDs y slugs.
+**⚠️ Coches.net:** la URL antigua `/<marca>-<modelo>-segunda-mano/` **redirige a
+noticias**. Usa `/segunda-mano/coches/<marca>-<modelo>`.
+**📖 Estructura real de cada página (qué ver en la captura): ver `paginas_reales.md`**
+
+**Tabla maestra de marcas:** se obtiene navegando el buscador de Coches.net
+(campo marca → desplegable). No es JSON: es lo que ves al teclear.
+
+---
+
+## 🧭 Dónde están los datos VISIBLES por portal
+
+> Con computer use solo lees lo que el usuario vería. Mapa visual por fuente.
+
+### 🇪🇸 Coches.net
+
+- **Listado:** tarjetas con título, etiqueta de precio, precio, año, km, cv, ciudad. Orden por precio (selector). Paginación clicable abajo.
+- **Tasación:** en la ficha del anuncio hay un bloque "Precio tasado" visible → léelo en Flujo A cuando haga falta.
+- **`priceRankIndicator` ES VISIBLE** en la tarjeta: "Buen precio" / "Precio justo" / etc. (verificado 12-ago).
+- **`publicationDate` / `priceDrop`:** no siempre visibles → si no se ven en la ficha, no se fuerzan (método degradado declarado). Rotación se infiere de los días visibles.
+
+### 🇪🇸 Wallapop
+
+- Búsqueda con keywords. Tarjetas: precio, año, km, CV, descripción.
+- **Scroll infinito:** `Page Down` varias veces hasta agotar o ~20-25 anuncios.
+- Anuncios sin año/km completos → `man`, no descartar.
+
+### 🇪🇸 Milanuncios
+
+- Tarjetas: precio, año, km, **"financiado"/"contado"**, fecha, descripción.
+- Financiados inflan el precio → descuéntalo mentalmente. Paginación abajo.
+
+### 🇩🇪 AutoScout24.de
+
+- Contador arriba ("X Anzeigen"). Tarjetas: precio, km, año, CV, cambio.
+- Orden por precio con el selector. **Solo contar y validar hueco. NUNCA fijar
+  precio de referencia.**
+- Consentimiento cookies → clic "Accept"/"Zustimmen".
+
+### 🇩🇪 AutoUncle (es)
+
+- Tabla de anuncios: precio, año, km y **"publicado hace X días"** + portal origen.
+- Filtros laterales: año, km, potencia. Agrega varios portales → joya para días
+  publicado. **Nunca fuente única DE** (cruza con mobile.de/AS24).
+
+### 🇩🇪 kleinanzeigen.de
+
+- `https://www.kleinanzeigen.de/s-<marca>-<modelo>/k0` + filtros.
+- Tarjetas: precio, km, año, "Privat"/"Gewerblich". Precio `VB` = negociable.
+- Pesado con bots: navega lento, 1 búsqueda por sesión máx.
+
+### 🏁 km77 (solo Flujo A)
+
+- Ficha de datos del modelo: **PVP**, **CO₂ g/km**, tipo IEDMT, etiqueta DGT.
+- Si no está la versión exacta → la más cercana, anotar "versión aproximada".
+- CO₂ faltante en mobile.de → estimar y DECIRLO (anti-patrón A3).
 
 ---
 
@@ -52,81 +149,42 @@ mobile.de    /fahrzeuge/search.html?...&lang=de  ← siempre lang=de
 - **Fase 2:** Las 4 restantes + fichas top 15-25 + km77 si hay versión conocida
 - **Output:** 7 fuentes + informe MODELO + top 5
 
+> **🌍 Origen DE vs ES (12-ago-2026):** las fuentes ES (Coches.net, Wallapop, Milanuncios) ya NO son solo comparables de venta — también son fuentes de **compra** (coche nacional). Si el origen no está especificado, medir ambos mercados y comparar dónde sale mejor. Ver `costes.md` §Origen.
+
 ### Flujo C (MERCADO) — escanear N modelos
 - **Solo Fase 1** por modelo (3 fuentes). No hay Fase 2.
 - **Output:** Tabla BUSQUEDA con N filas (uno por modelo)
 
 ---
 
-## 🚗 mobile.de — extractores
+## 🚗 mobile.de — navegación
 
 ### Pasada 1 — listado
 
-URL: `/fahrzeuge/search.html?dam=false&isSearchRequest=true&ms=<make>;<model>;<modelGroup>;<desc>&p=<min>:<max>&ml=:<kmMax>&fr=<anio>:&pw=<minKW>:<maxKW>&tr=AUTOMATIC_GEAR&fe=SUNROOF&s=Car&vc=Car&sb=p&od=up&lang=de`
+URL: `/fahrzeuge/search.html?dam=false&isSearchRequest=true&ms=<make>;<model>;<modelGroup>;<desc>&p=<min>:<max>&ml=:<kmMax>&fr=<anio>:&pw=<minKW>:<maxKW>&s=Car&vc=Car&lang=de`
 
-**⚠️ IMPORTANTE:** La URL base usa `suchen.mobile.de`, pero ese subdominio puede bloquearse. Orden de reintento: `www.mobile.de` → `web_fetch` ficha → `web_fetch` listado → marcar bloqueada. **Genera la URL con `suchen.` primero y reescribe a `www.` si falla.**
+**⚠️ IMPORTANTE:** La URL base usa `suchen.mobile.de`, pero ese subdominio puede bloquearse. Si falla, re-navega a `www.mobile.de/fahrzeuge/search.html?...`. Orden de reintento: `www.mobile.de` → recarga + espera → `bloqueada (captcha/denegado, N intentos)`.
 
-Ruta JSON: `window.__INITIAL_STATE__.search['srp'].data.searchResults` (clave literal `'srp'`).
+**En el screenshot del listado lee:**
+- **Contador de resultados** (arriba: "X Ergebnisse") → es el N de muestra.
+- **Tarjetas:** título, precio (gross; si comercio, `zzgl. MwSt.`/neto), km, año (Erstzulassung MM/JJ), CV (PS), cambio, ciudad, `Fahrzeughalter` a veces.
+- **Filtros columna izquierda:** clic en "Erstzulassung von", "Kilometer", "Preis", cambio (Schaltgetriebe/Automatik), "Nur gewerbliche Anbieter".
+- **Orden:** selector "Sortieren" → "Preis aufsteigend" (para ver la base, como hacía `sb=p&od=up`).
+- **Patrocinados:** suelen llevar "Anzeige"/"Sponsored" → no contarlos en la muestra.
 
-```js
-window.__S=function(html){
-  if(/Zugriff verweigert|Access denied/i.test(html)) return {__bloq:true};
-  const m=html.match(/window\.__INITIAL_STATE__\s*=\s*/); if(!m) return null;
-  let i=m.index+m[0].length,d=0,ini=i,str=false,esc=false;
-  for(;i<html.length;i++){ const c=html[i];
-    if(str){ if(esc)esc=false; else if(c==='\\')esc=true; else if(c==='"')str=false; continue; }
-    if(c==='"')str=true; else if(c==='{')d++; else if(c==='}'){ d--; if(d===0){i++;break;} } }
-  try{ return JSON.parse(html.slice(ini,i)); }catch(e){ return null; } };
-
-window.__ex=function(st){ const sr=st.search['srp'].data.searchResults;
- const num=t=>{const m=String(t||'').replace(/\./g,'').match(/\d+/);return m?+m[0]:null;};
- return sr.items.filter(a=>a.type==='ad').map(a=>{
-  const at=a.attr||{},ci=a.contactInfo||{},p=a.price||{},pr=a.priceRating||{};
-  const [mm,yy]=String(at.fr||'').split('/');
-  // ⚠️ El año siguiente reemplazar 2026 por el año actual
-  const mes=yy?(new Date().getFullYear()+1-+yy)*12+(8-(+mm||1)):null;
-  const km=num(at.ml);
-  return {id:a.id, url:'https://www.mobile.de/fahrzeuge/details.html?id='+a.id,
-   t:((a.shortTitle||'')+' '+(a.subTitle||'')).trim().slice(0,62),
-   pre:p.grossAmount, ivaD:p.netAmount!=null,
-   ahAlta:p.netAmount!=null?Math.round(p.grossAmount-p.netAmount):0,
-   baja:p.reducedGross||null, sello:pr.ratingLabel||null,
-   fr:at.fr, mes, km, kmAnio:(mes&&km)?Math.round(km/(mes/12)):null, cv:at.pw,
-   prop:at.pvo, pais:at.cn, ciu:at.loc, tipo:ci.sellerType, fotos:a.numImages};});};
-```
-
-**Filtra patrocinados** (`type === 'ad'`). **`sb=p&od=up` sesga a versión base** → acotar con `pw=`.
+**Sesgo de versión base:** ordenar por precio sube la versión base. Acota con `pw=<minKW>:<maxKW>` (potencia kW) en la URL o el filtro de potencia.
 
 ### Pasada 2 — fichas (solo Flujo A y B en Fase 2)
 
-Ruta: `state.search.vip.ads[<clave>].data.ad`. Clave puede no ser el id → `Object.keys(...)[0]`.
+Abre en pestaña/URL la ficha del anuncio (`https://www.mobile.de/fahrzeuge/details.html?id=<id>`).
 
-```js
-function planoAttrs(A){
-  const o={};
-  const rec=(x)=>{ if(!x) return;
-    if(Array.isArray(x)) return x.forEach(rec);
-    if(typeof x==='object'){
-      if(x.label!=null&&x.value!=null){ o[String(x.label).slice(0,45)]=String(x.value).slice(0,60); return; }
-      Object.values(x).forEach(rec); } };
-  rec(A); return o; }
+**En el screenshot de la ficha lee:**
+- **"Fahrzeugdaten"** → km, Erstzulassung, Leistung (kW/CV), Getriebe, Farbe, Schadstoffklasse, Anzahl der Fahrzeughalter, **CO₂** si existe.
+- **"Ausstattung"** → lista de equipamiento (techo, cuero, ACC, LED, asientos calefactables, audio premium, enganche, AWD, garantía…).
+- **Precio:** arriba a la derecha. `zzgl. MwSt.` = neto → anota IVA aparte.
+- **Advertencias visibles:** "Unfallschaden", "Nicht unfallfrei", "NUR AN AUTOHÄNDLER" → descartar o marcar según criba.
 
-const F=ad.features||[];
-const eq={ techo:F.some(f=>/Panorama|Schiebedach|Glasdach/i.test(f)),
-  cuero:F.some(f=>/Lederausstattung|Leder\b/i.test(f)),
-  navi:F.some(f=>/Navigation/i.test(f)), camara:F.some(f=>/Rückfahrkamera|Kamera/i.test(f)),
-  acc:F.some(f=>/Abstandstempomat|Abstandsregel/i.test(f)),
-  led:F.some(f=>/LED|Matrix|Xenon/i.test(f)), asientosCal:F.some(f=>/Sitzheizung/i.test(f)),
-  virtual:F.some(f=>/Digitales Cockpit|Head-Up/i.test(f)),
-  audio:F.some(f=>/Bang|Bose|Harman|Canton|Dynaudio/i.test(f)),
-  enganche:F.some(f=>/Anhängerkupplung/i.test(f)),
-  awd:F.some(f=>/Allrad|4MOTION|quattro|xDrive/i.test(f)),
-  garantia:F.some(f=>/Garantie/i.test(f)) };
-```
-
-Etiquetas útiles: `CO₂-Emissionen (komb.)` · `Erstzulassung` · `Kilometerstand` · `Leistung` · `Schadstoffklasse` · `Anzahl der Fahrzeughalter` · `Getriebe` · `Farbe`.
-
-Avisos: CO₂ falta a menudo (6/20 fichas) → estimar y decirlo · `vehicleCondition` solo `"used"` sin `Unfallfrei` no declara estar libre · <15 features = anuncio pobre (salvo topes de gama) · no hay VIN ni fecha de publicación.
+Avisos: CO₂ falta a menudo → estimar y decirlo · <15 features = anuncio pobre (salvo topes de gama) · no hay VIN ni fecha de publicación.
 
 ### `ms` validados
 
@@ -141,71 +199,64 @@ Avisos: CO₂ falta a menudo (6/20 fichas) → estimar y decirlo · `vehicleCond
 | BMW Serie 1 | `3500;;20;` | | Mercedes CLA | `17200;;45;` |
 | BMW M2 | `3500;117;;` | | Mercedes A45 AMG | `17200;229;;` |
 
-Trampas: `/auto/volkswagen-golf-gti.html` y `-golf-r.html` devuelven el Golf entero · `-cla.html` y `-1er.html` devuelven la marca entera. Validar `ms` contra `<h1>`.
+Trampas: `/auto/volkswagen-golf-gti.html` y `-golf-r.html` devuelven el Golf entero · `-cla.html` y `-1er.html` devuelven la marca entera. Validar el `ms` contra el **título visible** de la página.
 
 ### Orden de reintento mobile.de bloqueado
 
-`www.mobile.de` → `web_fetch` ficha (`/fahrzeuge/details.html?id=`) → `web_fetch` listado → marcar PARCIAL con aviso.
+`www.mobile.de` (recarga + espera 2-3 s) → `suchen.mobile.de` → marcar PARCIAL con aviso y seguir con AS24 + AutoUncle.
 
 ---
 
-## 💰 Presupuesto de peticiones
+## 💰 Presupuesto de tokens (cada screenshot ≈ 1.000-1.800 tokens)
 
-| Fuente | Concurrencia | Pausa | Máx/llamada | Por sesión |
-|---|---:|---:|---:|---:|
-| AutoScout24 | 3 | 0.7s | 12 | — |
-| mobile.de contar | 2 | 1.5s | 8 | — |
-| mobile.de fichas | 2 | 1.5s | 12 | — |
-| **mobile.de total** | — | — | — | **45** (avisar a 35) |
+> El "conteo de peticiones" de antes ahora es **conteo de screenshots/acciones**.
+> Cada captura cuesta tokens: sé frugal. Una acción = navegar, clic, scroll, screenshot…
 
-Reglas generales:
-- `Runtime.evaluate` muere a 45s.
-- **NUNCA 2 llamadas a mobile.de en mismo `browser_batch`.**
-- Usar `textContent`, no `innerText` (vacío en pestañas de fondo).
-- `JSON.stringify` de 25 fichas se trunca → guardar en `window.__POOL` y pedir `slice()`.
+| Fuente | Acciones/screenshots típicos |
+|---|---:|
+| mobile.de listado | búsqueda + 3-4 filtros + 2 páginas ≈ 8-12 capturas |
+| mobile.de fichas | 15-25 fichas top, 1 captura cada una (verificar antes de registrar) |
+| AutoScout24 | 1 búsqueda + 1 página ≈ 4-6 |
+| AutoUncle | 1 búsqueda + 1 página ≈ 4-6 |
+| kleinanzeigen | 1 búsqueda + 1 página ≈ 4-6 |
+| Coches.net | búsqueda + 2-3 páginas ≈ 6-10 |
+| Wallapop | búsqueda + scroll ≈ 5-8 |
+| Milanuncios | búsqueda + 2 páginas ≈ 5-8 |
+| km77 | 1-2 fichas ≈ 3-4 |
+
+**Límites por sesión (mantener de SKILL.md):** mobile.de NUNCA >45 acciones ·
+Flujo A ≤70 · Flujo B ≤50 · Flujo C ≤100. Avisar al 50% y al 80%.
+
+**Frugalidad:**
+- No capturear la misma página 2 veces sin necesidad.
+- En listados, una captura de pantalla completa lee muchas tarjetas → 1 captura
+  por página suele bastar; usa `zoom` solo para datos pequeños puntuales.
+- Verifica con screenshot SOLO cuando vayas a registrar un dato importante
+  (precio de candidato, CO₂, conteo total), no en cada micro-paso.
 
 ---
 
-## ⚠️ Trampas críticas (las que causaron fallos reales)
+## ⚠️ Trampas críticas (adaptadas a computer use)
 
 | Trampa | Consecuencia | Solución |
 |---|---|---|
-| `__INITIAL_PROPS__` = `undefined` en Coches.net | Pierde tasación, fecha, DGT | Esperar hidratación (2-3 reintentos, 1.5s) — pero **aceptar** método degradado (texto visible) en Fase 1 para no gastar tokens |
+| **Clic falla por mala coordenada** | No se aplica el filtro | Describir posicionalmente ("el selector abajo a la izquierda"), zoom, o atajo de teclado |
+| **Dropdown no se abre** | No se puede elegir opción | Clic en el campo + `key` flechas + Enter (teclado, no ratón) |
+| **Scroll no funciona** | No llega más muestra | `Page Down` / `End` |
+| **Datos solo en JSON invisible** | `__INITIAL_PROPS__` no accesible | **Método degradado:** leer DOM visible. En Fase 1 aceptar tras 1 intento |
+| **Skeleton / carga lenta** | Se lee página vacía | `wait` 2-3 s, recargar 1 vez, luego screenshot |
+| **Cookie banner tapa contenido** | Datos ocultos | Clic aceptar primero (posicional) |
+| **Captcha** | Fuente inaccesible | Recargar 1-2 veces con pausa → si sigue, `bloqueada (captcha)` y seguir |
 
-### Ejemplo concreto: esperar hidratación de `__INITIAL_PROPS__`
+**Regla de los 2 intentos:** navegación humana (screenshot + clic) → 2 intentos →
+método degradado (leer visible) → solo entonces marcar la fuente. NUNCA
+obsesionarse con una fuente.
 
-```javascript
-// Coches.net: esperar a que __INITIAL_PROPS__ se hidrate
-async function waitForInitialProps(maxRetries = 3, delay = 1500) {
-  for (let i = 0; i < maxRetries; i++) {
-    const props = window.__INITIAL_PROPS__;
-    if (props && props.pageProps && props.pageProps.ads) {
-      return props; // ✅ Hidratado
-    }
-    
-    if (i < maxRetries - 1) {
-      console.log(`⏳ Reintento ${i + 1}/${maxRetries}...`);
-      await new Promise(resolve => setTimeout(resolve, delay));
-    }
-  }
-  
-  // ⚠️ Timeout: usar método degradado (leer texto visible)
-  console.warn('⚠️ __INITIAL_PROPS__ no disponible, usando método degradado');
-  return null;
-}
-
-// Uso:
-const data = await waitForInitialProps();
-if (data) {
-  // Extraer de JSON (tasación, fecha, DGT disponibles)
-  const ads = data.pageProps.ads;
-} else {
-  // Fallback: leer tarjetas visibles del DOM
-  const cards = document.querySelectorAll('.ad-card');
-}
-```
-
-**Regla:** En Fase 1, aceptar método degradado tras 1 reintento (no gastar tokens). En Fase 2, hacer 3 reintentos completos.
+> ⚠️ **Clave:** `__INITIAL_PROPS__` / `__INITIAL_STATE__` / `__NEXT_DATA__` eran
+> trucos de inyección JS que **NO existen en computer use**. Cuando el portal
+> tenga el dato solo en su estado JS (tasación Coches.net, `publicationDate`,
+> `priceRankIndicator`, `priceDrop`), se lee el equivalente VISIBLE de la página
+> o se declara no disponible. No gastes tiempo buscándolos.
 
 ---
 
@@ -247,9 +298,10 @@ Regex: `/import(ad|ación)|traído de|comprado en (alemania\|opel alemania)|naci
 
 ## 🎯 Calibraciones
 
-**`priceRankIndicator` Coches.net:** `3` = «Precio justo», `4` = «Buen precio», `5` y `2` sin confirmar.
+**`priceRankIndicator` Coches.net:** visible en la tarjeta — "Buen precio" =
+`4`, "Precio justo" = `3` (verificado 12-ago). Úsalo como señal de precio.
 
-**`publicationDate` Coches.net:** mediana de días publicados = indicador de rotación (factor 1 de vendibilidad).
+**`publicationDate` Coches.net:** mediana de días publicados = rotación (factor 1 vendibilidad) — leerlo en la ficha cuando sea visible; si no, inferir de los días publicados mostrados en las tarjetas.
 
 **Descuento por días publicado (PENDIENTE calibrar):**
 
@@ -284,5 +336,5 @@ Regex: `/import(ad|ación)|traído de|comprado en (alemania\|opel alemania)|naci
 | **Datos por fuente** | Precio, año, km, versión (listado) | Añade descripción entera, features, equipamiento, CO₂, propietarios |
 | **Fichas mobile.de** | No (solo listado) | Sí (15-25 top candidatos) |
 | **km77** | No (solo si Flujo A se va a profundizar) | Sí (PVP, CO₂, etiqueta) |
-| **Peticiones típicas** | 15-20 | 30-40 |
+| **Acciones/screenshots típicos** | 12-18 | 25-40 |
 | **Output** | Foto general (mediana, hueco, N) | Detalle por unidad + veredicto |

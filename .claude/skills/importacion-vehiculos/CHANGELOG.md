@@ -5,13 +5,63 @@ Todos los cambios notables en el skill `importacion-vehiculos` se documentarán 
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [2.4.2] - 2026-08-12 — Cascada de informes + checkpoints Flujo B
+
+### 🏗️ División de trabajo definitiva (12-ago-2026)
+- **Investigación → Claude (Desktop)** · **Almacenamiento, gestión y actualizaciones → Laravel (importnexcore)**.
+- Laravel = **repositorio único y fuente de verdad** de informes PDF, imágenes, JSON, dossier, folleto.
+- Flujo: Claude investiga → sube paquete ZIP a `/api/import-valuation` → **FIN**. Laravel gestiona ver/mostrar/actualizar/iterar.
+- Claude **NO consulta** lo subido. Cada nuevo encargo = nuevo chat en Claude.
+- Documentado en `operaciones.md` §División de trabajo · Desktop `CLAUDE.md` · Laravel `copilot-instructions.md`.
+- Tras la prueba VS Code: la investigación con filtros se hace en Claude Desktop (VS Code lee pero no filtra bien, ver `memoria/retrospectiva.md`).
+
+### 🏢 Cambio de negocio (12-ago-2026)
+- **Ampliación:** JJ Import Motors ya no solo importa desde Alemania — también ofrece servicios de búsqueda y gestión **dentro de España**.
+- **Modelo sin compra (reforzado):** la empresa **NO compra coches ni mantiene stock**. Solo **oferta el servicio** de búsqueda, importación y gestión con honorarios fijos. El cliente es quien compra el coche.
+- **🌍 Origen DE vs ES:** si el encargo no especifica origen, buscar el modelo en **ambos mercados** y comparar dónde sale mejor (coste total puesto en Huelva). `costes.md` §Origen con las dos fórmulas (DE con importación, ES sin importación) + comparativa.
+- Reflejado en: `SKILL.md` (frontmatter + negocio + origen) · `costes.md` · `briefing_encargo.md` (parámetro origen) · `extractores.md` · Desktop `CLAUDE.md`/`INSTRUCCIONES_PROYECTO.md`/`README.md` · Laravel `copilot-instructions.md` · `docs/guias/README.md`.
+### � Auditoría proactiva (revisión de consistencia)- **🛡️ Regla dura #5 — COBERTURA COMPLETA (12-ago-2026):** se intentan SIEMPRE las 7 fuentes (ni más ni menos). Nunca cifras/veredicto con <7 sin marcar informe PARCIAL + preguntar. Caso real: se dieron precios con 2-3 fuentes y AutoScout24.
+- **Tabla de fiabilidad por fuente** en `SKILL.md`: mobile.de (precio DE 🟢) + Coches.net (precio ES 🟢) como únicas referencias de precio; AutoUncle solo rotación; AutoScout24 SOLO contar (🔴 nunca precio, agrega feeds sin cribar); kleinanzeigen/Wallapop/Milanuncios chollos particulares.
+- **Anti-patrones A7 y A8** añadidos (cobertura incompleta + AutoScout24 como precio). Total: 8.
+- **Trampa documentada** en `memoria/trampas-encontradas.md` (AS24 precio engañoso, caso real 12-ago).- **📊 Plantilla COMPARATIVA** nueva en `SKILL.md` — cuando el usuario pide investigar VARIOS candidatos, primero comparativa lado a lado (precio/año/km/estado/coste/ahorro/score + banderas 🟢🟡🔴 + enlaces), luego informes individuales.
+- **briefing_encargo.md** — "Encargo completo (Flujo B)" renombrado a "Encargo INCOMPLETO" (contradicción corregida: un encargo completo NO pide confirmación). Regla dura #1 matizada con "salvo que ya vengan dados".
+- **briefing_encargo.md** — Flujo B "Claude automáticamente" actualizado con el pipeline real (informe MODELO → esperar elección → automático).
+- **guia_prompts.md** — Regla 2: año desactualizado ("últimos 5 años 2019-2024" → "recientes").
+- **anti_patrones.md** — typo "Claudeestima" → "Claude estima".
+- **SKILL.md** — referencia rápida de checkpoints actualizada (CP1 = esperar elección de candidato tras informe MODELO).
+- **🔁 APRENDIZAJE CONTINUO:** regla en `SKILL.md` §Aprendizaje continuo + plantilla `memoria/retrospectiva.md`. Cada conversación produce ≥1 aprendizaje; los fallos del usuario se convierten en trampa/anti-patrón/regla documentada.
+- **🚗 Motores gasolina 2016+** en `riesgos.md` · **⚠️ Regla IEDMT** en `costes.md` (no estimar de oído) · **🧠 preferencias de negocio** en proyecto (`preferencias.md`).
+
+### �🔄 Cascada de informes (regla dura nueva)
+- **SKILL.md** §CASCADA DE INFORMES: los informes NO salen todos a la vez. Flujo B entrega INFORME MODELO + top 5 con enlaces + CP1 → usuario elige → se convierte a Flujo A → informe UNIDAD → dossier → ZIP.
+- **NUNCA** saltar del resumen informal al "¿evalúo el candidato X?" sin entregar el INFORME MODELO completo + enlaces + CP1 (caso real 12-ago: se saltó).
+- **Operaciones.md** Flujo B actualizado: CP1 obligatorio entre Fase 1 y Fase 2.
+
+### ⚡ MODO AUTOMÁTICO EN CASCADA
+- **SKILL.md** §MODO AUTOMÁTICO: Fase 1 automática → INFORME MODELO + top 5 → **el USUARIO elige candidato** (no Claude) → resto automático (fotos + informe UNIDAD + dossier + ZIP). Si varios candidatos → comparativa antes.
+- Solo pausa en: veredicto 🟡/🔴, bandera crítica de seguridad (VIN ausente / no declara accidentes), o encargo incompleto.
+- NUNCA preguntar "¿qué candidato investigo?" — se entrega el informe MODELO y se espera la instrucción del usuario.
+- **briefing_encargo.md** Paso 3: excepción de modo automático cuando no falta ningún crítico.
+- **operaciones.md** Flujo B: Fase 1 termina en informe MODELO; tras elegir candidato todo es automático.
+
+### 📋 Plantilla INFORME TIPO MODELO
+- Nueva plantilla completa en `SKILL.md` (cobertura 7 fuentes + mediana/cuartil ES/DE + vendibilidad 5 factores + top 5 con enlaces + coste puesto en Huelva).
+
+### 🏷️ Aclaración de quién genera cada PDF
+- Claude genera esqueletos `.txt` [MARCADOR] en el ZIP. Los PDFs finales (`dossier`, `ficha-publicitaria`, `folleto`) los genera **Laravel** (Blade+Browsershot) cuando el coche está en inventario. Claude NO genera PDFs ni folleto durante la investigación.
+
+### 🧹 Limpieza de empaquetado
+- Excluidos del ZIP los builds (`\.(zip|skill)$`) y `lista.txt` — se auto-incluían duplicando el tamaño (252KB→503KB). ZIP ahora generado FUERA del directorio fuente.
+
+---
+
 ## [2.4.1] - 2026-08-12 — Guía de uso para usuarios finales
 
 ### 📚 docs/guias/
 - `README.md` — índice + diagrama de flujo del negocio (mermaid).
 - `01-primeros-pasos.md` — arranque, verificación sync, token budget.
 - `02-flujo-a-unidad.md` / `03-flujo-b-modelo.md` / `04-flujo-c-mercado.md`.
-- `05-informes.md` — leer informes + briefing PDF.
+- `05-informes.md` — leer informes + dossier del cliente.
 - `06-cierre-venta.md` — registrar cierres (curl) + KPIs en `/kpis`.
 - `07-solucion-problemas.md` — FAQ y troubleshooting.
 - `ejemplos/` — casos reales Astra OPC + Tiguan (Flujo A), Golf GTI + scouting (B/C).

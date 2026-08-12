@@ -92,6 +92,8 @@ Campos no confirmados van a `null`, **nunca inventados**. `co2_confirmado: false
 
 ## `anuncio`
 
+> **Origen (12-ago-2026):** `pais_origen` acepta `"Alemania"` (importación) o `"España"` (compra nacional). Los costes dependen de este valor (ver `costes.md` §Origen).
+
 ```json
 {
   "portal": "mobile.de",
@@ -255,6 +257,83 @@ Lista de strings. Mostrar siempre junto a la ficha.
 
 ---
 
+## `dossier` (solo Flujo A · ver `dossier_cliente.md`)
+
+Bloque opcional que activa la generación del `dossier-cliente.txt` (PDF profesional para cliente).
+Solo se rellena si el veredicto es `Comprar` o `Comprar si baja de precio`.
+
+```json
+{
+  "dossier": {
+    "dossier_num": "JJM-2026-08-12-0042",
+    "carta_presentacion": "Estimado cliente, en JJ Import Motors...",
+    "resumen_30s": {
+      "oportunidades": ["Configuración deseada", "Estado verificado"],
+      "atencion": ["CO₂ puede variar ±5 g/km → IEDMT ±50-80 €"],
+      "proximo_paso": "Reserva 1.000 € para iniciar compra"
+    },
+    "equipamiento_destacado": ["Pack Performance", "Asientos Alcantara", "Techo"],
+    "estado_verificado": ["1 propietario particular", "Libro sellado", "TÜV vigente"],
+    "estado_pendiente": ["Neumáticos", "Frenos", "COC completo"],
+    "mercado_es": {
+      "min": 32400, "q1": 33200, "mediana": 34500, "q3": 36100, "max": 39900, "n": 8
+    },
+    "nuestra_oferta": 28500,
+    "ahorro_eur": 6000,
+    "ahorro_pct": 17.4,
+    "de_vs_es": {
+      "precio_de": 26800, "precio_es": 34500,
+      "uds_de": 12, "uds_es": 8,
+      "hueco_pct": 22.4
+    },
+    "eval_tecnica": {
+      "motor": "EA888 2.0 TSI 300 CV",
+      "fiabilidad": "Buena",
+      "problemas_conocidos": ["Bobinas 60k", "Cadena distribución 100k"],
+      "recalls_activos": false
+    },
+    "coste_transparente": [
+      {"concepto": "Compra del vehículo (DE)", "importe": 21950, "nota": ""},
+      {"concepto": "Transporte DE → ES", "importe": 900, "nota": ""},
+      {"concepto": "ITV + tasas DGT", "importe": 115, "nota": ""},
+      {"concepto": "Impuesto matriculación (IEDMT)", "importe": 830, "nota": "* Estimado"},
+      {"concepto": "Matrícula + gestoría", "importe": 305, "nota": ""},
+      {"concepto": "Honorarios JJ Import Motors", "importe": 4400, "nota": "** Fijos declarados"}
+    ],
+    "coste_total": 28500,
+    "timeline": [
+      {"semana": "0", "fase": "Reserva y encargo"},
+      {"semana": "1", "fase": "Compra y verificación"},
+      {"semana": "2-3", "fase": "Transporte y trámites DE"},
+      {"semana": "3-4", "fase": "Llegada y trámites ES"},
+      {"semana": "5-6", "fase": "Entrega"}
+    ],
+    "garantia_incluido": ["Gestión integral", "Verificación documental", "Inspección previa", "Soporte 30 días"],
+    "garantia_no_incluido": ["Garantía mecánica", "Problemas ocultos", "Mantenimiento ordinario"],
+    "faq": [
+      {"q": "¿Puedo ver el coche antes?", "a": "Vídeo inspección 60 fotos + 5 min."},
+      {"q": "¿Y si hay problemas al llegar?", "a": "30 días para reportar incidencias."}
+    ],
+    "pasos": [
+      "Reserva 1.000 € → bloqueo vehículo",
+      "Vídeo inspección (48-72h)",
+      "Validación: confirmación o reembolso",
+      "Firma contrato + pago 40%",
+      "Inicio del proceso de importación"
+    ]
+  }
+}
+```
+
+🔴 **Regla dura:** `dossier.coste_transparente` suma EXACTAMENTE `dossier.coste_total`.
+El importe de "Compra del vehículo" incluye margen interno camuflado — NUNCA reflejar
+el precio real del anuncio alemán en este bloque (iría al `informe-interno.txt`).
+
+🔴 **`dossier_num`** generado por Claude con formato `JJM-AAAA-MM-DD-####` (4 dígitos,
+secuencial diario). El contador vive en `datos/contador_dossier.json` en Desktop.
+
+---
+
 ## 📄 Estructura JSON para Flujo C (MERCADO)
 
 Estructura agregada con N entradas. NO tiene los bloques `vehiculo`, `anuncio`, `investigacion`, `costes`, `publicidad` por unidad.
@@ -325,9 +404,86 @@ Idéntica a Flujo A, con estas diferencias:
 
 ---
 
+## `extras` (solo Flujo A · ver `informe_tecnico.md`)
+
+Bloque opcional con el análisis técnico avanzado para el informe interno. Solo se rellena
+en Flujo A cuando se va a decidir la compra.
+
+```json
+{
+  "extras": {
+    "score_global": 84,
+    "score_dim": {
+      "margen_vs_objetivo": 21,
+      "vendibilidad": 21,
+      "cobertura_fuentes": 14,
+      "calidad_datos_vendedor": 13,
+      "riesgo_residual": 8,
+      "confianza_veredicto": 7
+    },
+    "margen_vs_referencias": {
+      "vs_mediana": {"eur": 6000, "pct": 21.1, "semaforo": "green"},
+      "vs_q1": {"eur": 4700, "pct": 16.5, "semaforo": "green"},
+      "vs_comp_ajustado": {"eur": 5800, "pct": 20.3, "semaforo": "green"},
+      "vs_min": {"eur": 3900, "pct": 13.7, "semaforo": "amber"}
+    },
+    "iedmt_sensibilidad": {
+      "co2_mas_5g": 475,
+      "co2_menos_5g": 305,
+      "sin_minoracion": 1301,
+      "rango_min": 305,
+      "rango_max": 1301
+    },
+    "prediccion_venta": {
+      "optimista": {"precio": 31500, "dias_min": 18, "dias_max": 25, "margen_eur": 3000, "margen_pct": 10.5},
+      "base": {"precio": 33200, "dias_min": 30, "dias_max": 45, "margen_eur": 4700, "margen_pct": 16.5},
+      "conservador": {"precio": 34500, "dias_min": 50, "dias_max": 70, "margen_eur": 6000, "margen_pct": 21.1},
+      "pesimista": {"precio": 36100, "dias_min": 75, "dias_max": 90, "margen_eur": 7600, "margen_pct": 26.7},
+      "recomendada": "base"
+    },
+    "negociacion": {
+      "precio_publicado": 26800,
+      "precio_objetivo": 25950,
+      "precio_tope": 26500,
+      "mensaje_aleman": "Sehr geehrte Damen und Herren...",
+      "backup_b_url": "https://www.autoscout24.de/...",
+      "backup_c_url": "https://www.mobile.de/..."
+    },
+    "riesgos_mitigacion": [
+      {"riesgo": "CO₂ COC distinto", "probabilidad": "Media", "impacto": "Alto", "mitigacion": "Solicitar COC antes pago"},
+      {"riesgo": "Vendedor no negocia", "probabilidad": "Baja", "impacto": "Medio", "mitigacion": "Backup B/C"}
+    ],
+    "banderas": {
+      "rojas": [],
+      "amarillas": ["45 días publicado", "Pack Performance mantenimiento caro"]
+    },
+    "accion_inmediata": [
+      "Enviar email negociación",
+      "Preparar contrato servicios",
+      "Solicitar COC",
+      "Pedir reserva 1.000 €",
+      "Confirmar transporte",
+      "Preparar dossier cliente",
+      "Enviar dossier + vídeo"
+    ],
+    "plazo_objetivo_dias": 7
+  }
+}
+```
+
+`score_global` se compone de 6 dimensiones (25+25+15+15+10+10 = 100).
+Ver `informe_tecnico.md` §15 para la fórmula de cálculo de cada dimensión.
+
+`prediccion_venta.recomendada` es uno de `optimista|base|conservador|pesimista`.
+Sirve para fijar el precio de salida en la ficha publicitaria.
+
+---
+
 ## 📝 Formato esqueleto `.txt` — para plantillas Blade
 
-`empaquetar.py` ya NO genera PDFs. Escribe archivos `.txt` con bloques `[MARCADOR]` que la plantilla Blade de Laravel (`jj-import/folleto.blade.php`, `jj-import/briefing.blade.php`) convierte a PDF con Browsershot.
+`empaquetar.py` ya NO genera PDFs. Escribe archivos `.txt` con bloques `[MARCADOR]` que las plantillas Blade de Laravel (`jj-import/folleto.blade.php`, `jj-import/ficha-coche.blade.php`, `jj-import/informe-interno.blade.php`, `jj-import/dossier.blade.php`) convierten a PDF con Browsershot.
+
+> **Briefing PDF ha sido DEPRECADO 12-ago-2026.** Era redundante con `ficha-coche.blade.php`. Sustituido por `dossier.blade.php` (PDF profesional para cliente, 15 secciones). La ruta `POST /api/cars/{car}/briefing-pdf` sigue existiendo pero devuelve 410 Gone.
 
 ### Reglas del formato
 
@@ -379,9 +535,12 @@ class Esqueleto
 | Archivo | Bloques esperados |
 |---|---|
 | `ficha-publicitaria.txt` | TITULO, SUBTITULO, PRECIO, AHORRO, ESPECIFICACIONES, ETIQUETA, DESTACADOS, DESCRIPCION, QUE_INCLUYE, AVISO_LEGAL, FOTOS, CONTACTO |
-| `informe-interno.txt` | COSTE_COMPRA, COSTE_TOTAL, HONORARIOS, PRECIO_CLIENTE, COMPARABLE_AJUSTADO, MEDIANA_ES, MEDIANA_DE, HUECO, VENDIBILIDAD, VEREDICTO, RIESGOS, ALTERNATIVAS |
+| `informe-interno.txt` | Ver `informe_tecnico.md` §formato-txt (15 secciones, ~60 bloques). **Los bloques `MARGEN`, `VENTA`, `IEDMT_SENSIBILIDAD`, `SCORE_DIM`, `RIESGO`, `BANDERA_ROJA/AMARILLA`, `COBERTURA`, `CAND_*`, `NEG_*`, `COMP_AJUSTE`, `VENDIBILIDAD_FACTOR`, `ACCION` se renderizan como filas/tablas en `informe-interno.blade.php`.** |
+| `dossier-cliente.txt` | Ver `dossier_cliente.md` §formato-txt (15 secciones, ~50 bloques). **Los bloques `FICHA_TECNICA`, `EQUIPAMIENTO`, `MERCADO_*`, `COSTE_LINEA`, `TIMELINE_SEMANA`, `FAQ_Q/A`, `PASOS`, `GARANTIA_*`, `ESTADO_*`, `DE_VS_ES`, `EVAL_*` se renderizan en `dossier.blade.php`.** |
 | `redes-sociales.txt` | GANCHO, POST_LARGO, POST_CORTO, STORIES, HASHTAGS, PIE_FOTO |
 | `anuncio-portales.txt` | TITULO, DESCRIPCION, FICHA_RAPIDA, QUE_INCLUYE, AVISO_LEGAL |
+
+> **Nota ingestor:** `ValuationPackageIngestor` guarda **cualquier `.txt` dentro de `contenido/`** del ZIP en `cars/{id}/contenido/`. Por tanto `dossier-cliente.txt` se persiste automáticamente sin tocar el ingestor. Rutas disponibles: `cars.ficha`, `cars.dossier` (autenticado), `cars.informe-interno` (solo owner/operator).
 
 ---
 
