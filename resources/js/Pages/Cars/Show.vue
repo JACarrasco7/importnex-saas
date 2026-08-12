@@ -25,6 +25,9 @@ import Badge from '@/Components/Badge.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import ConfirmDialog from '@/Components/ConfirmDialog.vue';
 import { useFormat } from '@/Composables/useFormat';
+import { useTranslations } from '@/Composables/useTranslations';
+
+const { t } = useTranslations();
 
 const props = defineProps({
     car: Object,
@@ -40,7 +43,7 @@ const docToDelete = ref(null);
 const photoForm = useForm({ photo_type: 'exterior', photos: [] });
 const docForm = useForm({ doc_type: 'invoice', doc_key: '', name: '', documents: [] });
 
-const { currency, date, statusVariant, trafficLightVariant } = useFormat();
+const { currency, date, statusLabel, statusVariant, trafficLightVariant } = useFormat();
 
 const submitPhotos = () => {
     uploadProgress.value = true;
@@ -84,26 +87,26 @@ const confirmDeleteDoc = () => {
 };
 
 const costItems = [
-    { key: 'purchase_price', label: 'Precio de compra' },
-    { key: 'new_price', label: 'Precio nuevo' },
-    { key: 'transport', label: 'Transporte' },
-    { key: 'itv_fee', label: 'Tasa ITV' },
-    { key: 'coc_fee', label: 'Tasa COC' },
-    { key: 'dgt_fees', label: 'Tasas DGT' },
-    { key: 'professional_fees', label: 'Honorarios' },
-    { key: 'deposit', label: 'Fianza' },
+    { key: 'purchase_price', label: t('cars.cost_items.purchase_price') },
+    { key: 'new_price', label: t('cars.cost_items.new_price') },
+    { key: 'transport', label: t('cars.cost_items.transport') },
+    { key: 'itv_fee', label: t('cars.cost_items.itv_fee') },
+    { key: 'coc_fee', label: t('cars.cost_items.coc_fee') },
+    { key: 'dgt_fees', label: t('cars.cost_items.dgt_fees') },
+    { key: 'professional_fees', label: t('cars.cost_items.professional_fees') },
+    { key: 'deposit', label: t('cars.cost_items.deposit') },
 ];
 
 const specItems = [
-    { key: 'brand', label: 'Marca' },
-    { key: 'model', label: 'Modelo' },
-    { key: 'year', label: 'Año' },
-    { key: 'mileage', label: 'Kilometraje', suffix: ' km' },
-    { key: 'fuel', label: 'Combustible' },
-    { key: 'transmission', label: 'Transmisión' },
-    { key: 'cv', label: 'Potencia', suffix: ' CV' },
+    { key: 'brand', label: t('cars.spec_items.brand') },
+    { key: 'model', label: t('cars.spec_items.model') },
+    { key: 'year', label: t('cars.spec_items.year') },
+    { key: 'mileage', label: t('cars.spec_items.mileage'), suffix: ' km' },
+    { key: 'fuel', label: t('cars.spec_items.fuel') },
+    { key: 'transmission', label: t('cars.spec_items.transmission') },
+    { key: 'cv', label: t('cars.spec_items.power'), suffix: ' CV' },
     { key: 'co2', label: 'CO₂', suffix: ' g/km' },
-    { key: 'color', label: 'Color' },
+    { key: 'color', label: t('cars.spec_items.color') },
     { key: 'vin', label: 'VIN' },
 ];
 
@@ -504,8 +507,8 @@ const onDocKeyChange = () => {
                 <!-- ╔ DOCUMENTS ════════════════════════════════════════════════════════╗ -->
                 <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-                        <h3 class="text-base font-semibold text-gray-900">Documents</h3>
-                        <span class="text-sm text-gray-500">{{ car.documents?.length || 0 }} files</span>
+                        <h3 class="text-base font-semibold text-gray-900">{{ t('cars.documents') }}</h3>
+                        <span class="text-sm text-gray-500">{{ car.documents?.length || 0 }} {{ t('cars.files') }}</span>
                     </div>
                     <div class="p-6 space-y-4">
                         <form @submit.prevent="submitDocuments" class="grid grid-cols-1 gap-3 rounded-xl bg-gray-50 p-4 sm:grid-cols-4">
@@ -515,11 +518,11 @@ const onDocKeyChange = () => {
                                     <option v-for="d in g.items" :key="d.id" :value="d.doc_key">{{ d.name }}</option>
                                 </optgroup>
                             </select>
-                            <input v-model="docForm.name" type="text" placeholder="Name (optional)" class="rounded-lg border-gray-300 text-sm focus:border-estoril-500 focus:ring-estoril-500" />
+                            <input v-model="docForm.name" type="text" :placeholder="t('cars.doc_name_placeholder')" class="rounded-lg border-gray-300 text-sm focus:border-estoril-500 focus:ring-estoril-500" />
                             <input type="file" multiple accept=".pdf,.doc,.docx,.xls,.xlsx" @change="handleDocFiles" class="block w-full text-sm text-gray-500 file:mr-3 file:rounded-lg file:border-0 file:bg-estoril-50 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-estoril-700 hover:file:bg-estoril-100" />
                             <button type="submit" :disabled="!docForm.documents.length || uploadProgress" class="inline-flex items-center justify-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white hover:bg-estoril-500 disabled:opacity-50">
                                 <ArrowDownTrayIcon class="h-4 w-4" />
-                                {{ uploadProgress ? 'Uploading…' : 'Upload' }}
+                                {{ uploadProgress ? t('cars.uploading') : t('cars.upload') }}
                             </button>
                         </form>
 

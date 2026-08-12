@@ -27,6 +27,7 @@ import {
     ShoppingBagIcon,
     ArrowTopRightOnSquareIcon,
     GlobeAltIcon,
+    ChartBarIcon,
 } from '@heroicons/vue/24/outline';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import FlashMessage from '@/Components/FlashMessage.vue';
@@ -46,6 +47,12 @@ const sidebarOpen = ref(false);
 const userMenuOpen = ref(false);
 const userMenuRef = ref(null);
 const page = usePage();
+
+function openCommandPalette() {
+    // Placeholder: CommandPalette component will be wired here in a future iteration.
+    // Until then we keep the trigger button visible but harmless so `$dispatch`
+    // (a Livewire/Alpine-only helper) does not throw at runtime.
+}
 
 onClickOutside(userMenuRef, () => {
     userMenuOpen.value = false;
@@ -91,6 +98,7 @@ const navGroups = computed(() => [
             { name: t('nav.map'), route: 'cars.map', icon: MapIcon },
             { name: t('nav.finance'), route: 'finance.index', icon: BanknotesIcon },
             { name: t('nav.trips'), route: 'trips.index', icon: CalendarDaysIcon },
+            { name: t('nav.kpis'), route: 'kpis.index', icon: ChartBarIcon },
             { name: t('nav.marketplace'), route: 'marketplace.index', icon: ShoppingBagIcon, external: true },
         ],
     },
@@ -193,12 +201,12 @@ const navGroups = computed(() => [
                     </button>
                     <button
                         type="button"
-                        @click="$dispatch('command-palette:open')"
+                        @click.prevent="openCommandPalette"
                         class="hidden md:inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5 text-sm text-gray-500 transition hover:bg-gray-100 dark:border-asphalt-700 dark:bg-asphalt-800 dark:text-asphalt-400 dark:hover:bg-asphalt-700"
                         :aria-label="t('common.search') ?? 'Buscar'"
                     >
                         <span class="text-xs">🔍</span>
-                        <span>Buscar...</span>
+                        <span>{{ t('common.search') }}...</span>
                         <kbd class="ml-2 rounded border border-gray-300 bg-white px-1.5 py-0.5 text-[10px] font-mono dark:border-asphalt-600 dark:bg-asphalt-900">⌘K</kbd>
                     </button>
                     <div v-if="$slots.header" class="hidden sm:block">
@@ -259,17 +267,17 @@ const navGroups = computed(() => [
                                 <div class="py-1">
                                     <Link :href="route('profile.edit')" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                                         <UserCircleIcon class="h-4 w-4" />
-                                        Profile
+                                        {{ t('nav.profile') }}
                                     </Link>
                                     <Link v-if="user?.organization_id" :href="route('organization.show', user.organization_id)" class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                                         <BuildingOfficeIcon class="h-4 w-4" />
-                                        Organization
+                                        {{ t('nav.organization') }}
                                     </Link>
                                 </div>
                                 <div class="border-t border-gray-100 py-1">
                                     <Link :href="route('logout')" method="post" as="button" class="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                                         <ArrowRightOnRectangleIcon class="h-4 w-4" />
-                                        Log out
+                                        {{ t('auth.logout') }}
                                     </Link>
                                 </div>
                             </div>

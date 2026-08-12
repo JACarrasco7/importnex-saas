@@ -14,7 +14,7 @@ import { useTranslations } from '@/Composables/useTranslations';
 import { useFormat } from '@/Composables/useFormat';
 
 const { t, locale } = useTranslations();
-const { date } = useFormat();
+const { date, statusLabel } = useFormat();
 
 const props = defineProps({
     requests: Object,
@@ -47,17 +47,6 @@ const statusVariant = (status) => {
         cancelled: 'gray',
     };
     return map[status] || 'gray';
-};
-
-const statusLabel = (status) => {
-    const map = {
-        pending: t('car_requests.status.pending'),
-        contacted: t('car_requests.status.contacted'),
-        in_progress: t('car_requests.status.in_progress'),
-        completed: t('car_requests.status.completed'),
-        cancelled: t('car_requests.status.cancelled'),
-    };
-    return map[status] || status;
 };
 
 const filteredRequests = computed(() => {
@@ -220,7 +209,7 @@ const copyPublicUrl = () => {
                                         </p>
                                     </Link>
                                 </div>
-                                <Badge :variant="statusVariant(request.status)" class="shrink-0">{{ statusLabel(request.status) }}</Badge>
+                                <Badge :variant="statusVariant(request.status)" class="shrink-0">{{ statusLabel(t, request.status) }}</Badge>
                             </div>
 
                             <div class="mt-4 space-y-2 text-sm">

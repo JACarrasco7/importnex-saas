@@ -43,7 +43,7 @@ const inputClass = 'block w-full rounded-lg border-gray-300 pl-10 text-sm text-g
             </button>
 
             <p class="text-center text-sm text-gray-600 dark:text-gray-400">
-                {{ t('auth.no_account') }}
+                {{ t('auth.remembered_password') }}
                 <Link :href="route('login')" class="font-semibold text-estoril-600 hover:text-estoril-500 dark:text-estoril-300">{{ t('auth.login') }}</Link>
             </p>
         </form>

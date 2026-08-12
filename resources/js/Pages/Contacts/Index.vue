@@ -84,7 +84,7 @@ const confirmDelete = () => {
 
         <div class="py-8">
             <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <PageHeader :title="t('contacts.network_title')" :subtitle="t('contacts.subtitle', { count: contacts.total || 0 })">
+                <PageHeader :title="t('contacts.network_title')" :subtitle="t('contacts.subtitle', { count: props.contacts?.total || 0 })">
                     <template #actions>
                         <Link :href="route('contacts.create')" prefetch="hover" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
                             <PlusIcon class="h-4 w-4" />
@@ -124,7 +124,7 @@ const confirmDelete = () => {
                         <div class="mt-1 text-2xl font-bold text-estoril-600 dark:text-estoril-400">{{ stats.dealers }}</div>
                     </div>
                     <div class="rounded-xl bg-emerald-50 p-4 shadow-sm ring-1 ring-emerald-200 dark:bg-emerald-900/20 dark:ring-emerald-800">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">{{ t('cars.transport') }}</div>
+                        <div class="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">{{ t('contacts.transport') }}</div>
                         <div class="mt-1 text-2xl font-bold text-emerald-600 dark:text-emerald-400">{{ stats.transport }}</div>
                     </div>
                 </div>
@@ -172,10 +172,10 @@ const confirmDelete = () => {
                                 <Link :href="route('contacts.show', contact.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-estoril-50 hover:text-estoril-600" :title="t('common.view')">
                                     <EyeIcon class="h-4 w-4" />
                                 </Link>
-                                <Link :href="route('contacts.edit', contact.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600" :title="t('cars.edit')">
+                                <Link :href="route('contacts.edit', contact.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600" :title="t('common.edit')">
                                     <PencilIcon class="h-4 w-4" />
                                 </Link>
-                                <button type="button" @click="askDelete(contact)" class="rounded-md p-1.5 text-gray-400 hover:bg-rose-50 hover:text-rose-600" :title="t('cars.delete_label')">
+                                <button type="button" @click="askDelete(contact)" class="rounded-md p-1.5 text-gray-400 hover:bg-rose-50 hover:text-rose-600" :title="t('common.delete')">
                                     <TrashIcon class="h-4 w-4" />
                                 </button>
                             </div>

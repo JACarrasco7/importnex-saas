@@ -209,7 +209,7 @@ function featureValueDisplay(value) {
                                 €{{ billingPeriod === 'yearly' ? plan.yearlyPrice : plan.price }}
                             </span>
                             <span class="text-sm text-gray-500 dark:text-gray-400">
-                                /{{ billingPeriod === 'yearly' ? t('pricing_public.year') : t('pricing_public.month') }}
+                                /{{ billingPeriod === 'yearly' ? t('pricing_public.yearly_short') : t('pricing_public.monthly_short') }}
                             </span>
                         </div>
 

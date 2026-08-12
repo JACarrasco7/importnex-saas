@@ -4,6 +4,9 @@ import { usePage } from '@inertiajs/vue3';
 import { SparklesIcon, XMarkIcon, PaperAirplaneIcon, TrashIcon, ArrowsPointingOutIcon, ArrowsPointingInIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outline';
 import axios from 'axios';
 import FloatingActionGrid from '@/Components/FloatingActionGrid.vue';
+import { useTranslations } from '@/Composables/useTranslations';
+
+const { t } = useTranslations();
 
 const open = ref(false);
 const expanded = ref(false);
@@ -59,7 +62,7 @@ async function send() {
     const userText = inputText.value.trim();
     if (!userText) return;
     if (!hasKey.value) {
-        errorMsg.value = 'No hay IA configurada. Ve a Organización → Edit para añadir un proveedor y una API key.';
+        errorMsg.value = t('ai.no_provider');
         return;
     }
 
@@ -168,7 +171,7 @@ onMounted(() => scrollToBottom());
         <!-- No provider warning -->
         <div v-if="!hasKey" class="m-3 flex items-start gap-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800 ring-1 ring-amber-200">
             <ExclamationTriangleIcon class="mt-0.5 h-4 w-4 shrink-0" />
-            <span>Necesitas configurar un proveedor IA en <strong>Organización → Edit</strong>.</span>
+            <span v-html="t('ai.no_provider_hint')"></span>
         </div>
 
         <!-- Error -->

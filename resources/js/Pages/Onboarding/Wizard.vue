@@ -177,14 +177,14 @@ const goToCarsIndex = () => {
                             <BuildingOfficeIcon class="h-10 w-10 text-estoril-600" />
                         </div>
                         <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                            Tu organización está lista
+                            {{ t('onboarding.step1_done_title') }}
                         </h3>
                         <p class="text-gray-600 dark:text-gray-400 mb-6">
-                            <span class="font-semibold">{{ progress?.organization?.name }}</span> ha sido creada correctamente. Ya puedes empezar a importar vehículos.
+                            {{ t('onboarding.step1_done_desc', { name: progress?.organization?.name }) }}
                         </p>
                         <div class="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                             <CheckCircleIcon class="h-5 w-5 text-green-600" />
-                            <span>Organización creada</span>
+                            <span>{{ t('onboarding.org_created') }}</span>
                         </div>
                     </div>
 
@@ -194,14 +194,14 @@ const goToCarsIndex = () => {
                             <CarIcon class="h-10 w-10" :class="stepData?.carsCount > 0 ? 'text-green-600' : 'text-estoril-600'" />
                         </div>
                         <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                            {{ stepData?.carsCount > 0 ? '¡Genial!' : 'Añade tu primer vehículo' }}
+                            {{ stepData?.carsCount > 0 ? t('onboarding.step2_title_done') : t('onboarding.step2_title_empty') }}
                         </h3>
                         <p class="text-gray-600 dark:text-gray-400 mb-6">
                             {{ stepData?.subtitle }}
                         </p>
                         <div v-if="stepData?.carsCount > 0" class="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-6">
                             <CheckCircleIcon class="h-5 w-5 text-green-600" />
-                            <span>{{ stepData?.carsCount }} vehículo(s) añadido(s)</span>
+                            <span>{{ t('onboarding.step2_count_desc', { count: stepData.carsCount }) }}</span>
                         </div>
                         <button
                             v-else
@@ -210,7 +210,7 @@ const goToCarsIndex = () => {
                             @click="goToCarsIndex"
                         >
                             <TruckIcon class="h-5 w-5" />
-                            Ir a vehículos
+                            {{ t('onboarding.go_to_vehicles') }}
                         </button>
                     </div>
 

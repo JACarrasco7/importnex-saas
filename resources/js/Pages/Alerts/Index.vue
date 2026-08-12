@@ -400,7 +400,7 @@ const inlineActions = (alert) => {
                     </button>
                 </div>
                 <button @click="showSnooze = false" class="mt-4 w-full rounded-lg bg-gray-50 px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 dark:bg-gray-700/50 dark:hover:bg-gray-700">
-                    Cancelar
+                    {{ t('common.cancel') }}
                 </button>
             </div>
         </div>

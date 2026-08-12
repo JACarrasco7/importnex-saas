@@ -16,7 +16,7 @@ const props = defineProps({
     totalTransport: Number,
 });
 
-const { currency, statusVariant } = useFormat();
+const { currency, statusLabel, statusVariant } = useFormat();
 </script>
 
 <template>
@@ -49,12 +49,12 @@ const { currency, statusVariant } = useFormat();
                                 <div>
                                     <h3 class="text-lg font-bold text-gray-900">{{ trip.city }}</h3>
                                     <p class="text-sm text-gray-500">
-                                        {{ trip.count }} cars · Transport {{ currency(trip.total_transport) }} · Value {{ currency(trip.total_value) }}
+                                        {{ t('trips.summary', { count: trip.count, transport: currency(trip.total_transport), value: currency(trip.total_value) }) }}
                                     </p>
                                 </div>
                             </div>
                             <Badge v-if="trip.potential_savings > 0" variant="green">
-                                Save {{ currency(trip.potential_savings) }}
+                                {{ t('trips.save') }} {{ currency(trip.potential_savings) }}
                             </Badge>
                         </div>
                         <div v-if="trip.recommendation" class="border-b border-gray-200 bg-blue-50 px-6 py-3">

@@ -1,6 +1,9 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { XMarkIcon } from '@heroicons/vue/24/outline';
+import { useTranslations } from '@/Composables/useTranslations';
+
+const { t } = useTranslations();
 
 const show = ref(false);
 const email = ref('');
@@ -39,12 +42,12 @@ const submit = async () => {
             submitted.value = true;
             setTimeout(close, 2000);
         } else if (resp.status === 429) {
-            errorMsg.value = data.message || 'Demasiados intentos, prueba en un minuto.';
+            errorMsg.value = data.message || t('newsletter.error_rate_limit');
         } else {
-            errorMsg.value = data.message || 'No se pudo suscribir. Inténtalo de nuevo.';
+            errorMsg.value = data.message || t('newsletter.error_generic');
         }
     } catch (e) {
-        errorMsg.value = 'Error de conexión. Inténtalo de nuevo.';
+        errorMsg.value = t('newsletter.error_connection');
     } finally {
         submitting.value = false;
     }
@@ -94,14 +97,11 @@ onMounted(() => {
                                 <svg class="h-6 w-6 text-estoril-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                 </svg>
-                            </div>
-
-                            <h3 class="text-2xl font-bold text-gray-900 mb-2">
-                                ¿Te gustaría recibir ofertas exclusivas?
+                            </di{{ t('newsletter.popup_title') }}
                             </h3>
 
                             <p class="text-gray-600 mb-6">
-                                Suscríbete a nuestra newsletter y recibe las mejores ofertas de importación de vehículos directamente en tu email.
+                                {{ t('newsletter.popup_desc') }}
                             </p>
 
                             <!-- Form -->
@@ -109,7 +109,7 @@ onMounted(() => {
                                 <input
                                     v-model="email"
                                     type="email"
-                                    placeholder="Tu email"
+                                    :placeholder="t('newsletter.email_placeholder')"
                                     required
                                     :disabled="submitting"
                                     class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-estoril-500 focus:ring-estoril-500 disabled:opacity-50"
@@ -120,7 +120,7 @@ onMounted(() => {
                                     :disabled="submitting || !email"
                                     class="w-full bg-estoril-600 text-white py-3 rounded-lg font-semibold hover:bg-estoril-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    {{ submitting ? 'Enviando...' : 'Suscribirme gratis' }}
+                                    {{ submitting ? t('newsletter.sending') : t('newsletter.subscribe_cta') }}
                                 </button>
 
                                 <p v-if="errorMsg" class="text-xs text-rose-600">{{ errorMsg }}</p>
@@ -128,10 +128,13 @@ onMounted(() => {
 
                             <!-- Success state -->
                             <div v-else class="rounded-lg bg-emerald-50 border border-emerald-200 p-4">
-                                <p class="text-sm font-semibold text-emerald-700">¡Suscripción exitosa!</p>
-                                <p class="mt-1 text-xs text-emerald-600">Te hemos añadido a nuestra newsletter.</p>
+                                <p class="text-sm font-semibold text-emerald-700">{{ t('newsletter.success_title') }}</p>
+                                <p class="mt-1 text-xs text-emerald-600">{{ t('newsletter.success_desc') }}</p>
                             </div>
 
+                            <!-- Legal text -->
+                            <p class="mt-4 text-xs text-gray-500">
+                                {{ t('newsletter.legal_text') }}
                             <!-- Legal text -->
                             <p class="mt-4 text-xs text-gray-500">
                                 Al suscribirte aceptas nuestra política de privacidad. Puedes darte de baja en cualquier momento.

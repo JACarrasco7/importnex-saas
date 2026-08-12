@@ -22,20 +22,20 @@ const currentTab = ref(props.filters?.status || 'all');
 const showDelete = ref(false);
 const clientToDelete = ref(null);
 
-const { currency, statusVariant } = useFormat();
+const { currency, statusLabel, statusVariant } = useFormat();
 const { t } = useTranslations();
 
 const tabs = computed(() => [
-    { id: 'all', label: 'All', count: props.clients.total },
-    ...props.statuses.map(status => ({
+    { id: 'all', label: t('common.all'), count: props.clients?.total || 0 },
+    ...(props.statuses || []).map(status => ({
         id: status,
-        label: status,
-        count: props.clients.data?.filter(c => c.status === status).length || 0
+        label: t(`clients.status.${status}`, status),
+        count: props.clients?.data?.filter(c => c.status === status).length || 0
     }))
 ]);
 
 const filteredClients = computed(() => {
-    let result = props.clients.data || [];
+    let result = props.clients?.data || [];
     if (currentTab.value !== 'all') {
         result = result.filter(c => c.status === currentTab.value);
     }
@@ -50,7 +50,7 @@ const filteredClients = computed(() => {
 });
 
 const stats = computed(() => {
-    const clients = props.clients.data || [];
+    const clients = props.clients?.data || [];
     return {
         total: clients.length,
         active: clients.filter(c => c.status === 'active').length,
@@ -96,7 +96,7 @@ const confirmDelete = () => {
 
         <div class="py-8">
             <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <PageHeader :title="t('clients.title')" :subtitle="t('clients.subtitle', { count: clients.total || 0 })">
+                <PageHeader :title="t('clients.title')" :subtitle="t('clients.subtitle', { count: props.clients?.total || 0 })">
                     <template #actions>
                         <Link :href="route('clients.create')" prefetch="hover" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
                             <PlusIcon class="h-4 w-4" />

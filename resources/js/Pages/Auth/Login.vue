@@ -28,7 +28,7 @@ const inputClass = 'block w-full rounded-lg border-gray-300 pl-10 text-sm text-g
         </div>
 
         <div class="mb-8">
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">{{ t('auth.login') }} {{ t('app.title') }}</h2>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">{{ t('auth.login') }}</h2>
             <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ t('auth.login_subtitle') }}</p>
         </div>
 
