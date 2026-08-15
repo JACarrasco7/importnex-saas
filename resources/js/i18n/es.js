@@ -113,7 +113,6 @@ export default {
     add_subtitle_full: 'Registra un vehículo en tu inventario',
     edit_title: 'Editar: :brand :model',
     add: 'Añadir Vehículo',
-    import: 'Importar CSV',
     vin: 'VIN',
     make: 'Marca',
     model: 'Modelo',

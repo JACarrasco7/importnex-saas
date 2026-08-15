@@ -110,7 +110,6 @@ export default {
   cars: {
     title: 'Find my perfect car',
     add: 'Add Vehicle',
-    import: 'Import CSV',
     vin: 'VIN',
     make: 'Make',
     model: 'Model',
