@@ -103,6 +103,8 @@ export default {
         title: 'Clientes',
         subtitle: ':count en tu CRM',
         add_subtitle: 'Añade un nuevo cliente a tu CRM',
+        add_title: 'Añadir un nuevo cliente',
+        add_subtitle_full: 'Registra un cliente en tu CRM',
         add: 'Añadir Cliente',
         no_clients: 'Aún no hay clientes',
         create_first: 'Crea tu primer cliente',

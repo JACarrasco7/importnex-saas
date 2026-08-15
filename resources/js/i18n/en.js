@@ -118,6 +118,7 @@ export default {
         resolve: 'Resolve',
         mark_resolved: 'Mark as resolved',
         resolved: 'Resolved',
+        pending: 'Pending',
         no_alerts: 'No pending alerts',
         severity: {
             low: 'Low',
