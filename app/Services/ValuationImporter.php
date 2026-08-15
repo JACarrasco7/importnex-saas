@@ -34,6 +34,8 @@ class ValuationImporter
      */
     public bool $skipRemotePhotos = false;
 
+    public function __construct(private readonly GeoCoder $geoCoder = new GeoCoder) {}
+
     /** Aspect keys we accept (mapped to canonical English). */
     private const RESEARCH_ASPECT_MAP = [
         'problemas_comunes' => 'common_issues',
@@ -269,6 +271,15 @@ class ValuationImporter
         // Si Claude manda semáforo explícito, respetarlo (el observer lo pisaría).
         if (isset($m['semaforo']) && $m['semaforo'] !== null && $m['semaforo'] !== '') {
             $car->preserveTrafficLight = true;
+        }
+
+        // §mapa (15-ago-2026) — coordenadas: si el JSON trae lat/lng se usan;
+        // si no, se geolocaliza la ciudad (cache permanente) para que el
+        // coche importado aparezca en el mapa.
+        $coords = $this->resolveCoords($a);
+        if ($coords !== null) {
+            $car->lat = $coords['lat'];
+            $car->lng = $coords['lng'];
         }
 
         // §3.1 — co2_confirmado: warning en avisos
@@ -595,6 +606,30 @@ class ValuationImporter
 
         // already "MM/YYYY" or similar — trust it
         return (string) $raw;
+    }
+
+    /**
+     * Coordenadas del anuncio: lat/lng explícitos del JSON o geocoding de la
+     * ciudad como fallback. Devuelve null si no hay nada resoluble.
+     *
+     * @param  array<string, mixed>  $ad
+     * @return array{lat: float, lng: float}|null
+     */
+    private function resolveCoords(array $ad): ?array
+    {
+        $lat = isset($ad['lat']) && is_numeric($ad['lat']) ? (float) $ad['lat'] : null;
+        $lng = isset($ad['lng']) && is_numeric($ad['lng']) ? (float) $ad['lng'] : null;
+
+        if ($lat !== null && $lng !== null && ($lat !== 0.0 || $lng !== 0.0)) {
+            return ['lat' => $lat, 'lng' => $lng];
+        }
+
+        $city = trim((string) ($ad['ciudad'] ?? ''));
+        if ($city === '') {
+            return null;
+        }
+
+        return $this->geoCoder->geocodeCity($city);
     }
 
     private function formatSeller(array $ad): ?string

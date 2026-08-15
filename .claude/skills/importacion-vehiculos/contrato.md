@@ -112,10 +112,14 @@ Campos no confirmados van a `null`, **nunca inventados**. `co2_confirmado: false
   "vendedor_tipo": "Profesional",
   "vendedor_nombre": "Autohaus Beispiel GmbH",
   "fecha_captura": "2026-08-11",
+  "lat": 52.3069,
+  "lng": 9.7889,
   "descripcion_original": "Texto literal COMPLETO del anuncio...",
   "descripcion_traducida": "Traducción completa..."
 }
 ```
+
+> 🆕 **`lat`/`lng` (15-ago-2026):** coordenadas de la ciudad del anuncio (opcional). Si van, Laravel las guarda tal cual y el coche aparece en el mapa. Si no van, Laravel geolocaliza `ciudad` automáticamente (Nominatim con cache).
 
 > 🔴 **`descripcion_original` = texto literal COMPLETO del anuncio, pegado tal cual** (el que ve el cliente en el portal, incluidas mayúsculas/errores del vendedor). NO resumir, NO corregir, NO inventar. `descripcion_traducida` = la traducción completa al español. Si solo hay una, las dos llevan el mismo texto. Laravel muestra ambas en la ficha (pestaña Resumen: "Texto original" / "Traducción").
 

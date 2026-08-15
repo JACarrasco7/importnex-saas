@@ -186,6 +186,12 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
         ->where('car', '[0-9]+')
         ->name('cars.destroy');
 
+    // Matching coche ↔ solicitud de cliente (vincula cliente y pasa a en curso)
+    Route::post('/cars/{car}/match-request/{carRequest}', [CarController::class, 'matchRequest'])
+        ->where('car', '[0-9]+')
+        ->where('carRequest', '[0-9]+')
+        ->name('cars.match-request');
+
     // Car Photos
     Route::post('/cars/{car}/photos', [CarPhotoController::class, 'store'])->name('cars.photos.store');
     Route::delete('/cars/{car}/photos/{photo}', [CarPhotoController::class, 'destroy'])->name('cars.photos.destroy');

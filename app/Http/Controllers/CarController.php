@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreCarRequest;
 use App\Http\Requests\UpdateCarRequest;
 use App\Models\Car;
+use App\Models\CarRequest;
 use App\Models\Client;
 use App\Services\Scraping\CarScrapingService;
 use Illuminate\Http\JsonResponse;
@@ -140,8 +141,64 @@ class CarController extends Controller
                 'inspections_progress' => $inspectionsProgress,
                 'inspections_by_section' => $inspectionsBySection,
                 'documents_by_group' => $documentsByGroup,
+                'matching_requests' => $this->matchingRequests($car),
             ],
         ]);
+    }
+
+    /**
+     * Solicitudes de clientes compatibles con este coche: misma marca y, si la
+     * solicitud concreta modelo, que coincida también. Solo estados vivos
+     * (pendiente / contactada / en curso). Sirve para vincular el coche al
+     * cliente de la solicitud en un clic tras importarlo.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function matchingRequests(Car $car): array
+    {
+        return CarRequest::query()
+            ->whereIn('status', ['pending', 'contacted', 'in_progress'])
+            ->where(fn ($q) => $q
+                ->whereNull('brand')
+                ->orWhere('brand', 'like', '%'.$car->brand.'%'))
+            ->where(fn ($q) => $q
+                ->where(fn ($q2) => $q2->whereNull('model')->orWhere('model', ''))
+                ->orWhere('model', 'like', '%'.$car->model.'%'))
+            ->with('client:id,name')
+            ->orderByDesc('created_at')
+            ->limit(10)
+            ->get(['id', 'client_id', 'name', 'brand', 'model', 'budget_max', 'status', 'created_at'])
+            ->map(fn ($r) => [
+                'id' => $r->id,
+                'name' => $r->name ?: $r->client?->name,
+                'brand' => $r->brand,
+                'model' => $r->model,
+                'budget_max' => $r->budget_max,
+                'status' => $r->status,
+                'client_id' => $r->client_id,
+            ])
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Vincula este coche con la solicitud de un cliente: asigna el cliente al
+     * coche (si la solicitud lo tiene) y pasa la solicitud a "en curso".
+     */
+    public function matchRequest(Car $car, CarRequest $carRequest): RedirectResponse
+    {
+        if ($carRequest->client_id) {
+            $car->client_id = $carRequest->client_id;
+            $car->save();
+        }
+
+        $carRequest->status = 'in_progress';
+        $carRequest->notes = trim(($carRequest->notes ? $carRequest->notes."\n" : '')
+            .'['.now()->format('d/m/Y H:i')."] Vinculado a vehículo #{$car->id} ({$car->brand} {$car->model}).");
+        $carRequest->save();
+
+        return redirect()->route('cars.show', $car->id)
+            ->with('success', 'Vehículo vinculado a la solicitud.');
     }
 
     private function docGroupLabel(string $group): string

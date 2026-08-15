@@ -686,6 +686,34 @@ const onDocKeyChange = () => {
                     </div>
                 </Teleport>
 
+                <!-- Solicitudes de clientes compatibles (matching por marca/modelo) -->
+                <div v-if="activeSection === 'resumen' && derived?.matching_requests?.length" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
+                    <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+                        <h3 class="text-base font-semibold text-gray-900">{{ t('cars.matching_requests') }}</h3>
+                        <span class="text-xs text-gray-500">{{ derived.matching_requests.length }}</span>
+                    </div>
+                    <ul class="divide-y divide-gray-200">
+                        <li v-for="req in derived.matching_requests" :key="req.id" class="flex items-center justify-between gap-3 px-6 py-3 hover:bg-gray-50">
+                            <div class="min-w-0 flex-1">
+                                <p class="truncate text-sm font-medium text-gray-900">{{ req.name || t('cars.matching_no_name') }}</p>
+                                <p class="text-xs text-gray-500">
+                                    <span v-if="req.brand">{{ req.brand }}{{ req.model ? ' ' + req.model : '' }} · </span>
+                                    <span v-if="req.budget_max">{{ t('cars.matching_budget') }} {{ currency(req.budget_max) }} · </span>
+                                    <span>{{ statusLabel(t, req.status) }}</span>
+                                </p>
+                            </div>
+                            <Link
+                                :href="route('cars.match-request', { car: car.id, carRequest: req.id })"
+                                method="post"
+                                as="button"
+                                class="shrink-0 rounded-lg bg-estoril-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-estoril-500"
+                            >
+                                {{ t('cars.matching_link') }}
+                            </Link>
+                        </li>
+                    </ul>
+                </div>
+
                 <!-- Assigned Client -->
                 <div v-if="car.client" class="overflow-hidden rounded-2xl bg-linear-to-br from-blue-50 to-estoril-50 shadow-sm ring-1 ring-blue-200">
                     <div class="border-b border-blue-200 px-6 py-4 flex items-center gap-2">
