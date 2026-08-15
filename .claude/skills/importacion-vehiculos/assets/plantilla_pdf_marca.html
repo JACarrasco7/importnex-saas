@@ -1,31 +1,31 @@
 <!DOCTYPE html>
 <!--
-  plantilla_pdf_marca.html — PLANTILLA ÚNICA DE MARCA PARA PDFs DE INVESTIGACIÓN
-  =============================================================================
+  plantilla_pdf_marca.html — v2.9.7 · PLANTILLA ÚNICA DE MARCA PARA PDFs DE INVESTIGACIÓN
+  =======================================================================================
   PROPÓSITO
-    Esta es la plantilla HTML que Claude DEBE usar para generar los PDFs de
-    investigación (informe_busqueda_*.pdf y informe_unidad_*.pdf).
-    Es una copia FIEL del diseño de las plantillas Blade de Laravel
-    (resources/views/jj-import/ficha-coche.blade.php) para que los PDFs de
-    Claude y los de Laravel sean VISUALMENTE IDÉNTICOS.
+    Plantilla OBLIGATORIA para que Claude genere los PDFs de investigación
+    (informe_busqueda_*.pdf y informe_unidad_*.pdf). Diseño premium, coherente
+    con la marca JJ Import Motors (estoril/asphalt/platinum + accent naranja),
+    pero con estructura propia de informes (no es el folleto).
 
-  CÓMO USARLA (obligatorio, ver SKILL.md §Quién genera cada PDF)
+  CÓMO USARLA (SKILL.md §Quién genera cada PDF)
     1. Copia este HTML como base.
-    2. Rellena los marcadores {{...}} con los datos del informe.
-    3. Guarda como informe_busqueda_<modelo>.html / informe_unidad_<unidad>.html
-       en informes\<marca>\<modelo>\.
+    2. Rellena los {{MARCARORES}} con los datos del informe.
+    3. Guarda como informe_busqueda_<modelo>.html / informe_unidad_<unidad>.html.
     4. Convierte a PDF con Chrome headless:
-         chrome --headless --print-to-pdf=informe_busqueda_<modelo>.pdf informe_busqueda_<modelo>.html
+         chrome --headless --print-to-pdf=salida.pdf entrada.html
        Si no hay Chrome: script Python con reportlab manteniendo esta identidad.
-    5. Borra el .html intermedio (o consérvalo; el .pdf es el entregable).
 
-  DISEÑO (NO CAMBIAR — es la marca)
-    - Tipografía: Inter (import de Google Fonts).
-    - Fondo: #0f1d42 → #14265a (gradiente) + grid sutil + resplandores radiales.
-    - Colores: estoril #1A306D · accent #E8590C · platino #BEC0C3 · texto #e5e7eb.
-    - Elementos: header (logo + badge), hero (eyebrow + título + claim),
-      specs-strip, price-band naranja, secciones con h2, chips, listas,
-      CTA + QR, legal.
+  COMPONENTES DISPONIBLES
+    - Header con logo, número de informe y badge de flujo
+    - Hero con eyebrow, título y claim
+    - KPI cards (grid de 4 métricas destacadas)
+    - Secciones con h2 + sub-bloques
+    - Grid de cobertura de fuentes con estados (OK/degradado/omitido)
+    - Tabla de candidatos premium (badges DE/ES, semáforo, highlight del elegido)
+    - Chips de equipamiento / destacados
+    - Tarjeta de recomendación / veredicto
+    - Footer completo (contacto, QR, legal, fecha)
 -->
 <html lang="es">
 <head>
@@ -38,7 +38,7 @@
 
     html, body {
         font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
-        background: #0f1d42;
+        background: #0a142e;
         color: #e5e7eb;
         -webkit-font-smoothing: antialiased;
         -webkit-print-color-adjust: exact;
@@ -47,137 +47,180 @@
 
     body {
         position: relative;
-        padding: 30px 34px 60px 34px;
         background:
-            radial-gradient(ellipse at 100% 0%, rgba(143, 163, 217, 0.12) 0%, transparent 45%),
-            linear-gradient(180deg, #0f1d42 0%, #14265a 50%, #0f1d42 100%);
+            radial-gradient(ellipse at 100% 0%, rgba(143, 163, 217, 0.14) 0%, transparent 50%),
+            radial-gradient(ellipse at 0% 100%, rgba(232, 89, 12, 0.08) 0%, transparent 50%),
+            linear-gradient(180deg, #0a142e 0%, #0f1d42 40%, #14265a 100%);
     }
 
     body::before {
         content: '';
-        position: absolute;
-        inset: 0;
+        position: absolute; inset: 0;
         background-image:
             linear-gradient(rgba(143, 163, 217, 0.04) 1px, transparent 1px),
             linear-gradient(90deg, rgba(143, 163, 217, 0.04) 1px, transparent 1px);
-        background-size: 28px 28px;
-        pointer-events: none;
-        z-index: 0;
+        background-size: 26px 26px;
+        pointer-events: none; z-index: 0;
     }
 
-    .container { position: relative; z-index: 1; max-width: 1060px; margin: 0 auto; }
+    .container { position: relative; z-index: 1; max-width: 1060px; margin: 0 auto; padding: 34px 34px 56px 34px; }
 
+    /* ── HEADER ─────────────────────────────────────────── */
     .header {
         display: flex; justify-content: space-between; align-items: center;
-        padding-bottom: 16px; border-bottom: 1px solid rgba(143, 163, 217, 0.2);
+        padding-bottom: 16px; border-bottom: 1px solid rgba(143, 163, 217, 0.22);
         margin-bottom: 22px;
     }
-    .logo { height: 46px; width: auto; }
-    .badge-llave {
-        display: inline-flex; align-items: center; gap: 7px;
+    .brand-lockup { display: flex; align-items: center; gap: 12px; }
+    .logo { height: 44px; width: auto; }
+    .brand-name { font-size: 18px; font-weight: 800; color: #fff; letter-spacing: -0.3px; }
+    .brand-name .accent { color: #E8590C; }
+    .brand-sub { font-size: 8.5px; color: #8fa3d9; letter-spacing: 2.5px; text-transform: uppercase; font-weight: 600; }
+    .header-right { text-align: right; }
+    .badge-flujo {
+        display: inline-flex; align-items: center; gap: 6px;
         background: linear-gradient(135deg, #1A306D 0%, #2a3d87 100%);
-        color: #fff; padding: 8px 16px; border-radius: 100px;
-        font-size: 10px; font-weight: 700; letter-spacing: 1.3px;
-        box-shadow: 0 4px 14px rgba(26, 48, 109, 0.4);
+        color: #fff; padding: 7px 14px; border-radius: 100px;
+        font-size: 9.5px; font-weight: 700; letter-spacing: 1.2px;
+        box-shadow: 0 4px 14px rgba(26, 48, 109, 0.45);
     }
+    .meta-line { font-size: 8.5px; color: #64748b; margin-top: 6px; }
 
-    .hero { text-align: center; margin-bottom: 20px; }
+    /* ── HERO ───────────────────────────────────────────── */
+    .hero { text-align: center; margin-bottom: 22px; }
     .hero-eyebrow {
         display: inline-flex; align-items: center; gap: 8px;
-        background: rgba(26, 48, 109, 0.15); border: 1px solid rgba(143, 163, 217, 0.3);
-        color: #8fa3d9; padding: 5px 15px; border-radius: 100px;
-        font-size: 9.5px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
-        margin-bottom: 10px;
+        background: rgba(26, 48, 109, 0.2); border: 1px solid rgba(143, 163, 217, 0.35);
+        color: #9fb4e8; padding: 5px 15px; border-radius: 100px;
+        font-size: 9.5px; font-weight: 600; letter-spacing: 1.6px; text-transform: uppercase;
+        margin-bottom: 12px;
     }
-    .h1-title { font-size: 28px; font-weight: 800; line-height: 1.12; color: #fff; letter-spacing: -0.5px; }
-    .h1-title .accent { color: #8fa3d9; }
-    .claim { font-size: 13px; color: #94a3b8; margin-top: 8px; }
+    .h1-title { font-size: 30px; font-weight: 900; line-height: 1.1; color: #fff; letter-spacing: -0.7px; }
+    .h1-title .accent { color: #E8590C; }
+    .claim { font-size: 13px; color: #94a3b8; margin-top: 9px; max-width: 760px; margin-left: auto; margin-right: auto; line-height: 1.5; }
 
-    /* Specs strip */
+    /* ── KPI CARDS ──────────────────────────────────────── */
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+    .kpi-card {
+        background: linear-gradient(180deg, rgba(20,38,90,0.85) 0%, rgba(15,23,42,0.6) 100%);
+        border: 1px solid rgba(143,163,217,0.25); border-radius: 12px; padding: 12px 14px;
+    }
+    .kpi-card .k { font-size: 8px; color: #8fa3d9; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 3px; }
+    .kpi-card .v { font-size: 16px; font-weight: 800; color: #f1f5f9; line-height: 1.15; }
+    .kpi-card .v .accent { color: #E8590C; }
+    .kpi-card .s { font-size: 8.5px; color: #64748b; margin-top: 2px; }
+
+    /* ── SPECS STRIP ────────────────────────────────────── */
     .specs-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 18px; }
     .spec-box {
-        background: linear-gradient(180deg, rgba(15,23,42,0.8) 0%, rgba(15,23,42,0.5) 100%);
-        border: 1px solid rgba(143,163,217,0.2); border-radius: 10px; padding: 10px 12px; text-align: center;
+        background: rgba(15,23,42,0.55); border: 1px solid rgba(143,163,217,0.2);
+        border-radius: 10px; padding: 9px 12px; text-align: center;
     }
     .spec-box .k { font-size: 8px; color: #64748b; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 600; }
-    .spec-box .v { font-size: 14px; font-weight: 800; color: #f1f5f9; margin-top: 2px; }
+    .spec-box .v { font-size: 13px; font-weight: 800; color: #f1f5f9; margin-top: 2px; }
 
-    /* Price band */
+    /* ── PRICE BAND ─────────────────────────────────────── */
     .price-band {
         display: flex; align-items: center; justify-content: space-between; gap: 14px;
-        background: linear-gradient(135deg, rgba(232,89,12,0.18) 0%, rgba(26,48,109,0.15) 100%);
+        background: linear-gradient(135deg, rgba(232,89,12,0.16) 0%, rgba(26,48,109,0.14) 100%);
         border: 1px solid rgba(232,89,12,0.4); border-radius: 14px; padding: 16px 22px; margin-bottom: 18px;
     }
     .price-main .label { font-size: 9px; color: #8fa3d9; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
-    .price-main .value { font-size: 30px; font-weight: 900; color: #E8590C; line-height: 1.1; }
-    .price-main .caption { font-size: 10.5px; color: #cbd5e1; margin-top: 2px; }
-    .price-side { text-align: right; font-size: 10px; color: #94a3b8; line-height: 1.5; }
+    .price-main .value { font-size: 30px; font-weight: 900; color: #E8590C; line-height: 1.05; }
+    .price-main .caption { font-size: 10.5px; color: #cbd5e1; margin-top: 3px; }
+    .price-side { text-align: right; font-size: 10px; color: #94a3b8; line-height: 1.55; max-width: 300px; }
 
-    /* Sections */
-    .section { margin-bottom: 16px; }
+    /* ── SECTIONS ───────────────────────────────────────── */
+    .section { margin-bottom: 18px; }
     .h2 {
-        color: #8fa3d9; font-size: 12px; font-weight: 800; letter-spacing: 1.6px; text-transform: uppercase;
-        padding-bottom: 6px; border-bottom: 1px solid rgba(143,163,217,0.15); margin-bottom: 10px;
+        color: #9fb4e8; font-size: 12px; font-weight: 800; letter-spacing: 1.7px; text-transform: uppercase;
+        padding-bottom: 7px; border-bottom: 1px solid rgba(143,163,217,0.18); margin-bottom: 11px;
+        display: flex; align-items: center; gap: 8px;
     }
+    .h2::before { content: ''; width: 4px; height: 14px; border-radius: 2px; background: linear-gradient(180deg, #E8590C, #f07c3a); }
     .list { list-style: none; }
-    .list li {
-        display: flex; align-items: flex-start; gap: 8px;
-        font-size: 11.5px; color: #cbd5e1; line-height: 1.5; padding: 4px 0;
-    }
-    .list li::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #8fa3d9; margin-top: 5px; flex-shrink: 0; }
+    .list li { font-size: 11.5px; color: #cbd5e1; line-height: 1.6; padding: 4px 0 4px 15px; position: relative; }
+    .list li::before { content: '▸'; color: #E8590C; position: absolute; left: 0; font-size: 10px; top: 4px; }
     .list li strong { color: #f1f5f9; }
 
+    /* ── COVERAGE GRID ──────────────────────────────────── */
+    .coverage { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .cov-card {
+        display: flex; align-items: center; gap: 10px;
+        background: rgba(15,23,42,0.5); border: 1px solid rgba(143,163,217,0.18);
+        border-radius: 10px; padding: 9px 12px;
+    }
+    .cov-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .cov-dot.ok { background: #10B981; box-shadow: 0 0 8px rgba(16,185,129,0.6); }
+    .cov-dot.deg { background: #F59E0B; box-shadow: 0 0 8px rgba(245,158,11,0.5); }
+    .cov-dot.omit { background: #64748b; }
+    .cov-name { font-size: 10px; font-weight: 700; color: #f1f5f9; }
+    .cov-desc { font-size: 8.5px; color: #94a3b8; }
+
+    /* ── TABLE ──────────────────────────────────────────── */
+    table.data { width: 100%; border-collapse: collapse; margin-bottom: 6px; }
+    table.data th {
+        text-align: left; font-size: 8.5px; color: #9fb4e8; text-transform: uppercase;
+        letter-spacing: 0.8px; font-weight: 700; padding: 7px 8px;
+        border-bottom: 1px solid rgba(143,163,217,0.28);
+    }
+    table.data td { font-size: 10px; color: #cbd5e1; padding: 7px 8px; border-bottom: 1px solid rgba(143,163,217,0.08); vertical-align: middle; }
+    table.data tr:nth-child(even) td { background: rgba(26,48,109,0.12); }
+    table.data tr.pick td { background: rgba(232,89,12,0.10); border-left: 3px solid #E8590C; }
+    .badge-origen { display: inline-block; padding: 1px 7px; border-radius: 6px; font-size: 8px; font-weight: 800; letter-spacing: 0.5px; }
+    .badge-origen.de { background: #1A306D; color: #c7d4f5; border: 1px solid rgba(143,163,217,0.35); }
+    .badge-origen.es { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.35); }
+    .sem { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
+    .sem.green { background: #10B981; } .sem.amber { background: #F59E0B; } .sem.red { background: #EF4444; }
+    .enlace { color: #8fa3d9; text-decoration: none; font-size: 9.5px; word-break: break-all; }
+
+    /* ── CHIPS ──────────────────────────────────────────── */
     .equip { display: flex; flex-wrap: wrap; gap: 6px; }
     .chip {
-        background: rgba(26,48,109,0.25); border: 1px solid rgba(143,163,217,0.25);
-        color: #cbd5e1; padding: 4px 10px; border-radius: 100px; font-size: 9.5px; font-weight: 500;
+        background: rgba(26,48,109,0.28); border: 1px solid rgba(143,163,217,0.28);
+        color: #dbe4f5; padding: 5px 11px; border-radius: 100px; font-size: 9.5px; font-weight: 500;
     }
 
-    /* Tables (informe de búsqueda / unidades) */
-    table.data { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
-    table.data th {
-        text-align: left; font-size: 8.5px; color: #8fa3d9; text-transform: uppercase;
-        letter-spacing: 0.8px; font-weight: 700; padding: 6px 8px;
-        border-bottom: 1px solid rgba(143,163,217,0.25);
+    /* ── RECOMMENDATION ─────────────────────────────────── */
+    .verdict-card {
+        background: linear-gradient(135deg, rgba(232,89,12,0.14) 0%, rgba(26,48,109,0.2) 100%);
+        border: 1px solid rgba(232,89,12,0.4); border-radius: 14px; padding: 16px 20px;
     }
-    table.data td { font-size: 10.5px; color: #cbd5e1; padding: 6px 8px; border-bottom: 1px solid rgba(143,163,217,0.1); }
-    table.data tr:nth-child(even) td { background: rgba(26,48,109,0.12); }
-    .sem { display: inline-block; width: 9px; height: 9px; border-radius: 50%; }
-    .sem.green { background: #10B981; } .sem.amber { background: #F59E0B; } .sem.red { background: #EF4444; }
+    .verdict-title { font-size: 11px; color: #E8590C; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 6px; }
+    .verdict-text { font-size: 12px; color: #e8edf7; line-height: 1.65; }
+    .verdict-text strong { color: #fff; }
 
-    /* CTA + QR */
-    .cta-row { display: grid; grid-template-columns: 1.6fr 1fr; gap: 14px; margin-top: 4px; }
-    .cta-card {
-        background: linear-gradient(135deg, rgba(232,89,12,0.12) 0%, rgba(26,48,109,0.15) 100%);
-        border: 1px solid rgba(232,89,12,0.35); border-radius: 14px; padding: 16px 20px;
+    /* ── FOOTER ─────────────────────────────────────────── */
+    .footer {
+        margin-top: 22px; padding-top: 14px; border-top: 1px solid rgba(143,163,217,0.2);
+        display: flex; justify-content: space-between; align-items: center; gap: 16px;
     }
-    .cta-text { font-size: 14px; font-weight: 800; color: #fff; margin-bottom: 4px; }
-    .contact { font-size: 11px; color: #cbd5e1; line-height: 1.6; }
-
-    .qr-card {
-        background: linear-gradient(180deg, rgba(15,23,42,0.75) 0%, rgba(15,23,42,0.45) 100%);
-        border: 1px solid rgba(143,163,217,0.3); border-radius: 14px; padding: 12px;
-        display: flex; align-items: center; gap: 12px;
-    }
-    .qr-box { flex-shrink: 0; width: 82px; height: 82px; background: #fff; border-radius: 8px; padding: 4px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(143,163,217,0.3); }
-    .qr-box svg { width: 100%; height: 100%; display: block; }
-    .qr-tag { color: #8fa3d9; font-size: 8px; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 3px; text-transform: uppercase; }
-    .qr-title { font-size: 12px; font-weight: 800; color: #f8fafc; margin-bottom: 3px; line-height: 1.15; }
-    .qr-desc { font-size: 8.5px; color: #94a3b8; line-height: 1.35; }
-
+    .footer-contact { font-size: 10.5px; color: #cbd5e1; line-height: 1.7; }
+    .footer-contact strong { color: #fff; }
+    .qr-box { flex-shrink: 0; width: 74px; height: 74px; background: #fff; border-radius: 10px; padding: 4px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(143,163,217,0.25); }
+    .qr-box svg, .qr-box img { width: 100%; height: 100%; display: block; border-radius: 6px; }
     .legal {
-        margin-top: 16px; padding-top: 10px; border-top: 1px solid rgba(143,163,217,0.15);
-        font-size: 8px; color: #64748b; line-height: 1.5; font-style: italic; text-align: center;
+        margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(143,163,217,0.12);
+        font-size: 7.8px; color: #64748b; line-height: 1.55; font-style: italic; text-align: center;
     }
 </style>
 </head>
 <body>
 <div class="container">
 
-    <!-- HEADER: logo de marca/JJ_logo_horizontal_blanco.png (o base64) + badge -->
+    <!-- HEADER -->
     <div class="header">
-        <img src="{{LOGO}}" alt="JJ Import Motors" class="logo">
-        <span class="badge-llave">{{BADGE}}</span>
+        <div class="brand-lockup">
+            <img src="{{LOGO}}" alt="JJ Import Motors" class="logo">
+            <div>
+                <div class="brand-name">JJ <span class="accent">Import</span> Motors</div>
+                <div class="brand-sub">Búsqueda &amp; Importación de Vehículos</div>
+            </div>
+        </div>
+        <div class="header-right">
+            <span class="badge-flujo">{{BADGE_FLUJO}}</span>
+            <div class="meta-line">{{NUMERO_INFORME}} · {{FECHA}}</div>
+        </div>
     </div>
 
     <!-- HERO -->
@@ -187,80 +230,97 @@
         <p class="claim">{{CLAIM}}</p>
     </div>
 
-    <!-- SPECS STRIP (4 valores clave: año | km | combustible | precio) -->
-    <div class="specs-strip">
-        <div class="spec-box"><div class="k">Año</div><div class="v">{{ANIO}}</div></div>
-        <div class="spec-box"><div class="k">Km</div><div class="v">{{KM}}</div></div>
-        <div class="spec-box"><div class="k">Combustible</div><div class="v">{{COMBUSTIBLE}}</div></div>
-        <div class="spec-box"><div class="k">Precio</div><div class="v">{{PRECIO}}</div></div>
+    <!-- KPI CARDS (4 métricas clave) -->
+    <div class="kpi-grid">
+        <div class="kpi-card"><div class="k">{{KPI_1_K}}</div><div class="v">{{KPI_1_V}}</div><div class="s">{{KPI_1_S}}</div></div>
+        <div class="kpi-card"><div class="k">{{KPI_2_K}}</div><div class="v">{{KPI_2_V}}</div><div class="s">{{KPI_2_S}}</div></div>
+        <div class="kpi-card"><div class="k">{{KPI_3_K}}</div><div class="v">{{KPI_3_V}}</div><div class="s">{{KPI_3_S}}</div></div>
+        <div class="kpi-card"><div class="k">{{KPI_4_K}}</div><div class="v {{KPI_4_CLASS}}">{{KPI_4_V}}</div><div class="s">{{KPI_4_S}}</div></div>
     </div>
 
-    <!-- PRICE BAND (opcional: precio final / ahorro) -->
+    <!-- SPECS STRIP -->
+    <div class="specs-strip">
+        <div class="spec-box"><div class="k">Año mín.</div><div class="v">{{ANIO}}</div></div>
+        <div class="spec-box"><div class="k">Km máx.</div><div class="v">{{KM}}</div></div>
+        <div class="spec-box"><div class="k">Combustible</div><div class="v">{{COMBUSTIBLE}}</div></div>
+        <div class="spec-box"><div class="k">Cambio</div><div class="v">{{CAMBIO}}</div></div>
+    </div>
+
+    <!-- PRICE BAND (opcional) -->
     <div class="price-band">
         <div class="price-main">
             <div class="label">{{PRECIO_LABEL}}</div>
             <div class="value">{{PRECIO_FINAL}}</div>
             <div class="caption">{{PRECIO_CAPTION}}</div>
         </div>
-        <div class="price-side">
-            <div>{{PRECIO_NOTA}}</div>
+        <div class="price-side">{{PRECIO_NOTA}}</div>
+    </div>
+
+    <!-- COVERAGE DE FUENTES -->
+    <div class="section">
+        <div class="h2">Cobertura de fuentes</div>
+        <div class="coverage">
+            <div class="cov-card"><span class="cov-dot {{F1_CLASS}}"></span><div><div class="cov-name">mobile.de (DE)</div><div class="cov-desc">{{F1_DESC}}</div></div></div>
+            <div class="cov-card"><span class="cov-dot {{F2_CLASS}}"></span><div><div class="cov-name">Coches.net (ES)</div><div class="cov-desc">{{F2_DESC}}</div></div></div>
+            <div class="cov-card"><span class="cov-dot {{F3_CLASS}}"></span><div><div class="cov-name">AutoScout24.de (DE)</div><div class="cov-desc">{{F3_DESC}}</div></div></div>
+            <div class="cov-card"><span class="cov-dot {{F4_CLASS}}"></span><div><div class="cov-name">Wallapop (ES)</div><div class="cov-desc">{{F4_DESC}}</div></div></div>
+            <div class="cov-card"><span class="cov-dot {{F5_CLASS}}"></span><div><div class="cov-name">kleinanzeigen.de (DE)</div><div class="cov-desc">{{F5_DESC}}</div></div></div>
+            <div class="cov-card"><span class="cov-dot {{F6_CLASS}}"></span><div><div class="cov-name">Milanuncios (ES)</div><div class="cov-desc">{{F6_DESC}}</div></div></div>
+            <div class="cov-card"><span class="cov-dot {{F7_CLASS}}"></span><div><div class="cov-name">AutoUncle (DE)</div><div class="cov-desc">{{F7_DESC}}</div></div></div>
         </div>
     </div>
 
-    <!-- SECCIONES: repite el patrón .section por cada bloque del informe -->
-    <div class="section">
-        <div class="h2">{{SECCION_1_TITULO}}</div>
-        <ul class="list">
-            <li><strong>{{ITEM_1}}</strong></li>
-            <li>{{ITEM_2}}</li>
-        </ul>
-    </div>
-
-    <!-- TABLA (informe de búsqueda: candidatos) -->
+    <!-- TABLA DE CANDIDATOS -->
     <div class="section">
         <div class="h2">{{TABLA_TITULO}}</div>
         <table class="data">
             <thead>
-                <tr><th>#</th><th>Unidad</th><th>Año</th><th>Km</th><th>Precio</th><th>Encaje</th></tr>
+                <tr><th>#</th><th>Origen</th><th>Precio</th><th>Coste en Huelva</th><th>Año</th><th>Km</th><th>Motor</th><th>Encaje</th><th>Anuncio</th></tr>
             </thead>
             <tbody>
-                <tr><td>1</td><td>{{UNIDAD}}</td><td>{{ANIO}}</td><td>{{KM}}</td><td>{{PRECIO}}</td><td><span class="sem green"></span> {{ENCaje}}</td></tr>
+                <tr class="{{FILA_1_CLASS}}"><td>1</td><td><span class="badge-origen {{ORIGEN_1}}">{{ORIGEN_1}}</span></td><td>{{P_1}}</td><td>{{PH_1}}</td><td>{{A_1}}</td><td>{{KM_1}}</td><td>{{MOTOR_1}}</td><td><span class="sem {{SEM_1}}"></span>{{ENC_1}}</td><td><a class="enlace" href="{{URL_1}}">{{URL_1_SHORT}}</a></td></tr>
+                <tr class="{{FILA_2_CLASS}}"><td>2</td><td><span class="badge-origen {{ORIGEN_2}}">{{ORIGEN_2}}</span></td><td>{{P_2}}</td><td>{{PH_2}}</td><td>{{A_2}}</td><td>{{KM_2}}</td><td>{{MOTOR_2}}</td><td><span class="sem {{SEM_2}}"></span>{{ENC_2}}</td><td><a class="enlace" href="{{URL_2}}">{{URL_2_SHORT}}</a></td></tr>
+                <tr class="{{FILA_3_CLASS}}"><td>3</td><td><span class="badge-origen {{ORIGEN_3}}">{{ORIGEN_3}}</span></td><td>{{P_3}}</td><td>{{PH_3}}</td><td>{{A_3}}</td><td>{{KM_3}}</td><td>{{MOTOR_3}}</td><td><span class="sem {{SEM_3}}"></span>{{ENC_3}}</td><td><a class="enlace" href="{{URL_3}}">{{URL_3_SHORT}}</a></td></tr>
+                <tr class="{{FILA_4_CLASS}}"><td>4</td><td><span class="badge-origen {{ORIGEN_4}}">{{ORIGEN_4}}</span></td><td>{{P_4}}</td><td>{{PH_4}}</td><td>{{A_4}}</td><td>{{KM_4}}</td><td>{{MOTOR_4}}</td><td><span class="sem {{SEM_4}}"></span>{{ENC_4}}</td><td><a class="enlace" href="{{URL_4}}">{{URL_4_SHORT}}</a></td></tr>
+                <tr class="{{FILA_5_CLASS}}"><td>5 ★</td><td><span class="badge-origen {{ORIGEN_5}}">{{ORIGEN_5}}</span></td><td>{{P_5}}</td><td>{{PH_5}}</td><td>{{A_5}}</td><td>{{KM_5}}</td><td>{{MOTOR_5}}</td><td><span class="sem {{SEM_5}}"></span>{{ENC_5}}</td><td><a class="enlace" href="{{URL_5}}">{{URL_5_SHORT}}</a></td></tr>
             </tbody>
         </table>
     </div>
 
-    <!-- CHIPS (equipamiento / destacados) -->
+    <!-- VEREDICTO / RECOMENDACIÓN -->
+    <div class="section">
+        <div class="h2">{{VEREDICTO_TITULO}}</div>
+        <div class="verdict-card">
+            <div class="verdict-title">{{VEREDICTO_LABEL}}</div>
+            <div class="verdict-text">{{VEREDICTO_TEXTO}}</div>
+        </div>
+    </div>
+
+    <!-- CHIPS (destacados / equipamiento) -->
     <div class="section">
         <div class="h2">{{CHIPS_TITULO}}</div>
         <div class="equip">
-            <span class="chip">{{CHIP}}</span>
+            <span class="chip">{{CHIP_1}}</span>
+            <span class="chip">{{CHIP_2}}</span>
+            <span class="chip">{{CHIP_3}}</span>
+            <span class="chip">{{CHIP_4}}</span>
+            <span class="chip">{{CHIP_5}}</span>
         </div>
     </div>
 
-    <!-- CTA + QR -->
-    <div class="cta-row">
-        <div class="cta-card">
-            <div class="cta-text">{{CTA_TEXTO}}</div>
-            <div class="contact">
-                📞 675 70 14 39 · 691 48 59 27<br>
-                ✉️ jjimportmotors@gmail.com<br>
-                {{CTA_NOTA}}
-            </div>
+    <!-- FOOTER -->
+    <div class="footer">
+        <div class="footer-contact">
+            <strong>JJ Import Motors</strong> · Huelva<br>
+            📞 675 70 14 39 · 691 48 59 27<br>
+            ✉️ jjimportmotors@gmail.com
         </div>
-        <div class="qr-card">
-            <div class="qr-box">{{QR_SVG}}</div>
-            <div>
-                <div class="qr-tag">Solicita tu estudio</div>
-                <div class="qr-title">Escanea y dinos qué buscas</div>
-                <div class="qr-desc">Te preparamos una valoración sin compromiso.</div>
-            </div>
-        </div>
+        <div class="qr-box">{{QR_SVG}}</div>
     </div>
 
-    <!-- LEGAL -->
     <div class="legal">
-        {{LEGAL}} · JJ Import Motors actúa como gestor de importación, no como vendedor del vehículo.
-        Precio sujeto a confirmación de emisiones (CO₂/COC) y disponibilidad en origen.
+        Servicio de gestión de búsqueda e importación de vehículos. JJ Import Motors actúa como gestor, no como vendedor del vehículo.
+        Precios sujetos a confirmación de disponibilidad y emisiones (CO₂/COC) en origen. Informe generado el {{FECHA}}.
     </div>
 
 </div>

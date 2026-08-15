@@ -85,6 +85,18 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 ### 🧪 Tests
 - +8 tests nuevos (validaciones, mapeos, IEDMT, idempotencia cierre). Área importación/cierres/KPIs: 85 passed.
 
+## [2.9.7] - 2026-08-15 — Plantilla de PDF rediseñada (nivel premium)
+
+### 🎨 `plantilla_pdf_marca.html` v2
+- Header con lockup de marca + badge de flujo + nº de informe + fecha.
+- Hero con título en acento naranja + claim.
+- **KPI cards** (grid de 4 métricas clave: mejor DE, coste en Huelva, mejor ES, ahorro).
+- **Cobertura de fuentes en grid de tarjetas** con estados (OK verde / degradado ámbar / omitido gris).
+- **Tabla de candidatos premium**: badges DE/ES, semáforo, columna de enlace, fila del elegido destacada (`pick` con borde naranja).
+- **Veredicto en tarjeta de recomendación** + chips de equipamiento + footer completo (contacto + legal).
+- Coherente con la marca (estoril/asphalt/platinum + accent naranja) pero con estructura propia de informes (no es el folleto).
+- Aplicada de ejemplo al `informe_busqueda_tiguan.html` (verificado visualmente).
+
 ## [2.9.6] - 2026-08-15 — Milanuncios resuelto: paginación por URL (confirmado)
 
 ### 🟢 Cobertura Milanuncios al 100%
