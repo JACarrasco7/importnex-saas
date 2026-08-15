@@ -58,6 +58,16 @@
 ### ⚠️ Mobile.de: filtro "Beschädigte Fahrzeuge" oculto
 **Portal:** mobile.de
 **Síntoma:** Por defecto NO muestra coches con daños. Hay que activarlo explícitamente.
+
+### ⚠️ Milanuncios: listado virtualizado — solo monta la 1ª tarjeta (15-ago-2026) ✅ RESUELTO
+**Portal:** Milanuncios
+**Síntoma real:** Con scroll infinito solo renderiza la primera tarjeta (la patrocinada/"Destacado") aunque se haga scroll real repetido y se ordene por "más baratos primero". La pestaña se bloquea (timeout) antes de cargar el resto.
+**Causa raíz:** Virtualización agresiva: el DOM solo monta las tarjetas del viewport; el scroll infinito no dispara la carga.
+**✅ Resuelto (15-ago-2026):** la **paginación por URL** carga el listado completo y **respeta los filtros**. El contenedor es `.ma-AdList` y el parámetro es `&pagina=N` (confirmado navegando).
+**Mitigación OBLIGATORIA (en orden):**
+1. **Paginación por URL** (la fiable): `?s=<marca>+<modelo>&...&pagina=1`, luego `pagina=2`, `pagina=3`... — NO scroll infinito.
+2. **Bandas de precio** (`&hasta=X&desde=Y`) para reducir el nº de resultados y agilizar.
+3. Si aún así no carga → declarar `bloqueada (virtualización, N intentos)` en la cobertura y continuar (A7); el informe queda PARCIAL declarado.
 **Mitigación:** Activar `dam=true` en la URL o filtro manual.
 
 ### ⚠️ Kleinanzeigen: "VB" = negociable

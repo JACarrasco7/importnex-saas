@@ -85,6 +85,13 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 ### 🧪 Tests
 - +8 tests nuevos (validaciones, mapeos, IEDMT, idempotencia cierre). Área importación/cierres/KPIs: 85 passed.
 
+## [2.9.6] - 2026-08-15 — Milanuncios resuelto: paginación por URL (confirmado)
+
+### 🟢 Cobertura Milanuncios al 100%
+- Confirmado navegando: **`&pagina=N`** carga el listado completo y **respeta los filtros** (contenedor `.ma-AdList`, parámetro `pagina`).
+- `trampas-encontradas.md`: virtualización marcada **RESUELTA** — la paginación por URL es la vía principal; el scroll infinito NO es fiable.
+- `paginas_reales.md`: URL de filtros reales (`anoh`, `cajacambio`, `engineHpTo`, `fuels`, `hasta`, `kilometersTo`, `puertas`, `orden`) + `pagina=N` + `nextToken` (degradado).
+
 ## [2.9.5] - 2026-08-15 — Limpieza de inconsistencias residuales
 
 ### 🧹 Coherencia contrato ↔ código

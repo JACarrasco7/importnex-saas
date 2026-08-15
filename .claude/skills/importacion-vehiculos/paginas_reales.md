@@ -226,6 +226,14 @@ Botón "Filtros" abre modal. Acepta cookies al cargar.
 https://www.milanuncios.com/coches-de-segunda-mano/?s=<marca>+<modelo>
 ```
 
+### URL con filtros + paginación (verificada 15-ago-2026)
+```
+https://www.milanuncios.com/coches-de-segunda-mano/?anoh=2013&cajacambio=manual&engineHpTo=200&fuels=gasoline&hasta=30000&kilometersTo=30000&puertas=5&orden=relevance&pagina=2
+```
+- **Paginación = `pagina=N`** (confirmado navegando: `&pagina=2` devuelve página 2).
+- Filtros en URL: `anoh` (año desde) · `cajacambio` (cambio) · `engineHpTo` (CV máx) · `fuels` (gasoline/diesel) · `hasta`/`desde` (precio) · `kilometersTo` (km máx) · `puertas` · `orden` (relevance/precio).
+- El listado también trae `nextToken=` (cursor de la API interna de búsqueda): **método técnico degradado** (ver `extractores.md`) — permite pedir la página siguiente vía la API del portal si la navegación real se bloquea. Declararlo siempre si se usa.
+
 ### Cabecera
 - Contador visible: "**8.991 anuncios**" + "Ordenado por relevancia".
 
@@ -240,6 +248,12 @@ https://www.milanuncios.com/coches-de-segunda-mano/?s=<marca>+<modelo>
 Barra: Coches · Toda España · Precio · Todas las marcas. Botón "Filtros" abre modal.
 
 **Clave:** los financiados inflan el precio de catálogo → **usar siempre el contado**.
+
+### ⚠️ Virtualización del listado (15-ago-2026) ✅ RESUELTA con paginación por URL
+- El **scroll infinito NO fiable**: solo monta la tarjeta patrocinada. La paginación por URL SÍ carga el listado completo y **respeta los filtros** (confirmado 15-ago).
+- **Vía principal → paginación por URL:** `&pagina=1`, `&pagina=2`... (parámetro `pagina`). Contenedor del listado: `.ma-AdList`.
+- **Bandas de precio:** `&hasta=...&desde=...` para reducir resultados.
+- Si falla → marcar `bloqueada (virtualización)` en la cobertura y seguir (A7); el informe queda PARCIAL declarado.
 
 ---
 
