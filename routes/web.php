@@ -157,7 +157,6 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::post('/cars', [CarController::class, 'store'])
         ->middleware('plan.limit:cars')
         ->name('cars.store');
-    Route::post('/cars/import', [CarController::class, 'import'])->name('cars.import');
     Route::post('/cars/scrape-url', [CarController::class, 'scrapeUrl'])
         ->middleware('throttle:api-read')
         ->name('cars.scrape-url');

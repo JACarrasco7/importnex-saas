@@ -14,7 +14,7 @@ const onZipSelected = (event) => {
     if (!file) return;
     processing.value = true;
     const formData = new FormData();
-    formData.append('mode', 'zip');
+    formData.append('mode', 'upload');
     formData.append('file', file);
     router.post(route('cars.import-valuation.store'), formData, {
         onFinish: () => { processing.value = false; },
