@@ -54,6 +54,9 @@ Frases tipo "quita el coste del servicio" / "todo incluido" / "sin honorarios" s
 
 ## 4. NAVEGACIÓN (método único)
 Navegación REAL estilo humano: screenshot + clic + escribir + scroll + esperar. **NUNCA fetch ni inyección JS.** Lee `paginas_reales.md` antes de abrir cada portal. Usa `playbook_filtrado.md` para ir rápido. Después de cada paso, captura y verifica antes de registrar un dato. Solo registra lo VISTO en captura.
+- **Fotos:** descargar las imágenes REALES del anuncio (van en `vehiculo.fotos`) — NUNCA capturas de pantalla.
+- **Enlaces:** toda URL es la ficha del anuncio individual (mobile.de `details.html?id=`, slug Coches.net, `/app/item/<id>`), nunca búsqueda genérica.
+- **Fuentes:** todo informe cierra con "Fuentes consultadas" (estado por fuente + enlace).
 
 Fuentes (7): mobile.de · Coches.net · AutoScout24.de · AutoUncle · Wallapop · Milanuncios · kleinanzeigen.de.
 - Fase 1 (obligatorias): mobile.de + Coches.net + AutoUncle.
@@ -90,7 +93,7 @@ NUNCA saltes del resumen informal a "¿evalúo el candidato X?" sin entregar INF
 - Todo informe Flujo A incluye PRECIO MÁXIMO DE COMPRA.
 
 ## 7. CONTRATO JSON → Laravel
-Al final (Flujo A) genera `informe.json` (schema_version=1, bloques _meta/vehiculo/anuncio/investigacion/balance/veredicto/costes/mercado/avisos/publicidad) + esqueletos `.txt [BLOQUE]` + fotos. `pvp_nuevo` OBLIGATORIO (va en `costes.pvp_nuevo`; Laravel lo usa para `new_price`/`manual_tax_base` y el IEDMT). `pais_origen`: "Alemania" | "España". Las **fotos van en `vehiculo.fotos`** (Laravel las lee de ahí, no de `anuncio`).
+Al final (Flujo A) genera `informe.json` (schema_version=1, bloques _meta/vehiculo/anuncio/investigacion/balance/veredicto/costes/mercado/avisos/publicidad) + esqueletos `.txt [BLOQUE]` + fotos. `pvp_nuevo` OBLIGATORIO (va en `costes.pvp_nuevo`; Laravel lo usa para `new_price`/`manual_tax_base` y el IEDMT). `pais_origen`: "Alemania" | "España". Las **fotos van en `vehiculo.fotos`** (Laravel las lee de ahí, no de `anuncio`) — **descargadas del anuncio, nunca capturas**. Las **fuentes** van en el bloque `fuentes` con sus URLs.
 
 **Campos que el ZIP DEBE llevar SIEMPRE (15-ago-2026):**
 - 🔴 `anuncio.descripcion_original` = **texto literal COMPLETO del anuncio** (pegado tal cual, sin resumir/corregir) + `anuncio.descripcion_traducida` completa.

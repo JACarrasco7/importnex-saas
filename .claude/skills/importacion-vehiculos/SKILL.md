@@ -733,6 +733,28 @@ C:\Users\jacar\Desktop\JJImportMotors\
 3. **Nunca fuera del Desktop.** Si un informe quedó en otra ruta (outputs de la
    sesión, AppData, temp), copiarlo a la estructura del Desktop.
 
+### 📸 FOTOS REALES · ENLACES DE ANUNCIO · FUENTES CON URL (15-ago-2026 · v2.9.4)
+
+> **Reglas duras exigidas por el usuario en cada entrega.** Fallo real 15-ago (Tiguan): se subieron **capturas de pantalla** en vez de las fotos reales del anuncio, enlaces genéricos y sin la lista de fuentes.
+
+**1. Fotos = descargadas del ANUNCIO, NUNCA capturas.**
+- Las fotos del candidato son las **imágenes reales del anuncio** (URLs `https://...jpg|png|webp` de la ficha del portal), descargadas a `<coche_id>_fotos\`.
+- **PROHIBIDO** subir capturas de pantalla del navegador ni screenshots del listado.
+- Van en el JSON como **`vehiculo.fotos`** (Laravel las descarga desde ahí al importar).
+- Si el portal bloquea la descarga (hotlink), reintentar con User-Agent de navegador y avisar de las que fallen — **nunca** sustituirlas por capturas.
+
+**2. Enlaces = del ANUNCIO individual, NUNCA genéricos.**
+- Toda URL de candidato/comparable es la **ficha del vehículo** (ej. `mobile.de/fahrzeuge/details.html?id=<id>`, slug de Coches.net, `/app/item/<id>` de Wallapop).
+- **PROHIBIDO** usar URLs de búsqueda/filtro del portal (`?sortOption=...&categories=...`), páginas de listado o el dominio raíz. Si la fuente no da URL directa, construirla desde el ID (A6).
+
+**3. Fuentes = SIEMPRE documentadas con su URL en el informe.**
+- Todo informe (búsqueda y unidad) incluye al final la sección **"Fuentes consultadas"**: cada fuente con su estado (OK / 0 resultados / bloqueada+intentos) y su enlace cuando aplique.
+- Se registran las fuentes del flujo (no solo las que dieron candidatos); si alguna quedó sin peinar, se declara.
+- En el JSON van en el bloque `fuentes` (o en `avisos` si alguna quedó bloqueada).
+
+**4. Organización = SIEMPRE por marca/modelo.**
+- Todo lo que genera Claude se guarda en `informes\<marca>\<modelo>\` (y `laravel\export\` para los JSON) — nunca suelto ni en AppData. Normalizar nombres (minúsculas, sin tildes, guiones).
+
 
 ### ⚡ MODO AUTOMÁTICO EN CASCADA (12-ago-2026) — regla dura
 
@@ -814,23 +836,15 @@ TRAS ELEGIR CANDIDATO (todo automático, sin preguntar)
 14. Acción inmediata (pasos numerados con plazo)
 15. Score global de oportunidad (6 dimensiones, 0-100)
 
-**_outputs del informe UNIDAD (archivos .txt en ZIP, para Laravel):**
+**_outputs del informe UNIDAD (archivos .txt en ZIP):**
 - `informe-interno.txt` (análisis JJ Import Motors · ver `informe_tecnico.md`)
 - `dossier-cliente.txt` (PDF profesional para cliente · ver `dossier_cliente.md`) — solo si veredicto 🟢/🔵
 - `ficha-publicitaria.txt` (venta en portales · contrato.md §publicidad)
 - `redes-sociales.txt` + `anuncio-portales.txt` (ver contrato.md)
 
-**📄 Además, Claude ENTREGA al usuario los PDFs de INVESTIGACIÓN** (no van dentro del ZIP):
-- `informe_busqueda_<modelo>.pdf` (Fase 1) · `informe_unidad_<unidad>.pdf` (Fase 2) — método en §Quién genera cada PDF.
-
 **Cuándo emitir dossier cliente:** 🟢 Comprar siempre · 🔵 Comprar si baja de precio siempre · 🟡 Dudoso solo si el cliente pidió evaluarlo · 🔴 Descartar nunca (carta breve en su lugar).
 
-**⚠️ Quién genera cada PDF (15-ago-2026 · v2.9.2):**
-- **Claude SÍ genera los PDFs de INVESTIGACIÓN** (entregables de las fases, para el USUARIO):
-  - `informe_busqueda_<modelo>.pdf` (fin de Fase 1 · Flujo B/C) y `informe_unidad_<unidad>.pdf` (Fase 2 · Flujo A).
-  - **Método (obligatorio):** usar la plantilla única **`assets/plantilla_pdf_marca.html`** (copia fiel del diseño de las plantillas Blade de Laravel): rellenar los `{{marcadores}}` con los datos del informe, guardar como `.html` en `informes\<marca>\<modelo>\` y convertir a PDF con Chrome headless (`chrome --headless --print-to-pdf=salida.pdf entrada.html`); si Chrome no está disponible, script Python con reportlab manteniendo la identidad. Así los PDFs de Claude son **visualmente idénticos** a los de Laravel.
-- **Claude genera los esqueletos `.txt` [MARCADOR]** dentro del ZIP (para Laravel).
-- **Laravel SÍ genera los PDFs de MARKETING/VENTA** (Blade + Browsershot) desde los `.txt` del ZIP cuando el coche está en el sistema: `dossier`, `ficha-publicitaria`, `folleto`. Claude NO genera estos tres durante la investigación.
+**⚠️ Quién genera cada PDF (12-ago-2026):** Claude genera los **esqueletos `.txt` [MARCADOR]** dentro del ZIP. Los PDFs finales (`dossier`, `ficha-publicitaria`, `folleto`) los **genera Laravel** (Blade + Browsershot) cuando el coche ya está en el sistema. Claude NO genera PDFs, NO genera el folleto publicitario ni la ficha durante la investigación — esos salen del panel cuando el coche está en inventario.
 
 ---
 
