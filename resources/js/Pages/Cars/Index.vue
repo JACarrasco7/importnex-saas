@@ -32,7 +32,7 @@ const tabs = computed(() => {
     const ordered = statusOrder.filter(s => props.statuses.includes(s));
     const remaining = props.statuses.filter(s => !ordered.includes(s));
     return [
-        { id: 'all', label: 'All', count: props.cars.total },
+        { id: 'all', label: 'All', count: props.cars?.total || 0 },
         ...ordered.map(status => ({
             id: status,
             label: t(`cars.status.${status}`),
@@ -47,7 +47,7 @@ const tabs = computed(() => {
 });
 
 const stats = computed(() => {
-    const cars = props.cars.data || [];
+    const cars = props.cars?.data || [];
     return {
         green: cars.filter(c => c.traffic_light === 'green').length,
         amber: cars.filter(c => c.traffic_light === 'amber').length,
@@ -57,7 +57,7 @@ const stats = computed(() => {
 });
 
 const filteredCars = computed(() => {
-    let result = props.cars.data || [];
+    let result = props.cars?.data || [];
     if (currentTab.value !== 'all') {
         result = result.filter(c => c.status === currentTab.value);
     }
@@ -117,7 +117,7 @@ const confirmDelete = () => {
 
         <div class="py-8">
             <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <PageHeader :title="t('nav.inventory')" :subtitle="t('app.inventory_count', { count: cars.total || 0 })">
+                <PageHeader :title="t('nav.inventory')" :subtitle="t('app.inventory_count', { count: cars?.total || 0 })">
                     <template #actions>
                         <Link :href="route('cars.kanban')" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             <Squares2X2Icon class="h-4 w-4" />
@@ -150,11 +150,6 @@ const confirmDelete = () => {
                                 <option value="">{{ t('common.all') }}</option>
                                 <option v-for="light in lights" :key="light" :value="light">{{ t('cars.light.' + light) }}</option>
                             </select>
-                        </div>
-                        <div class="flex items-end pb-2">
-                            <p class="text-xs text-gray-500">
-                                Upload vehicles via manual form or ZIP package from AI tools.
-                            </p>
                         </div>
                     </div>
                 </div>
