@@ -86,19 +86,26 @@ class PaqueteValoracionController extends Controller
         $lines[] = '# Ficha generada automáticamente (sin esqueleto del ZIP)';
         $lines[] = '[TITULO] '.trim($car->brand.' '.$car->model).' '.($car->year ?? '');
 
-        // La vista hace filas('SPEC') → espera pares 'Etiqueta | Valor'.
-        $spec = array_filter([
-            'Año', (string) $car->year,
-            'KM', number_format($car->mileage ?? 0, 0, ',', '.'),
-            'Combustible', (string) $car->fuel,
-            'Cambio', (string) $car->transmission,
-            'Potencia', $car->cv ? $car->cv.' CV' : null,
-            'Color', (string) $car->color,
-        ]);
-        $lines[] = '[SPEC] '.implode(' | ', $spec);
+        // La vista hace filas('SPEC') → espera UN par 'Etiqueta | Valor' POR línea.
+        $spec = [
+            'Año' => (string) $car->year,
+            'KM' => number_format($car->mileage ?? 0, 0, ',', '.'),
+            'Combustible' => (string) $car->fuel,
+            'Cambio' => (string) $car->transmission,
+            'Potencia' => $car->cv ? $car->cv.' CV' : null,
+            'Color' => (string) $car->color,
+        ];
+        foreach ($spec as $label => $value) {
+            if ($value !== null && $value !== '') {
+                $lines[] = '[SPEC] '.$label.' | '.$value;
+            }
+        }
 
+        // M6: la vista ficha-coche.blade.php NO pinta [DESCRIPCION]; pinta
+        // [H2]+[ARGUMENTO]. Emitimos ambos para que la descripción se vea.
         if ($car->description) {
-            $lines[] = '[DESCRIPCION] '.$car->description;
+            $lines[] = '[H2] Descripción';
+            $lines[] = '[ARGUMENTO] '.$car->description;
         }
 
         if ($car->purchase_price) {

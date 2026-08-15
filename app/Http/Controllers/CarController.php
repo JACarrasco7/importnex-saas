@@ -11,6 +11,7 @@ use App\Services\Scraping\CarScrapingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -195,6 +196,10 @@ class CarController extends Controller
     private function matchingRequests(Car $car): array
     {
         return CarRequest::query()
+            // Multi-tenancy: CarRequest NO tiene global scope propio (a
+            // diferencia de Car), así que el filtro por organización es
+            // obligatorio aquí o se filtraría información de otros tenants.
+            ->where('organization_id', $car->organization_id)
             ->whereIn('status', ['pending', 'contacted', 'in_progress'])
             ->where(fn ($q) => $q
                 ->whereNull('brand')
@@ -222,21 +227,32 @@ class CarController extends Controller
     /**
      * Vincula este coche con la solicitud de un cliente: asigna el cliente al
      * coche (si la solicitud lo tiene) y pasa la solicitud a "en curso".
+     *
+     * Seguridad multi-tenant: aborta 403 si la solicitud no pertenece a la
+     * misma organización que el coche (evita vincular/modificar datos ajenos).
      */
     public function matchRequest(Car $car, CarRequest $carRequest): RedirectResponse
     {
-        if ($carRequest->client_id) {
-            $car->client_id = $carRequest->client_id;
-            $car->save();
-        }
+        abort_unless(
+            (int) $carRequest->organization_id === (int) $car->organization_id,
+            403,
+            'La solicitud pertenece a otra organización.'
+        );
 
-        $carRequest->status = 'in_progress';
-        $carRequest->notes = trim(($carRequest->notes ? $carRequest->notes."\n" : '')
-            .'['.now()->format('d/m/Y H:i')."] Vinculado a vehículo #{$car->id} ({$car->brand} {$car->model}).");
-        $carRequest->save();
+        return DB::transaction(function () use ($car, $carRequest) {
+            if ($carRequest->client_id) {
+                $car->client_id = $carRequest->client_id;
+                $car->save();
+            }
 
-        return redirect()->route('cars.show', $car->id)
-            ->with('success', 'Vehículo vinculado a la solicitud.');
+            $carRequest->status = 'in_progress';
+            $carRequest->notes = trim(($carRequest->notes ? $carRequest->notes."\n" : '')
+                .'['.now()->format('d/m/Y H:i')."] Vinculado a vehículo #{$car->id} ({$car->brand} {$car->model}).");
+            $carRequest->save();
+
+            return redirect()->route('cars.show', $car->id)
+                ->with('success', 'Vehículo vinculado a la solicitud.');
+        });
     }
 
     private function docGroupLabel(string $group): string

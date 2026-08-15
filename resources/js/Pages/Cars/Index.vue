@@ -32,7 +32,7 @@ const tabs = computed(() => {
     const ordered = statusOrder.filter(s => props.statuses.includes(s));
     const remaining = props.statuses.filter(s => !ordered.includes(s));
     return [
-        { id: 'all', label: 'All', count: props.cars?.total || 0 },
+        { id: 'all', label: t('common.all'), count: props.cars?.total || 0 },
         ...ordered.map(status => ({
             id: status,
             label: t(`cars.status.${status}`),
@@ -102,9 +102,12 @@ const nextPhoto = (car) => {
 };
 
 
-
+// Debounce 300ms para no disparar una request por tecla (auditoría M3).
+let searchTimer = null;
 watch([search, lightFilter], () => {
-    router.get(
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+        router.get(
         route('cars.index'),
         {
             search: search.value || undefined,
@@ -113,6 +116,7 @@ watch([search, lightFilter], () => {
         },
         { preserveState: true, preserveScroll: true }
     );
+    }, 300);
 });
 
 const askDelete = (car) => {
@@ -147,11 +151,11 @@ const confirmDelete = () => {
                     <template #actions>
                         <Link :href="route('cars.kanban')" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             <Squares2X2Icon class="h-4 w-4" />
-                            Kanban
+                            {{ t('nav.kanban') }}
                         </Link>
                         <Link :href="route('cars.import-valuation.create')" class="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500">
                             <SparklesIcon class="h-4 w-4" />
-                            Subir ZIP
+                            {{ t('cars.upload_zip') }}
                         </Link>
                         <Link :href="route('cars.create')" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
                             <PlusIcon class="h-4 w-4" />
@@ -265,7 +269,7 @@ const confirmDelete = () => {
                                 </div>
                                 <div>
                                     <span class="text-[10px] uppercase tracking-wider text-gray-500">{{ t('cars.mileage') }}</span>
-                                    <p class="font-medium text-gray-900">{{ car.mileage ? (car.mileage / 1000).toFixed(0) + 'k km' : '—' }}</p>
+                                    <p class="font-medium text-gray-900">{{ car.mileage ? t('cars.k_km', { k: (car.mileage / 1000).toFixed(0) }) : '—' }}</p>
                                 </div>
                                 <div v-if="car.fuel">
                                     <span class="text-[10px] uppercase tracking-wider text-gray-500">{{ t('cars.fuel') }}</span>
@@ -312,9 +316,9 @@ const confirmDelete = () => {
 
         <ConfirmDialog
             :show="showDelete"
-            title="Delete car"
-            :message="`Are you sure you want to delete ${carToDelete?.brand} ${carToDelete?.model}? This action cannot be undone.`"
-            confirm-text="Delete"
+            :title="t('cars.delete_car')"
+            :message="t('cars.confirm_delete_car_full', { brand: carToDelete?.brand, model: carToDelete?.model })"
+            :confirm-text="t('common.delete')"
             variant="danger"
             @close="showDelete = false"
             @confirm="confirmDelete"

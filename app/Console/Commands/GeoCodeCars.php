@@ -61,6 +61,10 @@ class GeoCodeCars extends Command
                 $car->save();
             }
             $ok++;
+
+            // Nominatim pide máx. 1 req/s; las llamadas cacheadas son instantáneas,
+            // pero las que disparan red necesitan respetar el límite.
+            usleep(1_000_000);
         }
 
         $this->info(sprintf('%s: %d geocodificados, %d sin resultado.', $dryRun ? 'Dry run' : 'Hecho', $ok, $fail));

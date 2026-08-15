@@ -102,4 +102,56 @@ class CarMatchRequestTest extends TestCase
         $this->assertDatabaseHas('car_requests', ['id' => $request->id, 'status' => 'in_progress']);
         $this->assertStringContainsString("Vinculado a vehículo #{$car->id}", $request->fresh()->notes);
     }
+
+    public function test_show_excludes_matching_requests_from_other_organizations(): void
+    {
+        [$user, $org] = $this->actingUser();
+        $otherOrg = Organization::factory()->create();
+
+        $car = Car::factory()->create([
+            'organization_id' => $org->id,
+            'brand' => 'Opel',
+            'model' => 'Astra',
+        ]);
+
+        // Solicitud de OTRA organización con misma marca/modelo: NO debe aparecer.
+        CarRequest::create([
+            'organization_id' => $otherOrg->id,
+            'name' => 'Hacker',
+            'brand' => 'Opel',
+            'model' => 'Astra',
+            'status' => 'pending',
+        ]);
+
+        $response = $this->actingAs($user)->get(route('cars.show', $car->id));
+
+        $response->assertOk();
+        $matching = $response->viewData('page')['props']['derived']['matching_requests'];
+        $this->assertCount(0, $matching);
+    }
+
+    public function test_match_request_from_other_organization_is_forbidden(): void
+    {
+        [$user, $org] = $this->actingUser();
+        $otherOrg = Organization::factory()->create();
+
+        $car = Car::factory()->create([
+            'organization_id' => $org->id,
+            'brand' => 'Opel',
+            'model' => 'Astra',
+        ]);
+        $request = CarRequest::create([
+            'organization_id' => $otherOrg->id,
+            'name' => 'Hacker',
+            'brand' => 'Opel',
+            'status' => 'pending',
+        ]);
+
+        $response = $this->actingAs($user)
+            ->post(route('cars.match-request', ['car' => $car->id, 'carRequest' => $request->id]));
+
+        $response->assertForbidden();
+        $this->assertNull($car->fresh()->client_id);
+        $this->assertSame('pending', $request->fresh()->status);
+    }
 }

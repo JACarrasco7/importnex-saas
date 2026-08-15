@@ -87,6 +87,23 @@ class ValuationImporter
         'bajo' => 'low',    'baja' => 'low',    'low' => 'low',
     ];
 
+    /**
+     * Traduce el semáforo del JSON (verde/ámbar/rojo o green/amber/red) al
+     * valor canónico en inglés que usa la app. Null si no se reconoce.
+     */
+    private function translateTrafficLight(mixed $semaforo): ?string
+    {
+        $normalized = mb_strtolower(trim((string) $semaforo));
+
+        return match ($normalized) {
+            'verde', 'green' => 'green',
+            'ambar', 'amber' => 'amber',
+            'rojo', 'red' => 'red',
+            'neutro', 'neutral' => 'neutral',
+            default => null,
+        };
+    }
+
     private const FUEL_MAP = [
         'diésel' => 'Diesel',  'diesel' => 'Diesel',
         'gasolina' => 'Gasoline', 'gasoline' => 'Gasoline',
@@ -415,8 +432,11 @@ class ValuationImporter
                 'market_min' => $m['precio_min'] ?? null,
                 'market_max' => $m['precio_max'] ?? null,
                 'estimated_saving' => $m['ahorro_estimado'] ?? null,
-                // NOTA: traffic_light NO se persiste desde el JSON — CarObserver::saving()
-                // lo recalcula a partir de costes y market_avg en cada guardado.
+                // Cuando el JSON trae semáforo explícito (preserveTrafficLight),
+                // se persiste mapeado; si no, el observer lo recalcula.
+                'traffic_light' => $car->preserveTrafficLight
+                    ? $this->translateTrafficLight($m['semaforo'] ?? null)
+                    : null,
                 'comparables_list' => $this->normalizeComparables($m['comparables'] ?? []),
 
                 // Source
@@ -429,6 +449,10 @@ class ValuationImporter
             ], fn ($v) => $v !== null && $v !== '' && $v !== []));
 
             $car->save();
+
+            // I5 (auditoría): reset de la flag temporal para no arrastrarla en
+            // re-usos de la misma instancia de Car.
+            $car->preserveTrafficLight = false;
 
             if ($wasNew) {
                 Log::info('Nuevo coche creado', [

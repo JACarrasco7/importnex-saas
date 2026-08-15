@@ -288,7 +288,7 @@ function renderPreview() {
                             class="ml-2 inline-flex items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-sm font-semibold text-gray-700 ring-1 ring-gray-300 hover:bg-gray-50"
                         >
                             <EyeIcon class="h-4 w-4" />
-                            {{ showPreview ? 'Ocultar preview' : 'Ver preview' }}
+                            {{ showPreview ? t('marketing.hide_preview') : t('marketing.show_preview') }}
                         </button>
                     </div>
 
@@ -427,7 +427,7 @@ function renderPreview() {
                             class="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700 ring-1 ring-gray-300 hover:bg-gray-50 disabled:opacity-50"
                         >
                             <LightBulbIcon class="h-4 w-4" />
-                            {{ saving ? 'Guardando…' : 'Guardar borrador' }}
+                            {{ saving ? t('cars.saving') : t('marketing.save_draft') }}
                         </button>
                     </div>
                 </div>

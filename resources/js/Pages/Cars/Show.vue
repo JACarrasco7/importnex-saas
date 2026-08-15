@@ -46,7 +46,7 @@ const sections = [
     { id: 'resumen', label: t('cars.section_resumen') },
     { id: 'investigacion', label: t('cars.section_investigacion') },
     { id: 'mercado', label: t('cars.section_mercado') },
-    { id: 'checklist', label: 'Checklist' },
+    { id: 'checklist', label: t('cars.section_checklist') },
     { id: 'documentos', label: t('cars.documents') },
     { id: 'fotos', label: t('cars.photos_title') },
     { id: 'gastos', label: t('cars.expenses_vs_estimated') },
@@ -157,15 +157,15 @@ const ratingIcon = (r) => ({
 }[r] || MinusCircleIcon);
 
 const researchAspectLabels = {
-    common_issues: 'Problemas habituales',
-    recalls: 'Llamadas a revisión',
-    market_price: 'Precio de mercado',
-    reliability: 'Fiabilidad',
-    spain_homologation: 'Homologación en España',
-    dgt_label: 'Etiqueta ambiental DGT',
-    insurance_estimate: 'Estimación de seguro',
-    parts_maintenance: 'Piezas y mantenimiento',
-    unit_specific: 'Específico de la unidad',
+    common_issues: t('marketplace_show.aspect_common_issues'),
+    recalls: t('marketplace_show.aspect_recalls'),
+    market_price: t('marketplace_show.aspect_market_price'),
+    reliability: t('marketplace_show.aspect_reliability'),
+    spain_homologation: t('marketplace_show.aspect_spain_homologation'),
+    dgt_label: t('marketplace_show.aspect_dgt_label'),
+    insurance_estimate: t('marketplace_show.aspect_insurance_estimate'),
+    parts_maintenance: t('marketplace_show.aspect_parts_maintenance'),
+    unit_specific: t('marketplace_show.aspect_unit_specific'),
 };
 
 const aspects = computed(() => {
@@ -182,9 +182,9 @@ const marketPosition = computed(() => {
     const total = props.derived?.total_cost || 0;
     if (!stats.avg || !total) return null;
     const ratio = total / stats.avg;
-    if (ratio <= 1.00) return { label: 'Por debajo del mercado', variant: 'success', ratio };
-    if (ratio <= 1.05) return { label: 'En mercado', variant: 'warning', ratio };
-    return { label: 'Por encima del mercado', variant: 'danger', ratio };
+    if (ratio <= 1.00) return { label: t('marketplace_show.market_below'), variant: 'success', ratio };
+    if (ratio <= 1.05) return { label: t('marketplace_show.market_at'), variant: 'warning', ratio };
+    return { label: t('marketplace_show.market_above'), variant: 'danger', ratio };
 });
 
 const expandedSections = ref({});
@@ -373,7 +373,7 @@ const onDocKeyChange = () => {
                 <!-- ╔ INVESTIGATION ══════════════════════════════════════════════════════╗ -->
                 <div v-show="activeSection === 'investigacion'" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-                        <h3 class="text-base font-semibold text-gray-900">Investigación</h3>
+                        <h3 class="text-base font-semibold text-gray-900">{{ t('cars.section_investigacion') }}</h3>
                         <span v-if="derived?.research_gaps?.length" class="text-xs font-medium text-amber-700">
                             {{ derived.research_gaps.length }} aspecto{{ derived.research_gaps.length === 1 ? '' : 's' }} pendiente{{ derived.research_gaps.length === 1 ? '' : 's' }}
                         </span>
@@ -384,7 +384,7 @@ const onDocKeyChange = () => {
                         <div class="flex flex-wrap items-center gap-3">
                             <Badge :variant="verdictVariant(car.verdict)" dot size="lg">{{ car.verdict }}</Badge>
                             <Badge v-if="car.verdict_confidence" :variant="confidenceVariant(car.verdict_confidence)">
-                                Confianza: {{ car.verdict_confidence }}
+                                {{ t('marketplace_show.confidence') }}: {{ car.verdict_confidence }}
                             </Badge>
                             <span v-if="car.verdict_at" class="text-xs text-gray-500">
                                 {{ date(car.verdict_at) }}
@@ -392,13 +392,13 @@ const onDocKeyChange = () => {
                         </div>
                         <p v-if="car.verdict_reasoning" class="mt-3 text-sm text-gray-700">{{ car.verdict_reasoning }}</p>
                         <p v-if="car.verdict_changes" class="mt-2 text-xs italic text-gray-600">
-                            <span class="font-semibold not-italic text-gray-700">Qué cambiaría esto:</span>
+                            <span class="font-semibold not-italic text-gray-700">{{ t('marketplace_show.what_would_change') }}:</span>
                             {{ car.verdict_changes }}
                         </p>
                     </div>
 
                     <div v-if="!car.verdict && !derived?.research_gaps?.length" class="px-6 py-8 text-center text-sm text-gray-500">
-                        No hay valoración todavía. Importa un informe del chat o ejecuta el verificador de IA.
+                        No hay valoración todavía. {{ t('marketplace_show.import_report_hint') }}
                     </div>
 
                     <!-- Análisis IA (ai_analysis_json) — el veredicto detallado del verificador -->
@@ -423,15 +423,15 @@ const onDocKeyChange = () => {
 
                         <div v-if="car.ai_analysis_json.market_avg || car.ai_analysis_json.market_min || car.ai_analysis_json.market_max" class="mb-3 grid grid-cols-3 gap-2">
                             <div v-if="car.ai_analysis_json.market_min" class="rounded-lg bg-gray-50 p-3 text-center">
-                                <div class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Min</div>
+                                <div class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">{{ t('marketplace_show.minimum') }}</div>
                                 <div class="font-mono text-sm font-semibold text-gray-900">{{ currency(car.ai_analysis_json.market_min) }}</div>
                             </div>
                             <div v-if="car.ai_analysis_json.market_avg" class="rounded-lg bg-gray-50 p-3 text-center">
-                                <div class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Media</div>
+                                <div class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">{{ t('marketplace_show.avg') }}</div>
                                 <div class="font-mono text-sm font-semibold text-gray-900">{{ currency(car.ai_analysis_json.market_avg) }}</div>
                             </div>
                             <div v-if="car.ai_analysis_json.market_max" class="rounded-lg bg-gray-50 p-3 text-center">
-                                <div class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Max</div>
+                                <div class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">{{ t('marketplace_show.maximum') }}</div>
                                 <div class="font-mono text-sm font-semibold text-gray-900">{{ currency(car.ai_analysis_json.market_max) }}</div>
                             </div>
                         </div>
@@ -507,7 +507,7 @@ const onDocKeyChange = () => {
                                     <p v-if="aspect.finding" class="mt-2 text-sm text-gray-700">{{ aspect.finding }}</p>
                                     <a v-if="aspect.source" :href="aspect.source" target="_blank" rel="noopener" class="mt-2 inline-flex items-center gap-1 text-xs text-estoril-600 hover:text-estoril-500">
                                         <LinkIcon class="h-3 w-3" />
-                                        Fuente
+                                        {{ t('marketplace_show.source') }}
                                     </a>
                                     <span v-if="aspect.date" class="ml-2 text-xs text-gray-400">{{ aspect.date }}</span>
                                 </template>
@@ -526,19 +526,19 @@ const onDocKeyChange = () => {
                     </div>
                     <div class="grid grid-cols-1 gap-6 p-6 md:grid-cols-4">
                         <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Media</dt>
+                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('marketplace_show.avg') }}</dt>
                             <dd class="mt-1 font-mono text-lg font-semibold text-gray-900">{{ currency(car.market_avg) }}</dd>
                         </div>
                         <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Mínimo</dt>
+                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('marketplace_show.minimum') }}</dt>
                             <dd class="mt-1 font-mono text-lg font-semibold text-gray-900">{{ currency(car.market_min) }}</dd>
                         </div>
                         <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Máximo</dt>
+                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('marketplace_show.maximum') }}</dt>
                             <dd class="mt-1 font-mono text-lg font-semibold text-gray-900">{{ currency(car.market_max) }}</dd>
                         </div>
                         <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Ahorro estimado</dt>
+                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('marketplace_show.estimated_saving') }}</dt>
                             <dd class="mt-1 font-mono text-lg font-semibold text-green-700">{{ currency(car.estimated_saving) }}</dd>
                         </div>
                     </div>
@@ -568,13 +568,13 @@ const onDocKeyChange = () => {
                 <!-- ╔ CHECKLIST ════════════════════════════════════════════════════════╗ -->
                 <div v-show="activeSection === 'checklist'" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4">
-                        <h3 class="text-base font-semibold text-gray-900">Checklist</h3>
+                        <h3 class="text-base font-semibold text-gray-900">{{ t('cars.section_checklist') }}</h3>
                     </div>
 
                     <!-- Milestones progress -->
                     <div class="border-b border-gray-200 bg-gray-50 px-6 py-4">
                         <div class="mb-2 flex items-center justify-between">
-                            <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-700">Hitos</h4>
+                            <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-700">{{ t('marketplace_show.milestones') }}</h4>
                             <span class="text-sm font-mono font-semibold text-gray-900">
                                 {{ derived?.milestones_progress?.completed || 0 }} / {{ derived?.milestones_progress?.total || 0 }}
                             </span>
@@ -727,16 +727,16 @@ const onDocKeyChange = () => {
                     <div class="p-6 space-y-4">
                         <form @submit.prevent="submitPhotos" class="grid grid-cols-1 gap-3 rounded-xl bg-gray-50 p-4 sm:grid-cols-[1fr_2fr_auto]">
                             <select v-model="photoForm.photo_type" class="block rounded-lg border-gray-300 text-sm focus:border-estoril-500 focus:ring-estoril-500">
-                                <option value="exterior">Exterior</option>
-                                <option value="interior">Interior</option>
-                                <option value="engine">Engine</option>
-                                <option value="defect">Defect</option>
-                                <option value="document">Document</option>
+                                <option value="exterior">{{ t('cars.photo_type_exterior') }}</option>
+                                <option value="interior">{{ t('cars.photo_type_interior') }}</option>
+                                <option value="engine">{{ t('cars.photo_type_engine') }}</option>
+                                <option value="defect">{{ t('cars.photo_type_defect') }}</option>
+                                <option value="document">{{ t('cars.photo_type_document') }}</option>
                             </select>
                             <input type="file" multiple accept="image/*" @change="handlePhotoFiles" class="block w-full text-sm text-gray-500 file:mr-3 file:rounded-lg file:border-0 file:bg-estoril-50 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-estoril-700 hover:file:bg-estoril-100" />
                             <button type="submit" :disabled="!photoForm.photos.length || uploadProgress" class="inline-flex items-center justify-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white hover:bg-estoril-500 disabled:opacity-50">
                                 <ArrowDownTrayIcon class="h-4 w-4" />
-                                {{ uploadProgress ? 'Uploading...' : 'Upload' }}
+                                {{ uploadProgress ? t('cars.uploading') : t('cars.upload') }}
                             </button>
                         </form>
 
@@ -784,7 +784,7 @@ const onDocKeyChange = () => {
                                 <p class="text-xs text-gray-500">
                                     <span v-if="req.brand">{{ req.brand }}{{ req.model ? ' ' + req.model : '' }} · </span>
                                     <span v-if="req.budget_max">{{ t('cars.matching_budget') }} {{ currency(req.budget_max) }} · </span>
-                                    <span>{{ statusLabel(t, req.status) }}</span>
+                                    <span>{{ t('car_requests.status.' + req.status, req.status) }}</span>
                                 </p>
                             </div>
                             <Link
@@ -820,7 +820,7 @@ const onDocKeyChange = () => {
                         </div>
                         <div class="flex items-end">
                             <Link :href="route('clients.show', car.client.id)" class="inline-flex items-center gap-1 text-sm font-semibold text-estoril-600 hover:text-estoril-500">
-                                View client →
+                                {{ t('cars.view_client') }} →
                             </Link>
                         </div>
                     </div>
@@ -829,7 +829,7 @@ const onDocKeyChange = () => {
                 <!-- Notes -->
                 <div v-if="car.notes" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4">
-                        <h3 class="text-base font-semibold text-gray-900">Notes</h3>
+                        <h3 class="text-base font-semibold text-gray-900">{{ t('cars.notes') }}</h3>
                     </div>
                     <div class="p-6">
                         <pre class="whitespace-pre-wrap font-sans text-sm text-gray-700">{{ car.notes }}</pre>
@@ -845,10 +845,10 @@ const onDocKeyChange = () => {
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Concept</th>
-                                    <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Estimated</th>
-                                    <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Actual</th>
-                                    <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Diff</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.expense_concept') }}</th>
+                                    <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.expense_estimated') }}</th>
+                                    <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.expense_actual') }}</th>
+                                    <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.expense_diff') }}</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200">

@@ -635,4 +635,54 @@ class ValuationImporterTest extends TestCase
 
         $this->assertStringNotContainsString('IEDMT: Claude estima', $car->notes);
     }
+
+    public function test_persists_traffic_light_from_json_when_present(): void
+    {
+        $org = Organization::factory()->create();
+        $importer = app(ValuationImporter::class);
+        $car = Car::factory()->make(['organization_id' => $org->id]);
+
+        $payload = [
+            '_meta' => ['schema_version' => ValuationImporter::SUPPORTED_SCHEMA_VERSION],
+            'vehiculo' => ['marca' => 'Opel', 'modelo' => 'Corsa', 'anio' => 2019, 'km' => 40000],
+            'anuncio' => ['url' => 'https://example.com/ad-semaforo'],
+            'investigacion' => [],
+            'balance' => ['a_favor' => [], 'en_contra' => []],
+            'veredicto' => ['recomendacion' => 'Comprar', 'confianza' => 'alta'],
+            'mercado' => ['precio_medio' => 10000, 'precio_min' => 9000, 'precio_max' => 12000, 'semaforo' => 'rojo'],
+        ];
+
+        $car = $importer->apply($car, $payload);
+        $car->refresh();
+
+        $this->assertSame('red', $car->traffic_light);
+    }
+
+    public function test_recalculates_traffic_light_when_no_semaforo_in_json(): void
+    {
+        $org = Organization::factory()->create();
+        $importer = app(ValuationImporter::class);
+        $car = Car::factory()->make([
+            'organization_id' => $org->id,
+            'purchase_price' => 9000,
+            'market_avg' => 50000,
+        ]);
+
+        $payload = [
+            '_meta' => ['schema_version' => ValuationImporter::SUPPORTED_SCHEMA_VERSION],
+            'vehiculo' => ['marca' => 'Opel', 'modelo' => 'Corsa', 'anio' => 2019, 'km' => 40000],
+            'anuncio' => ['url' => 'https://example.com/ad-semaforo-2'],
+            'investigacion' => [],
+            'balance' => ['a_favor' => [], 'en_contra' => []],
+            'veredicto' => ['recomendacion' => 'Comprar', 'confianza' => 'alta'],
+            'mercado' => ['precio_medio' => 50000, 'precio_min' => 45000, 'precio_max' => 55000],
+        ];
+
+        $car = $importer->apply($car, $payload);
+        $car->refresh();
+
+        // Sin semáforo en el JSON, el observer recalcula desde costes/market_avg
+        // (ratio << 1.00 → green).
+        $this->assertSame('green', $car->traffic_light);
+    }
 }

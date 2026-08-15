@@ -33,23 +33,24 @@ const submitting = ref(false);
 const errorMsg = ref('');
 
 // Order matters: deterministic ordering in the modal.
+// Labels vienen de i18n (cars.verify_fields.<key>) para respetar el locale.
 const FIELDS = [
-    { key: 'valuation', label: 'Valuation paragraph', type: 'long' },
-    { key: 'description', label: 'Description', type: 'long' },
-    { key: 'purchase_price', label: 'Purchase price', type: 'number', format: 'currency' },
-    { key: 'manual_tax_base', label: 'Manual tax base', type: 'number', format: 'currency' },
-    { key: 'verdict', label: 'Verdict', type: 'short', enum: ['Buy', 'Buy if price drops', 'Doubtful', 'Discard'] },
-    { key: 'verdict_confidence', label: 'Verdict confidence', type: 'short', enum: ['high', 'medium', 'low'] },
-    { key: 'verdict_reasoning', label: 'Verdict reasoning', type: 'long' },
-    { key: 'market_avg', label: 'Market average', type: 'number', format: 'currency' },
-    { key: 'market_min', label: 'Market min', type: 'number', format: 'currency' },
-    { key: 'market_max', label: 'Market max', type: 'number', format: 'currency' },
-    { key: 'estimated_saving', label: 'Estimated saving', type: 'number', format: 'currency' },
-    { key: 'pros', label: 'Pros', type: 'array' },
-    { key: 'cons', label: 'Cons', type: 'array' },
-    { key: 'tips', label: 'Tips', type: 'array' },
-    { key: 'red_flags', label: 'Red flags', type: 'array' },
-];
+    { key: 'valuation', type: 'long' },
+    { key: 'description', type: 'long' },
+    { key: 'purchase_price', type: 'number', format: 'currency' },
+    { key: 'manual_tax_base', type: 'number', format: 'currency' },
+    { key: 'verdict', type: 'short', enum: ['Buy', 'Buy if price drops', 'Doubtful', 'Discard'] },
+    { key: 'verdict_confidence', type: 'short', enum: ['high', 'medium', 'low'] },
+    { key: 'verdict_reasoning', type: 'long' },
+    { key: 'market_avg', type: 'number', format: 'currency' },
+    { key: 'market_min', type: 'number', format: 'currency' },
+    { key: 'market_max', type: 'number', format: 'currency' },
+    { key: 'estimated_saving', type: 'number', format: 'currency' },
+    { key: 'pros', type: 'array' },
+    { key: 'cons', type: 'array' },
+    { key: 'tips', type: 'array' },
+    { key: 'red_flags', type: 'array' },
+].map(f => ({ ...f, label: t('cars.verify_fields.' + f.key, f.key) }));
 
 // `checked` is the user's choice per field, defaults to true when the field
 // has a proposed value AND the car has no current value (so the AI is the only

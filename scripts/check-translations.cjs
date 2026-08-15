@@ -47,6 +47,19 @@ try {
 const esKeys = getAllKeys(esTranslations);
 const enKeys = getAllKeys(enTranslations);
 
+// Claves que son objetos plurales (p.ej. app.inventory_count → _one/_other):
+// se usan con t('app.inventory_count', {count}) y no deben reportarse missing.
+function isPluralObjectKey(obj, key) {
+    const parts = key.split('.');
+    let cur = obj;
+    for (let i = 0; i < parts.length; i++) {
+        if (cur === null || typeof cur !== 'object') return false;
+        cur = cur[parts[i]];
+        if (cur === undefined) return false;
+    }
+    return cur !== null && typeof cur === 'object' && !Array.isArray(cur) && ('_one' in cur || '_other' in cur);
+}
+
 // Find missing keys
 const missingInEs = enKeys.filter(k => !esKeys.includes(k));
 const missingInEn = esKeys.filter(k => !enKeys.includes(k));
@@ -81,8 +94,67 @@ if (enDuplicates.length > 0) {
     enDuplicates.forEach(k => console.log(`  ${k}`));
 }
 
-// Summary
-if (missingInEs.length === 0 && missingInEn.length === 0 && duplicates.length === 0 && enDuplicates.length === 0) {
+// M4 (auditoría 15-ago-2026): detectar claves usadas en los .vue que no
+// existen en los ficheros de traducción (se renderizarían como literal), y
+// claves definidas sin uso (informativo — hay claves usadas dinámicamente).
+const vueDir = path.join(__dirname, '../resources/js/Pages');
+const usedKeys = new Set();
+const usedInFile = {};
+
+function walkVue(dir) {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+        const full = path.join(dir, entry.name);
+        if (entry.isDirectory()) walkVue(full);
+        else if (entry.name.endsWith('.vue')) {
+            const content = fs.readFileSync(full, 'utf8');
+            // t('literal') / t("literal") — ignora concat (t('x.'+k)) y casos
+            // como photoForm.reset('photos') (el `t` de `reset(` no es t()).
+            // Lookbehind negativo: la `t` no puede ir precedida de identificador.
+            const re = /(?<![A-Za-z0-9_$])t\(\s*['"]([^'"$]+)['"]/g;
+            let m;
+            while ((m = re.exec(content)) !== null) {
+                const key = m[1].trim();
+                if (!key) continue;
+                usedKeys.add(key);
+                if (!usedInFile[key]) usedInFile[key] = [];
+                usedInFile[key].push(path.relative(path.join(__dirname, '..'), full));
+            }
+        }
+    }
+}
+walkVue(vueDir);
+
+const usedButMissing = [...usedKeys]
+    // Excluye concat dinámicas tipo t('cars.status.' + s) y t('x.'+k)
+    .filter(k => !k.endsWith('.'))
+    // Excluye claves plurales (t('app.inventory_count', {count}))
+    .filter(k => !isPluralObjectKey(esTranslations, k))
+    .filter(k => !isPluralObjectKey(enTranslations, k))
+    .filter(k => !esKeys.includes(k) && !enKeys.includes(k));
+// WARNING informativo: no rompe el exit code (hay páginas fuera del alcance
+// de la sesión con claves pendientes). Reporta para corregirlas poco a poco.
+if (usedButMissing.length > 0) {
+    console.log('\n⚠️  Keys used in .vue but MISSING in es/en (would render literal):');
+    usedButMissing.forEach(k => {
+        const where = [...new Set(usedInFile[k])].join(', ');
+        console.log(`  ${k}  (${where})`);
+    });
+    console.log(`  → ${usedButMissing.length} keys pendientes (no bloquea, pero revisa)`);
+}
+
+// Huérfanas: definidas en ambos pero sin uso literal en .vue. Informativo:
+// pueden ser usadas dinámicamente (t('cars.status.'+s)) o por otros scripts.
+const orphans = esKeys.filter(k => enKeys.includes(k) && !usedKeys.has(k));
+if (orphans.length > 0) {
+    console.log('\n--- Keys defined but not referenced literally in Pages (info only) ---');
+    console.log(`  (${orphans.length} keys — muchas son dinámicas, no es un error)`);
+}
+
+// Summary — usadas-inexistentes es WARNING (no rompe); solo falla la paridad
+// o duplicados reales.
+const allOk = missingInEs.length === 0 && missingInEn.length === 0 &&
+    duplicates.length === 0 && enDuplicates.length === 0;
+if (allOk) {
     console.log('\n✅ All translations are complete and consistent!');
     process.exit(0);
 } else {
