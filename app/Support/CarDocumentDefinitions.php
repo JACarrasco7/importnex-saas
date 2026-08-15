@@ -38,15 +38,20 @@ class CarDocumentDefinitions
         ['key' => 'cliente_contrato',    'name' => 'Contrato de encargo firmado',                   'group' => CarDocument::GROUP_SPAIN_PROCEDURES, 'doc_type' => 'contract'],
         ['key' => 'senal_recibo',        'name' => 'Recibo de señal',                               'group' => CarDocument::GROUP_SPAIN_PROCEDURES, 'doc_type' => 'invoice'],
         ['key' => 'seguro',              'name' => 'Seguro de transporte / importación',            'group' => CarDocument::GROUP_SPAIN_PROCEDURES, 'doc_type' => 'insurance'],
+
+        // ai_reports (3) — PDFs de investigación que genera CLAUDE en el Desktop
+        ['key' => 'informe_busqueda',    'name' => 'Informe de búsqueda (Claude)',                  'group' => CarDocument::GROUP_AI_REPORTS, 'doc_type' => 'pdf'],
+        ['key' => 'informe_unidad',      'name' => 'Informe de unidad (Claude)',                    'group' => CarDocument::GROUP_AI_REPORTS, 'doc_type' => 'pdf'],
+        ['key' => 'briefing_pdf',        'name' => 'Briefing / resumen cliente (Claude)',           'group' => CarDocument::GROUP_AI_REPORTS, 'doc_type' => 'pdf'],
     ];
 
     /**
      * Mapea doc_key → milestone del checklist que se marca al recibirlo.
      */
     public const DOC_TO_MILESTONE = [
-        'coc'        => 'coc_ordered',
+        'coc' => 'coc_ordered',
         'itv_import' => 'itv_passed',
-        'iedmt_576'  => 'iedmt_paid',
+        'iedmt_576' => 'iedmt_paid',
         'permiso_circulacion' => 'registered',
     ];
 

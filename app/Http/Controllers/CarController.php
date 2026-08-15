@@ -11,6 +11,7 @@ use App\Services\Scraping\CarScrapingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -142,8 +143,51 @@ class CarController extends Controller
                 'inspections_by_section' => $inspectionsBySection,
                 'documents_by_group' => $documentsByGroup,
                 'matching_requests' => $this->matchingRequests($car),
+                'laravel_pdfs' => $this->laravelPdfs($car),
             ],
         ]);
+    }
+
+    /**
+     * PDFs que genera LARAVEL (Blade + Browsershot) a partir de los esqueletos
+     * .txt del ZIP. Se listan en la pestaña Documentos para diferenciarlos de
+     * los PDFs que genera Claude (informe de búsqueda/unidad, briefing).
+     *
+     * @return array<int, array{key: string, label: string, route: string, available: bool}>
+     */
+    private function laravelPdfs(Car $car): array
+    {
+        $contenidoDir = 'cars/'.$car->id.'/contenido';
+        $has = function (string $file) use ($contenidoDir): bool {
+            foreach (['local', 'public'] as $disk) {
+                if (Storage::disk($disk)->exists($contenidoDir.'/'.$file)) {
+                    return true;
+                }
+            }
+
+            return false;
+        };
+
+        return [
+            [
+                'key' => 'ficha',
+                'label' => 'Ficha cliente',
+                'route' => route('cars.ficha', $car->id),
+                'available' => $has('ficha-publicitaria.txt'),
+            ],
+            [
+                'key' => 'informe_interno',
+                'label' => 'Informe interno',
+                'route' => route('cars.informe-interno', $car->id),
+                'available' => $has('informe-interno.txt'),
+            ],
+            [
+                'key' => 'briefing',
+                'label' => 'Briefing PDF',
+                'route' => route('cars.marketing.briefing', $car->id),
+                'available' => true,
+            ],
+        ];
     }
 
     /**
@@ -207,7 +251,7 @@ class CarController extends Controller
             'seller_origin' => 'Seller / Country of origin',
             'purchase_transport' => 'Purchase & transport',
             'spain_procedures' => 'Spain procedures',
-            'ai_reports' => 'AI briefing reports',
+            'ai_reports' => 'AI research reports (Claude)',
             default => ucfirst(str_replace('_', ' ', $group)),
         };
     }

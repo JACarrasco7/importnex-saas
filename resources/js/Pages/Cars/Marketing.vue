@@ -86,6 +86,14 @@ function loadContent() {
 }
 
 watch(activeChannel, loadContent);
+
+// Re-sincroniza el formulario cuando cambian los contenidos (tras generar/guardar).
+// Vue re-evalúa currentContent al mutar props.contents, pero loadContent solo
+// se dispara al cambiar de canal; con este watch el form se refresca en sitio.
+watch(
+    () => props.contents.map(c => c.id + ':' + c.updated_at).join('|'),
+    () => loadContent(),
+);
 loadContent();
 
 function togglePreview() {

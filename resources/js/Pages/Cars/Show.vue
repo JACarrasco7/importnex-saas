@@ -236,7 +236,7 @@ const onDocKeyChange = () => {
                             <ArrowLeftIcon class="h-4 w-4" />
                             {{ t('common.back') }}
                         </Link>
-                        <Link v-if="['Located', 'Valuing'].includes(car.status)" :href="route('cars.verify.show', car.id)" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
+                        <Link v-if="!['Delivered', 'Discarded'].includes(car.status)" :href="route('cars.verify.show', car.id)" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
                             <SparklesIcon class="h-4 w-4" />
                             {{ t('cars.verify_with_ai') }}
                         </Link>
@@ -399,6 +399,62 @@ const onDocKeyChange = () => {
 
                     <div v-if="!car.verdict && !derived?.research_gaps?.length" class="px-6 py-8 text-center text-sm text-gray-500">
                         No hay valoración todavía. Importa un informe del chat o ejecuta el verificador de IA.
+                    </div>
+
+                    <!-- Análisis IA (ai_analysis_json) — el veredicto detallado del verificador -->
+                    <div v-if="car.ai_analysis_json" class="border-b border-gray-200 px-6 py-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.ai_analysis_title') }}</h4>
+                            <Link :href="route('cars.verify.show', car.id)" class="inline-flex items-center gap-1 text-xs font-semibold text-estoril-600 hover:text-estoril-500">
+                                <SparklesIcon class="h-3 w-3" />
+                                {{ t('cars.ai_suggestions') }}
+                            </Link>
+                        </div>
+
+                        <div v-if="car.ai_analysis_json.valuation" class="mb-3 rounded-lg border border-gray-200 bg-white p-3">
+                            <h5 class="text-xs font-semibold uppercase tracking-wider text-estoril-700">{{ t('cars.ai_valuation') }}</h5>
+                            <p class="mt-1 text-sm text-gray-700">{{ car.ai_analysis_json.valuation }}</p>
+                        </div>
+
+                        <div v-if="car.ai_analysis_json.recommendation" class="mb-3 rounded-lg border border-gray-200 bg-white p-3">
+                            <h5 class="text-xs font-semibold uppercase tracking-wider text-estoril-700">{{ t('cars.ai_recommendation') }}</h5>
+                            <p class="mt-1 text-sm text-gray-700">{{ car.ai_analysis_json.recommendation }}</p>
+                        </div>
+
+                        <div v-if="car.ai_analysis_json.market_avg || car.ai_analysis_json.market_min || car.ai_analysis_json.market_max" class="mb-3 grid grid-cols-3 gap-2">
+                            <div v-if="car.ai_analysis_json.market_min" class="rounded-lg bg-gray-50 p-3 text-center">
+                                <div class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Min</div>
+                                <div class="font-mono text-sm font-semibold text-gray-900">{{ currency(car.ai_analysis_json.market_min) }}</div>
+                            </div>
+                            <div v-if="car.ai_analysis_json.market_avg" class="rounded-lg bg-gray-50 p-3 text-center">
+                                <div class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Media</div>
+                                <div class="font-mono text-sm font-semibold text-gray-900">{{ currency(car.ai_analysis_json.market_avg) }}</div>
+                            </div>
+                            <div v-if="car.ai_analysis_json.market_max" class="rounded-lg bg-gray-50 p-3 text-center">
+                                <div class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">Max</div>
+                                <div class="font-mono text-sm font-semibold text-gray-900">{{ currency(car.ai_analysis_json.market_max) }}</div>
+                            </div>
+                        </div>
+
+                        <div v-if="car.ai_analysis_json.red_flags?.length" class="mb-3">
+                            <h5 class="text-xs font-semibold uppercase tracking-wider text-rose-700">{{ t('cars.ai_red_flags') }}</h5>
+                            <ul class="mt-1 space-y-1.5">
+                                <li v-for="(flag, i) in car.ai_analysis_json.red_flags" :key="i" class="flex items-start gap-2 rounded-lg bg-rose-50 p-2 text-sm text-rose-900">
+                                    <XCircleIcon class="mt-0.5 h-4 w-4 shrink-0 text-rose-600" />
+                                    {{ flag }}
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div v-if="car.ai_analysis_json.tips?.length">
+                            <h5 class="text-xs font-semibold uppercase tracking-wider text-estoril-700">{{ t('cars.ai_tips') }}</h5>
+                            <ul class="mt-1 space-y-1.5">
+                                <li v-for="(tip, i) in car.ai_analysis_json.tips" :key="i" class="flex items-start gap-2 rounded-lg bg-estoril-50 p-2 text-sm text-estoril-900">
+                                    <CheckCircleIcon class="mt-0.5 h-4 w-4 shrink-0 text-estoril-600" />
+                                    {{ tip }}
+                                </li>
+                            </ul>
+                        </div>
                     </div>
 
                     <!-- Balance pros / cons -->
@@ -605,6 +661,35 @@ const onDocKeyChange = () => {
                                 {{ uploadProgress ? t('cars.uploading') : t('cars.upload') }}
                             </button>
                         </form>
+
+                        <!-- PDFs generables por Laravel (esqueletos del ZIP → Blade + Browsershot) -->
+                        <div v-if="derived?.laravel_pdfs?.length" class="rounded-xl border border-gray-200">
+                            <div class="border-b border-gray-200 bg-gray-50 px-4 py-2 flex items-center justify-between">
+                                <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-600">{{ t('cars.pdfs_generated') }}</h4>
+                                <span class="text-[10px] text-gray-400">{{ t('cars.pdfs_laravel_note') }}</span>
+                            </div>
+                            <ul class="divide-y divide-gray-200">
+                                <li v-for="pdf in derived.laravel_pdfs" :key="pdf.key" class="flex items-center justify-between gap-3 px-4 py-3">
+                                    <div class="flex items-center gap-3 min-w-0">
+                                        <DocumentIcon class="h-6 w-6 shrink-0 text-estoril-600" />
+                                        <div class="min-w-0">
+                                            <p class="font-medium text-gray-900">{{ pdf.label }}</p>
+                                            <p v-if="!pdf.available" class="text-xs text-amber-700">{{ t('cars.pdfs_need_skeleton') }}</p>
+                                        </div>
+                                    </div>
+                                    <a
+                                        v-if="pdf.available"
+                                        :href="pdf.route"
+                                        target="_blank"
+                                        class="inline-flex shrink-0 items-center gap-1 rounded-md bg-estoril-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-estoril-500"
+                                    >
+                                        <ArrowDownTrayIcon class="h-3 w-3" />
+                                        {{ t('cars.pdfs_download') }}
+                                    </a>
+                                    <span v-else class="shrink-0 rounded-md bg-gray-100 px-3 py-1.5 text-xs font-semibold text-gray-400">{{ t('cars.pdfs_not_available') }}</span>
+                                </li>
+                            </ul>
+                        </div>
 
                         <div v-for="g in derived?.documents_by_group || []" :key="g.group" class="space-y-2">
                             <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ g.label }}</h4>
