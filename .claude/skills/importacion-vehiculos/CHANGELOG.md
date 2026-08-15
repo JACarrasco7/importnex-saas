@@ -85,6 +85,12 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 ### 🧪 Tests
 - +8 tests nuevos (validaciones, mapeos, IEDMT, idempotencia cierre). Área importación/cierres/KPIs: 85 passed.
 
+## [2.9.5] - 2026-08-15 — Limpieza de inconsistencias residuales
+
+### 🧹 Coherencia contrato ↔ código
+- contrato.md: "Adaptado a los 4 flujos" (incluye D). Bloques del dossier-cliente se renderizan en `ficha-coche.blade.php` (no `dossier.blade.php`).
+- SKILL.md: comando real `importnex:import-valuation` (no `jj:importar`); mapa del ZIP corregido.
+
 ## [2.9.3] - 2026-08-15 — Diseño de PDF unificado (plantilla de marca única)
 ### 🎨 Plantilla única de marca (Claude ↔ Laravel idénticos)
 - Nueva `assets/plantilla_pdf_marca.html`: copia fiel del CSS de `ficha-coche.blade.php` (Inter, fondo #0f1d42, gradientes, grid, price-band naranja, CTA+QR). Claude la usa OBLIGATORIAMENTE para los PDFs de investigación → visualmente idénticos a los de Laravel.

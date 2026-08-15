@@ -706,7 +706,7 @@ ENCARGO (Flujo B: MODELO)
 2. **Los `.md` de `informes\` son para el USUARIO.** No los procesa ningún script.
    Son lectura humana: búsqueda, unidad, comparativa.
 3. **Los JSON de `laravel\export\` son para las MÁQUINAS.** Los lee `empaquetar.py`
-   o Laravel (`php artisan jj:importar`). No hace falta abrirlos a mano.
+   o Laravel (`php artisan importnex:import-valuation`). No hace falta abrirlos a mano.
 4. **Los PDFs no los genera Claude** — salen de Laravel (Blade + Browsershot) tras
    subir el ZIP.
 
@@ -947,7 +947,7 @@ Las 16 reglas duras (A1-A16) viven en `anti_patrones.md`. Cargarlas cuando se du
 ├── manifest.json                   ← Metadatos del paquete
 ├── contenido/
 │   ├── ficha-publicitaria.txt      ← Esqueleto [BLOQUE] → folleto.blade.php
-│   ├── dossier-cliente.txt        ← Esqueleto [BLOQUE] → dossier.blade.php (PDF cliente)
+│   ├── dossier-cliente.txt        ← Esqueleto [BLOQUE] → documento del cliente (ficha-coche) en Laravel
 │   ├── informe-interno.txt         ← Esqueleto [BLOQUE] → informe-interno.blade.php (PDF equipo)
 │   ├── redes-sociales.txt          ← [GANCHO] [POST_LARGO] [STORIES] [HASHTAGS]
 │   └── anuncio-portales.txt        ← [TITULO] [DESCRIPCION] [AVISO_LEGAL]
