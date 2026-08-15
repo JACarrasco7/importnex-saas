@@ -35,8 +35,6 @@ const tabs = computed(() => {
         { id: 'all', label: 'All', count: props.cars.total },
         ...ordered.map(status => ({
             id: status,
-        ...ordered.map(status => ({
-            id: status,
             label: t(`cars.status.${status}`),
             count: props.cars.data?.filter(c => c.status === status).length || 0
         })),
