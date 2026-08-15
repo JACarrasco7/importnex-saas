@@ -1,3 +1,15 @@
+{{-- ═══════════════════════════════════════════════════════════════════════
+    FICHA DEL COCHE (PDF) — TIPO: marketing / venta al cliente
+    ─────────────────────────────────────────────────────────────────────────
+    · QUIÉN LO GENERA  : Laravel (Blade + Browsershot)
+    · DESDE QUÉ ARCHIVO: contenido/ficha-publicitaria.txt  (esqueleto [MARCADOR])
+    · RUTA             : GET /cars/{car}/ficha  (autenticado)
+    · CONTROLADOR      : PaqueteValoracionController@ficha
+    · AUDIENCIA        : CLIENTE final. NO mostrar margen ni honorarios.
+    · Bloques que renderiza: TITULO, CLAIM, ETIQUETA_DGT, SPEC, PRECIO,
+      PRECIO_CAPTION, PLAZO, PRECIO_NOTA, H2+INCLUYE/ARGUMENTO/EQUIPAMIENTO,
+      CTA, CONTACTO, QR, QR_TEXTO, LEGAL, FOTOS.
+    ═══════════════════════════════════════════════════════════════════════ --}}
 @php
     $telefono_1 = $telefono_1 ?? '675 70 14 39';
     $telefono_2 = $telefono_2 ?? '691 48 59 27';
@@ -20,6 +32,26 @@
             $qr_svg = null;
         }
     }
+
+    // ── KPI: KM y Año se derivan de la ficha técnica (SPEC Etiqueta | Valor) ──
+    $specs = $e->filas('SPEC');
+    $spec_val = function ($needle) use ($specs) {
+        foreach ($specs as $s) {
+            if (stripos((string) ($s[0] ?? ''), $needle) !== false) {
+                return $s[1] ?? null;
+            }
+        }
+        return null;
+    };
+    $kpi_km   = $spec_val('KM') ?? $spec_val('Kilómetros');
+    $kpi_anio = $spec_val('Año');
+    $kpi_precio = $e->uno('PRECIO');
+    $kpi_ahorro = $e->uno('AHORRO');
+
+    // ── Origen DE/ES (badge) — desde el país de origen del coche ──
+    $pais = strtolower((string) ($car->pais_origen ?? ''));
+    $origen = (str_contains($pais, 'alem') || $pais === 'de') ? 'de'
+        : ((str_contains($pais, 'espa') || $pais === 'es') ? 'es' : null);
 @endphp
 
 <!DOCTYPE html>
@@ -121,9 +153,27 @@
         /* Sections */
         .section { margin-bottom: 16px; }
         .h2 {
-            color: #8fa3d9; font-size: 12px; font-weight: 800; letter-spacing: 1.6px; text-transform: uppercase;
+            color: #9fb4e8; font-size: 12px; font-weight: 800; letter-spacing: 1.6px; text-transform: uppercase;
             padding-bottom: 6px; border-bottom: 1px solid rgba(143,163,217,0.15); margin-bottom: 10px;
+            display: flex; align-items: center; gap: 8px;
         }
+        .h2::before { content: ''; width: 4px; height: 14px; border-radius: 2px; background: linear-gradient(180deg, #E8590C, #f07c3a); }
+
+        /* ── KPI CARDS ──────────────────────────────────────── */
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; margin-bottom: 18px; }
+        .kpi-card {
+            background: linear-gradient(180deg, rgba(20,38,90,0.85) 0%, rgba(15,23,42,0.6) 100%);
+            border: 1px solid rgba(143,163,217,0.25); border-radius: 12px; padding: 11px 13px;
+        }
+        .kpi-card .k { font-size: 8px; color: #8fa3d9; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 3px; }
+        .kpi-card .v { font-size: 16px; font-weight: 800; color: #f1f5f9; line-height: 1.15; }
+        .kpi-card .v .accent { color: #E8590C; }
+        .kpi-card .s { font-size: 8.5px; color: #64748b; margin-top: 2px; }
+
+        /* ── BADGE ORIGEN (DE/ES) ──────────────────────────── */
+        .badge-origen { display: inline-block; padding: 2px 9px; border-radius: 6px; font-size: 9px; font-weight: 800; letter-spacing: 0.6px; vertical-align: middle; margin-left: 8px; }
+        .badge-origen.de { background: #1A306D; color: #c7d4f5; border: 1px solid rgba(143,163,217,0.4); }
+        .badge-origen.es { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.4); }
         .list { list-style: none; }
         .list li {
             display: flex; align-items: flex-start; gap: 8px;
@@ -179,10 +229,49 @@
         <div class="hero">
             <span class="hero-eyebrow">Importación Premium · Alemania → España</span>
             <h1 class="h1-title">{{ $e->uno('TITULO') }}@if($e->uno('ETIQUETA_DGT'))<span class="badge-dgt">{{ $e->uno('ETIQUETA_DGT') }}</span>@endif</h1>
+            @if($origen)
+                <p class="claim" style="margin-top:8px;">
+                    <span class="badge-origen {{ $origen }}">Origen: {{ $origen === 'de' ? 'Alemania' : 'España' }}</span>
+                </p>
+            @endif
             @if($e->uno('CLAIM'))
                 <p class="claim">{{ $e->uno('CLAIM') }}</p>
             @endif
         </div>
+
+        {{-- ── KPI CARDS ─────────────────────────────────────────────── --}}
+        @if($kpi_precio || $kpi_ahorro || $kpi_km || $kpi_anio)
+        <div class="kpi-grid">
+            @if($kpi_precio)
+                <div class="kpi-card">
+                    <div class="k">Precio final</div>
+                    <div class="v"><span class="accent">{{ $kpi_precio }}</span></div>
+                    <div class="s">Llave en mano</div>
+                </div>
+            @endif
+            @if($kpi_ahorro)
+                <div class="kpi-card">
+                    <div class="k">Ahorro</div>
+                    <div class="v" style="color:#4ade80;">{{ $kpi_ahorro }}</div>
+                    <div class="s">vs. mercado español</div>
+                </div>
+            @endif
+            @if($kpi_km)
+                <div class="kpi-card">
+                    <div class="k">Kilómetros</div>
+                    <div class="v">{{ $kpi_km }}</div>
+                    <div class="s">Odómetro verificado</div>
+                </div>
+            @endif
+            @if($kpi_anio)
+                <div class="kpi-card">
+                    <div class="k">Año</div>
+                    <div class="v">{{ $kpi_anio }}</div>
+                    <div class="s">Primera matriculación</div>
+                </div>
+            @endif
+        </div>
+        @endif
 
         @if(!empty($fotos))
         <div class="gallery">

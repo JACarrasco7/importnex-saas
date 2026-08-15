@@ -4,9 +4,20 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Spatie\Browsershot\Browsershot;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Spatie\Browsershot\Browsershot;
 
+/**
+ * Folleto institucional de JJ Import Motors (marketing, público).
+ *
+ * TIPO DE DOCUMENTO: folleto de servicio (estático, no depende de esqueletos
+ * del ZIP). Es UNO de los 4 PDFs que genera LARAVEL — los otros son:
+ *   - ficha-coche    → contenido/ficha-publicitaria.txt  (PaqueteValoracionController@ficha)
+ *   - informe-interno→ contenido/informe-interno.txt     (PaqueteValoracionController@interno)
+ *   - dossier        → contenido/dossier-cliente.txt      (documento del cliente)
+ * Los PDFs de INVESTIGACIÓN (informe_busqueda / informe_unidad) los genera CLAUDE
+ * con plantilla_pdf_marca.html, no Laravel.
+ */
 class JJImportFolletoController extends Controller
 {
     public function download(Request $request)
@@ -23,7 +34,7 @@ class JJImportFolletoController extends Controller
             $cachePath = storage_path('app/public/jj-import-folleto.pdf');
 
             $logoPath = public_path('images/jj-import/logo-horizontal-blanco.png');
-            $logoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
+            $logoBase64 = 'data:image/png;base64,'.base64_encode(file_get_contents($logoPath));
 
             $qrUrl = 'https://jjimportmotors.on-forge.com/request/jj-import-motors';
             $qrSvg = QrCode::format('svg')
@@ -56,10 +67,11 @@ class JJImportFolletoController extends Controller
 
             if (file_exists($cachePath)) {
                 copy($cachePath, $publicPath);
+
                 return response()->download($cachePath, 'JJ_Import_Motors_Folleto.pdf');
             }
         } catch (\Exception $e) {
-            Log::error('Error generando PDF JJ Import Motors: ' . $e->getMessage());
+            Log::error('Error generando PDF JJ Import Motors: '.$e->getMessage());
         }
 
         return response()->json([

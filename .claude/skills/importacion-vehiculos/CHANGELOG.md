@@ -85,6 +85,19 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 ### 🧪 Tests
 - +8 tests nuevos (validaciones, mapeos, IEDMT, idempotencia cierre). Área importación/cierres/KPIs: 85 passed.
 
+## [2.9.9] - 2026-08-15 — Plantillas Blade de Laravel a nivel premium + mapa de PDFs
+
+### 🎨 Plantillas Blade (Laravel) — nivel premium
+- **`informe-interno.blade.php`**: KPI cards (score global, recomendación, mediana ES, cobertura), coverage grid de fuentes con estados (OK/degradada/omitida), tarjeta de candidato, margen vs mercado, barras de score por dimensiones (SCORE_DIM) y vendibilidad, predicción de venta (4 escenarios con fila RECOMENDADA), riesgos + banderas rojas/amarillas, acciones numeradas con plazo, tabla de comparables con badges DE/ES + fila ELEGIDO, verdict-card final. `h2` con barra accent.
+- **`ficha-coche.blade.php`**: KPI cards (precio, ahorro, KM, año derivados de SPEC/PRECIO/AHORRO), badge de origen DE/ES desde `cars.pais_origen`, `h2` con barra accent.
+- **`folleto.blade.php`**: cabecera de documentación (tipo/origen).
+- **Controladores**: docblocks con el mapa de "qué PDF genera qué y de qué esqueleto" en `PaqueteValoracionController` y `JJImportFolletoController`.
+
+### 📚 Mapa de PDFs documentado (7 PDFs, tipos y dónde se crean)
+- **`SKILL.md`** §MAPA DE PDFs, **`contrato.md`** §Mapa de PDFs, **`docs/MAPA_PDFS.md`** (repo) e **`INSTRUCCIONES_PROYECTO.md`** (Desktop): tabla de 7 PDFs (3 Claude investigación + 4 Laravel venta) con origen y ruta de creación.
+- **Tests**: `tests/Feature/PlantillasValoracionRenderTest.php` (render de informe-interno y ficha-coche con secciones premium).
+- Nota: briefing PDF ya eliminado (v2.9.8); status cliente 'Briefing' y `briefing_encargo.md` no son el PDF.
+
 ## [2.9.8] - 2026-08-15 — Briefing PDF eliminado del ecosistema
 
 ### 🗑️ Eliminación (decisión del usuario)

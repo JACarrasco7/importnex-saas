@@ -560,6 +560,20 @@ class Esqueleto
 
 > **Nota ingestor:** `ValuationPackageIngestor` guarda **cualquier `.txt` dentro de `contenido/`** del ZIP en `cars/{id}/contenido/`. Por tanto `dossier-cliente.txt` se persiste automáticamente sin tocar el ingestor. Rutas disponibles: `cars.ficha`, `cars.dossier` (autenticado), `cars.informe-interno` (solo owner/operator).
 
+### 🗺️ Mapa de PDFs — tipos y dónde se crean (15-ago-2026)
+
+| # | PDF | Tipo | Quién lo genera | De qué sale | Dónde se crea |
+|---|---|---|---|---|---|
+| 1 | `informe_busqueda_*.pdf` | Investigación (búsqueda) | **CLAUDE** | Markdown Fase 1 | Desktop, plantilla `assets/plantilla_pdf_marca.html` |
+| 2 | `informe_unidad_*.pdf` | Investigación (unidad) | **CLAUDE** | `informe_tecnico.md` | Idem plantilla de marca |
+| 3 | Informe técnico unidad (Flujo A) | Investigación (técnico) | **CLAUDE** | `informe_tecnico.md` | Idem plantilla de marca |
+| 4 | Dossier cliente | Venta / cliente | **LARAVEL** | `contenido/dossier-cliente.txt` | `ficha-coche.blade.php` (documento cliente) |
+| 5 | Ficha del coche | Venta / cliente | **LARAVEL** | `contenido/ficha-publicitaria.txt` | `PaqueteValoracionController@ficha` · ruta `cars.ficha` |
+| 6 | Informe interno | Venta / equipo | **LARAVEL** | `contenido/informe-interno.txt` | `PaqueteValoracionController@interno` · ruta `cars.informe-interno` |
+| 7 | Folleto institucional | Marketing / público | **LARAVEL** | estático | `JJImportFolletoController@download` · ruta `jj-import.folleto` |
+
+**Reglas:** Claude genera SOLO los de investigación (1-3); Laravel SOLO los de venta (4-7) desde los `.txt` del ZIP. El briefing PDF ya NO existe (eliminado). El informe interno (margen/honorarios/URLs) es solo equipo.
+
 ---
 
 ## 📦 Datos de marca

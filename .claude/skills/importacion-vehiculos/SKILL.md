@@ -670,6 +670,27 @@ ENCARGO (Flujo B: MODELO)
 | **2 · Avance con candidato** (usuario elige uno) | **INFORME DE UNIDAD** | Las 15 secciones de `informe_tecnico.md` (o las 11 no negociables del flujo MODELO) SOLO del candidato elegido | `informe_unidad_<modelo>_<unidad>.md` + esqueletos `.txt` |
 | **3 · Cierre** (veredicto 🟢/🔵) | **ZIP Laravel** | `informe.json` + `manifest.json` + `contenido/*.txt` + `fotos/` | `[coche_id].zip` → se sube a Laravel |
 
+### 🗺️ MAPA DE PDFs — TIPOS y DÓNDE SE CREA CADA UNO (15-ago-2026)
+
+> **Hay 7 PDFs en total: 3 los genera CLAUDE (investigación) y 4 los genera LARAVEL (venta/documento).**
+> **El briefing PDF ya NO existe** (eliminado 15-ago-2026). El status de cliente 'Briefing' (pipeline) y `briefing_encargo.md` (cuestionario previo) NO son el PDF briefing y se mantienen.
+
+| # | PDF | Tipo | Quién lo genera | De qué sale | Dónde se crea |
+|---|---|---|---|---|---|
+| 1 | `informe_busqueda_*.pdf` | Investigación (búsqueda) | **CLAUDE** | Markdown Fase 1 | HTML de marca → Chrome headless, plantilla `assets/plantilla_pdf_marca.html` |
+| 2 | `informe_unidad_*.pdf` | Investigación (unidad) | **CLAUDE** | `informe_tecnico.md` (15 sec) | Idem plantilla de marca |
+| 3 | informe técnico unidad (Flujo A) | Investigación (técnico) | **CLAUDE** | `informe_tecnico.md` | Idem plantilla de marca |
+| 4 | Dossier cliente | Venta / cliente | **LARAVEL** | `contenido/dossier-cliente.txt` | Blade `ficha-coche.blade.php` (documento cliente) |
+| 5 | Ficha del coche | Venta / cliente | **LARAVEL** | `contenido/ficha-publicitaria.txt` | Blade `ficha-coche.blade.php` · `PaqueteValoracionController@ficha` · ruta `cars.ficha` |
+| 6 | Informe interno | Venta / equipo | **LARAVEL** | `contenido/informe-interno.txt` | Blade `informe-interno.blade.php` · `PaqueteValoracionController@interno` · ruta `cars.informe-interno` |
+| 7 | Folleto institucional | Marketing / público | **LARAVEL** | estático (sin esqueleto) | Blade `folleto.blade.php` · `JJImportFolletoController@download` · ruta `jj-import.folleto` |
+
+**Reglas duras del mapa:**
+1. **Claude NUNCA genera los PDFs de venta** (ficha, informe interno, folleto) — los hace Laravel con Blade + Browsershot tras recibir el ZIP.
+2. **Laravel NUNCA genera los PDFs de investigación** — los hace Claude en el Desktop con la plantilla de marca.
+3. El **informe interno** (margen, honorarios, URLs de comparables) es SOLO equipo; el **dossier/ficha** es para el cliente (sin margen).
+4. Los esqueletos `.txt` (`contenido/*.txt`) son la ÚNICA entrada de Laravel: `ficha-publicitaria.txt`, `informe-interno.txt`, `dossier-cliente.txt`.
+
 **Reglas duras:**
 1. **La fase 1 acaba con el informe de búsqueda y la lista de candidatos.** No se escribe valoración en la fase 1.
 2. **No se mezclan búsqueda y valoración en el mismo archivo.** `informe_busqueda_*.md` ≠ `informe_unidad_*.md`.

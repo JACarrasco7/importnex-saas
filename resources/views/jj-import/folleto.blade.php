@@ -1,3 +1,12 @@
+{{-- ═══════════════════════════════════════════════════════════════════════
+    FOLLETO JJ IMPORT MOTORS (PDF) — TIPO: marketing institucional
+    ─────────────────────────────────────────────────────────────────────────
+    · QUIÉN LO GENERA  : Laravel (Blade + Browsershot, o PDF estático subido)
+    · DESDE QUÉ ARCHIVO: estático (no usa esqueletos del ZIP)
+    · RUTA             : GET /jj-import/folleto  (pública)
+    · CONTROLADOR      : JJImportFolletoController@download
+    · AUDIENCIA        : PÚBLICO general. Describe el servicio (sin coches).
+    ═══════════════════════════════════════════════════════════════════════ --}}
 @php
     $precio_honorarios = '1.500 €';
     $telefono_1 = '675 70 14 39';

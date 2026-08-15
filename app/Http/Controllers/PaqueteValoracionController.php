@@ -15,8 +15,11 @@ use Spatie\Browsershot\Browsershot;
  * Sirve los dos documentos de valoración como PDF (maquetados con Blade +
  * Browsershot a partir de los esqueletos .txt guardados por el importador).
  *
- *  - ficha-coche: documento del cliente. Puede colgar del expediente.
- *  - informe-interno: documento interno con costes y margen. SOLO equipo.
+ * TIPOS DE DOCUMENTO (PDFs de LARAVEL, NO los de Claude):
+ *   - ficha-coche     ← contenido/ficha-publicitaria.txt  → documento del cliente
+ *   - informe-interno ← contenido/informe-interno.txt     → solo equipo
+ * Los PDFs de INVESTIGACIÓN (informe_busqueda / informe_unidad) los genera CLAUDE
+ * en el Desktop con plantilla_pdf_marca.html; aquí solo se sirven los de venta.
  */
 class PaqueteValoracionController extends Controller
 {
