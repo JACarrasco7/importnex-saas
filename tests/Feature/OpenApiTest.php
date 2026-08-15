@@ -2,10 +2,13 @@
 
 namespace Tests\Feature;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class OpenApiTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_openapi_json_endpoint_returns_valid_spec(): void
     {
         $response = $this->get('/openapi.json');

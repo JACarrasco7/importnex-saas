@@ -5,6 +5,23 @@ Todos los cambios notables en el skill `importacion-vehiculos` se documentarán 
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [2.9.5] - 2026-08-15 — Enlaces SIEMPRE al anuncio concreto + sync guías
+
+### 🔗 A6 reforzado — todo enlace es a la FICHA del anuncio
+- Regla generalizada a TODOS los enlaces que produce el skill: candidatos del top 5, tablas de candidatos, comparables del JSON y del informe. SIEMPRE la ficha del anuncio concreto (URL directa o construida desde el ID); NUNCA una búsqueda, un filtro del portal o la home. Un enlace que no abre EL anuncio no vale.
+
+### 📚 Guías y consistencia
+- `docs/guias/05-flujo-d-descubrimiento.md` sincronizada con la skill: D1a/D1b (asc+desc sin paginar), A15 (navegación real obligatoria), A16 (TODOS los modelos, no "3-7"), matiz A12 en D1.
+- Fix CHANGELOG: entrada 2.9.3 duplicada ("Diseño de PDF unificado") renumerada a 2.9.4 y reordenada.
+- Laravel en sync: `ValuationImporter::buildNotes()` persiste §anuncio (precio publicado/negociado, días, TÜV, carrocería, color interior); `Show.vue` bloque Equipamiento; i18n `cars.equipment` es/en; skill `vehicle-listings` + `.ai/rules/vehicles.md` (orden price_asc por defecto en listados).
+
+## [2.9.4] - 2026-08-15 — Diseño de PDF unificado (plantilla de marca única)
+
+### 🎨 Plantilla única de marca (Claude ↔ Laravel idénticos)
+- Nueva `assets/plantilla_pdf_marca.html`: copia fiel del CSS de `ficha-coche.blade.php` (Inter, fondo #0f1d42, gradientes, grid, price-band naranja, CTA+QR). Claude la usa OBLIGATORIAMENTE para los PDFs de investigación → visualmente idénticos a los de Laravel.
+- Método en SKILL.md §Quién genera cada PDF: rellenar `{{marcadores}}` → HTML → Chrome headless → PDF.
+- Corregido en contrato.md: `dossier.blade.php` NO existe en Laravel. El documento del cliente real es `ficha-coche` (desde `ficha-publicitaria.txt`); `dossier-cliente.txt` es el esqueleto extendido que el ingestor guarda en `contenido/`.
+
 ## [2.9.3] - 2026-08-15 — Sondeo D1 blindado (navegación real, filtros no modelos)
 
 ### 🔴 Búsqueda web PROHIBIDA como sondeo (A15)
@@ -48,24 +65,15 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 - `Show.vue`: nuevo bloque **Equipamiento** en la pestaña Resumen (chips) — el importer ya persistía `equipment` pero la UI no lo mostraba.
 - i18n: clave `cars.equipment` añadida en es/en (paridad 1272/1272, 0 missing).
 
-## [2.9.0] - 2026-08-15 — Camino fijo, micro-plans, cuaderno de sesión y auditoría de fase
+## [2.9.1] - 2026-08-15 — División de PDFs: investigación (Claude) vs marketing (Laravel)
 
-### 🧭 EL CAMINO (SKILL.md) — desambiguación total de fases
-- Mapa numerado de pasos por flujo (D/B/A) + **protocolo de waypoint**: cada mensaje declara `📍 Camino: Flujo X · paso N`.
-- **Protocolo de desviación:** preguntas laterales = misiones laterales; se responden y se RETOMA el paso (`↩️ Vuelvo al paso N`). Cambio de destino se declara (`🔀 Cambio de camino`).
-- Anti-patrón **A14**: abandonar el camino en silencio.
+### 🖨️ Quién genera cada PDF (corregido)
+- **Claude SÍ genera los PDFs de INVESTIGACIÓN** (entregables de fase, para el usuario): `informe_busqueda_<modelo>.pdf` (Fase 1 · Flujo B/C) y `informe_unidad_<unidad>.pdf` (Fase 2 · Flujo A). Método: HTML con la marca → Chrome headless (`--print-to-pdf`); si no hay Chrome, reportlab.
+- **Laravel genera los PDFs de MARKETING/VENTA** (Blade + Browsershot) desde los esqueletos `.txt` del ZIP cuando el coche está en el sistema: `dossier`, `ficha-publicitaria`, `folleto`.
+- Corregido en: SKILL.md (outputs, entregables por fase, §Quién genera cada PDF), operaciones.md (división de trabajo), contrato.md (empaquetar.py), ROADMAP.md.
+- Origen del cambio: el usuario esperaba los PDFs de búsqueda/unidad al cerrar cada fase (caso Tiguan); la skill se lo prohibía y solo entregaba `.md`.
 
-### 📋 Micro-plan antes de CADA búsqueda
-- No solo el plan inicial: cada ronda de navegación lleva micro-plan de 3-5 líneas + OK del usuario. Lotes coherentes agrupados; cambio de objetivo/filtros → nuevo micro-plan. Preguntar mucho está BIEN.
-
-### 📓 Cuaderno de sesión — aprendizaje en vivo
-- `informes\_sesion\sesion_<fecha>_<encargo>.md`: parámetros fijados, correcciones del usuario con hora (se aplican YA), preferencias detectadas, pendiente al cierre.
-- Se relee antes de cada micro-plan. Al cierre se vuelca a `memoria/` del skill.
-
-### 🧐 Auditoría de fase
-- Checklist interno de 4 líneas al completar CADA paso: entregable guardado · camino correcto · correcciones aplicadas · cobertura real declarada. Si falla algo, se corrige antes de avanzar.
-
-## [2.9.1] - 2026-08-15 — Auditoría de integración con Laravel (contrato ↔ código)
+## [2.9.0] - 2026-08-15 — Auditoría de integración con Laravel (contrato ↔ código)
 
 ### 📡 Contrato alineado con el importador real (contrato.md)
 - **Fotos**: la ubicación canónica es `vehiculo.fotos` (el importador las lee de ahí). `anuncio.fotos` queda como retrocompatible.
@@ -85,20 +93,22 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 ### 🧪 Tests
 - +8 tests nuevos (validaciones, mapeos, IEDMT, idempotencia cierre). Área importación/cierres/KPIs: 85 passed.
 
-## [2.9.2] - 2026-08-15 — División de PDFs: investigación (Claude) vs marketing (Laravel)
+## [2.8.5] - 2026-08-15 — Camino fijo, micro-plans, cuaderno de sesión y auditoría de fase
 
-### 🖨️ Quién genera cada PDF (corregido)
-- **Claude SÍ genera los PDFs de INVESTIGACIÓN** (entregables de fase, para el usuario): `informe_busqueda_<modelo>.pdf` (Fase 1 · Flujo B/C) y `informe_unidad_<unidad>.pdf` (Fase 2 · Flujo A). Método: HTML con la marca → Chrome headless (`--print-to-pdf`); si no hay Chrome, reportlab.
-- **Laravel genera los PDFs de MARKETING/VENTA** (Blade + Browsershot) desde los esqueletos `.txt` del ZIP cuando el coche está en el sistema: `dossier`, `ficha-publicitaria`, `folleto`.
-- Corregido en: SKILL.md (outputs, entregables por fase, §Quién genera cada PDF), operaciones.md (división de trabajo), contrato.md (empaquetar.py), ROADMAP.md.
-- Origen del cambio: el usuario esperaba los PDFs de búsqueda/unidad al cerrar cada fase (caso Tiguan); la skill se lo prohibía y solo entregaba `.md`.
+### 🧭 EL CAMINO (SKILL.md) — desambiguación total de fases
+- Mapa numerado de pasos por flujo (D/B/A) + **protocolo de waypoint**: cada mensaje declara `📍 Camino: Flujo X · paso N`.
+- **Protocolo de desviación:** preguntas laterales = misiones laterales; se responden y se RETOMA el paso (`↩️ Vuelvo al paso N`). Cambio de destino se declara (`🔀 Cambio de camino`).
+- Anti-patrón **A14**: abandonar el camino en silencio.
 
-## [2.9.3] - 2026-08-15 — Diseño de PDF unificado (plantilla de marca única)
+### 📋 Micro-plan antes de CADA búsqueda
+- No solo el plan inicial: cada ronda de navegación lleva micro-plan de 3-5 líneas + OK del usuario. Lotes coherentes agrupados; cambio de objetivo/filtros → nuevo micro-plan. Preguntar mucho está BIEN.
 
-### 🎨 Plantilla única de marca (Claude ↔ Laravel idénticos)
-- Nueva `assets/plantilla_pdf_marca.html`: copia fiel del CSS de `ficha-coche.blade.php` (Inter, fondo #0f1d42, gradientes, grid, price-band naranja, CTA+QR). Claude la usa OBLIGATORIAMENTE para los PDFs de investigación → visualmente idénticos a los de Laravel.
-- Método en SKILL.md §Quién genera cada PDF: rellenar `{{marcadores}}` → HTML → Chrome headless → PDF.
-- Corregido en contrato.md: `dossier.blade.php` NO existe en Laravel. El documento del cliente real es `ficha-coche` (desde `ficha-publicitaria.txt`); `dossier-cliente.txt` es el esqueleto extendido que el ingestor guarda en `contenido/`.
+### 📓 Cuaderno de sesión — aprendizaje en vivo
+- `informes\_sesion\sesion_<fecha>_<encargo>.md`: parámetros fijados, correcciones del usuario con hora (se aplican YA), preferencias detectadas, pendiente al cierre.
+- Se relee antes de cada micro-plan. Al cierre se vuelca a `memoria/` del skill.
+
+### 🧐 Auditoría de fase
+- Checklist interno de 4 líneas al completar CADA paso: entregable guardado · camino correcto · correcciones aplicadas · cobertura real declarada. Si falla algo, se corrige antes de avanzar.
 
 ## [2.8.0] - 2026-08-15 — Flujo D · DESCUBRIMIENTO (cliente sin modelo)
 

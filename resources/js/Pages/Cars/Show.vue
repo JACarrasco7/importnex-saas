@@ -355,6 +355,21 @@ const onDocKeyChange = () => {
                     </div>
                 </div>
 
+                <!-- Equipamiento del anuncio (lista COMPLETA del JSON) -->
+                <div v-if="activeSection === 'resumen' && car.equipment?.length" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
+                    <div class="border-b border-gray-200 px-6 py-4">
+                        <h3 class="text-base font-semibold text-gray-900">{{ t('cars.equipment') }}</h3>
+                    </div>
+                    <div class="p-6">
+                        <ul class="flex flex-wrap gap-2">
+                            <li v-for="(item, i) in car.equipment" :key="i"
+                                class="rounded-full bg-estoril-50 px-3 py-1 text-sm text-estoril-700 ring-1 ring-estoril-100">
+                                {{ item }}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
                 <!-- ╔ INVESTIGATION ══════════════════════════════════════════════════════╗ -->
                 <div v-show="activeSection === 'investigacion'" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">

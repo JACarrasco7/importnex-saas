@@ -135,6 +135,7 @@ export default {
     photos_title: 'Photos',
     original_text: 'Original text',
     translated_text: 'Translation',
+    equipment: 'Equipment',
     delete_photo: 'Delete photo?',
     delete_photo_msg: 'This will permanently remove the photo.',
     delete_document: 'Delete document?',

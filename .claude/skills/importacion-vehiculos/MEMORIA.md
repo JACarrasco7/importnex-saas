@@ -110,5 +110,6 @@ ENCARGO (Flujo B) → 📋 INFORME MODELO + top 5 con ENLACES → CP1 (¿Fase 2 
 
 ## 🗓️ Última actualización
 
+- **2026-08-15:** v2.9.5 — A6 reforzado (enlaces siempre a la ficha del anuncio), guía 05 sincronizada (D1a/D1b, A15/A16), fix CHANGELOG duplicado. v2.9.4 plantilla PDF de marca única. v2.9.3 sondeo D1 blindado (navegación real, filtros no modelos, D1a+D1b).
 - **2026-08-15:** v2.9.0 — Flujo D (descubrimiento), anti-patrones A9-A14, El Camino, micro-plan, cuaderno de sesión, auditoría de fase, entregables por fase.
 - **2026-08-12:** Sistema de memoria del skill creado. 4 archivos de memoria + este índice.

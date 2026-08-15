@@ -45,7 +45,9 @@ El skill te pedirá confirmar la modalidad si tu petición usa frases ambiguas (
 ## 4. Salida típica por fase
 
 ### Fase D1 (Sweep de modelos)
-- Lista de 3-7 modelos que encajan
+- **NAVEGACIÓN REAL obligatoria** (Coches.net + mobile.de con filtros): la búsqueda web/snippets NO vale como sondeo (A15).
+- Lista de **TODOS los modelos/motorizaciones que caben** con los filtros del encargo (A16) — no una selección de 3-7 ni "otros por explorar".
+- Método eficiente (D1a + D1b): lectura **asc** (suelo, pág 1) + lectura **desc** (techo, pág 1) + facetas de marca con conteo + semilla `modelos-medidos.md`. El precio-desde por modelo se diferencia después (1 consulta solo si falta).
 - Tipos de combustible disponibles (diésel/gasolina/híbrido)
 - Quick check: ¿hay suficientes unidades en DE?
 
@@ -104,7 +106,9 @@ Nunca al revés: no se navega a anuncios individuales antes de que el usuario el
 
 ## 8. Anti-patrones comunes (evita)
 
-- **A12:** Dejarte solo con la primera página de resultados. El skill DEBE hacer barrido completo.
-- **A13:** Cambiar filtros silenciosamente. El skill debe declarar: "He cambiado a <filtro> porque <motivo>."
+- **A12:** Dejarte solo con la primera página de resultados. En Flujo B (candidatos) el skill DEBE cubrir todo el rango (bandas/paginación). Matiz D1: en el sondeo de modelos NO se pagina — asc + desc + facetas bastan.
+- **A13:** Cambiar filtros silenciosamente (en cualquier sentido: relajar O restringir más de lo aprobado). El skill debe declarar: "He cambiado a <filtro> porque <motivo>."
+- **A15:** Sondeo D1 con búsqueda web en vez de navegación real. Cifras inconsistentes — pedir repetición con navegación real.
+- **A16:** Selección manual de 3-4 modelos y "otros por explorar" sin sondear. El sondeo es por filtros y lista TODOS los que caben; la potencia es mínima (≥Xcv, versiones 125/130/150 valen igual).
 
 Si el skill hace alguna de estas cosas → pídele que corrija.

@@ -414,7 +414,7 @@ class ValuationImporter
                 'schema_version' => $payload['_meta']['schema_version'] ?? self::SUPPORTED_SCHEMA_VERSION,
 
                 // Notes: append everything that didn't map to a column
-                'notes' => $this->buildNotes($v, $c, $vd, $payload['avisos'] ?? [], $payload['fuentes'] ?? []),
+                'notes' => $this->buildNotes($v, $c, $vd, $payload['avisos'] ?? [], $payload['fuentes'] ?? [], $a),
             ], fn ($v) => $v !== null && $v !== '' && $v !== []));
 
             $car->save();
@@ -672,9 +672,30 @@ class ValuationImporter
         return $out;
     }
 
-    private function buildNotes(array $v, array $c, array $vd, array $avisos, array $fuentes = []): string
+    private function buildNotes(array $v, array $c, array $vd, array $avisos, array $fuentes = [], array $a = []): string
     {
         $lines = [];
+
+        // §anuncio (15-ago-2026) — datos extra del anuncio que no tienen columna propia
+        if (isset($a['precio_publicado']) && $a['precio_publicado'] !== null && $a['precio_publicado'] !== '') {
+            $lines[] = 'Published price: '.$a['precio_publicado'].' €';
+        }
+        if (isset($a['precio_negociado']) && $a['precio_negociado'] !== null && $a['precio_negociado'] !== '') {
+            $lines[] = 'Negotiated price: '.$a['precio_negociado'].' €';
+        }
+        if (isset($a['dias_publicado']) && $a['dias_publicado'] !== null && $a['dias_publicado'] !== '') {
+            $lines[] = 'Days listed: '.$a['dias_publicado'];
+        }
+        if (! empty($a['tuv_vigente_hasta'])) {
+            $lines[] = 'TÜV/HU valid until: '.$a['tuv_vigente_hasta'];
+        }
+        if (! empty($v['carroceria'])) {
+            $lines[] = 'Body: '.$v['carroceria'];
+        }
+        if (! empty($v['color_interior'])) {
+            $lines[] = 'Interior color: '.$v['color_interior'];
+        }
+
         if (! empty($v['garantia'])) {
             $lines[] = 'Warranty: '.$v['garantia'];
         }

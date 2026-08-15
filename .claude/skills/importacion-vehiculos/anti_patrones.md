@@ -5,7 +5,7 @@
 
 ---
 
-## 🛡️ Los 14 anti-patrones
+## 🛡️ Los 16 anti-patrones
 
 | # | Anti-patrón | Regla dura |
 |---|---|---|
@@ -20,9 +20,11 @@
 | **A9** | Afirmar sin comprobar | "NUNCA decir 'sí lo vi en mi barrido' sin comprobarlo. Si no está en los datos capturados, digo que no está. Un falso positivo es peor que un falso negativo." |
 | **A10** | Precio financiado como contado | "El precio grande de MUY CAR/Flexicar (y portales ES) suele ser el FINANCIADO, no el contado. Confirmar el contado antes de meterlo en la tabla: Milanuncios `price.cashPrice.value`, Coches.net/Wallapop abrir ficha y buscar 'contado'." |
 | **A11** | Paginación parcial | "Coches.net ordena por relevancia, NO por precio. Para cliente concreto hay que recorrer TODAS las páginas con `pg=` filtrando por precio `pf=`. Si no se puede paginar todo, DECIRLO y marcar cobertura parcial." |
-| **A12** | Página 1 como listado | "Ordenar por precio ascendente y leer SOLO la página 1 = sesgo hacia lo más barato/viejo (caso María 15-ago: 526 resultados, se enseñaron 8 de 3.000-4.200 € y se perdieron DS4/308/Astra). El listado del cliente cubre TODO el rango de presupuesto: todas las páginas o bandas de precio. Si se trunca, DECLARARLO." |
-| **A13** | Filtros alterados sin declarar | "Cualquier ampliación/relajación de los filtros del encargo (año 2016→2012, km, precio) se declara ANTES de navegar y se marca en el informe. Nunca cambiar los criterios del cliente en silencio." |
+| **A12** | Página 1 como listado | "Ordenar por precio ascendente y leer SOLO la página 1 = sesgo hacia lo más barato/viejo (caso María 15-ago: 526 resultados, se enseñaron 8 de 3.000-4.200 € y se perdieron DS4/308/Astra). El listado del cliente cubre TODO el rango de presupuesto: todas las páginas o bandas de precio. Si se trunca, DECLARARLO. Matiz D1: en el sondeo de modelos (enumerar qué cabe) NO se pagina — bastan 2 lecturas (asc=suelo + desc=techo) + facetas de marca + semilla (ver SKILL.md §D1). La paginación completa es de Flujo B (candidatos con enlaces)." |
+| **A13** | Filtros alterados sin declarar | "Cualquier cambio de los filtros del encargo se declara ANTES de navegar y se marca en el informe: tanto ampliar/relajar (año 2016→2012, km, precio) como usar un rango MÁS RESTRICTIVO que el aprobado (caso 15-ago: se aprobó 2012+ y se filtró 2016+). Nunca cambiar los criterios del cliente en silencio, en ningún sentido." |
 | **A14** | Abandonar el camino en silencio | "El flujo es un camino numerado con waypoint 📍 en cada mensaje. Una pregunta lateral del usuario es una misión lateral: se responde y se RETOMA el paso (↩⃾ Vuelvo al paso N). Si tras una desviación el entregable de la fase no llegó, es un fallo. Un cambio de destino real se declara (🔀 Cambio de camino)." |
+| **A15** | Sondeo D1 con búsqueda web | "El sondeo de modelos del Flujo D se hace SIEMPRE con navegación real a Coches.net + mobile.de con los filtros del encargo. La búsqueda web (snippets/agregadores) NO es método de sondeo: da cifras inconsistentes que contradicen la navegación real (caso 15-ago: Focus ES '~9.900 €' cuando la navegación real daba 3.000-6.990 €; 308 DE '10.980-12.600 €' sin confirmar). Degradado solo con portal bloqueado + reintentos (A2/A7)." |
+| **A16** | Selección manual de modelos en D1 | "El sondeo es por FILTROS, no por modelo: una pasada con los filtros del encargo devuelve TODOS los modelos que caben. Prohibido elegir 3-4 a mano y dejar 'otros por explorar' sin sondear. Listar TODOS los que salen. La potencia es mínimo (≥Xcv) → versiones 125/130/150 valen igual; nunca sondear solo la variante tope." |
 
 ---
 
@@ -99,9 +101,9 @@ precio_max = comparable_objetivo × (1 − umbral)
 
 ### A6 — Tabla sin enlaces
 
-**Error típico:** Claude muestra una tabla de candidatos con precio/año/km pero sin URLs. El usuario tiene que buscar los anuncios manualmente.
+**Error típico:** Claude muestra una tabla de candidatos con precio/año/km pero sin URLs. El usuario tiene que buscar los anuncios manualmente. O peor: enlaces que abren una búsqueda/filtro del portal en vez del anuncio.
 
-**Regla:** Toda tabla de candidatos lleva columna **ENLACE** clickable. Si la fuente no da URL directa, se construye desde el ID:
+**Regla:** Todo enlace (top 5, candidatos, comparables) apunta a la **ficha del anuncio concreto**. Si la fuente no da URL directa, se construye desde el ID:
 
 ---
 
@@ -140,6 +142,8 @@ Antes de cerrar cualquier informe, verificar:
 - [ ] ¿Veredicto contra cuartil bajo también? (A4)
 - [ ] ¿Informe Flujo A tiene precio máximo? (A5)
 - [ ] ¿Todas las tablas tienen columna ENLACE? (A6)
+- [ ] ¿Sondeo D1 con navegación real, no búsqueda web? (A15)
+- [ ] ¿Informe D2 lista TODOS los modelos del filtro, sin "otros por explorar"? (A16)
 
 ---
 
@@ -153,3 +157,6 @@ Antes de cerrar cualquier informe, verificar:
 | A4 | Astra OPC: veredicto positivo con cuartil bajo negativo | 09-ago-2026 |
 | A5 | Regla histórica del skill original | pre-09-ago |
 | A6 | "El usuario no puede ver el coche sin PDF" — feedback directo | 11-ago-2026 |
+| A13 (ext) | Usar rango más restrictivo que el aprobado (2016+ tras aprobar 2012+) | 15-ago-2026 |
+| A15 | Sondeo D1 con búsqueda web — datos inconsistentes vs navegación real | 15-ago-2026 |
+| A16 | Selección manual de modelos en D1 ("otros por explorar") | 15-ago-2026 |
