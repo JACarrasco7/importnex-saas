@@ -10,15 +10,22 @@ class Car extends Model
 {
     use HasFactory, SoftDeletes;
 
+    /**
+     * Flag temporal (no persistido) para que el observer NO recalcule el
+     * semáforo cuando viene explícito del import JSON (mercado.semaforo).
+     */
+    public bool $preserveTrafficLight = false;
+
     protected $fillable = [
         'brand', 'model', 'version', 'year', 'mileage', 'fuel', 'transmission', 'drivetrain',
         'cv', 'displacement', 'co2', 'consumption', 'owners', 'doors',
         'seats', 'euro_norm', 'color', 'itv_date',
+        'pais_origen', 'co2_confirmado',
         'purchase_price', 'new_price', 'manual_tax_base', 'boe_confirmed',
         'transport', 'itv_fee', 'coc_fee', 'dgt_fees', 'professional_fees', 'deposit',
         'vin', 'vat_scenario', 'seller', 'city', 'lat', 'lng',
         'status', 'url_link', 'traffic_light', 'valuation', 'recommendation',
-        'description', 'equipment', 'tips', 'red_flags',
+        'description', 'original_description', 'equipment', 'tips', 'red_flags',
         'research', 'pros', 'cons',
         'is_marketplace', 'marketplace_views',
         'verdict', 'verdict_confidence', 'verdict_reasoning', 'verdict_changes', 'verdict_at',
@@ -33,6 +40,7 @@ class Car extends Model
         'research' => 'array', 'pros' => 'array', 'cons' => 'array',
         'ai_analysis_json' => 'array',
         'comparables_list' => 'array', 'fotos_json' => 'array', 'boe_confirmed' => 'boolean',
+        'co2_confirmado' => 'boolean',
         'is_marketplace' => 'boolean',
         'verdict_at' => 'datetime',
         'lat' => 'decimal:8', 'lng' => 'decimal:8',

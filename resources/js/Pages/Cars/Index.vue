@@ -36,12 +36,12 @@ const tabs = computed(() => {
         ...ordered.map(status => ({
             id: status,
             label: t(`cars.status.${status}`),
-            count: props.cars.data?.filter(c => c.status === status).length || 0
+            count: props.cars?.data?.filter(c => c.status === status).length || 0
         })),
         ...remaining.map(status => ({
             id: status,
             label: t(`cars.status.${status}`),
-            count: props.cars.data?.filter(c => c.status === status).length || 0
+            count: props.cars?.data?.filter(c => c.status === status).length || 0
         }))
     ];
 });
@@ -52,7 +52,7 @@ const stats = computed(() => {
         green: cars.filter(c => c.traffic_light === 'green').length,
         amber: cars.filter(c => c.traffic_light === 'amber').length,
         red: cars.filter(c => c.traffic_light === 'red').length,
-        totalValue: cars.reduce((sum, c) => sum + (c.purchase_price || 0), 0),
+        totalValue: cars.reduce((sum, c) => sum + (Number(c.purchase_price) || 0), 0),
     };
 });
 
@@ -74,6 +74,32 @@ const filteredCars = computed(() => {
     }
     return result;
 });
+
+// Foto activa por card (carrusel). Key = car.id.
+const activePhoto = ref({});
+const currentPhotoIndex = (car) => {
+    const n = photoCount(car);
+    if (n === 0) return 0;
+    const idx = activePhoto.value[car.id] ?? 0;
+    return ((idx % n) + n) % n;
+};
+const photoSrc = (car) => {
+    const photos = car.photos || [];
+    const photo = photos[currentPhotoIndex(car)];
+    if (!photo) return null;
+    return photo.url ? `/storage/${photo.url}` : (typeof photo === 'string' ? photo : null);
+};
+const photoCount = (car) => (car.photos || []).length;
+const prevPhoto = (car) => {
+    const n = photoCount(car);
+    if (n < 2) return;
+    activePhoto.value[car.id] = currentPhotoIndex(car) - 1;
+};
+const nextPhoto = (car) => {
+    const n = photoCount(car);
+    if (n < 2) return;
+    activePhoto.value[car.id] = currentPhotoIndex(car) + 1;
+};
 
 
 
@@ -145,7 +171,7 @@ const confirmDelete = () => {
                             </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Traffic light</label>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">{{ t('cars.traffic_light_label') }}</label>
                             <select v-model="lightFilter" class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-500 focus:ring-estoril-500">
                                 <option value="">{{ t('common.all') }}</option>
                                 <option v-for="light in lights" :key="light" :value="light">{{ t('cars.light.' + light) }}</option>
@@ -157,7 +183,7 @@ const confirmDelete = () => {
                 <!-- Quick Stats -->
                 <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
                     <div class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-gray-500">Total Value</div>
+                        <div class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.total_value') }}</div>
                         <div class="mt-1 text-2xl font-bold text-gray-900">{{ currency(stats.totalValue) }}</div>
                     </div>
                     <div class="rounded-xl bg-emerald-50 p-4 shadow-sm ring-1 ring-emerald-200 dark:bg-emerald-900/20 dark:ring-emerald-800">
@@ -201,14 +227,24 @@ const confirmDelete = () => {
                         :key="car.id"
                         class="group relative overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-200 transition-all hover:shadow-md hover:ring-gray-300"
                     >
-                        <Link :href="route('cars.show', car.id)" class="block">
-                            <div v-if="car.photos && car.photos.length > 0" class="aspect-video overflow-hidden bg-gray-100">
-                                <img :src="car.photos[0]" :alt="`${car.brand} ${car.model}`" class="h-full w-full object-cover transition-transform group-hover:scale-105" loading="lazy" />
-                            </div>
-                            <div v-else class="flex aspect-square items-center justify-center bg-gray-100">
-                                <span class="text-4xl">🚗</span>
-                            </div>
-                        </Link>
+                        <!-- Photo carousel -->
+                        <div class="relative aspect-video overflow-hidden bg-gray-100">
+                            <Link :href="route('cars.show', car.id)" class="block h-full w-full">
+                                <img v-if="photoSrc(car)" :src="photoSrc(car)" :alt="`${car.brand} ${car.model}`" class="h-full w-full object-cover transition-transform group-hover:scale-105" loading="lazy" />
+                                <div v-else class="flex h-full w-full items-center justify-center">
+                                    <span class="text-4xl">🚗</span>
+                                </div>
+                            </Link>
+                            <!-- Carousel controls -->
+                            <template v-if="photoCount(car) > 1">
+                                <button type="button" @click.stop="prevPhoto(car)" class="absolute left-1 top-1/2 -translate-y-1/2 rounded-full bg-black/40 p-1 text-white opacity-0 transition hover:bg-black/60 group-hover:opacity-100">‹</button>
+                                <button type="button" @click.stop="nextPhoto(car)" class="absolute right-1 top-1/2 -translate-y-1/2 rounded-full bg-black/40 p-1 text-white opacity-0 transition hover:bg-black/60 group-hover:opacity-100">›</button>
+                                <span class="absolute bottom-1 right-1 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                                    {{ currentPhotoIndex(car) + 1 }} / {{ photoCount(car) }}
+                                </span>
+                            </template>
+                            <Badge v-if="car.traffic_light" :variant="trafficLightVariant(car.traffic_light)" dot class="absolute left-2 top-2 shrink-0">{{ car.traffic_light }}</Badge>
+                        </div>
 
                         <div class="p-4">
                             <div class="flex items-start justify-between gap-3">
@@ -220,28 +256,35 @@ const confirmDelete = () => {
                                         <p v-if="car.version" class="mt-0.5 text-xs text-gray-500 truncate">{{ car.version }}</p>
                                     </Link>
                                 </div>
-                                <Badge :variant="trafficLightVariant(car.traffic_light)" dot class="shrink-0">{{ car.traffic_light }}</Badge>
                             </div>
 
                             <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
                                 <div>
-                                    <span class="text-[10px] uppercase tracking-wider text-gray-500">Year</span>
+                                    <span class="text-[10px] uppercase tracking-wider text-gray-500">{{ t('cars.year') }}</span>
                                     <p class="font-medium text-gray-900">{{ car.year }}</p>
                                 </div>
                                 <div>
-                                    <span class="text-[10px] uppercase tracking-wider text-gray-500">Mileage</span>
-                                    <p class="font-medium text-gray-900">{{ (car.mileage / 1000).toFixed(0) }}k km</p>
+                                    <span class="text-[10px] uppercase tracking-wider text-gray-500">{{ t('cars.mileage') }}</span>
+                                    <p class="font-medium text-gray-900">{{ car.mileage ? (car.mileage / 1000).toFixed(0) + 'k km' : '—' }}</p>
+                                </div>
+                                <div v-if="car.fuel">
+                                    <span class="text-[10px] uppercase tracking-wider text-gray-500">{{ t('cars.fuel') }}</span>
+                                    <p class="font-medium text-gray-900 truncate">{{ car.fuel }}</p>
+                                </div>
+                                <div v-if="car.transmission">
+                                    <span class="text-[10px] uppercase tracking-wider text-gray-500">{{ t('cars.transmission') }}</span>
+                                    <p class="font-medium text-gray-900 truncate">{{ car.transmission }}</p>
                                 </div>
                             </div>
 
                             <div class="mt-3 flex items-center justify-between gap-2 border-t border-gray-100 pt-3">
                                 <div>
-                                    <span class="text-[10px] uppercase tracking-wider text-gray-500">Price</span>
+                                    <span class="text-[10px] uppercase tracking-wider text-gray-500">{{ t('cars.price') }}</span>
                                     <p class="text-base font-bold text-gray-900">{{ currency(car.purchase_price) }}</p>
                                 </div>
                                 <div class="flex flex-wrap items-center justify-end gap-1">
                                     <Badge v-if="car.is_marketplace" variant="estoril" size="sm">🌐 Marketplace</Badge>
-                                    <Badge :variant="statusVariant(car.status)" size="sm">{{ car.status }}</Badge>
+                                    <Badge :variant="statusVariant(car.status)" size="sm">{{ statusLabel(t, car.status) }}</Badge>
                                 </div>
                             </div>
                         </div>
@@ -249,13 +292,13 @@ const confirmDelete = () => {
                         <div class="flex border-t border-gray-100 bg-gray-50 px-4 py-2">
                             <div class="flex-1" />
                             <div class="flex items-center gap-1">
-                                <Link :href="route('cars.show', car.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-estoril-50 hover:text-estoril-600" title="View">
+                                <Link :href="route('cars.show', car.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-estoril-50 hover:text-estoril-600" :title="t('common.view')">
                                     <EyeIcon class="h-3.5 w-3.5" />
                                 </Link>
-                                <Link :href="route('cars.edit', car.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600" title="Edit">
+                                <Link :href="route('cars.edit', car.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600" :title="t('common.edit')">
                                     <PencilIcon class="h-3.5 w-3.5" />
                                 </Link>
-                                <button type="button" @click="askDelete(car)" class="rounded-md p-1.5 text-gray-400 hover:bg-rose-50 hover:text-rose-600" title="Delete">
+                                <button type="button" @click="askDelete(car)" class="rounded-md p-1.5 text-gray-400 hover:bg-rose-50 hover:text-rose-600" :title="t('common.delete')">
                                     <TrashIcon class="h-3.5 w-3.5" />
                                 </button>
                             </div>
@@ -263,7 +306,7 @@ const confirmDelete = () => {
                     </div>
                 </div>
 
-                <EmptyState v-else icon="🚗" title="No cars found" description="Try adjusting your filters or add your first vehicle to the inventory." action-text="Add your first car" :action-route="route('cars.create')" />
+                <EmptyState v-else icon="🚗" :title="t('cars.no_cars_found')" :description="t('cars.no_cars_found_desc')" :action-text="t('cars.add_first_car')" :action-route="route('cars.create')" />
             </div>
         </div>
 

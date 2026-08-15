@@ -18,6 +18,7 @@ import {
     LinkIcon,
     ChevronDownIcon,
     ChevronRightIcon,
+    XMarkIcon,
 } from '@heroicons/vue/24/outline';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import MapaLeaflet from '@/Components/MapaLeaflet.vue';
@@ -39,6 +40,32 @@ const showDeletePhoto = ref(false);
 const showDeleteDoc = ref(false);
 const photoToDelete = ref(null);
 const docToDelete = ref(null);
+
+// Tabs de sección (para no hacer scroll gigante)
+const sections = [
+    { id: 'resumen', label: t('cars.section_resumen') },
+    { id: 'investigacion', label: t('cars.section_investigacion') },
+    { id: 'mercado', label: t('cars.section_mercado') },
+    { id: 'checklist', label: 'Checklist' },
+    { id: 'documentos', label: t('cars.documents') },
+    { id: 'fotos', label: t('cars.photos_title') },
+    { id: 'gastos', label: t('cars.expenses_vs_estimated') },
+];
+const activeSection = ref('resumen');
+
+// Lightbox de fotos
+const lightboxIndex = ref(-1);
+const lightboxPhotos = computed(() => props.car.photos || []);
+const openLightbox = (index) => { lightboxIndex.value = index; };
+const closeLightbox = () => { lightboxIndex.value = -1; };
+const nextLightbox = () => {
+    if (lightboxPhotos.value.length === 0) return;
+    lightboxIndex.value = (lightboxIndex.value + 1) % lightboxPhotos.value.length;
+};
+const prevLightbox = () => {
+    if (lightboxPhotos.value.length === 0) return;
+    lightboxIndex.value = (lightboxIndex.value - 1 + lightboxPhotos.value.length) % lightboxPhotos.value.length;
+};
 
 const photoForm = useForm({ photo_type: 'exterior', photos: [] });
 const docForm = useForm({ doc_type: 'invoice', doc_key: '', name: '', documents: [] });
@@ -239,6 +266,26 @@ const onDocKeyChange = () => {
                     <span v-if="car.year" class="text-sm text-gray-500">{{ car.year }}</span>
                 </div>
 
+                <!-- Section tabs -->
+                <div class="overflow-x-auto rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
+                    <nav class="flex gap-1 p-1.5">
+                        <button
+                            v-for="sec in sections"
+                            :key="sec.id"
+                            type="button"
+                            @click="activeSection = sec.id"
+                            :class="[
+                                'whitespace-nowrap rounded-lg px-4 py-2 text-sm font-semibold transition',
+                                activeSection === sec.id
+                                    ? 'bg-estoril-600 text-white shadow'
+                                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                            ]"
+                        >
+                            {{ sec.label }}
+                        </button>
+                    </nav>
+                </div>
+
                 <!-- IEDMT estimation warning (permanent, per plan) -->
                 <div class="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
                     <ExclamationTriangleIcon class="h-5 w-5 shrink-0 text-amber-600" />
@@ -254,7 +301,7 @@ const onDocKeyChange = () => {
                 </div>
 
                 <!-- Location -->
-                <div v-if="car.lat && car.lng" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
+                <div v-if="activeSection === 'resumen' && car.lat && car.lng" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4">
                         <h3 class="text-base font-semibold text-gray-900">{{ t('cars.location') }}</h3>
                     </div>
@@ -264,7 +311,7 @@ const onDocKeyChange = () => {
                 </div>
 
                 <!-- Technical specs -->
-                <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
+                <div v-show="activeSection === 'resumen'" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4">
                         <h3 class="text-base font-semibold text-gray-900">{{ t('cars.section_tech_sheet') }}</h3>
                     </div>
@@ -277,7 +324,7 @@ const onDocKeyChange = () => {
                 </div>
 
                 <!-- Costs -->
-                <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
+                <div v-show="activeSection === 'resumen'" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
                         <h3 class="text-base font-semibold text-gray-900">{{ t('cars.costs') }}</h3>
                         <span class="text-sm text-gray-500">{{ t('cars.total_all_included') }} <span class="font-mono font-semibold text-gray-900">{{ currency(derived?.total_cost) }}</span></span>
@@ -290,8 +337,26 @@ const onDocKeyChange = () => {
                     </div>
                 </div>
 
+                <!-- Descripción del anuncio (original + traducción) -->
+                <div v-if="activeSection === 'resumen' && (car.description || car.original_description)" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
+                    <div class="border-b border-gray-200 px-6 py-4">
+                        <h3 class="text-base font-semibold text-gray-900">{{ t('cars.description') }}</h3>
+                    </div>
+                    <div class="space-y-4 p-6">
+                        <div v-if="car.original_description">
+                            <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.original_text') }}</h4>
+                            <p class="mt-2 text-sm text-gray-700 whitespace-pre-wrap">{{ car.original_description }}</p>
+                        </div>
+                        <div v-if="car.description && car.description !== car.original_description">
+                            <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.translated_text') }}</h4>
+                            <p class="mt-2 text-sm text-gray-900 whitespace-pre-wrap">{{ car.description }}</p>
+                        </div>
+                        <p v-else-if="!car.original_description" class="text-sm text-gray-500">{{ t('cars.description') }}</p>
+                    </div>
+                </div>
+
                 <!-- ╔ INVESTIGATION ══════════════════════════════════════════════════════╗ -->
-                <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
+                <div v-show="activeSection === 'investigacion'" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
                         <h3 class="text-base font-semibold text-gray-900">Investigación</h3>
                         <span v-if="derived?.research_gaps?.length" class="text-xs font-medium text-amber-700">
@@ -381,7 +446,7 @@ const onDocKeyChange = () => {
                 </div>
 
                 <!-- ╔ MARKET ═══════════════════════════════════════════════════════════╗ -->
-                <div v-if="car.market_avg || derived?.comparables_stats?.count" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
+                <div v-if="activeSection === 'mercado' && (car.market_avg || derived?.comparables_stats?.count)" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
                         <h3 class="text-base font-semibold text-gray-900">{{ t('cars.market_comparables') }}</h3>
                         <Badge v-if="marketPosition" :variant="marketPosition.variant">
@@ -430,7 +495,7 @@ const onDocKeyChange = () => {
                 </div>
 
                 <!-- ╔ CHECKLIST ════════════════════════════════════════════════════════╗ -->
-                <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
+                <div v-show="activeSection === 'checklist'" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4">
                         <h3 class="text-base font-semibold text-gray-900">Checklist</h3>
                     </div>
@@ -505,7 +570,7 @@ const onDocKeyChange = () => {
                 </div>
 
                 <!-- ╔ DOCUMENTS ════════════════════════════════════════════════════════╗ -->
-                <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
+                <div v-show="activeSection === 'documentos'" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
                         <h3 class="text-base font-semibold text-gray-900">{{ t('cars.documents') }}</h3>
                         <span class="text-sm text-gray-500">{{ car.documents?.length || 0 }} {{ t('cars.files') }}</span>
@@ -554,7 +619,7 @@ const onDocKeyChange = () => {
                 </div>
 
                 <!-- Photos -->
-                <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
+                <div v-show="activeSection === 'fotos'" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
                         <h3 class="text-base font-semibold text-gray-900">Photos</h3>
                         <span class="text-sm text-gray-500">{{ car.photos?.length || 0 }} files</span>
@@ -576,20 +641,35 @@ const onDocKeyChange = () => {
                         </form>
 
                         <div v-if="car.photos?.length" class="grid grid-cols-2 gap-3 md:grid-cols-4">
-                            <div v-for="photo in car.photos" :key="photo.id" class="group relative overflow-hidden rounded-lg">
-                                <img :src="`/storage/${photo.url}`" :alt="photo.photo_type" class="h-32 w-full object-cover" />
-                                <div class="absolute inset-0 flex items-center justify-center bg-black/0 transition group-hover:bg-black/50">
-                                    <button @click="askDeletePhoto(photo)" class="rounded-md bg-rose-600 px-3 py-1 text-xs font-semibold text-white opacity-0 transition group-hover:opacity-100">
-                                        <TrashIcon class="h-3 w-4 inline" />
-                                        Delete
-                                    </button>
-                                </div>
+                            <div v-for="(photo, idx) in car.photos" :key="photo.id" class="group relative overflow-hidden rounded-lg">
+                                <button type="button" @click="openLightbox(idx)" class="block h-full w-full">
+                                    <img :src="`/storage/${photo.url}`" :alt="photo.photo_type" class="h-32 w-full cursor-zoom-in object-cover" loading="lazy" />
+                                </button>
+                                <!-- Delete en la esquina superior derecha, sin overlay -->
+                                <button type="button" @click.stop="askDeletePhoto(photo)" class="absolute right-1.5 top-1.5 rounded-md bg-rose-600/90 p-1.5 text-white opacity-0 shadow transition hover:bg-rose-600 group-hover:opacity-100" :title="t('common.delete')">
+                                    <TrashIcon class="h-3.5 w-3.5" />
+                                </button>
                                 <span class="absolute bottom-2 left-2 rounded bg-black/70 px-2 py-0.5 text-xs text-white">{{ photo.photo_type }}</span>
                             </div>
                         </div>
                         <p v-else class="py-6 text-center text-sm text-gray-500">{{ t('cars.no_photos_yet') }}</p>
                     </div>
                 </div>
+
+                <!-- Lightbox de fotos -->
+                <Teleport to="body">
+                    <div v-if="lightboxIndex >= 0" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4" @click="closeLightbox">
+                        <button type="button" class="absolute right-4 top-4 rounded-full bg-white/10 p-2 text-white hover:bg-white/20" @click.stop="closeLightbox">
+                            <XMarkIcon class="h-6 w-6" />
+                        </button>
+                        <button v-if="lightboxPhotos.length > 1" type="button" class="absolute left-4 rounded-full bg-white/10 p-3 text-white hover:bg-white/20" @click.stop="prevLightbox">‹</button>
+                        <img v-if="lightboxPhotos[lightboxIndex]" :src="`/storage/${lightboxPhotos[lightboxIndex].url}`" :alt="lightboxPhotos[lightboxIndex].photo_type" class="max-h-[85vh] max-w-full rounded-lg object-contain shadow-2xl" @click.stop />
+                        <button v-if="lightboxPhotos.length > 1" type="button" class="absolute right-4 rounded-full bg-white/10 p-3 text-white hover:bg-white/20" @click.stop="nextLightbox">›</button>
+                        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-white/10 px-4 py-1.5 text-sm text-white">
+                            {{ lightboxIndex + 1 }} / {{ lightboxPhotos.length }}
+                        </div>
+                    </div>
+                </Teleport>
 
                 <!-- Assigned Client -->
                 <div v-if="car.client" class="overflow-hidden rounded-2xl bg-linear-to-br from-blue-50 to-estoril-50 shadow-sm ring-1 ring-blue-200">
@@ -629,7 +709,7 @@ const onDocKeyChange = () => {
                 </div>
 
                 <!-- Expenses -->
-                <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
+                <div v-show="activeSection === 'gastos'" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4">
                         <h3 class="text-base font-semibold text-gray-900">{{ t('cars.expenses_vs_estimated') }}</h3>
                     </div>
@@ -660,7 +740,7 @@ const onDocKeyChange = () => {
             </div>
         </div>
 
-        <ConfirmDialog :show="showDeletePhoto" title="Delete photo?" message="This will permanently remove the photo." @confirm="confirmDeletePhoto" @cancel="showDeletePhoto = false" />
-        <ConfirmDialog :show="showDeleteDoc" title="Delete document?" message="This will permanently remove the document." @confirm="confirmDeleteDoc" @cancel="showDeleteDoc = false" />
+        <ConfirmDialog :show="showDeletePhoto" :title="t('cars.delete_photo')" :message="t('cars.delete_photo_msg')" :confirm-text="t('common.delete')" :cancel-text="t('common.cancel')" @confirm="confirmDeletePhoto" @close="showDeletePhoto = false" @cancel="showDeletePhoto = false" />
+        <ConfirmDialog :show="showDeleteDoc" :title="t('cars.delete_document')" :message="t('cars.delete_document_msg')" :confirm-text="t('common.delete')" :cancel-text="t('common.cancel')" @confirm="confirmDeleteDoc" @close="showDeleteDoc = false" @cancel="showDeleteDoc = false" />
     </AuthenticatedLayout>
 </template>

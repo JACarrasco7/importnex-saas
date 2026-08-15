@@ -52,7 +52,7 @@
                                 <button
                                     type="button"
                                     class="inline-flex justify-center rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-                                    @click="$emit('close')"
+                                    @click="$emit('cancel'); $emit('close')"
                                 >
                                     {{ cancelText }}
                                 </button>
@@ -79,7 +79,7 @@ const props = defineProps({
     variant: { type: String, default: 'danger' },
 });
 
-defineEmits(['close', 'confirm']);
+defineEmits(['close', 'confirm', 'cancel']);
 
 const variantMap = {
     danger: {

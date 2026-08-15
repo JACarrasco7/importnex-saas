@@ -11,7 +11,7 @@
 
 | Flujo | Archivo | Estructura JSON | Uso en Laravel |
 |---|---|---|---|
-| **A: UNIDAD** | `informe.json` dentro del ZIP | Vista completa, un solo coche | Crea/actualiza `Valoracion` |
+| **A: UNIDAD** | `informe.json` dentro del ZIP | Vista completa, un solo coche | Crea/actualiza `Car` |
 | **B: MODELO** | `export/flujo-b-<modelo>-<fecha>.json` | Igual que A, sin `publicidad` | Histórico cacheable |
 | **C: MERCADO** | `export/flujo-c-<fecha>.json` | Estructura agregada con N modelos | Tabla scouting |
 
@@ -82,7 +82,8 @@ El importador de Laravel (`ValuationImporter.php`) empareja por **VIN**, luego p
   "equipamiento": ["Techo panorámico", "Navegador", "Asientos calefactables"],
   "garantia": "Sin garantía de fábrica restante",
   "accidentes_declarados": "El vendedor declara libre de accidentes",
-  "historial_mantenimiento": "Libro de revisiones sellado"
+  "historial_mantenimiento": "Libro de revisiones sellado",
+  "fotos": ["https://..."]
 }
 ```
 
@@ -105,11 +106,12 @@ Campos no confirmados van a `null`, **nunca inventados**. `co2_confirmado: false
   "vendedor_tipo": "Profesional",
   "vendedor_nombre": "Autohaus Beispiel GmbH",
   "fecha_captura": "2026-08-11",
-  "fotos": ["https://..."],
   "descripcion_original": "Texto original...",
   "descripcion_traducida": "Traducción..."
 }
 ```
+
+> ⚠️ **Las fotos van en `vehiculo.fotos`, NO en `anuncio.fotos`** — `ValuationImporter::savePhotosAndFiles()` lee `vehiculo.fotos`. Si las fotos van en `anuncio.fotos`, Laravel no las descarga.
 
 ---
 
@@ -131,7 +133,7 @@ Campos no confirmados van a `null`, **nunca inventados**. `co2_confirmado: false
 
 `valoracion`: solo `favorable`, `neutro`, `desfavorable` o vacío. Hallazgo vacío = "no se investigó". Si se investigó y salió limpio, el texto lo dice con valoración `favorable`. **No perder esta distinción al importar.**
 
-> **Mapeo al importar (auditoría #12):** `ValuationImporter` traduce `valoracion` (español) a `rating` (inglés) al guardarlo en `Car.research` y `InvestigationCache` (mapea `favorable→good`, `neutro→neutral`, `desfavorable→bad` vía `RATING_MAP`). En cambio, `InvestigationCache` conserva la clave `valoracion` en el JSON crudo de `aspectos`. Es intencional: `Car` usa `rating` (normalizado), `InvestigationCache` guarda el payload original. No mezclar ambos nombres al consultar.
+> **Mapeo al importar (auditoría #12):** `ValuationImporter` traduce `valoracion` (español) a `rating` al guardarlo en `Car.research` y `InvestigationCache` (mapea `favorable→favorable`, `neutro→neutral`, `desfavorable→unfavorable` vía `RATING_MAP`). En cambio, `InvestigationCache` conserva la clave `valoracion` en el JSON crudo de `aspectos`. Es intencional: `Car` usa `rating` (normalizado), `InvestigationCache` guarda el payload original. No mezclar ambos nombres al consultar.
 
 ### `boe_confirmed` (auditoría #13)
 
@@ -220,7 +222,9 @@ Caducidades: recalls 6 meses · seguro y piezas 12 · averías 18 · homologaci�
 
 `semaforo`: `green` (precio ≤ media), `amber` (hasta +5%), `red` (>+5%).
 
-🔴 **Comparables SIEMPRE con URL.** Cada `comparables[].url` se construye con el id del anuncio. Sin URL = la fila no cuenta.
+> ⚠️ **`semaforo` es informativo — NO se persiste.** Laravel lo recalcula automáticamente en `CarObserver::saving()` a partir del coste total y la media de mercado (`traffic_light`). El valor del chat sirve para verificar coherencia, pero el que manda en la app es el recalculado.
+
+🔴 **Comparables SIEMPRE con URL del anuncio DIRECTO.** Cada `comparables[].url` es la ficha del vehículo (p.ej. `https://suchen.mobile.de/fahrzeuge/details.html?id=123456`), construida con el id del anuncio. **NUNCA** una URL de búsqueda/filtro del portal (`/fahrzeuge/...?sortOption=...&categories=...`) — eso lleva al cliente a una lista, no al coche. Sin URL = la fila no cuenta.
 
 ---
 
@@ -483,7 +487,7 @@ Sirve para fijar el precio de salida en la ficha publicitaria.
 
 `empaquetar.py` ya NO genera PDFs. Escribe archivos `.txt` con bloques `[MARCADOR]` que las plantillas Blade de Laravel (`jj-import/folleto.blade.php`, `jj-import/ficha-coche.blade.php`, `jj-import/informe-interno.blade.php`, `jj-import/dossier.blade.php`) convierten a PDF con Browsershot.
 
-> **Briefing PDF ha sido DEPRECADO 12-ago-2026.** Era redundante con `ficha-coche.blade.php`. Sustituido por `dossier.blade.php` (PDF profesional para cliente, 15 secciones). La ruta `POST /api/cars/{car}/briefing-pdf` sigue existiendo pero devuelve 410 Gone.
+> **Dossier (PDF cliente)** lo genera `dossier.blade.php` (15 secciones). La ruta `POST /api/cars/{car}/briefing-pdf` existe y sube un PDF adjunto real (extensión `.pdf`, máx 10 MB) a `importnex/briefings/`.
 
 ### Reglas del formato
 
@@ -579,17 +583,16 @@ class Esqueleto
 ```
 POST https://dev.aktive.cloud/importnexcore/api/import-valuation
 Header: X-Import-Token: <token>
-Body: multipart/form-data con el ZIP (solo Flujo A)
-       o application/json con el JSON suelto (Flujo A, B, C)
+Body: application/json (Flujo A, B, C). El ZIP con fotos se sube por la ruta web `POST /cars/import-valuation` (panel).
 ```
 
-Comando local: `php artisan jj:importar` (lee de `export/`).
+Comando local: `php artisan importnex:import-valuation --file=<ruta-json>` (lee de `storage/app/importnex/import/`).
 
 **Qué enviar según flujo:**
 
 | Flujo | Endpoint | Estado | Formato |
 |---|---|---|---|
-| A | `POST /api/import-valuation` | ✅ Implementado (jul-2026) | ZIP multipart o JSON |
+| A | `POST /api/import-valuation` | ✅ Implementado (jul-2026) | JSON (el ZIP va por web `/cars/import-valuation`) |
 | B | `POST /api/import-modelo` | ✅ Implementado (ago-2026) | JSON |
 | C | `POST /api/import-mercado` | ✅ Implementado (ago-2026) | JSON |
 

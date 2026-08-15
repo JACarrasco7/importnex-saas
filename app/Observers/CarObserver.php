@@ -77,6 +77,10 @@ class CarObserver
 
     private function shouldRecalculateTrafficLight(Car $car): bool
     {
+        if ($car->preserveTrafficLight) {
+            return false;
+        }
+
         if (! $car->exists) {
             return true;
         }

@@ -18,6 +18,7 @@ class CarController extends Controller
     public function index(Request $request): Response
     {
         $cars = Car::query()
+            ->with('photos')
             ->when($request->input('status'), fn ($q, $s) => $q->where('status', $s))
             ->when($request->input('traffic_light'), fn ($q, $t) => $q->where('traffic_light', $t))
             ->when($request->input('search'), function ($q, $s) {

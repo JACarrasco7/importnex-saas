@@ -24,7 +24,7 @@ const props = defineProps({
     car: Object,
 });
 
-const { trafficLightVariant, formatCurrency, formatShortDate, statusLabel } = useFormat();
+const { trafficLightVariant, currency: formatCurrency, date: formatShortDate, statusLabel } = useFormat();
 const { t } = useTranslations();
 
 const aiAnalysis = computed(() => props.car.ai_analysis_json || null);

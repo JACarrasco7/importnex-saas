@@ -5,7 +5,7 @@
 
 ---
 
-## 🛡️ Los 6 anti-patrones
+## 🛡️ Los 14 anti-patrones
 
 | # | Anti-patrón | Regla dura |
 |---|---|---|
@@ -14,9 +14,15 @@
 | **A3** | IEDMT sin fuente | "El CO₂ y PVP vienen de km77 o BOE. NUNCA de 'modelo similar'. Marcar `co2_confirmado: false` si estimado." |
 | **A4** | Veredicto sin cuartil bajo | "Si ahorro contra cuartil bajo es negativo, veredicto de margen es NO, aunque mediana diga SÍ." |
 | **A5** | Informe sin precio máximo | "Todo informe Flujo A incluye precio máximo de compra. Sin excepción." |
-| **A6** | Tabla sin enlaces | "Toda tabla de candidatos incluye columna ENLACE clickable. Si no hay URL, se construye desde el ID." |
+| **A6** | Tabla sin enlaces | "Toda tabla de candidatos incluye columna ENLACE clickable. Si no hay URL, se construye desde el ID. Los enlaces de comparables van SIEMPRE al anuncio directo (ficha del vehículo), NUNCA a una búsqueda/filtro del portal." |
 | **A7** | Cobertura incompleta | "Siempre se intentan las 7 fuentes. Con <7 NO hay cifras ni veredicto: informe PARCIAL + preguntar al usuario." |
 | **A8** | AutoScout24 como precio | "AutoScout24 NUNCA da precio de referencia (agrega feeds sin cribar). Solo para contar ofertas." |
+| **A9** | Afirmar sin comprobar | "NUNCA decir 'sí lo vi en mi barrido' sin comprobarlo. Si no está en los datos capturados, digo que no está. Un falso positivo es peor que un falso negativo." |
+| **A10** | Precio financiado como contado | "El precio grande de MUY CAR/Flexicar (y portales ES) suele ser el FINANCIADO, no el contado. Confirmar el contado antes de meterlo en la tabla: Milanuncios `price.cashPrice.value`, Coches.net/Wallapop abrir ficha y buscar 'contado'." |
+| **A11** | Paginación parcial | "Coches.net ordena por relevancia, NO por precio. Para cliente concreto hay que recorrer TODAS las páginas con `pg=` filtrando por precio `pf=`. Si no se puede paginar todo, DECIRLO y marcar cobertura parcial." |
+| **A12** | Página 1 como listado | "Ordenar por precio ascendente y leer SOLO la página 1 = sesgo hacia lo más barato/viejo (caso María 15-ago: 526 resultados, se enseñaron 8 de 3.000-4.200 € y se perdieron DS4/308/Astra). El listado del cliente cubre TODO el rango de presupuesto: todas las páginas o bandas de precio. Si se trunca, DECLARARLO." |
+| **A13** | Filtros alterados sin declarar | "Cualquier ampliación/relajación de los filtros del encargo (año 2016→2012, km, precio) se declara ANTES de navegar y se marca en el informe. Nunca cambiar los criterios del cliente en silencio." |
+| **A14** | Abandonar el camino en silencio | "El flujo es un camino numerado con waypoint 📍 en cada mensaje. Una pregunta lateral del usuario es una misión lateral: se responde y se RETOMA el paso (↩⃾ Vuelvo al paso N). Si tras una desviación el entregable de la fase no llegó, es un fallo. Un cambio de destino real se declara (🔀 Cambio de camino)." |
 
 ---
 

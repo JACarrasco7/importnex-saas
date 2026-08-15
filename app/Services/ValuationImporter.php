@@ -158,6 +158,21 @@ class ValuationImporter
             }
         }
 
+        // §contrato — brand/model son NOT NULL en BD: devolver 422 limpio en vez de 500 SQL
+        if (isset($payload['vehiculo'])) {
+            $brand = trim((string) ($payload['vehiculo']['marca'] ?? ''));
+            $model = trim((string) ($payload['vehiculo']['modelo'] ?? ''));
+            if ($brand === '' || $model === '') {
+                throw new RuntimeException('Missing required fields: vehiculo.marca y vehiculo.modelo son obligatorios.');
+            }
+        }
+
+        // §contrato — pvp_nuevo es OBLIGATORIO en Flujo A: sin él, IEDMT = 0 y el coste total sale mal
+        $flujo = $payload['_meta']['flujo'] ?? 'A';
+        if ($flujo === 'A' && isset($payload['costes']) && ! isset($payload['costes']['pvp_nuevo'])) {
+            throw new RuntimeException('Missing required field: costes.pvp_nuevo (obligatorio para calcular el IEDMT).');
+        }
+
         return $payload;
     }
 
@@ -251,6 +266,11 @@ class ValuationImporter
         $c = $payload['costes'] ?? [];
         $m = $payload['mercado'] ?? [];
 
+        // Si Claude manda semáforo explícito, respetarlo (el observer lo pisaría).
+        if (isset($m['semaforo']) && $m['semaforo'] !== null && $m['semaforo'] !== '') {
+            $car->preserveTrafficLight = true;
+        }
+
         // §3.1 — co2_confirmado: warning en avisos
         $avisos = $payload['avisos'] ?? [];
         if (isset($v['co2_confirmado']) && $v['co2_confirmado'] === false) {
@@ -286,6 +306,30 @@ class ValuationImporter
             );
         }
 
+        // §contrato — verificar IEDMT de Claude contra el recálculo de Laravel (>10% → aviso)
+        $iedmtClaude = isset($c['iedmt_estimado']) && $c['iedmt_estimado'] !== null
+            ? (float) $c['iedmt_estimado']
+            : null;
+        if ($iedmtClaude !== null) {
+            $probe = new Car;
+            $probe->co2 = $v['co2_gkm'] ?? null;
+            $probe->year = $this->normalizeYear($v['anio'] ?? null);
+            $probe->boe_confirmed = false;
+            $probe->manual_tax_base = $c['pvp_nuevo'] ?? null;
+            $probe->new_price = $c['pvp_nuevo'] ?? null;
+            $iedmtLaravel = (float) $probe->calculateIEDMT();
+            if ($iedmtLaravel > 0) {
+                $diffPct = abs($iedmtClaude - $iedmtLaravel) / $iedmtLaravel;
+                if ($diffPct > 0.10) {
+                    $avisos[] = sprintf(
+                        'IEDMT: Claude estima %d € y Laravel recalcula %d € (diferencia >10%%). Revisar CO₂ y PVP.',
+                        (int) round($iedmtClaude),
+                        (int) round($iedmtLaravel)
+                    );
+                }
+            }
+        }
+
         // Persistir avisos actualizados en payload para uso posterior
         $payload['avisos'] = $avisos;
 
@@ -304,6 +348,7 @@ class ValuationImporter
                 'drivetrain' => $this->translate($v['traccion'] ?? null, self::DRIVETRAIN_MAP),
                 'cv' => $v['potencia_cv'] ?? null,
                 'co2' => $v['co2_gkm'] ?? null,
+                'co2_confirmado' => $v['co2_confirmado'] ?? null,
                 'color' => $v['color_exterior'] ?? null,
                 'doors' => $v['puertas'] ?? null,
                 'seats' => $v['plazas'] ?? null,
@@ -315,8 +360,10 @@ class ValuationImporter
                 // Listing
                 'url_link' => $a['url'] ?? null,
                 'city' => $a['ciudad'] ?? null,
+                'pais_origen' => $a['pais_origen'] ?? null,
                 'seller' => $this->formatSeller($a),
                 'description' => $a['descripcion_traducida'] ?? $a['descripcion_original'] ?? null,
+                'original_description' => $a['descripcion_original'] ?? null,
                 'equipment' => $this->normalizeEquipment($v['equipamiento'] ?? []),
 
                 // Costs (from the chat's breakdown)
@@ -357,6 +404,8 @@ class ValuationImporter
                 'market_min' => $m['precio_min'] ?? null,
                 'market_max' => $m['precio_max'] ?? null,
                 'estimated_saving' => $m['ahorro_estimado'] ?? null,
+                // NOTA: traffic_light NO se persiste desde el JSON — CarObserver::saving()
+                // lo recalcula a partir de costes y market_avg en cada guardado.
                 'comparables_list' => $this->normalizeComparables($m['comparables'] ?? []),
 
                 // Source
@@ -417,7 +466,9 @@ class ValuationImporter
         @file_put_contents($reportFile, json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
         // Procesar fotos si existen (salvo que el paquete ya las traiga en local)
-        $fotos = $payload['vehiculo']['fotos'] ?? [];
+        // §contrato — retrocompatibilidad: el contrato documentaba fotos en anuncio.fotos;
+        // la ubicación canónica es vehiculo.fotos, pero aceptamos ambas.
+        $fotos = $payload['vehiculo']['fotos'] ?? $payload['anuncio']['fotos'] ?? [];
         if (! empty($fotos) && ! $this->skipRemotePhotos) {
             $this->savePhotos($car, $fotos);
         }
