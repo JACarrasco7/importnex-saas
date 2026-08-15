@@ -23,7 +23,7 @@ class DiagAi extends Command
         $this->line('org ai_provider: '.var_export($org?->ai_provider, true));
         $this->line('org ai_model: '.var_export($org?->ai_model, true));
         $this->line('org ai_api_key set: '.var_export(! empty($org?->ai_api_key), true));
-        $this->line('org hasAi: '.var_export($org?->hasAi(), true));
+        $this->line('org hasAi: '.var_export($org?->hasAiConfigured(), true));
 
         $car = Car::withoutGlobalScopes()->where('id', 1)->first();
         if ($car) {
