@@ -55,7 +55,7 @@ Fuentes: 7 (Wallapop, Milanuncios, Coches.net, mobile.de, AS24.de, AutoUncle, kl
 Método: navegación real estilo humano SIEMPRE primero → ver `navegacion_real.md`
 Playbook de filtrado: `playbook_filtrado.md` · estructura real: `paginas_reales.md`
 Trampas top 3: countryCode SIEMPRE | navegación real primero (screenshot+clic), degradado si no se ve | mobile.de directo NUNCA saltar
-Anti-patrones bloqueados: 14 (A1-A14, ver §Anti-patrones)
+Anti-patrones bloqueados: 16 (A1-A16, ver §Anti-patrones)
 Camino fijo: waypoint 📍 en cada mensaje · desviaciones = misión lateral con retorno ↩⃾ (A14)
 Micro-plan 3-5 líneas antes de CADA búsqueda · cuaderno de sesión en informes\_sesion\
 Checkpoints: CP-D tras informe MODELOS (elegir modelos) | CP1 tras informe MODELO (esperar elección de candidato) | CP2 tras comparable | CP3 antes de veredicto
@@ -99,10 +99,21 @@ Tope de gama: doble pasada por kW SIEMPRE → `playbook_filtrado.md` §Doble pas
 
 > **El problema que resuelve:** el cliente trae presupuesto y requisitos pero NO modelo ("9.000 € todo incluido, 2016+, gasolina, +120cv, 5p, ¿qué mercado es mejor?"). El usuario tampoco sabe qué pedir. Navegar directo a anuncios reales quema peticiones y sesga (caso María 15-ago). El Flujo D particiona la búsqueda en un **embudo de 3 pasos**.
 
-**D1 · Sondeo de modelos (barato, sin anuncios):**
-- Peinar ES (Coches.net) y DE (mobile.de) **solo a nivel de MODELO/MOTORZACIÓN**: filtros del encargo (año, km, combustible, cv, precio ≤ techo por origen según M1/M2/M3).
+**D1 · Sondeo de modelos (barato, sin anuncios) — navegación real OBLIGATORIA (A15):**
+- **MÉTODO: navegación real SIEMPRE** (Coches.net ES + mobile.de DE) con los filtros del encargo. La **búsqueda web** (snippets de Google/agregadores) está **PROHIBIDA como sondeo** (A15): da cifras inconsistentes y contradice lo verificado con navegación real. Degradado solo si el portal está bloqueado, declarando reintentos (A2/A7).
+- **El sondeo es por FILTROS, no por modelo (A16):** una pasada con los filtros del encargo (año, km, combustible, potencia mínima, precio ≤ techo por origen según M1/M2/M3) devuelve **TODOS** los modelos/motorizaciones que caben. Se listan **TODOS los que salen**; prohibido elegir 3-4 a mano ni dejar "otros por explorar" sin sondear.
+- **Potencia = filtro MÍNIMO (≥Xcv):** versiones 125/130/150 valen igual si cumplen el mínimo. Nunca sondear solo la variante tope (ej. buscar el León 150cv y descartar el 125cv).
+- **Rango de año APROBADO se respeta (A13):** si el usuario amplió (2016→2012), se filtra con el ampliado, no el estricto.
+- **Eficiencia — D1 en dos sub-pasadas, sin paginar (D1a enumera, D1b afina):**
+  - **D1a · ENUMERAR modelos (solo nombres, 2 lecturas por mercado):**
+    1. **Lectura asc (suelo):** filtros del encargo + orden precio asc → leer SOLO página 1 → modelos que caben holgado 🟢.
+    2. **Lectura desc (techo):** mismos filtros + orden precio desc → leer SOLO página 1 → modelos que caben justo 🟡. **Con asc+desc se cubre TODO el rango en 2 páginas**, sin paginar hasta el techo.
+    3. **Facetas de marca/modelo con conteo** (si el portal las muestra en el lateral): anotar marcas/modelos con nº de resultados — enumera el mercado completo sin abrir anuncios ni paginar.
+    4. **Semilla de modelos (`memoria/modelos-medidos.md`):** el segmento (gasolina compacto +120cv, ≤150k km…) tiene una lista finita conocida (~10-15 modelos). Partir de ella para no redescubrir el mercado; el barrido solo añade modelos raros.
+  - **D1b · PRECIO-DESDE (diferido, solo si falta):** el precio exacto por modelo NO se necesita en la primera pasada. Solo para los modelos que D1a dejó sin precio claro → 1 consulta por modelo (marca+modelo + orden asc + página 1). El nº de resultados de la faceta ya es señal de interés: no abrir fichas ni leer más de 1 página.
+  - **El anuncio individual solo se investiga cuando el embudo es pequeño** (Flujo A/B): en D1 el anuncio concreto no aporta nada — solo interesa modelo + precio-desde + nº de oferta.
 - Se recopila: nombre de modelo + motorización + precio-desde verificado + nº resultados. **NO fichas, NO vendedores, NO fotos, NO anuncios individuales.**
-- Presupuesto: ~4-8 peticiones totales (2-4 por mercado). Ordenar por precio ascendente y anotar el mínimo VERIFICADO de cada modelo (A12: mirar más allá de la página 1 por modelo, no del listado entero).
+- Presupuesto: ~4-6 peticiones por mercado (2 de D1a + 1-2 de D1b + facetas/semilla). La paginación completa es de Flujo B.
 
 **D2 · INFORME DE MODELOS (entregable del Flujo D):**
 - Organizado **por país × año × motorización**, con veredicto de encaje por modelo:
@@ -128,6 +139,10 @@ D sondeo → INFORME DE MODELOS (país × año × motorización)
 1. En D1 NO se abren fichas de anuncios individuales — es sondeo de modelos, no búsqueda de candidatos.
 2. El INFORME DE MODELOS NO es un listado de anuncios: sin enlaces a unidades concretas, solo modelos/motorizaciones con precio-desde.
 3. No se pasa a Flujo B sin que el usuario elija modelos (CP-D).
+4. **D1 SIEMPRE con navegación real (A15).** La búsqueda web/snippets NO es método válido de sondeo — datos inconsistentes (caso 15-ago: Focus ES "~9.900 €" cuando la navegación real daba 3.000-6.990 €).
+5. **El informe D2 lista TODOS los modelos** que salen con los filtros (A16), sin "otros por explorar" pendientes: si un modelo cumple las specs, se sondea en la misma pasada.
+6. **El requisito de potencia es mínimo (≥Xcv):** filtrar por kW/cv mínimos, no buscar una variante concreta; versiones 125/130/150 cumplen +120cv.
+7. **D1 NO pagina (eficiencia):** D1a enumera con 2 lecturas por mercado (asc = suelo + desc = techo) + facetas de marca + semilla `modelos-medidos.md`; D1b difiere el precio-desde a 1 consulta por modelo solo si falta. El anuncio individual solo se investiga cuando el embudo es pequeño (Flujo A/B).
 
 **Antes de navegar en Flujo A/B → briefing de encargo (`briefing_encargo.md`):**
 1. Extraer parámetros dados (modelo, año mín, km máx, presupuesto...).
@@ -799,15 +814,23 @@ TRAS ELEGIR CANDIDATO (todo automático, sin preguntar)
 14. Acción inmediata (pasos numerados con plazo)
 15. Score global de oportunidad (6 dimensiones, 0-100)
 
-**_outputs del informe UNIDAD (archivos .txt en ZIP):**
+**_outputs del informe UNIDAD (archivos .txt en ZIP, para Laravel):**
 - `informe-interno.txt` (análisis JJ Import Motors · ver `informe_tecnico.md`)
 - `dossier-cliente.txt` (PDF profesional para cliente · ver `dossier_cliente.md`) — solo si veredicto 🟢/🔵
 - `ficha-publicitaria.txt` (venta en portales · contrato.md §publicidad)
 - `redes-sociales.txt` + `anuncio-portales.txt` (ver contrato.md)
 
+**📄 Además, Claude ENTREGA al usuario los PDFs de INVESTIGACIÓN** (no van dentro del ZIP):
+- `informe_busqueda_<modelo>.pdf` (Fase 1) · `informe_unidad_<unidad>.pdf` (Fase 2) — método en §Quién genera cada PDF.
+
 **Cuándo emitir dossier cliente:** 🟢 Comprar siempre · 🔵 Comprar si baja de precio siempre · 🟡 Dudoso solo si el cliente pidió evaluarlo · 🔴 Descartar nunca (carta breve en su lugar).
 
-**⚠️ Quién genera cada PDF (12-ago-2026):** Claude genera los **esqueletos `.txt` [MARCADOR]** dentro del ZIP. Los PDFs finales (`dossier`, `ficha-publicitaria`, `folleto`) los **genera Laravel** (Blade + Browsershot) cuando el coche ya está en el sistema. Claude NO genera PDFs, NO genera el folleto publicitario ni la ficha durante la investigación — esos salen del panel cuando el coche está en inventario.
+**⚠️ Quién genera cada PDF (15-ago-2026 · v2.9.2):**
+- **Claude SÍ genera los PDFs de INVESTIGACIÓN** (entregables de las fases, para el USUARIO):
+  - `informe_busqueda_<modelo>.pdf` (fin de Fase 1 · Flujo B/C) y `informe_unidad_<unidad>.pdf` (Fase 2 · Flujo A).
+  - **Método:** renderizar el informe en HTML con la marca JJ Import Motors (colores de `marca.json`: #1A306D/#38393D/#BEC0C3) y convertirlo a PDF con Chrome headless (`chrome --headless --print-to-pdf=salida.pdf entrada.html`); si Chrome no está disponible, script Python con reportlab. Guardar en `informes\<marca>\<modelo>\`.
+- **Claude genera los esqueletos `.txt` [MARCADOR]** dentro del ZIP (para Laravel).
+- **Laravel SÍ genera los PDFs de MARKETING/VENTA** (Blade + Browsershot) desde los `.txt` del ZIP cuando el coche está en el sistema: `dossier`, `ficha-publicitaria`, `folleto`. Claude NO genera estos tres durante la investigación.
 
 ---
 
@@ -860,7 +883,7 @@ LO DEMÁS: sin cambios significativos.
 
 ## 🛡️ ANTI-PATRONES BLOQUEADOS
 
-Las 14 reglas duras (A1-A14) viven en `anti_patrones.md`. Cargarlas cuando se duda de una práctica o antes de cerrar un informe.
+Las 16 reglas duras (A1-A16) viven en `anti_patrones.md`. Cargarlas cuando se duda de una práctica o antes de cerrar un informe.
 
 **Resumen rápido:**
 - **A1** No descartar por silencio (sello `man`, no exclusión)
@@ -916,6 +939,13 @@ Las 14 reglas duras (A1-A14) viven en `anti_patrones.md`. Cargarlas cuando se du
 │   └── anuncio-portales.txt        ← [TITULO] [DESCRIPCION] [AVISO_LEGAL]
 └── fotos/
 ```
+
+**Reglas duras del `informe.json` del ZIP (15-ago-2026):**
+
+1. 🔴 **`anuncio.descripcion_original` = texto literal COMPLETO del anuncio** (pegado tal cual, sin resumir ni corregir) + `descripcion_traducida` completa. Laravel las muestra en la ficha. Un resumen traducido NO vale: se pierde el original.
+2. 🔴 **`vehiculo.equipamiento` = lista COMPLETA** de la sección `Ausstattung`/features del anuncio (no solo los 15 destacados del informe humano). Laravel lo muestra y lo usa para el ajuste de comparable y la ficha publicitaria.
+3. 🔴 **`mercado.comparables[].url` = URL directa de la FICHA del anuncio**, nunca una búsqueda/filtro del portal (A6). Sin URL, el comparable se descarta al importar.
+4. ✅ Campos extra del anuncio si están visibles: `dias_publicado`, `tuv_vigente_hasta`, `precio_publicado` vs `precio_negociado`, `carroceria`, `color_interior`. Laravel los guarda en `Car.notes`.
 
 **Qué hace Laravel con cada archivo:** ver `contrato.md`.
 
@@ -976,6 +1006,12 @@ Las 14 reglas duras (A1-A14) viven en `anti_patrones.md`. Cargarlas cuando se du
 - [ ] Fase 3 → ZIP generado (sin ZIP la fase no está terminada)
 - [ ] Búsqueda y valoración en archivos separados (`informe_busqueda_*` ≠ `informe_unidad_*`)
 - [ ] No afirmé haber visto un anuncio sin comprobarlo (A9) · Confirmé contado vs financiado (A10) · Paginé todas las páginas (A11)
+
+**Contenido del JSON del ZIP (15-ago-2026)**
+- [ ] `anuncio.descripcion_original` = texto literal COMPLETO del anuncio (no resumido) + `descripcion_traducida`
+- [ ] `vehiculo.equipamiento` = lista COMPLETA del anuncio (Ausstattung), no solo los 15 destacados
+- [ ] `mercado.comparables[].url` = URL directa de la ficha (nunca búsqueda/filtro) (A6)
+- [ ] Campos extra si están visibles: `dias_publicado`, `tuv_vigente_hasta`, `precio_publicado`, `carroceria`, `color_interior`
 
 ---
 

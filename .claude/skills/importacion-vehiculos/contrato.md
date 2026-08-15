@@ -70,6 +70,7 @@ El importador de Laravel (`ValuationImporter.php`) empareja por **VIN**, luego p
   "combustible": "Gasolina",
   "cambio": "Manual",
   "traccion": "Delantera",
+  "carroceria": "Sportback",
   "puertas": 3,
   "plazas": 5,
   "potencia_cv": 280,
@@ -89,6 +90,8 @@ El importador de Laravel (`ValuationImporter.php`) empareja por **VIN**, luego p
 
 Campos no confirmados van a `null`, **nunca inventados**. `co2_confirmado: false` → el dato viene del anuncio o estimación, no del COC. ⚠️ **El CO₂ determina el tramo del IEDMT.**
 
+> 🔴 **`equipamiento` = lista COMPLETA del anuncio** (sección `Ausstattung`/features), NO solo los 15 destacados del `informe_tecnico.md`. Esa lista de 15 es para el informe humano; en el JSON van TODOS los items vistos en la captura. Laravel la muestra en la ficha y la usa para el ajuste de comparable y la ficha publicitaria. Sin equipamiento completo, el coche parece menos equipado de lo que está.
+
 ---
 
 ## `anuncio`
@@ -102,14 +105,21 @@ Campos no confirmados van a `null`, **nunca inventados**. `co2_confirmado: false
   "pais_origen": "Alemania",
   "ciudad": "Múnich",
   "precio_publicado": 12900,
+  "precio_negociado": 12550,
   "moneda": "EUR",
+  "dias_publicado": 45,
+  "tuv_vigente_hasta": "04/2027",
   "vendedor_tipo": "Profesional",
   "vendedor_nombre": "Autohaus Beispiel GmbH",
   "fecha_captura": "2026-08-11",
-  "descripcion_original": "Texto original...",
-  "descripcion_traducida": "Traducción..."
+  "descripcion_original": "Texto literal COMPLETO del anuncio...",
+  "descripcion_traducida": "Traducción completa..."
 }
 ```
+
+> 🔴 **`descripcion_original` = texto literal COMPLETO del anuncio, pegado tal cual** (el que ve el cliente en el portal, incluidas mayúsculas/errores del vendedor). NO resumir, NO corregir, NO inventar. `descripcion_traducida` = la traducción completa al español. Si solo hay una, las dos llevan el mismo texto. Laravel muestra ambas en la ficha (pestaña Resumen: "Texto original" / "Traducción").
+
+> 🆕 **Campos extra del anuncio (12-ago-2026):** `dias_publicado` (señal de demanda: muchos días = baja rotación DE), `tuv_vigente_hasta` (TÜV/HU en DE, el equivalente a la ITV — caduca o no: dato clave para importación), `precio_publicado` vs `precio_negociado` (sirve de pista de negociación). El importer los guarda en `Car.notes`.
 
 > ⚠️ **Las fotos van en `vehiculo.fotos`, NO en `anuncio.fotos`** — `ValuationImporter::savePhotosAndFiles()` lee `vehiculo.fotos`. Si las fotos van en `anuncio.fotos`, Laravel no las descarga.
 
@@ -485,7 +495,7 @@ Sirve para fijar el precio de salida en la ficha publicitaria.
 
 ## 📝 Formato esqueleto `.txt` — para plantillas Blade
 
-`empaquetar.py` ya NO genera PDFs. Escribe archivos `.txt` con bloques `[MARCADOR]` que las plantillas Blade de Laravel (`jj-import/folleto.blade.php`, `jj-import/ficha-coche.blade.php`, `jj-import/informe-interno.blade.php`, `jj-import/dossier.blade.php`) convierten a PDF con Browsershot.
+`empaquetar.py` ya NO genera PDFs (ni de marketing ni de investigación). Escribe archivos `.txt` con bloques `[MARCADOR]` que las plantillas Blade de Laravel (`jj-import/folleto.blade.php`, `jj-import/ficha-coche.blade.php`, `jj-import/informe-interno.blade.php`, `jj-import/dossier.blade.php`) convierten a PDF con Browsershot. Los PDFs de investigación (búsqueda/unidad) los genera Claude aparte (ver SKILL.md §Quién genera cada PDF) y se entregan al usuario; NO van dentro del ZIP.
 
 > **Dossier (PDF cliente)** lo genera `dossier.blade.php` (15 secciones). La ruta `POST /api/cars/{car}/briefing-pdf` existe y sube un PDF adjunto real (extensión `.pdf`, máx 10 MB) a `importnex/briefings/`.
 

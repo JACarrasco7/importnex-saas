@@ -5,6 +5,49 @@ Todos los cambios notables en el skill `importacion-vehiculos` se documentarán 
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [2.9.3] - 2026-08-15 — Sondeo D1 blindado (navegación real, filtros no modelos)
+
+### 🔴 Búsqueda web PROHIBIDA como sondeo (A15)
+- El sondeo D1 del Flujo D se hace SIEMPRE con navegación real a Coches.net + mobile.de con los filtros del encargo. La búsqueda web (snippets/agregadores) queda **prohibida como método de sondeo** — da cifras inconsistentes y contradice lo verificado con navegación real.
+- Caso real 15-ago (conversación nueva): Focus ES "~9.900 €" cuando la navegación real daba 3.000-6.990 €; 308 DE "10.980-12.600 €" sin confirmar. Degradado solo con portal bloqueado + reintentos (A2/A7).
+
+### 🎯 Sondeo por FILTROS, no por modelo (A16)
+- Una pasada con los filtros del encargo devuelve **TODOS** los modelos/motorizaciones que caben. Prohibido elegir 3-4 a mano y dejar "otros por explorar" sin sondear.
+- **Potencia = filtro MÍNIMO (≥Xcv):** versiones 125/130/150 valen igual; nunca sondear solo la variante tope (caso León 150cv descartando el 125cv).
+
+### ⚡ Eficiencia: D1 enumera, NO pagina (D1a + D1b)
+- **D1a · ENUMERAR modelos** (solo nombres) con 2 lecturas por mercado: **asc** (suelo, página 1 → 🟢) + **desc** (techo, página 1 → 🟡). Con asc+desc se cubre TODO el rango en 2 páginas.
+- Complemento sin paginar: **facetas de marca/modelo con conteo** (enumera el mercado completo) + **semilla de modelos** `memoria/modelos-medidos.md` (segmento finito conocido, no redescubrir).
+- **D1b · PRECIO-DESDE diferido**: el precio exacto por modelo no hace falta en la primera pasada; 1 consulta por modelo solo si D1a lo dejó sin precio claro.
+- El anuncio individual solo se investiga cuando el embudo es pequeño (Flujo A/B). Matiz en A12 para no confundir "cubrir todo el rango" (candidatos) con "pagar cada página del sondeo" (D1).
+
+### 📅 Rango de año aprobado se respeta (A13 extendido)
+- A13 cubre ahora también usar un rango MÁS RESTRICTIVO que el aprobado (se aprobó 2012+ y se filtró 2016+). Declarar cualquier cambio ANTES de navegar, en ambos sentidos.
+
+### 📄 Archivos tocados
+- `SKILL.md`: D1 reescrito (navegación real, filtros, cobertura total, potencia mínima, rango aprobado) + reglas duras 4-6 del Flujo D.
+- `anti_patrones.md`: A15, A16 nuevos; A13 extendido; checklist y tabla de origen actualizados.
+
+## [2.9.2] - 2026-08-15 — Contrato de datos completo para Laravel (descripción original, equipamiento, campos del anuncio)
+
+### 🔴 Descripción original literal (punto 8 de la auditoría)
+- `anuncio.descripcion_original` = **texto literal COMPLETO del anuncio** (pegado tal cual, sin resumir ni corregir) + `descripcion_traducida` completa. Regla dura en `contrato.md`, `SKILL.md` (reglas del ZIP) y checklist. Antes la skill no forzaba el original → riesgo de que el ZIP llegara solo con traducción/resumen.
+
+### 🎛️ Equipamiento COMPLETO del anuncio
+- `vehiculo.equipamiento` = **lista COMPLETA** de la sección `Ausstattung`/features, no solo los 15 destacados del `informe_tecnico.md` (esa lista es solo para el informe humano).
+- Motivo: Laravel lo muestra en la ficha y lo usa para el ajuste de comparable y la ficha publicitaria. Un coche mal equipado en el JSON sale más pobre de lo que es.
+
+### 📰 Campos extra del anuncio (nuevos en contrato.md)
+- `anuncio.dias_publicado` (señal de demanda: muchos días = baja rotación DE), `anuncio.tuv_vigente_hasta` (TÜV/HU, clave en importación), `anuncio.precio_publicado` vs `precio_negociado` (pista de negociación), `vehiculo.carroceria`, `vehiculo.color_interior`.
+- Laravel los persiste en `Car.notes` (sin migración) — ver `ValuationImporter::buildNotes()` (6º parámetro `$a`).
+
+### 🔗 Comparables con URL directa (punto 6)
+- Reforzado en checklist del ZIP: `mercado.comparables[].url` = ficha del anuncio, nunca búsqueda/filtro. Sin URL, el importer descarta la fila.
+
+### 🖥️ Laravel (cierre del hueco de UI)
+- `Show.vue`: nuevo bloque **Equipamiento** en la pestaña Resumen (chips) — el importer ya persistía `equipment` pero la UI no lo mostraba.
+- i18n: clave `cars.equipment` añadida en es/en (paridad 1272/1272, 0 missing).
+
 ## [2.9.0] - 2026-08-15 — Camino fijo, micro-plans, cuaderno de sesión y auditoría de fase
 
 ### 🧭 EL CAMINO (SKILL.md) — desambiguación total de fases
@@ -41,6 +84,14 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ### 🧪 Tests
 - +8 tests nuevos (validaciones, mapeos, IEDMT, idempotencia cierre). Área importación/cierres/KPIs: 85 passed.
+
+## [2.9.2] - 2026-08-15 — División de PDFs: investigación (Claude) vs marketing (Laravel)
+
+### 🖨️ Quién genera cada PDF (corregido)
+- **Claude SÍ genera los PDFs de INVESTIGACIÓN** (entregables de fase, para el usuario): `informe_busqueda_<modelo>.pdf` (Fase 1 · Flujo B/C) y `informe_unidad_<unidad>.pdf` (Fase 2 · Flujo A). Método: HTML con la marca → Chrome headless (`--print-to-pdf`); si no hay Chrome, reportlab.
+- **Laravel genera los PDFs de MARKETING/VENTA** (Blade + Browsershot) desde los esqueletos `.txt` del ZIP cuando el coche está en el sistema: `dossier`, `ficha-publicitaria`, `folleto`.
+- Corregido en: SKILL.md (outputs, entregables por fase, §Quién genera cada PDF), operaciones.md (división de trabajo), contrato.md (empaquetar.py), ROADMAP.md.
+- Origen del cambio: el usuario esperaba los PDFs de búsqueda/unidad al cerrar cada fase (caso Tiguan); la skill se lo prohibía y solo entregaba `.md`.
 
 ## [2.8.0] - 2026-08-15 — Flujo D · DESCUBRIMIENTO (cliente sin modelo)
 

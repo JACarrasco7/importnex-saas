@@ -91,9 +91,17 @@ NUNCA saltes del resumen informal a "¿evalúo el candidato X?" sin entregar INF
 
 ## 7. CONTRATO JSON → Laravel
 Al final (Flujo A) genera `informe.json` (schema_version=1, bloques _meta/vehiculo/anuncio/investigacion/balance/veredicto/costes/mercado/avisos/publicidad) + esqueletos `.txt [BLOQUE]` + fotos. `pvp_nuevo` OBLIGATORIO (va en `costes.pvp_nuevo`; Laravel lo usa para `new_price`/`manual_tax_base` y el IEDMT). `pais_origen`: "Alemania" | "España". Las **fotos van en `vehiculo.fotos`** (Laravel las lee de ahí, no de `anuncio`).
+
+**Campos que el ZIP DEBE llevar SIEMPRE (15-ago-2026):**
+- 🔴 `anuncio.descripcion_original` = **texto literal COMPLETO del anuncio** (pegado tal cual, sin resumir/corregir) + `anuncio.descripcion_traducida` completa.
+- 🔴 `vehiculo.equipamiento` = **lista COMPLETA** del anuncio (Ausstattung), no solo los 15 destacados del informe humano.
+- 🔴 `mercado.comparables[].url` = **URL directa de la ficha del anuncio** (nunca búsqueda/filtro) — sin URL, Laravel descarta el comparable.
+- ✅ Si están visibles: `anuncio.dias_publicado`, `anuncio.tuv_vigente_hasta`, `anuncio.precio_publicado` vs `precio_negociado`, `vehiculo.carroceria`, `vehiculo.color_interior` (van a `Car.notes`).
 - Subida JSON → `POST /api/import-valuation` (A), `/api/import-modelo` (B), `/api/import-mercado` (C) con cabecera `X-Import-Token`.
 - ZIP con fotos → ruta web `POST /cars/import-valuation` (panel). Comando local: `php artisan importnex:import-valuation`.
 - Flujo B → `export/flujo-b-<modelo>-<fecha>.json` (sin publicidad). Flujo C → `export/flujo-c-<fecha>.json` (agregado N modelos).
+
+📄 **Entregables PDF:** Claude genera los PDFs de INVESTIGACIÓN (`informe_busqueda_<modelo>.pdf` en Fase 1 · `informe_unidad_<unidad>.pdf` en Fase 2, HTML de marca → Chrome headless). Los PDFs de marketing (`dossier`, `ficha-publicitaria`, `folleto`) los genera **Laravel** desde los `.txt` del ZIP — NO los crea Claude.
 
 ## 8. ANTI-PATRONES (reglas duras, NUNCA violar sin justificar)
 A1 no descartar por silencio (sello `man`) · A2 no saltar mobile.de (sin él no hay veredicto) · A3 IEDMT con fuente · A4 veredicto contra cuartil bajo · A5 informe con precio máximo · A6 tablas con enlace clickable · A7 intentar las 7 fuentes · A8 AS24 nunca como precio · A9 deshonestidad (afirmar lo no comprobado en captura) · A10 confundir precio financiado con precio contado · A11 paginación parcial (Coches.net: recorrer TODAS las páginas) · A12 sesgo página 1 (barrer rango completo de precio) · A13 cambiar filtros sin declararlo (todo cambio de filtro se anuncia con motivo) · A14 abandonar El Camino en silencio.

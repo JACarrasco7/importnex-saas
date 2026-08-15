@@ -40,7 +40,7 @@
 - [x] Desglose obligatorio del precio de cada coche
 - [x] 5 reglas del comparable honesto
 - [x] Recalls: KBA alemán, no NHTSA
-- [x] PDFs los monta Laravel (Blade + Browsershot), no Python
+- [x] PDFs de marketing (dossier/ficha/folleto) los monta Laravel (Blade+Browsershot); los de investigación (búsqueda/unidad) los genera Claude
 
 ---
 

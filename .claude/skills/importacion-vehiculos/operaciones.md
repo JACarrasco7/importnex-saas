@@ -11,11 +11,11 @@
 
 ```
 1. 🔍 INVESTIGACIÓN → SOLO en Claude (Desktop). Navegación real, filtros, 7 fuentes.
-   └─ genera: informe MODELO / UNIDAD + dossier + esqueletos .txt [MARCADOR] + JSON
+   └─ genera: informe MODELO / UNIDAD (.md **+ PDF de investigación**) + esqueletos .txt [MARCADOR] + JSON
 
 2. 📦 SUBIR AL SISTEMA → el JSON se sube vía API (`/api/import-valuation` con `X-Import-Token`); el ZIP con fotos se sube desde el panel web (`POST /cars/import-valuation`).
    └─ Laravel (importnexcore) = REPOSITORIO ÚNICO y FUENTE DE VERDAD de:
-       ✓ informes (PDF por Blade+Browsershot) · ✓ imágenes/fotos · ✓ JSON · ✓ dossier · ✓ folleto
+       ✓ PDFs de marketing (dossier, ficha, folleto — por Blade+Browsershot) · ✓ imágenes/fotos · ✓ JSON · ✓ dossier · ✓ folleto
 
 3. 📊 VER / MOSTRAR / GESTIONAR / ACTUALIZAR → TODO desde el sistema Laravel.
    └─ El sistema se encarga de las actualizaciones, iteraciones, nuevas versiones, etc.
@@ -25,7 +25,7 @@
 
 **Reglas duras:**
 - La **investigación** (navegación/filtros) se hace en Claude Desktop — NO en VS Code (fricción con filtros, ver `memoria/retrospectiva.md`).
-- El **repositorio de informes/PDF/imágenes/JSON es Laravel**. Claude genera el paquete y lo SUBE; no lo mantiene local.
+- El **repositorio de PDFs de marketing/imágenes/JSON es Laravel**. Claude genera el paquete y lo SUBE; además entrega al usuario los **PDFs de investigación** (búsqueda/unidad). Los PDFs de marketing (dossier/ficha/folleto) solo salen de Laravel.
 - Para **ver un informe/PDF/fotos** → consultar el sistema Laravel (nunca regenerar desde cero si ya está subido).
 - Claude NO consulta Laravel para "revisar" o "iterar". Cada entrega al sistema es el final del ciclo para Claude.
 
