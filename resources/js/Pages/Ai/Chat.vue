@@ -20,7 +20,7 @@ const sending = ref(false);
 const errorMsg = ref('');
 
 const providerLabel = computed(() => {
-    if (!props.current?.provider) return t('ai_chat.disabled');
+    if (!props.current?.provider) return 'Disabled';
     return props.providers.find(p => p.key === props.current.provider)?.label ?? props.current.provider;
 });
 
@@ -35,7 +35,7 @@ function removeMessage(idx) {
 async function send() {
     errorMsg.value = '';
     if (!props.current?.has_key) {
-        errorMsg.value = t('ai_chat.no_provider');
+        errorMsg.value = 'No AI provider configured. Set one in Organization → Edit.';
         return;
     }
     sending.value = true;
@@ -47,10 +47,10 @@ async function send() {
         if (resp.data.success) {
             messages.value.push({ role: 'assistant', content: resp.data.text });
         } else {
-            errorMsg.value = resp.data.error || t('ai_chat.call_failed');
+            errorMsg.value = resp.data.error || 'AI call failed';
         }
     } catch (e) {
-        errorMsg.value = e.response?.data?.error || e.message || t('ai_chat.unknown_error');
+        errorMsg.value = e.response?.data?.error || e.message || 'Unknown error';
     } finally {
         sending.value = false;
     }
@@ -73,10 +73,10 @@ async function send() {
 
                 <div class="rounded-2xl bg-white p-6 shadow ring-1 ring-gray-200">
                     <div v-if="!current?.has_key" class="mb-4 flex items-start gap-3 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800 ring-1 ring-amber-200">
-                        <ExclamationTriangleIcon class="mt-0.5 h-5 w-5 shrink-0" />
+                        <ExclamationTriangleIcon class="mt-0.5 h-5 w-5 flex-shrink-0" />
                         <div>
-                            {{ t('ai_chat.no_provider_banner') }}
-                            <a :href="route('organization.edit', { organization: 'current' })" class="font-semibold underline">{{ t('ai_chat.configure_now') }}</a>.
+                            No AI provider configured for this organization yet.
+                            <a :href="route('organization.edit', { organization: 'current' })" class="font-semibold underline">Configure it now</a>.
                         </div>
                     </div>
 
@@ -93,17 +93,17 @@ async function send() {
                                     {{ msg.role }}
                                 </span>
                                 <button v-if="msg.role === 'user' && messages.length > 1" @click="removeMessage(idx)"
-                                        class="text-xs text-red-600 hover:text-red-800">{{ t('common.remove') }}</button>
+                                        class="text-xs text-red-600 hover:text-red-800">Remove</button>
                             </div>
                             <textarea v-if="msg.role === 'user'" v-model="msg.content" rows="3"
                                       class="mt-2 block w-full rounded border-gray-300 text-sm"
-                                      :placeholder="t('ai_chat.message_placeholder')"></textarea>
+                                      placeholder="Type your message…"></textarea>
                             <pre v-else class="mt-2 whitespace-pre-wrap text-sm text-gray-800">{{ msg.content }}</pre>
                         </div>
 
                         <button @click="addMessage" type="button"
                                 class="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 ring-1 ring-gray-300 hover:bg-gray-50">
-                            + {{ t('ai_chat.add_message') }}
+                            + Add message
                         </button>
                     </div>
 
@@ -111,7 +111,7 @@ async function send() {
                         <button @click="send" :disabled="sending || !current?.has_key"
                                 class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500 disabled:opacity-50">
                             <PaperAirplaneIcon class="h-4 w-4" />
-                            {{ sending ? t('ai_chat.sending') : t('ai_chat.send_to', { provider: providerLabel }) }}
+                            {{ sending ? 'Sending…' : 'Send to ' + providerLabel }}
                         </button>
                     </div>
                 </div>

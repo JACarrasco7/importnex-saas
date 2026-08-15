@@ -16,7 +16,7 @@ const props = defineProps({
     totalTransport: Number,
 });
 
-const { currency, statusLabel, statusVariant } = useFormat();
+const { currency, statusVariant } = useFormat();
 </script>
 
 <template>
@@ -37,7 +37,7 @@ const { currency, statusLabel, statusVariant } = useFormat();
                     </template>
                 </PageHeader>
 
-                <EmptyState v-if="!trips?.length" icon="🚛" :title="t('trips.no_trips_to_plan')" :description="t('trips.no_trips_desc')" />
+                <EmptyState v-if="!trips?.length" icon="🚛" title="No trips to plan" description="No cars in Purchased or In transit status with location data yet." />
 
                 <div v-else class="space-y-6">
                     <div v-for="trip in trips" :key="trip.city" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
@@ -49,17 +49,17 @@ const { currency, statusLabel, statusVariant } = useFormat();
                                 <div>
                                     <h3 class="text-lg font-bold text-gray-900">{{ trip.city }}</h3>
                                     <p class="text-sm text-gray-500">
-                                        {{ t('trips.summary', { count: trip.count, transport: currency(trip.total_transport), value: currency(trip.total_value) }) }}
+                                        {{ trip.count }} cars · Transport {{ currency(trip.total_transport) }} · Value {{ currency(trip.total_value) }}
                                     </p>
                                 </div>
                             </div>
                             <Badge v-if="trip.potential_savings > 0" variant="green">
-                                {{ t('trips.save') }} {{ currency(trip.potential_savings) }}
+                                Save {{ currency(trip.potential_savings) }}
                             </Badge>
                         </div>
                         <div v-if="trip.recommendation" class="border-b border-gray-200 bg-blue-50 px-6 py-3">
                             <div class="flex items-start gap-2">
-                                <LightBulbIcon class="h-5 w-5 shrink-0 text-blue-600" />
+                                <LightBulbIcon class="h-5 w-5 flex-shrink-0 text-blue-600" />
                                 <p class="text-sm text-blue-900">{{ trip.recommendation }}</p>
                             </div>
                         </div>
@@ -84,7 +84,7 @@ const { currency, statusLabel, statusVariant } = useFormat();
                                             </Link>
                                         </td>
                                         <td class="px-6 py-3 text-sm text-gray-500">{{ car.year }}</td>
-                                        <td class="px-6 py-3"><Badge :variant="statusVariant(car.status)">{{ statusLabel(t, car.status) }}</Badge></td>
+                                        <td class="px-6 py-3"><Badge :variant="statusVariant(car.status)">{{ car.status }}</Badge></td>
                                         <td class="px-6 py-3 text-right text-sm text-gray-700">{{ currency(car.transport) }}</td>
                                         <td class="px-6 py-3 text-right text-sm font-semibold text-gray-900">{{ currency(car.purchase_price) }}</td>
                                     </tr>

@@ -24,7 +24,7 @@ const form = useForm({
     notes: props.contact.notes ?? '',
 });
 
-const submit = () => form.patch(route('contacts.update', props.contact.id));
+const submit = () => form.put(route('contacts.update', props.contact.id));
 
 const inputClass = 'block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-estoril-500 focus:ring-estoril-500';
 </script>
@@ -49,35 +49,35 @@ const inputClass = 'block w-full rounded-lg border-gray-300 text-sm shadow-sm fo
                 </PageHeader>
 
                 <form @submit.prevent="submit" class="space-y-6">
-                    <FormSection :title="t('cars.contact_info')">
+                    <FormSection title="Contact info">
                         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                            <FormField :label="t('cars.name_field')" required><input v-model="form.name" type="text" required :class="inputClass" /></FormField>
-                            <FormField :label="t('cars.phone_field')"><input v-model="form.phone" type="tel" :class="inputClass" /></FormField>
-                            <FormField :label="t('cars.email_field')"><input v-model="form.email" type="email" :class="inputClass" /></FormField>
-                            <FormField :label="t('cars.field_city')"><input v-model="form.city" type="text" :class="inputClass" /></FormField>
-                            <FormField :label="t('cars.client')" v-if="clients?.length">
+                            <FormField label="Name" required><input v-model="form.name" type="text" required :class="inputClass" /></FormField>
+                            <FormField label="Phone"><input v-model="form.phone" type="tel" :class="inputClass" /></FormField>
+                            <FormField label="Email"><input v-model="form.email" type="email" :class="inputClass" /></FormField>
+                            <FormField label="City"><input v-model="form.city" type="text" :class="inputClass" /></FormField>
+                            <FormField label="Client" v-if="clients?.length">
                                 <select v-model="form.client_id" :class="inputClass">
-                                    <option :value="null">— {{ t('cars.no_client') }} —</option>
+                                    <option :value="null">— No client —</option>
                                     <option v-for="c in clients" :key="c.id" :value="c.id">{{ c.name }}</option>
                                 </select>
                             </FormField>
                         </div>
                     </FormSection>
 
-                    <FormSection :title="t('cars.tags_notes')">
-                        <FormField :label="t('cars.tags')" :hint="t('cars.tags_hint')">
+                    <FormSection title="Tags & notes">
+                        <FormField label="Tags" hint="Comma separated">
                             <input v-model="form.tags" type="text" :class="inputClass" />
                         </FormField>
-                        <FormField :label="t('cars.notes')">
+                        <FormField label="Notes">
                             <textarea v-model="form.notes" rows="3" :class="inputClass" />
                         </FormField>
                     </FormSection>
 
                     <div class="flex items-center justify-end gap-3 rounded-2xl bg-gray-50 px-6 py-4 ring-1 ring-gray-200">
-                        <Link :href="route('contacts.index')" class="text-sm font-semibold text-gray-700 hover:text-gray-900">{{ t('cars.cancel') }}</Link>
+                        <Link :href="route('contacts.index')" class="text-sm font-semibold text-gray-700 hover:text-gray-900">Cancel</Link>
                         <button type="submit" :disabled="form.processing" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500 disabled:opacity-50">
                             <CheckIcon class="h-4 w-4" />
-                            {{ form.processing ? t('cars.updating') : t('cars.update_contact') }}
+                            {{ form.processing ? 'Updating...' : 'Update contact' }}
                         </button>
                     </div>
                 </form>

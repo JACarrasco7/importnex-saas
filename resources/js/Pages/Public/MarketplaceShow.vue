@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, onMounted, onUnmounted } from 'vue';
+import { computed } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import {
     ArrowLeftIcon,
@@ -8,42 +8,11 @@ import {
     XCircleIcon,
     MinusCircleIcon,
     LinkIcon,
-    EyeIcon,
-    ChevronLeftIcon,
-    ChevronRightIcon,
-    XMarkIcon,
 } from '@heroicons/vue/24/outline';
 import MapaLeaflet from '@/Components/MapaLeaflet.vue';
 import Badge from '@/Components/Badge.vue';
-import MarketplaceLayout from '@/Layouts/MarketplaceLayout.vue';
-import ShareCar from '@/Components/ShareCar.vue';
-import WishlistButton from '@/Components/WishlistButton.vue';
-import LazyImage from '@/Components/LazyImage.vue';
-import FinancingCalculator from '@/Components/FinancingCalculator.vue';
 import { useFormat } from '@/Composables/useFormat';
 import { useTranslations } from '@/Composables/useTranslations';
-
-// Marketplace item 6: Lightbox state
-const lightboxOpen = ref(false);
-const lightboxIndex = ref(0);
-const openLightbox = (i) => { lightboxIndex.value = i; lightboxOpen.value = true; };
-const closeLightbox = () => { lightboxOpen.value = false; };
-const nextPhoto = () => {
-    if (!props.car?.photos?.length) return;
-    lightboxIndex.value = (lightboxIndex.value + 1) % props.car.photos.length;
-};
-const prevPhoto = () => {
-    if (!props.car?.photos?.length) return;
-    lightboxIndex.value = (lightboxIndex.value - 1 + props.car.photos.length) % props.car.photos.length;
-};
-const onKeydown = (e) => {
-    if (!lightboxOpen.value) return;
-    if (e.key === 'Escape') closeLightbox();
-    else if (e.key === 'ArrowRight') nextPhoto();
-    else if (e.key === 'ArrowLeft') prevPhoto();
-};
-onMounted(() => { window.addEventListener('keydown', onKeydown); });
-onUnmounted(() => { window.removeEventListener('keydown', onKeydown); });
 
 const props = defineProps({
     car: Object,
@@ -81,77 +50,6 @@ const ratingIcon = (r) => ({
     favorable: CheckCircleIcon, neutral: MinusCircleIcon, unfavorable: XCircleIcon,
 }[r] || MinusCircleIcon);
 
-// SEO: OG + Schema.org Vehicle (Marketplace-1 items 13+14)
-const seoTitle = computed(() =>
-    `${props.car?.brand ?? ''} ${props.car?.model ?? ''} ${props.car?.year ?? ''} — JJ Import Motors`.trim()
-);
-const seoDescription = computed(() => {
-    const c = props.car;
-    if (!c) return t('cars.marketplace_brand_model', { brand: '', model: '' });
-    const parts = [
-        c.brand,
-        c.model,
-        c.year,
-        c.mileage ? `${(c.mileage / 1000).toFixed(0)}k km` : null,
-        c.fuel,
-        c.transmission,
-    ].filter(Boolean);
-    return parts.join(' · ');
-});
-const seoImage = computed(() => {
-    const first = props.car?.photos?.[0] ?? null;
-    if (!first) return null;
-    if (first.startsWith('http')) return first;
-    return `${window.location.origin}${first}`;
-});
-const seoUrl = computed(() => `${window.location.origin}${route('marketplace.show', props.car?.id)}`);
-
-const vehicleJsonLd = computed(() => {
-    const c = props.car;
-    if (!c) return null;
-    const data = {
-        '@context': 'https://schema.org',
-        '@type': 'Vehicle',
-        name: `${c.brand} ${c.model}`.trim(),
-        brand: { '@type': 'Brand', name: c.brand },
-        model: c.model,
-        vehicleModelDate: String(c.year ?? ''),
-        vehicleConfiguration: c.transmission ?? undefined,
-        fuelType: c.fuel ?? undefined,
-        vehicleSeatingCapacity: c.seats ?? undefined,
-        numberOfDoors: c.doors ?? undefined,
-        color: c.color ?? undefined,
-        mileageFromOdometer: c.mileage
-            ? { '@type': 'QuantitativeValue', value: c.mileage, unitCode: 'KMT' }
-            : undefined,
-        vehicleEngine: c.cv
-            ? { '@type': 'EngineSpecification', enginePower: { '@type': 'QuantitativeValue', value: c.cv, unitCode: 'HP' } }
-            : undefined,
-        emissionsCO2: c.co2
-            ? { '@type': 'QuantitativeValue', value: c.co2, unitCode: 'GR' }
-            : undefined,
-        description: c.description ?? seoDescription.value,
-        image: seoImage.value ?? undefined,
-        url: seoUrl.value,
-        offers: c.purchase_price
-            ? {
-                '@type': 'Offer',
-                price: c.purchase_price,
-                priceCurrency: props.car?.organization?.currency ?? 'EUR',
-                availability: 'https://schema.org/InStock',
-                url: seoUrl.value,
-                seller: {
-                    '@type': 'AutoDealer',
-                    name: 'JJ Import Motors',
-                    url: window.location.origin,
-                },
-            }
-            : undefined,
-    };
-    // Quitar claves undefined (JSON.stringify las omite pero las defino explicitamente)
-    return JSON.stringify(data);
-});
-
 const researchAspectLabels = {
     common_issues: t('marketplace_show.aspect_common_issues'),
     recalls: t('marketplace_show.aspect_recalls'),
@@ -185,65 +83,50 @@ const marketPosition = computed(() => {
 </script>
 
 <template>
-    <Head :title="seoTitle">
-        <!-- Open Graph dinamico (Item 14: OG meta tags por vehículo) -->
-        <meta property="og:type" content="website" />
-        <meta property="og:url" :content="seoUrl" />
-        <meta property="og:title" :content="seoTitle" />
-        <meta property="og:description" :content="seoDescription" />
-        <meta v-if="seoImage" property="og:image" :content="seoImage" />
-        <meta property="og:locale" content="es_ES" />
-        <meta property="og:site_name" content="JJ Import Motors" />
+    <Head :title="`${car.brand} ${car.model} - Marketplace`" />
 
-        <!-- Twitter Card -->
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" :content="seoTitle" />
-        <meta name="twitter:description" :content="seoDescription" />
-        <meta v-if="seoImage" name="twitter:image" :content="seoImage" />
+    <div class="min-h-screen bg-gradient-to-br from-platinum-100 via-white to-estoril-50">
+        <!-- Public header -->
+        <header class="border-b border-gray-200 bg-white/80 backdrop-blur">
+            <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+                <Link :href="route('marketplace.index')" class="flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-gray-900">
+                    <ArrowLeftIcon class="h-4 w-4" />
+                    {{ t('marketplace_show.back_to_marketplace') }}
+                </Link>
+                <a :href="route('login')" class="text-sm font-semibold text-gray-700 hover:text-gray-900">{{ t('marketplace_show.sign_in') }}</a>
+            </div>
+        </header>
 
-        <!-- SEO clasico -->
-        <meta name="description" :content="seoDescription" />
-        <link rel="canonical" :href="seoUrl" />
-    </Head>
-
-    <MarketplaceLayout>        <!-- SEO Schema.org Vehicle (Item 13: Schema.org Vehicle + Offer por vehículo) -->
-        <script v-if="vehicleJsonLd" type="application/ld+json" v-html="vehicleJsonLd" />
         <div class="py-8">
             <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
                 <!-- Header -->
-                <div class="flex items-start justify-between border-b border-gray-200 pb-4 dark:border-asphalt-700">
-                    <div class="flex-1">
-                        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ car.brand }} {{ car.model }}</h1>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ t('marketplace_show.vin_label') }} {{ car.vin || t('marketplace.not_available') }}</p>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <WishlistButton :car="car" />
-                        <ShareCar :car="car" :url="shareUrl" />
-                    </div>
+                <div class="border-b border-gray-200 pb-4">
+                    <h1 class="text-3xl font-bold text-gray-900">{{ car.brand }} {{ car.model }}</h1>
+                    <p class="mt-1 text-sm text-gray-500">{{ t('marketplace_show.vin_label') }} {{ car.vin || t('marketplace.not_available') }}</p>
                 </div>
 
                 <!-- Status bar -->
                 <div class="flex flex-wrap items-center gap-3">
                     <Badge :variant="trafficLightVariant(car.traffic_light)" dot>{{ car.traffic_light }}</Badge>
                     <Badge :variant="verdictVariant(car.verdict)">{{ car.verdict }}</Badge>
-                    <span v-if="car.year" class="text-sm text-gray-500 dark:text-gray-400">{{ car.year }}</span>
+                    <span v-if="car.year" class="text-sm text-gray-500">{{ car.year }}</span>
                 </div>
 
                 <!-- IEDMT estimation warning -->
-                <div class="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 shadow-sm dark:border-amber-900/50 dark:bg-amber-900/20">
-                    <ExclamationTriangleIcon class="h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
-                    <div class="text-sm text-amber-900 dark:text-amber-200">
+                <div class="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                    <ExclamationTriangleIcon class="h-5 w-5 flex-shrink-0 text-amber-600" />
+                    <div class="text-sm text-amber-900">
                         <p class="font-semibold">{{ t('marketplace_show.iedmt_warning_title') }}</p>
-                        <p class="mt-1 text-amber-800 dark:text-amber-300">
+                        <p class="mt-1 text-amber-800">
                             {{ t('marketplace_show.iedmt_warning_desc', { amount: currency(derived?.iedmt), total: currency(derived?.total_cost) }) }}
                         </p>
                     </div>
                 </div>
 
                 <!-- Location -->
-                <div v-if="car.lat && car.lng" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 transition-colors duration-300 dark:bg-asphalt-800 dark:ring-asphalt-700">
-                    <div class="border-b border-gray-200 px-6 py-4 dark:border-asphalt-700">
-                        <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ t('marketplace_show.section_location') }}</h3>
+                <div v-if="car.lat && car.lng" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
+                    <div class="border-b border-gray-200 px-6 py-4">
+                        <h3 class="text-base font-semibold text-gray-900">{{ t('marketplace_show.section_location') }}</h3>
                     </div>
                     <div class="p-6">
                         <MapaLeaflet :lat="car.lat" :lng="car.lng" :marker-text="`${car.brand} ${car.model} - ${car.city || ''}`" height="300px" />
@@ -251,124 +134,116 @@ const marketPosition = computed(() => {
                 </div>
 
                 <!-- Technical specs -->
-                <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700">
-                    <div class="border-b border-gray-200 px-6 py-4 dark:border-asphalt-700">
-                        <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ t('marketplace_show.section_tech_specs') }}</h3>
+                <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
+                    <div class="border-b border-gray-200 px-6 py-4">
+                        <h3 class="text-base font-semibold text-gray-900">{{ t('marketplace_show.section_tech_specs') }}</h3>
                     </div>
                     <div class="grid grid-cols-2 gap-x-6 gap-y-4 p-6 md:grid-cols-4">
                         <div v-for="spec in specItems" :key="spec.key">
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ spec.label }}</dt>
-                            <dd class="mt-1 text-sm font-medium text-gray-900 dark:text-white" :class="{ 'font-mono text-xs': spec.key === 'vin' }">{{ car[spec.key] || t('marketplace.not_available') }}{{ spec.suffix || '' }}</dd>
+                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ spec.label }}</dt>
+                            <dd class="mt-1 text-sm font-medium text-gray-900" :class="{ 'font-mono text-xs': spec.key === 'vin' }">{{ car[spec.key] || t('marketplace.not_available') }}{{ spec.suffix || '' }}</dd>
                         </div>
                     </div>
                 </div>
 
                 <!-- Costs -->
-                <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700">
-                    <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between dark:border-asphalt-700">
-                        <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ t('marketplace_show.section_costs') }}</h3>
-                        <span class="text-sm text-gray-500 dark:text-gray-400">{{ t('marketplace_show.total_all_in') }}: <span class="font-mono font-semibold text-gray-900 dark:text-white">{{ currency(derived?.total_cost) }}</span></span>
+                <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
+                    <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+                        <h3 class="text-base font-semibold text-gray-900">{{ t('marketplace_show.section_costs') }}</h3>
+                        <span class="text-sm text-gray-500">{{ t('marketplace_show.total_all_in') }}: <span class="font-mono font-semibold text-gray-900">{{ currency(derived?.total_cost) }}</span></span>
                     </div>
                     <div class="grid grid-cols-2 gap-x-6 gap-y-4 p-6 md:grid-cols-4">
                         <div v-for="cost in costItems" :key="cost.key">
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ cost.label }}</dt>
-                            <dd class="mt-1 text-sm font-semibold text-gray-900 dark:text-white">{{ currency(car[cost.key]) }}</dd>
+                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ cost.label }}</dt>
+                            <dd class="mt-1 text-sm font-semibold text-gray-900">{{ currency(car[cost.key]) }}</dd>
                         </div>
                     </div>
                 </div>
 
-                <!-- Financing calculator (Marketplace-3.15) -->
-                <FinancingCalculator
-                    v-if="car.purchase_price"
-                    :price="Number(car.purchase_price)"
-                    :currency="currency(undefined)"
-                    :locale="$page.props.locale || 'es'"
-                />
-
                 <!-- Investigation -->
-                <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700">
-                    <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between dark:border-asphalt-700">
-                        <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ t('marketplace_show.section_investigation') }}</h3>
-                        <span v-if="derived?.research_gaps?.length" class="text-xs font-medium text-amber-700 dark:text-amber-300">
+                <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
+                    <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+                        <h3 class="text-base font-semibold text-gray-900">{{ t('marketplace_show.section_investigation') }}</h3>
+                        <span v-if="derived?.research_gaps?.length" class="text-xs font-medium text-amber-700">
                             {{ derived.research_gaps.length === 1 ? t('marketplace_show.aspects_pending', { count: derived.research_gaps.length }) : t('marketplace_show.aspects_pending_plural', { count: derived.research_gaps.length }) }}
                         </span>
                     </div>
 
                     <!-- Verdict -->
-                    <div v-if="car.verdict" class="border-b border-gray-200 bg-gray-50 px-6 py-4 dark:border-asphalt-700 dark:bg-asphalt-800">
+                    <div v-if="car.verdict" class="border-b border-gray-200 bg-gray-50 px-6 py-4">
                         <div class="flex flex-wrap items-center gap-3">
                             <Badge :variant="verdictVariant(car.verdict)" dot size="lg">{{ car.verdict }}</Badge>
                             <Badge v-if="car.verdict_confidence" :variant="confidenceVariant(car.verdict_confidence)">
                                 {{ t('marketplace_show.confidence') }}: {{ car.verdict_confidence }}
                             </Badge>
-                            <span v-if="car.verdict_at" class="text-xs text-gray-500 dark:text-gray-400">
+                            <span v-if="car.verdict_at" class="text-xs text-gray-500">
                                 {{ date(car.verdict_at) }}
                             </span>
                         </div>
-                        <p v-if="car.verdict_reasoning" class="mt-3 text-sm text-gray-700 dark:text-gray-300">{{ car.verdict_reasoning }}</p>
-                        <p v-if="car.verdict_changes" class="mt-2 text-xs italic text-gray-600 dark:text-gray-400">
-                            <span class="font-semibold not-italic text-gray-700 dark:text-gray-300">{{ t('marketplace_show.what_would_change') }}</span>
+                        <p v-if="car.verdict_reasoning" class="mt-3 text-sm text-gray-700">{{ car.verdict_reasoning }}</p>
+                        <p v-if="car.verdict_changes" class="mt-2 text-xs italic text-gray-600">
+                            <span class="font-semibold not-italic text-gray-700">{{ t('marketplace_show.what_would_change') }}</span>
                             {{ car.verdict_changes }}
                         </p>
                     </div>
 
-                    <div v-if="!car.verdict && !derived?.research_gaps?.length" class="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
+                    <div v-if="!car.verdict && !derived?.research_gaps?.length" class="px-6 py-8 text-center text-sm text-gray-500">
                         {{ t('marketplace_show.no_valuation') }}
                     </div>
 
                     <!-- Balance pros / cons -->
                     <div v-if="(car.pros?.length || car.cons?.length)" class="grid grid-cols-1 gap-6 p-6 md:grid-cols-2">
                         <div>
-                            <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-estoril-800 dark:text-estoril-300">{{ t('marketplace_show.in_favor', { count: car.pros?.length || 0 }) }}</h4>
+                            <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-estoril-800">{{ t('marketplace_show.in_favor', { count: car.pros?.length || 0 }) }}</h4>
                             <ul v-if="car.pros?.length" class="space-y-2">
-                                <li v-for="(pro, i) in car.pros" :key="i" class="flex items-start gap-2 rounded-lg border border-estoril-200 bg-estoril-50 p-3 dark:border-asphalt-700 dark:bg-asphalt-800">
-                                    <CheckCircleIcon class="mt-0.5 h-4 w-4 shrink-0 text-estoril-700 dark:text-estoril-300" />
+                                <li v-for="(pro, i) in car.pros" :key="i" class="flex items-start gap-2 rounded-lg border border-estoril-200 bg-estoril-50 p-3">
+                                    <CheckCircleIcon class="mt-0.5 h-4 w-4 flex-shrink-0 text-estoril-700" />
                                     <div class="flex-1">
-                                        <p class="text-sm text-gray-900 dark:text-white">{{ pro.text }}</p>
-                                        <span class="mt-1 inline-block text-xs font-medium uppercase text-estoril-800 dark:text-estoril-300">{{ pro.weight }}</span>
+                                        <p class="text-sm text-gray-900">{{ pro.text }}</p>
+                                        <span class="mt-1 inline-block text-xs font-medium uppercase text-estoril-800">{{ pro.weight }}</span>
                                     </div>
                                 </li>
                             </ul>
-                            <p v-else class="text-sm italic text-gray-500 dark:text-gray-400">{{ t('marketplace_show.no_points_in_favor') }}</p>
+                            <p v-else class="text-sm italic text-gray-500">{{ t('marketplace_show.no_points_in_favor') }}</p>
                         </div>
                         <div>
-                            <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-red-700 dark:text-red-400">{{ t('marketplace_show.against', { count: car.cons?.length || 0 }) }}</h4>
+                            <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-red-700">{{ t('marketplace_show.against', { count: car.cons?.length || 0 }) }}</h4>
                             <ul v-if="car.cons?.length" class="space-y-2">
-                                <li v-for="(con, i) in car.cons" :key="i" class="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-900/50 dark:bg-red-900/20">
-                                    <XCircleIcon class="mt-0.5 h-4 w-4 shrink-0 text-red-600 dark:text-red-400" />
+                                <li v-for="(con, i) in car.cons" :key="i" class="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3">
+                                    <XCircleIcon class="mt-0.5 h-4 w-4 flex-shrink-0 text-red-600" />
                                     <div class="flex-1">
-                                        <p class="text-sm text-gray-900 dark:text-white">{{ con.text }}</p>
-                                        <span class="mt-1 inline-block text-xs font-medium uppercase text-red-700 dark:text-red-400">{{ con.weight }}</span>
+                                        <p class="text-sm text-gray-900">{{ con.text }}</p>
+                                        <span class="mt-1 inline-block text-xs font-medium uppercase text-red-700">{{ con.weight }}</span>
                                     </div>
                                 </li>
                             </ul>
-                            <p v-else class="text-sm italic text-gray-500 dark:text-gray-400">{{ t('marketplace_show.no_points_against') }}</p>
+                            <p v-else class="text-sm italic text-gray-500">{{ t('marketplace_show.no_points_against') }}</p>
                         </div>
                     </div>
 
                     <!-- 9 research aspects -->
-                    <div class="border-t border-gray-200 px-6 py-4 dark:border-asphalt-700">
-                        <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ t('marketplace_show.nine_research_aspects') }}</h4>
+                    <div class="border-t border-gray-200 px-6 py-4">
+                        <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('marketplace_show.nine_research_aspects') }}</h4>
                         <ul class="grid grid-cols-1 gap-3 md:grid-cols-2">
                             <li v-for="aspect in aspects" :key="aspect.key" class="rounded-lg border p-3"
-                                :class="aspect.missing ? 'border-dashed border-gray-300 bg-gray-50 dark:border-asphalt-600 dark:bg-asphalt-800' : 'border-gray-200 bg-white dark:border-asphalt-700 dark:bg-asphalt-800'">
+                                :class="aspect.missing ? 'border-dashed border-gray-300 bg-gray-50' : 'border-gray-200 bg-white'">
                                 <div class="flex items-start justify-between gap-2">
-                                    <p class="text-sm font-medium text-gray-900 dark:text-white">{{ aspect.label }}</p>
-                                    <component v-if="!aspect.missing" :is="ratingIcon(aspect.rating)" class="h-4 w-4 shrink-0"
+                                    <p class="text-sm font-medium text-gray-900">{{ aspect.label }}</p>
+                                    <component v-if="!aspect.missing" :is="ratingIcon(aspect.rating)" class="h-4 w-4 flex-shrink-0"
                                         :class="{
                                             'text-estoril-700': aspect.rating === 'favorable',
                                             'text-red-600': aspect.rating === 'unfavorable',
                                             'text-gray-500': aspect.rating === 'neutral' || !aspect.rating,
                                         }" />
                                 </div>
-                                <p v-if="aspect.missing" class="mt-2 text-xs italic text-gray-500 dark:text-gray-400">{{ t('marketplace_show.not_yet_investigated') }}</p>
+                                <p v-if="aspect.missing" class="mt-2 text-xs italic text-gray-500">{{ t('marketplace_show.not_yet_investigated') }}</p>
                                 <template v-else>
-                                    <p v-if="aspect.finding" class="mt-2 text-sm text-gray-700 dark:text-gray-300">{{ aspect.finding }}</p>
-                                    <a v-if="aspect.source" :href="aspect.source" target="_blank" rel="noopener" class="mt-2 inline-flex items-center gap-1 text-xs text-estoril-600 hover:text-estoril-500 dark:text-estoril-400">
+                                    <p v-if="aspect.finding" class="mt-2 text-sm text-gray-700">{{ aspect.finding }}</p>
+                                    <a v-if="aspect.source" :href="aspect.source" target="_blank" rel="noopener" class="mt-2 inline-flex items-center gap-1 text-xs text-estoril-600 hover:text-estoril-500">
                                         <LinkIcon class="h-3 w-3" />
                                         {{ t('marketplace_show.source') }}
                                     </a>
-                                    <span v-if="aspect.date" class="ml-2 text-xs text-gray-400 dark:text-gray-500">{{ aspect.date }}</span>
+                                    <span v-if="aspect.date" class="ml-2 text-xs text-gray-400">{{ aspect.date }}</span>
                                 </template>
                             </li>
                         </ul>
@@ -376,46 +251,46 @@ const marketPosition = computed(() => {
                 </div>
 
                 <!-- Market comparables -->
-                <div v-if="car.market_avg || derived?.comparables_stats?.count" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 transition-colors duration-300 dark:bg-asphalt-800 dark:ring-asphalt-700">
-                    <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between dark:border-asphalt-700">
-                        <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ t('marketplace_show.section_market_comparables') }}</h3>
+                <div v-if="car.market_avg || derived?.comparables_stats?.count" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
+                    <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+                        <h3 class="text-base font-semibold text-gray-900">{{ t('marketplace_show.section_market_comparables') }}</h3>
                         <Badge v-if="marketPosition" :variant="marketPosition.variant">
                             {{ marketPosition.label }} ({{ (marketPosition.ratio * 100).toFixed(1) }}%)
                         </Badge>
                     </div>
                     <div class="grid grid-cols-1 gap-6 p-6 md:grid-cols-4">
                         <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ t('marketplace_show.avg') }}</dt>
-                            <dd class="mt-1 font-mono text-lg font-semibold text-gray-900 dark:text-white">{{ currency(car.market_avg) }}</dd>
+                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('marketplace_show.avg') }}</dt>
+                            <dd class="mt-1 font-mono text-lg font-semibold text-gray-900">{{ currency(car.market_avg) }}</dd>
                         </div>
                         <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ t('marketplace_show.minimum') }}</dt>
-                            <dd class="mt-1 font-mono text-lg font-semibold text-gray-900 dark:text-white">{{ currency(car.market_min) }}</dd>
+                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('marketplace_show.minimum') }}</dt>
+                            <dd class="mt-1 font-mono text-lg font-semibold text-gray-900">{{ currency(car.market_min) }}</dd>
                         </div>
                         <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ t('marketplace_show.maximum') }}</dt>
-                            <dd class="mt-1 font-mono text-lg font-semibold text-gray-900 dark:text-white">{{ currency(car.market_max) }}</dd>
+                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('marketplace_show.maximum') }}</dt>
+                            <dd class="mt-1 font-mono text-lg font-semibold text-gray-900">{{ currency(car.market_max) }}</dd>
                         </div>
                         <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ t('marketplace_show.estimated_saving') }}</dt>
-                            <dd class="mt-1 font-mono text-lg font-semibold text-estoril-800 dark:text-estoril-300">{{ currency(car.estimated_saving) }}</dd>
+                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('marketplace_show.estimated_saving') }}</dt>
+                            <dd class="mt-1 font-mono text-lg font-semibold text-estoril-800">{{ currency(car.estimated_saving) }}</dd>
                         </div>
                     </div>
 
-                    <div v-if="car.comparables_list?.length" class="border-t border-gray-200 px-6 py-4 dark:border-asphalt-700">
-                        <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ t('marketplace_show.comparables_count', { count: car.comparables_list.length }) }}</h4>
-                        <ul class="divide-y divide-gray-200 rounded-lg border border-gray-200 dark:divide-asphalt-700 dark:border-asphalt-700">
-                            <li v-for="(comp, i) in car.comparables_list" :key="i" class="flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-asphalt-800">
+                    <div v-if="car.comparables_list?.length" class="border-t border-gray-200 px-6 py-4">
+                        <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('marketplace_show.comparables_count', { count: car.comparables_list.length }) }}</h4>
+                        <ul class="divide-y divide-gray-200 rounded-lg border border-gray-200">
+                            <li v-for="(comp, i) in car.comparables_list" :key="i" class="flex items-center justify-between px-4 py-3 hover:bg-gray-50">
                                 <div class="min-w-0 flex-1">
-                                    <p class="truncate text-sm font-medium text-gray-900 dark:text-white">{{ comp.title || comp.t }}</p>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                                    <p class="truncate text-sm font-medium text-gray-900">{{ comp.title || comp.t }}</p>
+                                    <p class="text-xs text-gray-500">
                                         <span v-if="comp.km">{{ comp.km.toLocaleString() }} km</span>
                                         <span v-if="comp.country"> &middot; {{ comp.country || comp.pais }}</span>
                                     </p>
                                 </div>
                                 <div class="flex items-center gap-3">
-                                    <span class="font-mono text-sm font-semibold text-gray-900 dark:text-white">{{ currency(comp.price ?? comp.p) }}</span>
-                                    <a v-if="comp.url || comp.u" :href="comp.url || comp.u" target="_blank" rel="noopener" class="text-estoril-600 hover:text-estoril-500 dark:text-estoril-400">
+                                    <span class="font-mono text-sm font-semibold text-gray-900">{{ currency(comp.price ?? comp.p) }}</span>
+                                    <a v-if="comp.url || comp.u" :href="comp.url || comp.u" target="_blank" rel="noopener" class="text-estoril-600 hover:text-estoril-500">
                                         <LinkIcon class="h-4 w-4" />
                                     </a>
                                 </div>
@@ -425,110 +300,56 @@ const marketPosition = computed(() => {
                 </div>
 
                 <!-- Import progress (read-only) -->
-                <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700">
-                    <div class="border-b border-gray-200 px-6 py-4 dark:border-asphalt-700">
-                        <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ t('marketplace_show.section_import_progress') }}</h3>
+                <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
+                    <div class="border-b border-gray-200 px-6 py-4">
+                        <h3 class="text-base font-semibold text-gray-900">{{ t('marketplace_show.section_import_progress') }}</h3>
                     </div>
-                    <div class="bg-gray-50 px-6 py-4 dark:bg-asphalt-800">
+                    <div class="bg-gray-50 px-6 py-4">
                         <div class="mb-2 flex items-center justify-between">
-                            <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300">{{ t('marketplace_show.milestones') }}</h4>
-                            <span class="text-sm font-mono font-semibold text-gray-900 dark:text-white">
+                            <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-700">{{ t('marketplace_show.milestones') }}</h4>
+                            <span class="text-sm font-mono font-semibold text-gray-900">
                                 {{ derived?.milestones_progress?.completed || 0 }} / {{ derived?.milestones_progress?.total || 0 }}
                             </span>
                         </div>
-                        <div class="h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-asphalt-700">
+                        <div class="h-2 w-full overflow-hidden rounded-full bg-gray-200">
                             <div class="h-full bg-estoril-600 transition-all"
                                 :style="{ width: derived?.milestones_progress?.total ? ((derived.milestones_progress.completed / derived.milestones_progress.total) * 100) + '%' : '0%' }" />
                         </div>
-                        <p class="mt-3 text-sm text-gray-600 dark:text-gray-400">
+                        <p class="mt-3 text-sm text-gray-600">
                             {{ t('marketplace_show.inspections', { done: derived?.inspections_progress?.completed || 0, total: derived?.inspections_progress?.total || 0 }) }}
                         </p>
                     </div>
                 </div>
 
-                <!-- Photos (read-only gallery with lightbox) -->
-                <div v-if="car.photos?.length" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 transition-colors duration-300 dark:bg-asphalt-800 dark:ring-asphalt-700">
-                    <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-asphalt-700">
-                        <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ t('marketplace_show.section_photos') }}</h3>
-                        <div class="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-                            <span v-if="car.marketplace_views" class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-1 dark:bg-asphalt-700">
-                                <EyeIcon class="h-3 w-3" />
-                                {{ car.marketplace_views }} {{ t('marketplace_show.views_label', { default: 'visitas' }) }}
-                            </span>
-                            <ShareCar :car="car" :share-url="shareUrl" />
-                        </div>
+                <!-- Photos (read-only gallery) -->
+                <div v-if="car.photos?.length" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
+                    <div class="border-b border-gray-200 px-6 py-4">
+                        <h3 class="text-base font-semibold text-gray-900">{{ t('marketplace_show.section_photos') }}</h3>
                     </div>
                     <div class="grid grid-cols-2 gap-3 p-6 md:grid-cols-4">
-                        <button
-                            v-for="(photo, i) in car.photos"
-                            :key="photo.id"
-                            type="button"
-                            @click="openLightbox(i)"
-                            class="group relative overflow-hidden rounded-lg">
-                            <LazyImage
-                                :src="`/storage/${photo.url}`"
-                                :alt="photo.photo_type || ''"
-                                ratio="aspect-[4/3]"
-                                fit="object-cover transition group-hover:scale-105" />
+                        <a v-for="photo in car.photos" :key="photo.id" :href="`/storage/${photo.url}`" target="_blank" rel="noopener" class="group relative overflow-hidden rounded-lg">
+                            <img :src="`/storage/${photo.url}`" :alt="photo.photo_type" class="h-32 w-full object-cover transition group-hover:scale-105" loading="lazy" />
                             <span class="absolute bottom-2 left-2 rounded bg-black/70 px-2 py-0.5 text-xs text-white">{{ photo.photo_type }}</span>
-                            <span class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition group-hover:opacity-100">
-                                <span class="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-gray-900">{{ t('marketplace_show.zoom', { default: 'Ver grande' }) }}</span>
-                            </span>
-                        </button>
+                        </a>
                     </div>
                 </div>
 
-                <!-- Lightbox (Marketplace item 6) -->
-                <Teleport to="body">
-                    <div
-                        v-if="lightboxOpen"
-                        class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
-                        @click.self="closeLightbox">
-                        <button
-                            type="button"
-                            @click="closeLightbox"
-                            class="absolute right-4 top-4 rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
-                            :aria-label="t('marketplace_show.close_lightbox', { default: 'Cerrar' })">
-                            <XMarkIcon class="h-6 w-6" />
-                        </button>
-                        <button
-                            v-if="car.photos?.length > 1"
-                            type="button"
-                            @click="prevPhoto"
-                            class="absolute left-4 rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
-                            :aria-label="t('marketplace_show.prev', { default: 'Anterior' })">
-                            <ChevronLeftIcon class="h-6 w-6" />
-                        </button>
-                        <button
-                            v-if="car.photos?.length > 1"
-                            type="button"
-                            @click="nextPhoto"
-                            class="absolute right-4 rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
-                            :aria-label="t('marketplace_show.next', { default: 'Siguiente' })">
-                            <ChevronRightIcon class="h-6 w-6" />
-                        </button>
-                        <div class="relative max-h-full max-w-5xl">
-                            <LazyImage
-                                :src="`/storage/${car.photos[lightboxIndex]?.url}`"
-                                :alt="car.photos[lightboxIndex]?.photo_type || ''"
-                                ratio="aspect-auto"
-                                fit="max-h-[85vh] max-w-full rounded object-contain"
-                                :root-margin="'500px'" />
-                            <p class="mt-2 text-center text-sm text-white">{{ lightboxIndex + 1 }} / {{ car.photos.length }}</p>
-                        </div>
-                    </div>
-                </Teleport>
-
                 <!-- Notes (read-only) -->
-                <div v-if="car.notes" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 transition-colors duration-300 dark:bg-asphalt-800 dark:ring-asphalt-700">
-                    <div class="border-b border-gray-200 px-6 py-4 dark:border-asphalt-700">
-                        <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ t('marketplace_show.section_notes') }}</h3>
+                <div v-if="car.notes" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
+                    <div class="border-b border-gray-200 px-6 py-4">
+                        <h3 class="text-base font-semibold text-gray-900">{{ t('marketplace_show.section_notes') }}</h3>
                     </div>
                     <div class="p-6">
-                        <pre class="whitespace-pre-wrap font-sans text-sm text-gray-700 dark:text-gray-300">{{ car.notes }}</pre>
+                        <pre class="whitespace-pre-wrap font-sans text-sm text-gray-700">{{ car.notes }}</pre>
                     </div>
                 </div>
             </div>
         </div>
-    </MarketplaceLayout>
+
+        <footer class="mt-12 border-t border-gray-200 bg-white py-6">
+            <div class="mx-auto max-w-7xl px-4 text-center text-sm text-gray-500 sm:px-6 lg:px-8">
+                &copy; {{ new Date().getFullYear() }} Importnex. {{ t('marketplace_show.footer_rights') }}
+            </div>
+        </footer>
+    </div>
 </template>

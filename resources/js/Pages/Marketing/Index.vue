@@ -58,7 +58,7 @@ function getStatusBadge(content) {
                     <template #actions>
                         <Link :href="route('dashboard')" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             <ArrowLeftIcon class="h-4 w-4" />
-                            {{ t('nav.dashboard') }}
+                            Dashboard
                         </Link>
                     </template>
                 </PageHeader>
@@ -67,15 +67,15 @@ function getStatusBadge(content) {
                 <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
                     <div class="rounded-xl bg-white p-4 ring-1 ring-gray-200">
                         <div class="text-2xl font-bold text-estoril-600">{{ stats.total_cars }}</div>
-                        <div class="text-xs text-gray-500">{{ t('marketing.registered_vehicles') }}</div>
+                        <div class="text-xs text-gray-500">Coches registrados</div>
                     </div>
                     <div class="rounded-xl bg-white p-4 ring-1 ring-gray-200">
                         <div class="text-2xl font-bold text-emerald-600">{{ stats.with_content }}</div>
-                        <div class="text-xs text-gray-500">{{ t('marketing.with_ads') }}</div>
+                        <div class="text-xs text-gray-500">Con anuncios</div>
                     </div>
                     <div class="rounded-xl bg-white p-4 ring-1 ring-gray-200">
                         <div class="text-2xl font-bold text-blue-600">{{ stats.published }}</div>
-                        <div class="text-xs text-gray-500">{{ t('marketing.published') }}</div>
+                        <div class="text-xs text-gray-500">Publicados</div>
                     </div>
                     <div class="rounded-xl bg-white p-4 ring-1 ring-gray-200">
                         <div class="text-2xl font-bold text-amber-600">{{ stats.drafts }}</div>
@@ -88,11 +88,11 @@ function getStatusBadge(content) {
                     <table class="w-full text-sm">
                         <thead>
                             <tr class="border-b border-gray-200 bg-gray-50 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                <th class="px-4 py-3">{{ t('cars.col_car') }}</th>
-                                <th class="px-4 py-3">{{ t('cars.price') }}</th>
-                                <th class="px-4 py-3">{{ t('cars.col_channels') }}</th>
-                                <th class="px-4 py-3">{{ t('cars.col_status') }}</th>
-                                <th class="px-4 py-3 text-right">{{ t('cars.col_actions') }}</th>
+                                <th class="px-4 py-3">Coche</th>
+                                <th class="px-4 py-3">Precio</th>
+                                <th class="px-4 py-3">Canales</th>
+                                <th class="px-4 py-3">Estado</th>
+                                <th class="px-4 py-3 text-right">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>

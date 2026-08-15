@@ -117,6 +117,37 @@ Encontrar un coche bueno en Alemania → ofertarlo (redes, portales) o a un clie
 **mobile.de** (`Sehr guter Preis` / `Guter Preis` / `Fairer Preis`) mide el **mercado alemán** — sirve para negociar allí.
 **Coches.net** (`Super precio` / `Buen precio` / `Precio justo` / `Precio alto`) mide el **español** — **este es el dato bueno**.
 
+## COBERTURA OBLIGATORIA — LAS 7 FUENTES, SIEMPRE
+
+> **No se da por terminada una búsqueda con fuentes sin peinar.**
+> Verificado el 15-ago-2026 (Tiguan cliente): se dejaron Wallapop, Milanuncios y AutoUncle
+> como «parciales porque son webs 100 % JS» sin navegarlas. Eso **no es válido**:
+> si la fuente es 100 % JS, se navega con el navegador. No es excusa para saltarla.
+
+**La búsqueda SOLO está completa cuando las 7 fuentes están peinadas.** Si una no se pudo
+cubrir, **no se entrega el resultado como definitivo**: se marca la fuente como pendiente y
+se dice EXPLÍCITAMENTE en el informe de búsqueda qué falta y por qué, antes de presentar
+candidatos.
+
+| Bloque | Fuentes (peinar TODAS) | Obligatorio en |
+|---|---|---|
+| **España** | Wallapop · Milanuncios · Coches.net · AutoScout24.es | Todo cliente concreto en España |
+| **Alemania** | mobile.de · kleinanzeigen.de · autouncle.de | Toda importación |
+
+**Reglas:**
+
+1. **Ninguna fuente se salta por ser «difícil».** Wallapop y Milanuncios son 100 % JS →
+   navegador. AutoUncle entra por `h2`/`h3`, nunca por `body.textContent`. kleinanzeigen.de
+   hoy llega vía AutoUncle. Todas son peinables.
+2. **Si el presupuesto de peticiones no da para todo**, se prioriza por peso de la tabla
+   (Wallapop/Milanuncios/Coches.net en ES; mobile.de/autouncle.de en DE) **y se declara
+   la cobertura real** en el informe. Nunca silenciar una fuente sin peinar.
+3. **Contraste cruzado obligatorio**: mismo candidato en 2+ fuentes se deduce por
+   `(año, km ±2 %, CV, precio ±3 %)` y se queda el precio más bajo anotando «también en X».
+4. **El informe de búsqueda lista UNA fila por fuente** (URL, filtros, nº resultados, uso)
+   — ver «Qué lleva un informe de valoración». Si una fuente no sirvió, se lista igualmente
+   con el porqué.
+
 ---
 
 # QUÉ SCRAPER ALIMENTA CADA FACTOR
@@ -401,9 +432,22 @@ slug (minusculas, sin tildes, guiones) y tienes la URL. Validado con los casos d
 > **Coches.net no filtra por potencia ni version por URL.** `pw`, `pwt`, `hpf`, `pot`,
 > `?text=` y los slugs de version se ignoran. Se aisla filtrando `items[].hp` en local.
 
+> **COCHES.NET ORDENA POR «RELEVANCIA», NO POR PRECIO — y hay que paginar TODO.**
+> Verificado el 15-ago-2026 (Tiguan): 434 unidades gasolina; se revisaron 6 páginas
+> (54 fichas) y se colaron candidatos buenos en páginas no miradas. Para cliente
+> concreto: filtrar por precio ≤ tope con `pf=` y **recorrer TODAS las páginas con `pg=`
+> hasta agotar resultados**. Si no se puede paginar todo, **DECIRLO** y marcar cobertura
+> parcial en el informe de búsqueda.
+
 > **MILANUNCIOS: dos precios por anuncio.** `price.cashPrice.value` es el contado,
 > `price.financedPrice.value` el financiado. **El contado es el MAYOR.** En el DOM se
 > confunden; en el JSON no.
+
+> **PRECIO FINANCIADO COMO GANCHO — en TODOS los portales.** MUY CAR y Flexicar muestran
+> como precio grande el **financiado**, no el contado (verificado 15-ago-2026, Tiguan).
+> Antes de dar un precio, confirma que es el **contado**: en Milanuncios usa
+> `price.cashPrice.value`; en Coches.net/Wallapop abre la ficha y busca «contado». Un
+> precio financiado metido en la tabla infla el ahorro y falsifica el ranking.
 
 > **WALLAPOP: sube por el DOM solo hasta el nodo con UN enlace `/item/`.** Mas arriba
 > esta el contenedor de resultados y las 50 tarjetas devuelven el mismo texto. Descarta
@@ -727,12 +771,42 @@ Caché primero. Caducidades: recalls 6 meses · seguro y piezas 12 · averías 1
 
 ---
 
+# ENTREGABLES OBLIGATORIOS POR FASE
+
+> **Cada fase produce SU entregable, en orden, y NO se mezclan en un mismo archivo.**
+> Verificado el 15-ago-2026 (Tiguan cliente): se creó un único `informe_tiguan_cliente.md`
+> que mezclaba búsqueda y valoración, y el informe de unidad solo apareció al pedirlo.
+> Eso es un fallo de la skill: la fase 1 es CANDIDATOS + INFORME DE BÚSQUEDA, y la
+> valoración de una unidad solo llega cuando el usuario avanza con ella.
+
+| Fase | Entregable | Qué es | Cuándo se genera |
+|---|---|---|---|
+| **1 · Búsqueda** | **Informe de búsqueda** + candidatos | Cobertura por fuente (URL, filtros, nº resultados), tabla de candidatos con precio/año/km/enlace, qué se excluyó y por qué | Al terminar el barrido de TODAS las fuentes. Es la conclusión de la fase 1 |
+| **2 · Avance con un candidato** | **Informe de la unidad / valoración** | Las 11 secciones no negociables, SOLO del/los candidato(s) que el usuario elige | Cuando el usuario avanza con un candidato concreto. NO antes |
+| **3 · Cierre** | **ZIP empaquetado** | `empaquetar.py` → `paquetes/` con informe.json, manifest.json y contenido/ | Al confirmar el coche |
+
+**Reglas:**
+
+1. **La fase 1 acaba con el informe de búsqueda y la lista de candidatos.** No se escribe
+   informe de valoración en la fase 1: solo cobertura + candidatos.
+2. **No se mezclan búsqueda y valoración en el mismo archivo.** El informe de búsqueda es
+   `informe_busqueda_<modelo>.md`; el de unidad es `informe_unidad_<modelo>_<unidad>.md`.
+3. **El informe de la unidad NO se genera en la fase 1 ni para todos los finalistas.**
+   Se genera cuando el usuario avanza con un candidato concreto, y solo para ese/os.
+4. **El ZIP se genera al cerrar coche**, no cuando el usuario lo recuerda.
+5. **Todo informe se guarda en la carpeta de trabajo del usuario.**
+
+---
+
 # EL PAQUETE .zip
 
 ```bash
 python3 empaquetar.py informes/<coche_id>.json --salida paquetes
 python3 cache_investigacion.py guardar informes/<coche_id>.json
 ```
+
+> **El ZIP es entregable obligatorio de la fase de cierre.** Si no se generó, la fase no
+> está terminada. No se da por cerrado un coche sin su paquete.
 
 **Campos que rompen el cálculo:** `costes.pvp_nuevo`, `costes.otros` (~114 €), `costes.honorarios`, `veredicto.precio_objetivo`, `mercado.*` cuadrando con `comparables`.
 
@@ -802,6 +876,25 @@ del texto corrido, no solo los de las tablas.
 **E.** 3-5 finalistas: `python3 comparativa_cliente.py`.
 **F.** Si importar no compensa, **dilo**.
 
+> **LA TARIFA DEPENDE DE DÓNDE ESTÁ LA UNIDAD — se decide ANTES de desglosar.**
+> Verificado el 15-ago-2026 (Tiguan cliente): el cliente pedía «todo incluido» y el flujo
+> asumió los 1.500 € de importación sin comprobar si el coche estaba ya en España.
+
+| Ubicación de la unidad | Qué se cobra | Qué se descuenta del desglose |
+|---|---|---|
+| **En España** (concesionario/particular ES) | **Tarifa de gestión reducida** (~500 €, validar con el usuario) | NO transporte · NO *Ausfuhrkennzeichen* · NO IEDMT · NO ITV de importación |
+| **En Alemania / UE** | Honorarios de importación (1.500-2.250 €) + coste fijo completo (transporte, Ausfuhr, IEDMT, ITV) | Nada: aplica el desglose completo |
+| **Canarias / Baleares** | Ojo: IGIC, no IVA. El traslado peninsular extra NO compite en igualdad | Restar o descartar si no encaja en presupuesto |
+
+**En el desglose de un coche en España** se muestra precio + tarifa de gestión, y la línea
+«ahorro frente a importar» como argumento comercial. **En un coche en Alemania**, el desglose
+completo de la sección «DESGLOSE Y VEREDICTO».
+
+**Entregables del flujo (obligatorios, en orden):**
+1. Fase 1 → informe de búsqueda + candidatos (al terminar el barrido).
+2. Fase 2 → informe de la unidad SOLO del candidato en el que avance.
+3. Fase 3 → ZIP al cerrar coche. — Ver «ENTREGABLES OBLIGATORIOS POR FASE».
+
 ---
 
 # CHECKLIST
@@ -840,10 +933,22 @@ del texto corrido, no solo los de las tablas.
 - [ ] Cada fuente aparece con su URL, sus filtros y su recuento
 - [ ] Hay un apartado explícito de **«lo que es estimación»**
 
+**Cobertura y entregables (obligatorio, añadido 15-ago-2026)**
+- [ ] Peiné **TODAS las 7 fuentes**: ES (Wallapop, Milanuncios, Coches.net, AutoScout24.es) y DE (mobile.de, kleinanzeigen.de, autouncle.de). Ninguna se salta por ser «100 % JS» — se navega con el navegador
+- [ ] Si una fuente quedó sin peinar, **lo dije explícitamente** en el informe de búsqueda, con el motivo, ANTES de presentar candidatos
+- [ ] Deduplicé entre fuentes por `(año, km ±2 %, CV, precio ±3 %)`
+- [ ] Generé el **informe de búsqueda** al terminar el barrido — es el entregable de la fase 1, con cobertura por fuente y tabla de candidatos
+- [ ] NO generé informe de valoración en la fase 1: búsqueda y valoración van en archivos separados
+- [ ] Generé el **informe de la unidad** SOLO del candidato en el que avanzó el usuario, no de todos los finalistas
+- [ ] Generé el **ZIP** al cerrar coche (`empaquetar.py`) — la fase no está terminada sin él
+- [ ] Confirmé **contado vs financiado** en cada precio (MUY CAR/Flexicar muestran el financiado como grande)
+- [ ] Apliqué la **tarifa según ubicación**: unidad en España → tarifa de gestión reducida (~500 €); en Alemania/UE → honorarios completos + coste fijo; Canarias/Baleares → IGIC y traslado extra
+
 **Siempre**
 - [ ] Todo candidato lleva su enlace
 - [ ] Dije qué parte es estimación
 - [ ] Un falso positivo es mucho peor que un falso negativo
+- [ ] No afirmé haber visto/medido algo sin comprobarlo — si no está en los datos, digo que no está
 - [ ] No hay margen, hay honorarios
 - [ ] Nada de asesoramiento fiscal ni legal
 

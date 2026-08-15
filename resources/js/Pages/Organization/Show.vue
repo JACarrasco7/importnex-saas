@@ -35,14 +35,14 @@ const { date } = useFormat();
                     </template>
                 </PageHeader>
 
-                <FormSection :title="t('organization.details')">
+                <FormSection title="Details">
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
                         <div class="flex items-center gap-3">
                             <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-estoril-50">
                                 <BuildingOfficeIcon class="h-5 w-5 text-estoril-600" />
                             </div>
                             <div>
-                                <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('organization.field_name') }}</dt>
+                                <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Name</dt>
                                 <dd class="font-medium text-gray-900">{{ organization.name }}</dd>
                             </div>
                         </div>
@@ -51,8 +51,8 @@ const { date } = useFormat();
                                 <CreditCardIcon class="h-5 w-5 text-estoril-600" />
                             </div>
                             <div>
-                                <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('organization.field_plan') }}</dt>
-                                <dd class="font-medium text-gray-900">{{ organization.plan || t('organization.default_plan') }}</dd>
+                                <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Plan</dt>
+                                <dd class="font-medium text-gray-900">{{ organization.plan || 'starter' }}</dd>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
@@ -60,8 +60,8 @@ const { date } = useFormat();
                                 <CalendarIcon class="h-5 w-5 text-amber-600" />
                             </div>
                             <div>
-                                <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('organization.field_trial_ends') }}</dt>
-                                <dd class="font-medium text-gray-900">{{ organization.trial_ends_at ? date(organization.trial_ends_at) : t('organization.no_trial') }}</dd>
+                                <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Trial ends</dt>
+                                <dd class="font-medium text-gray-900">{{ organization.trial_ends_at ? date(organization.trial_ends_at) : 'No trial' }}</dd>
                             </div>
                         </div>
                     </div>

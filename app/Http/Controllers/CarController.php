@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreCarRequest;
 use App\Http\Requests\UpdateCarRequest;
-use App\Imports\CarsImport;
 use App\Models\Car;
 use App\Models\Client;
 use App\Services\Scraping\CarScrapingService;
@@ -13,7 +12,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
-use Maatwebsite\Excel\Facades\Excel;
 
 class CarController extends Controller
 {
@@ -42,18 +40,6 @@ class CarController extends Controller
             'lights' => $lights,
             'filters' => $request->only(['status', 'traffic_light', 'search']),
         ]);
-    }
-
-    public function import(Request $request): RedirectResponse
-    {
-        $request->validate([
-            'file' => 'required|mimes:csv,xlsx,xls|max:2048',
-        ]);
-
-        Excel::import(new CarsImport, $request->file('file'));
-
-        return redirect()->route('cars.index')
-            ->with('success', 'Cars imported successfully.');
     }
 
     /**

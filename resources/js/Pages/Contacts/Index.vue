@@ -79,14 +79,14 @@ const confirmDelete = () => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight dark:text-white">{{ t('contacts.title') }}</h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ t('contacts.title') }}</h2>
         </template>
 
         <div class="py-8">
             <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <PageHeader :title="t('contacts.network_title')" :subtitle="t('contacts.subtitle', { count: props.contacts?.total || 0 })">
+                <PageHeader :title="t('contacts.network_title')" :subtitle="t('contacts.subtitle', { count: contacts.total || 0 })">
                     <template #actions>
-                        <Link :href="route('contacts.create')" prefetch="hover" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
+                        <Link :href="route('contacts.create')" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
                             <PlusIcon class="h-4 w-4" />
                             {{ t('contacts.add') }}
                         </Link>
@@ -94,20 +94,20 @@ const confirmDelete = () => {
                 </PageHeader>
 
                 <!-- Filters -->
-                <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700">
+                <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2">
                         <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">{{ t('app.search') }}</label>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">{{ t('app.search') }}</label>
                             <div class="relative">
                                 <MagnifyingGlassIcon class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                                <input v-model="search" type="text" placeholder="Nombre, email, ciudad..." class="block w-full rounded-lg border-gray-300 pl-9 text-sm focus:border-estoril-500 focus:ring-estoril-500 dark:border-asphalt-600 dark:bg-asphalt-700 dark:text-white dark:placeholder-gray-500" />
+                                <input v-model="search" type="text" placeholder="Name, email, city..." class="block w-full rounded-lg border-gray-300 pl-9 text-sm focus:border-estoril-500 focus:ring-estoril-500" />
                             </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">Etiqueta</label>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Tag</label>
                             <div class="relative">
                                 <TagIcon class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                                <input v-model="tagFilter" type="text" placeholder="p. ej. concesionario, transporte..." class="block w-full rounded-lg border-gray-300 pl-9 text-sm focus:border-estoril-500 focus:ring-estoril-500 dark:border-asphalt-600 dark:bg-asphalt-700 dark:text-white dark:placeholder-gray-500" />
+                                <input v-model="tagFilter" type="text" placeholder="e.g. dealer, transport..." class="block w-full rounded-lg border-gray-300 pl-9 text-sm focus:border-estoril-500 focus:ring-estoril-500" />
                             </div>
                         </div>
                     </div>
@@ -115,17 +115,17 @@ const confirmDelete = () => {
 
                 <!-- Quick Stats -->
                 <div class="grid grid-cols-3 gap-4 sm:grid-cols-3">
-                    <div class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ t('cars.total_label') }}</div>
-                        <div class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">{{ stats.total }}</div>
+                    <div class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200">
+                        <div class="text-xs font-semibold uppercase tracking-wider text-gray-500">Total</div>
+                        <div class="mt-1 text-2xl font-bold text-gray-900">{{ stats.total }}</div>
                     </div>
-                    <div class="rounded-xl bg-estoril-50 p-4 shadow-sm ring-1 ring-estoril-200 dark:bg-estoril-900/20 dark:ring-estoril-800">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-estoril-700 dark:text-estoril-400">{{ t('cars.dealers') }}</div>
-                        <div class="mt-1 text-2xl font-bold text-estoril-600 dark:text-estoril-400">{{ stats.dealers }}</div>
+                    <div class="rounded-xl bg-estoril-50 p-4 shadow-sm ring-1 ring-estoril-200">
+                        <div class="text-xs font-semibold uppercase tracking-wider text-estoril-700">Dealers</div>
+                        <div class="mt-1 text-2xl font-bold text-estoril-600">{{ stats.dealers }}</div>
                     </div>
-                    <div class="rounded-xl bg-emerald-50 p-4 shadow-sm ring-1 ring-emerald-200 dark:bg-emerald-900/20 dark:ring-emerald-800">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">{{ t('contacts.transport') }}</div>
-                        <div class="mt-1 text-2xl font-bold text-emerald-600 dark:text-emerald-400">{{ stats.transport }}</div>
+                    <div class="rounded-xl bg-emerald-50 p-4 shadow-sm ring-1 ring-emerald-200">
+                        <div class="text-xs font-semibold uppercase tracking-wider text-emerald-700">Transport</div>
+                        <div class="mt-1 text-2xl font-bold text-emerald-600">{{ stats.transport }}</div>
                     </div>
                 </div>
 
@@ -134,7 +134,7 @@ const confirmDelete = () => {
                     <div
                         v-for="contact in filteredContacts"
                         :key="contact.id"
-                        class="group relative overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-200 transition-all hover:shadow-md hover:ring-gray-300 dark:bg-asphalt-800 dark:ring-asphalt-700 dark:hover:ring-asphalt-600"
+                        class="group relative overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-200 transition-all hover:shadow-md hover:ring-gray-300"
                     >
                         <div class="p-5">
                             <Link :href="route('contacts.show', contact.id)" class="block">
@@ -169,13 +169,13 @@ const confirmDelete = () => {
                         <div class="flex border-t border-gray-100 bg-gray-50 px-5 py-3">
                             <div class="flex-1" />
                             <div class="flex items-center gap-1">
-                                <Link :href="route('contacts.show', contact.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-estoril-50 hover:text-estoril-600" :title="t('common.view')">
+                                <Link :href="route('contacts.show', contact.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-estoril-50 hover:text-estoril-600" title="View">
                                     <EyeIcon class="h-4 w-4" />
                                 </Link>
-                                <Link :href="route('contacts.edit', contact.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600" :title="t('common.edit')">
+                                <Link :href="route('contacts.edit', contact.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600" title="Edit">
                                     <PencilIcon class="h-4 w-4" />
                                 </Link>
-                                <button type="button" @click="askDelete(contact)" class="rounded-md p-1.5 text-gray-400 hover:bg-rose-50 hover:text-rose-600" :title="t('common.delete')">
+                                <button type="button" @click="askDelete(contact)" class="rounded-md p-1.5 text-gray-400 hover:bg-rose-50 hover:text-rose-600" title="Delete">
                                     <TrashIcon class="h-4 w-4" />
                                 </button>
                             </div>
@@ -183,21 +183,14 @@ const confirmDelete = () => {
                     </div>
                 </div>
 
-                <EmptyState
-                    v-else
-                    icon="📇"
-                    :title="t('cars.no_contacts_found')"
-                    :description="t('cars.no_contacts_found_desc')"
-                    :primary-action="{ text: t('cars.add_first_contact'), route: route('contacts.create') }"
-                    :secondary-action="{ text: t('cars.view_marketplace', 'Ver Marketplace'), route: route('marketplace.index') }"
-                />
+                <EmptyState v-else icon="📇" title="No contacts found" description="Try adjusting your filters or add your first contact to your network." action-text="Add your first contact" :action-route="route('contacts.create')" />
             </div>
         </div>
 
         <ConfirmDialog
             :show="showDelete"
-            :title="t('contacts.delete_contact')"
-            :message="t('contacts.delete_contact_message', { name: contactToDelete?.name })"
+            title="Delete contact"
+            :message="`Are you sure you want to delete ${contactToDelete?.name}? This action cannot be undone.`"
             confirm-text="Delete"
             variant="danger"
             @close="showDelete = false"

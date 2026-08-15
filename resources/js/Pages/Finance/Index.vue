@@ -17,7 +17,7 @@ const props = defineProps({
 });
 
 const { t } = useTranslations();
-const { currency, statusLabel } = useFormat();
+const { currency } = useFormat();
 
 const maxMonthlyTotal = computed(() => Math.max(1, ...(props.monthly?.map((m) => Number(m.total)) || [0])));
 
@@ -42,10 +42,10 @@ const costCategories = computed(() => [
 
                 <!-- KPIs -->
                 <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                    <StatCard :label="t('finance.grand_total')" :value="currency(kpis.grandTotal)" :hint="t('finance.all_costs_across_fleet')" :icon="BanknotesIcon" color="indigo" />
-                    <StatCard :label="t('finance.purchase_investment')" :value="currency(kpis.totalInvestment)" :hint="t('finance.vehicle_acquisition')" :icon="CurrencyEuroIcon" color="blue" />
-                    <StatCard :label="t('finance.cars_in_pipeline')" :value="kpis.carsCount" :hint="t('finance.currently_active')" :icon="TruckIcon" color="purple" />
-                    <StatCard :label="t('finance.avg_purchase')" :value="currency(kpis.averagePurchase)" :hint="t('finance.per_car')" :icon="ChartBarIcon" color="emerald" />
+                    <StatCard label="Grand total" :value="currency(kpis.grandTotal)" hint="All costs across fleet" :icon="BanknotesIcon" color="indigo" />
+                    <StatCard label="Purchase investment" :value="currency(kpis.totalInvestment)" hint="Vehicle acquisition" :icon="CurrencyEuroIcon" color="blue" />
+                    <StatCard label="Cars in pipeline" :value="kpis.carsCount" hint="Currently active" :icon="TruckIcon" color="purple" />
+                    <StatCard label="Avg purchase" :value="currency(kpis.averagePurchase)" hint="Per car" :icon="ChartBarIcon" color="emerald" />
                 </div>
 
                 <!-- Cost breakdown -->
@@ -65,11 +65,11 @@ const costCategories = computed(() => [
                 <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4 flex items-center gap-2">
                         <ScaleIcon class="h-5 w-5 text-gray-400" />
-                        <h3 class="text-base font-semibold text-gray-900">{{ t('finance.estimated_vs_actual') }}</h3>
+                        <h3 class="text-base font-semibold text-gray-900">Estimated vs Actual</h3>
                     </div>
                     <div class="grid grid-cols-1 gap-6 p-6 md:grid-cols-2">
                         <div>
-                            <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('finance.estimated') }}</h4>
+                            <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Estimated</h4>
                             <table class="min-w-full text-sm">
                                 <tbody class="divide-y divide-gray-200">
                                     <tr v-for="expense in estimatedExpenses" :key="expense.concept">
@@ -80,7 +80,7 @@ const costCategories = computed(() => [
                             </table>
                         </div>
                         <div>
-                            <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('finance.actual') }}</h4>
+                            <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">Actual</h4>
                             <table class="min-w-full text-sm">
                                 <tbody class="divide-y divide-gray-200">
                                     <tr v-for="expense in actualExpenses" :key="expense.concept">
@@ -96,20 +96,20 @@ const costCategories = computed(() => [
                 <!-- By status -->
                 <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4">
-                        <h3 class="text-base font-semibold text-gray-900">{{ t('finance.by_status') }}</h3>
+                        <h3 class="text-base font-semibold text-gray-900">By status</h3>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.status') }}</th>
-                                    <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.title') }}</th>
-                                    <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.total_investment') }}</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Status</th>
+                                    <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Cars</th>
+                                    <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Total investment</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200">
                                 <tr v-for="(data, status) in byStatus" :key="status" class="hover:bg-gray-50">
-                                        <td class="px-6 py-3 text-sm text-gray-900">{{ statusLabel(t, status) }}</td>
+                                    <td class="px-6 py-3 text-sm text-gray-900">{{ status }}</td>
                                     <td class="px-6 py-3 text-right text-sm text-gray-700">{{ data.count }}</td>
                                     <td class="px-6 py-3 text-right text-sm font-semibold text-gray-900">{{ currency(data.total) }}</td>
                                 </tr>
@@ -121,16 +121,16 @@ const costCategories = computed(() => [
                 <!-- Monthly chart -->
                 <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4">
-                        <h3 class="text-base font-semibold text-gray-900">{{ t('cars.last_6_months') }}</h3>
+                        <h3 class="text-base font-semibold text-gray-900">Last 6 months</h3>
                     </div>
-                    <div v-if="monthly.length === 0" class="p-6 text-center text-sm text-gray-500">{{ t('cars.no_data_yet') }}</div>
+                    <div v-if="monthly.length === 0" class="p-6 text-center text-sm text-gray-500">No data yet.</div>
                     <div v-else class="space-y-3 p-6">
                         <div v-for="entry in monthly" :key="entry.month" class="flex items-center gap-3">
                             <div class="w-20 text-sm font-medium text-gray-700">{{ entry.month }}</div>
                             <div class="relative flex-1 h-9 overflow-hidden rounded-lg bg-gray-100">
-                                <div class="absolute inset-y-0 left-0 bg-linear-to-r from-estoril-600 to-estoril-800 transition-all" :style="{ width: ((Number(entry.total) / maxMonthlyTotal) * 100) + '%' }"></div>
+                                <div class="absolute inset-y-0 left-0 bg-gradient-to-r from-estoril-600 to-estoril-800 transition-all" :style="{ width: ((Number(entry.total) / maxMonthlyTotal) * 100) + '%' }"></div>
                                 <div class="absolute inset-0 flex items-center justify-between px-3 text-xs font-medium text-gray-700">
-                                    <span>{{ t('finance.n_cars', { count: entry.count }) }}</span>
+                                    <span>{{ entry.count }} cars</span>
                                     <span class="font-semibold text-gray-900">{{ currency(entry.total) }}</span>
                                 </div>
                             </div>
