@@ -218,7 +218,6 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::post('/cars/{car}/marketing/generate', [CarMarketingController::class, 'generate'])->name('cars.marketing.generate');
     Route::post('/cars/{car}/marketing/save', [CarMarketingController::class, 'save'])->name('cars.marketing.save');
     Route::post('/cars/{car}/marketing/publish', [CarMarketingController::class, 'publish'])->name('cars.marketing.publish');
-    Route::get('/cars/{car}/marketing/briefing', [CarMarketingController::class, 'briefing'])->name('cars.marketing.briefing');
 
     // Paquete de valoración (esqueletos .txt → PDF con Blade + Browsershot)
     // Ficha del cliente: cuelga del expediente (autenticado).

@@ -27,11 +27,6 @@ Route::middleware('import-token')->group(function () {
     Route::get('/investigation-cache', [ImportValuationApiController::class, 'getInvestigationCache'])
         ->middleware('throttle:api-read');
 
-    // Adjunta un PDF-briefing generado por el chat al expediente de un coche ya
-    // existente. Mismo token, subida de archivo en vez de JSON.
-    Route::post('/cars/{car}/briefing-pdf', [ImportValuationApiController::class, 'attachBriefing'])
-        ->middleware('throttle:api-write');
-
     // §3.5 — Registro de cierres (tracking de KPIs de negocio).
     // POST para crear/actualizar, GET para listar + estadísticas.
     Route::post('/cierres', [ImportValuationApiController::class, 'storeCierre'])

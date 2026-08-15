@@ -85,6 +85,13 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 ### 🧪 Tests
 - +8 tests nuevos (validaciones, mapeos, IEDMT, idempotencia cierre). Área importación/cierres/KPIs: 85 passed.
 
+## [2.9.8] - 2026-08-15 — Briefing PDF eliminado del ecosistema
+
+### 🗑️ Eliminación (decisión del usuario)
+- **Laravel:** eliminadas la vista `jj-import/briefing.blade.php`, las rutas `/cars/{car}/marketing/briefing` y `/api/cars/{car}/briefing-pdf`, los métodos `CarMarketingController::briefing()` y `ImportValuationApiController::attachBriefing()`, la entrada 'briefing' del listado de PDFs (`CarController::laravelPdfs`) y `briefing_pdf` (`CarDocumentDefinitions`). Borrado `BriefingPdfApiTest`.
+- **Nota:** el status de cliente 'Briefing' (pipeline de ventas) NO se toca — es un estado del cliente, no un informe. `briefing_encargo.md` (cuestionario previo) se mantiene — NO es el PDF briefing.
+- **Resultado: 7 PDFs** — 3 Claude (búsqueda global, modelo, unidad) + 4 Laravel (dossier, ficha-coche, informe-interno, folleto).
+
 ## [2.9.7] - 2026-08-15 — Plantilla de PDF rediseñada (nivel premium)
 
 ### 🎨 `plantilla_pdf_marca.html` v2

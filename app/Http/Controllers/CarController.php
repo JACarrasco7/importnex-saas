@@ -151,7 +151,7 @@ class CarController extends Controller
     /**
      * PDFs que genera LARAVEL (Blade + Browsershot) a partir de los esqueletos
      * .txt del ZIP. Se listan en la pestaña Documentos para diferenciarlos de
-     * los PDFs que genera Claude (informe de búsqueda/unidad, briefing).
+     * los PDFs que genera Claude (informe de búsqueda/unidad).
      *
      * @return array<int, array{key: string, label: string, route: string, available: bool}>
      */
@@ -180,12 +180,6 @@ class CarController extends Controller
                 'label' => 'Informe interno',
                 'route' => route('cars.informe-interno', $car->id),
                 'available' => $has('informe-interno.txt'),
-            ],
-            [
-                'key' => 'briefing',
-                'label' => 'Briefing PDF',
-                'route' => route('cars.marketing.briefing', $car->id),
-                'available' => true,
             ],
         ];
     }

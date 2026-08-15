@@ -39,10 +39,9 @@ class CarDocumentDefinitions
         ['key' => 'senal_recibo',        'name' => 'Recibo de señal',                               'group' => CarDocument::GROUP_SPAIN_PROCEDURES, 'doc_type' => 'invoice'],
         ['key' => 'seguro',              'name' => 'Seguro de transporte / importación',            'group' => CarDocument::GROUP_SPAIN_PROCEDURES, 'doc_type' => 'insurance'],
 
-        // ai_reports (3) — PDFs de investigación que genera CLAUDE en el Desktop
+        // ai_reports (2) — PDFs de investigación que genera CLAUDE en el Desktop
         ['key' => 'informe_busqueda',    'name' => 'Informe de búsqueda (Claude)',                  'group' => CarDocument::GROUP_AI_REPORTS, 'doc_type' => 'pdf'],
         ['key' => 'informe_unidad',      'name' => 'Informe de unidad (Claude)',                    'group' => CarDocument::GROUP_AI_REPORTS, 'doc_type' => 'pdf'],
-        ['key' => 'briefing_pdf',        'name' => 'Briefing / resumen cliente (Claude)',           'group' => CarDocument::GROUP_AI_REPORTS, 'doc_type' => 'pdf'],
     ];
 
     /**
