@@ -93,6 +93,13 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 - Corregido en: SKILL.md (outputs, entregables por fase, §Quién genera cada PDF), operaciones.md (división de trabajo), contrato.md (empaquetar.py), ROADMAP.md.
 - Origen del cambio: el usuario esperaba los PDFs de búsqueda/unidad al cerrar cada fase (caso Tiguan); la skill se lo prohibía y solo entregaba `.md`.
 
+## [2.9.3] - 2026-08-15 — Diseño de PDF unificado (plantilla de marca única)
+
+### 🎨 Plantilla única de marca (Claude ↔ Laravel idénticos)
+- Nueva `assets/plantilla_pdf_marca.html`: copia fiel del CSS de `ficha-coche.blade.php` (Inter, fondo #0f1d42, gradientes, grid, price-band naranja, CTA+QR). Claude la usa OBLIGATORIAMENTE para los PDFs de investigación → visualmente idénticos a los de Laravel.
+- Método en SKILL.md §Quién genera cada PDF: rellenar `{{marcadores}}` → HTML → Chrome headless → PDF.
+- Corregido en contrato.md: `dossier.blade.php` NO existe en Laravel. El documento del cliente real es `ficha-coche` (desde `ficha-publicitaria.txt`); `dossier-cliente.txt` es el esqueleto extendido que el ingestor guarda en `contenido/`.
+
 ## [2.8.0] - 2026-08-15 — Flujo D · DESCUBRIMIENTO (cliente sin modelo)
 
 ### 🔍 Nuevo flujo D con embudo de 3 pasos

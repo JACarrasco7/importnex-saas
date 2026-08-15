@@ -828,7 +828,7 @@ TRAS ELEGIR CANDIDATO (todo automático, sin preguntar)
 **⚠️ Quién genera cada PDF (15-ago-2026 · v2.9.2):**
 - **Claude SÍ genera los PDFs de INVESTIGACIÓN** (entregables de las fases, para el USUARIO):
   - `informe_busqueda_<modelo>.pdf` (fin de Fase 1 · Flujo B/C) y `informe_unidad_<unidad>.pdf` (Fase 2 · Flujo A).
-  - **Método:** renderizar el informe en HTML con la marca JJ Import Motors (colores de `marca.json`: #1A306D/#38393D/#BEC0C3) y convertirlo a PDF con Chrome headless (`chrome --headless --print-to-pdf=salida.pdf entrada.html`); si Chrome no está disponible, script Python con reportlab. Guardar en `informes\<marca>\<modelo>\`.
+  - **Método (obligatorio):** usar la plantilla única **`assets/plantilla_pdf_marca.html`** (copia fiel del diseño de las plantillas Blade de Laravel): rellenar los `{{marcadores}}` con los datos del informe, guardar como `.html` en `informes\<marca>\<modelo>\` y convertir a PDF con Chrome headless (`chrome --headless --print-to-pdf=salida.pdf entrada.html`); si Chrome no está disponible, script Python con reportlab manteniendo la identidad. Así los PDFs de Claude son **visualmente idénticos** a los de Laravel.
 - **Claude genera los esqueletos `.txt` [MARCADOR]** dentro del ZIP (para Laravel).
 - **Laravel SÍ genera los PDFs de MARKETING/VENTA** (Blade + Browsershot) desde los `.txt` del ZIP cuando el coche está en el sistema: `dossier`, `ficha-publicitaria`, `folleto`. Claude NO genera estos tres durante la investigación.
 

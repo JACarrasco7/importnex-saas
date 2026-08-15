@@ -495,9 +495,9 @@ Sirve para fijar el precio de salida en la ficha publicitaria.
 
 ## 📝 Formato esqueleto `.txt` — para plantillas Blade
 
-`empaquetar.py` ya NO genera PDFs (ni de marketing ni de investigación). Escribe archivos `.txt` con bloques `[MARCADOR]` que las plantillas Blade de Laravel (`jj-import/folleto.blade.php`, `jj-import/ficha-coche.blade.php`, `jj-import/informe-interno.blade.php`, `jj-import/dossier.blade.php`) convierten a PDF con Browsershot. Los PDFs de investigación (búsqueda/unidad) los genera Claude aparte (ver SKILL.md §Quién genera cada PDF) y se entregan al usuario; NO van dentro del ZIP.
+`empaquetar.py` ya NO genera PDFs (ni de marketing ni de investigación). Escribe archivos `.txt` con bloques `[MARCADOR]` que las plantillas Blade de Laravel (`jj-import/folleto.blade.php`, `jj-import/ficha-coche.blade.php`, `jj-import/informe-interno.blade.php`) convierten a PDF con Browsershot. El documento del cliente en Laravel es `ficha-coche` (desde `ficha-publicitaria.txt`); `dossier-cliente.txt` es el esqueleto extendido (15 secciones) que el ingestor guarda en `cars/{id}/contenido/`. Los PDFs de investigación (búsqueda/unidad) los genera Claude aparte (ver SKILL.md §Quién genera cada PDF) y se entregan al usuario; NO van dentro del ZIP.
 
-> **Dossier (PDF cliente)** lo genera `dossier.blade.php` (15 secciones). La ruta `POST /api/cars/{car}/briefing-pdf` existe y sube un PDF adjunto real (extensión `.pdf`, máx 10 MB) a `importnex/briefings/`.
+> **Documento del cliente en Laravel:** `ficha-coche.blade.php` (desde `ficha-publicitaria.txt`). El `dossier-cliente.txt` (15 secciones) es el esqueleto extendido que el ingestor guarda en `cars/{id}/contenido/`; sirve de base al dossier PDF que genera Claude (investigación) si aplica.
 
 ### Reglas del formato
 
