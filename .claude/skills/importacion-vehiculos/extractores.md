@@ -5,7 +5,7 @@
 > `Runtime.evaluate`, `web_fetch` ni `browser_batch`. Lo único que existe es:
 > **ver (screenshot), clicar, escribir, tecla, scroll, esperar, zoom**.
 > Todo dato que no aparezca en la captura NO se puede leer → método degradado.
-> Adaptado a los **3 flujos** (A/B/C) y al **sistema de fases** (1=sondeo, 2=profunda) del SKILL.md.
+> Adaptado a los **4 flujos** (A/B/C/D) y al **sistema de fases** (1=sondeo, 2=profunda) del SKILL.md.
 
 ---
 

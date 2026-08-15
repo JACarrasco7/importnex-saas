@@ -31,6 +31,34 @@ class ValuationImporterTest extends TestCase
         $importer->validate([]);
     }
 
+    public function test_requires_pvp_nuevo_for_flujo_a(): void
+    {
+        $importer = app(ValuationImporter::class);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('pvp_nuevo');
+
+        $importer->validate([
+            '_meta' => ['schema_version' => ValuationImporter::SUPPORTED_SCHEMA_VERSION, 'flujo' => 'A'],
+            'vehiculo' => ['marca' => 'Opel', 'modelo' => 'Astra'],
+            'costes' => ['precio_coche' => 20000],
+        ]);
+    }
+
+    public function test_requires_marca_y_modelo_when_vehiculo_present(): void
+    {
+        $importer = app(ValuationImporter::class);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('vehiculo.marca');
+
+        $importer->validate([
+            '_meta' => ['schema_version' => ValuationImporter::SUPPORTED_SCHEMA_VERSION, 'flujo' => 'A'],
+            'vehiculo' => ['anio' => 2016],
+            'costes' => ['pvp_nuevo' => 30000],
+        ]);
+    }
+
     public function test_resolves_existing_car_by_vin(): void
     {
         $org = Organization::factory()->create();
@@ -502,5 +530,109 @@ class ValuationImporterTest extends TestCase
         $car = $importer->apply($car, $payload);
 
         $this->assertNull($car->drivetrain);
+    }
+
+    /**
+     * §auditoría — anuncio.pais_origen se persiste
+     */
+    public function test_persists_pais_origen(): void
+    {
+        $org = Organization::factory()->create();
+        $importer = app(ValuationImporter::class);
+        $car = Car::factory()->make(['organization_id' => $org->id]);
+
+        $payload = [
+            '_meta' => ['schema_version' => ValuationImporter::SUPPORTED_SCHEMA_VERSION, 'flujo' => 'A'],
+            'vehiculo' => ['marca' => 'VW', 'modelo' => 'Golf', 'anio' => 2018, 'km' => 50000, 'combustible' => 'Gasolina', 'cambio' => 'Manual', 'potencia_cv' => 245, 'co2_gkm' => 165],
+            'anuncio' => ['url' => 'https://example.com/ad-de', 'pais_origen' => 'Alemania'],
+            'investigacion' => [],
+            'balance' => ['a_favor' => [], 'en_contra' => []],
+            'veredicto' => ['recomendacion' => 'Comprar', 'confianza' => 'media', 'razonamiento' => 'Test', 'precio_objetivo' => 26000, 'fecha' => '2026-08-12'],
+            'costes' => ['precio_coche' => 28000, 'pvp_nuevo' => 40000],
+            'mercado' => ['precio_medio' => 32000, 'comparables' => []],
+        ];
+
+        $car = $importer->apply($car, $payload);
+
+        $this->assertSame('Alemania', $car->pais_origen);
+    }
+
+    /**
+     * §auditoría — co2_confirmado se persiste como flag (false → estimado)
+     */
+    public function test_persists_co2_confirmado_flag(): void
+    {
+        $org = Organization::factory()->create();
+        $importer = app(ValuationImporter::class);
+        $car = Car::factory()->make(['organization_id' => $org->id]);
+
+        $payload = [
+            '_meta' => ['schema_version' => ValuationImporter::SUPPORTED_SCHEMA_VERSION, 'flujo' => 'A'],
+            'vehiculo' => ['marca' => 'VW', 'modelo' => 'Golf', 'anio' => 2018, 'km' => 50000, 'combustible' => 'Gasolina', 'cambio' => 'Manual', 'potencia_cv' => 245, 'co2_gkm' => 165, 'co2_confirmado' => false],
+            'anuncio' => ['url' => 'https://example.com/ad-co2'],
+            'investigacion' => [],
+            'balance' => ['a_favor' => [], 'en_contra' => []],
+            'veredicto' => ['recomendacion' => 'Comprar', 'confianza' => 'media', 'razonamiento' => 'Test', 'precio_objetivo' => 26000, 'fecha' => '2026-08-12'],
+            'costes' => ['precio_coche' => 28000, 'pvp_nuevo' => 40000],
+            'mercado' => ['precio_medio' => 32000, 'comparables' => []],
+        ];
+
+        $car = $importer->apply($car, $payload);
+
+        $this->assertFalse($car->co2_confirmado);
+        $this->assertStringContainsString('CO₂ no confirmado', $car->notes);
+    }
+
+    /**
+     * §auditoría — diferencia IEDMT Claude vs Laravel >10% genera aviso
+     */
+    public function test_iedmt_diff_over_10_percent_adds_aviso(): void
+    {
+        $org = Organization::factory()->create();
+        $importer = app(ValuationImporter::class);
+        $car = Car::factory()->make(['organization_id' => $org->id]);
+
+        // VW Golf 2018, CO₂ 165 g/km → 9.75%. PVP 40.000 €, antigüedad 8 años → 24%.
+        // Laravel calcula ≈ 40.000 × 0.24 × 0.0975 ≈ 936 €. Claude manda 400 € (diferencia >10%).
+        $payload = [
+            '_meta' => ['schema_version' => ValuationImporter::SUPPORTED_SCHEMA_VERSION, 'flujo' => 'A'],
+            'vehiculo' => ['marca' => 'VW', 'modelo' => 'Golf', 'anio' => 2018, 'km' => 50000, 'combustible' => 'Gasolina', 'cambio' => 'Manual', 'potencia_cv' => 245, 'co2_gkm' => 165],
+            'anuncio' => ['url' => 'https://example.com/ad-iedmt'],
+            'investigacion' => [],
+            'balance' => ['a_favor' => [], 'en_contra' => []],
+            'veredicto' => ['recomendacion' => 'Comprar', 'confianza' => 'media', 'razonamiento' => 'Test', 'precio_objetivo' => 26000, 'fecha' => '2026-08-12'],
+            'costes' => ['precio_coche' => 28000, 'pvp_nuevo' => 40000, 'iedmt_estimado' => 400],
+            'mercado' => ['precio_medio' => 32000, 'comparables' => []],
+        ];
+
+        $car = $importer->apply($car, $payload);
+
+        $this->assertStringContainsString('IEDMT: Claude estima', $car->notes);
+    }
+
+    /**
+     * §auditoría — IEDMT sin divergencia no genera aviso
+     */
+    public function test_iedmt_within_10_percent_no_aviso(): void
+    {
+        $org = Organization::factory()->create();
+        $importer = app(ValuationImporter::class);
+        $car = Car::factory()->make(['organization_id' => $org->id]);
+
+        // Mismo coche: Claude manda ≈ el mismo valor que Laravel (936 € → usar 950 €).
+        $payload = [
+            '_meta' => ['schema_version' => ValuationImporter::SUPPORTED_SCHEMA_VERSION, 'flujo' => 'A'],
+            'vehiculo' => ['marca' => 'VW', 'modelo' => 'Golf', 'anio' => 2018, 'km' => 50000, 'combustible' => 'Gasolina', 'cambio' => 'Manual', 'potencia_cv' => 245, 'co2_gkm' => 165],
+            'anuncio' => ['url' => 'https://example.com/ad-iedmt-ok'],
+            'investigacion' => [],
+            'balance' => ['a_favor' => [], 'en_contra' => []],
+            'veredicto' => ['recomendacion' => 'Comprar', 'confianza' => 'media', 'razonamiento' => 'Test', 'precio_objetivo' => 26000, 'fecha' => '2026-08-12'],
+            'costes' => ['precio_coche' => 28000, 'pvp_nuevo' => 40000, 'iedmt_estimado' => 950],
+            'mercado' => ['precio_medio' => 32000, 'comparables' => []],
+        ];
+
+        $car = $importer->apply($car, $payload);
+
+        $this->assertStringNotContainsString('IEDMT: Claude estima', $car->notes);
     }
 }

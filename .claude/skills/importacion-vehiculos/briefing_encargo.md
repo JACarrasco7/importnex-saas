@@ -13,10 +13,12 @@ Antes de abrir cualquier portal, confirmar con el usuario (si no vienen dados):
 
 | # | Parámetro | Ejemplo | ¿Crítico? |
 |---|---|---|---|
-| 1 | **Modelo + versión** | Opel Astra J OPC | ✅ SIEMPRE |
+| 1 | **Modelo + versión** | Opel Astra J OPC | ✅ SIEMPRE · **si NO hay modelo pero sí presupuesto+requisitos → FLUJO D** (sondeo de modelos), no se pregunta el modelo |
+
+**📓 Arranque de sesión (15-ago-2026):** crear el cuaderno `informes\_sesion\sesion_<fecha>_<encargo>.md` con los parámetros confirmados ANTES de la primera búsqueda. Toda corrección del usuario entra en el cuaderno y se aplica YA (ver SKILL.md §CUADERNO DE SESIÓN).
 | 2 | **Año mínimo (EZ)** | ≥2012 | ✅ SIEMPRE |
 | 3 | **Km máximo** | ≤130.000 | ✅ SIEMPRE |
-| 4 | **Presupuesto tope** | ≤15.000 € (o "sin límite") | ✅ SIEMPRE · 🎯 confirmar por encargo si incluye o no honorarios (no asumir) |
+| 4 | **Presupuesto tope** | ≤15.000 € (o "sin límite") | ✅ SIEMPRE · 🎯 confirmar **modalidad de honorarios M1/M2/M3** (ver abajo) — no asumir |
 | 5 | **Potencia (kW/CV)** | 280 CV / 206 kW | 🔶 Si tope de gama |
 | 6 | **Combustible** | Gasolina | 🔶 |
 | 7 | **Cambio** | Manual / DSG | 🔶 |
@@ -26,6 +28,19 @@ Antes de abrir cualquier portal, confirmar con el usuario (si no vienen dados):
 | 11 | **Plazo** | Flexibles / urgente | 🟡 Opcional |
 | 12 | **¿Ya viste algún candidato?** | URL del 8.999 € | 🟡 Evita rebuscar |
 | 13 | **Origen** | DE / ES / el mejor | 🔶 Si no dice → buscar ambos y comparar |
+
+### 💶 Modalidades de honorarios — preguntar SIEMPRE (15-ago-2026)
+
+> **3 fallos reales con lo mismo:** 12-ago (9.000 €, hubo que corregir el techo) · 15-ago Tiguan (tarifa reducida ES asumida mal) · 15-ago María ("quita el coste del servicio" leído como "descuenta" cuando era "no se cobra"). Ya NO se asume: se pregunta o se confirma la interpretación.
+
+| Modo | Qué significa | Techo de búsqueda |
+|---|---|---|
+| **M1 · Incluidos** | El presupuesto paga coche + logística + honorarios | presupuesto − costes − honorarios |
+| **M2 · Aparte** | Honorarios se cobran fuera del presupuesto | presupuesto − costes (SIN restar honorarios) |
+| **M3 · No se cobran** | Cliente especial / cortesía / familiar | presupuesto − costes (honorarios = 0 €) |
+
+**Regla de ambigüedad:** frases tipo "quita el coste del servicio", "todo incluido", "sin honorarios" se REFORMULAN en 1 línea antes de ejecutar:
+> "Entiendo: no se cobran honorarios a este cliente (M3) → techo completo 9.000 €. Correcto?"
 
 ---
 

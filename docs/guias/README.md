@@ -2,7 +2,7 @@
 
 > **Para:** Equipo de JJ Import Motors (Huelva)
 > **Qué es:** Uso diario del skill `importacion-vehiculos` (importar coches de Alemania sin stock, cobrando honorarios).
-> **Actualizado:** 2026-08-12 (skill v2.4.0)
+> **Actualizado:** 2026-08-15 (skill v2.9.0)
 
 ---
 
@@ -14,9 +14,10 @@
 | [02-flujo-a-unidad](02-flujo-a-unidad.md) | Evaluar un coche concreto (URL) | Al recibir una URL de un cliente |
 | [03-flujo-b-modelo](03-flujo-b-modelo.md) | Investigar un modelo (buscar oportunidades) | Antes de comprar un modelo |
 | [04-flujo-c-mercado](04-flujo-c-mercado.md) | Escanear el mercado (oportunidades) | Revisión periódica de mercado |
-| [05-informes](05-informes.md) | Leer informes de valoración + briefing PDF | Al entregar a cliente |
-| [06-cierre-venta](06-cierre-venta.md) | Registrar ventas y ver KPIs en `/kpis` | Cada venta / fin de mes |
-| [07-solucion-problemas](07-solucion-problemas.md) | FAQ y troubleshooting | Cuando algo falla |
+| [05-flujo-d-descubrimiento](05-flujo-d-descubrimiento.md) | Descubrir modelos/motorizaciones que encajan | No tienes modelo claro |
+| [06-informes](06-informes.md) | Leer informes de valoración + briefing PDF | Al entregar a cliente |
+| [07-cierre-venta](07-cierre-venta.md) | Registrar ventas y ver KPIs en `/kpis` | Cada venta / fin de mes |
+| [08-solucion-problemas](08-solucion-problemas.md) | FAQ y troubleshooting | Cuando algo falla |
 
 ---
 

@@ -1,6 +1,7 @@
 {
   "_meta": {
     "schema_version": 1,
+    "flujo": "A",
     "generado_el": "2026-07-29T12:00:00+02:00",
     "origen": "chat-ia",
     "coche_id": "ejemplo-opel-astra-2019"
@@ -127,6 +128,7 @@
   },
   "costes": {
     "precio_coche": 12900,
+    "pvp_nuevo": 22500,
     "transporte": 1200,
     "itv_matriculacion": 95,
     "tasa_dgt": 20.61,

@@ -1,8 +1,13 @@
 # Rediseño del flujo, de principio a fin
 
 Pensado desde cero el 9 de agosto de 2026, después de auditar los seis portales.
-Parte de que hay **tres escenarios de entrada distintos** y de que hoy los tres usan
+Parte de que hay **cuatro escenarios de entrada distintos** y de que hoy los tres originales usan
 el mismo camino, que sirve bien para uno solo.
+
+> **Actualizado 15-ago-2026 (skill v2.9.0):** cuarto flujo añadido (**Flujo D · Descubrimiento**)
+> para clientes que tienen presupuesto + requisitos pero NO modelo — sondeo barato de modelos/motorizaciones
+> antes de invertir en Flujo B. Camino numerado con waypoint en cada mensaje y protocolo de misión lateral
+> con retorno (A14). Ver `docs/SKILL_actualizada_09ago2026.md` §EL CAMINO, §MICRO-PLAN, §CUADERNO DE SESIÓN, §AUDITORÍA DE FASE.
 
 ---
 
@@ -44,19 +49,24 @@ navegador.
 
 # 1 · El espinazo común
 
+> **Actualizado 15-ago-2026:** se añade el **Escenario D — cliente sin modelo concreto** (Flujo D en la skill):
+> el usuario trae presupuesto + requisitos pero no sabe qué modelo pedir. Se peinan ES+DE solo a nivel de
+> modelo/motorización (no anuncios), se entrega INFORME DE MODELOS (país × año × motorización), el usuario
+> elige 2-3 modelos y cada uno entra al Flujo B con su embudo.
+
 Los tres escenarios comparten el mismo motor. Lo que cambia es por dónde entran.
 
 ```
-                 ESCENARIO A          ESCENARIO B           ESCENARIO C
-                 (una URL)         (cliente concreto)     (barrido propio)
-                      |                    |                     |
-                 coche fijo          perfil y presupuesto    nada fijo
-                      |                    |                     |
-                      |            elegir 3-5 modelos      CRIBA BARATA
-                      |                    |               (2 peticiones
-                      |                    |                 por modelo)
-                      |                    |                     |
-                      +--------------------+---------------------+
+                 ESCENARIO A          ESCENARIO B           ESCENARIO C         ESCENARIO D (nuevo 15-ago)
+                 (una URL)         (cliente concreto)     (barrido propio)    (cliente sin modelo)
+                      |                    |                     |                       |
+                 coche fijo          perfil y presupuesto    nada fijo          presupuesto+requisitos
+                      |                    |                     |                       |
+                      |            elegir 3-5 modelos      CRIBA BARATA          SONDEO MODELOS
+                      |                    |               (2 peticiones            (4-8 peticiones
+                      |                    |                 por modelo)            ES+DE solo modelos)
+                      |                    |                     |                       |
+                      +--------------------+---------------------+-----------------------+
                                            |
                                   FICHA TECNICA CANONICA
                                   (km77: PVP, CO2, tipo,

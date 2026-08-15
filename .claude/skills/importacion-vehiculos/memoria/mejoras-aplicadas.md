@@ -60,6 +60,46 @@
 **Beneficio:** El skill es coherente y cubre el caso "investiga varios candidatos" que el usuario pidió.
 **Validación:** SKILL.md §COMPARATIVA + correcciones en briefing/guia/anti_patrones.
 
+### Mejora #10: Estructura de informes por fase + tarifa ES + anti-patrones A9-A11 (2026-08-15)
+**Problema:** En el encargo Tiguan cliente solo se creó un `.md` de valoración al final; faltaron el informe de búsqueda (fase 1), el informe de unidad y el ZIP. Además se asumieron 1.500 € de importación cuando la unidad estaba en España, y el barrido de Coches.net fue parcial (6 páginas de muchas).
+**Solución:** 
+- §ESTRUCTURA DE INFORMES en SKILL.md: fase 1 = informe de búsqueda + candidatos; fase 2 = informe de unidad solo del elegido; fase 3 = ZIP. Archivos separados.
+- costes.md §Origen ES: tarifa de gestión reducida (~500 €) para unidades en España, no los 1.500 €.
+- anti_patrones.md: A9 (no afirmar sin comprobar), A10 (financiado vs contado), A11 (paginación completa Coches.net).
+**Beneficio:** El usuario recibe candidatos + informe de búsqueda al terminar el barrido, y el resto solo cuando avanza con uno. Los precios y la cobertura son fiables.
+**Validación:** SKILL.md §ESTRUCTURA DE INFORMES + checklist · costes.md §Origen ES · anti_patrones.md (8→11) · CHANGELOG 2.5.0.
+
+### Mejora #11: Estructura de carpetas por marca/modelo en el Desktop (2026-08-15)
+**Problema:** El informe del Tiguan se guardó en `AppData\Roaming\Claude\...\outputs\` (carpeta de la sesión) y el usuario no lo encontraba.
+**Solución:** Ruta de guardado obligatoria `C:\Users\jacar\Desktop\JJImportMotors\informes\<marca>\<modelo>\` con subcarpeta README.md. Informes .md, JSON, fotos y ZIP por marca/modelo.
+**Beneficio:** Todo centralizado en el Desktop, organizado por marca/modelo, fácil de encontrar y de mover a Laravel.
+**Validación:** SKILL.md §DÓNDE SE GUARDA TODO · operaciones.md §Estructura de carpetas · README.md en informes/ · CHANGELOG 2.6.0.
+
+### Mejora #12: Encargos abiertos — modalidades honorarios, plan de barrido, bandas de precio (2026-08-15)
+**Problema:** En el encargo de María (9.000 €, "revisa qué mercado es mejor"): (1) "quita el coste del servicio" se interpretó como "descuenta honorarios" cuando era "no se cobran" → toda la primera tabla mal calculada; (2) se ordenó por precio y se leyó SOLO la página 1 → 8 coches de 3-4k presentados de 526 resultados, perdiendo DS4/308/Astra que también entraban; (3) año ensanchado 2016→2012 sin declarar; (4) el usuario tuvo que preguntar "¿qué vas a hacer?" porque nadie le propuso el plan.
+**Solución:**
+- Modalidades de honorarios M1/M2/M3 (incluidos/aparte/no se cobran) — pregunta crítica del briefing + reformulación de frases ambiguas en 1 línea.
+- PLAN DE BARRIDO previo para encargos abiertos: mercados, filtros, bandas, cobertura y entregable — se muestra antes de navegar.
+- A12 (página 1 ≠ listado) y A13 (filtros alterados se declaran antes). Técnica de bandas de precio en playbook.
+**Beneficio:** En encargos con libertad, el usuario aprueba UN plan corto en vez de corregir a mitad; los techos salen bien a la primera; el listado cubre todo el rango de presupuesto.
+**Validación:** briefing_encargo.md §Modalidades · SKILL.md §PLAN DE BARRIDO + checklist · anti_patrones.md A12-A13 · playbook_filtrado.md §Bandas · costes.md §Techo · CHANGELOG 2.7.0.
+
+### Mejora #13: Flujo D · DESCUBRIMIENTO — embudo para clientes sin modelo (2026-08-15)
+**Problema:** El cliente trae presupuesto y requisitos pero no modelo. La skill solo tenía B (modelo concreto) y C (scouting de negocio) — navegar a anuncios reales sin modelo elegido sesga y quema peticiones. El usuario tampoco sabe qué especificar.
+**Solución:** Flujo D con embudo de 3 pasos: (D1) sondeo barato ES+DE de modelos/motorizaciones que caben, sin anuncios; (D2) INFORME DE MODELOS por país × año × motorización con encaje 🟢🟡🔴 y mejor mercado; (D3) el usuario elige 2-3 modelos → Flujo B cada uno → Flujo A. CP-D entre D2 y B.
+**Beneficio:** La búsqueda se particiona: primero el menú de modelos que caben (8 peticiones), y las peticiones caras solo en los modelos que el usuario elige. Respuesta directa a cómo manejar encargos ambiguos.
+**Validación:** SKILL.md §FLUJO D + §INFORME TIPO MODELOS (plantilla) + detección de 4 flujos + triggers · briefing_encargo.md parám 1 · CHANGELOG 2.8.0.
+
+### Mejora #14: Camino fijo, micro-plans, cuaderno de sesión y auditoría de fase (2026-08-15)
+**Problema:** En sesiones largas Claude se desviaba del flujo sin volver, repetía errores que el usuario ya había corregido, y solo aprendía al cierre. Los informes llegaban mal porque los pasos se mezclaban.
+**Solución:**
+- §EL CAMINO: mapa numerado por flujo + waypoint en cada mensaje + misiones laterales con retorno (A14).
+- §MICRO-PLAN antes de cada búsqueda (no solo la inicial) con OK del usuario.
+- §CUADERNO DE SESIÓN: aprendizajes y correcciones en vivo (`informes\_sesion\`), releído antes de cada micro-plan, volcado a memoria al cierre.
+- §AUDITORÍA DE FASE: checklist de 4 líneas al completar cada paso.
+**Beneficio:** Cero ambigüedad sobre en qué fase se está y qué falta; el entendimiento Claude-usuario crece dentro de la MISMA sesión; los entregables no se saltan.
+**Validación:** SKILL.md §EL CAMINO/§MICRO-PLAN/§CUADERNO/§AUDITORÍA · anti_patrones.md A14 · briefing_encargo.md §Arranque · CHANGELOG 2.9.0.
+
 ---
 
 ## 🛠️ Mejoras técnicas

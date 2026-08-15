@@ -770,7 +770,73 @@ Caché primero. Caducidades: recalls 6 meses · seguro y piezas 12 · averías 1
 **Costes escondidos:** correa en 1.4 TSI (600-900 €) · ITV a petición (300-400 €) · titularidad italiana.
 
 ---
+## 📋 MICRO-PLAN antes de CADA búsqueda — no solo la primera (15-ago-2026)
 
+> **Regla dura:** ninguna ronda de navegación empieza sin micro-plan aprobado. El plan inicial cubre el arranque; este protocolo cubre TODAS las búsquedas siguientes. Preguntar mucho está BIEN: cada OK del usuario es una corrección barata (1 línea) frente a una búsqueda cara (10-40 peticiones).
+
+**Formato del micro-plan (3-5 líneas):**
+```
+📍 Camino: Flujo B · paso 3
+📋 Siguiente búsqueda: Coches.net, págs 2-5 del listado ordenado por precio
+   Filtros: ≤8.850 € · ≥2016 · ≤150k km · gasolina · ≥120cv
+   Objetivo: completar la banda 5-8k (A12) · ~6 peticiones
+   ¿OK?
+```
+
+**Cuándo hace falta micro-plan nuevo:** al cambiar fuente/mercado/banda/filtro/techo o al pasar de fase. NO hace falta para el lote ya aprobado (página siguiente, misma banda).
+
+---
+
+## 🧭 EL CAMINO — mapa fijo + waypoint + protocolo de desviación (15-ago-2026)
+
+> **Objetivo: cero ambigüedad sobre en qué punto del flujo estamos y qué falta.** El flujo es un camino numerado. En cada mensaje se declara el waypoint; si el usuario desvía, se responde y se RETOMA.
+
+**Los mapas:**
+- **Flujo D:** briefing+cuaderno → micro-plan sondeo → sondeo ES+DE → INFORME DE MODELOS → CP-D (usuario elige 2-3 modelos) → cada modelo entra en Flujo B.
+- **Flujo B:** briefing → micro-plan Fase 1 → Fase 1 (3 fuentes) → INFORME MODELO+top5 → CP1 (elige candidato) → Fase 2 (7 fuentes) → micro-plan fichas → INFORME UNIDAD → CP3 veredicto → dossier → ZIP.
+- **Flujo A:** briefing → micro-plan → Fase 1+2 → INFORME UNIDAD → CP3 → dossier → ZIP.
+
+**Protocolo de waypoint:** `📍 Camino: Flujo X · paso N/M`.
+**Desviación = misión lateral:** responder + declarar retorno `↩⃾ Vuelvo al paso N`. Cambio de destino = `🔀 Cambio de camino`.
+**PROHIBIDO** abandonar el camino en silencio (A14): si tras una desviación el informe de fase no llegó, es un fallo.
+
+---
+
+## 📓 CUADERNO DE SESIÓN — aprendizaje en vivo (15-ago-2026)
+
+> **El problema:** las correcciones del usuario ("no me cuentes honorarios", "prefiero concesionario", "sin Canarias") se aplicaban una vez y se perdían dentro de la sesión. El cuaderno lo arregla.
+
+**Archivo:** `informes\_sesion\sesion_<fecha>_<encargo>.md` — se crea en el briefing y se actualiza EN EL MOMENTO.
+
+```
+# 📓 Sesión 2026-08-15 — Tiguan cliente María
+## Parámetros fijados (fuente de verdad de la sesión)
+- Presupuesto 18-20k M1 · 2017+ · ≤160k km · gasolina · 5p · tarifa ES reducida 500 €
+## Correcciones del usuario (se aplican YA)
+- [12:15] "quita los de Canarias" → filtro IGIC activo desde ya
+- [12:40] "prefiero concesionario" → priorizar profesional en ranking
+## Preferencias detectadas (no dichas, inferidas)
+- Valora equipamiento (4Motion/DSG) por encima de km bajos
+## Pendiente al cierre
+- Volcar correcciones a memoria/preferencias · registrar trampa financiado-vs-contado
+```
+
+**Reglas:** corrección con hora y aplicada YA · se RELEE antes de cada micro-plan · al cierre se vuelca a `memoria/` del skill. Si el entorno no permite escribir, se mantiene en el chat con el mismo formato y se entrega el texto al cierre.
+
+---
+
+## 🧐 AUDITORÍA DE FASE — checklist al completar CADA paso (15-ago-2026)
+
+4 líneas internas al cerrar cualquier paso (no se molesta al usuario salvo fallo):
+```
+□ Entregable del paso guardado en su ruta
+□ Waypoint correcto — no quedó una misión lateral sin retorno (A14)
+□ Correcciones del cuaderno aplicadas en este paso
+□ Cobertura real declarada (fuentes peinadas/bloqueadas, páginas leídas — A7/A12)
+```
+Si algo falla → se corrige ANTES de avanzar. Sin deuda de fase.
+
+---
 # ENTREGABLES OBLIGATORIOS POR FASE
 
 > **Cada fase produce SU entregable, en orden, y NO se mezclan en un mismo archivo.**
@@ -894,6 +960,8 @@ completo de la sección «DESGLOSE Y VEREDICTO».
 1. Fase 1 → informe de búsqueda + candidatos (al terminar el barrido).
 2. Fase 2 → informe de la unidad SOLO del candidato en el que avance.
 3. Fase 3 → ZIP al cerrar coche. — Ver «ENTREGABLES OBLIGATORIOS POR FASE».
+
+> **Estas fases se ejecutan dentro de un CAMINO NUMERADO** (ver §EL CAMINO y §MICRO-PLAN). En cada mensaje Claude declara su posición (waypoint `📍`). Toda desviación del usuario se atiende como misión lateral con retorno `↩⃾`; un cambio de destino real se declara `🔀 Cambio de camino` (A14). Las correcciones del usuario se registran en el cuaderno de sesión con hora y se aplican YA (§CUADERNO DE SESIÓN).
 
 ---
 

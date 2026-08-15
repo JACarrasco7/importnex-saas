@@ -441,3 +441,19 @@ Extraído de `.ai/rules/`, `.ai/memory/findings.json` (18 findings) y `AUDITORIA
 Desde el 6 de agosto, ImportnexCore pasó de "software para un cliente" a **producto SaaS profesional**: público indexable con conversión, onboarding que activa en D0, dark mode + accesibilidad, bundle optimizado, billing con dunning completo, marketplace viral (wishlist + comparador + calculadora), notificaciones multicanal y un sistema IA que ahora gasta 75-90% menos tokens y se valida solo con CI + hooks.
 
 **El sistema está production-ready al ~92-95%.** Lo que queda es operacionalización (push, SMTP, VAPID) y los items server-side del marketplace, no desarrollo de base.
+---
+
+## 📌 Skill `importacion-vehiculos` — v2.9.0 (2026-08-15)
+
+Cambios posteriores al 8-ago ya aplicados al ZIP de la skill que carga Claude Desktop:
+
+- **Flujo D · Descubrimiento** (cliente sin modelo): sondeo de modelos/motorizaciones que caben en presupuesto, antes de invertir en Flujo B.
+- **Camino fijo + waypoint + protocolo de misión lateral** (A14): cada mensaje declara su posición en el flujo y retoma tras cada desviación.
+- **Micro-plan antes de CADA búsqueda** (no solo la inicial) + OK del usuario.
+- **Cuaderno de sesión en vivo** (`informes\_sesion\`): correcciones del usuario con hora, aplicadas YA.
+- **Auditoría de fase**: checklist al cerrar cada paso, sin deuda acumulada.
+- **Modalidades de honorarios M1/M2/M3** + tarifa ES reducida (~500 €) para unidades en España.
+- **Anti-patrones A9-A14** (no afirmar sin comprobar, financiado vs contado, paginación completa, página 1 ≠ listado, filtros alterados en silencio, camino abandonado en silencio).
+- **Estructura por marca/modelo en el Desktop** organizada: `.md` en `informes\<marca>\<modelo>\`; JSONs/ZIPs en `laravel\export\` y `laravel\paquetes\`; `informe.json` SOLO dentro del ZIP.
+
+Referencia canónica: `docs/SKILL_actualizada_09ago2026.md` (espejo de la skill real).

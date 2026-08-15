@@ -200,3 +200,20 @@ persistencia de filtros.
 
 Los dos primeros son media tarde y cambian todos los veredictos que salgan a partir de
 ahora. El resto puede ir entrando con el trabajo normal.
+
+---
+
+## 📌 Actualizado 2026-08-15 — skill v2.9.0
+
+Cambios posteriores a esta auditoría, ya reflejados en `importacion-vehiculos.skill.zip`:
+
+- **Flujo D · Descubrimiento** (encargo abierto sin modelo): sondeo barato de modelos/motorizaciones ES+DE, INFORME DE MODELOS por país × año × motorización, embudo a Flujo B. Resuelve el caso "cliente con presupuesto, sin modelo" (analizado en conversación María 9.000 €).
+- **Camino fijo + waypoint + protocolo de misión lateral** (A14): cada mensaje declara `📍 Camino: Flujo X · paso N/M`; las preguntas laterales se responden con retorno `↩⃾`; un cambio de destino real se declara `🔀`.
+- **Micro-plan antes de CADA búsqueda** (no solo la primera): 3-5 líneas con posición, fuente, filtros, banda, nº peticiones + OK del usuario. Preguntar mucho está BIEN: 1 línea de OK corrige más barato que 10-40 peticiones mal gastadas.
+- **Cuaderno de sesión** (`informes\_sesion\`): parámetros, correcciones del usuario con hora aplicadas YA, preferencias detectadas. Se relee antes de cada micro-plan y se vuelca a la memoria al cierre.
+- **Auditoría de fase**: checklist de 4 líneas (entregable · camino · correcciones · cobertura) al cerrar cada paso, sin acumular deuda de fase.
+- **Modalidades de honorarios M1/M2/M3** (incluidos / aparte / no se cobran): pregunta crítica del briefing + reformulación de frases ambiguas ("quita el coste del servicio" → "¿M3?") antes de ejecutar.
+- **Tarifa ES reducida** (~500 €) para unidades en España (no 1.500 €).
+- **Anti-patrones A9-A14** adicionales (no afirmar sin comprobar, financiado vs contado, paginación completa, página 1 ≠ listado, filtros alterados en silencio, camino abandonado en silencio).
+- **Estructura de guardado en el Desktop** por marca/modelo: `.md` en `informes\<marca>\<modelo>\`; JSONs y ZIPs en `laravel\export\` y `laravel\paquetes\`; `informe.json` SOLO dentro del ZIP.
+- **Paginación completa de Coches.net** (A11) ya era priorizada aquí; ahora reforzada como A11/A12 (paginar TODO el rango, no solo página 1).

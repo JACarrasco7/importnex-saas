@@ -13,7 +13,7 @@
 1. 🔍 INVESTIGACIÓN → SOLO en Claude (Desktop). Navegación real, filtros, 7 fuentes.
    └─ genera: informe MODELO / UNIDAD + dossier + esqueletos .txt [MARCADOR] + JSON
 
-2. 📦 SUBIR AL SISTEMA → el paquete ZIP se sube a Laravel (endpoint /api/import-valuation).
+2. 📦 SUBIR AL SISTEMA → el JSON se sube vía API (`/api/import-valuation` con `X-Import-Token`); el ZIP con fotos se sube desde el panel web (`POST /cars/import-valuation`).
    └─ Laravel (importnexcore) = REPOSITORIO ÚNICO y FUENTE DE VERDAD de:
        ✓ informes (PDF por Blade+Browsershot) · ✓ imágenes/fotos · ✓ JSON · ✓ dossier · ✓ folleto
 
@@ -114,27 +114,46 @@ Cuando el usuario diga **"arrancamos sesión"** o cualquier trigger de investiga
 
 ## 📂 Estructura de carpetas por flujo
 
+> **RUTA BASE de informes (15-ago-2026):** `C:\Users\jacar\Desktop\JJImportMotors\informes\`
+> organizada por **marca/modelo**. Todo lo que genera Claude va ahí — NUNCA en
+> `AppData\Roaming\Claude\...\outputs\` ni en la carpeta de la sesión.
+
 ```
-JJImportMotors/laravel/
+JJImportMotors/informes/                  ← SOLO .md para el USUARIO (por marca/modelo)
+└── <marca>/
+    └── <modelo>/
+        ├── informe_busqueda_<fecha>.md   ← Fase 1: cobertura + candidatos
+        ├── informe_unidad_<fecha>.md     ← Fase 2: informe del candidato elegido
+        └── comparativa_<fecha>.md        ← si compara varios candidatos
+
+JJImportMotors/laravel/                   ← scripts Python, JSON de contrato y ZIPs
+├── export/                               ← JSON que leen los scripts y Laravel
+│   ├── flujo-a-<coche_id>.json           ← entrada de empaquetar.py (Flujo A)
+│   │                                        (el informe.json NO existe suelto: va DENTRO del ZIP)
+│   ├── flujo-b-<modelo>-<fecha>.json     ← histórico cacheable (Flujo B)
+│   └── flujo-c-<fecha>.json              ← scouting agregado (Flujo C)
+├── paquetes/                             ← ZIPs generados (solo Flujo A)
+│   └── <coche_id>.zip                    ← informe.json + manifest + contenido/ + fotos/
+├── <coche_id>_fotos/                     ← fotos descargadas (las mete empaquetar.py en el ZIP)
 ├── informes/
 │   ├── datos/
-│   │   ├── indice.json                          ← UN archivo, resumen de todos los modelos
+│   │   ├── indice.json                  ← UN archivo, resumen de todos los modelos
 │   │   └── <marca>/<modelo-slug>/
-│   │       └── mercado_<fecha>.json             ← Snapshot (se actualiza cada medición)
-│   ├── pdf/                                     ← PDFs finales (Blade + Browsershot)
+│   │       └── mercado_<fecha>.json     ← Snapshot (se actualiza cada medición)
+│   ├── pdf/                             ← PDFs finales (Blade + Browsershot) — los genera LARAVEL
 │   │   └── <marca>/<modelo-slug>/
 │   └── historial/
 │       └── <marca>/<modelo-slug>/
-│           └── informe_<fecha>.json              ← JSONs Flujo A y B completos
-├── scouting/                                    ← Solo Flujo C
-│   └── scouting_<fecha>.json                     ← Tabla multi-modelo agregada
-├── export/                                      ← Listos para Laravel
-│   ├── flujo-a-<coche_id>.json                   ← Un coche concreto (ZIP)
-│   ├── flujo-b-<modelo>-<fecha>.json             ← Modelo cacheable
-│   └── flujo-c-<fecha>.json                      ← Scouting
-└── paquetes/                                    ← ZIPs generados (solo Flujo A)
-    └── <coche_id>.zip
+│           └── informe_<fecha>.json     ← JSONs Flujo A y B completos
+└── scouting/                            ← Solo Flujo C
+    └── scouting_<fecha>.json            ← Tabla multi-modelo agregada
 ```
+
+**Reglas de guardado (15-ago-2026):**
+- **`.md` para el usuario** → `JJImportMotors/informes/<marca>/<modelo>/`. No los lee ningún script.
+- **JSON de contrato** → `JJImportMotors/laravel/export/` (flujo-a/b/c). Los lee `empaquetar.py` o Laravel.
+- **ZIP final** → `JJImportMotors/laravel/paquetes/<coche_id>.zip`. El `informe.json` va DENTRO, no suelto.
+- **NUNCA** escribir informes en la carpeta de outputs de la sesión de Claude (`AppData\Roaming\Claude\...`).
 
 ### Por flujo
 

@@ -25,9 +25,11 @@ PRECIO FINAL = Precio anuncio ES
              + Traslado local (0-300 €, según distancia)
              + Gestoría / transferencia (~150 €)
              + ITV en vigor (0 € si la tiene; ~50 € si toca)
-             + Honorarios (1.500-2.250 €)
+             + Tarifa de gestión ES (~500 €, validar con el usuario)
 ```
 > **SIN transporte DE, SIN ausfuhr, SIN ITV importación, SIN IEDMT.** El coche ES ya está matriculado y con impuestos pagados.
+> **⚠️ TARIFA ES REDUCIDA (15-ago-2026):** si la unidad está en España, NO se cobran los 1.500 € de importación. Se cobra una **tarifa de gestión reducida (~500 €)** — confirmar el importe exacto con el usuario en cada encargo (caso Tiguan 15-ago: se asumieron 1.500 € por defecto y no aplicaba).
+> **⚠️ Canarias/Baleares:** IGIC, no IVA. El traslado peninsular extra NO compite en igualdad de condiciones — descartar o avisar.
 
 ### ⚖️ Comparativa DE vs ES (cuando origen no especificado)
 ```
@@ -38,16 +40,18 @@ Coste total ES = precio ES + traslado + gestoría + honorarios
 ```
 ### 🎯 Techo de precio de búsqueda (desde presupuesto del cliente)
 
-> **Regla (12-ago-2026):** para FILTRAR (Flujo B/C), el techo del coche sale del presupuesto del cliente. **CONFIRMAR SIEMPRE por encargo si el presupuesto incluye o no los honorarios — no asumir.** Por defecto, "presupuesto total puesto en Huelva" = coche + logística + honorarios (todo incluido); se descuentan todos los costes conocidos del techo de búsqueda.
+> **Regla (actualizada 15-ago-2026):** para FILTRAR (Flujo B/C), el techo del coche sale del presupuesto del cliente según la **modalidad de honorarios** del encargo (M1/M2/M3, ver `briefing_encargo.md` §Modalidades). **3 fallos reales por asumir** (12-ago y 15-ago ×2): ya NO se asume — se pregunta o se reformula la interpretación en 1 línea.
 
 ```
-Techo coche DE = presupuesto − transporte 900 − ausfuhr 114 − ITV 115 − IEDMT − (honorarios SI los incluye)
-Techo coche ES = presupuesto − traslado − gestoría − (honorarios SI los incluye)
+Techo coche DE = presupuesto − transporte 900 − ausfuhr 114 − ITV 115 − IEDMT − honorarios(solo en M1)
+Techo coche ES = presupuesto − traslado − gestoría − honorarios(solo en M1)
 
-Ej (encargo 9.000 €, 12-ago): el usuario pidió NO descontar los 1.500 € de honorarios → DE ≈ 7.700-7.900 € · ES ≈ 8.500-8.850 €
+M1 · Incluidos  → restar honorarios del techo
+M2 · Aparte     → NO restar honorarios (se cobran fuera del presupuesto)
+M3 · No se cobran → NO restar (tarifa 0 €; cliente especial)
+
+Ej M2/M3 (María, 9.000 €, 15-ago): DE ≈ 7.870 € · ES ≈ 8.550-8.850 €
 ```
-
-> ⚠️ **En el encargo del 12-ago (9.000 €) el usuario pidió no descontar honorarios del techo. Fue una decisión de ESE encargo, NO una regla general.** En cada encargo hay que confirmar si el presupuesto del cliente incluye o no los honorarios.
 **Peso del coste fijo según precio de compra:**
 
 | Compra | Peso coste fijo | Viabilidad |

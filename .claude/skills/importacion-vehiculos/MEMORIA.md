@@ -56,8 +56,8 @@
 
 | Métrica | Valor |
 |---|---|
-| Versión actual | 2.4.2 |
-| Fecha de release | 2026-08-12 |
+| Versión actual | 2.9.0 |
+| Fecha de release | 2026-08-15 |
 
 ---
 
@@ -110,4 +110,5 @@ ENCARGO (Flujo B) → 📋 INFORME MODELO + top 5 con ENLACES → CP1 (¿Fase 2 
 
 ## 🗓️ Última actualización
 
+- **2026-08-15:** v2.9.0 — Flujo D (descubrimiento), anti-patrones A9-A14, El Camino, micro-plan, cuaderno de sesión, auditoría de fase, entregables por fase.
 - **2026-08-12:** Sistema de memoria del skill creado. 4 archivos de memoria + este índice.

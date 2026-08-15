@@ -203,6 +203,12 @@ Referencias rápidas:
 - Aplicar `Sortieren → Preis (niedrigster zuerst)`.
 - Los **anuncios patrocinados** (suelen ser los primeros, caros o no reales) se IGNORAN — mirar los primeros resultados orgánicos.
 
+### Bandas de precio — el listado NO es solo el más barato (15-ago-2026)
+- **Fallo real (María, 9.000 €):** 526 resultados ordenados por precio ascendente, se leyó SOLO la página 1 → se enseñaron 8 coches de 3.000-4.200 € y se perdieron DS4, 308, Astra... que TAMBIÉN entraban en presupuesto.
+- **Regla:** el listado para el cliente cubre TODO el rango válido (suelo → techo), no el extremo barato. Con muchos resultados, recorrer por **bandas** (ej. 3-5k / 5-7k / 7k-techo) o paginar hasta el techo (A12).
+- Un coche de 7.500 € en presupuesto con mejor equipamiento puede ser MEJOR candidato que el de 3.750 €: el objetivo es el mejor **valor** del rango, no el precio mínimo.
+- **Año ensanchado (2016→2012) u otro filtro relajado:** declararlo ANTES de navegar y marcarlo en el informe (A13) — el usuario lo tolera, pero no en silencio.
+
 ### Anuncios engañosos (CRÍTICO · 12-ago-2026)
 - **Síntoma:** precio anómalamente bajo en el listado (ej. 2.499 € para un coche de 2016+).
 - **Causas:** coche siniestrado, fechas mal etiquetadas, error del vendedor, enganche.
@@ -261,10 +267,10 @@ Un coche es **chollo priorizable** si tiene ≥3 de estas señales visibles:
 Antes de abrir el navegador, plantéate y di en voz alta:
 
 ```
-1. ¿Qué flujo? (A/B/C) → define profundidad
+1. ¿Qué flujo? (A/B/C/D) → define profundidad
 2. ¿Qué fuentes tocan? (3 Fase 1 ó 7 Fase 2)
 3. ¿Qué datos mínimos necesito? (precio, km, año, días publicado, CO₂)
-4. ¿Cuál es mi budget de capturas? (A=70, B=50, C=100)
+4. ¿Cuál es mi budget de capturas? (A=70, B=50, C=100, D=8+embudo)
 5. ¿Qué filtros aplicar primero para acotar?
 ```
 

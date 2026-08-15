@@ -545,9 +545,23 @@ class ImportValuationApiController extends Controller
                 }
             }
 
-            $cierre = Cierre::create([
-                'organization_id' => $org->id,
-                'coche_id' => $payload['coche_id'],
+            // §auditoría — idempotente: mismo coche + misma fecha de investigación no duplica.
+            // Un reenvío (retry de curl, doble clic) actualiza el registro existente.
+            // Se usa whereDate porque el cast 'date' guarda 'YYYY-MM-DD 00:00:00' y un
+            // where con 'YYYY-MM-DD' a secas no coincide.
+            $cierre = Cierre::where('organization_id', $org->id)
+                ->where('coche_id', $payload['coche_id'])
+                ->whereDate('fecha_investigacion', $payload['fecha_investigacion'])
+                ->first();
+
+            if (! $cierre) {
+                $cierre = new Cierre([
+                    'organization_id' => $org->id,
+                    'coche_id' => $payload['coche_id'],
+                ]);
+            }
+
+            $cierre->fill([
                 'car_id' => $carId,
                 'brand' => $brand,
                 'model' => $model,
@@ -574,11 +588,11 @@ class ImportValuationApiController extends Controller
             ]);
 
             return response()->json([
-                'status' => 'created',
+                'status' => $cierre->wasRecentlyCreated ? 'created' : 'updated',
                 'cierre_id' => $cierre->id,
                 'dias_hasta_venta' => $cierre->dias_hasta_venta,
                 'desviacion_pct' => $cierre->desviacionPorcentaje(),
-            ], 201);
+            ], $cierre->wasRecentlyCreated ? 201 : 200);
 
         } catch (\Throwable $e) {
             Log::error('ImportValuationApiController::storeCierre failed', ['error' => $e->getMessage()]);

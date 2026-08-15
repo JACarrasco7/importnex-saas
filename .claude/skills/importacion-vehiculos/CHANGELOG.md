@@ -5,6 +5,103 @@ Todos los cambios notables en el skill `importacion-vehiculos` se documentarán 
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [2.9.0] - 2026-08-15 — Camino fijo, micro-plans, cuaderno de sesión y auditoría de fase
+
+### 🧭 EL CAMINO (SKILL.md) — desambiguación total de fases
+- Mapa numerado de pasos por flujo (D/B/A) + **protocolo de waypoint**: cada mensaje declara `📍 Camino: Flujo X · paso N`.
+- **Protocolo de desviación:** preguntas laterales = misiones laterales; se responden y se RETOMA el paso (`↩️ Vuelvo al paso N`). Cambio de destino se declara (`🔀 Cambio de camino`).
+- Anti-patrón **A14**: abandonar el camino en silencio.
+
+### 📋 Micro-plan antes de CADA búsqueda
+- No solo el plan inicial: cada ronda de navegación lleva micro-plan de 3-5 líneas + OK del usuario. Lotes coherentes agrupados; cambio de objetivo/filtros → nuevo micro-plan. Preguntar mucho está BIEN.
+
+### 📓 Cuaderno de sesión — aprendizaje en vivo
+- `informes\_sesion\sesion_<fecha>_<encargo>.md`: parámetros fijados, correcciones del usuario con hora (se aplican YA), preferencias detectadas, pendiente al cierre.
+- Se relee antes de cada micro-plan. Al cierre se vuelca a `memoria/` del skill.
+
+### 🧐 Auditoría de fase
+- Checklist interno de 4 líneas al completar CADA paso: entregable guardado · camino correcto · correcciones aplicadas · cobertura real declarada. Si falla algo, se corrige antes de avanzar.
+
+## [2.9.1] - 2026-08-15 — Auditoría de integración con Laravel (contrato ↔ código)
+
+### 📡 Contrato alineado con el importador real (contrato.md)
+- **Fotos**: la ubicación canónica es `vehiculo.fotos` (el importador las lee de ahí). `anuncio.fotos` queda como retrocompatible.
+- **Comando real**: `php artisan importnex:import-valuation` (no `jj:importar`). Modelo real: `Car` (no `Valoracion`).
+- **RATING_MAP real**: `favorable→favorable`, `desfavorable→unfavorable` (no good/bad).
+- **Endpoints**: el API acepta JSON (`/api/import-valuation` A, `/api/import-modelo` B, `/api/import-mercado` C); el ZIP con fotos va por la ruta web `POST /cars/import-valuation`.
+- **briefing-pdf**: implementado (sube PDF real), no devuelve 410.
+- **`semaforo` es informativo**: `CarObserver::saving()` recalcula `traffic_light` desde costes; el valor del chat no se persiste.
+
+### 🛡️ Mejoras de robustez en Laravel (ValuationImporter)
+- `validate()` exige `vehiculo.marca` + `modelo` (evita error SQL 500 → 422 limpio) y `costes.pvp_nuevo` en Flujo A (evita IEDMT = 0 silencioso).
+- Persistencia nueva: `anuncio.pais_origen` → `Car.pais_origen`; `vehiculo.co2_confirmado` → `Car.co2_confirmado` (migración `add_pais_origen_and_co2_confirmado_to_cars`).
+- Verificación de IEDMT: si el importe de Claude difiere >10% del recálculo de Laravel, se añade aviso a `notes`.
+- Fotos: fallback `anuncio.fotos` si no vienen en `vehiculo.fotos`.
+- `/api/cierres` idempotente: mismo coche + misma fecha no duplica (retry/doble clic actualiza el registro).
+
+### 🧪 Tests
+- +8 tests nuevos (validaciones, mapeos, IEDMT, idempotencia cierre). Área importación/cierres/KPIs: 85 passed.
+
+## [2.8.0] - 2026-08-15 — Flujo D · DESCUBRIMIENTO (cliente sin modelo)
+
+### 🔍 Nuevo flujo D con embudo de 3 pasos
+- **D1 sondeo de modelos** (4-8 peticiones): peinar ES+DE solo a nivel de modelo/motorización con los filtros del encargo. Sin fichas, sin anuncios individuales.
+- **D2 INFORME DE MODELOS**: organizado por país × año × motorización, con veredicto de encaje (🟢 holgado / 🟡 justo / 🔴 no cabe) y mejor mercado por modelo. Plantilla añadida. CP-D: esperar a que el usuario elija 2-3 modelos.
+- **D3 embudo**: cada modelo elegido → Flujo B (7 fuentes) → candidato → Flujo A. Las peticiones crecen al bajar de nivel: sondeo (8) → B (15-50) → A (35-70).
+- Origen del cambio: análisis de la conversación "María" (9.000 €, sin modelo) — el usuario propuso particionar la búsqueda: primero modelos que caben, luego investigar los que él elija.
+- Detección de flujo actualizada (4 flujos) + triggers nuevos + briefing: modelo no se pregunta si hay presupuesto+requisitos (va a Flujo D).
+
+## [2.7.0] - 2026-08-15 — Encargos abiertos: modalidades honorarios, plan de barrido y bandas de precio
+
+### 💶 Modalidades de honorarios M1/M2/M3 (briefing_encargo + costes)
+- 3 fallos reales por ASUMIR el tratamiento de honorarios: 12-ago (techo corregido a mitad), 15-ago Tiguan (tarifa reducida ES), 15-ago María ("quita el coste del servicio" leído como "descuenta" cuando era "no se cobra").
+- Ahora: M1 incluidos / M2 aparte / M3 no se cobran — se pregunta SIEMPRE o se reformula la interpretación en 1 línea antes de ejecutar.
+
+### 📋 Plan de barrido previo para encargos ABIERTOS (SKILL.md)
+- Cuando el usuario pide "revisa qué hay/modelos/mercado" sin URL, NO se navega directo: se muestra el plan (mercados, filtros, bandas de precio, cobertura, entregable esperado) en 5-8 líneas y se pide OK.
+- Responde al fallo real María 15-ago: medio informe PARCIAL entregado antes de que el usuario preguntara "¿qué vas a hacer?".
+
+### 🛡️ Anti-patrones A12 y A13 (anti_patrones.md, 11→13)
+- **A12** — Página 1 ordenada por precio como "listado": cubre TODO el rango del presupuesto (bandas de precio o paginación completa). Caso María: 526 resultados, solo 8 enseñados.
+- **A13** — Filtros del encargo alterados en silencio (año 2016→2012): se declara ANTES de navegar.
+
+### 📊 Bandas de precio (playbook_filtrado.md)
+- Técnica nueva: recorrer el rango por bandas (3-5k/5-7k/7k-techo); el objetivo es el mejor VALOR del rango, no el precio mínimo.
+
+## [2.6.1] - 2026-08-15 — Corregida ambigüedad de rutas (JSON vs .md)
+
+- **SKILL.md** §DÓNDE SE GUARDA CADA COSA reescrito con tabla única QUÉ archivo va DÓNDE: `.md` del usuario en `informes\<marca>\<modelo>\`; JSON de contrato (`flujo-a/b/c`) en `laravel\export\`; ZIP en `laravel\paquetes\`.
+- **Aclaración explícita:** `informe.json` NO existe suelto — va DENTRO del ZIP y lo genera `empaquetar.py` desde `export\flujo-a-<coche_id>.json`. Confusión real detectada: se buscaba un "informe de JSON" en la carpeta del modelo.
+- `operaciones.md` y `README.md` del Desktop actualizados con la misma tabla.
+
+## [2.6.0] - 2026-08-15 — Estructura de carpetas por marca/modelo en el Desktop
+
+### 📁 Ruta de guardado obligatoria (15-ago-2026)
+- **SKILL.md** §DÓNDE SE GUARDA TODO: todo se guarda en `C:\Users\jacar\Desktop\JJImportMotors\informes\<marca>\<modelo>\`.
+- NUNCA en `AppData\Roaming\Claude\...\outputs\` (fallo real 15-ago Tiguan: el informe se escribió ahí y el usuario no lo veía).
+- Estructura por marca/modelo: `informe_busqueda_<fecha>.md` · `informe_unidad_<fecha>.md` · `<coche_id>.json` · `<coche_id>_fotos/` · `<coche_id>.zip`.
+- `README.md` creado en `Desktop\JJImportMotors\informes\` documentando la estructura.
+- **operaciones.md** actualizado: rutas de informes .md en `informes/`, datos/export/paquetes siguen en `laravel/`.
+
+## [2.5.0] - 2026-08-15 — Estructura de informes por fase + tarifa ES + anti-patrones A9-A11
+
+### 📋 Estructura de informes obligatoria por fase (15-ago-2026)
+- **SKILL.md** §ESTRUCTURA DE INFORMES: cada fase produce SU entregable, en orden, sin mezclarlos y sin esperar a que el usuario los pida.
+  - Fase 1 (búsqueda) → INFORME DE BÚSQUEDA + candidatos (con cobertura por fuente, NO valoración).
+  - Fase 2 (avance) → INFORME DE UNIDAD solo del candidato elegido.
+  - Fase 3 (cierre) → ZIP Laravel obligatorio.
+- Fallo real 15-ago (Tiguan cliente): se entregó un único `.md` de valoración al final y faltaron informe de búsqueda, informe de unidad y ZIP.
+
+### 💶 Tarifa ES reducida (15-ago-2026)
+- **costes.md** §Origen ES: si la unidad está en España se cobra tarifa de gestión reducida (~500 €, validar con el usuario), NO los 1.500 € de importación.
+- Aviso Canarias/Baleares (IGIC + traslado extra).
+
+### 🛡️ Anti-patrones A9, A10, A11 (15-ago-2026)
+- **A9** — No afirmar haber visto/medido algo sin comprobarlo (caso Tiguan: "sí lo vi en mi barrido" sin verificar).
+- **A10** — Precio financiado como gancho en portales ES (MUY CAR/Flexicar): confirmar contado antes de la tabla.
+- **A11** — Paginación completa de Coches.net ordenando por precio (`pg=` + `pf=`), no muestrear 6 de muchas páginas.
+- Actualizado en `anti_patrones.md` (8 → 11) y `SKILL.md` checklist.
+
 ## [2.4.2] - 2026-08-12 — Cascada de informes + checkpoints Flujo B
 
 ### 🏗️ División de trabajo definitiva (12-ago-2026)

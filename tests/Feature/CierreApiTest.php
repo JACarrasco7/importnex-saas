@@ -64,6 +64,30 @@ class CierreApiTest extends TestCase
         $this->assertEquals(5, $cierre->dias_hasta_venta);
     }
 
+    public function test_store_cierre_is_idempotent(): void
+    {
+        $payload = [
+            'coche_id' => 'opel-astra-opc-2012-38347146649056',
+            'fecha_investigacion' => '2026-08-10',
+            'veredicto' => 'Comprar',
+            'precio_objetivo' => 11800,
+            'precio_final' => 11500,
+            'estado' => 'vendido',
+        ];
+
+        $headers = ['X-Import-Token' => $this->token];
+
+        // Primera llamada → crea
+        $first = $this->postJson('/api/cierres', $payload, $headers);
+        $first->assertStatus(201)->assertJson(['status' => 'created']);
+        $this->assertDatabaseCount('cierres', 1);
+
+        // Reenvío (retry/doble clic) → actualiza, NO duplica
+        $second = $this->postJson('/api/cierres', $payload, $headers);
+        $second->assertStatus(200)->assertJson(['status' => 'updated']);
+        $this->assertDatabaseCount('cierres', 1);
+    }
+
     public function test_store_cierre_rejects_missing_required_fields(): void
     {
         $response = $this->postJson(
