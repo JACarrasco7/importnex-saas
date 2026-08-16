@@ -408,6 +408,8 @@ export default {
     k_km: ':k k km',
     verify_with_ai: 'Verify with AI',
     verify_fields: {
+        traffic_light: 'Traffic light',
+        recommendation: 'Recommendation',
         valuation: 'Valuation paragraph',
         description: 'Description',
         purchase_price: 'Purchase price',

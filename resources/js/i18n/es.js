@@ -519,6 +519,8 @@ export default {
     k_km: ':k k km',
     verify_with_ai: 'Verificar con IA',
     verify_fields: {
+        traffic_light: 'Semáforo',
+        recommendation: 'Recomendación',
         valuation: 'Párrafo de valoración',
         description: 'Descripción',
         purchase_price: 'Precio de compra',

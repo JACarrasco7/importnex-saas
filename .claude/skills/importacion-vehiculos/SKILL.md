@@ -302,18 +302,7 @@ FLUJO A: 1 plan de fase → 2 EJECUTAR Fase 1+2 → 3 INFORME UNIDAD → CP3 →
 
 **NUNCA preguntar dentro de una fase aprobada:** "¿continúo?", "¿descargo las fotos?", "¿sigo con la siguiente página?" — el lote de la fase se ejecuta completo y se informa al cierre. El informe se entrega y **se espera la instrucción del usuario** — no se le pregunta qué candidato, es él quien elige.
 
-### Actualización de EL CAMINO con mando por fase
-
-```
-FLUJO D: 1 plan de fase (briefing+cache+cuaderno) → 2 EJECUTAR sondeo ES+DE → 3 INFORME DE MODELOS
-          → CP-D (usuario elige 2-3 modelos) → cada modelo entra en FLUJO B
-
-FLUJO B: 1 plan de fase (briefing+cache+cuaderno) → 2 EJECUTAR Fase 1 (3 fuentes) → 3 INFORME MODELO+top5
-          → CP1 (usuario elige candidato) → 4 plan de fase Fase 2 → 5 EJECUTAR Fase 2 (7 fuentes)
-          → 6 INFORME UNIDAD → CP3 veredicto → dossier → ZIP (→ FIN)
-
-FLUJO A: 1 plan de fase → 2 EJECUTAR Fase 1+2 → 3 INFORME UNIDAD → CP3 → dossier → ZIP
-```
+> **Mapas de camino por flujo:** ver §EL CAMINO (arriba) — versión con PROTOCOLO DE MANDO.
 
 ---
 
