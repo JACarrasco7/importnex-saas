@@ -1059,7 +1059,10 @@ export default {
     subtitle: 'See where your cars are located',
     cars: 'cars',
     cities: 'cities',
+    vehicles: 'cars',
     cars_in: 'cars in',
+    location_subtitle: 'Precise location',
+    vehicles_here: 'Cars here',
     empty_title: 'No location data yet',
     empty_desc: 'Add lat/lng to your cars to see them on the map.'
   },

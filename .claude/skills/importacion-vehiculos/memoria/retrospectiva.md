@@ -28,6 +28,39 @@ SESIÓN <fecha> — <modelo / encargo / tarea>
 
 ---
 
+## Plantilla de CIERRE — al elegir candidato único (16-ago-2026)
+
+> **Cuándo:** el usuario elige UN candidato y termina el Flujo A (ZIP), o el encargo se aborta. Ver `SKILL.md` §Auditoría de cierre. Se rellena SIN navegar, mirando hacia atrás.
+
+```markdown
+🏁 CIERRE <fecha> — <modelo elegido / abortado>
+
+📊 EFICIENCIA
+  · Peticiones reales vs presupuesto del plan: <N real> vs <N plan>
+  · Desbordado en: <fuente/paso + causa>
+
+🔻 EMBUDO
+  · Niveles recorridos: <D → B → A / B → A / directo A>
+  · Candidatos por nivel: <N modelos → N candidatos → 1 elegido>
+  · 80% descartado en nivel: <D1 / Fase 1 / Fase 2>
+  · Fase 2 gastada en candidatos que caían antes: <sí/no + cuál>
+
+✏️ CORRECCIONES DEL USUARIO
+  · <N> correcciones · causa raíz: <briefing incompleto / plan mal calibrado / fuente>
+  · <corrección → convertida en: trampa/anti-patrón/regla (archivo)>
+
+🚦 CHECKPOINTS
+  · Respetados: <CP-D · CP1 · CP2 · CP3>
+  · Saltados: <cuál + coste estimado>
+
+🏆 RESULTADO
+  · Candidato final: <modelo · precio · origen · score>
+  · Dato de mercado aprendido: <dato>
+  · ¿El embudo ahorró tokens vs búsqueda directa? <sí/no · estimación>
+```
+
+---
+
 ### 2026-08-12 — Prueba real de navegación desde VS Code (Playwright)
 
 **🏗️ Decisión de arquitectura (resultado de la prueba):**

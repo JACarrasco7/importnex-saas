@@ -63,6 +63,7 @@ Flujo D (cliente sin modelo): sondeo modelos ES+DE → informe MODELOS (país×a
 Origen DE vs ES: si no se especifica, buscar en ambos mercados y comparar dónde sale mejor → costes.md §Origen
 Briefing encargo: preguntar críticos ANTES de navegar → `briefing_encargo.md`
 Tope de gama: doble pasada por kW SIEMPRE → `playbook_filtrado.md` §Doble pasada
+Cierre: AUDITORÍA DE CIERRE al elegir candidato único (o abortar) → 5 dimensiones + 3 salidas a memoria
 ```
 
 ---
@@ -150,6 +151,153 @@ D sondeo → INFORME DE MODELOS (país × año × motorización)
 3. Si es tope de gama → confirmar potencia (activa doble pasada).
 4. Guardar encargo en memoria al cerrar.
 > Fallo real 12-ago: se navegó sin preguntar potencia → se perdió el OPC de 8.999 € mal etiquetado.
+
+---
+
+## 💡 ASISTENTE DE PLANIFICACIÓN — encargos abiertos/vagos (16-ago-2026)
+
+> **El problema:** El usuario dice "busca algo para 15.000 €" o "qué merece la pena" y la IA lanza 50+ peticiones sin dirección clara. Se queman tokens y el resultado no es útil.
+> **La solución:** La IA ayuda al usuario a construir un PLAN paso a paso con estrategia de embudo, filtrando progresivamente desde muy abierto a muy específico.
+
+### Protocolo en 4 pasos
+
+```
+PASO 1 — DETECTAR el tipo de encargo (flauto automático)
+  └─ ¿URL concreta? → Flujo A (evaluación unitaria, sin ayuda de planificación)
+  └─ ¿Modelo concreto? → Ver STEP 2 (mejorar prompt si falta críticos)
+  └─ ¿Solo presupuesto + requisitos? → Flujo D (sondeo de modelos primero)
+  └─ ¿"Qué merece la pena"? → Flujo C + Paso 2 (definir segmentos together)
+
+PASO 2 — MEJORAR el prompt (Prompt Improver)
+  └─ Detectar vaguedad: <50 chars o <3 parámetros
+  └─ Proponer prompt mejorado con completar críticos
+  └─ Preguntar SOLO lo que falta (máx 4 cosas)
+  └─ Opción "busca tú / lo que puedas"
+
+PASO 3 — PLANIFICAR la estrategia de embudo
+  └─ Mostrar el PLAN DE BARRIDO (mercados, filtros, bandas, fuentes)
+  └─ Explicar el enfoque: del MÁS abierto al MÁS específico
+  └─ Pedir OK antes de ejecutar
+
+PASO 4 — EJECUTAR en cascada con checkpoints
+  └─ Fase 1 → Informe + lista de candidatos + checkpoint
+  └─ Usuario elige → Fase 2 → Informe unidad + checkpoint
+  └─ Veredicto → Dossier + ZIP
+```
+
+### Ejemplo práctico paso a paso
+
+**Usuario dice:** "busca algo para 15.000 €"
+
+**Claude responde (PASO 1 + 2):**
+```
+Tengo el presupuesto pero me falta definir QUÉ tipo de coche. ¿Me ayudas?
+
+1. Finalidad: ¿para reventa / uso personal / familiar?
+2. Segmento: ¿compacto / SUV / berlina / deportivo?
+3. Origen: ¿importación de Alemania o compra nacional?
+4. Año mínimo / KM máximo?
+
+O si prefieres, dime "busca tú" y propongo yo lo más rentable del mercado.
+```
+
+**Usuario responde:** "uso personal, compacto, Alemania, 2018+, ≤100k"
+
+**Claude responde (PASO 3):**
+```
+📋 PLAN DE BARRIDO — Compactos 2018+ ≤100k desde 15.000 €
+
+1. Mercados:
+   - 🇩🇪 Alemania: techo ≈ 11.250 € (transporte 900 + ausfuhr 114 + ITV 115 + honorarios 1.500)
+   - 🇪🇸 España: techo ≈ 14.650 € (honorarios 1.500)
+
+2. Filtros: ≥2018 · ≤100.000 km · Gasolina/Diesel · 5p · ≤11.250 € (DE)
+
+3. Bandas de precio a recorrer:
+   - 5.000-7.000 € (suelo, muchas unidades)
+   - 7.000-9.000 € (dulce, equilibrio km/precio)
+   - 9.000-11.250 € (techo, mejores acabados)
+
+4. Fuentes Fase 1 (sondeo rápido):
+   - mobile.de (3-5 páginas)
+   - Coches.net (2-3 páginas)
+   - AutoUncle (1 captura)
+
+5. Entregable:
+   - Informe de MODELOS (5-8 modelos que caben con precio-desde)
+   - Tú eliges 2-3 → investigo a fondo (candidatos reales)
+
+Tokens estimados: ~12 peticiones (~4.000 tokens). ¿OK?
+```
+
+**Usuario:** "OK"
+
+**Claude ejecuta (PASO 4) — Flujo D:**
+```
+D1: Sondeo ES+DE (8 peticiones) → Encontré 7 modelos que caben
+D2: INFORME DE MODELOS con tabla por país×año×motor
+CP-D: Elige 2-3 modelos → cada uno pasa a Flujo B (candidatos con enlaces)
+```
+
+### ¿Cuándo aplicar cada herramienta?
+
+| Herramienta | Cuándo usar | Token ahorro |
+|---|---|---|
+| **Prompt Improver** | Prompt <50 chars o <3 parámetros | Evita búsquedas al 50% irrelevantes |
+| **Briefing encargo** | Modelo concreto pero falta críticos (año/km/presupuesto) | Evita Fase 2 del 80% (candidatos fuera de rango) |
+| **Plan de barrido** | Libertad de búsqueda (cómo buscar) | Claridad de qué esperar, reduces retro-ajustes |
+| **Flujo D (embudo)** | Presupuesto + requisitos SIN modelo | ¡HUGE ahorro! Sondeo (8) → B (15-50) → A (35-70) |
+| **Flujo A directo** | URL concreta o "evalúa este" | No aplica (ya es específico) |
+
+### Estrategia de embudo visualizada
+
+```
+🎯 OBJETIVO: encontrar el mejor coche de 15.000 €
+
+NIVEL 1 — Sondeo barato (Fase 1, D1)
+  Filtros amplios → 7 modelos que caben en el presupuesto
+  Coste: 8 peticiones (~3.000 tokens)
+  └─ Output: Informe de MODELOS (solo nombres + precio-desde)
+
+       ↓ Usuario elige 2-3 modelos
+
+NIVEL 2 — Búsqueda media (Flujo B)
+  3 fuentes → Top 5 candidatos por modelo con enlaces
+  Coste: 15-20 peticiones por modelo (~6.000 tokens)
+  └─ Output: Informe MODELO + candidatos con enlaces + CP1
+
+       ↓ Usuario elige 1 candidato
+
+NIVEL 3 — Investigación profunda (Flujo A)
+  7 fuentes → Análisis completo del candidato elegido
+  Coste: 35-50 peticiones (~12.000 tokens)
+  └─ Output: Informe UNIDAD + Dossier + ZIP
+
+       ↓ Veredicto
+
+FIN
+```
+
+**Sin embudo (anti-patrón):** 70 peticiones por modelo × 3-5 modelos = 210-350 peticiones (~60.000+ tokens)
+**Con embudo:** 8 + (15-20 × 2-3) + 35-50 = 73-113 peticiones (~25.000 tokens) → **58% de ahorro**
+
+### Reglas para el asistente de planificación
+
+1. **PASO 1 (detectar) SIEMPRE ANTES de cualquier búsqueda.** No adivinar, preguntar.
+2. **PASO 2 (mejorar) solo si es vago.** <50 chars o <3 parámetros.
+3. **PASO 3 (planificar) SIEMPRE incluye checkpoints explícitos.** "CP-D: elige modelos", "CP1: elige candidato".
+4. **PASO 4 (ejecutar) en cascada, no todo de golpe.** El usuario debe poder decidir en cada paso.
+5. **Mantener siempre la opción "busca tú / lo que puedas".** No bloquear por falta de detalle.
+6. **Documentar el plan en el cuaderno de sesión.** Para que las correcciones del usuario afecten a búsquedas futuras.
+
+### Referencias cruzadas
+
+- 📄 **Prompt Improver completo:** ver `guia_prompts.md`
+- 📄 **Briefing de encargo:** ver `briefing_encargo.md`
+- 📄 **Flujo D (descubrimiento) detallado:** ver §FLUJO D en este documento
+- 📄 **PLAN DE BARRIDO:** ver §PLAN DE BARRIDO previo en este documento
+
+---
 
 **📋 PLAN DE BARRIDO previo — encargos ABIERTOS sin URL (15-ago-2026):**
 > Cuando el usuario pide "revisa qué hay / qué modelos / qué mercado es mejor" SIN modelo concreto (mucha libertad), eso es **FLUJO D**: primero el sondeo de modelos (D1) + INFORME DE MODELOS (D2), y el Flujo B solo con los modelos que el usuario elija. El plan de barrido se muestra igualmente (mercados, filtros, bandas, techo por origen) pero el entregable inmediato es el INFORME DE MODELOS, no candidatos. Si ya hay modelo concreto pero libertad de cómo buscar, el plan de barrido aplica al Flujo B directo. Fallo real 15-ago (María, 9.000 €): se navegó a anuncios reales sin modelo elegido y se entregó un medio informe PARCIAL.
@@ -372,6 +520,27 @@ SESIÓN <fecha> — <modelo/encargo>
 ```
 
 **Regla:** cada conversación debe producir AL MENOS una línea de aprendizaje. Si el usuario detecta un fallo, ese fallo se convierte en regla/anti-patrón/trampa documentado — no en un "lo siento" sin más.
+
+### 🏁 AUDITORÍA DE CIERRE — al elegir el candidato único (16-ago-2026)
+
+> **Trigger:** el usuario elige UN candidato y el Flujo A termina (informe unidad + dossier + ZIP) — o dice "este es" / "cerramos". También si el encargo se **aborta** sin elección: se audita igualmente (aprender por qué no cerró). Es el cierre del embudo: el único momento donde se puede medir si el embudo AHORRÓ de verdad.
+
+**Las 5 dimensiones (respuestas cortas, SIN navegar — solo mirar hacia atrás):**
+
+| # | Dimensión | Qué medir |
+|---|---|---|
+| 1 | **Eficiencia** | Peticiones reales vs presupuesto del plan · ¿en qué fuente/paso se desbordó? |
+| 2 | **Embudo** | Niveles recorridos (D→B→A) · candidatos por nivel · en qué nivel se descartó el 80% · ¿se gastó Fase 2 en alguno que caía por filtro temprano? |
+| 3 | **Correcciones** | Nº de correcciones del usuario + causa raíz (briefing incompleto / plan mal calibrado / fuente que falló) |
+| 4 | **Checkpoints** | ¿Se respetaron CP-D/CP1/CP2/CP3? ¿Cuál se saltó y qué costó? |
+| 5 | **Resultado** | Candidato final (modelo, precio, origen, score) + dato de mercado aprendido |
+
+**Salidas obligatorias (3):**
+1. `memoria/retrospectiva.md` → entrada de sesión con las 5 dimensiones (plantilla de cierre).
+2. `memoria/modelos-medidos.md` → el modelo elegido con precio real verificado + fecha.
+3. **Cada corrección/fallo ≥ 1** → trampa en `memoria/trampas-encontradas.md` o anti-patrón propuesto en `anti_patrones.md` (proponer el texto al usuario, no editar a ciegas).
+
+**Regla de oro:** todo cierre produce ≥ 1 línea de aprendizaje. Si el embudo funcionó SIN correcciones → registrar el patrón en "lo que funcionó" como referencia reutilizable (para repetirlo, no solo para evitar errores).
 
 ---
 
@@ -1012,6 +1181,7 @@ Las 16 reglas duras (A1-A16) viven en `anti_patrones.md`. Cargarlas cuando se du
 - [ ] Cuaderno de sesión al día (correcciones con hora, releído antes de cada micro-plan)
 - [ ] Micro-plan aprobado antes de CADA búsqueda nueva (fuente/banda/filtros/fase)
 - [ ] Auditoría de fase pasada al completar cada paso (entregable · camino · correcciones · cobertura)
+- [ ] Auditoría de cierre al elegir candidato único o abortar (eficiencia · embudo · correcciones · checkpoints · resultado → 3 salidas)
 
 **Al medir**
 - [ ] Fase 1 con las 3 fuentes obligatorias (Coches.net, mobile.de, AutoUncle)

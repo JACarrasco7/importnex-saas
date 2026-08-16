@@ -5,6 +5,25 @@ Todos los cambios notables en el skill `importacion-vehiculos` se documentarán 
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [3.0.0] - 2026-08-16 — Asistente de planificación + Auditoría de cierre de conversación
+
+### 💡 ASISTENTE DE PLANIFICACIÓN — encargos abiertos/vagos
+- Protocolo de 4 pasos ANTES de cualquier búsqueda: **DETECTAR** flujo → **MEJORAR** prompt (solo si vago) → **PLANIFICAR** embudo (plan de barrido + presupuesto de tokens) → **EJECUTAR** en cascada con checkpoints.
+- Prompt Improver integrado en el PASO 2 (referencia a `guia_prompts.md`); plan de barrido integrado en el PASO 3.
+- Tabla "qué herramienta cuándo" (Prompt Improver / briefing / plan de barrido / Flujo D / Flujo A) con ahorro por herramienta.
+- Embudo visualizado por niveles con coste: sondeo (8) → Flujo B (15-50) → Flujo A (35-70) → ~58% de ahorro teórico vs sin embudo.
+- 6 reglas duras: detectar siempre antes de buscar, mejorar solo si vago, checkpoints explícitos, cascada no todo de golpe, opción "busca tú" siempre, plan documentado en cuaderno de sesión.
+
+### 🏁 AUDITORÍA DE CIERRE — al elegir candidato único (nueva)
+- **Trigger:** usuario elige UN candidato (fin de Flujo A + ZIP) o dice "este es"/"cerramos"; también en aborto sin elección.
+- **5 dimensiones:** eficiencia (real vs plan) · embudo (niveles, descartes, Fase 2 mal gastada) · correcciones del usuario (causa raíz) · checkpoints respetados/saltados · resultado final.
+- **3 salidas obligatorias:** entrada en `memoria/retrospectiva.md` (plantilla de cierre nueva) · modelo elegido en `memoria/modelos-medidos.md` · ≥1 trampa/anti-patrón por fallo detectado.
+- Objetivo: verificar si el embudo ahorra de verdad (el 58% teórico pasa a medirse por encargo).
+
+### 📄 Archivos tocados
+- `SKILL.md`: §Asistente de planificación (16-ago) + §Auditoría de cierre tras §Aprendizaje continuo + línea en referencia rápida + item en checklist final.
+- `memoria/retrospectiva.md`: plantilla de CIERRE (5 dimensiones) añadida.
+
 ## [2.9.3] - 2026-08-15 — Sondeo D1 blindado (navegación real, filtros no modelos)
 
 ### 🔴 Búsqueda web PROHIBIDA como sondeo (A15)

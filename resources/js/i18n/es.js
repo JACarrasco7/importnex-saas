@@ -1066,7 +1066,10 @@ export default {
     subtitle: 'Ve dónde están ubicados tus vehículos',
     cars: 'vehículos',
     cities: 'ciudades',
+    vehicles: 'vehículos',
     cars_in: 'vehículos en',
+    location_subtitle: 'Ubicación precisa',
+    vehicles_here: 'Vehículos aquí',
     empty_title: 'Aún no hay datos de ubicación',
     empty_desc: 'Añade lat/lng a tus vehículos para verlos en el mapa.'
   },
