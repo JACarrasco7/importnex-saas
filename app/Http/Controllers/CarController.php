@@ -143,7 +143,8 @@ class CarController extends Controller
                 'inspections_progress' => $inspectionsProgress,
                 'inspections_by_section' => $inspectionsBySection,
                 'documents_by_group' => $documentsByGroup,
-                'matching_requests' => $this->matchingRequests($car),
+                'matching_requests' => $car->client ? [] : $this->matchingRequests($car),
+                'linked_request' => $this->linkedRequest($car),
                 'laravel_pdfs' => $this->laravelPdfs($car),
             ],
         ]);
@@ -175,6 +176,12 @@ class CarController extends Controller
                 'label' => 'Ficha cliente',
                 'route' => route('cars.ficha', $car->id),
                 'available' => $has('ficha-publicitaria.txt'),
+            ],
+            [
+                'key' => 'folleto',
+                'label' => 'Folleto',
+                'route' => route('cars.folleto', $car->id),
+                'available' => true,
             ],
             [
                 'key' => 'informe_interno',
@@ -222,6 +229,42 @@ class CarController extends Controller
             ])
             ->values()
             ->all();
+    }
+
+    /**
+     * Solicitud del cliente ya vinculado al coche (si lo hay). Se usa en la
+     * ficha para mostrar los datos de la solicitud junto al cliente asignado.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function linkedRequest(Car $car): ?array
+    {
+        if (! $car->client_id) {
+            return null;
+        }
+
+        $req = CarRequest::query()
+            ->where('organization_id', $car->organization_id)
+            ->where('client_id', $car->client_id)
+            ->whereIn('status', ['pending', 'contacted', 'in_progress'])
+            ->orderByDesc('created_at')
+            ->first(['id', 'name', 'brand', 'model', 'budget_max', 'budget_min', 'status', 'created_at', 'notes']);
+
+        if (! $req) {
+            return null;
+        }
+
+        return [
+            'id' => $req->id,
+            'name' => $req->name,
+            'brand' => $req->brand,
+            'model' => $req->model,
+            'budget_max' => $req->budget_max,
+            'budget_min' => $req->budget_min,
+            'status' => $req->status,
+            'created_at' => $req->created_at,
+            'notes' => $req->notes,
+        ];
     }
 
     /**

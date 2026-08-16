@@ -3,7 +3,7 @@
 > **Cargar cuando:** Flujo A cerrado con veredicto "Comprar" o "Comprar si baja de precio".
 > **No cargar para:** Flujo B/C, ni informes descartados.
 >
-> **🌍 Origen (12-ago-2026):** el dossier se adapta al origen del coche. Si es **ES** (compra nacional), NO incluir secciones de importación (transporte DE, IEDMT, ausfuhr) — sustituirlas por el desglose ES (`costes.md` §Origen).
+> **🌍 Origen (12-ago-2026):** el dossier se adapta al origen del coche. Si es **ES** (compra nacional), NO incluir secciones de importación (transporte DE, IEDMT, ausfuhr) — sustituirlas por el desglose ES (`../04-negocio/costes.md` §Origen).
 >
 > **Filosofía:** El cliente paga honorarios. A cambio recibe un **dossier profesional** (no un simple anuncio)
 > que justifica la decisión con datos verificables. Genera confianza, reduce fricción en el cierre y

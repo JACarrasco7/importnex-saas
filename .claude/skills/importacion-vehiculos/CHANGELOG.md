@@ -9,7 +9,7 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ### 💡 ASISTENTE DE PLANIFICACIÓN — encargos abiertos/vagos
 - Protocolo de 4 pasos ANTES de cualquier búsqueda: **DETECTAR** flujo → **MEJORAR** prompt (solo si vago) → **PLANIFICAR** embudo (plan de barrido + presupuesto de tokens) → **EJECUTAR** en cascada con checkpoints.
-- Prompt Improver integrado en el PASO 2 (referencia a `guia_prompts.md`); plan de barrido integrado en el PASO 3.
+- Prompt Improver integrado en el PASO 2 (referencia a `01-arranque/guia_prompts.md`); plan de barrido integrado en el PASO 3.
 - Tabla "qué herramienta cuándo" (Prompt Improver / briefing / plan de barrido / Flujo D / Flujo A) con ahorro por herramienta.
 - Embudo visualizado por niveles con coste: sondeo (8) → Flujo B (15-50) → Flujo A (35-70) → ~58% de ahorro teórico vs sin embudo.
 - 6 reglas duras: detectar siempre antes de buscar, mejorar solo si vago, checkpoints explícitos, cascada no todo de golpe, opción "busca tú" siempre, plan documentado en cuaderno de sesión.
@@ -45,15 +45,15 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ### 📄 Archivos tocados
 - `SKILL.md`: D1 reescrito (navegación real, filtros, cobertura total, potencia mínima, rango aprobado) + reglas duras 4-6 del Flujo D.
-- `anti_patrones.md`: A15, A16 nuevos; A13 extendido; checklist y tabla de origen actualizados.
+- `06-reglas/anti_patrones.md`: A15, A16 nuevos; A13 extendido; checklist y tabla de origen actualizados.
 
 ## [2.9.2] - 2026-08-15 — Contrato de datos completo para Laravel (descripción original, equipamiento, campos del anuncio)
 
 ### 🔴 Descripción original literal (punto 8 de la auditoría)
-- `anuncio.descripcion_original` = **texto literal COMPLETO del anuncio** (pegado tal cual, sin resumir ni corregir) + `descripcion_traducida` completa. Regla dura en `contrato.md`, `SKILL.md` (reglas del ZIP) y checklist. Antes la skill no forzaba el original → riesgo de que el ZIP llegara solo con traducción/resumen.
+- `anuncio.descripcion_original` = **texto literal COMPLETO del anuncio** (pegado tal cual, sin resumir ni corregir) + `descripcion_traducida` completa. Regla dura en `03-informes/contrato.md`, `SKILL.md` (reglas del ZIP) y checklist. Antes la skill no forzaba el original → riesgo de que el ZIP llegara solo con traducción/resumen.
 
 ### 🎛️ Equipamiento COMPLETO del anuncio
-- `vehiculo.equipamiento` = **lista COMPLETA** de la sección `Ausstattung`/features, no solo los 15 destacados del `informe_tecnico.md` (esa lista es solo para el informe humano).
+- `vehiculo.equipamiento` = **lista COMPLETA** de la sección `Ausstattung`/features, no solo los 15 destacados del `03-informes/informe_tecnico.md` (esa lista es solo para el informe humano).
 - Motivo: Laravel lo muestra en la ficha y lo usa para el ajuste de comparable y la ficha publicitaria. Un coche mal equipado en el JSON sale más pobre de lo que es.
 
 ### 📰 Campos extra del anuncio (nuevos en contrato.md)
@@ -113,15 +113,15 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 - **Controladores**: docblocks con el mapa de "qué PDF genera qué y de qué esqueleto" en `PaqueteValoracionController` y `JJImportFolletoController`.
 
 ### 📚 Mapa de PDFs documentado (7 PDFs, tipos y dónde se crean)
-- **`SKILL.md`** §MAPA DE PDFs, **`contrato.md`** §Mapa de PDFs, **`docs/MAPA_PDFS.md`** (repo) e **`INSTRUCCIONES_PROYECTO.md`** (Desktop): tabla de 7 PDFs (3 Claude investigación + 4 Laravel venta) con origen y ruta de creación.
+- **`SKILL.md`** §MAPA DE PDFs, **`03-informes/contrato.md`** §Mapa de PDFs, **`docs/MAPA_PDFS.md`** (repo) e **`INSTRUCCIONES_PROYECTO.md`** (Desktop): tabla de 7 PDFs (3 Claude investigación + 4 Laravel venta) con origen y ruta de creación.
 - **Tests**: `tests/Feature/PlantillasValoracionRenderTest.php` (render de informe-interno y ficha-coche con secciones premium).
-- Nota: briefing PDF ya eliminado (v2.9.8); status cliente 'Briefing' y `briefing_encargo.md` no son el PDF.
+- Nota: briefing PDF ya eliminado (v2.9.8); status cliente 'Briefing' y `01-arranque/briefing_encargo.md` no son el PDF.
 
 ## [2.9.8] - 2026-08-15 — Briefing PDF eliminado del ecosistema
 
 ### 🗑️ Eliminación (decisión del usuario)
 - **Laravel:** eliminadas la vista `jj-import/briefing.blade.php`, las rutas `/cars/{car}/marketing/briefing` y `/api/cars/{car}/briefing-pdf`, los métodos `CarMarketingController::briefing()` y `ImportValuationApiController::attachBriefing()`, la entrada 'briefing' del listado de PDFs (`CarController::laravelPdfs`) y `briefing_pdf` (`CarDocumentDefinitions`). Borrado `BriefingPdfApiTest`.
-- **Nota:** el status de cliente 'Briefing' (pipeline de ventas) NO se toca — es un estado del cliente, no un informe. `briefing_encargo.md` (cuestionario previo) se mantiene — NO es el PDF briefing.
+- **Nota:** el status de cliente 'Briefing' (pipeline de ventas) NO se toca — es un estado del cliente, no un informe. `01-arranque/briefing_encargo.md` (cuestionario previo) se mantiene — NO es el PDF briefing.
 - **Resultado: 7 PDFs** — 3 Claude (búsqueda global, modelo, unidad) + 4 Laravel (dossier, ficha-coche, informe-interno, folleto).
 
 ## [2.9.9] - 2026-08-16 — Rediseño premium de plantillas Blade Laravel
@@ -154,7 +154,7 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 ### 🟢 Cobertura Milanuncios al 100%
 - Confirmado navegando: **`&pagina=N`** carga el listado completo y **respeta los filtros** (contenedor `.ma-AdList`, parámetro `pagina`).
 - `trampas-encontradas.md`: virtualización marcada **RESUELTA** — la paginación por URL es la vía principal; el scroll infinito NO es fiable.
-- `paginas_reales.md`: URL de filtros reales (`anoh`, `cajacambio`, `engineHpTo`, `fuels`, `hasta`, `kilometersTo`, `puertas`, `orden`) + `pagina=N` + `nextToken` (degradado).
+- `02-flujos/paginas_reales.md`: URL de filtros reales (`anoh`, `cajacambio`, `engineHpTo`, `fuels`, `hasta`, `kilometersTo`, `puertas`, `orden`) + `pagina=N` + `nextToken` (degradado).
 
 ## [2.9.5] - 2026-08-15 — Limpieza de inconsistencias residuales
 
@@ -215,7 +215,7 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 - **SKILL.md** §DÓNDE SE GUARDA CADA COSA reescrito con tabla única QUÉ archivo va DÓNDE: `.md` del usuario en `informes\<marca>\<modelo>\`; JSON de contrato (`flujo-a/b/c`) en `laravel\export\`; ZIP en `laravel\paquetes\`.
 - **Aclaración explícita:** `informe.json` NO existe suelto — va DENTRO del ZIP y lo genera `empaquetar.py` desde `export\flujo-a-<coche_id>.json`. Confusión real detectada: se buscaba un "informe de JSON" en la carpeta del modelo.
-- `operaciones.md` y `README.md` del Desktop actualizados con la misma tabla.
+- `05-operaciones/operaciones.md` y `README.md` del Desktop actualizados con la misma tabla.
 
 ## [2.6.0] - 2026-08-15 — Estructura de carpetas por marca/modelo en el Desktop
 
@@ -243,7 +243,7 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 - **A9** — No afirmar haber visto/medido algo sin comprobarlo (caso Tiguan: "sí lo vi en mi barrido" sin verificar).
 - **A10** — Precio financiado como gancho en portales ES (MUY CAR/Flexicar): confirmar contado antes de la tabla.
 - **A11** — Paginación completa de Coches.net ordenando por precio (`pg=` + `pf=`), no muestrear 6 de muchas páginas.
-- Actualizado en `anti_patrones.md` (8 → 11) y `SKILL.md` checklist.
+- Actualizado en `06-reglas/anti_patrones.md` (8 → 11) y `SKILL.md` checklist.
 
 ## [2.4.2] - 2026-08-12 — Cascada de informes + checkpoints Flujo B
 
@@ -252,14 +252,14 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 - Laravel = **repositorio único y fuente de verdad** de informes PDF, imágenes, JSON, dossier, folleto.
 - Flujo: Claude investiga → sube paquete ZIP a `/api/import-valuation` → **FIN**. Laravel gestiona ver/mostrar/actualizar/iterar.
 - Claude **NO consulta** lo subido. Cada nuevo encargo = nuevo chat en Claude.
-- Documentado en `operaciones.md` §División de trabajo · Desktop `CLAUDE.md` · Laravel `copilot-instructions.md`.
+- Documentado en `05-operaciones/operaciones.md` §División de trabajo · Desktop `CLAUDE.md` · Laravel `copilot-instructions.md`.
 - Tras la prueba VS Code: la investigación con filtros se hace en Claude Desktop (VS Code lee pero no filtra bien, ver `memoria/retrospectiva.md`).
 
 ### 🏢 Cambio de negocio (12-ago-2026)
 - **Ampliación:** JJ Import Motors ya no solo importa desde Alemania — también ofrece servicios de búsqueda y gestión **dentro de España**.
 - **Modelo sin compra (reforzado):** la empresa **NO compra coches ni mantiene stock**. Solo **oferta el servicio** de búsqueda, importación y gestión con honorarios fijos. El cliente es quien compra el coche.
-- **🌍 Origen DE vs ES:** si el encargo no especifica origen, buscar el modelo en **ambos mercados** y comparar dónde sale mejor (coste total puesto en Huelva). `costes.md` §Origen con las dos fórmulas (DE con importación, ES sin importación) + comparativa.
-- Reflejado en: `SKILL.md` (frontmatter + negocio + origen) · `costes.md` · `briefing_encargo.md` (parámetro origen) · `extractores.md` · Desktop `CLAUDE.md`/`INSTRUCCIONES_PROYECTO.md`/`README.md` · Laravel `copilot-instructions.md` · `docs/guias/README.md`.
+- **🌍 Origen DE vs ES:** si el encargo no especifica origen, buscar el modelo en **ambos mercados** y comparar dónde sale mejor (coste total puesto en Huelva). `04-negocio/costes.md` §Origen con las dos fórmulas (DE con importación, ES sin importación) + comparativa.
+- Reflejado en: `SKILL.md` (frontmatter + negocio + origen) · `04-negocio/costes.md` · `01-arranque/briefing_encargo.md` (parámetro origen) · `02-flujos/extractores.md` · Desktop `CLAUDE.md`/`INSTRUCCIONES_PROYECTO.md`/`README.md` · Laravel `copilot-instructions.md` · `docs/guias/README.md`.
 ### � Auditoría proactiva (revisión de consistencia)- **🛡️ Regla dura #5 — COBERTURA COMPLETA (12-ago-2026):** se intentan SIEMPRE las 7 fuentes (ni más ni menos). Nunca cifras/veredicto con <7 sin marcar informe PARCIAL + preguntar. Caso real: se dieron precios con 2-3 fuentes y AutoScout24.
 - **Tabla de fiabilidad por fuente** en `SKILL.md`: mobile.de (precio DE 🟢) + Coches.net (precio ES 🟢) como únicas referencias de precio; AutoUncle solo rotación; AutoScout24 SOLO contar (🔴 nunca precio, agrega feeds sin cribar); kleinanzeigen/Wallapop/Milanuncios chollos particulares.
 - **Anti-patrones A7 y A8** añadidos (cobertura incompleta + AutoScout24 como precio). Total: 8.
@@ -270,7 +270,7 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 - **anti_patrones.md** — typo "Claudeestima" → "Claude estima".
 - **SKILL.md** — referencia rápida de checkpoints actualizada (CP1 = esperar elección de candidato tras informe MODELO).
 - **🔁 APRENDIZAJE CONTINUO:** regla en `SKILL.md` §Aprendizaje continuo + plantilla `memoria/retrospectiva.md`. Cada conversación produce ≥1 aprendizaje; los fallos del usuario se convierten en trampa/anti-patrón/regla documentada.
-- **🚗 Motores gasolina 2016+** en `riesgos.md` · **⚠️ Regla IEDMT** en `costes.md` (no estimar de oído) · **🧠 preferencias de negocio** en proyecto (`preferencias.md`).
+- **🚗 Motores gasolina 2016+** en `04-negocio/riesgos.md` · **⚠️ Regla IEDMT** en `04-negocio/costes.md` (no estimar de oído) · **🧠 preferencias de negocio** en proyecto (`preferencias.md`).
 
 ### �🔄 Cascada de informes (regla dura nueva)
 - **SKILL.md** §CASCADA DE INFORMES: los informes NO salen todos a la vez. Flujo B entrega INFORME MODELO + top 5 con enlaces + CP1 → usuario elige → se convierte a Flujo A → informe UNIDAD → dossier → ZIP.
@@ -384,15 +384,15 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 ## [2.1.0] - 2026-08-12 — Documentación §3.7 y refactor §2.3
 
 ### ✅ §3.7 — Documentación `verify_desktop_sync.py`
-- **Nueva sección** `## ✅ Verificación de sincronización Desktop (ARRANQUE)` al inicio de `operaciones.md`
+- **Nueva sección** `## ✅ Verificación de sincronización Desktop (ARRANQUE)` al inicio de `05-operaciones/operaciones.md`
 - Documenta comando (`py .claude/skills/.../verify_desktop_sync.py`), qué verifica (12 scripts + 2 datos), output exitoso y output con faltantes
 - Integra con flujo Claude: ejecutar **siempre** al inicio de sesión antes de leer `indice.json` o invocar `franja.py`
 - Exit code 0 = sesión OK; exit code ≠ 0 = NO arrancar
 
 ### 📐 §2.3 — Single source of truth IEDMT
-- `contrato.md` §`costes`: el bloque IEDMT ahora referencia [`costes.md §IEDMT`](costes.md#-iedmt-orden-hac15012025-vigor-1-ene-2026) en lugar de duplicar la fórmula
+- `03-informes/contrato.md` §`costes`: el bloque IEDMT ahora referencia [`04-negocio/costes.md §IEDMT`](../04-negocio/costes.md#-iedmt-orden-hac15012025-vigor-1-ene-2026) en lugar de duplicar la fórmula
 - `iedmt_metodologia` redefinido: cadena corta con PVP/antigüedad/CO₂/cifras resultantes (ejemplo real), sin desglose de fórmula
-- Single source of truth mantenida en `costes.md` (Orden HAC/1501/2025)
+- Single source of truth mantenida en `04-negocio/costes.md` (Orden HAC/1501/2025)
 
 ---
 

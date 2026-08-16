@@ -222,6 +222,8 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     // Paquete de valoración (esqueletos .txt → PDF con Blade + Browsershot)
     // Ficha del cliente: cuelga del expediente (autenticado).
     Route::get('/cars/{car}/ficha', [PaqueteValoracionController::class, 'ficha'])->name('cars.ficha');
+    // Folleto del coche: versión visual/compacta para venta.
+    Route::get('/cars/{car}/folleto', [PaqueteValoracionController::class, 'folleto'])->name('cars.folleto');
     // Informe interno: SOLO equipo, nunca expuesto al cliente.
     Route::get('/cars/{car}/informe-interno', [PaqueteValoracionController::class, 'interno'])->name('cars.informe-interno');
 

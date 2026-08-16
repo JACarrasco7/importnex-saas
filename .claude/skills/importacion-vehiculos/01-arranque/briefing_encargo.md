@@ -15,7 +15,7 @@ Antes de abrir cualquier portal, confirmar con el usuario (si no vienen dados):
 |---|---|---|---|
 | 1 | **Modelo + versión** | Opel Astra J OPC | ✅ SIEMPRE · **si NO hay modelo pero sí presupuesto+requisitos → FLUJO D** (sondeo de modelos), no se pregunta el modelo |
 
-**📓 Arranque de sesión (15-ago-2026):** crear el cuaderno `informes\_sesion\sesion_<fecha>_<encargo>.md` con los parámetros confirmados ANTES de la primera búsqueda. Toda corrección del usuario entra en el cuaderno y se aplica YA (ver SKILL.md §CUADERNO DE SESIÓN).
+**📓 Arranque de sesión (15-ago-2026):** crear el cuaderno `informes_sesion\sesion_<fecha>_<encargo>.md` con los parámetros confirmados ANTES de la primera búsqueda. Toda corrección del usuario entra en el cuaderno y se aplica YA (ver `../SKILL.md` §CUADERNO DE SESIÓN).
 | 2 | **Año mínimo (EZ)** | ≥2012 | ✅ SIEMPRE |
 | 3 | **Km máximo** | ≤130.000 | ✅ SIEMPRE |
 | 4 | **Presupuesto tope** | ≤15.000 € (o "sin límite") | ✅ SIEMPRE · 🎯 confirmar **modalidad de honorarios M1/M2/M3** (ver abajo) — no asumir |
@@ -67,7 +67,7 @@ ENTIENDO EL ENCARGO:
 **NO abrir ningún portal hasta que el usuario confirme los críticos (1-4).** Con eso basta para Fase 1.
 
 **⚠️ EXCEPCIÓN (12-ago-2026) — Modo automático:**
-> Si TODOS los críticos ya vienen dados en el mensaje (modelo+versión, año mín, km máx, presupuesto, potencia si tope de gama, combustible, cambio, finalidad), **NO esperar respuesta para el briefing**. Confirmar en 1 línea ("Entendido, encargo completo") y ejecutar Fase 1 automática → entregar INFORME MODELO + top 5 → **esperar a que el usuario elija candidato**. Tras elegir: todo automático (fotos + informe UNIDAD + dossier + ZIP; si son varios → comparativa antes). Ver `SKILL.md` §MODO AUTOMÁTICO.
+> Si TODOS los críticos ya vienen dados en el mensaje (modelo+versión, año mín, km máx, presupuesto, potencia si tope de gama, combustible, cambio, finalidad), **NO esperar respuesta para el briefing**. Confirmar en 1 línea ("Entendido, encargo completo") y ejecutar Fase 1 automática → entregar INFORME MODELO + top 5 → **esperar a que el usuario elija candidato**. Tras elegir: todo automático (fotos + informe UNIDAD + dossier + ZIP; si son varios → comparativa antes). Ver `../SKILL.md` §PROTOCOLO DE MANDO.
 
 ---
 
@@ -107,7 +107,7 @@ Si el modelo/versión buscado es un **tope de gama**, preguntar/confirmar la pot
 
 **¿Es tope de gama?** Palabras clave en la versión: `OPC`, `GTI`, `GTD`, `R`, `M`, `AMG`, `RS`, `Type R`, `N`, `GTE`, `ST`, `XRi`, `TS`, `Performance`, `Clubsport`, `+`.
 
-Si SÍ → la búsqueda usa DOBLE PASADA (ver `playbook_filtrado.md` §Doble pasada):
+Si SÍ → la búsqueda usa DOBLE PASADA (ver `../02-flujos/playbook_filtrado.md` §Doble pasada):
 ```
 Búsqueda 1: variante de texto
 Búsqueda 2: modelo base + filtro kW (potencia_tope ±10)
@@ -147,7 +147,7 @@ Esto permite: reutilizar el encargo, ver resultados anteriores, y no repetir bú
 
 ## 📋 Reglas duras del briefing
 
-1. **NUNCA** navegar sin confirmar los críticos (modelo, año mín, km máx, presupuesto) — **salvo que ya vengan dados** (entonces modo automático, ver `SKILL.md` §MODO AUTOMÁTICO).
+1. **NUNCA** navegar sin confirmar los críticos (modelo, año mín, km máx, presupuesto) — **salvo que ya vengan dados** (entonces modo automático, ver `../SKILL.md` §PROTOCOLO DE MANDO).
 2. **SIEMPRE** confirmar potencia si es tope de gama (activa doble pasada).
 3. **SIEMPRE** guardar el encargo en memoria al cerrarlo.
 4. **NUNCA** repetir una búsqueda que ya está en memoria (leer primero).

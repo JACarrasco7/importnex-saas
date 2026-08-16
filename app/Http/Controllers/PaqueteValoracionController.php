@@ -51,6 +51,37 @@ class PaqueteValoracionController extends Controller
         ], 'Ficha_'.$this->slug($car));
     }
 
+    /**
+     * Folleto del coche: versión visual/compacta (portada, precio, veredicto)
+     * para imprimir o enviar por WhatsApp. Distinta de la ficha técnica.
+     *
+     * GET /cars/{car}/folleto
+     */
+    public function folleto(Car $car)
+    {
+        $contenido = $this->leer($car, 'ficha-publicitaria.txt');
+        if ($contenido === null) {
+            $contenido = $this->fichaDesdeCar($car);
+        }
+
+        $e = Esqueleto::desde($contenido);
+        $qrUrl = $e->uno('QR') ?? route('public.car-request.index', ['slug' => 'jj-import-motors']);
+
+        return $this->pdf('jj-import.folleto-coche', [
+            'e' => $e,
+            'car' => $car,
+            'logo_base64' => $this->logo(),
+            'fotos' => $this->fotos($car),
+            'qr_svg' => QrCode::format('svg')
+                ->size(200)->margin(1)->errorCorrection('H')
+                ->backgroundColor(255, 255, 255)->color(6, 16, 31)
+                ->generate($qrUrl),
+            'telefono_1' => '675 70 14 39',
+            'telefono_2' => '691 48 59 27',
+            'email' => 'jjimportmotors@gmail.com',
+        ], 'Folleto_'.$this->slug($car));
+    }
+
     public function interno(Car $car)
     {
         // Requisito duro: solo el equipo interno (rol owner/operator autenticado).

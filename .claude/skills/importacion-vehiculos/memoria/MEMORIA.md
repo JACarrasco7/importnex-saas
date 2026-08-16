@@ -9,10 +9,13 @@
 | Archivo | Qué guarda | Cuándo consultar |
 |---|---|---|
 | **`MEMORIA.md`** (este) | Índice | SIEMPRE al inicio |
-| `memoria/modelos-medidos.md` | Histórico de modelos investigados | Al retomar un modelo ya medido |
+| `memoria/modelos-medidos.md` | Histórico de modelos investigados (cache) | Al retomar un modelo ya medido (PASO 0) |
+| `memoria/encargos.md` | Registro central de encargos (cliente→flujo→entregables→resultado) | Al recibir cualquier encargo (PASO 0) · Auditoría de cierre |
+| `memoria/filtros-portales.md` | Filtros/URLs verificados por portal (qué aplica por URL vs clic) | Al construir el plan de fase / asesor de filtros |
 | `memoria/vendedores-confianza.md` | Dealers que responden bien | Antes de negociar |
 | `memoria/trampas-encontradas.md` | Trampas detectadas en portales | Antes de cada navegación |
 | `memoria/mejoras-aplicadas.md` | Cambios y mejoras del skill | Al planificar cambios |
+| `memoria/retrospectiva.md` | Retrospectivas de sesión + plantilla de CIERRE | Al cerrar conversación / auditoría de cierre |
 
 ---
 
@@ -21,17 +24,21 @@
 ### Al INICIO de cada conversación:
 1. Lee este `MEMORIA.md`
 2. Lee `trampas-encontradas.md` (NO repetir errores)
-3. Lee `modelos-medidos.md` (saber qué ya está hecho)
+3. Lee `modelos-medidos.md` + `encargos.md` (saber qué ya está hecho → **PASO 0 cache**, ver `../SKILL.md` §ARRANQUE)
 4. Lee `mejoras-aplicadas.md` (respetar lo que funciona)
+5. **3bis:** si el encargo es de mercado → cruzar con `indice.json` (Desktop, regla <3 semanas) y `datos_mercado.json`
 
 ### Durante la conversación:
 - Si descubres una trampa nueva → añádela a `trampas-encontradas.md`
-- Si mides un modelo nuevo → añádelo a `modelos-medidos.md`
+- Si mides un modelo nuevo → añádelo a `modelos-medidos.md` (12 campos, con `refrescar_antes_de`)
+- Si cierras/abortas un encargo → regístralo en `encargos.md`
+- Si verificas un filtro/URL nuevo en un portal → añádelo a `filtros-portales.md` (fecha + parámetro)
 - Si un vendedor responde bien/mal → anótalo en `vendedores-confianza.md`
 - Si mejoras el skill → documéntalo en `mejoras-aplicadas.md`
 
 ### Al FINALIZAR:
-- Verifica que los 4 archivos de memoria estén actualizados
+- **Auditoría de cierre** (ver `../SKILL.md` §AUDITORÍA DE CIERRE): volcar las 5 dimensiones a `retrospectiva.md` (plantilla CIERRE)
+- Verifica que los 8 archivos de memoria estén actualizados
 - Si hay aprendizajes grandes → añádelos también a `.claude/memoria/decisiones.md` del proyecto
 
 ---
@@ -56,8 +63,8 @@
 
 | Métrica | Valor |
 |---|---|
-| Versión actual | 2.9.0 |
-| Fecha de release | 2026-08-15 |
+| Versión actual | 3.1.0 |
+| Fecha de release | 2026-08-16 |
 
 ---
 
@@ -82,7 +89,7 @@ ENCARGO (Flujo B) → 📋 INFORME MODELO + top 5 con ENLACES → CP1 (¿Fase 2 
 
 - **Negocio:** NO compramos stock. Solo ofertamos el servicio (honorarios). El cliente compra el coche.
 - **Ámbito:** importación desde Alemania + servicios de búsqueda y gestión dentro de España.
-- **Origen:** si no se especifica → buscar en AMBOS mercados y comparar dónde sale mejor. DE = con costes de importación; ES = sin ellos. Ver `costes.md` §Origen.
+- **Origen:** si no se especifica → buscar en AMBOS mercados y comparar dónde sale mejor. DE = con costes de importación; ES = sin ellos. Ver `../04-negocio/costes.md` §Origen.
 
 ## 📊 Métricas del skill (detalle)
 
@@ -91,8 +98,9 @@ ENCARGO (Flujo B) → 📋 INFORME MODELO + top 5 con ENLACES → CP1 (¿Fase 2 
 | Fuentes integradas | 7 portales |
 | Cobertura | 100% (DE + ES) |
 | Trampas documentadas | 8 (4 confirmadas, 4 potenciales) |
-| Modelos medidos | 3 (Astra OPC, Tiguan, Golf GTI) |
+| Modelos medidos | 4 (Astra OPC ×2, Tiguan, Golf GTI) |
 | Coches evaluados | 7 |
+| Encargos registrados | 9 (8 cerrados + 1 abortado) |
 | Tests PHP pasando | 4/4 |
 
 ---
@@ -110,6 +118,4 @@ ENCARGO (Flujo B) → 📋 INFORME MODELO + top 5 con ENLACES → CP1 (¿Fase 2 
 
 ## 🗓️ Última actualización
 
-- **2026-08-15:** v2.9.5 — A6 reforzado (enlaces siempre a la ficha del anuncio), guía 05 sincronizada (D1a/D1b, A15/A16), fix CHANGELOG duplicado. v2.9.4 plantilla PDF de marca única. v2.9.3 sondeo D1 blindado (navegación real, filtros no modelos, D1a+D1b).
-- **2026-08-15:** v2.9.0 — Flujo D (descubrimiento), anti-patrones A9-A14, El Camino, micro-plan, cuaderno de sesión, auditoría de fase, entregables por fase.
-- **2026-08-12:** Sistema de memoria del skill creado. 4 archivos de memoria + este índice.
+- **2026-08-16:** v3.1.0 — Reorganización física completa (carpetas 01-06), `encargos.md` + `filtros-portales.md` creados, `modelos-medidos.md` ampliado a 12 campos, este índice con 8 archivos + PASO 0 cache.

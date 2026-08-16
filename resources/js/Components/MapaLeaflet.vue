@@ -1,5 +1,9 @@
 <script setup>
 import { onMounted, ref, watch } from 'vue';
+import 'leaflet/dist/leaflet.css';
+import iconRetinaUrl from 'leaflet/dist/images/marker-icon-2x.png';
+import iconUrl from 'leaflet/dist/images/marker-icon.png';
+import shadowUrl from 'leaflet/dist/images/marker-shadow.png';
 
 const props = defineProps({
     lat: { type: [String, Number], default: null },
@@ -17,12 +21,11 @@ onMounted(async () => {
 
     const L = await import('leaflet');
 
-    // Configurar rutas de iconos de Leaflet
-    delete L.Icon.Default.prototype._getIconUrl;
+    // Iconos de marcador empaquetados por Vite (rutas automáticas al build)
     L.Icon.Default.mergeOptions({
-        iconRetinaUrl: '/build/assets/marker-icon-2x.png',
-        iconUrl: '/build/assets/marker-icon.png',
-        shadowUrl: '/build/assets/marker-shadow.png',
+        iconRetinaUrl,
+        iconUrl,
+        shadowUrl,
     });
 
     map = L.map(mapContainer.value, {
@@ -33,11 +36,15 @@ onMounted(async () => {
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19,
     }).addTo(map);
 
     marker = L.marker([parseFloat(props.lat), parseFloat(props.lng)], {
         title: props.markerText,
     }).addTo(map).bindPopup(props.markerText).openPopup();
+
+    // Invalidar tamaño tras montar para evitar paneles grises con layouts flex
+    setTimeout(() => map.invalidateSize(), 100);
 });
 
 watch(() => props.lat, (newVal) => {

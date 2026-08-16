@@ -147,4 +147,50 @@ class PlantillasValoracionRenderTest extends TestCase
         $this->assertStringContainsString('badge-origen de', $html);
         $this->assertStringContainsString('DE', $html);
     }
+
+    public function test_folleto_coche_renderiza_veredicto_y_cta(): void
+    {
+        $contenido = implode("\n", [
+            '# Folleto de ejemplo',
+            '[TITULO] Opel Astra J OPC',
+            '[CLAIM] Importado y verificado',
+            '[SPEC] KM | 120.000',
+            '[SPEC] Año | 2013',
+            '[SPEC] Combustible | Gasolina',
+            '[PRECIO] 14.900 €',
+            '[AHORRO] 1.500 €',
+            '[ARGUMENTO] Coche en perfecto estado | sin detalles',
+        ]);
+
+        $e = Esqueleto::desde($contenido);
+        $car = new Car([
+            'pais_origen' => 'Alemania',
+            'traffic_light' => 'green',
+        ]);
+
+        $html = View::make('jj-import.folleto-coche', [
+            'e' => $e,
+            'car' => $car,
+            'logo_base64' => null,
+            'fotos' => [],
+            'telefono_1' => '675 70 14 39',
+            'telefono_2' => '691 48 59 27',
+            'email' => 'jjimportmotors@gmail.com',
+        ])->render();
+
+        // Portada / precio protagonista
+        $this->assertStringContainsString('FOLLETO DEL COCHE', $html);
+        $this->assertStringContainsString('14.900 €', $html);
+        // KPI grid
+        $this->assertStringContainsString('Kilómetros', $html);
+        $this->assertStringContainsString('120.000', $html);
+        // Veredicto con semáforo verde
+        $this->assertStringContainsString('Veredicto:', $html);
+        $this->assertStringContainsString('Excelente compra', $html);
+        $this->assertStringContainsString('#10b981', $html);
+        // CTA + QR
+        $this->assertStringContainsString('¿Te interesa este coche?', $html);
+        $this->assertStringContainsString('Escanea', $html);
+        $this->assertStringContainsString('675 70 14 39', $html);
+    }
 }

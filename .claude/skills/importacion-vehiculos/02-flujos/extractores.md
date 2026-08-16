@@ -149,7 +149,7 @@ noticias**. Usa `/segunda-mano/coches/<marca>-<modelo>`.
 - **Fase 2:** Las 4 restantes + fichas top 15-25 + km77 si hay versión conocida
 - **Output:** 7 fuentes + informe MODELO + top 5
 
-> **🌍 Origen DE vs ES (12-ago-2026):** las fuentes ES (Coches.net, Wallapop, Milanuncios) ya NO son solo comparables de venta — también son fuentes de **compra** (coche nacional). Si el origen no está especificado, medir ambos mercados y comparar dónde sale mejor. Ver `costes.md` §Origen.
+> **🌍 Origen DE vs ES (12-ago-2026):** las fuentes ES (Coches.net, Wallapop, Milanuncios) ya NO son solo comparables de venta — también son fuentes de **compra** (coche nacional). Si el origen no está especificado, medir ambos mercados y comparar dónde sale mejor. Ver `../04-negocio/costes.md` §Origen.
 
 ### Flujo C (MERCADO) — escanear N modelos
 - **Solo Fase 1** por modelo (3 fuentes). No hay Fase 2.

@@ -32,15 +32,15 @@ triggers:
 
 Localizar coches (desde Alemania y dentro de España) y **ofertar el servicio de importación/gestión** a clientes. **NO compramos stock** — solo honorarios por el servicio. El cliente es quien compra el coche.
 
-> 📁 **Compañeros:** `navegacion_real.md` (MÉTODO PREFERIDO — navegar como humano) · `paginas_reales.md` (estructura REAL capturada de los 7 portales) · `playbook_filtrado.md` (técnicas de filtrado/búsqueda para Claude Desktop) · `extractores.md` (URLs, trampas, diccionario) · `contrato.md` (JSON + esqueleto) · `operaciones.md` (carpetas, scripts) · **`anti_patrones.md`** (reglas duras 14)
+> 📁 **Compañeros:** `02-flujos/navegacion_real.md` (MÉTODO PREFERIDO — navegar como humano) · `02-flujos/paginas_reales.md` (estructura REAL capturada de los 7 portales) · `02-flujos/playbook_filtrado.md` (técnicas de filtrado/búsqueda para Claude Desktop) · `02-flujos/extractores.md` (URLs, trampas, diccionario) · `03-informes/contrato.md` (JSON + esqueleto) · `05-operaciones/operaciones.md` (carpetas, scripts) · **`06-reglas/anti_patrones.md`** (reglas duras 16)
 > 
-> 📚 **Módulos especializados:** `comparables.md` (ajuste 9 claves) · `costes.md` (IEDMT + desglose) · `riesgos.md` (motores problemáticos) · `operaciones_cierre.md` (cierre + KPIs + sync)
+> 📚 **Módulos especializados:** `03-informes/comparables.md` (ajuste 9 claves) · `04-negocio/costes.md` (IEDMT + desglose) · `04-negocio/riesgos.md` (motores problemáticos) · `05-operaciones/operaciones_cierre.md` (cierre + KPIs + sync)
 >
-> 📄 **Informes ( outputs finales):** `informe_tecnico.md` (análisis interno 15 secciones + score 0-100) · `dossier_cliente.md` (PDF profesional para cliente, 15 secciones, genera confianza)
+> 📄 **Informes ( outputs finales):** `03-informes/informe_tecnico.md` (análisis interno 15 secciones + score 0-100) · `03-informes/dossier_cliente.md` (PDF profesional para cliente, 15 secciones, genera confianza)
 >
-> 🧠 **Memoria persistente (12-ago-2026):** `MEMORIA.md` (léeme primero) · `memoria/modelos-medidos.md` · `memoria/vendedores-confianza.md` · `memoria/trampas-encontradas.md` · `memoria/mejoras-aplicadas.md`
+> 🧠 **Memoria persistente (12-ago-2026):** `memoria/MEMORIA.md` (léeme primero) · `memoria/modelos-medidos.md` · `memoria/vendedores-confianza.md` · `memoria/trampas-encontradas.md` · `memoria/mejoras-aplicadas.md`
 >
-> 🎯 **Briefing de encargo (12-ago-2026):** `briefing_encargo.md` — preguntas previas OBLIGATORIAS antes de navegar (año mín, km máx, presupuesto, potencia si tope de gama). Ahorra tokens y evita re-búsquedas.
+> 🎯 **Briefing de encargo (12-ago-2026):** `01-arranque/briefing_encargo.md` — preguntas previas OBLIGATORIAS antes de navegar (año mín, km máx, presupuesto, potencia si tope de gama). Ahorra tokens y evita re-búsquedas.
 
 ---
 
@@ -49,20 +49,19 @@ Localizar coches (desde Alemania y dentro de España) y **ofertar el servicio de
 ```
 Umbrales objetivo: Nicho ≥10% | Rotación ≥10% | Tramo 8-14k ≥12%
 Umbrales mínimos (EXIT 3): Nicho 8% | Rotación 10% | Tramo 8-14k 12%
-Costes fijos: ver `costes.md` (transporte + ausfuhr + ITV + honorarios) — §1.4 single source of truth
-Costes fijos: Transporte 900€ + Ausfuhr 114€ + ITV 115€ + Honorarios 1.500-2.250€
+Costes fijos: ver `04-negocio/costes.md` (transporte + ausfuhr + ITV + honorarios) — §1.4 single source of truth
 Fuentes: 7 (Wallapop, Milanuncios, Coches.net, mobile.de, AS24.de, AutoUncle, kleinanzeigen.de)
-Método: navegación real estilo humano SIEMPRE primero → ver `navegacion_real.md`
-Playbook de filtrado: `playbook_filtrado.md` · estructura real: `paginas_reales.md`
+Método: navegación real estilo humano SIEMPRE primero → ver `02-flujos/navegacion_real.md`
+Playbook de filtrado: `02-flujos/playbook_filtrado.md` · estructura real: `02-flujos/paginas_reales.md`
 Trampas top 3: countryCode SIEMPRE | navegación real primero (screenshot+clic), degradado si no se ve | mobile.de directo NUNCA saltar
 Anti-patrones bloqueados: 16 (A1-A16, ver §Anti-patrones)
 Camino fijo: waypoint 📍 en cada mensaje · desviaciones = misión lateral con retorno ↩⃾ (A14)
 Micro-plan 3-5 líneas antes de CADA búsqueda · cuaderno de sesión en informes\_sesion\
 Checkpoints: CP-D tras informe MODELOS (elegir modelos) | CP1 tras informe MODELO (esperar elección de candidato) | CP2 tras comparable | CP3 antes de veredicto
 Flujo D (cliente sin modelo): sondeo modelos ES+DE → informe MODELOS (país×año×motor) → embudo a B
-Origen DE vs ES: si no se especifica, buscar en ambos mercados y comparar dónde sale mejor → costes.md §Origen
-Briefing encargo: preguntar críticos ANTES de navegar → `briefing_encargo.md`
-Tope de gama: doble pasada por kW SIEMPRE → `playbook_filtrado.md` §Doble pasada
+Origen DE vs ES: si no se especifica, buscar en ambos mercados y comparar dónde sale mejor → 04-negocio/costes.md §Origen
+Briefing encargo: preguntar críticos ANTES de navegar → `01-arranque/briefing_encargo.md`
+Tope de gama: doble pasada por kW SIEMPRE → `02-flujos/playbook_filtrado.md` §Doble pasada
 Cierre: AUDITORÍA DE CIERRE al elegir candidato único (o abortar) → 5 dimensiones + 3 salidas a memoria
 ```
 
@@ -79,7 +78,7 @@ Cierre: AUDITORÍA DE CIERRE al elegir candidato único (o abortar) → 5 dimens
 
 > **CASCADA (12-ago-2026):** Flujo B **nunca** salta a "¿evalúo el candidato X?" sin entregar antes el INFORME MODELO + top 5 con enlaces + CP1. El usuario elige el candidato → **se convierte a Flujo A** → ahí sí: informe UNIDAD + dossier + folleto + ZIP. Los informes NO salen todos a la vez, son en cascada con checkpoint entre fases.
 
-> **🌍 ORIGEN DE vs ES (12-ago-2026):** el encargo puede ser de un coche de **Alemania** (importación) o de **España** (compra nacional). Si el usuario NO especifica origen, buscar el modelo en **AMBOS mercados** y comparar **dónde sale mejor** (coste total puesto en Huelva). El origen ganador determina los costes: DE = transporte+ausfuhr+ITV import+IEDMT; ES = sin esos costes. Ver `costes.md` §Origen.
+> **🌍 ORIGEN DE vs ES (12-ago-2026):** el encargo puede ser de un coche de **Alemania** (importación) o de **España** (compra nacional). Si el usuario NO especifica origen, buscar el modelo en **AMBOS mercados** y comparar **dónde sale mejor** (coste total puesto en Huelva). El origen ganador determina los costes: DE = transporte+ausfuhr+ITV import+IEDMT; ES = sin esos costes. Ver `04-negocio/costes.md` §Origen.
 
 ### Detección automática de flujo
 
@@ -145,7 +144,7 @@ D sondeo → INFORME DE MODELOS (país × año × motorización)
 6. **El requisito de potencia es mínimo (≥Xcv):** filtrar por kW/cv mínimos, no buscar una variante concreta; versiones 125/130/150 cumplen +120cv.
 7. **D1 NO pagina (eficiencia):** D1a enumera con 2 lecturas por mercado (asc = suelo + desc = techo) + facetas de marca + semilla `modelos-medidos.md`; D1b difiere el precio-desde a 1 consulta por modelo solo si falta. El anuncio individual solo se investiga cuando el embudo es pequeño (Flujo A/B).
 
-**Antes de navegar en Flujo A/B → briefing de encargo (`briefing_encargo.md`):**
+**Antes de navegar en Flujo A/B → briefing de encargo (`01-arranque/briefing_encargo.md`):**
 1. Extraer parámetros dados (modelo, año mín, km máx, presupuesto...).
 2. Preguntar SOLO los críticos que falten (tabla de faltantes) + **modalidad de honorarios M1/M2/M3**.
 3. Si es tope de gama → confirmar potencia (activa doble pasada).
@@ -292,8 +291,8 @@ FIN
 
 ### Referencias cruzadas
 
-- 📄 **Prompt Improver completo:** ver `guia_prompts.md`
-- 📄 **Briefing de encargo:** ver `briefing_encargo.md`
+- 📄 **Prompt Improver completo:** ver `01-arranque/guia_prompts.md`
+- 📄 **Briefing de encargo:** ver `01-arranque/briefing_encargo.md`
 - 📄 **Flujo D (descubrimiento) detallado:** ver §FLUJO D en este documento
 - 📄 **PLAN DE BARRIDO:** ver §PLAN DE BARRIDO previo en este documento
 
@@ -312,7 +311,7 @@ FIN
 > Con el OK → ejecutar sin volver a preguntar. El plan sustituye al briefing cuando no falta ningún parámetro.
 
 **🛠️ Prompt Improver (12-ago-2026) — refinar prompts vagos:**
-> Antes de ejecutar, detectar si el prompt del usuario es vago y proponer uno MEJOR con briefing completo. Detalle en `guia_prompts.md`.
+> Antes de ejecutar, detectar si el prompt del usuario es vago y proponer uno MEJOR con briefing completo. Detalle en `01-arranque/guia_prompts.md`.
 
 **Reglas rápidas:**
 - **<50 chars** → probablemente vago → mejorar
@@ -366,7 +365,7 @@ Estados: `OK` · `0 resultados` · `bloqueada (motivo + intentos)` · `sin extra
 
 **4 reglas duras:**
 1. **No parar al tener candidatos.** Se recorren TODAS las fuentes y luego se ordena.
-2. **Fuente bloqueada → reintentar.** Primero navegación real (recarga + espera + clic en filtros) → si captcha, 1-2 reintentos → método técnico de `extractores.md` → solo entonces bloquear.
+2. **Fuente bloqueada → reintentar.** Primero navegación real (recarga + espera + clic en filtros) → si captcha, 1-2 reintentos → método técnico de `02-flujos/extractores.md` → solo entonces bloquear.
 3. **Método degradado se declara.** Si Coches.net no muestra la tasación/rotación en pantalla (están en estado JS inaccesible) y se lee solo el texto visible, decirlo.
 4. **COBERTURA COMPLETA OBLIGATORIA (12-ago-2026).** Se intentan SIEMPRE las 7 fuentes, ni más ni menos. NO dar cifras ni veredicto con <7 sin marcar el informe **PARCIAL** y preguntar al usuario. Fuente degradada/bloqueada se declara con sus intentos; nunca "no la miré" sin documentar el reintento.
 
@@ -385,7 +384,7 @@ Estados: `OK` · `0 resultados` · `bloqueada (motivo + intentos)` · `sin extra
 **Regla de oro:** 2 fuentes de precio fiables (mobile.de DE + Coches.net ES). El resto complementa (oferta, chollos, rotación) pero NUNCA sustituye a las 2 de referencia.
 
 **Regla dura #4 — DOBLE PASADA por potencia (12-ago-2026):**
-> Si la versión buscada es un **tope de gama / acabado especial** (`OPC`, `GTI`, `R`, `M`, `AMG`, `RS`, `Type R`, `N`, `Performance`...), el filtro por variante de texto NO es suficiente — se pierde coches genuinos mal etiquetados (caso real: OPC 8.999 € con título "Opel Astra"). SIEMPRE hacer la búsqueda 2 por **kW** (campo estructurado del permiso) y cruzar por unión de IDs. Ver `playbook_filtrado.md` §Doble pasada. Trampa documentada en `memoria/trampas-encontradas.md`.
+> Si la versión buscada es un **tope de gama / acabado especial** (`OPC`, `GTI`, `R`, `M`, `AMG`, `RS`, `Type R`, `N`, `Performance`...), el filtro por variante de texto NO es suficiente — se pierde coches genuinos mal etiquetados (caso real: OPC 8.999 € con título "Opel Astra"). SIEMPRE hacer la búsqueda 2 por **kW** (campo estructurado del permiso) y cruzar por unión de IDs. Ver `02-flujos/playbook_filtrado.md` §Doble pasada. Trampa documentada en `memoria/trampas-encontradas.md`.
 
 Para Alemania, orden: mobile.de directo → AutoScout24.de directo → AutoUncle (NUNCA única) → kleinanzeigen.de.
 
@@ -501,7 +500,7 @@ Durante la conversación, Claude debe actualizar la memoria cuando detecte:
 
 **Cuándo actualizar:** en cuanto ocurre (no esperar al final). Al cerrar la conversación, verifica que la memoria está al día.
 
-**Detalles completos:** ver `MEMORIA.md` del skill.
+**Detalles completos:** ver `memoria/MEMORIA.md` del skill.
 
 ### 🔁 APRENDIZAJE CONTINUO — retrospectiva al cerrar sesión (12-ago-2026)
 
@@ -538,7 +537,7 @@ SESIÓN <fecha> — <modelo/encargo>
 **Salidas obligatorias (3):**
 1. `memoria/retrospectiva.md` → entrada de sesión con las 5 dimensiones (plantilla de cierre).
 2. `memoria/modelos-medidos.md` → el modelo elegido con precio real verificado + fecha.
-3. **Cada corrección/fallo ≥ 1** → trampa en `memoria/trampas-encontradas.md` o anti-patrón propuesto en `anti_patrones.md` (proponer el texto al usuario, no editar a ciegas).
+3. **Cada corrección/fallo ≥ 1** → trampa en `memoria/trampas-encontradas.md` o anti-patrón propuesto en `06-reglas/anti_patrones.md` (proponer el texto al usuario, no editar a ciegas).
 
 **Regla de oro:** todo cierre produce ≥ 1 línea de aprendizaje. Si el embudo funcionó SIN correcciones → registrar el patrón en "lo que funcionó" como referencia reutilizable (para repetirlo, no solo para evitar errores).
 
@@ -612,7 +611,7 @@ Si en mobile.de + Coches.net ya se ve hueco claro (<8% o >8% decisivo), **AutoUn
 
 **5. Doble pasada solo si aplica:**
 - Si el modelo NO es tope de gama → 1 sola búsqueda (ahorra 2-3 capturas).
-- Si SÍ es tope de gama → doble pasada por kW (imprescindible, ver `playbook_filtrado.md` §Doble pasada).
+- Si SÍ es tope de gama → doble pasada por kW (imprescindible, ver `02-flujos/playbook_filtrado.md` §Doble pasada).
 
 **6. Stop temprano (anti-desperdicio):**
 - <3 resultados tras filtros duros → relajar filtros (no hacer más capturas de vacíos).
@@ -628,7 +627,7 @@ Si en mobile.de + Coches.net ya se ve hueco claro (<8% o >8% decisivo), **AutoUn
 - **Flujo A:** total máx 70. Avisar a 35 (50%) y a 56 (80%).
 - **Flujo B:** total máx 50. Avisar a 25 (50%) y a 40 (80%).
 - **Flujo C:** total máx 100 (7 modelos). Avisar al 50% (50) y al 80% (80).
-- **mobile.de:** NUNCA >45 en una sesión. Avisar a 35 (regla dura, ver extractores.md §Presupuesto).
+- **mobile.de:** NUNCA >45 en una sesión. Avisar a 35 (regla dura, ver `02-flujos/extractores.md` §Presupuesto).
 
 **Si se supera el budget sin veredicto:** STOP. Mostrar resumen parcial + preguntar si invertir más o cerrar como PARCIAL.
 
@@ -740,7 +739,7 @@ Tabla multi-modelo. Cada fila: modelo, segmento, hueco%, N uds DE, vendibilidad 
 
 El informe BUSQUEDA agrupa por estas 4 dimensiones y el usuario elige cuáles profundizar (Flujo B).
 
-**Variaciones estacionales:** Anotar en §10 si el análisis es en temporada baja (otoño/invierno): "Precio de temporada baja, posible subida 5-8% en primavera". Ver tabla completa en `costes.md`.
+**Variaciones estacionales:** Anotar en §10 si el análisis es en temporada baja (otoño/invierno): "Precio de temporada baja, posible subida 5-8% en primavera". Ver tabla completa en `04-negocio/costes.md`.
 
 ### INFORME TIPO MODELO (Flujo B)
 
@@ -836,29 +835,30 @@ ENCARGO (Flujo B: MODELO)
 | Fase | Entregable | Contenido mínimo | Formato / archivo |
 |---|---|---|---|
 | **1 · Búsqueda** (fin de Fase 1/2 de fuentes) | **INFORME DE BÚSQUEDA + candidatos** | Cobertura por fuente (URL, filtros, nº resultados, estado), tabla de candidatos con precio/año/km/enlace, qué se excluyó y por qué, qué fuente quedó sin peinar y por qué | `informe_busqueda_<modelo>.md` (o en el chat si breve). NO es un informe de valoración |
-| **2 · Avance con candidato** (usuario elige uno) | **INFORME DE UNIDAD** | Las 15 secciones de `informe_tecnico.md` (o las 11 no negociables del flujo MODELO) SOLO del candidato elegido | `informe_unidad_<modelo>_<unidad>.md` + esqueletos `.txt` |
+| **2 · Avance con candidato** (usuario elige uno) | **INFORME DE UNIDAD** | Las 15 secciones de `03-informes/informe_tecnico.md` (o las 11 no negociables del flujo MODELO) SOLO del candidato elegido | `informe_unidad_<modelo>_<unidad>.md` + esqueletos `.txt` |
 | **3 · Cierre** (veredicto 🟢/🔵) | **ZIP Laravel** | `informe.json` + `manifest.json` + `contenido/*.txt` + `fotos/` | `[coche_id].zip` → se sube a Laravel |
 
 ### 🗺️ MAPA DE PDFs — TIPOS y DÓNDE SE CREA CADA UNO (15-ago-2026)
 
 > **Hay 7 PDFs en total: 3 los genera CLAUDE (investigación) y 4 los genera LARAVEL (venta/documento).**
-> **El briefing PDF ya NO existe** (eliminado 15-ago-2026). El status de cliente 'Briefing' (pipeline) y `briefing_encargo.md` (cuestionario previo) NO son el PDF briefing y se mantienen.
+> **El briefing PDF ya NO existe** (eliminado 15-ago-2026). El status de cliente 'Briefing' (pipeline) y `01-arranque/briefing_encargo.md` (cuestionario previo) NO son el PDF briefing y se mantienen.
 
 | # | PDF | Tipo | Quién lo genera | De qué sale | Dónde se crea |
 |---|---|---|---|---|---|
 | 1 | `informe_busqueda_*.pdf` | Investigación (búsqueda) | **CLAUDE** | Markdown Fase 1 | HTML de marca → Chrome headless, plantilla `assets/plantilla_pdf_marca.html` |
-| 2 | `informe_unidad_*.pdf` | Investigación (unidad) | **CLAUDE** | `informe_tecnico.md` (15 sec) | Idem plantilla de marca |
-| 3 | informe técnico unidad (Flujo A) | Investigación (técnico) | **CLAUDE** | `informe_tecnico.md` | Idem plantilla de marca |
+| 2 | `informe_unidad_*.pdf` | Investigación (unidad) | **CLAUDE** | `03-informes/informe_tecnico.md` (15 sec) | Idem plantilla de marca |
+| 3 | informe técnico unidad (Flujo A) | Investigación (técnico) | **CLAUDE** | `03-informes/informe_tecnico.md` | Idem plantilla de marca |
 | 4 | Dossier cliente | Venta / cliente | **LARAVEL** | `contenido/dossier-cliente.txt` | Blade `ficha-coche.blade.php` (documento cliente) |
 | 5 | Ficha del coche | Venta / cliente | **LARAVEL** | `contenido/ficha-publicitaria.txt` | Blade `ficha-coche.blade.php` · `PaqueteValoracionController@ficha` · ruta `cars.ficha` |
 | 6 | Informe interno | Venta / equipo | **LARAVEL** | `contenido/informe-interno.txt` | Blade `informe-interno.blade.php` · `PaqueteValoracionController@interno` · ruta `cars.informe-interno` |
-| 7 | Folleto institucional | Marketing / público | **LARAVEL** | estático (sin esqueleto) | Blade `folleto.blade.php` · `JJImportFolletoController@download` · ruta `jj-import.folleto` |
+| 7 | **Folleto del coche** | Venta / cliente | **LARAVEL** | `contenido/ficha-publicitaria.txt` (mismo que ficha) | Blade `folleto-coche.blade.php` · `PaqueteValoracionController@folleto` · ruta `cars.folleto` |
+| 8 | Folleto institucional | Marketing / público | **LARAVEL** | estático (sin esqueleto) | Blade `folleto.blade.php` · `JJImportFolletoController@download` · ruta `jj-import.folleto` |
 
 **Reglas duras del mapa:**
 1. **Claude NUNCA genera los PDFs de venta** (ficha, informe interno, folleto) — los hace Laravel con Blade + Browsershot tras recibir el ZIP.
 2. **Laravel NUNCA genera los PDFs de investigación** — los hace Claude en el Desktop con la plantilla de marca.
-3. El **informe interno** (margen, honorarios, URLs de comparables) es SOLO equipo; el **dossier/ficha** es para el cliente (sin margen).
-4. Los esqueletos `.txt` (`contenido/*.txt`) son la ÚNICA entrada de Laravel: `ficha-publicitaria.txt`, `informe-interno.txt`, `dossier-cliente.txt`.
+3. El **informe interno** (margen, honorarios, URLs de comparables) es SOLO equipo; el **dossier/ficha/folleto** es para el cliente (sin margen).
+4. Los esqueletos `.txt` (`contenido/*.txt`) son la ÚNICA entrada de Laravel: `ficha-publicitaria.txt`, `informe-interno.txt`, `dossier-cliente.txt`. El **folleto del coche reutiliza `ficha-publicitaria.txt`** — no requiere esqueleto propio.
 
 **Reglas duras:**
 1. **La fase 1 acaba con el informe de búsqueda y la lista de candidatos.** No se escribe valoración en la fase 1.
@@ -1008,15 +1008,15 @@ TRAS ELEGIR CANDIDATO (todo automático, sin preguntar)
 
 ### INFORME TIPO UNIDAD (Flujo A) — el completo, 15 secciones
 
-> 📄 **Ver `informe_tecnico.md` para estructura completa con score 0-100 y bloques `[MARCADOR]`.** Resumen rápido:
+> 📄 **Ver `03-informes/informe_tecnico.md` para estructura completa con score 0-100 y bloques `[MARCADOR]`.** Resumen rápido:
 
 1. Cabecera (coche_id · score global · recomendación)
 2. Cobertura 7 fuentes con ⭐ confianza por fuente
 3. Oferta española (comparables con sello 🟢🟡🔴 + cuartiles + días medio)
 4. Oferta alemana (ídem + portal + vendedor + VB + cambios precio)
 5. Candidato seleccionado (ficha completa + ficha técnica + hallazgos)
-6. **Comparable ajustado** → cálculo línea a línea (ver `comparables.md`)
-7. **Coste puesto en Huelva** → desglose + análisis sensibilidad IEDMT (ver `costes.md`)
+6. **Comparable ajustado** → cálculo línea a línea (ver `03-informes/comparables.md`)
+7. **Coste puesto en Huelva** → desglose + análisis sensibilidad IEDMT (ver `04-negocio/costes.md`)
 8. Margen y veredicto (contra 4 referencias: mediana + Q1 + ajustado + mínimo)
 9. **Vendibilidad** 5 factores justificados (100 puntos)
 10. **Plan de negociación** con mensaje alemán + precio tope + backups
@@ -1027,8 +1027,8 @@ TRAS ELEGIR CANDIDATO (todo automático, sin preguntar)
 15. Score global de oportunidad (6 dimensiones, 0-100)
 
 **_outputs del informe UNIDAD (archivos .txt en ZIP):**
-- `informe-interno.txt` (análisis JJ Import Motors · ver `informe_tecnico.md`)
-- `dossier-cliente.txt` (PDF profesional para cliente · ver `dossier_cliente.md`) — solo si veredicto 🟢/🔵
+- `informe-interno.txt` (análisis JJ Import Motors · ver `03-informes/informe_tecnico.md`)
+- `dossier-cliente.txt` (PDF profesional para cliente · ver `03-informes/dossier_cliente.md`) — solo si veredicto 🟢/🔵
 - `ficha-publicitaria.txt` (venta en portales · contrato.md §publicidad)
 - `redes-sociales.txt` + `anuncio-portales.txt` (ver contrato.md)
 
@@ -1087,7 +1087,7 @@ LO DEMÁS: sin cambios significativos.
 
 ## 🛡️ ANTI-PATRONES BLOQUEADOS
 
-Las 16 reglas duras (A1-A16) viven en `anti_patrones.md`. Cargarlas cuando se duda de una práctica o antes de cerrar un informe.
+Las 16 reglas duras (A1-A16) viven en `06-reglas/anti_patrones.md`. Cargarlas cuando se duda de una práctica o antes de cerrar un informe.
 
 **Resumen rápido:**
 - **A1** No descartar por silencio (sello `man`, no exclusión)
@@ -1133,7 +1133,7 @@ Las 16 reglas duras (A1-A16) viven en `anti_patrones.md`. Cargarlas cuando se du
 
 ```
 [coche_id].zip
-├── informe.json                    ← JSON completo del CONTRATO (contrato.md)
+├── informe.json                    ← JSON completo del CONTRATO (`03-informes/contrato.md`)
 ├── manifest.json                   ← Metadatos del paquete
 ├── contenido/
 │   ├── ficha-publicitaria.txt      ← Esqueleto [BLOQUE] → folleto.blade.php
@@ -1151,7 +1151,7 @@ Las 16 reglas duras (A1-A16) viven en `anti_patrones.md`. Cargarlas cuando se du
 3. 🔴 **`mercado.comparables[].url` = URL directa de la FICHA del anuncio**, nunca una búsqueda/filtro del portal (A6). Sin URL, el comparable se descarta al importar.
 4. ✅ Campos extra del anuncio si están visibles: `dias_publicado`, `tuv_vigente_hasta`, `precio_publicado` vs `precio_negociado`, `carroceria`, `color_interior`. Laravel los guarda en `Car.notes`.
 
-**Qué hace Laravel con cada archivo:** ver `contrato.md`.
+**Qué hace Laravel con cada archivo:** ver `03-informes/contrato.md`.
 
 **Lo que NUNCA va en el ZIP:** PDFs pre-generados, Excels, datos de otros coches, anotaciones internas tipo "(NUEVO)" o "revisión anterior".
 
@@ -1189,7 +1189,7 @@ Las 16 reglas duras (A1-A16) viven en `anti_patrones.md`. Cargarlas cuando se du
 - [ ] PVP y CO₂ de km77 (si Flujo A)
 - [ ] Medí DE en mobile.de directo, no solo AutoUncle
 - [ ] Usé navegación real primero (navegar, filtrar, leer visible) antes que inyección JS
-- [ ] Ante bloqueo, probé recarga + navegación real + `extractores.md` antes de marcar
+- [ ] Ante bloqueo, probé recarga + navegación real + `02-flujos/extractores.md` antes de marcar
 - [ ] No descarté por silencio (A1) · mobile.de en cobertura OK (A2)
 - [ ] CO₂ de km77 o BOE, no estimación (A3)
 
@@ -1202,8 +1202,8 @@ Las 16 reglas duras (A1-A16) viven en `anti_patrones.md`. Cargarlas cuando se du
 - [ ] Tablas con columna ENLACE (A6)
 
 **Al cerrar**
-- [ ] Actualicé `datos/registro_cierres.json` → Ver `operaciones_cierre.md`
-- [ ] Calculé KPIs mensuales si aplica → Ver `operaciones_cierre.md`
+- [ ] Actualicé `datos/registro_cierres.json` → Ver `05-operaciones/operaciones_cierre.md`
+- [ ] Calculé KPIs mensuales si aplica → Ver `05-operaciones/operaciones_cierre.md`
 
 **Estructura de informes (15-ago-2026)**
 - [ ] Fase 1 → entregué INFORME DE BÚSQUEDA + candidatos (no un informe de valoración)
@@ -1226,10 +1226,10 @@ Cargar solo cuando se necesite la sección específica:
 
 | Módulo | Cuándo cargar | Contenido |
 |---|---|---|
-| **`comparables.md`** | Flujo A: ajuste de comparable | 9 claves, filtro admisión, comparable sin muestra, detección competencia, primas equipamiento |
-| **`costes.md`** | Flujo A: desglose económico | IEDMT (fórmula + tabla), precio máximo de compra, IVA, moneda extranjera, ejemplo completo |
-| **`riesgos.md`** | Flujo A/B: motor problemático | Tabla riesgos por motor (DQ200, EA888, N47, etc.), verificación, reglas descarte automático |
-| **`operaciones_cierre.md`** | Cierre de venta + KPIs | Registro cierre JSON, KPIs, changelog, sync Desktop ↔ Skill, encargo permanente |
+| **`03-informes/comparables.md`** | Flujo A: ajuste de comparable | 9 claves, filtro admisión, comparable sin muestra, detección competencia, primas equipamiento |
+| **`04-negocio/costes.md`** | Flujo A: desglose económico | IEDMT (fórmula + tabla), precio máximo de compra, IVA, moneda extranjera, ejemplo completo |
+| **`04-negocio/riesgos.md`** | Flujo A/B: motor problemático | Tabla riesgos por motor (DQ200, EA888, N47, etc.), verificación, reglas descarte automático |
+| **`05-operaciones/operaciones_cierre.md`** | Cierre de venta + KPIs | Registro cierre JSON, KPIs, changelog, sync Desktop ↔ Skill, encargo permanente |
 
 ---
 

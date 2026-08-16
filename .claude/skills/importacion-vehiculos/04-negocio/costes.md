@@ -40,7 +40,7 @@ Coste total ES = precio ES + traslado + gestoría + honorarios
 ```
 ### 🎯 Techo de precio de búsqueda (desde presupuesto del cliente)
 
-> **Regla (actualizada 15-ago-2026):** para FILTRAR (Flujo B/C), el techo del coche sale del presupuesto del cliente según la **modalidad de honorarios** del encargo (M1/M2/M3, ver `briefing_encargo.md` §Modalidades). **3 fallos reales por asumir** (12-ago y 15-ago ×2): ya NO se asume — se pregunta o se reformula la interpretación en 1 línea.
+> **Regla (actualizada 15-ago-2026):** para FILTRAR (Flujo B/C), el techo del coche sale del presupuesto del cliente según la **modalidad de honorarios** del encargo (M1/M2/M3, ver `../01-arranque/briefing_encargo.md` §Modalidades). **3 fallos reales por asumir** (12-ago y 15-ago ×2): ya NO se asume — se pregunta o se reformula la interpretación en 1 línea.
 
 ```
 Techo coche DE = presupuesto − transporte 900 − ausfuhr 114 − ITV 115 − IEDMT − honorarios(solo en M1)

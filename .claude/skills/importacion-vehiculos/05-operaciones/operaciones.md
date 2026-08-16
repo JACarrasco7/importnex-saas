@@ -205,7 +205,7 @@ Cada operación devuelve:
 ]
 ```
 
-**Cuándo un aprendizaje entra al skill:** cuando aparece 3 veces se sistematiza en `extractores.md` §Trampas críticas.
+**Cuándo un aprendizaje entra al skill:** cuando aparece 3 veces se sistematiza en `../02-flujos/extractores.md` §Trampas críticas.
 
 ### Caché de investigación (9 aspectos)
 

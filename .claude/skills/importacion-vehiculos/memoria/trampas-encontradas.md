@@ -1,6 +1,6 @@
 # Trampas encontradas — Catálogo
 
-> Trampas y patrones raros detectados en los portales. Cuando aparece 3 veces la misma trampa, se sistematiza en `extractores.md`.
+> Trampas y patrones raros detectados en los portales. Cuando aparece 3 veces la misma trampa, se sistematiza en `../02-flujos/extractores.md`.
 
 ---
 

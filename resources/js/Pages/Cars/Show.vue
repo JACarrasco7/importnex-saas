@@ -8,6 +8,7 @@ import {
     MegaphoneIcon,
     TrashIcon,
     DocumentIcon,
+    DocumentTextIcon,
     ArrowDownTrayIcon,
     EyeIcon,
     UserCircleIcon,
@@ -19,6 +20,8 @@ import {
     ChevronDownIcon,
     ChevronRightIcon,
     XMarkIcon,
+    GlobeEuropeAfricaIcon,
+    LanguageIcon,
 } from '@heroicons/vue/24/outline';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import MapaLeaflet from '@/Components/MapaLeaflet.vue';
@@ -337,19 +340,26 @@ const onDocKeyChange = () => {
                     </div>
                 </div>
 
-                <!-- Descripción del anuncio (original + traducción) -->
+                <!-- Descripción del anuncio (original + traducción SIEMPRE si existen) -->
                 <div v-if="activeSection === 'resumen' && (car.description || car.original_description)" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
-                    <div class="border-b border-gray-200 px-6 py-4">
+                    <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
                         <h3 class="text-base font-semibold text-gray-900">{{ t('cars.description') }}</h3>
+                        <span v-if="car.original_description && car.description" class="rounded-full bg-estoril-50 px-2.5 py-0.5 text-[11px] font-medium text-estoril-600">{{ t('cars.description_bilingual') }}</span>
                     </div>
-                    <div class="space-y-4 p-6">
+                    <div class="space-y-5 p-6">
                         <div v-if="car.original_description">
-                            <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.original_text') }}</h4>
-                            <p class="mt-2 text-sm text-gray-700 whitespace-pre-wrap">{{ car.original_description }}</p>
+                            <h4 class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-500">
+                                <GlobeEuropeAfricaIcon class="h-3.5 w-3.5 text-gray-400" />
+                                {{ t('cars.original_text') }}
+                            </h4>
+                            <p class="mt-2 rounded-lg bg-gray-50 p-3 text-sm text-gray-700 whitespace-pre-wrap">{{ car.original_description }}</p>
                         </div>
-                        <div v-if="car.description && car.description !== car.original_description">
-                            <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.translated_text') }}</h4>
-                            <p class="mt-2 text-sm text-gray-900 whitespace-pre-wrap">{{ car.description }}</p>
+                        <div v-if="car.description">
+                            <h4 class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-500">
+                                <LanguageIcon class="h-3.5 w-3.5 text-gray-400" />
+                                {{ t('cars.translated_text') }}
+                            </h4>
+                            <p class="mt-2 rounded-lg bg-estoril-50/50 p-3 text-sm text-gray-900 whitespace-pre-wrap">{{ car.description }}</p>
                         </div>
                         <p v-else-if="!car.original_description" class="text-sm text-gray-500">{{ t('cars.description') }}</p>
                     </div>
@@ -804,24 +814,89 @@ const onDocKeyChange = () => {
                     <div class="border-b border-blue-200 px-6 py-4 flex items-center gap-2">
                         <UserCircleIcon class="h-5 w-5 text-blue-600" />
                         <h3 class="text-base font-semibold text-gray-900">{{ t('cars.assigned_client') }}</h3>
+                        <Badge v-if="derived?.linked_request" variant="green" class="ml-2">{{ t('cars.client_linked') }}</Badge>
                     </div>
-                    <div class="grid grid-cols-1 gap-4 p-6 sm:grid-cols-4">
-                        <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Name</dt>
-                            <dd class="mt-1 font-medium text-gray-900">{{ car.client.name }}</dd>
+                    <div class="grid grid-cols-1 gap-5 p-6 md:grid-cols-2">
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-3">
+                                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white shadow-sm ring-2 ring-blue-200">
+                                    <UserCircleIcon class="h-6 w-6 text-blue-600" />
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="truncate text-base font-bold text-gray-900">{{ car.client.name }}</p>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs text-gray-500">{{ t('cars.client_id') }} #{{ car.client.id }}</span>
+                                        <Badge :variant="statusVariant(car.client.status)">{{ statusLabel(t, car.client.status) }}</Badge>
+                                    </div>
+                                </div>
+                            </div>
+                            <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                <div>
+                                    <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.client_contact') }}</dt>
+                                    <dd class="mt-1 text-sm text-gray-800">{{ car.client.contact_info || '—' }}</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.client_looking_for') }}</dt>
+                                    <dd class="mt-1 text-sm text-gray-800">{{ car.client.looking_for || '—' }}</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.client_budget') }}</dt>
+                                    <dd class="mt-1 text-sm text-gray-800">
+                                        <template v-if="car.client.budget_min || car.client.budget_max">
+                                            {{ currency(car.client.budget_min || 0) }} – {{ currency(car.client.budget_max || 0) }}
+                                        </template>
+                                        <template v-else>—</template>
+                                    </dd>
+                                </div>
+                            </dl>
+                            <div class="flex flex-wrap gap-2 pt-1">
+                                <Link :href="route('clients.show', car.client.id)" class="inline-flex items-center gap-1 rounded-lg bg-estoril-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-estoril-500">
+                                    {{ t('cars.view_client') }} →
+                                </Link>
+                                <Link :href="route('clients.edit', car.client.id)" class="inline-flex items-center gap-1 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-estoril-700 shadow-sm ring-1 ring-gray-200 hover:bg-gray-50">
+                                    {{ t('cars.edit_client') }}
+                                </Link>
+                            </div>
                         </div>
-                        <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Contact</dt>
-                            <dd class="mt-1 text-sm text-gray-700">{{ car.client.contact_info || '—' }}</dd>
-                        </div>
-                        <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Status</dt>
-                            <dd class="mt-1"><Badge :variant="statusVariant(car.client.status)">{{ statusLabel(t, car.client.status) }}</Badge></dd>
-                        </div>
-                        <div class="flex items-end">
-                            <Link :href="route('clients.show', car.client.id)" class="inline-flex items-center gap-1 text-sm font-semibold text-estoril-600 hover:text-estoril-500">
-                                {{ t('cars.view_client') }} →
-                            </Link>
+
+                        <!-- Solicitud vinculada -->
+                        <div v-if="derived?.linked_request" class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-gray-200">
+                            <div class="mb-3 flex items-center justify-between">
+                                <h4 class="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                                    <DocumentTextIcon class="h-4 w-4 text-estoril-500" />
+                                    {{ t('cars.linked_request') }}
+                                </h4>
+                                <span class="text-xs text-gray-400">{{ t('cars.linked_request_since') }} {{ derived.linked_request.created_at ? date(derived.linked_request.created_at) : '—' }}</span>
+                            </div>
+                            <dl class="space-y-3">
+                                <div v-if="derived.linked_request.name" class="flex items-start justify-between gap-2">
+                                    <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.linked_request_name') }}</dt>
+                                    <dd class="text-sm text-gray-800 text-right">{{ derived.linked_request.name }}</dd>
+                                </div>
+                                <div v-if="derived.linked_request.brand" class="flex items-start justify-between gap-2">
+                                    <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.linked_request_vehicle') }}</dt>
+                                    <dd class="text-sm text-gray-800 text-right">{{ derived.linked_request.brand }}{{ derived.linked_request.model ? ' ' + derived.linked_request.model : '' }}</dd>
+                                </div>
+                                <div v-if="derived.linked_request.budget_min || derived.linked_request.budget_max" class="flex items-start justify-between gap-2">
+                                    <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.linked_request_budget') }}</dt>
+                                    <dd class="text-sm text-gray-800 text-right">
+                                        {{ currency(derived.linked_request.budget_min || 0) }} – {{ currency(derived.linked_request.budget_max || 0) }}
+                                    </dd>
+                                </div>
+                                <div class="flex items-start justify-between gap-2">
+                                    <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.linked_request_status') }}</dt>
+                                    <dd class="text-sm"><Badge :variant="statusVariant(derived.linked_request.status)">{{ t('car_requests.status.' + derived.linked_request.status, derived.linked_request.status) }}</Badge></dd>
+                                </div>
+                                <div v-if="derived.linked_request.notes" class="border-t border-gray-100 pt-2">
+                                    <dt class="mb-1 text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.linked_request_notes') }}</dt>
+                                    <dd class="text-xs text-gray-600 whitespace-pre-wrap">{{ derived.linked_request.notes }}</dd>
+                                </div>
+                            </dl>
+                            <div class="mt-4 flex justify-end">
+                                <Link :href="route('car-requests.show', derived.linked_request.id)" class="inline-flex items-center gap-1 text-xs font-semibold text-estoril-600 hover:text-estoril-500">
+                                    {{ t('cars.view_request') }} →
+                                </Link>
+                            </div>
                         </div>
                     </div>
                 </div>

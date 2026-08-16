@@ -3,12 +3,12 @@
 > Actualizado: 2026-08-15 · Aplica a skill `importacion-vehiculos` v2.9.9+ y Laravel.
 > El **briefing PDF ya NO existe** (eliminado 15-ago-2026). El status de cliente 'Briefing' y `briefing_encargo.md` no son el PDF briefing.
 
-## Resumen: 7 PDFs en dos familias
+## Resumen: 8 PDFs en dos familias
 
 | Familia | Quién lo genera | Para quién | Contenido |
 |---|---|---|---|
 | **Investigación** (3) | **Claude** (Desktop) | El usuario / equipo | Búsqueda, candidatos, análisis técnico, veredicto |
-| **Venta / documento** (4) | **Laravel** (Blade + Browsershot) | Cliente / público / equipo | Ficha, dossier, informe interno, folleto |
+| **Venta / documento** (5) | **Laravel** (Blade + Browsershot) | Cliente / público / equipo | Ficha, folleto del coche, dossier, informe interno, folleto institucional |
 
 Regla de oro: **Claude no genera los PDFs de venta y Laravel no genera los de investigación.**
 
@@ -27,6 +27,7 @@ Se entregan al usuario (leerlos). NO van dentro del ZIP.
 | PDF | Esqueleto .txt (entrada) | Controlador · ruta | Blade | Audiencia |
 |---|---|---|---|---|
 | Ficha del coche | `contenido/ficha-publicitaria.txt` | `PaqueteValoracionController@ficha` · `cars.ficha` | `ficha-coche.blade.php` | Cliente |
+| Folleto del coche | `contenido/ficha-publicitaria.txt` (reutiliza ficha) | `PaqueteValoracionController@folleto` · `cars.folleto` | `folleto-coche.blade.php` | Cliente |
 | Dossier cliente | `contenido/dossier-cliente.txt` (15 sec) | se sirve vía ficha/documento cliente | `ficha-coche.blade.php` | Cliente |
 | Informe interno | `contenido/informe-interno.txt` (~60 bloques) | `PaqueteValoracionController@interno` · `cars.informe-interno` (solo owner/operator) | `informe-interno.blade.php` | Equipo |
 | Folleto institucional | estático (sin esqueleto) | `JJImportFolletoController@download` · `jj-import.folleto` | `folleto.blade.php` | Público |
@@ -38,6 +39,9 @@ Cabecera: `SCORE_GLOBAL`, `RECOMENDACION`, `COBERTURA`, `CAND_*`, `MARGEN`, `SCO
 
 ### `ficha-coche.blade.php` (cliente)
 Cabecera: `TITULO`, `CLAIM`, `ETIQUETA_DGT`, `SPEC` (→ KPI cards de KM/Año), `PRECIO`, `AHORRO`, `PRECIO_CAPTION`, `PLAZO`, `PRECIO_NOTA`, `H2`+`INCLUYE`/`ARGUMENTO`/`EQUIPAMIENTO`, `CTA`, `CONTACTO`, `QR`, `QR_TEXTO`, `LEGAL`, `FOTOS`. Badge de origen DE/ES desde `cars.pais_origen`.
+
+### `folleto-coche.blade.php` (cliente — folleto del coche)
+Versión visual/compacta del mismo esqueleto: portada con foto grande + precio flotante, KPI grid (KM/Año/Combustible/Potencia/Cambio), banda de veredicto (semáforo), highlights (`ARGUMENTO`/`INCLUYE`/`EQUIPAMIENTO`), CTA + QR + contacto. Badge "FOLLETO DEL COCHE". Se lista en la pestaña Documentos junto a la ficha.
 
 ### `folleto.blade.php` (público)
 Estático: servicio, honorarios, contacto, QR. No depende de esqueletos.

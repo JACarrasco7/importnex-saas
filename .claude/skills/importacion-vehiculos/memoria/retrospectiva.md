@@ -68,7 +68,7 @@ SESIÓN <fecha> — <modelo / encargo / tarea>
 - **Laravel (importnexcore) → repositorio único y fuente de verdad** de informes/PDF/imágenes/JSON.
 - **Subir** el paquete ZIP a Laravel (`/api/import-valuation`); **ver/mostrar/gestionar/actualizar** solo desde Laravel.
 - Claude **NO consulta** lo subido. Cada nuevo encargo se lanza como uno nuevo desde Claude.
-- Documentado en `operaciones.md` §División de trabajo + Desktop `CLAUDE.md` + Laravel `copilot-instructions.md`.
+- Documentado en `../05-operaciones/operaciones.md` §División de trabajo + Desktop `CLAUDE.md` + Laravel `copilot-instructions.md`.
 
 **✅ Funciona:**
 - Abrir portales (mobile.de, Coches.net) y leer el DOM visible (precios, años, km, kW).
@@ -113,8 +113,8 @@ SESIÓN <fecha> — <modelo / encargo / tarea>
 
 **📝 Ajustes:**
 - `SKILL.md`: cascada, modo automático, origen, cobertura #5, aprendizaje continuo.
-- `costes.md`: §Origen, techo de búsqueda, regla IEDMT.
-- `anti_patrones.md`: A7, A8 (total 8).
-- `playbook_filtrado.md`: filtrado fino (CV/kW, 5 puertas, patrocinados, engañosos).
-- `riesgos.md`: motores gasolina 2016+.
-- `briefing_encargo.md`: parámetro origen, presupuesto honorarios aparte.
+- `../04-negocio/costes.md`: §Origen, techo de búsqueda, regla IEDMT.
+- `../06-reglas/anti_patrones.md`: A7, A8 (total 8).
+- `../02-flujos/playbook_filtrado.md`: filtrado fino (CV/kW, 5 puertas, patrocinados, engañosos).
+- `../04-negocio/riesgos.md`: motores gasolina 2016+.
+- `../01-arranque/briefing_encargo.md`: parámetro origen, presupuesto honorarios aparte.

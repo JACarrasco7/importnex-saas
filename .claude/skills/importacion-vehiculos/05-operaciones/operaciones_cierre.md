@@ -103,7 +103,7 @@ Versionado formal de cambios en los archivos del skill.
 
 **Cuándo actualizar:**
 - Cada vez que se modifica SKILL.md o archivos modulares
-- Cambios en `contrato.md` (estructura JSON)
+- Cambios en `../03-informes/contrato.md` (estructura JSON)
 - Nuevos endpoints o migraciones en Laravel
 
 **Ejemplo de entrada:**

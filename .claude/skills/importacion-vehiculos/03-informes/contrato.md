@@ -96,7 +96,7 @@ Campos no confirmados van a `null`, **nunca inventados**. `co2_confirmado: false
 
 ## `anuncio`
 
-> **Origen (12-ago-2026):** `pais_origen` acepta `"Alemania"` (importación) o `"España"` (compra nacional). Los costes dependen de este valor (ver `costes.md` §Origen).
+> **Origen (12-ago-2026):** `pais_origen` acepta `"Alemania"` (importación) o `"España"` (compra nacional). Los costes dependen de este valor (ver `../04-negocio/costes.md` §Origen).
 
 ```json
 {
@@ -203,7 +203,7 @@ Caducidades: recalls 6 meses · seguro y piezas 12 · averías 18 · homologaci�
 }
 ```
 
-> 📐 **Cálculo del IEDMT:** single source of truth en [`costes.md` §IEDMT](costes.md#-iedmt-orden-hac15012025-vigor-1-ene-2026) (Orden HAC/1501/2025, vigor 1-ene-2026). Ahí está la fórmula completa, los tramos de CO₂ y los coeficientes por antigüedad.
+> 📐 **Cálculo del IEDMT:** single source of truth en [`../04-negocio/costes.md` §IEDMT](../04-negocio/costes.md#-iedmt-orden-hac15012025-vigor-1-ene-2026) (Orden HAC/1501/2025, vigor 1-ene-2026). Ahí está la fórmula completa, los tramos de CO₂ y los coeficientes por antigüedad.
 
 🔴 **`pvp_nuevo` es OBLIGATORIO.** Laravel recalcula el IEDMT con `Car::calculateIEDMT()` a partir del PVP nuevo, antigüedad y CO₂. Sin él, IEDMT = 0 € y el coste total sale mal. Pasar el PVP **sin depreciar**: el coeficiente de antigüedad lo aplica la app.
 
