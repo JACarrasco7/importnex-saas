@@ -26,19 +26,19 @@ class PublicMarketplaceController extends Controller
             ->where('is_marketplace', true) // Solo coches marcados para publicar
             ->whereIn('status', ['Delivered']) // Only show delivered cars
             ->whereIn('verdict', ['Buy', 'Buy if price drops']) // Only show positive verdicts
-            ->when($request->input('search'), function($q, $s) {
-                $q->where(function($sub) use ($s) {
+            ->when($request->input('search'), function ($q, $s) {
+                $q->where(function ($sub) use ($s) {
                     $sub->where('brand', 'like', "%$s%")
                         ->orWhere('model', 'like', "%$s%")
                         ->orWhere('vin', 'like', "%$s%");
                 });
             })
-            ->when($request->input('verdict'), fn($q, $v) => $q->where('verdict', $v))
-            ->when($request->input('traffic_light'), fn($q, $tl) => $q->where('traffic_light', $tl))
-            ->when($request->input('min_price'), fn($q, $p) => $q->where('purchase_price', '>=', $p))
-            ->when($request->input('max_price'), fn($q, $p) => $q->where('purchase_price', '<=', $p))
-            ->when($request->input('year_min'), fn($q, $y) => $q->whereRaw("SUBSTRING(year, -4) >= ?", [$y]))
-            ->when($request->input('year_max'), fn($q, $y) => $q->whereRaw("SUBSTRING(year, -4) <= ?", [$y]))
+            ->when($request->input('verdict'), fn ($q, $v) => $q->where('verdict', $v))
+            ->when($request->input('traffic_light'), fn ($q, $tl) => $q->where('traffic_light', $tl))
+            ->when($request->input('min_price'), fn ($q, $p) => $q->where('purchase_price', '>=', $p))
+            ->when($request->input('max_price'), fn ($q, $p) => $q->where('purchase_price', '<=', $p))
+            ->when($request->input('year_min'), fn ($q, $y) => $q->whereRaw('SUBSTRING(year, -4) >= ?', [$y]))
+            ->when($request->input('year_max'), fn ($q, $y) => $q->whereRaw('SUBSTRING(year, -4) <= ?', [$y]))
             ->orderBy('created_at', 'desc')
             ->paginate(12)
             ->withQueryString();
@@ -58,6 +58,35 @@ class PublicMarketplaceController extends Controller
     }
 
     /**
+     * Compare up to 4 marketplace cars side by side.
+     *
+     * GET /marketplace/compare?ids=1,2,3
+     */
+    public function compare(Request $request): Response
+    {
+        $ids = collect(explode(',', (string) $request->query('ids', '')))
+            ->map(fn (string $id) => (int) trim($id))
+            ->filter()
+            ->unique()
+            ->take(4)
+            ->values();
+
+        $cars = Car::query()
+            ->whereHas('organization', fn ($query) => $query->where('is_public', true))
+            ->where('is_marketplace', true)
+            ->whereIn('status', ['Delivered'])
+            ->whereIn('verdict', ['Buy', 'Buy if price drops'])
+            ->whereIn('id', $ids->all())
+            ->with(['photos', 'organization'])
+            ->get();
+
+        return Inertia::render('Public/MarketplaceCompare', [
+            'cars' => $cars,
+            'requestedIds' => $ids->all(),
+        ]);
+    }
+
+    /**
      * Show a single car from the marketplace.
      *
      * GET /marketplace/{car}
@@ -65,12 +94,14 @@ class PublicMarketplaceController extends Controller
     public function show(Car $car): Response
     {
         // Verify this car should be publicly visible
-        if (!$car->organization || !$car->organization->is_public ||
-            !$car->is_marketplace ||
-            !in_array($car->status, ['Delivered']) ||
-            !in_array($car->verdict, ['Buy', 'Buy if price drops'])) {
+        if (! $car->organization || ! $car->organization->is_public ||
+            ! $car->is_marketplace ||
+            ! in_array($car->status, ['Delivered']) ||
+            ! in_array($car->verdict, ['Buy', 'Buy if price drops'])) {
             abort(404);
         }
+
+        $car->increment('marketplace_views');
 
         $car->load(['photos', 'organization']);
 
@@ -82,10 +113,10 @@ class PublicMarketplaceController extends Controller
         return Inertia::render('Public/MarketplaceShow', [
             'car' => $car,
             'derived' => [
-                'total_cost'           => $car->calculateTotalCost(),
-                'iedmt'                => $car->calculateIEDMT(),
-                'research_gaps'        => $car->researchGaps,
-                'comparables_stats'    => $car->comparablesStats,
+                'total_cost' => $car->calculateTotalCost(),
+                'iedmt' => $car->calculateIEDMT(),
+                'research_gaps' => $car->researchGaps,
+                'comparables_stats' => $car->comparablesStats,
             ],
         ]);
     }
