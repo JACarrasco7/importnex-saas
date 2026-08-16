@@ -57,7 +57,8 @@ Playbook de filtrado: `02-flujos/playbook_filtrado.md` · estructura real: `02-f
 Trampas top 3: countryCode SIEMPRE | navegación real primero (screenshot+clic), degradado si no se ve | mobile.de directo NUNCA saltar
 Anti-patrones bloqueados: 16 (A1-A16, ver §Anti-patrones)
 Camino fijo: waypoint 📍 en cada mensaje · desviaciones = misión lateral con retorno ↩⃾ (A14)
-Micro-plan 3-5 líneas antes de CADA búsqueda · cuaderno de sesión en informes\_sesion\
+Plan de fase 3-5 líneas ANTES de cada fase (Protocolo de Mando) · cuaderno de sesión en informes\_sesion\
+Protocolo de Mando: usuario aprueba cada fase · IA ejecuta la fase completa · pausa solo en emergencias
 Checkpoints: CP-D tras informe MODELOS (elegir modelos) | CP1 tras informe MODELO (esperar elección de candidato) | CP2 tras comparable | CP3 antes de veredicto
 Flujo D (cliente sin modelo): sondeo modelos ES+DE → informe MODELOS (país×año×motor) → embudo a B
 Origen DE vs ES: si no se especifica, buscar en ambos mercados y comparar dónde sale mejor → 04-negocio/costes.md §Origen
@@ -183,7 +184,7 @@ CASOS:
 > **Regla:** en encargos abiertos/vagos ("busca algo para 15.000 €", "qué merece la pena") se aplica el **Protocolo en 4 pasos** del planificador:
 > **PASO 0 cache → PASO 1 detectar flujo → PASO 2 mejorar prompt (si vago) → PASO 3 plan de fase (OK del usuario) → PASO 4 ejecutar en cascada.**
 >
-> Cargar `01-arranque/planificador.md` completo antes de navegar en cualquier encargo no-URL. Referencias: briefing (`briefing_encargo.md`), plantillas de prompt (`guia_prompts.md`), filtros por portal (`../memoria/filtros-portales.md`).
+> Cargar `01-arranque/planificador.md` completo antes de navegar en cualquier encargo no-URL. Referencias: briefing (`01-arranque/briefing_encargo.md`), plantillas de prompt (`01-arranque/guia_prompts.md`), filtros por portal (`memoria/filtros-portales.md`).
 
 ---
 
@@ -337,7 +338,7 @@ FLUJO A: 1 plan de fase → 2 EJECUTAR Fase 1+2 → 3 INFORME UNIDAD → CP3 →
 
 **Reglas:**
 1. Toda corrección del usuario entra al cuaderno CON hora y se aplica de inmediato — no solo en la siguiente búsqueda.
-2. El cuaderno se RELEE antes de cada micro-plan (¿algo de aquí cambia el plan?).
+2. El cuaderno se RELEE antes de cada plan de fase (¿algo de aquí cambia el plan?).
 3. Al cierre, el apartado "Pendiente" se vuelca a `memoria/` del skill y a `.claude/memoria/preferencias.md`.
 4. Si el entorno no permite escribir el cuaderno, se mantiene en el contexto del chat con el mismo formato y se entrega el texto al cierre.
 
@@ -511,52 +512,9 @@ Si en mobile.de + Coches.net ya se ve hueco claro (<8% o >8% decisivo), **AutoUn
 | **EXIT 2** | Hueco 8-15% | "Justo. ¿Invierto en Fase 2?" PREGUNTAR. |
 | **EXIT 3** | Margen < umbral mínimo (Nicho 8%, Rotación 10%, 8-14k 10%) | Informe reducido sin publicidad. Entre umbral mínimo y objetivo (ej: Nicho 8-10%), avisar "margen justo, posible si vendibilidad ≥70". |
 
-### Priorización por ROI (Flujo B y C)
+### Priorización por ROI y Deduplicación — ver `02-flujos/playbook_filtrado.md`
 
-Cuando hay >3 modelos sin medir, aplicar scoring automático **antes** de empezar:
-
-```
-PRIORIDAD = MargenEstimado × VendibilidadEstimada × Urgencia
-```
-
-| Factor | Cálculo | Ejemplo |
-|---|---|---|
-| **MargenEstimado** | Ratio histórico del segmento | Nicho: 18%, Rotación: 10% |
-| **VendibilidadEstimada** | Atractivo del modelo | Deportivo: 80, Premium: 60, Utilitario: 40 |
-| **Urgencia** | ¿Hay cliente esperando? | Cliente concreto: 100, Sin cliente: 30, >1 mes sin medir: +20 |
-
-**Tabla de priorización:**
-
-| Modelo | Segmento | Margen est. | Vend. est. | Urgencia | PRIORIDAD |
-|---|---|---:|---:|---:|---:|
-| Golf 8 GTI CS | Nicho | 18% | 90 | 50 | **8.100** |
-| Mercedes CLA | Rotación | 10% | 65 | 110 | **7.150** |
-| BMW M240i | Nicho | 18% | 85 | 30 | **4.590** |
-| Volvo XC60 T8 | Nicho | 15% | 70 | 30 | **3.150** |
-
-**Regla:** Antes de cada sesión, puntuar los "sin medir" y proponer el top 3 al usuario.
-
-### Deduplicación entre fuentes
-
-**Problema:** Mismo coche en Wallapop y Milanuncios cuenta 2 veces. Infla la muestra.
-
-**Solución:** Normalizar antes de contar:
-
-```
-Para cada coche en el pool:
-  huella = (año, km_redondeado(±2%), cv, precio_redondeado(±3%), combustible)
-
-Si huella ya existe → es duplicado → contar 1 vez, anotar fuentes
-```
-
-**Output:** "8 coches únicos en España (12 anuncios contando duplicados: 4 en Wallapop, 5 en Milanuncios, 3 en Coches.net)"
-
-**Cuándo aplicar:**
-- **Fase 1:** Después de recolectar Coches.net + mobile.de + AutoUncle
-- **Fase 2:** Después de recolectar las 4 fuentes restantes
-- **Flujo C:** Después de cada modelo escaneado
-
-**Regla:** Si la huella coincide pero el precio difiere >10%, NO es duplicado (puede ser versión distinta).
+> Movido a `02-flujos/playbook_filtrado.md`: **Priorización por ROI** (`PRIORIDAD = MargenEstimado × VendibilidadEstimada × Urgencia`, puntuar "sin medir" y proponer top 3) y **Deduplicación entre fuentes** (huella año/km±2%/cv/precio±3%/combustible).
 
 ---
 
@@ -670,7 +628,7 @@ El informe BUSQUEDA agrupa por estas 4 dimensiones y el usuario elige cuáles pr
 ≈ 12.400–13.700 € (transporte + ausfuhr + ITV + honorarios + IEDMT)
 
 ---
-**Checkpoint CP1:** Entregar el informe MODELO y **esperar la instrucción del usuario** (él elige candidato). NO preguntar "¿qué candidato investigo?" — si el encargo está completo, el usuario decide por iniciativa propia y desde ahí todo es automático. Ver §MODO AUTOMÁTICO.
+**Checkpoint CP1:** Entregar el informe MODELO y **esperar la instrucción del usuario** (él elige candidato). NO preguntar "¿qué candidato investigo?" — si el encargo está completo, el usuario decide por iniciativa propia y desde ahí todo es ejecución por fases. Ver §PROTOCOLO DE MANDO.
 ```
 
 ### CASCADA DE INFORMES — qué sale y cuándo (12-ago-2026)
@@ -710,90 +668,14 @@ ENCARGO (Flujo B: MODELO)
 | **2 · Avance con candidato** (usuario elige uno) | **INFORME DE UNIDAD** | Las 15 secciones de `03-informes/informe_tecnico.md` (o las 11 no negociables del flujo MODELO) SOLO del candidato elegido | `informe_unidad_<modelo>_<unidad>.md` + esqueletos `.txt` |
 | **3 · Cierre** (veredicto 🟢/🔵) | **ZIP Laravel** | `informe.json` + `manifest.json` + `contenido/*.txt` + `fotos/` | `[coche_id].zip` → se sube a Laravel |
 
-### 🗺️ MAPA DE PDFs — TIPOS y DÓNDE SE CREA CADA UNO (15-ago-2026)
+### 🗺️ MAPA DE PDFs y 📁 RUTAS DE GUARDADO — ver `05-operaciones/operaciones.md`
 
-> **Hay 7 PDFs en total: 3 los genera CLAUDE (investigación) y 4 los genera LARAVEL (venta/documento).**
-> **El briefing PDF ya NO existe** (eliminado 15-ago-2026). El status de cliente 'Briefing' (pipeline) y `01-arranque/briefing_encargo.md` (cuestionario previo) NO son el PDF briefing y se mantienen.
-
-| # | PDF | Tipo | Quién lo genera | De qué sale | Dónde se crea |
-|---|---|---|---|---|---|
-| 1 | `informe_busqueda_*.pdf` | Investigación (búsqueda) | **CLAUDE** | Markdown Fase 1 | HTML de marca → Chrome headless, plantilla `assets/plantilla_pdf_marca.html` |
-| 2 | `informe_unidad_*.pdf` | Investigación (unidad) | **CLAUDE** | `03-informes/informe_tecnico.md` (15 sec) | Idem plantilla de marca |
-| 3 | informe técnico unidad (Flujo A) | Investigación (técnico) | **CLAUDE** | `03-informes/informe_tecnico.md` | Idem plantilla de marca |
-| 4 | Dossier cliente | Venta / cliente | **LARAVEL** | `contenido/dossier-cliente.txt` | Blade `ficha-coche.blade.php` (documento cliente) |
-| 5 | Ficha del coche | Venta / cliente | **LARAVEL** | `contenido/ficha-publicitaria.txt` | Blade `ficha-coche.blade.php` · `PaqueteValoracionController@ficha` · ruta `cars.ficha` |
-| 6 | Informe interno | Venta / equipo | **LARAVEL** | `contenido/informe-interno.txt` | Blade `informe-interno.blade.php` · `PaqueteValoracionController@interno` · ruta `cars.informe-interno` |
-| 7 | **Folleto del coche** | Venta / cliente | **LARAVEL** | `contenido/ficha-publicitaria.txt` (mismo que ficha) | Blade `folleto-coche.blade.php` · `PaqueteValoracionController@folleto` · ruta `cars.folleto` |
-| 8 | Folleto institucional | Marketing / público | **LARAVEL** | estático (sin esqueleto) | Blade `folleto.blade.php` · `JJImportFolletoController@download` · ruta `jj-import.folleto` |
-
-**Reglas duras del mapa:**
-1. **Claude NUNCA genera los PDFs de venta** (ficha, informe interno, folleto) — los hace Laravel con Blade + Browsershot tras recibir el ZIP.
-2. **Laravel NUNCA genera los PDFs de investigación** — los hace Claude en el Desktop con la plantilla de marca.
-3. El **informe interno** (margen, honorarios, URLs de comparables) es SOLO equipo; el **dossier/ficha/folleto** es para el cliente (sin margen).
-4. Los esqueletos `.txt` (`contenido/*.txt`) son la ÚNICA entrada de Laravel: `ficha-publicitaria.txt`, `informe-interno.txt`, `dossier-cliente.txt`. El **folleto del coche reutiliza `ficha-publicitaria.txt`** — no requiere esqueleto propio.
-
-**Reglas duras:**
-1. **La fase 1 acaba con el informe de búsqueda y la lista de candidatos.** No se escribe valoración en la fase 1.
-2. **No se mezclan búsqueda y valoración en el mismo archivo.** `informe_busqueda_*.md` ≠ `informe_unidad_*.md`.
-3. **El informe de unidad NO se genera en la fase 1 ni para todos los finalistas.** Solo del candidato en el que el usuario avanza.
-4. **El ZIP se genera al cerrar coche**, no cuando el usuario lo recuerda. Sin ZIP la fase 3 no está terminada.
-5. **En Flujo A (URL directa):** el informe de búsqueda se limita a la cobertura de fuentes del mercado; el informe de unidad sale al evaluar la URL.
-
-### 📁 DÓNDE SE GUARDA CADA COSA — rutas por tipo de archivo (15-ago-2026)
-
-> **Regla 1: los `.md` que LEE EL USUARIO van al Desktop, organizados por marca/modelo.**
-> **Regla 2: los JSON de contrato y los ZIPs van a `laravel/` (los procesan los scripts Python y Laravel).**
-> NUNCA escribir nada en `AppData\Roaming\Claude\...\outputs\` (fallo real 15-ago, Tiguan: el informe se escribió ahí y el usuario no lo veía).
-
-**Tabla única de rutas — QUÉ archivo va DÓNDE:**
-
-| Archivo | Ruta | Quién lo usa | Cuándo |
-|---|---|---|---|
-| `informe_busqueda_<fecha>.md` | `informes\<marca>\<modelo>\` | El usuario (lectura) | Fin Fase 1 (Flujo B/C) |
-| `informe_unidad_<fecha>.md` | `informes\<marca>\<modelo>\` | El usuario (lectura) | Fase 2, candidato elegido |
-| `comparativa_<fecha>.md` | `informes\<marca>\<modelo>\` | El usuario (lectura) | Si compara varios candidatos |
-| `export\flujo-a-<coche_id>.json` | `laravel\` | `empaquetar.py` | Flujo A (entrada del ZIP) |
-| `export\flujo-b-<modelo>-<fecha>.json` | `laravel\` | Laravel (histórico cacheable) | Flujo B |
-| `export\scouting_<fecha>.json` | `laravel\` | Laravel (scouting) | Flujo C |
-| `<coche_id>.zip` | `laravel\paquetes\` | Subida a Laravel | Cierre Flujo A |
-| `informe.json` | **SOLO dentro del ZIP** | Laravel | Lo genera `empaquetar.py` — NO existe suelto |
-| Fotos del candidato | `<coche_id>_fotos\` junto al JSON de `export\` | `empaquetar.py` | Se descargan al elegir candidato |
-
-**Aclaraciones que evitan confusión (15-ago-2026):**
-
-1. **`informe.json` NO es un archivo suelto.** Es una entrada DENTRO del ZIP que
-   genera `empaquetar.py` a partir de `export\flujo-a-<coche_id>.json`. Si estás
-   buscando un "informe JSON" en la carpeta del modelo, no existe: existe el
-   `flujo-a-*.json` en `laravel\export\` y el ZIP en `laravel\paquetes\`.
-2. **Los `.md` de `informes\` son para el USUARIO.** No los procesa ningún script.
-   Son lectura humana: búsqueda, unidad, comparativa.
-3. **Los JSON de `laravel\export\` son para las MÁQUINAS.** Los lee `empaquetar.py`
-   o Laravel (`php artisan importnex:import-valuation`). No hace falta abrirlos a mano.
-4. **Los PDFs no los genera Claude** — salen de Laravel (Blade + Browsershot) tras
-   subir el ZIP.
-
-```
-C:\Users\jacar\Desktop\JJImportMotors\
-├── informes\                        ← SOLO .md para el USUARIO, por marca/modelo
-│   └── <marca>\<modelo>\            ← ej. vw\tiguan
-│       ├── informe_busqueda_<fecha>.md
-│       ├── informe_unidad_<fecha>.md
-│       └── comparativa_<fecha>.md
-└── laravel\                         ← trabajo de scripts y contrato con Laravel
-    ├── export\
-    │   ├── flujo-a-<coche_id>.json  ← entrada de empaquetar.py (Flujo A)
-    │   ├── flujo-b-<modelo>-<fecha>.json
-    │   └── scouting_<fecha>.json
-    └── paquetes\
-        └── <coche_id>.zip           ← contiene informe.json + manifest + contenido\ + fotos\
-```
-
-**Reglas de guardado:**
-1. Crear carpetas con `New-Item -ItemType Directory -Force`.
-2. **Normalizar nombres:** marca y modelo en minúsculas, sin tildes, con guiones
-   (`vw\tiguan`, `opel\astra`, `audi\a3`). Fecha en `YYYY-MM-DD`.
-3. **Nunca fuera del Desktop.** Si un informe quedó en otra ruta (outputs de la
-   sesión, AppData, temp), copiarlo a la estructura del Desktop.
+> **Detalle completo movido a `05-operaciones/operaciones.md`** (tabla 7 PDFs, reglas duras, rutas de guardado, aclaraciones `informe.json`).
+> **Resumen crítico (no negociable):**
+> 1. Claude genera los **PDFs de investigación** (búsqueda/unidad) y los **esqueletos `.txt` [MARCADOR]**; Laravel genera los PDFs de **venta** (dossier, ficha, folleto) con Blade + Browsershot.
+> 2. `.md` del usuario → `informes\<marca>\<modelo>\` · JSON/ZIP → `laravel\` (NUNCA AppData\Roaming\Claude).
+> 3. `informe.json` solo existe DENTRO del ZIP (lo genera `empaquetar.py`).
+> 4. Normalizar nombres: minúsculas, sin tildes, guiones (`vw\tiguan`), fecha `YYYY-MM-DD`.
 
 ### 📸 FOTOS REALES · ENLACES DE ANUNCIO · FUENTES CON URL (15-ago-2026 · v2.9.4)
 
@@ -933,26 +815,9 @@ LO DEMÁS: sin cambios significativos.
 
 ---
 
-## 📈 VENDIBILIDAD — 5 factores, 100 puntos
+## 📈 VENDIBILIDAD — 5 factores, 100 puntos — ver `03-informes/comparables.md`
 
-| # | Factor | Peso | Fuente | Estado |
-|---|---:|---|---|---|
-| 1 | Demanda del modelo | 30 | Coches.net `publicationDate` (mediana días) | ✅ |
-| 2 | Escasez configuración | 25 | AS24.es `countryCode` + recuento | ✅ |
-| 3 | Atractivo | 20 | Criterio cualitativo | Manual |
-| 4 | Equipamiento sobre std ES | 15 | mobile.de `features` vs acabado ES | ✅ |
-| 5 | Km e historial | 10 | mobile.de ficha: propietarios, ITV, km/año | ✅ |
-
-**Puntuación:** Demanda: top-10=30, fuerte=22, minoritario=14, nicho=6 · Escasez: ≤20=25, 20-50=21, 50-100=16, 100-300=10, >300=4 · Atractivo: icónico=18-20, deportivo=14-17, premium=10-13, utilitario=4-8 · Equipamiento: techo=4, cuero=3, AWD=3, LED=2, audio=2, HUD=1 · Historial: libro=3, 1dueño=2, <15k/año=3, ITV=2.
-
-### Matriz de decisión (solo Flujo A)
-
-| | Margen ≥10% | Margen <10% |
-|---|---|---|
-| **Vendibilidad ≥65** | 🟢 COMPRA PRIORITARIA | 🔵 OFERTA DE CONTENIDO |
-| **Vendibilidad <65** | 🟡 SOLO BAJO PEDIDO | 🔴 DESCARTAR |
-
-> La casilla azul se ignora siempre: coche con 5% margen y vendibilidad alta **sí se oferta**. Trae los clientes de los 3 siguientes.
+> **Movido a `03-informes/comparables.md`**: los 5 factores (Demanda 30 · Escasez 25 · Atractivo 20 · Equipamiento 15 · Km/historial 10), la puntuación por umbrales y la **Matriz de decisión** (Margen × Vendibilidad → 🟢/🔵/🟡/🔴). Cargar ese archivo en Flujo A para calcular y justificar la vendibilidad.
 
 ---
 
@@ -1048,7 +913,7 @@ Las 16 reglas duras (A1-A16) viven en `06-reglas/anti_patrones.md`. Cargarlas cu
 - [ ] Consulté `indice.json` y comprobé frescura
 - [ ] Miré el registro de clientes (Flujo B)
 - [ ] Confirmé la **modalidad de honorarios M1/M2/M3** del encargo (3 fallos reales por asumir)
-- [ ] Encargo abierto sin URL → mostré el **PLAN DE BARRIDO** antes de navegar
+- [ ] Encargo abierto sin URL → mostré el **PLAN DE FASE** (ver `01-arranque/planificador.md`) antes de navegar
 - [ ] Si amplié filtros del encargo (año, km, precio), lo declaré ANTES (A13)
 - [ ] Waypoint 📍 en cada mensaje · tras cada desviación retomé el paso (A14)
 - [ ] **PASO 0 cache**: consulté `memoria/encargos.md` + `memoria/modelos-medidos.md` + `indice.json` (frescura <3 sem)

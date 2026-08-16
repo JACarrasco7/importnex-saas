@@ -239,7 +239,7 @@ const onDocKeyChange = () => {
                             <ArrowLeftIcon class="h-4 w-4" />
                             {{ t('common.back') }}
                         </Link>
-                        <Link v-if="!['Delivered', 'Discarded'].includes(car.status)" :href="route('cars.verify.show', car.id)" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
+                        <Link :href="route('cars.verify.show', car.id)" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
                             <SparklesIcon class="h-4 w-4" />
                             {{ t('cars.verify_with_ai') }}
                         </Link>

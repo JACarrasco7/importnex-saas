@@ -2,7 +2,7 @@
 
 > **Memoria de filtros/URLs verificados por portal.** Objetivo: construir el plan de fase sabiendo ANTES qué filtros aplican por URL vs solo por clic, sin probar a ciegas (ahorra peticiones).
 >
-> **Fuente:** `../02-flujos/retrospectiva.md` (prueba Playwright 12-ago) + `../02-flujos/paginas_reales.md` + `../memoria/trampas-encontradas.md`.
+> **Fuente:** `../memoria/retrospectiva.md` (prueba Playwright 12-ago) + `../02-flujos/paginas_reales.md` + `trampas-encontradas.md`.
 >
 > **Formato de cada entrada:**
 

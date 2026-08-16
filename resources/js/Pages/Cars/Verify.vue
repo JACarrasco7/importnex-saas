@@ -148,10 +148,15 @@ function apply() {
                 </PageHeader>
 
                 <!-- Status banners -->
-                <div v-if="car.status === 'Pending review' && aiAnalysis" class="overflow-hidden rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                <div v-if="car.ai_verified_at && aiAnalysis" class="overflow-hidden rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
                     <div class="flex items-start gap-3">
-                        <ExclamationTriangleIcon class="h-5 w-5 shrink-0 text-amber-600" />
-                        <p class="text-sm text-amber-900">AI verification completed. Review the suggestions and pick which fields to apply — existing values are left intact unless you tick them.</p>
+                        <CheckCircleIcon class="h-5 w-5 shrink-0 text-emerald-600" />
+                        <div class="flex-1">
+                            <p class="text-sm font-semibold text-emerald-900">{{ t('cars.verification_done_title') }}</p>
+                            <p class="mt-0.5 text-xs text-emerald-700">
+                                {{ t('cars.verification_done_desc') }} · {{ t('cars.verification_done_at') }} {{ car.ai_verified_at ? formatShortDate(car.ai_verified_at) : '—' }}
+                            </p>
+                        </div>
                     </div>
                 </div>
                 <div v-else-if="car.status === 'Verifying'" class="overflow-hidden rounded-2xl border border-blue-200 bg-blue-50 p-4">
@@ -176,51 +181,123 @@ function apply() {
                     </div>
                 </div>
 
-                <!-- AI Suggestions summary -->
-                <div v-if="car.valuation || car.recommendation" class="space-y-6">
-                    <FormSection v-if="car.valuation" title="Valuation">
-                        <div class="flex items-start gap-3">
-                            <ChartBarIcon class="h-5 w-5 shrink-0 text-estoril-600" />
-                            <p class="text-sm text-gray-900">{{ car.valuation }}</p>
+                <!-- Investigación de la IA (completa, desde ai_analysis_json) -->
+                <template v-if="aiAnalysis">
+                    <!-- Veredicto -->
+                    <div v-if="aiAnalysis.verdict || aiAnalysis.traffic_light" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
+                        <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+                            <h3 class="text-base font-semibold text-gray-900">{{ t('cars.ai_investigation') }}</h3>
+                            <span v-if="aiAnalysis.provider || aiAnalysis.model" class="text-xs text-gray-400">
+                                {{ aiAnalysis.provider || 'IA' }}{{ aiAnalysis.model ? ' · ' + aiAnalysis.model : '' }}
+                            </span>
                         </div>
-                    </FormSection>
-
-                    <FormSection v-if="car.recommendation" title="Recommendation">
-                        <div class="flex items-start gap-3">
-                            <LightBulbIcon class="h-5 w-5 shrink-0 text-estoril-600" />
-                            <p class="text-sm text-gray-900">{{ car.recommendation }}</p>
+                        <div class="p-6">
+                            <div class="flex flex-wrap items-center gap-3">
+                                <Badge v-if="aiAnalysis.traffic_light" :variant="trafficLightVariant(aiAnalysis.traffic_light)" size="lg">
+                                    {{ t('cars.verify_fields.traffic_light', 'Semáforo') }}: {{ aiAnalysis.traffic_light }}
+                                </Badge>
+                                <Badge v-if="aiAnalysis.verdict" variant="indigo" size="lg">{{ aiAnalysis.verdict }}</Badge>
+                                <span v-if="aiAnalysis.verdict_confidence" class="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
+                                    {{ t('cars.verify_fields.verdict_confidence', 'Confianza') }}: {{ aiAnalysis.verdict_confidence }}
+                                </span>
+                            </div>
+                            <p v-if="aiAnalysis.verdict_reasoning" class="mt-4 rounded-lg bg-gray-50 p-3 text-sm text-gray-700">
+                                {{ aiAnalysis.verdict_reasoning }}
+                            </p>
                         </div>
-                    </FormSection>
+                    </div>
 
-                    <FormSection v-if="car.red_flags?.length" title="Red flags">
-                        <ul class="space-y-2">
-                            <li v-for="flag in car.red_flags" :key="flag" class="flex items-start gap-2 rounded-lg bg-rose-50 p-3">
-                                <FlagIcon class="h-4 w-4 shrink-0 text-rose-600" />
-                                <span class="text-sm text-rose-900">{{ flag }}</span>
-                            </li>
-                        </ul>
-                    </FormSection>
+                    <!-- Mercado + ahorro -->
+                    <div v-if="aiAnalysis.market_avg || aiAnalysis.market_min || aiAnalysis.market_max || aiAnalysis.estimated_saving" class="grid grid-cols-1 gap-4 sm:grid-cols-4">
+                        <div v-if="aiAnalysis.market_avg" class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-gray-200">
+                            <p class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.verify_fields.market_avg', 'Media mercado') }}</p>
+                            <p class="mt-1 text-lg font-bold text-gray-900">{{ formatCurrency(aiAnalysis.market_avg) }}</p>
+                        </div>
+                        <div v-if="aiAnalysis.market_min" class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-gray-200">
+                            <p class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.verify_fields.market_min', 'Mínimo') }}</p>
+                            <p class="mt-1 text-lg font-bold text-gray-900">{{ formatCurrency(aiAnalysis.market_min) }}</p>
+                        </div>
+                        <div v-if="aiAnalysis.market_max" class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-gray-200">
+                            <p class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.verify_fields.market_max', 'Máximo') }}</p>
+                            <p class="mt-1 text-lg font-bold text-gray-900">{{ formatCurrency(aiAnalysis.market_max) }}</p>
+                        </div>
+                        <div v-if="aiAnalysis.estimated_saving" class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-gray-200">
+                            <p class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.verify_fields.estimated_saving', 'Ahorro estimado') }}</p>
+                            <p class="mt-1 text-lg font-bold text-emerald-600">{{ formatCurrency(aiAnalysis.estimated_saving) }}</p>
+                        </div>
+                    </div>
 
-                    <FormSection v-if="car.tips?.length" title="Tips">
-                        <ul class="space-y-2">
-                            <li v-for="tip in car.tips" :key="tip" class="flex items-start gap-2 rounded-lg bg-emerald-50 p-3">
-                                <CheckCircleIcon class="h-4 w-4 shrink-0 text-emerald-600" />
-                                <span class="text-sm text-emerald-900">{{ tip }}</span>
-                            </li>
-                        </ul>
-                    </FormSection>
-                </div>
+                    <div class="space-y-6">
+                        <FormSection v-if="aiAnalysis.valuation" :title="t('cars.verify_fields.valuation', 'Valoración')">
+                            <div class="flex items-start gap-3">
+                                <ChartBarIcon class="h-5 w-5 shrink-0 text-estoril-600" />
+                                <p class="text-sm text-gray-900">{{ aiAnalysis.valuation }}</p>
+                            </div>
+                        </FormSection>
 
-                <!-- Apply modal trigger -->
+                        <FormSection v-if="aiAnalysis.recommendation" :title="t('cars.verify_fields.recommendation', 'Recomendación')">
+                            <div class="flex items-start gap-3">
+                                <LightBulbIcon class="h-5 w-5 shrink-0 text-estoril-600" />
+                                <p class="text-sm text-gray-900">{{ aiAnalysis.recommendation }}</p>
+                            </div>
+                        </FormSection>
+
+                        <div v-if="aiAnalysis.pros?.length || aiAnalysis.cons?.length" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <FormSection v-if="aiAnalysis.pros?.length" :title="t('cars.pros_label')">
+                                <ul class="space-y-2">
+                                    <li v-for="item in aiAnalysis.pros" :key="item" class="flex items-start gap-2 rounded-lg bg-emerald-50 p-3">
+                                        <CheckCircleIcon class="h-4 w-4 shrink-0 text-emerald-600" />
+                                        <span class="text-sm text-emerald-900">{{ item }}</span>
+                                    </li>
+                                </ul>
+                            </FormSection>
+                            <FormSection v-if="aiAnalysis.cons?.length" :title="t('cars.cons_label')">
+                                <ul class="space-y-2">
+                                    <li v-for="item in aiAnalysis.cons" :key="item" class="flex items-start gap-2 rounded-lg bg-rose-50 p-3">
+                                        <XMarkIcon class="h-4 w-4 shrink-0 text-rose-600" />
+                                        <span class="text-sm text-rose-900">{{ item }}</span>
+                                    </li>
+                                </ul>
+                            </FormSection>
+                        </div>
+
+                        <FormSection v-if="aiAnalysis.red_flags?.length" :title="t('cars.red_flags_label')">
+                            <ul class="space-y-2">
+                                <li v-for="flag in aiAnalysis.red_flags" :key="flag" class="flex items-start gap-2 rounded-lg bg-rose-50 p-3">
+                                    <FlagIcon class="h-4 w-4 shrink-0 text-rose-600" />
+                                    <span class="text-sm text-rose-900">{{ flag }}</span>
+                                </li>
+                            </ul>
+                        </FormSection>
+
+                        <FormSection v-if="aiAnalysis.tips?.length" :title="t('cars.tips_label')">
+                            <ul class="space-y-2">
+                                <li v-for="tip in aiAnalysis.tips" :key="tip" class="flex items-start gap-2 rounded-lg bg-emerald-50 p-3">
+                                    <CheckCircleIcon class="h-4 w-4 shrink-0 text-emerald-600" />
+                                    <span class="text-sm text-emerald-900">{{ tip }}</span>
+                                </li>
+                            </ul>
+                        </FormSection>
+                    </div>
+                </template>
+
+                <!-- Apply modal trigger + re-verify (siempre visibles con análisis) -->
                 <div v-if="aiAnalysis" class="flex flex-wrap items-center gap-3">
                     <button
                         type="button"
                         @click="openModal"
                         class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
                         <SparklesIcon class="h-4 w-4" />
-                        Review &amp; apply AI suggestions
+                        {{ t('cars.review_apply') }}
                     </button>
-                    <span class="text-xs text-gray-500">{{ Object.keys(aiAnalysis).length - 5 }} additional fields available · nothing changes until you pick them</span>
+                    <form method="POST" :action="route('cars.verify-sync', car.id)" class="inline-flex">
+                        <input type="hidden" name="_token" :value="$page.props.csrfToken" />
+                        <button type="submit" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-estoril-700 shadow-sm ring-1 ring-gray-200 hover:bg-gray-50">
+                            <SparklesIcon class="h-4 w-4" />
+                            {{ t('cars.verify_again') }}
+                        </button>
+                    </form>
+                    <span class="text-xs text-gray-500">{{ Object.keys(aiAnalysis).length - 5 }} {{ t('cars.additional_fields') }} · {{ t('cars.nothing_changes') }}</span>
                 </div>
             </div>
         </div>

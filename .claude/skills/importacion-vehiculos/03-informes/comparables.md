@@ -5,6 +5,29 @@
 
 ---
 
+## 📈 VENDIBILIDAD — 5 factores, 100 puntos (movido de SKILL.md)
+
+| # | Factor | Peso | Fuente | Estado |
+|---|---:|---|---|---|
+| 1 | Demanda del modelo | 30 | Coches.net `publicationDate` (mediana días) | ✅ |
+| 2 | Escasez configuración | 25 | AS24.es `countryCode` + recuento | ✅ |
+| 3 | Atractivo | 20 | Criterio cualitativo | Manual |
+| 4 | Equipamiento sobre std ES | 15 | mobile.de `features` vs acabado ES | ✅ |
+| 5 | Km e historial | 10 | mobile.de ficha: propietarios, ITV, km/año | ✅ |
+
+**Puntuación:** Demanda: top-10=30, fuerte=22, minoritario=14, nicho=6 · Escasez: ≤20=25, 20-50=21, 50-100=16, 100-300=10, >300=4 · Atractivo: icónico=18-20, deportivo=14-17, premium=10-13, utilitario=4-8 · Equipamiento: techo=4, cuero=3, AWD=3, LED=2, audio=2, HUD=1 · Historial: libro=3, 1dueño=2, <15k/año=3, ITV=2.
+
+### Matriz de decisión (solo Flujo A)
+
+| | Margen ≥10% | Margen <10% |
+|---|---|---|
+| **Vendibilidad ≥65** | 🟢 COMPRA PRIORITARIA | 🔵 OFERTA DE CONTENIDO |
+| **Vendibilidad <65** | 🟡 SOLO BAJO PEDIDO | 🔴 DESCARTAR |
+
+> La casilla azul se ignora siempre: coche con 5% margen y vendibilidad alta **sí se oferta**. Trae los clientes de los 3 siguientes.
+
+---
+
 ## ⚖️ 9 claves del comparable
 
 | # | Clave | Cómo se fija |

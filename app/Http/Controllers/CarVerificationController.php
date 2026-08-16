@@ -37,33 +37,32 @@ class CarVerificationController extends Controller
 
     /**
      * Synchronous verification (when queue is not available).
+     *
+     * NO toca ningún campo existente del coche: solo guarda el análisis de la
+     * IA en `ai_analysis_json` + `ai_verified_at`. El usuario revisa y aplica
+     * campo por campo desde el modal (apply). Esto garantiza que "verificar"
+     * nunca cambie nada de lo que ya está sin consentimiento explícito.
      */
     public function verifySync(Request $request, Car $car, CarVerificationService $service): RedirectResponse
     {
-        $car->update(['status' => 'Verifying']);
-
         $result = $service->verify($car);
 
         if (! $result['success']) {
-            $car->update(['status' => 'Located']);
-            return back()->with('error', 'Verification failed: ' . ($result['error'] ?? 'unknown'));
+            return back()->with('error', 'Verification failed: '.($result['error'] ?? 'unknown'));
         }
 
         $analysis = $result['analysis'];
         $analysisFull = $result['analysis_full'] ?? $analysis;
 
+        // Solo persistimos la investigación. El status y todos los campos se
+        // quedan como están; el usuario decide qué aplicar en el modal.
         $car->update([
-            'status' => 'Pending review',
-            'traffic_light' => $analysis['traffic_light'] ?? 'neutral',
-            'valuation' => $analysis['valuation'] ?? null,
-            'recommendation' => $analysis['recommendation'] ?? null,
-            'red_flags' => $analysis['red_flags'] ?? [],
-            'tips' => $analysis['tips'] ?? [],
             'ai_analysis_json' => $analysisFull,
+            'ai_verified_at' => now(),
         ]);
 
         return redirect()->route('cars.show', $car->id)
-            ->with('success', 'Verification completed.');
+            ->with('success', 'Verification completed. Review the suggestions and apply what you want.');
     }
 
     /**
@@ -81,7 +80,7 @@ class CarVerificationController extends Controller
         ]);
 
         $analysis = $car->ai_analysis_json;
-        if (!is_array($analysis) || empty($analysis)) {
+        if (! is_array($analysis) || empty($analysis)) {
             return back()->with('error', 'No AI analysis available for this car. Run the verification first.');
         }
 
@@ -109,7 +108,7 @@ class CarVerificationController extends Controller
         $car->update($fillable);
 
         return redirect()->route('cars.show', $car->id)
-            ->with('success', 'AI suggestions applied to: ' . implode(', ', $touched) . '.');
+            ->with('success', 'AI suggestions applied to: '.implode(', ', $touched).'.');
     }
 
     /**

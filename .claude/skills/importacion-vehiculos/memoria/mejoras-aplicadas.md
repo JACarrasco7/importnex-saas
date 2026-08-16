@@ -6,6 +6,20 @@
 
 ## 🎯 Mejoras de funcionalidad
 
+### Mejora #15: Reorganización total + Protocolo de Mando + PASO 0 cache (2026-08-16 · v3.1.0)
+**Problema:** carpeta desordenada (19 MD sueltos), SKILL.md de 1.251 líneas (63% consulta diferible), 12+ interrupciones por encargo por micro-plans, cache de informes previos rota.
+**Solución:**
+- Carpeta reorganizada en bloques numerados: `01-arranque` · `02-flujos` · `03-informes` · `04-negocio` · `05-operaciones` · `06-reglas` (raíz solo SKILL/CHANGELOG/ROADMAP).
+- `planificador.md` nuevo (asistente + plan de barrido + prompt improver + asesor de filtros) → SKILL.md de 1.251 a ~987 líneas.
+- **Protocolo de Mando:** usuario aprueba cada fase; IA ejecuta la fase completa; pausa solo en emergencias (4-6 interrupciones vs 12+).
+- **PASO 0 cache:** antes de navegar se consulta encargos + modelos-medidos + indice.json → no re-buscar lo hecho <3 semanas.
+- `memoria/encargos.md` y `memoria/filtros-portales.md` nuevos.
+**Validación:** grep de referencias cruzadas OK (solo intrafolder sin ruta). ZIP re-empaquetado (198 KB) y subido al Desktop.
+
+---
+
+## 🎯 Mejoras de funcionalidad
+
 ### Mejora #1: Sistema de memoria persistente (2026-08-12)
 **Problema:** Claude Desktop olvida todo entre conversaciones.
 **Solución:** Carpeta `.claude/skills/importacion-vehiculos/memoria/` + `.claude/memoria/` en el proyecto

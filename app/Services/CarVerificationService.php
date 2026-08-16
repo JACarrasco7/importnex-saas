@@ -17,7 +17,7 @@ class CarVerificationService
     public function verify(Car $car): array
     {
         $org = $car->organization;
-        if (!$org) {
+        if (! $org) {
             return ['success' => false, 'error' => 'Car has no organization'];
         }
 
@@ -105,13 +105,13 @@ PROMPT;
             json_encode($carData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE),
         );
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             return ['success' => false, 'error' => $result['error'] ?? 'unknown', 'provider' => $result['provider'] ?? null];
         }
 
         $parsed = $result['data'] ?? [];
 
-        $normalizeInt = static fn($v) => is_numeric($v) ? (int) $v : null;
+        $normalizeInt = static fn ($v) => is_numeric($v) ? (int) $v : null;
 
         // Keep the legacy short shape for backward compatibility (status emails,
         // alerts, etc.) plus expose the full enriched payload for the modal UI.
@@ -133,6 +133,8 @@ PROMPT;
             'estimated_saving' => $normalizeInt($parsed['estimated_saving'] ?? null),
             'pros' => $parsed['pros'] ?? [],
             'cons' => $parsed['cons'] ?? [],
+            'provider' => $result['provider'] ?? null,
+            'model' => $result['model'] ?? null,
         ]);
 
         return [

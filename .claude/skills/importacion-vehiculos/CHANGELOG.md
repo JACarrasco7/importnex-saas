@@ -5,6 +5,36 @@ Todos los cambios notables en el skill `importacion-vehiculos` se documentarán 
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [3.1.0] - 2026-08-16 — Reorganización física, Protocolo de Mando, PASO 0 cache, planificador
+
+### 🗂️ Reorganización física de la carpeta (FASE 0)
+- Carpetas numeradas por orden de lectura: `01-arranque/` · `02-flujos/` · `03-informes/` · `04-negocio/` · `05-operaciones/` · `06-reglas/` · `memoria/` · `references/` · `scripts/` · `assets/`.
+- Raíz limpia: solo `SKILL.md` + `CHANGELOG.md` + `ROADMAP.md`. `MEMORIA.md` → `memoria/`.
+- **Todas las referencias cruzadas** entre MD actualizadas a las rutas nuevas (grep validado; intrafolder siguen sin ruta).
+
+### 🧠 Memoria (FASE A)
+- **`memoria/encargos.md` (NUEVO)**: registro central de encargos (cliente → modalidad M1/M2/M3 → flujo → entregables → resultado → refrescar antes de). Backfill 9 encargos.
+- **`memoria/filtros-portales.md` (NUEVO)**: filtros/URLs verificados por portal (qué aplica por URL vs clic, doble pasada kW).
+- **`memoria/modelos-medidos.md`**: plantilla ampliada a 12 campos (+fuentes cubiertas, +peticiones, +refrescar antes de) + entradas incompletas completadas.
+- **`memoria/MEMORIA.md`**: índice de 8 archivos (antes 5), métricas v3.1.0, protocolo con `indice.json` como paso 3bis.
+
+### 📦 Reestructuración SKILL.md (FASE B) — 1.251 → ~987 líneas
+- **`01-arranque/planificador.md` (NUEVO)**: fusiona Asistente de planificación + Plan de barrido + Prompt Improver + Asesor de filtros (elimina ~190 líneas duplicadas de SKILL.md).
+- Secciones movidas a compañeros: Mapa de PDFs + Rutas de guardado → `05-operaciones/operaciones.md` · Priorización ROI + Deduplicación → `02-flujos/playbook_filtrado.md` · Vendibilidad + Matriz → `03-informes/comparables.md`.
+
+### 🔑 Protocolo de Mando (FASE D) — filosofía del usuario
+- **Sustituye a "Modo Automático" y a "Micro-plan con OK"**: el usuario aprueba CADA fase (plan de fase de 3-5 líneas); dentro de la fase la IA ejecuta TODO automáticamente; pausa solo por emergencia (presupuesto 80%, fuente bloqueada tras reintentos, hallazgo crítico, desviación A14).
+- De 12+ interrupciones por encargo a **4-6** (plan de fase + checkpoints de decisión CP-D/CP1/CP3).
+
+### 🗂️ PASO 0 — CHECK DE CACHE (FASE D)
+- Antes de navegar se lee `memoria/encargos.md` + `memoria/modelos-medidos.md` + `indice.json` (Desktop). Si hay informe <3 semanas → mostrar resumen + preguntar ¿delta / refrescar / nuevo?. NO re-buscar lo ya hecho.
+
+### 🔧 Fixes de contradicciones (FASE C)
+- CP2 unificado ("tras comparables, antes de veredicto"). · JSON Flujo C con nombre único `scouting_<fecha>.json`. · Umbral tramo 8-14k mínimo 10% ≠ objetivo 12%. · Resumen anti-patrones completo hasta A16 (faltaban A15/A16). · Frontmatter con `version: 3.1.0`.
+
+### 📄 Archivos tocados
+- `SKILL.md` (reestructuración + Protocolo de Mando + PASO 0 + fixes) · `01-arranque/planificador.md` (NUEVO) · `memoria/encargos.md` (NUEVO) · `memoria/filtros-portales.md` (NUEVO) · `memoria/modelos-medidos.md` · `memoria/MEMORIA.md` · `05-operaciones/operaciones.md` · `02-flujos/playbook_filtrado.md` · `03-informes/comparables.md` · `CHANGELOG.md`.
+
 ## [3.0.0] - 2026-08-16 — Asistente de planificación + Auditoría de cierre de conversación
 
 ### 💡 ASISTENTE DE PLANIFICACIÓN — encargos abiertos/vagos

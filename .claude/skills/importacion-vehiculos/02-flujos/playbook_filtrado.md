@@ -294,3 +294,53 @@ Cuando hagas screenshot, espera ver (móvil vs desktop):
 | **Ficha mobile.de** | Sección Fahrzeugdaten + Ausstattung + fotos |
 
 Si una captura tiene menos datos de los esperados → probablemente la página no cargó bien. Recarga 1 vez.
+---
+
+## 📊 PRIORIZACIÓN POR ROI (movido de SKILL.md — Flujo B y C)
+
+Cuando hay >3 modelos sin medir, aplicar scoring automático **antes** de empezar:
+
+```
+PRIORIDAD = MargenEstimado × VendibilidadEstimada × Urgencia
+```
+
+| Factor | Cálculo | Ejemplo |
+|---|---|---|
+| **MargenEstimado** | Ratio histórico del segmento | Nicho: 18%, Rotación: 10% |
+| **VendibilidadEstimada** | Atractivo del modelo | Deportivo: 80, Premium: 60, Utilitario: 40 |
+| **Urgencia** | ¿Hay cliente esperando? | Cliente concreto: 100, Sin cliente: 30, >1 mes sin medir: +20 |
+
+**Tabla de priorización:**
+
+| Modelo | Segmento | Margen est. | Vend. est. | Urgencia | PRIORIDAD |
+|---|---|---:|---:|---:|---:|
+| Golf 8 GTI CS | Nicho | 18% | 90 | 50 | **8.100** |
+| Mercedes CLA | Rotación | 10% | 65 | 110 | **7.150** |
+| BMW M240i | Nicho | 18% | 85 | 30 | **4.590** |
+| Volvo XC60 T8 | Nicho | 15% | 70 | 30 | **3.150** |
+
+**Regla:** Antes de cada sesión, puntuar los "sin medir" y proponer el top 3 al usuario.
+
+---
+
+## 🔗 DEDUPLICACIÓN ENTRE FUENTES (movido de SKILL.md)
+
+**Problema:** Mismo coche en Wallapop y Milanuncios cuenta 2 veces. Infla la muestra.
+
+**Solución:** Normalizar antes de contar:
+
+```
+Para cada coche en el pool:
+  huella = (año, km_redondeado(±2%), cv, precio_redondeado(±3%), combustible)
+
+Si huella ya existe → es duplicado → contar 1 vez, anotar fuentes
+```
+
+**Output:** "8 coches únicos en España (12 anuncios contando duplicados: 4 en Wallapop, 5 en Milanuncios, 3 en Coches.net)"
+
+**Cuándo aplicar:**
+- **Fase 1:** Después de recolectar Coches.net + mobile.de + AutoUncle
+- **Fase 2:** Después de recolectar las 4 fuentes restantes
+- **Flujo C:** Después de cada modelo escaneado
+
+**Regla:** Si la huella coincide pero el precio difiere >10%, NO es duplicado (puede ser versión distinta).

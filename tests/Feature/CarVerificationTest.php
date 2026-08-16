@@ -5,7 +5,6 @@ namespace Tests\Feature;
 use App\Models\Car;
 use App\Models\Organization;
 use App\Models\User;
-use App\Services\CarVerificationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
@@ -31,15 +30,21 @@ class CarVerificationTest extends TestCase
     {
         $org = Organization::factory()->create();
         $user = User::factory()->create(['organization_id' => $org->id, 'role' => 'owner']);
-        $car = Car::factory()->create(['organization_id' => $org->id]);
+        $car = Car::factory()->create([
+            'organization_id' => $org->id,
+            'status' => 'Located',
+        ]);
 
         $this->actingAs($user);
 
-        // No API key configured -> should fail and revert status
+        // No API key configured -> should fail and NOT touch anything
         $response = $this->post(route('cars.verify-sync', $car));
         $response->assertRedirect();
 
-        $this->assertEquals('Located', $car->fresh()->status);
+        $fresh = $car->fresh();
+        $this->assertEquals('Located', $fresh->status);
+        $this->assertNull($fresh->ai_analysis_json);
+        $this->assertNull($fresh->ai_verified_at);
     }
 
     public function test_verify_sync_with_mocked_ai_success(): void
@@ -54,6 +59,11 @@ class CarVerificationTest extends TestCase
                         'recommendation' => 'Buy',
                         'red_flags' => [],
                         'tips' => ['Inspect'],
+                        'verdict' => 'Buy',
+                        'market_avg' => 15000,
+                        'estimated_saving' => 1200,
+                        'pros' => ['Clean'],
+                        'cons' => ['High mileage'],
                     ]),
                 ]],
             ], 200),
@@ -61,7 +71,12 @@ class CarVerificationTest extends TestCase
 
         $org = Organization::factory()->withAi('anthropic', 'claude-3-5-sonnet-latest', 'sk-test-fake')->create();
         $user = User::factory()->create(['organization_id' => $org->id, 'role' => 'owner']);
-        $car = Car::factory()->create(['organization_id' => $org->id]);
+        $car = Car::factory()->create([
+            'organization_id' => $org->id,
+            'status' => 'Located',
+            'traffic_light' => 'neutral',
+            'valuation' => null,
+        ]);
 
         $this->actingAs($user);
 
@@ -69,9 +84,17 @@ class CarVerificationTest extends TestCase
         $response->assertRedirect(route('cars.show', $car->id));
 
         $car->refresh();
-        $this->assertEquals('Pending review', $car->status);
-        $this->assertEquals('green', $car->traffic_light);
-        $this->assertEquals('Good deal', $car->valuation);
+        // La verificación NO modifica nada existente: solo guarda el análisis.
+        $this->assertEquals('Located', $car->status);
+        $this->assertEquals('neutral', $car->traffic_light);
+        $this->assertNull($car->valuation);
+        // El análisis completo queda en ai_analysis_json + timestamp.
+        $this->assertNotNull($car->ai_verified_at);
+        $this->assertIsArray($car->ai_analysis_json);
+        $this->assertEquals('green', $car->ai_analysis_json['traffic_light']);
+        $this->assertEquals('Good deal', $car->ai_analysis_json['valuation']);
+        $this->assertEquals('Buy', $car->ai_analysis_json['verdict']);
+        $this->assertEquals(15000, $car->ai_analysis_json['market_avg']);
     }
 
     public function test_discard_reverts_car_status(): void

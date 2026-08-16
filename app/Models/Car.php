@@ -32,13 +32,14 @@ class Car extends Model
         'market_avg', 'market_min', 'market_max', 'estimated_saving',
         'research_source', 'schema_version',
         'comparables_list', 'fotos_json', 'notes', 'organization_id', 'client_id',
-        'ai_analysis_json',
+        'ai_analysis_json', 'ai_verified_at',
     ];
 
     protected $casts = [
         'equipment' => 'array', 'tips' => 'array', 'red_flags' => 'array',
         'research' => 'array', 'pros' => 'array', 'cons' => 'array',
         'ai_analysis_json' => 'array',
+        'ai_verified_at' => 'datetime',
         'comparables_list' => 'array', 'fotos_json' => 'array', 'boe_confirmed' => 'boolean',
         'co2_confirmado' => 'boolean',
         'is_marketplace' => 'boolean',

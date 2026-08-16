@@ -5,6 +5,88 @@
 
 ---
 
+## 🗺️ MAPA DE PDFs — TIPOS y DÓNDE SE CREA CADA UNO (movido de SKILL.md, 15-ago-2026)
+
+> **Hay 7 PDFs en total: 3 los genera CLAUDE (investigación) y 4 los genera LARAVEL (venta/documento).**
+> **El briefing PDF ya NO existe** (eliminado 15-ago-2026). El status de cliente 'Briefing' (pipeline) y `../01-arranque/briefing_encargo.md` (cuestionario previo) NO son el PDF briefing y se mantienen.
+
+| # | PDF | Tipo | Quién lo genera | De qué sale | Dónde se crea |
+|---|---|---|---|---|---|
+| 1 | `informe_busqueda_*.pdf` | Investigación (búsqueda) | **CLAUDE** | Markdown Fase 1 | HTML de marca → Chrome headless, plantilla `assets/plantilla_pdf_marca.html` |
+| 2 | `informe_unidad_*.pdf` | Investigación (unidad) | **CLAUDE** | `../03-informes/informe_tecnico.md` (15 sec) | Idem plantilla de marca |
+| 3 | informe técnico unidad (Flujo A) | Investigación (técnico) | **CLAUDE** | `../03-informes/informe_tecnico.md` | Idem plantilla de marca |
+| 4 | Dossier cliente | Venta / cliente | **LARAVEL** | `contenido/dossier-cliente.txt` | Blade `ficha-coche.blade.php` (documento cliente) |
+| 5 | Ficha del coche | Venta / cliente | **LARAVEL** | `contenido/ficha-publicitaria.txt` | Blade `ficha-coche.blade.php` · `PaqueteValoracionController@ficha` · ruta `cars.ficha` |
+| 6 | Informe interno | Venta / equipo | **LARAVEL** | `contenido/informe-interno.txt` | Blade `informe-interno.blade.php` · `PaqueteValoracionController@interno` · ruta `cars.informe-interno` |
+| 7 | **Folleto del coche** | Venta / cliente | **LARAVEL** | `contenido/ficha-publicitaria.txt` (mismo que ficha) | Blade `folleto-coche.blade.php` · `PaqueteValoracionController@folleto` · ruta `cars.folleto` |
+| 8 | Folleto institucional | Marketing / público | **LARAVEL** | estático (sin esqueleto) | Blade `folleto.blade.php` · `JJImportFolletoController@download` · ruta `jj-import.folleto` |
+
+**Reglas duras del mapa:**
+1. **Claude NUNCA genera los PDFs de venta** (ficha, informe interno, folleto) — los hace Laravel con Blade + Browsershot tras recibir el ZIP.
+2. **Laravel NUNCA genera los PDFs de investigación** — los hace Claude en el Desktop con la plantilla de marca.
+3. El **informe interno** (margen, honorarios, URLs de comparables) es SOLO equipo; el **dossier/ficha/folleto** es para el cliente (sin margen).
+4. Los esqueletos `.txt` (`contenido/*.txt`) son la ÚNICA entrada de Laravel: `ficha-publicitaria.txt`, `informe-interno.txt`, `dossier-cliente.txt`. El **folleto del coche reutiliza `ficha-publicitaria.txt`** — no requiere esqueleto propio.
+
+---
+
+## 📁 DÓNDE SE GUARDA CADA COSA — rutas por tipo de archivo (movido de SKILL.md, 15-ago-2026)
+
+> **Regla 1: los `.md` que LEE EL USUARIO van al Desktop, organizados por marca/modelo.**
+> **Regla 2: los JSON de contrato y los ZIPs van a `laravel/` (los procesan los scripts Python y Laravel).**
+> NUNCA escribir nada en `AppData\Roaming\Claude\...\outputs\` (fallo real 15-ago, Tiguan: el informe se escribió ahí y el usuario no lo veía).
+
+**Tabla única de rutas — QUÉ archivo va DÓNDE:**
+
+| Archivo | Ruta | Quién lo usa | Cuándo |
+|---|---|---|---|
+| `informe_busqueda_<fecha>.md` | `informes\<marca>\<modelo>\` | El usuario (lectura) | Fin Fase 1 (Flujo B/C) |
+| `informe_unidad_<fecha>.md` | `informes\<marca>\<modelo>\` | El usuario (lectura) | Fase 2, candidato elegido |
+| `comparativa_<fecha>.md` | `informes\<marca>\<modelo>\` | El usuario (lectura) | Si compara varios candidatos |
+| `export\flujo-a-<coche_id>.json` | `laravel\` | `empaquetar.py` | Flujo A (entrada del ZIP) |
+| `export\flujo-b-<modelo>-<fecha>.json` | `laravel\` | Laravel (histórico cacheable) | Flujo B |
+| `export\scouting_<fecha>.json` | `laravel\` | Laravel (scouting) | Flujo C |
+| `<coche_id>.zip` | `laravel\paquetes\` | Subida a Laravel | Cierre Flujo A |
+| `informe.json` | **SOLO dentro del ZIP** | Laravel | Lo genera `empaquetar.py` — NO existe suelto |
+| Fotos del candidato | `<coche_id>_fotos\` junto al JSON de `export\` | `empaquetar.py` | Se descargan al elegir candidato |
+
+**Aclaraciones que evitan confusión (15-ago-2026):**
+
+1. **`informe.json` NO es un archivo suelto.** Es una entrada DENTRO del ZIP que
+   genera `empaquetar.py` a partir de `export\flujo-a-<coche_id>.json`. Si estás
+   buscando un "informe JSON" en la carpeta del modelo, no existe: existe el
+   `flujo-a-*.json` en `laravel\export\` y el ZIP en `laravel\paquetes\`.
+2. **Los `.md` de `informes\` son para el USUARIO.** No los procesa ningún script.
+   Son lectura humana: búsqueda, unidad, comparativa.
+3. **Los JSON de `laravel\export\` son para las MÁQUINAS.** Los lee `empaquetar.py`
+   o Laravel (`php artisan importnex:import-valuation`). No hace falta abrirlos a mano.
+4. **Los PDFs no los genera Claude** — salen de Laravel (Blade + Browsershot) tras
+   subir el ZIP.
+
+```
+C:\Users\jacar\Desktop\JJImportMotors\
+├── informes\                        ← SOLO .md para el USUARIO, por marca/modelo
+│   └── <marca>\<modelo>\            ← ej. vw\tiguan
+│       ├── informe_busqueda_<fecha>.md
+│       ├── informe_unidad_<fecha>.md
+│       └── comparativa_<fecha>.md
+└── laravel\                         ← trabajo de scripts y contrato con Laravel
+    ├── export\
+    │   ├── flujo-a-<coche_id>.json  ← entrada de empaquetar.py (Flujo A)
+    │   ├── flujo-b-<modelo>-<fecha>.json
+    │   └── scouting_<fecha>.json
+    └── paquetes\
+        └── <coche_id>.zip           ← contiene informe.json + manifest + contenido\ + fotos\
+```
+
+**Reglas de guardado:**
+1. Crear carpetas con `New-Item -ItemType Directory -Force`.
+2. **Normalizar nombres:** marca y modelo en minúsculas, sin tildes, con guiones
+   (`vw\tiguan`, `opel\astra`, `audi\a3`). Fecha en `YYYY-MM-DD`.
+3. **Nunca fuera del Desktop.** Si un informe quedó en otra ruta (outputs de la
+   sesión, AppData, temp), copiarlo a la estructura del Desktop.
+
+---
+
 ## 🏗️ DIVISIÓN DE TRABAJO DEFINITIVA (12-ago-2026)
 
 > **Investigación → Claude (Desktop). Almacenamiento y gestión → Laravel (importnexcore).**
