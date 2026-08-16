@@ -1,5 +1,6 @@
 ---
 name: importacion-vehiculos
+version: 3.1.0
 description: >
   Negocio JJ Import Motors (Huelva): servicio de búsqueda e importación de coches
   (desde Alemania y dentro de España). NO compra stock, solo oferta el servicio
@@ -48,7 +49,7 @@ Localizar coches (desde Alemania y dentro de España) y **ofertar el servicio de
 
 ```
 Umbrales objetivo: Nicho ≥10% | Rotación ≥10% | Tramo 8-14k ≥12%
-Umbrales mínimos (EXIT 3): Nicho 8% | Rotación 10% | Tramo 8-14k 12%
+Umbrales mínimos (EXIT 3): Nicho 8% | Rotación 10% | Tramo 8-14k 10%
 Costes fijos: ver `04-negocio/costes.md` (transporte + ausfuhr + ITV + honorarios) — §1.4 single source of truth
 Fuentes: 7 (Wallapop, Milanuncios, Coches.net, mobile.de, AS24.de, AutoUncle, kleinanzeigen.de)
 Método: navegación real estilo humano SIEMPRE primero → ver `02-flujos/navegacion_real.md`
@@ -63,6 +64,8 @@ Origen DE vs ES: si no se especifica, buscar en ambos mercados y comparar dónde
 Briefing encargo: preguntar críticos ANTES de navegar → `01-arranque/briefing_encargo.md`
 Tope de gama: doble pasada por kW SIEMPRE → `02-flujos/playbook_filtrado.md` §Doble pasada
 Cierre: AUDITORÍA DE CIERRE al elegir candidato único (o abortar) → 5 dimensiones + 3 salidas a memoria
+PASO 0: CHECK DE CACHE antes de navegar (encargos + modelos-medidos + indice.json) → no re-buscar lo hecho
+Mando: PROTOCOLO DE MANDO — usuario aprueba cada fase, IA ejecuta la fase completa, pausa solo en emergencias
 ```
 
 ---
@@ -144,7 +147,27 @@ D sondeo → INFORME DE MODELOS (país × año × motorización)
 6. **El requisito de potencia es mínimo (≥Xcv):** filtrar por kW/cv mínimos, no buscar una variante concreta; versiones 125/130/150 cumplen +120cv.
 7. **D1 NO pagina (eficiencia):** D1a enumera con 2 lecturas por mercado (asc = suelo + desc = techo) + facetas de marca + semilla `modelos-medidos.md`; D1b difiere el precio-desde a 1 consulta por modelo solo si falta. El anuncio individual solo se investiga cuando el embudo es pequeño (Flujo A/B).
 
-**Antes de navegar en Flujo A/B → briefing de encargo (`01-arranque/briefing_encargo.md`):**
+**Antes de navegar en Flujo A/B → PASO 0 CACHE + briefing de encargo:**
+
+### 🗂️ PASO 0 — CHECK DE CACHE (16-ago-2026) — NO re-buscar lo ya hecho
+
+> **Se ejecuta SIEMPRE al recibir un encargo, ANTES de cualquier navegación o plan de fase.**
+
+```
+¿Ya existe investigación de este modelo/cliente?
+1. Leer `memoria/encargos.md` (¿encargo previo del cliente o del modelo?)
+2. Leer `memoria/modelos-medidos.md` (¿medición previa? — campo refrescar_antes_de)
+3. Cruce con `indice.json` (Desktop) + `datos_mercado.json` (regla frescura <3 semanas)
+
+CASOS:
+- Informe <3 semanas (refrescar_antes_de en futuro) → mostrar resumen + preguntar:
+    ¿🔄 delta (solo cambios) / 🔁 refrescar completo / 🆕 buscar de nuevo?
+- Encargo previo del MISMO cliente → retomar contexto (presupuesto, modalidad M1/M2/M3, preferencias)
+- Sin datos → investigación nueva normal
+```
+
+**Regla dura:** si hay cache reciente (<3 semanas), **NO** re-hacer las 7 fuentes. Se ofrece delta primero. Ahorro de tokens completo en ese caso.
+
 1. Extraer parámetros dados (modelo, año mín, km máx, presupuesto...).
 2. Preguntar SOLO los críticos que falten (tabla de faltantes) + **modalidad de honorarios M1/M2/M3**.
 3. Si es tope de gama → confirmar potencia (activa doble pasada).
@@ -153,192 +176,14 @@ D sondeo → INFORME DE MODELOS (país × año × motorización)
 
 ---
 
-## 💡 ASISTENTE DE PLANIFICACIÓN — encargos abiertos/vagos (16-ago-2026)
+## 💡 PLANIFICACIÓN DE ENCARGOS — ver `01-arranque/planificador.md` (16-ago-2026)
 
-> **El problema:** El usuario dice "busca algo para 15.000 €" o "qué merece la pena" y la IA lanza 50+ peticiones sin dirección clara. Se queman tokens y el resultado no es útil.
-> **La solución:** La IA ayuda al usuario a construir un PLAN paso a paso con estrategia de embudo, filtrando progresivamente desde muy abierto a muy específico.
-
-### Protocolo en 4 pasos
-
-```
-PASO 1 — DETECTAR el tipo de encargo (flauto automático)
-  └─ ¿URL concreta? → Flujo A (evaluación unitaria, sin ayuda de planificación)
-  └─ ¿Modelo concreto? → Ver STEP 2 (mejorar prompt si falta críticos)
-  └─ ¿Solo presupuesto + requisitos? → Flujo D (sondeo de modelos primero)
-  └─ ¿"Qué merece la pena"? → Flujo C + Paso 2 (definir segmentos together)
-
-PASO 2 — MEJORAR el prompt (Prompt Improver)
-  └─ Detectar vaguedad: <50 chars o <3 parámetros
-  └─ Proponer prompt mejorado con completar críticos
-  └─ Preguntar SOLO lo que falta (máx 4 cosas)
-  └─ Opción "busca tú / lo que puedas"
-
-PASO 3 — PLANIFICAR la estrategia de embudo
-  └─ Mostrar el PLAN DE BARRIDO (mercados, filtros, bandas, fuentes)
-  └─ Explicar el enfoque: del MÁS abierto al MÁS específico
-  └─ Pedir OK antes de ejecutar
-
-PASO 4 — EJECUTAR en cascada con checkpoints
-  └─ Fase 1 → Informe + lista de candidatos + checkpoint
-  └─ Usuario elige → Fase 2 → Informe unidad + checkpoint
-  └─ Veredicto → Dossier + ZIP
-```
-
-### Ejemplo práctico paso a paso
-
-**Usuario dice:** "busca algo para 15.000 €"
-
-**Claude responde (PASO 1 + 2):**
-```
-Tengo el presupuesto pero me falta definir QUÉ tipo de coche. ¿Me ayudas?
-
-1. Finalidad: ¿para reventa / uso personal / familiar?
-2. Segmento: ¿compacto / SUV / berlina / deportivo?
-3. Origen: ¿importación de Alemania o compra nacional?
-4. Año mínimo / KM máximo?
-
-O si prefieres, dime "busca tú" y propongo yo lo más rentable del mercado.
-```
-
-**Usuario responde:** "uso personal, compacto, Alemania, 2018+, ≤100k"
-
-**Claude responde (PASO 3):**
-```
-📋 PLAN DE BARRIDO — Compactos 2018+ ≤100k desde 15.000 €
-
-1. Mercados:
-   - 🇩🇪 Alemania: techo ≈ 11.250 € (transporte 900 + ausfuhr 114 + ITV 115 + honorarios 1.500)
-   - 🇪🇸 España: techo ≈ 14.650 € (honorarios 1.500)
-
-2. Filtros: ≥2018 · ≤100.000 km · Gasolina/Diesel · 5p · ≤11.250 € (DE)
-
-3. Bandas de precio a recorrer:
-   - 5.000-7.000 € (suelo, muchas unidades)
-   - 7.000-9.000 € (dulce, equilibrio km/precio)
-   - 9.000-11.250 € (techo, mejores acabados)
-
-4. Fuentes Fase 1 (sondeo rápido):
-   - mobile.de (3-5 páginas)
-   - Coches.net (2-3 páginas)
-   - AutoUncle (1 captura)
-
-5. Entregable:
-   - Informe de MODELOS (5-8 modelos que caben con precio-desde)
-   - Tú eliges 2-3 → investigo a fondo (candidatos reales)
-
-Tokens estimados: ~12 peticiones (~4.000 tokens). ¿OK?
-```
-
-**Usuario:** "OK"
-
-**Claude ejecuta (PASO 4) — Flujo D:**
-```
-D1: Sondeo ES+DE (8 peticiones) → Encontré 7 modelos que caben
-D2: INFORME DE MODELOS con tabla por país×año×motor
-CP-D: Elige 2-3 modelos → cada uno pasa a Flujo B (candidatos con enlaces)
-```
-
-### ¿Cuándo aplicar cada herramienta?
-
-| Herramienta | Cuándo usar | Token ahorro |
-|---|---|---|
-| **Prompt Improver** | Prompt <50 chars o <3 parámetros | Evita búsquedas al 50% irrelevantes |
-| **Briefing encargo** | Modelo concreto pero falta críticos (año/km/presupuesto) | Evita Fase 2 del 80% (candidatos fuera de rango) |
-| **Plan de barrido** | Libertad de búsqueda (cómo buscar) | Claridad de qué esperar, reduces retro-ajustes |
-| **Flujo D (embudo)** | Presupuesto + requisitos SIN modelo | ¡HUGE ahorro! Sondeo (8) → B (15-50) → A (35-70) |
-| **Flujo A directo** | URL concreta o "evalúa este" | No aplica (ya es específico) |
-
-### Estrategia de embudo visualizada
-
-```
-🎯 OBJETIVO: encontrar el mejor coche de 15.000 €
-
-NIVEL 1 — Sondeo barato (Fase 1, D1)
-  Filtros amplios → 7 modelos que caben en el presupuesto
-  Coste: 8 peticiones (~3.000 tokens)
-  └─ Output: Informe de MODELOS (solo nombres + precio-desde)
-
-       ↓ Usuario elige 2-3 modelos
-
-NIVEL 2 — Búsqueda media (Flujo B)
-  3 fuentes → Top 5 candidatos por modelo con enlaces
-  Coste: 15-20 peticiones por modelo (~6.000 tokens)
-  └─ Output: Informe MODELO + candidatos con enlaces + CP1
-
-       ↓ Usuario elige 1 candidato
-
-NIVEL 3 — Investigación profunda (Flujo A)
-  7 fuentes → Análisis completo del candidato elegido
-  Coste: 35-50 peticiones (~12.000 tokens)
-  └─ Output: Informe UNIDAD + Dossier + ZIP
-
-       ↓ Veredicto
-
-FIN
-```
-
-**Sin embudo (anti-patrón):** 70 peticiones por modelo × 3-5 modelos = 210-350 peticiones (~60.000+ tokens)
-**Con embudo:** 8 + (15-20 × 2-3) + 35-50 = 73-113 peticiones (~25.000 tokens) → **58% de ahorro**
-
-### Reglas para el asistente de planificación
-
-1. **PASO 1 (detectar) SIEMPRE ANTES de cualquier búsqueda.** No adivinar, preguntar.
-2. **PASO 2 (mejorar) solo si es vago.** <50 chars o <3 parámetros.
-3. **PASO 3 (planificar) SIEMPRE incluye checkpoints explícitos.** "CP-D: elige modelos", "CP1: elige candidato".
-4. **PASO 4 (ejecutar) en cascada, no todo de golpe.** El usuario debe poder decidir en cada paso.
-5. **Mantener siempre la opción "busca tú / lo que puedas".** No bloquear por falta de detalle.
-6. **Documentar el plan en el cuaderno de sesión.** Para que las correcciones del usuario afecten a búsquedas futuras.
-
-### Referencias cruzadas
-
-- 📄 **Prompt Improver completo:** ver `01-arranque/guia_prompts.md`
-- 📄 **Briefing de encargo:** ver `01-arranque/briefing_encargo.md`
-- 📄 **Flujo D (descubrimiento) detallado:** ver §FLUJO D en este documento
-- 📄 **PLAN DE BARRIDO:** ver §PLAN DE BARRIDO previo en este documento
-
----
-
-**📋 PLAN DE BARRIDO previo — encargos ABIERTOS sin URL (15-ago-2026):**
-> Cuando el usuario pide "revisa qué hay / qué modelos / qué mercado es mejor" SIN modelo concreto (mucha libertad), eso es **FLUJO D**: primero el sondeo de modelos (D1) + INFORME DE MODELOS (D2), y el Flujo B solo con los modelos que el usuario elija. El plan de barrido se muestra igualmente (mercados, filtros, bandas, techo por origen) pero el entregable inmediato es el INFORME DE MODELOS, no candidatos. Si ya hay modelo concreto pero libertad de cómo buscar, el plan de barrido aplica al Flujo B directo. Fallo real 15-ago (María, 9.000 €): se navegó a anuncios reales sin modelo elegido y se entregó un medio informe PARCIAL.
+> **Toda la planificación vive en `01-arranque/planificador.md`**: Asistente de planificación (4 pasos) + Plan de barrido + Prompt Improver + Asesor de filtros + embudo visualizado.
 >
-> Con los parámetros del briefing cerrados, mostrar el plan en 5-8 líneas y pedir OK:
-> 1. **Mercados** (ES + DE) con techo de compra por origen.
-> 2. **Filtros exactos**: año, km, combustible, cv, puertas, precio máx.
-> 3. **Bandas de precio** a recorrer (ej. 3-5k / 5-7k / 7k-techo) — no solo el suelo (A12).
-> 4. **Cobertura**: fuentes de Fase 1 y nº de páginas por fuente.
-> 5. **Entregable esperado**: informe de búsqueda con N candidatos en TODO el rango.
+> **Regla:** en encargos abiertos/vagos ("busca algo para 15.000 €", "qué merece la pena") se aplica el **Protocolo en 4 pasos** del planificador:
+> **PASO 0 cache → PASO 1 detectar flujo → PASO 2 mejorar prompt (si vago) → PASO 3 plan de fase (OK del usuario) → PASO 4 ejecutar en cascada.**
 >
-> Con el OK → ejecutar sin volver a preguntar. El plan sustituye al briefing cuando no falta ningún parámetro.
-
-**🛠️ Prompt Improver (12-ago-2026) — refinar prompts vagos:**
-> Antes de ejecutar, detectar si el prompt del usuario es vago y proponer uno MEJOR con briefing completo. Detalle en `01-arranque/guia_prompts.md`.
-
-**Reglas rápidas:**
-- **<50 chars** → probablemente vago → mejorar
-- **50-200 chars** → revisar si tiene 3+ parámetros
-- **>200 chars** → complejo, preguntar solo si falta crítico
-- **NUNCA preguntar más de 4 cosas a la vez**
-- **SIEMPRE** permitir "busca tú" / "lo que puedas"
-- **SIEMPRE** mostrar prompt mejorado listo + pedir confirmación
-
-**Ejemplo de mejora:**
-```
-Usuario: "busca GTI"
-
-Claude responde:
-Casi lo tengo. Solo falta:
-  • Versión (¿GTI / GTI Performance / GTI Clubsport?)
-  • Presupuesto máximo
-  · Finalidad (¿personal / reventa?)
-
-Prompt mejorado:
-  "VW Golf GTI 7.5 Performance 2020+, presupuesto 35k puesto en Huelva,
-   km máx 80.000, automático DSG, para reventa"
-
-Si OK, ejecuto (~50 capturas).
-```
-
-En caso de duda: **preguntar antes de gastar tokens**.
+> Cargar `01-arranque/planificador.md` completo antes de navegar en cualquier encargo no-URL. Referencias: briefing (`briefing_encargo.md`), plantillas de prompt (`guia_prompts.md`), filtros por portal (`../memoria/filtros-portales.md`).
 
 ---
 
@@ -394,17 +239,17 @@ Para Alemania, orden: mobile.de directo → AutoScout24.de directo → AutoUncle
 
 > **Objetivo: cero ambigüedad sobre en qué punto del flujo estamos y qué falta.** Cada flujo es una secuencia NUMERADA. En cada mensaje, Claude declara su posición con un waypoint; si el usuario desvía, se responde y se RETOMA.
 
-### Los mapas (una línea por paso)
+### Los mapas (una línea por paso) — versión con PROTOCOLO DE MANDO
 
 ```
-FLUJO D: 1 briefing+cuaderno → 2 micro-plan sondeo → 3 sondeo ES+DE → 4 INFORME DE MODELOS
+FLUJO D: 1 plan de fase → 2 EJECUTAR sondeo ES+DE → 3 INFORME DE MODELOS
           → CP-D (usuario elige 2-3 modelos) → cada modelo entra en FLUJO B
 
-FLUJO B: 1 briefing+cuaderno → 2 micro-plan Fase 1 → 3 Fase 1 (3 fuentes) → 4 INFORME MODELO+top5
-          → CP1 (usuario elige candidato) → 5 Fase 2 (7 fuentes) → 6 micro-plan fichas → 7 INFORME UNIDAD
-          → CP3 veredicto → dossier → ZIP (→ FIN)
+FLUJO B: 1 plan de fase → 2 EJECUTAR Fase 1 (3 fuentes) → 3 INFORME MODELO+top5
+          → CP1 (usuario elige candidato) → 4 plan de fase Fase 2 → 5 EJECUTAR Fase 2
+          → 6 INFORME UNIDAD → CP3 veredicto → dossier → ZIP (→ FIN)
 
-FLUJO A: 1 briefing+cuaderno → 2 micro-plan → 3 Fase 1+2 → 4 INFORME UNIDAD → CP3 → dossier → ZIP
+FLUJO A: 1 plan de fase → 2 EJECUTAR Fase 1+2 → 3 INFORME UNIDAD → CP3 → dossier → ZIP
 ```
 
 ### Protocolo de waypoint (en cada mensaje)
@@ -423,24 +268,51 @@ FLUJO A: 1 briefing+cuaderno → 2 micro-plan → 3 Fase 1+2 → 4 INFORME UNIDA
 
 ---
 
-## 📋 MICRO-PLAN antes de CADA búsqueda — no solo la primera (15-ago-2026)
+## � PROTOCOLO DE MANDO — guiado por fase, ejecución automática DENTRO de la fase (16-ago-2026)
 
-> **Regla dura:** ninguna ronda de navegación empieza sin micro-plan aprobado. El plan inicial (§PLAN DE BARRIDO) cubre el arranque; este protocolo cubre TODAS las búsquedas siguientes. Preguntar mucho está BIEN: cada OK del usuario es una corrección barata (1 línea) frente a una búsqueda cara (10-40 peticiones).
+> **Filosofía (decisión del usuario 16-ago):** *"nunca debería ser modo automático; deberían haber acciones automáticas según fases, pero siempre debe ser guiado por el usuario."*
+> El usuario aprueba **cada fase**; dentro de la fase la IA ejecuta **toda la fase** sin pedir OK a cada paso.
 
-**Formato del micro-plan (3-5 líneas, en el chat):**
+**El ciclo por fase (se repite en cada fase del camino):**
+
 ```
-📍 Camino: Flujo B · paso 3
-📋 Siguiente búsqueda: Coches.net, págs 2-5 del listado ordenado por precio
-   Filtros: ≤8.850 € · ≥2016 · ≤150k km · gasolina · ≥120cv
-   Objetivo: completar la banda 5-8k (A12) · ~6 peticiones
-   ¿OK?
+1. 📋 PLAN DE FASE (3-5 líneas): objetivo · fuentes · filtros (asesor de filtros) · presupuesto tokens · entregable
+2. ✅ OK del usuario (o correcciones → se aplican y se re-presenta el plan)
+3. 🚀 EJECUCIÓN AUTOMÁTICA completa de la fase (waypoint 📍 por mensaje, sin preguntar)
+4. 🧐 AUDITORÍA DE FASE (4 checks internos) → entregar resultado + checkpoint (CP)
+5. ➡️ Siguiente fase → volver al paso 1
 ```
 
-**Cuándo hace falta micro-plan nuevo:**
-- Al cambiar de fuente, de mercado o de banda de precio.
-- Al cambiar CUALQUIER filtro o el techo (A13: se declara el cambio).
-- Al pasar de fase (sondeo → fichas → informes).
-**Cuándo NO hace falta (lote ya aprobado):** el mismo listado, la página siguiente, la misma banda. Se ejecuta y se informa al terminar el lote.
+**Ejemplo en el chat:**
+```
+📍 Fase 2/4 — Flujo B
+📋 Plan de fase: Fase 2 en las 4 fuentes que faltan (Wallapop, Milanuncios, AS24, kleinanzeigen)
+   con los filtros del encargo · ~12 peticiones · entregable: INFORME MODELO completo 7/7
+   ¿Ejecuto?
+```
+
+**La ÚNICA decisión del usuario (decisión de negocio):** QUÉ candidato investigar (CP-D/CP1/CP3). El resto es ejecución de la skill.
+
+**Pausas SOLO por emergencia (dentro de la fase, se avisa y se espera):**
+1. **Presupuesto al 80%** (contador) sin veredicto claro → STOP + preguntar invertir o PARCIAL.
+2. **Fuente bloqueada** tras reintentos (recarga + navegación real + `02-flujos/extractores.md`) → declarar + preguntar si degradar.
+3. **Hallazgo crítico** (bandera roja de seguridad, veredicto 🟡/🔴 que cambia la fase) → avisar y decidir con el usuario.
+4. **Desviación de camino** (A14) o cambio de filtros del encargo (A13) → declarar, no callar.
+
+**NUNCA preguntar dentro de una fase aprobada:** "¿continúo?", "¿descargo las fotos?", "¿sigo con la siguiente página?" — el lote de la fase se ejecuta completo y se informa al cierre. El informe se entrega y **se espera la instrucción del usuario** — no se le pregunta qué candidato, es él quien elige.
+
+### Actualización de EL CAMINO con mando por fase
+
+```
+FLUJO D: 1 plan de fase (briefing+cache+cuaderno) → 2 EJECUTAR sondeo ES+DE → 3 INFORME DE MODELOS
+          → CP-D (usuario elige 2-3 modelos) → cada modelo entra en FLUJO B
+
+FLUJO B: 1 plan de fase (briefing+cache+cuaderno) → 2 EJECUTAR Fase 1 (3 fuentes) → 3 INFORME MODELO+top5
+          → CP1 (usuario elige candidato) → 4 plan de fase Fase 2 → 5 EJECUTAR Fase 2 (7 fuentes)
+          → 6 INFORME UNIDAD → CP3 veredicto → dossier → ZIP (→ FIN)
+
+FLUJO A: 1 plan de fase → 2 EJECUTAR Fase 1+2 → 3 INFORME UNIDAD → CP3 → dossier → ZIP
+```
 
 ---
 
@@ -637,7 +509,7 @@ Si en mobile.de + Coches.net ya se ve hueco claro (<8% o >8% decisivo), **AutoUn
 |---|---|---|
 | **EXIT 1** | Hueco <8% O <3 comparables ES | Informe rápido. "No sale." Actualizar `datos_mercado.json`. FIN. |
 | **EXIT 2** | Hueco 8-15% | "Justo. ¿Invierto en Fase 2?" PREGUNTAR. |
-| **EXIT 3** | Margen < umbral mínimo (Nicho 8%, Rotación 10%, 8-14k 12%) | Informe reducido sin publicidad. Entre umbral mínimo y objetivo (ej: Nicho 8-10%), avisar "margen justo, posible si vendibilidad ≥70". |
+| **EXIT 3** | Margen < umbral mínimo (Nicho 8%, Rotación 10%, 8-14k 10%) | Informe reducido sin publicidad. Entre umbral mínimo y objetivo (ej: Nicho 8-10%), avisar "margen justo, posible si vendibilidad ≥70". |
 
 ### Priorización por ROI (Flujo B y C)
 
@@ -810,7 +682,7 @@ ENCARGO (Flujo B: MODELO)
 │                      └ CP1: ¿Fase 2 o eliges candidato?
 │
 ├─ Fase 2 (7 fuentes) → 📋 INFORME MODELO completo (7 fuentes)
-│                      └ CP2: ¿qué candidato investigo a fondo?
+│                      └ CP2: ¿aprobar candidato a fondo? (tras comparables, antes de veredicto)
 │
 └─ ELIGES UNO → se convierte a FLUJO A (UNIDAD)
     │
@@ -882,7 +754,7 @@ ENCARGO (Flujo B: MODELO)
 | `comparativa_<fecha>.md` | `informes\<marca>\<modelo>\` | El usuario (lectura) | Si compara varios candidatos |
 | `export\flujo-a-<coche_id>.json` | `laravel\` | `empaquetar.py` | Flujo A (entrada del ZIP) |
 | `export\flujo-b-<modelo>-<fecha>.json` | `laravel\` | Laravel (histórico cacheable) | Flujo B |
-| `export\flujo-c-<fecha>.json` | `laravel\` | Laravel (scouting) | Flujo C |
+| `export\scouting_<fecha>.json` | `laravel\` | Laravel (scouting) | Flujo C |
 | `<coche_id>.zip` | `laravel\paquetes\` | Subida a Laravel | Cierre Flujo A |
 | `informe.json` | **SOLO dentro del ZIP** | Laravel | Lo genera `empaquetar.py` — NO existe suelto |
 | Fotos del candidato | `<coche_id>_fotos\` junto al JSON de `export\` | `empaquetar.py` | Se descargan al elegir candidato |
@@ -911,7 +783,7 @@ C:\Users\jacar\Desktop\JJImportMotors\
     ├── export\
     │   ├── flujo-a-<coche_id>.json  ← entrada de empaquetar.py (Flujo A)
     │   ├── flujo-b-<modelo>-<fecha>.json
-    │   └── flujo-c-<fecha>.json
+    │   └── scouting_<fecha>.json
     └── paquetes\
         └── <coche_id>.zip           ← contiene informe.json + manifest + contenido\ + fotos\
 ```
@@ -946,37 +818,36 @@ C:\Users\jacar\Desktop\JJImportMotors\
 - Todo lo que genera Claude se guarda en `informes\<marca>\<modelo>\` (y `laravel\export\` para los JSON) — nunca suelto ni en AppData. Normalizar nombres (minúsculas, sin tildes, guiones).
 
 
-### ⚡ MODO AUTOMÁTICO EN CASCADA (12-ago-2026) — regla dura
+### ⚡ EJECUCIÓN EN CASCADA — tras aprobar el plan de fase (16-ago-2026, ver §PROTOCOLO DE MANDO)
 
-> **Automatizar todo lo que es trabajo de Claude. La ÚNICA decisión que le corresponde al usuario es QUÉ candidato investigar (decisión de negocio).**
+> **Sustituye al antiguo "modo automático".** La ejecución es automática DENTRO de la fase aprobada; el usuario aprueba cada fase. La ÚNICA decisión de negocio del usuario es QUÉ candidato investigar.
 
 ```
-ENCARGO COMPLETO → automático:
+FASE APROBADA → EJECUTAR:
 
-FASE 1 (automática)
-1. Briefing: reconocer parámetros (no preguntar si no falta nada)
-2. Fase 1 (3 fuentes) → 📋 INFORME MODELO + top 5 con enlaces
-3. ENTREGAR informe MODELO y ESPERAR (el usuario elige candidato)
+1. Briefing: reconocer parámetros (no preguntar si no falta nada — si falta, plan de fase)
+2. Ejecutar la fase aprobada (ej. Fase 1 = 3 fuentes) → 📋 INFORME MODELO + top 5 con enlaces
+3. ENTREGAR informe y ESPERAR (el usuario elige candidato → CP-D/CP1)
 
 ⏸️ ÚNICA PAUSA LEGÍTIMA: el usuario indica el candidato
    "investiga el de 8.999 €" → 1 candidato
    "investiga estos 3" / "compáralos" → varios → comparativa antes
    "el mejor" → Claude propone 1 (con justificación) y sigue
 
-TRAS ELEGIR CANDIDATO (todo automático, sin preguntar)
+TRAS ELEGIR CANDIDATO (nueva fase aprobada → ejecutar)
 4. 📸 Fotos: descargar automáticamente
 5. Si VARIOS → 📊 COMPARATIVA primero (tabla lado a lado), luego informes
 6. 📋 INFORME UNIDAD completo (15 sec, score 0-100)
-7. 🟢/🔵 → 📄 DOSSIER CLIENTE automático
+7. 🟢/🔵 → 📄 DOSSIER CLIENTE
 8. 📦 ZIP completo: informe.json + manifest + esqueletos .txt + fotos
 ```
 
-**Solo PAUSAR y preguntar en estos casos:**
+**Solo PAUSAR y preguntar (además del OK de fase):**
 1. **Veredicto 🟡/🔴** → entregar informe y pedir decisión (no generar dossier)
 2. **Banderas críticas de seguridad** (VIN ausente, no declara "libre de accidentes") → avisar y marcar en el plan de negociación, PERO seguir generando el paquete
-3. **Encargo incompleto/vago** → briefing (preguntar solo lo que falta)
+3. **Encargo incompleto/vago** → briefing/plan de fase (preguntar solo lo que falta)
 
-**NUNCA preguntar:** "¿continúo?", "¿qué candidato investigo?", "¿descargo las fotos?", "¿genero el informe?". El informe MODELO se entrega y **se espera la instrucción del usuario** — no se le pregunta, es él quien elige el candidato.
+**NUNCA preguntar dentro de una fase aprobada:** "¿continúo?", "¿descargo las fotos?", "¿genero el informe?". El informe MODELO se entrega y **se espera la instrucción del usuario** — no se le pregunta, es él quien elige el candidato.
 
 ### 📊 COMPARATIVA DE CANDIDATOS — cuando el usuario pide investigar VARIOS
 
@@ -1104,6 +975,8 @@ Las 16 reglas duras (A1-A16) viven en `06-reglas/anti_patrones.md`. Cargarlas cu
 - **A12** Página 1 ordenada por precio NO es "el listado" — cubrir TODO el rango del presupuesto (bandas de precio)
 - **A13** Filtros del encargo alterados (año, km, precio) se declaran ANTES de navegar, nunca en silencio
 - **A14** Nunca abandonar el camino en silencio: desviación → responder → ↩⃾ volver al paso; cambio de destino → 🔀 declararlo
+- **A15** La búsqueda web/snippets NO es método de sondeo — D1 SIEMPRE con navegación real (datos inconsistentes)
+- **A16** El sondeo D1 es por FILTROS, no por modelo: una pasada con los filtros del encargo devuelve TODOS los modelos; prohibido elegir 3-4 a mano ni dejar "otros por explorar" sin sondear. Potencia = mínimo ≥Xcv, no solo la variante tope.
 
 ---
 
@@ -1178,8 +1051,9 @@ Las 16 reglas duras (A1-A16) viven en `06-reglas/anti_patrones.md`. Cargarlas cu
 - [ ] Encargo abierto sin URL → mostré el **PLAN DE BARRIDO** antes de navegar
 - [ ] Si amplié filtros del encargo (año, km, precio), lo declaré ANTES (A13)
 - [ ] Waypoint 📍 en cada mensaje · tras cada desviación retomé el paso (A14)
-- [ ] Cuaderno de sesión al día (correcciones con hora, releído antes de cada micro-plan)
-- [ ] Micro-plan aprobado antes de CADA búsqueda nueva (fuente/banda/filtros/fase)
+- [ ] **PASO 0 cache**: consulté `memoria/encargos.md` + `memoria/modelos-medidos.md` + `indice.json` (frescura <3 sem)
+- [ ] Cuaderno de sesión al día (correcciones con hora, releído antes de cada plan de fase)
+- [ ] Plan de fase aprobado por el usuario ANTES de cada fase (Protocolo de Mando)
 - [ ] Auditoría de fase pasada al completar cada paso (entregable · camino · correcciones · cobertura)
 - [ ] Auditoría de cierre al elegir candidato único o abortar (eficiencia · embudo · correcciones · checkpoints · resultado → 3 salidas)
 
