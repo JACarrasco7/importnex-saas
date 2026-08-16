@@ -109,6 +109,13 @@
             box-shadow: 0 4px 14px rgba(26, 48, 109, 0.4);
         }
 
+        .badge-pick { display: inline-block; background: rgba(232,89,12,0.2); color: #E8590C; border: 1px solid rgba(232,89,12,0.4); font-size: 7.5px; font-weight: 800; letter-spacing: 1px; padding: 1px 6px; border-radius: 100px; margin-left: 6px; }
+        .badge-pick.picked { background: rgba(232,89,12,0.3); border-color: #E8590C; color: #E8590C; }
+
+        .badge-origen { display: inline-block; padding: 2px 9px; border-radius: 6px; font-size: 9px; font-weight: 800; letter-spacing: 0.6px; vertical-align: middle; margin-left: 8px; }
+        .badge-origen.de { background: #1A306D; color: #c7d4f5; border: 1px solid rgba(143,163,217,0.4); }
+        .badge-origen.es { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.4); }
+
         .hero { text-align: center; margin-bottom: 20px; }
         .hero-eyebrow {
             display: inline-flex; align-items: center; gap: 8px;
@@ -121,7 +128,41 @@
         .h1-title .accent { color: #8fa3d9; }
         .claim { font-size: 13px; color: #94a3b8; margin-top: 8px; }
 
-        /* Gallery */
+        /* ── KPI GRID ──────────────────────────────────────── */
+        @if($kpi_precio || $kpi_ahorro || $kpi_km || $kpi_anio)
+        <div class="kpi-grid">
+            @if($kpi_precio)
+                <div class="kpi-card">
+                    <div class="k">Precio final</div>
+                    <div class="v"><span class="accent">{{ $kpi_precio }}</span></div>
+                    <div class="s">Llave en mano</div>
+                </div>
+            @endif
+            @if($kpi_ahorro)
+                <div class="kpi-card">
+                    <div class="k">Ahorro</div>
+                    <div class="v" style="color:#4ade80;">{{ $kpi_ahorro }}</div>
+                    <div class="s">vs. mercado español</div>
+                </div>
+            @endif
+            @if($kpi_km)
+                <div class="kpi-card">
+                    <div class="k">Kilómetros</div>
+                    <div class="v">{{ $kpi_km }}</div>
+                    <div class="s">Odómetro verificado</div>
+                </div>
+            @endif
+            @if($kpi_anio)
+                <div class="kpi-card">
+                    <div class="k">Año</div>
+                    <div class="v">{{ $kpi_anio }}</div>
+                    <div class="s">Primera matriculación</div>
+                </div>
+            @endif
+        </div>
+        @endif
+
+        /* Galería */
         .gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 18px; }
         .gallery .shot {
             border-radius: 10px; overflow: hidden; border: 1px solid rgba(143, 163, 217, 0.2);
@@ -159,16 +200,9 @@
         }
         .h2::before { content: ''; width: 4px; height: 14px; border-radius: 2px; background: linear-gradient(180deg, #E8590C, #f07c3a); }
 
-        /* ── KPI CARDS ──────────────────────────────────────── */
-        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; margin-bottom: 18px; }
-        .kpi-card {
-            background: linear-gradient(180deg, rgba(20,38,90,0.85) 0%, rgba(15,23,42,0.6) 100%);
-            border: 1px solid rgba(143,163,217,0.25); border-radius: 12px; padding: 11px 13px;
-        }
-        .kpi-card .k { font-size: 8px; color: #8fa3d9; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 3px; }
-        .kpi-card .v { font-size: 16px; font-weight: 800; color: #f1f5f9; line-height: 1.15; }
-        .kpi-card .v .accent { color: #E8590C; }
-        .kpi-card .s { font-size: 8.5px; color: #64748b; margin-top: 2px; }
+        /* ── BADGE ORIGEN (DE/ES) CON PICK ──────────────────── */
+        .badge-pick { display: inline-block; background: rgba(232,89,12,0.2); color: #E8590C; border: 1px solid rgba(232,89,12,0.4); font-size: 7.5px; font-weight: 800; letter-spacing: 1px; padding: 1px 6px; border-radius: 100px; margin-left: 6px; }
+        .badge-pick.picked { background: rgba(232,89,12,0.3); border-color: #E8590C; color: #E8590C; }
 
         /* ── BADGE ORIGEN (DE/ES) ──────────────────────────── */
         .badge-origen { display: inline-block; padding: 2px 9px; border-radius: 6px; font-size: 9px; font-weight: 800; letter-spacing: 0.6px; vertical-align: middle; margin-left: 8px; }

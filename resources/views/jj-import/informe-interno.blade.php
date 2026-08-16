@@ -215,6 +215,20 @@
         .cov-desc { font-size: 8.5px; color: #94a3b8; }
 
         /* ── BARRAS DE PROGRESO (score / vendibilidad) ──────── */
+        .coverage { display: grid; grid-template-columns: repeat(2, 1fr); gap: 7px; }
+        .cov-card {
+            display: flex; align-items: center; gap: 10px;
+            background: rgba(15,23,42,0.5); border: 1px solid rgba(143,163,217,0.18);
+            border-radius: 10px; padding: 8px 12px;
+        }
+        .cov-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+        .cov-dot.ok { background: #10B981; box-shadow: 0 0 8px rgba(16,185,129,0.6); }
+        .cov-dot.deg { background: #F59E0B; box-shadow: 0 0 8px rgba(245,158,11,0.5); }
+        .cov-dot.omit { background: #64748b; }
+        .cov-name { font-size: 10px; font-weight: 700; color: #f1f5f9; }
+        .cov-desc { font-size: 8.5px; color: #94a3b8; }
+
+        /* ── BARRAS DE PROGRESO (score / vendibilidad) ──────── */
         .bar-row { margin-bottom: 7px; }
         .bar-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-size: 10px; margin-bottom: 3px; }
         .bar-top .bar-name { font-weight: 700; color: #cbd5e1; }

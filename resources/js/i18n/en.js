@@ -1,6 +1,10 @@
 // Frontend translations - English
 // Use: t('nav.dashboard')
 export default {
+  ai_chat: {
+    title: 'Chat AI',
+    using: 'Using'
+  },
   app: {
     title: 'Importnex',
     dashboard_subtitle: "Here's what's happening with your inventory today.",
@@ -118,6 +122,9 @@ export default {
     price: 'Price',
     status: 'Status',
     color: 'Color',
+    metadata: 'Metadata',
+    category: 'Category',
+    content: 'Content',
     transmission: 'Transmission',
     fuel: 'Fuel',
     location: 'Location',
@@ -585,6 +592,9 @@ export default {
     subtitle: ':count in your CRM',
     add_subtitle: 'Add a new customer to your CRM',
     add: 'Add Client',
+    contact_logs_title: 'Contact log',
+    delete_log: 'Delete log',
+    delete_log_message: 'Delete this contact log permanently?',
     edit_title: 'Edit: :name',
     edit_page_title: 'Edit :name',
     edit_subtitle: 'Update client details',
@@ -868,6 +878,7 @@ export default {
     remove: 'Remove',
     back_to_client: 'Back to client',
     showing: 'Showing',
+    pending: 'Pending',
     to: 'to',
     dismiss: 'Dismiss',
     search: 'Search',
@@ -1108,6 +1119,16 @@ export default {
     step3_title: 'We import it for you',
     step3_desc: 'Processing, transport and registration included, all managed by us.',
     section_catalog: 'Catalog',
+    search_placeholder_short: 'Search brand or model…',
+    filter_deals_only: 'Deals',
+    back_to_top: 'Back to top',
+    newsletter_invalid_email: 'Invalid email',
+    newsletter_close: 'Close',
+    newsletter_title: '5 verified vehicles monthly in your inbox',
+    newsletter_desc: 'Get only vehicles with Buy or Buy if price drops verdict. No spam, unsubscribe anytime.',
+    newsletter_email_placeholder: 'your@email.com',
+    newsletter_cta: 'Subscribe',
+    newsletter_thanks: "You're in! We will notify you.",
     catalog_desc: ':count cars available, all with complete technical report.',
     filter_search: 'Search',
     filter_search_placeholder: 'Brand, model, VIN...',
@@ -1176,10 +1197,14 @@ export default {
       color: 'Color',
       verdict: 'Verdict',
       traffic_light: 'Traffic light',
-      savings: 'Estimated saving'
+      savings: 'Estimated saving',
+      view: 'View details'
     }
   },
   marketplace_show: {
+    back_to_marketplace: 'Back to marketplace',
+    sign_in: 'Sign in',
+    footer_rights: 'All rights reserved',
     vin_label: 'VIN',
     iedmt_warning_title: 'IEDMT is an estimate.',
     iedmt_warning_desc: 'Hacienda calculates the registration tax on its official tables of market value, not on the price you paid. Current estimate: :amount · Total all-in: :total',

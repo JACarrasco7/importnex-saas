@@ -60,6 +60,19 @@ function isPluralObjectKey(obj, key) {
     return cur !== null && typeof cur === 'object' && !Array.isArray(cur) && ('_one' in cur || '_other' in cur);
 }
 
+// Una clave usada t('cars.fuel_options') puede existir como OBJETO (no hoja).
+// getAllKeys solo produce hojas, así que "existe" si es hoja o prefix de alguna
+// clave existente.
+function keyExists(obj, key) {
+    const parts = key.split('.');
+    let cur = obj;
+    for (let i = 0; i < parts.length; i++) {
+        if (cur === null || typeof cur !== 'object' || cur[parts[i]] === undefined) return false;
+        cur = cur[parts[i]];
+    }
+    return true; // hoja o objeto intermedio
+}
+
 // Find missing keys
 const missingInEs = enKeys.filter(k => !esKeys.includes(k));
 const missingInEn = esKeys.filter(k => !enKeys.includes(k));
@@ -130,7 +143,8 @@ const usedButMissing = [...usedKeys]
     // Excluye claves plurales (t('app.inventory_count', {count}))
     .filter(k => !isPluralObjectKey(esTranslations, k))
     .filter(k => !isPluralObjectKey(enTranslations, k))
-    .filter(k => !esKeys.includes(k) && !enKeys.includes(k));
+    // Excluye claves que existen (hoja u objeto) en al menos un idioma
+    .filter(k => !keyExists(esTranslations, k) && !keyExists(enTranslations, k));
 // WARNING informativo: no rompe el exit code (hay páginas fuera del alcance
 // de la sesión con claves pendientes). Reporta para corregirlas poco a poco.
 if (usedButMissing.length > 0) {

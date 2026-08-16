@@ -11,6 +11,10 @@ export default {
     search: 'Buscar',
     inventory_count: { _one: ':count vehículo en su flota', _other: ':count vehículos en su flota' }
   },
+  ai_chat: {
+    title: 'Chat IA',
+    using: 'Usando',
+  },
   auth: {
     verify_email: 'Verificar correo',
     verify_title: 'Verifica tu correo',
@@ -296,12 +300,12 @@ export default {
     drop_cars_here: 'Suelta vehículos aquí',
     edit: 'Editar',
     confirm_delete_car_full: '¿Seguro que quieres eliminar :brand :model? Esta acción no se puede deshacer.',
-    no_contact_logs_yet: 'Aún no hay registros de contacto',
     cancel: 'Cancelar',
     no_clients_found: 'No se encontraron clientes',
     no_clients_found_desc: 'Ajusta tus filtros o añade tu primer cliente.',
     add_first_client: 'Añadir tu primer cliente',
     filter_clients_placeholder: 'Nombre, datos de contacto...',
+    no_contact_logs_yet: 'Sin registros de contacto aún',
     no_contact_logs_desc: 'Cuando registres una llamada, email o reunión, aparecerá aquí.',
     tags: 'Etiquetas',
     delete_label: 'Eliminar etiqueta',
@@ -333,6 +337,9 @@ export default {
     no_label: 'No',
     language: 'Idioma',
     placeholders: 'Marcadores de posición',
+    metadata: 'Metadatos',
+    category: 'Categoría',
+    content: 'Contenido',
     marketplace_brand_model: ':brand :model',
     upload_car_package: 'Subir paquete del vehículo',
     upload_car_package_title: 'Importar vehículo desde ZIP',
@@ -606,7 +613,10 @@ export default {
       'Order signed': 'Pedido firmado',
       'In process': 'En proceso',
       Delivered: 'Entregado'
-    }
+    },
+    contact_logs_title: 'Registros de contacto de :name',
+    delete_log: 'Eliminar registro',
+    delete_log_message: '¿Seguro que quieres eliminar este registro de contacto? Esta acción no se puede deshacer.'
   },
   alerts: {
     mute_type_help: 'Silencia un tipo activo:',
@@ -870,6 +880,7 @@ export default {
     close: 'Cerrar',
     of: 'de',
     all: 'Todos',
+    pending: 'Pendiente',
     cancel: 'Cancelar',
     view: 'Ver',
     remove: 'Quitar',
@@ -1162,6 +1173,15 @@ export default {
     footer_legal: 'Legal',
     footer_saas: '¿Eres importador? Conoce la plataforma',
     newsletter_invalid_email: 'Email inválido',
+    search_placeholder_short: 'Buscar marca o modelo…',
+    filter_deals_only: 'Ofertas',
+    back_to_top: 'Volver arriba',
+    newsletter_close: 'Cerrar',
+    newsletter_title: '5 vehículos verificados al mes en tu inbox',
+    newsletter_desc: 'Recibe solo los vehículos con veredicto Buy o Buy if price drops. Sin spam, baja cuando quieras.',
+    newsletter_email_placeholder: 'tu@email.com',
+    newsletter_cta: 'Suscribirme',
+    newsletter_thanks: '¡Listo! Te avisamos.',
     filter_fuel: 'Combustible',
     filter_all: 'Todos',
     filter_transmission: 'Cambio',
@@ -1183,11 +1203,15 @@ export default {
       color: 'Color',
       verdict: 'Veredicto',
       traffic_light: 'Tráfico',
-      savings: 'Ahorro estimado'
+      savings: 'Ahorro estimado',
+      view: 'Ver detalles'
     }
   },
   marketplace_show: {
     vin_label: 'VIN',
+    back_to_marketplace: 'Volver al marketplace',
+    sign_in: 'Iniciar sesión',
+    footer_rights: 'Todos los derechos reservados.',
     iedmt_warning_title: 'El IEDMT es una estimación.',
     iedmt_warning_desc: 'Hacienda calcula el impuesto de matriculación sobre sus tablas oficiales de valor de mercado, no sobre el precio que pagaste. Estimación actual: :amount · Coste total: :total',
     section_location: 'Ubicación',

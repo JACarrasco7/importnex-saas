@@ -93,11 +93,65 @@
             margin: 0 auto;
         }
 
-        /* ============ HEADER ============ */
+        /* ============ HEADER PREMIUM ============ */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding-bottom: 24px; border-bottom: 1px solid rgba(143,163,217,0.2); margin-bottom: 24px;
+        }
+        .logo { height: 56px; width: auto; }
+        .brand-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: linear-gradient(135deg, #1A306D 0%, #2a3d87 100%);
+            color: #fff; padding: 8px 16px; border-radius: 100px;
+            font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+        }
+
+        /* ============ KPI SECTION ============ */
+        .kpi-section { margin-bottom: 32px; }
+        .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .kpi-card {
+            background: linear-gradient(180deg, rgba(20,38,90,0.8) 0%, rgba(15,23,42,0.5) 100%);
+            border: 1px solid rgba(143,163,217,0.25); border-radius: 12px; padding: 14px 16px;
+        }
+        .kpi-card .k { font-size: 8px; color: #8fa3d9; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 4px; }
+        .kpi-card .v { font-size: 18px; font-weight: 800; color: #f1f5f9; line-height: 1.15; }
+        .kpi-card .v .accent { color: #E8590C; }
+        .kpi-card .s { font-size: 8.5px; color: #64748b; margin-top: 2px; }
+
+        /* ============ SECTIONS ============ */
+        .section { margin-bottom: 24px; }
+        .h2 {
+            color: #9fb4e8; font-size: 12px; font-weight: 800; letter-spacing: 1.6px; text-transform: uppercase;
+            padding-bottom: 8px; border-bottom: 1px solid rgba(143,163,217,0.15); margin-bottom: 16px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .h2::before { content: ''; width: 4px; height: 14px; border-radius: 2px; background: linear-gradient(180deg, #E8590C, #f07c3a); }
+
+        /* ============ TABLE PREMIUM ============ */
+        table.data { width: 100%; border-collapse: collapse; }
+        table.data th {
+            text-align: left; font-size: 8px; color: #9fb4e8; text-transform: uppercase;
+            letter-spacing: 0.7px; font-weight: 700; padding: 6px 8px;
+            border-bottom: 1px solid rgba(143,163,217,0.28);
+        }
+        table.data td { font-size: 10px; color: #cbd5e1; padding: 6px 8px; border-bottom: 1px solid rgba(143,163,217,0.08); vertical-align: middle; }
+        table.data tr:nth-child(even) td { background: rgba(26,48,109,0.12); }
+        .badge-origen { display: inline-block; padding: 1px 7px; border-radius: 6px; font-size: 8px; font-weight: 800; letter-spacing: 0.5px; }
+        .badge-origen.de { background: #1A306D; color: #c7d4f5; border: 1px solid rgba(143,163,217,0.35); }
+        .badge-origen.es { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.35); }
+        .tag-pick { display: inline-block; background: rgba(232,89,12,0.2); color: #E8590C; border: 1px solid rgba(232,89,12,0.4); font-size: 7.5px; font-weight: 800; letter-spacing: 1px; padding: 1px 6px; border-radius: 100px; margin-left: 6px; }
+
+        /* ============ CTA + QR ============ */
+        .cta-row { display: grid; grid-template-columns: 1.6fr 1fr; gap: 20px; margin-top: 24px; }
+        .cta-card {
+            background: linear-gradient(135deg, rgba(232,89,12,0.12) 0%, rgba(26,48,109,0.15) 100%);
+            border: 1px solid rgba(232,89,12,0.35); border-radius: 14px; padding: 20px 24px;
+        }
+        .cta-text { font-size: 15px; font-weight: 800; color: #fff; margin-bottom: 8px; }
+        .contact { font-size: 12px; color: #cbd5e1; line-height: 1.6; }
+        .qr-card {
             padding-bottom: 18px;
             border-bottom: 1px solid rgba(56, 189, 248, 0.12);
             margin-bottom: 26px;

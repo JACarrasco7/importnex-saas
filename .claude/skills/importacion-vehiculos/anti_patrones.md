@@ -101,9 +101,9 @@ precio_max = comparable_objetivo × (1 − umbral)
 
 ### A6 — Tabla sin enlaces
 
-**Error típico:** Claude muestra una tabla de candidatos con precio/año/km pero sin URLs. El usuario tiene que buscar los anuncios manualmente. O peor: enlaces que abren una búsqueda/filtro del portal en vez del anuncio.
+**Error típico:** Claude muestra una tabla de candidatos con precio/año/km pero sin URLs. El usuario tiene que buscar los anuncios manualmente.
 
-**Regla:** Todo enlace (top 5, candidatos, comparables) apunta a la **ficha del anuncio concreto**. Si la fuente no da URL directa, se construye desde el ID:
+**Regla:** Toda tabla de candidatos lleva columna **ENLACE** clickable. Si la fuente no da URL directa, se construye desde el ID:
 
 ---
 
