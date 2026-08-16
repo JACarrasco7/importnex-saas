@@ -105,6 +105,19 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 - **Nota:** el status de cliente 'Briefing' (pipeline de ventas) NO se toca — es un estado del cliente, no un informe. `briefing_encargo.md` (cuestionario previo) se mantiene — NO es el PDF briefing.
 - **Resultado: 7 PDFs** — 3 Claude (búsqueda global, modelo, unidad) + 4 Laravel (dossier, ficha-coche, informe-interno, folleto).
 
+## [2.9.9] - 2026-08-16 — Rediseño premium de plantillas Blade Laravel
+
+### 🎨 Mejoras visuales en plantillas Laravel
+- **`informe-interno.blade.php`**: Añadidas KPI cards premium (4 columnas), coverage grid de fuentes con estados OK/deg/omit, barras de progreso por dimensiones SCORE_DIM y VENDIBILIDAD_FACTOR, tarjeta verdict-card final con veredicto destacado, balance A_FAVOR/EN_CONTRA, tabla de comparables con badges DE/ES y fila Pick, y pie de página "CONFIDENCIAL".
+- **`ficha-coche.blade.php`**: Añadidas KPI cards premium (3 columnas), badge de origen DE/ES con indicador Pick, y KPIs derivados del campo SPEC (KM, año).
+- **`folleto.blade.php`**: Mejorada cabecera premium con brand-badge, sección KPI grid (3 columnas), headers h2 con barra accent, y mejoras de estilo consistentes con la marca JJ Import Motors (estoril/asphalt/platinum).
+- **`CarDocumentDefinitions.php`**: Comentario actualizado para reflejar que los reports AI son generados por Laravel (no briefing).
+- **`CarDocument.php`**: Comentario actualizado para aclarar que los reports AI no son briefing PDFs deprecated.
+
+### 📦 Empaquetado
+- ZIP skill re-empaquetado v2.9.9 con backup alfabético -n.
+- Push origin master con commits de todas las mejoras de esta sesión.
+
 ## [2.9.7] - 2026-08-15 — Plantilla de PDF rediseñada (nivel premium)
 
 ### 🎨 `plantilla_pdf_marca.html` v2
