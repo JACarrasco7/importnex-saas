@@ -340,9 +340,9 @@ onMounted(() => {
                         <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">{{ t('marketplace.section_catalog') }}</h2>
                         <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">{{ t('marketplace.catalog_desc').replace(':count', cars.total || 0) }}</p>
                     </div>
-                    <a :href="requestHref" class="inline-flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200">
-                        <PhoneIcon class="h-4 w-4" />
-                        {{ t('marketplace.cta_request_notify') }}
+                    <a :href="requestHref" class="inline-flex items-center justify-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200">
+                        <PhoneIcon class="h-4 w-4 shrink-0" />
+                        <span class="text-center">{{ t('marketplace.cta_request_notify') }}</span>
                     </a>
                 </div>
 
@@ -548,9 +548,9 @@ onMounted(() => {
                     <p class="mx-auto mt-2 max-w-md text-sm text-gray-600 dark:text-gray-400">
                         {{ t('marketplace.no_cars_desc') }}
                     </p>
-                    <a :href="requestHref" class="mt-6 inline-flex items-center gap-2 rounded-lg bg-estoril-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-estoril-800">
-                        <PhoneIcon class="h-4 w-4" />
-                        {{ t('marketplace.cta_request_notify') }}
+                    <a :href="requestHref" class="mt-6 inline-flex items-center justify-center gap-2 rounded-lg bg-estoril-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-estoril-800">
+                        <PhoneIcon class="h-4 w-4 shrink-0" />
+                        <span class="text-center">{{ t('marketplace.cta_request_notify') }}</span>
                     </a>
                 </div>
             </div>
@@ -565,22 +565,22 @@ onMounted(() => {
                 <p class="mx-auto mt-3 max-w-2xl text-lg text-gray-300">
                     {{ t('marketplace.section_contact_desc') }}
                 </p>
-                <div class="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                    <a :href="requestHref" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-6 py-3 text-base font-semibold text-white shadow-lg hover:bg-estoril-500">
-                        <EnvelopeIcon class="h-5 w-5" />
-                        {{ t('marketplace.cta_request_form') }}
+                <div class="mt-8 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-4">
+                    <a :href="requestHref" class="inline-flex items-center justify-center gap-2 rounded-lg bg-estoril-600 px-6 py-3 text-base font-semibold text-white shadow-lg hover:bg-estoril-500">
+                        <EnvelopeIcon class="h-5 w-5 shrink-0" />
+                        <span class="text-center">{{ t('marketplace.cta_request_form') }}</span>
                     </a>
-                    <a href="https://wa.me/34675701439" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-lg bg-white/10 px-6 py-3 text-base font-semibold text-white ring-1 ring-white/20 hover:bg-white/20">
-                        <PhoneIcon class="h-5 w-5" />
-                        {{ t('marketplace.cta_whatsapp') }}
+                    <a href="https://wa.me/34675701439" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 rounded-lg bg-white/10 px-6 py-3 text-base font-semibold text-white ring-1 ring-white/20 hover:bg-white/20">
+                        <PhoneIcon class="h-5 w-5 shrink-0" />
+                        <span class="text-center">{{ t('marketplace.cta_whatsapp') }}</span>
                     </a>
-                    <a href="tel:+34675701439" class="inline-flex items-center gap-2 rounded-lg bg-white/10 px-6 py-3 text-base font-semibold text-white ring-1 ring-white/20 hover:bg-white/20">
-                        <PhoneIcon class="h-5 w-5" />
-                        {{ t('marketplace.cta_call') }}
+                    <a href="tel:+34675701439" class="inline-flex items-center justify-center gap-2 rounded-lg bg-white/10 px-6 py-3 text-base font-semibold text-white ring-1 ring-white/20 hover:bg-white/20">
+                        <PhoneIcon class="h-5 w-5 shrink-0" />
+                        <span class="text-center">{{ t('marketplace.cta_call') }}</span>
                     </a>
-                    <a href="mailto:jjimportmotors@gmail.com" class="inline-flex items-center gap-2 rounded-lg bg-white/10 px-6 py-3 text-base font-semibold text-white ring-1 ring-white/20 hover:bg-white/20">
-                        <EnvelopeIcon class="h-5 w-5" />
-                        {{ t('marketplace.cta_email') }}
+                    <a href="mailto:jjimportmotors@gmail.com" class="inline-flex items-center justify-center gap-2 rounded-lg bg-white/10 px-6 py-3 text-base font-semibold text-white ring-1 ring-white/20 hover:bg-white/20">
+                        <EnvelopeIcon class="h-5 w-5 shrink-0" />
+                        <span class="text-center">{{ t('marketplace.cta_email') }}</span>
                     </a>
                 </div>
                 <p class="mt-8 text-sm text-gray-400">

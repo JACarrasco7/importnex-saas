@@ -63,21 +63,21 @@ const stats = [
                     <SparklesIcon class="h-4 w-4" />
                     {{ t('welcome.ai_powered') }}
                 </span>
-                <h1 class="mt-8 text-5xl font-bold tracking-tight text-gray-900 sm:text-6xl lg:text-7xl">
+                <h1 class="mt-8 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl">
                     {{ t('welcome.run_business') }}
                     <span class="block bg-gradient-to-r from-estoril-600 to-estoril-600 bg-clip-text text-transparent">{{ t('welcome.on_autopilot') }}</span>
                 </h1>
                 <p class="mx-auto mt-6 max-w-2xl text-lg text-gray-600">
                     {{ t('welcome.importnex_description') }}
                 </p>
-                <div class="mt-10 flex items-center justify-center gap-4">
-                    <Link :href="route('marketplace.index')" class="inline-flex items-center gap-2 rounded-lg bg-estoril-700 px-6 py-3 text-base font-semibold text-white shadow-lg hover:bg-estoril-800">
-                        {{ t('welcome.view_marketplace') }}
-                        <ArrowRightIcon class="h-4 w-4" />
+                <div class="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+                    <Link :href="route('marketplace.index')" class="inline-flex items-center justify-center gap-2 rounded-lg bg-estoril-700 px-6 py-3 text-base font-semibold text-white shadow-lg hover:bg-estoril-800">
+                        <span class="text-center">{{ t('welcome.view_marketplace') }}</span>
+                        <ArrowRightIcon class="h-4 w-4 shrink-0" />
                     </Link>
-                    <Link :href="route('register')" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-6 py-3 text-base font-semibold text-white shadow-lg hover:bg-estoril-500">
-                        {{ t('welcome.start_trial') }}
-                        <ArrowRightIcon class="h-4 w-4" />
+                    <Link :href="route('register')" class="inline-flex items-center justify-center gap-2 rounded-lg bg-estoril-600 px-6 py-3 text-base font-semibold text-white shadow-lg hover:bg-estoril-500">
+                        <span class="text-center">{{ t('welcome.start_trial') }}</span>
+                        <ArrowRightIcon class="h-4 w-4 shrink-0" />
                     </Link>
                     <Link :href="route('login')" class="text-base font-semibold text-gray-700 hover:text-gray-900">
                         {{ t('auth.login') }}
