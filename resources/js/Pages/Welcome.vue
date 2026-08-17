@@ -63,9 +63,8 @@ const stats = [
                     <SparklesIcon class="h-4 w-4" />
                     {{ t('welcome.ai_powered') }}
                 </span>
-                <h1 class="mt-8 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl lg:text-5xl">
-                    {{ t('welcome.run_business') }}
-                    <span class="block bg-gradient-to-r from-estoril-600 to-estoril-600 bg-clip-text text-transparent">{{ t('welcome.on_autopilot') }}</span>
+                <h1 class="mx-auto mt-8 max-w-4xl text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl lg:text-5xl">
+                    {{ t('welcome.run_business') }} <span class="whitespace-nowrap bg-gradient-to-r from-estoril-600 to-estoril-600 bg-clip-text text-transparent">{{ t('welcome.on_autopilot') }}</span>
                 </h1>
                 <p class="mx-auto mt-6 max-w-2xl text-lg text-gray-600">
                     {{ t('welcome.importnex_description') }}
