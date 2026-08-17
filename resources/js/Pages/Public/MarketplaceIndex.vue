@@ -540,12 +540,12 @@ onMounted(() => {
                 </div>
 
                 <!-- Empty state -->
-                <div v-else class="rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 p-12 text-center dark:border-asphalt-700 dark:bg-asphalt-800">
+                <div v-else class="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 p-12 text-center dark:border-asphalt-700 dark:bg-asphalt-800">
                     <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-estoril-100 dark:bg-estoril-900/40">
                         <SparklesIcon class="h-8 w-8 text-estoril-700 dark:text-estoril-300" />
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ t('marketplace.no_cars_title') }}</h3>
-                    <p class="mx-auto mt-2 max-w-md text-sm text-gray-600 dark:text-gray-400">
+                    <p class="mx-auto mt-2 w-full max-w-md text-sm text-gray-600 dark:text-gray-400">
                         {{ t('marketplace.no_cars_desc') }}
                     </p>
                     <a :href="requestHref" class="mt-6 inline-flex items-center justify-center gap-2 rounded-lg bg-estoril-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-estoril-800">
