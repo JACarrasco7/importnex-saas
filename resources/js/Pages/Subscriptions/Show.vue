@@ -26,30 +26,30 @@ const { t } = useTranslations();
 
         <div class="py-8">
             <div class="mx-auto max-w-3xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <PageHeader :title="`${planData.name} plan`" :subtitle="planData.description">
+                <PageHeader :title="t('subscription.head_plan', { name: planData.name })" :subtitle="planData.description">
                     <template #actions>
                         <Link :href="route('subscriptions.index')" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             <ArrowLeftIcon class="h-4 w-4" />
-                            Back
+                            {{ t('common.back') }}
                         </Link>
                     </template>
                 </PageHeader>
 
                 <div class="overflow-hidden rounded-2xl bg-linear-to-br from-estoril-700 to-estoril-900 p-6 text-white shadow-lg">
-                    <p class="text-sm font-medium text-estoril-100">Monthly price</p>
+                    <p class="text-sm font-medium text-estoril-100">{{ t('subscription.monthly_price') }}</p>
                     <p class="mt-2 text-5xl font-bold tracking-tight">{{ currency(planData.price) }}</p>
-                    <p class="mt-2 text-sm text-estoril-100">Billed monthly</p>
+                    <p class="mt-2 text-sm text-estoril-100">{{ t('subscription.billed_monthly') }}</p>
                 </div>
 
-                <FormSection title="What's included">
+                <FormSection :title="t('subscription.whats_included')">
                     <ul class="space-y-3">
                         <li class="flex items-center gap-3">
                             <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50">
                                 <TruckIcon class="h-5 w-5 text-emerald-600" />
                             </div>
                             <div>
-                                <p class="text-sm font-semibold text-gray-900">{{ planData.cars_limit }} cars</p>
-                                <p class="text-xs text-gray-500">Track up to this many vehicles</p>
+                                <p class="text-sm font-semibold text-gray-900">{{ planData.cars_limit }} {{ t('nav.cars') }}</p>
+                                <p class="text-xs text-gray-500">{{ t('subscription.cars_limit_desc') }}</p>
                             </div>
                         </li>
                         <li class="flex items-center gap-3">
@@ -57,8 +57,8 @@ const { t } = useTranslations();
                                 <UsersIcon class="h-5 w-5 text-blue-600" />
                             </div>
                             <div>
-                                <p class="text-sm font-semibold text-gray-900">{{ planData.clients_limit }} clients</p>
-                                <p class="text-xs text-gray-500">Manage your CRM up to this limit</p>
+                                <p class="text-sm font-semibold text-gray-900">{{ planData.clients_limit }} {{ t('nav.clients') }}</p>
+                                <p class="text-xs text-gray-500">{{ t('subscription.clients_limit_desc') }}</p>
                             </div>
                         </li>
                         <li class="flex items-center gap-3">

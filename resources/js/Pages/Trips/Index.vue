@@ -37,7 +37,7 @@ const { currency, statusVariant } = useFormat();
                     </template>
                 </PageHeader>
 
-                <EmptyState v-if="!trips?.length" icon="🚛" title="No trips to plan" description="No cars in Purchased or In transit status with location data yet." />
+                <EmptyState v-if="!trips?.length" icon="🚛" :title="t('trips.no_trips')" :description="t('trips.no_trips_desc')" />
 
                 <div v-else class="space-y-6">
                     <div v-for="trip in trips" :key="trip.city" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
@@ -67,11 +67,11 @@ const { currency, statusVariant } = useFormat();
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Vehicle</th>
-                                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Year</th>
-                                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Status</th>
-                                        <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Transport</th>
-                                        <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">Value</th>
+                                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.col_car') }}</th>
+                                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.year') }}</th>
+                                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('common.status') }}</th>
+                                        <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('finance.transport') }}</th>
+                                        <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.purchase_price') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200">

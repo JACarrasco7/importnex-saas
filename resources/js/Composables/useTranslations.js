@@ -1,176 +1,40 @@
-import { ref, computed, watch } from 'vue';
+import { computed, watch } from 'vue';
 import { usePage } from '@inertiajs/vue3';
-import es from '@/i18n/es.js';
-import en from '@/i18n/en.js';
-
-const localeModules = {
-    en,
-    es,
-};
-const cache = ref({});
+import { t as tFn, messages, currentLocale } from '@/i18n';
 
 /**
- * Carga diferida: si la traducción ya está en page.props (enviada por backend),
- * usa esa; si no, importa el módulo JS del idioma.
- */
-async function loadLocale(locale) {
-    const page = usePage();
-    const fromServer = page.props.translations;
-
-    if (fromServer && Object.keys(fromServer).length > 0) {
-        return fromServer;
-    }
-
-    if (cache.value[locale]) {
-        return cache.value[locale];
-    }
-
-    const mod = messages[locale] || messages.en;
-    cache.value[locale] = mod;
-    return mod;
-}
-
-/**
- * useTranslations()
+ * useTranslations() — composable retrocompatible.
  *
- * Si la página Inertia trae `props.translations` (enviadas desde el backend
- * mediante HandleInertiaRequests), las usa directamente sin descarga adicional.
+ * Usa el singleton global inicializado por el plugin i18n (resources/js/i18n/index.js)
+ * instalado en app.js. NO re-inicializa nada — comparte estado con el plugin.
  *
- * Si NO están (cliente sin backend configurado, tests, etc), hace fallback
- * a los módulos JS locales en resources/js/i18n/{locale}.js
+ * Devuelve:
+ *   t(key, replacements?, fallback?) — función de traducción
+ *   locale — ComputedRef del locale actual
+ *   isEnglish / isSpanish — ComputedRef helpers
+ *   ready — ComputedRef (true si cargado)
+ *
+ * Uso retrocompatible (código viejo sigue funcionando):
+ *   import { useTranslations } from '@/Composables/useTranslations';
+ *   const { t } = useTranslations();
+ *
+ * Para código NUEVO, se recomienda usar el plugin global directamente:
+ *   <template>{{ $t('cars.add') }}</template>
  */
 export function useTranslations() {
     const page = usePage();
-    const messages = ref({});
-    const ready = ref(false);
 
-    const locale = computed(() => page.props.locale || 'es');
-    const isEnglish = computed(() => locale.value === 'en');
-    const isSpanish = computed(() => locale.value === 'es');
-
-    function init() {
-        const loc = locale.value;
-        const fromServer = page.props.translations;
-
-        let result;
-        if (fromServer && Object.keys(fromServer).length > 0) {
-            result = fromServer;
-        } else {
-            const mod = localeModules[loc] || localeModules.en;
-            result = mod;
+    watch(() => page.props.locale, (newLoc) => {
+        if (newLoc && newLoc !== currentLocale.value) {
+            // El plugin ya se encarga; aquí solo forzamos reactividad local.
+            // No-op: el watch del plugin actualiza `messages` y `currentLocale`.
         }
+    });
 
-        messages.value = normalize(result, loc);
-        ready.value = true;
-    }
+    const locale = computed(() => currentLocale.value);
+    const isEnglish = computed(() => currentLocale.value === 'en');
+    const isSpanish = computed(() => currentLocale.value === 'es');
+    const ready = computed(() => messages.value && Object.keys(messages.value).length > 0);
 
-    // Inicialización síncrona: el módulo JS se importa en el top-level del archivo,
-    // por lo que `messages[locale]` está disponible desde el primer tick.
-    init();
-
-    watch(locale, () => init());
-
-    /**
-     * t('nav.dashboard', { count: 5 }, 'Dashboard')
-     * Soporta dot-notation y placeholders :name.
-     * Si la clave no existe y fallback es un string, lo devuelve.
-     */
-    function t(key, replacements = {}, fallback = null) {
-        if (!ready.value) {
-            return typeof fallback === 'string' ? fallback : key;
-        }
-
-        const keys = key.split('.');
-        let value = messages.value;
-
-        for (const k of keys) {
-            if (value && typeof value === 'object' && k in value) {
-                value = value[k];
-            } else {
-                return typeof fallback === 'string' ? fallback : key;
-            }
-        }
-
-        // Soporte arrays (listas traducibles, ej: options de selects)
-        if (Array.isArray(value)) {
-            return value;
-        }
-
-        // Soporte pluralización: si el valor es objeto con "_one" / "_other", pick según count
-        if (typeof value === 'object' && value !== null) {
-            if (replacements.count !== undefined) {
-                const n = replacements.count;
-                const isPlural = n !== 1;
-                if (isPlural && value._other) {
-                    value = value._other;
-                } else if (!isPlural && value._one) {
-                    value = value._one;
-                } else if (value._other) {
-                    value = value._other;
-                } else {
-                    return typeof fallback === 'string' ? fallback : key;
-                }
-            } else {
-                // Sin count: intentar _other como default
-                value = value._other || value._one || Object.values(value)[0] || key;
-                if (typeof value !== 'string') {
-                    return typeof fallback === 'string' ? fallback : key;
-                }
-            }
-        }
-
-        if (typeof value !== 'string') {
-            return typeof fallback === 'string' ? fallback : key;
-        }
-
-        // Soporte Laravel-style pipes: "one|other|plural" según count
-        if (value.includes('|') && replacements.count !== undefined) {
-            const parts = value.split('|').map(s => s.trim());
-            const n = replacements.count;
-            // Estilo Laravel: índice basado en count (1=singular, 2=plural, 0=zero)
-            let idx;
-            if (n === 0) idx = 0;
-            else if (n === 1) idx = 1;
-            else idx = Math.min(2, parts.length - 1);
-            value = parts[idx] || parts[0];
-        }
-
-        return value.replace(/:(\w+)/g, (m, name) =>
-            name in replacements ? replacements[name] : m
-        );
-    }
-
-    return { t, locale, isEnglish, isSpanish, ready };
-}
-
-/**
- * Normaliza entre los dos formatos:
- * Backend plano: { 'nav.dashboard': 'Dashboard' }
- * Frontend árbol: { nav: { dashboard: 'Dashboard' } }
- *
- * Devuelve siempre árbol para que t() recorra dot-notation uniformemente.
- */
-function normalize(input) {
-    if (!input) return {};
-
-    const firstKey = Object.keys(input)[0];
-    if (!firstKey) return input;
-
-    // Si ya es árbol (módulo JS), devolvemos tal cual
-    if (!firstKey.includes('.')) {
-        return input;
-    }
-
-    // Si es plano (con dots en keys), convertir a árbol
-    const tree = {};
-    for (const flatKey in input) {
-        const parts = flatKey.split('.');
-        let cur = tree;
-        for (let i = 0; i < parts.length - 1; i++) {
-            cur[parts[i]] = cur[parts[i]] || {};
-            cur = cur[parts[i]];
-        }
-        cur[parts[parts.length - 1]] = input[flatKey];
-    }
-    return tree;
+    return { t: tFn, locale, isEnglish, isSpanish, ready };
 }

@@ -2,6 +2,7 @@
 import { HeartIcon } from '@heroicons/vue/24/outline';
 import { HeartIcon as HeartIconSolid } from '@heroicons/vue/24/solid';
 import { useWishlist } from '@/Composables/useWishlist';
+import { useTranslations } from '@/Composables/useTranslations';
 
 const props = defineProps({
     car: {
@@ -11,6 +12,7 @@ const props = defineProps({
 });
 
 const wishlist = useWishlist();
+const { t } = useTranslations();
 
 const toggle = (e) => {
     e.preventDefault();
@@ -28,8 +30,8 @@ const toggle = (e) => {
                 ? 'bg-rose-500 text-white hover:bg-rose-600'
                 : 'bg-white/90 text-gray-700 hover:bg-rose-50 hover:text-rose-500 dark:bg-asphalt-800 dark:text-gray-300 dark:hover:bg-asphalt-700 dark:hover:text-rose-400',
         ]"
-        :aria-label="wishlist.has(car.id) ? 'Quitar de favoritos' : 'Añadir a favoritos'"
-        :title="wishlist.has(car.id) ? 'Quitar de favoritos' : 'Guardar en favoritos'"
+        :aria-label="wishlist.has(car.id) ? t('wishlist.remove') : t('wishlist.add')"
+        :title="wishlist.has(car.id) ? t('wishlist.remove') : t('wishlist.add')"
     >
         <HeartIcon v-if="!wishlist.has(car.id)" class="h-5 w-5" />
         <HeartIconSolid v-else class="h-5 w-5" />

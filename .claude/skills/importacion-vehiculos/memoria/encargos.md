@@ -7,6 +7,8 @@
 > - **Auditoría de cierre**: alimenta la dimensión "resultado" y el historial de qué funcionó.
 > - **Continuidad**: si el cliente vuelve, retomar contexto (presupuesto, modalidad, preferencias) sin volver a preguntar.
 >
+> **Caducidad (16-ago-2026):** cada entrada lleva `Refrescar antes de`. Si la fecha **ya pasó**, el encargo se marca como **re-investigar** en el PASO 0 (se ofrece investigación completa, no delta). Si está en futuro (<3 semanas), se ofrece delta. Mantener la fecha al día en cada cierre.
+>
 > **Formato de cada entrada (una `###` por encargo):**
 
 ```markdown

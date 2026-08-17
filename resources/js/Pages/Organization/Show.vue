@@ -42,7 +42,7 @@ const { date } = useFormat();
                                 <BuildingOfficeIcon class="h-5 w-5 text-estoril-600" />
                             </div>
                             <div>
-                                <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Name</dt>
+                                <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('organization.name') }}</dt>
                                 <dd class="font-medium text-gray-900">{{ organization.name }}</dd>
                             </div>
                         </div>
@@ -51,7 +51,7 @@ const { date } = useFormat();
                                 <CreditCardIcon class="h-5 w-5 text-estoril-600" />
                             </div>
                             <div>
-                                <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Plan</dt>
+                                <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('organization.plan') }}</dt>
                                 <dd class="font-medium text-gray-900">{{ organization.plan || 'starter' }}</dd>
                             </div>
                         </div>
@@ -60,8 +60,8 @@ const { date } = useFormat();
                                 <CalendarIcon class="h-5 w-5 text-amber-600" />
                             </div>
                             <div>
-                                <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Trial ends</dt>
-                                <dd class="font-medium text-gray-900">{{ organization.trial_ends_at ? date(organization.trial_ends_at) : 'No trial' }}</dd>
+                                <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('organization.trial_ends') }}</dt>
+                                <dd class="font-medium text-gray-900">{{ organization.trial_ends_at ? date(organization.trial_ends_at) : t('organization.no_trial') }}</dd>
                             </div>
                         </div>
                     </div>

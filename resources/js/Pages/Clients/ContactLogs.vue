@@ -76,7 +76,7 @@ const inputClass = 'block w-full rounded-lg border-gray-300 text-sm shadow-sm fo
 
         <div class="py-8">
             <div class="mx-auto max-w-3xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <PageHeader :title="`Contact logs`" :subtitle="`Communication history for ${client.name}`">
+                <PageHeader :title="t('clients.contact_logs_heading')" :subtitle="t('clients.contact_logs_subtitle', { name: client.name })">
                     <template #actions>
                         <Link :href="route('clients.show', client.id)" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             <ArrowLeftIcon class="h-4 w-4" />
@@ -86,25 +86,25 @@ const inputClass = 'block w-full rounded-lg border-gray-300 text-sm shadow-sm fo
                 </PageHeader>
 
                 <!-- New log form -->
-                <FormSection title="Log new contact">
+                <FormSection :title="t('clients.log_new_contact')">
                     <form @submit.prevent="submit" class="space-y-4">
                         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            <FormField label="Date" required>
+                            <FormField :label="t('clients.field_date')" required>
                                 <input v-model="form.contact_date" type="date" required :class="inputClass" />
                             </FormField>
-                            <FormField label="Channel" required>
+                            <FormField :label="t('clients.field_channel')" required>
                                 <select v-model="form.channel" required :class="inputClass">
                                     <option v-for="opt in channelOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
                                 </select>
                             </FormField>
                         </div>
-                        <FormField label="Summary" required>
-                            <textarea v-model="form.summary" rows="3" required :class="inputClass" placeholder="What was discussed?" />
+                        <FormField :label="t('clients.field_summary')" required>
+                            <textarea v-model="form.summary" rows="3" required :class="inputClass" :placeholder="t('clients.summary_placeholder')" />
                         </FormField>
                         <div class="flex justify-end">
                             <button type="submit" :disabled="form.processing" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500 disabled:opacity-50">
                                 <CheckIcon class="h-4 w-4" />
-                                {{ form.processing ? 'Saving...' : 'Log contact' }}
+                                {{ form.processing ? t('clients.saving') : t('clients.log_contact') }}
                             </button>
                         </div>
                     </form>
@@ -113,7 +113,7 @@ const inputClass = 'block w-full rounded-lg border-gray-300 text-sm shadow-sm fo
                 <!-- Logs list -->
                 <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4">
-                        <h3 class="text-base font-semibold text-gray-900">History</h3>
+                        <h3 class="text-base font-semibold text-gray-900">{{ t('clients.history') }}</h3>
                     </div>
                     <EmptyState v-if="!logs?.data?.length" icon="💬" :title="t('cars.no_contact_logs_yet')" :description="t('cars.no_contact_logs_desc')" />
                     <div v-else class="divide-y divide-gray-200">
@@ -128,7 +128,7 @@ const inputClass = 'block w-full rounded-lg border-gray-300 text-sm shadow-sm fo
                                 </div>
                                 <p class="mt-1 text-sm text-gray-900">{{ log.summary }}</p>
                             </div>
-                            <button @click="askDelete(log)" class="rounded-md p-1.5 text-gray-400 hover:bg-rose-50 hover:text-rose-600" title="Delete">
+                            <button @click="askDelete(log)" class="rounded-md p-1.5 text-gray-400 hover:bg-rose-50 hover:text-rose-600" :title="t('common.delete')">
                                 <TrashIcon class="h-4 w-4" />
                             </button>
                         </div>

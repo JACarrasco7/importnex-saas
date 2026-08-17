@@ -29,7 +29,7 @@ const inputClass = 'block w-full rounded-lg border-gray-300 text-sm shadow-sm fo
 </script>
 
 <template>
-    <Head :title="`Edit: ${client.name}`" />
+    <Head :title="t('clients.edit_title', { name: client.name })" />
 
     <AuthenticatedLayout>
         <template #header>

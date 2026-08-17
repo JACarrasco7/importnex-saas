@@ -106,7 +106,7 @@ C:\Users\jacar\Desktop\JJImportMotors\
 ```
 
 **Reglas duras:**
-- La **investigación** (navegación/filtros) se hace en Claude Desktop — NO en VS Code (fricción con filtros, ver `memoria/retrospectiva.md`).
+- La **investigación** (navegación/filtros) se hace en Claude Desktop — NO en VS Code (fricción con filtros, ver `../memoria/retrospectiva.md`).
 - El **repositorio de PDFs de marketing/imágenes/JSON es Laravel**. Claude genera el paquete y lo SUBE; además entrega al usuario los **PDFs de investigación** (búsqueda/unidad). Los PDFs de marketing (dossier/ficha/folleto) solo salen de Laravel.
 - Para **ver un informe/PDF/fotos** → consultar el sistema Laravel (nunca regenerar desde cero si ya está subido).
 - Claude NO consulta Laravel para "revisar" o "iterar". Cada entrega al sistema es el final del ciclo para Claude.
@@ -191,6 +191,32 @@ Exit code: `1` → **NO arrancar**, copiar archivos faltantes primero.
 Cuando el usuario diga **"arrancamos sesión"** o cualquier trigger de investigación, Claude debe ejecutar este script **antes** de leer `indice.json` o invocar `franja.py`. Si exit code ≠ 0, mostrar el output al usuario y pedir acción correctiva.
 
 > 📜 Cambiado 12-ago-2026 (§3.7 auditoría): antes el script existía pero no estaba documentado. Ahora es check de arranque obligatorio.
+
+---
+
+## 🧪 Verificación del skill — scripts de mantenimiento (16-ago-2026)
+
+> Dos scripts nuevos para mantener la coherencia del skill entre ediciones. Ejecutarlos ANTES de re-empaquetar el ZIP y al detectar referencias rotas.
+
+### 1. `verify_skill_refs.py` — valida referencias cruzadas
+
+Recorre los 29 `.md` del skill, extrae las referencias entre backticks/links que apuntan a `.md` locales, y verifica que el archivo destino EXISTE. Ignora referencias externas (Desktop, repo Laravel) y variables `<...>`.
+
+```bash
+py scripts/verify_skill_refs.py
+# Exit 0 = todas las referencias OK · Exit 1 = lista de rotas a corregir
+```
+
+### 2. `sync_indice.py` — regenera indice.json desde encargos.md
+
+El PASO 0 del skill lee `indice.json` (Desktop) para decidir si un modelo/cliente ya se investigó. Este script mantiene ese índice en sync con `../memoria/encargos.md` (fuente de verdad del skill).
+
+```bash
+py scripts/sync_indice.py                  # escribe indice.json en Desktop\JJImportMotors\
+py scripts/sync_indice.py --dry-run        # imprime el JSON sin escribir
+```
+
+**Regla de sync:** cada vez que se cierra un encargo (nueva entrada en `../memoria/encargos.md`), ejecutar `sync_indice.py` para que el PASO 0 de la próxima conversación vea la cache actualizada.
 
 ---
 
@@ -474,7 +500,7 @@ Hoja "Cliente y resumen": nombre, teléfono, email, cómo llegó, fecha alta.
 
 ### Mapa de celdas
 
-Ver `references/cell_map.md` para referencia rápida de dónde vive cada dato.
+Ver `../references/cell_map.md` para referencia rápida de dónde vive cada dato.
 
 ---
 
@@ -503,7 +529,7 @@ Ver `references/cell_map.md` para referencia rápida de dónde vive cada dato.
 
 > **Regla (12-ago-2026):** NUNCA saltar del resumen informal al "¿evalúo el candidato X?" sin entregar antes el INFORME TIPO MODELO + top 5 con enlaces + CP1. El usuario decide qué candidato profundizar (Flujo A), no Claude.
 
-> **⚡ MODO AUTOMÁTICO (12-ago-2026):** si el encargo llega COMPLETO (todos los críticos dados), la Fase 1 es automática y termina con el INFORME MODELO + top 5. El usuario elige candidato (NO Claude): "investiga el de X" → automático fotos + informe UNIDAD + dossier + ZIP. Si varios → comparativa antes. NO preguntar "¿qué candidato?", "¿continúo?", "¿descargo fotos?". Ver `SKILL.md` §MODO AUTOMÁTICO.
+> **🔑 PROTOCOLO DE MANDO (16-ago-2026):** el usuario aprueba CADA fase (plan de fase 3-5 líneas); dentro de la fase la ejecución es automática (Fase 1 = 3 fuentes → INFORME MODELO + top 5). El usuario elige candidato (NO Claude): "investiga el de X" → nueva fase aprobada → automático fotos + informe UNIDAD + dossier + ZIP. Si varios → comparativa antes. NO preguntar "¿qué candidato?", "¿continúo?", "¿descargo fotos?" dentro de una fase. Ver `../SKILL.md` §PROTOCOLO DE MANDO.
 
 #### Flujo C — Escanear mercado
 

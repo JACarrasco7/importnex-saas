@@ -46,7 +46,7 @@ const { t } = useTranslations();
                 <FormSection title="Summary">
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
                         <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Status</dt>
+                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('common.status') }}</dt>
                             <dd class="mt-1">
                                 <Badge :variant="invoice.status === 'paid' ? 'green' : 'amber'">
                                     <CheckCircleIcon v-if="invoice.status === 'paid'" class="h-3 w-3" />

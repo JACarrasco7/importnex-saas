@@ -52,7 +52,7 @@ const langVariant = (lang) => {
 
         <div class="py-8">
             <div class="mx-auto max-w-3xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <PageHeader :title="template.name" :subtitle="template.description || 'Message template'">
+                <PageHeader :title="template.name" :subtitle="template.description || t('templates.default_subtitle')">
                     <template #actions>
                         <Link :href="route('message-templates.index')" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             <ArrowLeftIcon class="h-4 w-4" />

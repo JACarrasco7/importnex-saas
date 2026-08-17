@@ -40,6 +40,28 @@ Cuando un coche investigado se vende (o no), registrar el resultado para calibra
 
 ---
 
+## 🏪 Registro de vendedores (al cerrar negociación · 16-ago-2026)
+
+> **Trigger automático:** al cerrar una venta O al descartar por culpa del vendedor, volcar el resultado a `../memoria/vendedores-confianza.md` (hoy vacío). Sin este paso, el skill no aprende qué dealers responden bien.
+
+**Cuándo dispara (cualquiera de estos):**
+- Negociación concluida (venta o no) → registrar si el vendedor respondió, contraofertó, cumplió.
+- Vendedor que no responde en 3+ días → marcarlo "no fiable".
+- Vendedor con anuncio engañoso (km/estado falso) → marcarlo "evitar".
+
+**Qué registrar en `../memoria/vendedores-confianza.md`:**
+```markdown
+### <Nombre vendedor> · <portal> · <fecha>
+- **Tipo:** concesionario | particular
+- **Respuesta:** rápida (<24h) | lenta | no responde
+- **Fiabilidad del anuncio:** coincidió | difirió (km/estado)
+- **Resultado:** vendió | contraofertó | ghosting | engaño
+```
+
+**Regla:** cada cierre alimenta el registro. Si un vendedor acumula 2+ marcas negativas, priorizar otros candidatos del mismo modelo en futuros encargos (se lee en `../memoria/vendedores-confianza.md` antes de negociar).
+
+---
+
 ## 📈 KPIs del skill (Mejora #16)
 
 Métricas para evaluar la calidad de las investigaciones.
@@ -97,7 +119,7 @@ con `brand`/`model` denormalizados para filtros por marca.
 
 Versionado formal de cambios en los archivos del skill.
 
-**Archivo:** `CHANGELOG.md` (en `.claude/skills/importacion-vehiculos/`)
+**Archivo:** `../CHANGELOG.md` (en la raíz del skill)
 
 **Formato:** [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/) + [Semantic Versioning](https://semver.org/lang/es/)
 

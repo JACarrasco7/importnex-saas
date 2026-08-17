@@ -9,13 +9,13 @@
 | Archivo | Qué guarda | Cuándo consultar |
 |---|---|---|
 | **`MEMORIA.md`** (este) | Índice | SIEMPRE al inicio |
-| `memoria/modelos-medidos.md` | Histórico de modelos investigados (cache) | Al retomar un modelo ya medido (PASO 0) |
-| `memoria/encargos.md` | Registro central de encargos (cliente→flujo→entregables→resultado) | Al recibir cualquier encargo (PASO 0) · Auditoría de cierre |
-| `memoria/filtros-portales.md` | Filtros/URLs verificados por portal (qué aplica por URL vs clic) | Al construir el plan de fase / asesor de filtros |
-| `memoria/vendedores-confianza.md` | Dealers que responden bien | Antes de negociar |
-| `memoria/trampas-encontradas.md` | Trampas detectadas en portales | Antes de cada navegación |
-| `memoria/mejoras-aplicadas.md` | Cambios y mejoras del skill | Al planificar cambios |
-| `memoria/retrospectiva.md` | Retrospectivas de sesión + plantilla de CIERRE | Al cerrar conversación / auditoría de cierre |
+| `modelos-medidos.md` | Histórico de modelos investigados (cache) | Al retomar un modelo ya medido (PASO 0) |
+| `encargos.md` | Registro central de encargos (cliente→flujo→entregables→resultado) | Al recibir cualquier encargo (PASO 0) · Auditoría de cierre |
+| `filtros-portales.md` | Filtros/URLs verificados por portal (qué aplica por URL vs clic) | Al construir el plan de fase / asesor de filtros |
+| `vendedores-confianza.md` | Dealers que responden bien | Antes de negociar |
+| `trampas-encontradas.md` | Trampas detectadas en portales | Antes de cada navegación |
+| `mejoras-aplicadas.md` | Cambios y mejoras del skill | Al planificar cambios |
+| `retrospectiva.md` | Retrospectivas de sesión + plantilla de CIERRE | Al cerrar conversación / auditoría de cierre |
 
 ---
 
@@ -83,7 +83,7 @@ ENCARGO (Flujo B) → 📋 INFORME MODELO + top 5 con ENLACES → CP1 (¿Fase 2 
 - **NUNCA** saltar del resumen informal al "¿evalúo el candidato X?" sin entregar INFORME MODELO + enlaces + CP1.
 - El usuario decide qué candidato profundizar (Flujo A), no Claude.
 - Folleto publicidad / ficha → los genera **Laravel** (no Claude), cuando el coche está en inventario.
-- Plantilla INFORME MODELO en `SKILL.md` §INFORME TIPO MODELO.
+- Plantilla INFORME MODELO en `../SKILL.md` §INFORME TIPO MODELO.
 
 ## 🌍 ORIGEN DE vs ES + negocio (12-ago-2026)
 

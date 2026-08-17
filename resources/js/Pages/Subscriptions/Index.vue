@@ -35,7 +35,7 @@ const planKeys = ['starter', 'pro', 'enterprise'];
                 <div v-if="on_trial" class="overflow-hidden rounded-2xl border border-blue-200 bg-blue-50 p-4">
                     <div class="flex items-center gap-3">
                         <SparklesIcon class="h-5 w-5 text-blue-600" />
-                        <p class="text-sm text-blue-700"><strong>Trial active:</strong> ends {{ date(trial_ends_at) }}</p>
+                        <p class="text-sm text-blue-700"><strong>{{ t('subscription.trial_active') }}:</strong> {{ t('subscription.ends') }} {{ date(trial_ends_at) }}</p>
                     </div>
                 </div>
 
@@ -43,7 +43,7 @@ const planKeys = ['starter', 'pro', 'enterprise'];
                     <div class="flex items-center gap-3">
                         <CheckIcon class="h-5 w-5 text-emerald-600" />
                         <p class="text-sm text-emerald-700">
-                            <strong>Subscription active:</strong> {{ subscription.status }}
+                            <strong>{{ t('subscription.subscription_active') }}:</strong> {{ subscription.status }}
                             <span v-if="subscription.ends_at"> — ends {{ date(subscription.ends_at) }}</span>
                         </p>
                     </div>
@@ -75,7 +75,7 @@ const planKeys = ['starter', 'pro', 'enterprise'];
 
                             <div class="mt-8">
                                 <Link v-if="currentPlan === key" :href="route('subscriptions.show', key)" class="block w-full rounded-lg border border-gray-300 bg-gray-50 py-3 text-center text-sm font-semibold text-gray-700 hover:bg-gray-100">
-                                    View details
+                                    {{ t('subscription.view_details') }}
                                 </Link>
                                 <form v-else-if="on_trial || !subscription" method="POST" :action="route('subscriptions.create', key)">
                                     <input type="hidden" name="_token" :value="$page.props.csrfToken" />
@@ -97,8 +97,8 @@ const planKeys = ['starter', 'pro', 'enterprise'];
                 <div v-if="subscription && !on_trial" class="overflow-hidden rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
                     <div class="flex items-center justify-between">
                         <div>
-                            <h3 class="text-base font-semibold text-gray-900">Subscription actions</h3>
-                            <p class="mt-1 text-sm text-gray-500">Manage your recurring subscription</p>
+                            <h3 class="text-base font-semibold text-gray-900">{{ t('subscription.actions_title') }}</h3>
+                            <p class="mt-1 text-sm text-gray-500">{{ t('subscription.actions_desc') }}</p>
                         </div>
                         <div class="flex gap-2">
                             <form v-if="subscription.status === 'active'" method="POST" :action="route('subscriptions.cancel')" class="inline">

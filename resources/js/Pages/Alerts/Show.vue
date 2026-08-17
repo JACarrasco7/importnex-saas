@@ -27,16 +27,16 @@ const { datetime } = useFormat();
 
         <div class="py-8">
             <div class="mx-auto max-w-3xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <PageHeader title="Alert details" :subtitle="`${alert.alert_type} Â· ${alert.reference_type} #${alert.reference_id}`">
+                <PageHeader :title="t('alerts.details')" :subtitle="`${alert.alert_type} · ${alert.reference_type} #${alert.reference_id}`">
                     <template #actions>
                         <Link :href="route('alerts.index')" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             <ArrowLeftIcon class="h-4 w-4" />
-                            Back
+                            {{ t('common.back') }}
                         </Link>
                     </template>
                 </PageHeader>
 
-                <FormSection title="Information">
+                <FormSection :title="t('alerts.information')">
                     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                         <div class="flex items-start gap-3">
                             <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-50">
@@ -52,7 +52,7 @@ const { datetime } = useFormat();
                                 <component :is="alert.resolved ? CheckCircleIcon : ClockIcon" :class="['h-5 w-5', alert.resolved ? 'text-emerald-600' : 'text-amber-600']" />
                             </div>
                             <div>
-                                <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Status</dt>
+                                <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('common.status') || t('alerts.status') }}</dt>
                                 <dd class="mt-1"><Badge :variant="alert.resolved ? 'green' : 'amber'">{{ alert.resolved ? t('alerts.resolved') : t('alerts.pending') }}</Badge></dd>
                             </div>
                         </div>

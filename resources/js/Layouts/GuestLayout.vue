@@ -2,6 +2,9 @@
 import { Link } from '@inertiajs/vue3';
 import { TruckIcon } from '@heroicons/vue/24/outline';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
+import { useTranslations } from '@/Composables/useTranslations';
+
+const { t } = useTranslations();
 </script>
 
 <template>
@@ -16,20 +19,20 @@ import ApplicationLogo from '@/Components/ApplicationLogo.vue';
             </Link>
 
             <div>
-                <h2 class="text-4xl font-bold leading-tight">Run your car import business on autopilot.</h2>
-                <p class="mt-4 text-lg text-estoril-100">Inventory, clients, finance, AI verification — all in one platform.</p>
+                <h2 class="text-4xl font-bold leading-tight">{{ t('guest.tagline') }}</h2>
+                <p class="mt-4 text-lg text-estoril-100">{{ t('guest.tagline_desc') }}</p>
                 <div class="mt-8 grid grid-cols-3 gap-6">
                     <div>
                         <p class="text-3xl font-bold">80%</p>
-                        <p class="mt-1 text-sm text-estoril-100">less time on spreadsheets</p>
+                        <p class="mt-1 text-sm text-estoril-100">{{ t('guest.stat_spreadsheets') }}</p>
                     </div>
                     <div>
                         <p class="text-3xl font-bold">3x</p>
-                        <p class="mt-1 text-sm text-estoril-100">faster turnover</p>
+                        <p class="mt-1 text-sm text-estoril-100">{{ t('guest.stat_turnover') }}</p>
                     </div>
                     <div>
                         <p class="text-3xl font-bold">24/7</p>
-                        <p class="mt-1 text-sm text-estoril-100">AI assistance</p>
+                        <p class="mt-1 text-sm text-estoril-100">{{ t('guest.stat_ai') }}</p>
                     </div>
                 </div>
             </div>

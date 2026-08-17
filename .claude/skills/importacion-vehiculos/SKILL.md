@@ -146,7 +146,7 @@ D sondeo → INFORME DE MODELOS (país × año × motorización)
 4. **D1 SIEMPRE con navegación real (A15).** La búsqueda web/snippets NO es método válido de sondeo — datos inconsistentes (caso 15-ago: Focus ES "~9.900 €" cuando la navegación real daba 3.000-6.990 €).
 5. **El informe D2 lista TODOS los modelos** que salen con los filtros (A16), sin "otros por explorar" pendientes: si un modelo cumple las specs, se sondea en la misma pasada.
 6. **El requisito de potencia es mínimo (≥Xcv):** filtrar por kW/cv mínimos, no buscar una variante concreta; versiones 125/130/150 cumplen +120cv.
-7. **D1 NO pagina (eficiencia):** D1a enumera con 2 lecturas por mercado (asc = suelo + desc = techo) + facetas de marca + semilla `modelos-medidos.md`; D1b difiere el precio-desde a 1 consulta por modelo solo si falta. El anuncio individual solo se investiga cuando el embudo es pequeño (Flujo A/B).
+7. **D1 NO pagina (eficiencia):** D1a enumera con 2 lecturas por mercado (asc = suelo + desc = techo) + facetas de marca + semilla `memoria/modelos-medidos.md`; D1b difiere el precio-desde a 1 consulta por modelo solo si falta. El anuncio individual solo se investiga cuando el embudo es pequeño (Flujo A/B).
 
 **Antes de navegar en Flujo A/B → PASO 0 CACHE + briefing de encargo:**
 
@@ -352,9 +352,11 @@ Durante la conversación, Claude debe actualizar la memoria cuando detecte:
 
 | Situación | Archivo a actualizar |
 |---|---|
-| Mides un modelo nuevo o evalúas una URL | `memoria/modelos-medidos.md` |
+| Cierras o abortas un encargo | `memoria/encargos.md` (cliente→flujo→resultado→refrescar antes de) |
+| Mides un modelo nuevo o evalúas una URL | `memoria/modelos-medidos.md` (12 campos, con `refrescar antes de`) |
+| Verificas un filtro/URL que funciona (o falla) en un portal | `memoria/filtros-portales.md` (fecha + parámetro) |
 | Detectas una trampa nueva en un portal | `memoria/trampas-encontradas.md` |
-| Un vendedor responde bien/mal | `memoria/vendedores-confianza.md` |
+| Un vendedor responde bien/mal o se negocia | `memoria/vendedores-confianza.md` |
 | Aplicas una mejora al skill | `memoria/mejoras-aplicadas.md` |
 | Aprendes algo sobre el usuario (preferencia, disgusto) | `.claude/memoria/preferencias.md` (en el proyecto) |
 | Cometes un error que debe evitarse | `.claude/memoria/errores-pasados.md` (en el proyecto) |
@@ -399,7 +401,9 @@ SESIÓN <fecha> — <modelo/encargo>
 **Salidas obligatorias (3):**
 1. `memoria/retrospectiva.md` → entrada de sesión con las 5 dimensiones (plantilla de cierre).
 2. `memoria/modelos-medidos.md` → el modelo elegido con precio real verificado + fecha.
-3. **Cada corrección/fallo ≥ 1** → trampa en `memoria/trampas-encontradas.md` o anti-patrón propuesto en `06-reglas/anti_patrones.md` (proponer el texto al usuario, no editar a ciegas).
+3. `memoria/encargos.md` → el encargo registrado (flujo, resultado, `refrescar antes de` = hoy +3 semanas) + ejecutar `py scripts/sync_indice.py` para actualizar `indice.json`.
+4. **Cada corrección/fallo ≥ 1** → trampa en `memoria/trampas-encontradas.md` o anti-patrón propuesto en `06-reglas/anti_patrones.md` (proponer el texto al usuario, no editar a ciegas).
+5. Si se verificó/negó un filtro o URL de portal durante la sesión → `memoria/filtros-portales.md` (fecha + parámetro).
 
 **Regla de oro:** todo cierre produce ≥ 1 línea de aprendizaje. Si el embudo funcionó SIN correcciones → registrar el patrón en "lo que funcionó" como referencia reutilizable (para repetirlo, no solo para evitar errores).
 

@@ -716,7 +716,7 @@ const onDocKeyChange = () => {
                                         <Badge :variant="docStatusVariant(doc.status)" size="sm">{{ statusLabel(t, doc.status) }}</Badge>
                                         <a v-if="doc.url" :href="`/storage/${doc.url}`" target="_blank" class="inline-flex items-center gap-1 rounded-md bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100">
                                             <EyeIcon class="h-3 w-3" />
-                                            View
+                                            {{ t('common.view') }}
                                         </a>
                                         <button v-if="doc.url" @click="askDeleteDoc(doc)" class="inline-flex items-center gap-1 rounded-md bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-700 hover:bg-rose-100">
                                             <TrashIcon class="h-3 w-3" />

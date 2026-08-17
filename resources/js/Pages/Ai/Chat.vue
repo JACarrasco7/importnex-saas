@@ -35,7 +35,7 @@ function removeMessage(idx) {
 async function send() {
     errorMsg.value = '';
     if (!props.current?.has_key) {
-        errorMsg.value = 'No AI provider configured. Set one in Organization → Edit.';
+        errorMsg.value = t('ai.no_provider_chat');
         return;
     }
     sending.value = true;
@@ -75,7 +75,7 @@ async function send() {
                     <div v-if="!current?.has_key" class="mb-4 flex items-start gap-3 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800 ring-1 ring-amber-200">
                         <ExclamationTriangleIcon class="mt-0.5 h-5 w-5 flex-shrink-0" />
                         <div>
-                            No AI provider configured for this organization yet.
+                            {{ t('ai.no_provider_org') }}
                             <a :href="route('organization.edit', { organization: 'current' })" class="font-semibold underline">Configure it now</a>.
                         </div>
                     </div>

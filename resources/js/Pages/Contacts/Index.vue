@@ -100,14 +100,14 @@ const confirmDelete = () => {
                             <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">{{ t('app.search') }}</label>
                             <div class="relative">
                                 <MagnifyingGlassIcon class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                                <input v-model="search" type="text" placeholder="Name, email, city..." class="block w-full rounded-lg border-gray-300 pl-9 text-sm focus:border-estoril-500 focus:ring-estoril-500" />
+                                <input v-model="search" type="text" :placeholder="t('contacts.search_placeholder')" class="block w-full rounded-lg border-gray-300 pl-9 text-sm focus:border-estoril-500 focus:ring-estoril-500" />
                             </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">Tag</label>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">{{ t('contacts.tag') }}</label>
                             <div class="relative">
                                 <TagIcon class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                                <input v-model="tagFilter" type="text" placeholder="e.g. dealer, transport..." class="block w-full rounded-lg border-gray-300 pl-9 text-sm focus:border-estoril-500 focus:ring-estoril-500" />
+                                <input v-model="tagFilter" type="text" :placeholder="t('contacts.tag_placeholder')" class="block w-full rounded-lg border-gray-300 pl-9 text-sm focus:border-estoril-500 focus:ring-estoril-500" />
                             </div>
                         </div>
                     </div>
@@ -116,15 +116,15 @@ const confirmDelete = () => {
                 <!-- Quick Stats -->
                 <div class="grid grid-cols-3 gap-4 sm:grid-cols-3">
                     <div class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-gray-500">Total</div>
+                        <div class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('contacts.total') }}</div>
                         <div class="mt-1 text-2xl font-bold text-gray-900">{{ stats.total }}</div>
                     </div>
                     <div class="rounded-xl bg-estoril-50 p-4 shadow-sm ring-1 ring-estoril-200">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-estoril-700">Dealers</div>
+                        <div class="text-xs font-semibold uppercase tracking-wider text-estoril-700">{{ t('contacts.dealers') }}</div>
                         <div class="mt-1 text-2xl font-bold text-estoril-600">{{ stats.dealers }}</div>
                     </div>
                     <div class="rounded-xl bg-emerald-50 p-4 shadow-sm ring-1 ring-emerald-200">
-                        <div class="text-xs font-semibold uppercase tracking-wider text-emerald-700">Transport</div>
+                        <div class="text-xs font-semibold uppercase tracking-wider text-emerald-700">{{ t('contacts.transport') }}</div>
                         <div class="mt-1 text-2xl font-bold text-emerald-600">{{ stats.transport }}</div>
                     </div>
                 </div>
@@ -169,13 +169,13 @@ const confirmDelete = () => {
                         <div class="flex border-t border-gray-100 bg-gray-50 px-5 py-3">
                             <div class="flex-1" />
                             <div class="flex items-center gap-1">
-                                <Link :href="route('contacts.show', contact.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-estoril-50 hover:text-estoril-600" title="View">
+                                <Link :href="route('contacts.show', contact.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-estoril-50 hover:text-estoril-600" :title="t('common.view')">
                                     <EyeIcon class="h-4 w-4" />
                                 </Link>
-                                <Link :href="route('contacts.edit', contact.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600" title="Edit">
+                                <Link :href="route('contacts.edit', contact.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600" :title="t('common.edit')">
                                     <PencilIcon class="h-4 w-4" />
                                 </Link>
-                                <button type="button" @click="askDelete(contact)" class="rounded-md p-1.5 text-gray-400 hover:bg-rose-50 hover:text-rose-600" title="Delete">
+                                <button type="button" @click="askDelete(contact)" class="rounded-md p-1.5 text-gray-400 hover:bg-rose-50 hover:text-rose-600" :title="t('common.delete')">
                                     <TrashIcon class="h-4 w-4" />
                                 </button>
                             </div>
@@ -183,15 +183,15 @@ const confirmDelete = () => {
                     </div>
                 </div>
 
-                <EmptyState v-else icon="📇" title="No contacts found" description="Try adjusting your filters or add your first contact to your network." action-text="Add your first contact" :action-route="route('contacts.create')" />
+                <EmptyState v-else icon="📇" :title="t('contacts.no_contacts')" :description="t('contacts.no_contacts_desc')" :action-text="t('contacts.add_first')" :action-route="route('contacts.create')" />
             </div>
         </div>
 
         <ConfirmDialog
             :show="showDelete"
-            title="Delete contact"
-            :message="`Are you sure you want to delete ${contactToDelete?.name}? This action cannot be undone.`"
-            confirm-text="Delete"
+            :title="t('contacts.delete_contact')"
+            :message="t('contacts.delete_contact_message', { name: contactToDelete?.name })"
+            :confirm-text="t('common.delete')"
             variant="danger"
             @close="showDelete = false"
             @confirm="confirmDelete"

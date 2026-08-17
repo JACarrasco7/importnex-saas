@@ -326,7 +326,7 @@ function apply() {
                         <header class="flex items-center justify-between gap-3 border-b border-gray-200 px-6 py-4">
                             <div>
                                 <h3 class="text-base font-semibold text-gray-900">{{ t('cars.ai_suggestions') }}</h3>
-                                <p class="text-xs text-gray-500">Select which fields to apply. Untouched fields stay as they are.</p>
+                                <p class="text-xs text-gray-500">{{ t('cars.verify_modal_desc') }}</p>
                             </div>
                             <button @click="showModal = false" type="button" class="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
                                 <XMarkIcon class="h-5 w-5" />
@@ -337,7 +337,7 @@ function apply() {
                             <span>{{ selectedCount }} selected</span>
                             <div class="flex items-center gap-2">
                                 <button type="button" @click="toggleAll(true)" class="rounded border border-gray-300 px-2.5 py-1 font-semibold hover:bg-gray-100">{{ t('cars.select_all_with_proposal') }}</button>
-                                <button type="button" @click="toggleAll(false)" class="rounded border border-gray-300 px-2.5 py-1 font-semibold hover:bg-gray-100">Clear</button>
+                                <button type="button" @click="toggleAll(false)" class="rounded border border-gray-300 px-2.5 py-1 font-semibold hover:bg-gray-100">{{ t('common.clear') }}</button>
                             </div>
                         </div>
 
@@ -349,10 +349,10 @@ function apply() {
                             <table class="w-full text-sm">
                                 <thead>
                                     <tr class="border-b border-gray-200 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                        <th class="w-10 py-2">Apply</th>
-                                        <th class="w-1/4 py-2">Field</th>
-                                        <th class="w-1/3 py-2">Current value</th>
-                                        <th class="w-1/3 py-2">AI proposal</th>
+                                        <th class="w-10 py-2">{{ t('common.apply') }}</th>
+                                        <th class="w-1/4 py-2">{{ t('common.field') }}</th>
+                                        <th class="w-1/3 py-2">{{ t('cars.current_value') }}</th>
+                                        <th class="w-1/3 py-2">{{ t('cars.ai_proposal') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -380,7 +380,7 @@ function apply() {
                                                         {{ formatDef(def, car[def.key]) }}
                                                     </template>
                                                 </div>
-                                                <p v-if="car[def.key] && (Array.isArray(car[def.key]) ? car[def.key].length > 0 : true)" class="mt-1 text-[11px] text-amber-700">⚠ You already have a value here. Tick to overwrite.</p>
+                                                <p v-if="car[def.key] && (Array.isArray(car[def.key]) ? car[def.key].length > 0 : true)" class="mt-1 text-[11px] text-amber-700">⚠ {{ t('cars.overwrite_warning') }}</p>
                                             </td>
                                             <td class="py-3 pr-3">
                                                 <div class="rounded-md bg-emerald-50 p-2 text-xs text-emerald-900 ring-1 ring-emerald-200">
@@ -402,7 +402,7 @@ function apply() {
 
                         <footer class="flex items-center justify-end gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4">
                             <button type="button" @click="showModal = false" class="text-sm font-semibold text-gray-700 hover:text-gray-900">
-                                Cancel
+                                {{ t('common.cancel') }}
                             </button>
                             <button
                                 type="button"
@@ -410,7 +410,7 @@ function apply() {
                                 :disabled="submitting || selectedCount === 0"
                                 class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500 disabled:opacity-50">
                                 <CheckIcon class="h-4 w-4" />
-                                {{ submitting ? 'Applying…' : `Apply ${selectedCount} field${selectedCount === 1 ? '' : 's'}` }}
+                                {{ submitting ? t('common.applying') : t('cars.apply_n_fields', { count: selectedCount }) }}
                             </button>
                         </footer>
                     </div>

@@ -53,7 +53,7 @@ const submit = () => {
 
                     <div class="flex items-center justify-end mt-6">
                         <PrimaryButton :disabled="form.processing">
-                            Create Organization
+                            {{ t('organization.create_button') }}
                         </PrimaryButton>
                     </div>
                 </form>

@@ -1,6 +1,6 @@
 # Retrospectiva de sesión — plantilla
 
-> **Usar al cerrar cada conversación** (ver `SKILL.md` §Aprendizaje continuo).
+> **Usar al cerrar cada conversación** (ver `../SKILL.md` §Aprendizaje continuo).
 > Objetivo: de cada conversación sale al menos una mejora. Si el usuario detecta un fallo, ese fallo se documenta (trampa/anti-patrón/regla) — no se queda en un "lo siento".
 
 ---
@@ -30,7 +30,7 @@ SESIÓN <fecha> — <modelo / encargo / tarea>
 
 ## Plantilla de CIERRE — al elegir candidato único (16-ago-2026)
 
-> **Cuándo:** el usuario elige UN candidato y termina el Flujo A (ZIP), o el encargo se aborta. Ver `SKILL.md` §Auditoría de cierre. Se rellena SIN navegar, mirando hacia atrás.
+> **Cuándo:** el usuario elige UN candidato y termina el Flujo A (ZIP), o el encargo se aborta. Ver `../SKILL.md` §Auditoría de cierre. Se rellena SIN navegar, mirando hacia atrás.
 
 ```markdown
 🏁 CIERRE <fecha> — <modelo elegido / abortado>
@@ -112,7 +112,7 @@ SESIÓN <fecha> — <modelo / encargo / tarea>
 - Preferencia: siempre intentar TODAS las fuentes, transparencia con las bloqueadas.
 
 **📝 Ajustes:**
-- `SKILL.md`: cascada, modo automático, origen, cobertura #5, aprendizaje continuo.
+- `../SKILL.md`: cascada, modo automático, origen, cobertura #5, aprendizaje continuo.
 - `../04-negocio/costes.md`: §Origen, techo de búsqueda, regla IEDMT.
 - `../06-reglas/anti_patrones.md`: A7, A8 (total 8).
 - `../02-flujos/playbook_filtrado.md`: filtrado fino (CV/kW, 5 puertas, patrocinados, engañosos).

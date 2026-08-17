@@ -207,7 +207,7 @@ Referencias rápidas:
 - **Fallo real (María, 9.000 €):** 526 resultados ordenados por precio ascendente, se leyó SOLO la página 1 → se enseñaron 8 coches de 3.000-4.200 € y se perdieron DS4, 308, Astra... que TAMBIÉN entraban en presupuesto.
 - **Regla:** el listado para el cliente cubre TODO el rango válido (suelo → techo), no el extremo barato. Con muchos resultados, recorrer por **bandas** (ej. 3-5k / 5-7k / 7k-techo) o paginar hasta el techo (A12).
 - Un coche de 7.500 € en presupuesto con mejor equipamiento puede ser MEJOR candidato que el de 3.750 €: el objetivo es el mejor **valor** del rango, no el precio mínimo.
-- **Distinción D1 vs Flujo B (15-ago-2026):** en el sondeo D1 (enumerar qué modelos caben) NO se pagan todas las páginas — 2 lecturas por mercado: **asc** (suelo, página 1) + **desc** (techo, página 1), más facetas de marca con conteo y semilla `modelos-medidos.md`. La paginación/bandas completas son para Flujo B, donde se entregan candidatos con enlaces. El precio-desde de cada modelo sale de su primera aparición en asc/desc, no de paginar.
+- **Distinción D1 vs Flujo B (15-ago-2026):** en el sondeo D1 (enumerar qué modelos caben) NO se pagan todas las páginas — 2 lecturas por mercado: **asc** (suelo, página 1) + **desc** (techo, página 1), más facetas de marca con conteo y semilla `../memoria/modelos-medidos.md`. La paginación/bandas completas son para Flujo B, donde se entregan candidatos con enlaces. El precio-desde de cada modelo sale de su primera aparición en asc/desc, no de paginar.
 - **Año ensanchado (2016→2012) u otro filtro relajado:** declararlo ANTES de navegar y marcarlo en el informe (A13) — el usuario lo tolera, pero no en silencio.
 
 ### Anuncios engañosos (CRÍTICO · 12-ago-2026)

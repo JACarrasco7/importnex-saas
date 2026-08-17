@@ -120,7 +120,7 @@ Cruce: unión de IDs
 
 ## 💾 Guardar el encargo en memoria
 
-Tras confirmar, apuntar el encargo en `memoria/modelos-medidos.md` (histórico):
+Tras confirmar, apuntar el encargo en `../memoria/modelos-medidos.md` (histórico):
 ```markdown
 ### [Marca Modelo] · encargo [fecha]
 - Año mín: X · Km máx: X · Presupuesto: X €

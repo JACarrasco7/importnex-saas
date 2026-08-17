@@ -184,7 +184,7 @@ Si el usuario tiene prisa y responde "no preguntes, busca tú", Claude asume def
 3. **SIEMPRE** preguntar primero los críticos (modelo, presupuesto, finalidad).
 4. **SIEMPRE** permitir "busca tú" / "lo que puedas" (no bloquear).
 5. **SIEMPRE** mostrar el prompt mejorado listo para que el usuario diga "OK" o lo modifique.
-6. **SIEMPRE** guardar el briefing confirmado en `memoria/modelos-medidos.md` al cerrar.
+6. **SIEMPRE** guardar el briefing confirmado en `../memoria/modelos-medidos.md` al cerrar.
 
 ---
 

@@ -26,7 +26,7 @@ const { currency, date, statusVariant } = useFormat();
 
         <div class="py-8">
             <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <PageHeader :title="client.name" :subtitle="client.looking_for || 'CRM client'">
+                <PageHeader :title="client.name" :subtitle="client.looking_for || t('clients.crm_default')">
                     <template #actions>
                         <Link :href="route('clients.index')" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             <ArrowLeftIcon class="h-4 w-4" />
@@ -42,26 +42,26 @@ const { currency, date, statusVariant } = useFormat();
                 <!-- Profile card -->
                 <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-                        <h3 class="text-base font-semibold text-gray-900">Profile</h3>
+                        <h3 class="text-base font-semibold text-gray-900">{{ t('clients.profile') }}</h3>
                         <Badge :variant="statusVariant(client.status)">{{ client.status }}</Badge>
                     </div>
                     <div class="grid grid-cols-1 gap-x-6 gap-y-4 p-6 sm:grid-cols-2 lg:grid-cols-4">
                         <div v-if="client.contact_info">
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Contact info</dt>
+                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('clients.section_contact') }}</dt>
                             <dd class="mt-1 inline-flex items-center gap-1.5 text-sm text-gray-900">
                                 <UserIcon class="h-4 w-4 text-gray-400" />
                                 {{ client.contact_info }}
                             </dd>
                         </div>
                         <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Budget</dt>
+                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('clients.budget') }}</dt>
                             <dd class="mt-1 text-sm font-semibold text-gray-900">
                                 <span v-if="client.budget_min || client.budget_max">{{ currency(client.budget_min) }} – {{ currency(client.budget_max) }}</span>
                                 <span v-else class="text-gray-400">—</span>
                             </dd>
                         </div>
                         <div v-if="client.notes" class="sm:col-span-2 lg:col-span-4">
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Notes</dt>
+                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('clients.notes') }}</dt>
                             <dd class="mt-1 text-sm text-gray-700">{{ client.notes }}</dd>
                         </div>
                     </div>
@@ -72,7 +72,7 @@ const { currency, date, statusVariant } = useFormat();
                     <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                         <div class="border-b border-gray-200 px-6 py-4 flex items-center gap-2">
                             <TruckIcon class="h-5 w-5 text-gray-400" />
-                            <h3 class="text-base font-semibold text-gray-900">Cars</h3>
+                            <h3 class="text-base font-semibold text-gray-900">{{ t('nav.cars') }}</h3>
                             <span class="ml-auto text-sm text-gray-500">{{ client.cars?.length || 0 }}</span>
                         </div>
                         <div v-if="client.cars?.length" class="divide-y divide-gray-200">
@@ -89,7 +89,7 @@ const { currency, date, statusVariant } = useFormat();
                         <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
                             <div class="flex items-center gap-2">
                                 <ChatBubbleLeftRightIcon class="h-5 w-5 text-gray-400" />
-                                <h3 class="text-base font-semibold text-gray-900">Contact log</h3>
+                                <h3 class="text-base font-semibold text-gray-900">{{ t('clients.contact_log_title') }}</h3>
                             </div>
                             <Link :href="route('clients.contact-logs.index', client.id)" class="text-sm font-semibold text-estoril-600 hover:text-estoril-500">
                                 {{ t('cars.view_all') }} →

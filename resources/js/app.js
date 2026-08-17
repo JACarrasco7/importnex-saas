@@ -7,6 +7,7 @@ import { createApp, h } from 'vue';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import ToastContainer from '@/Components/ToastContainer.vue';
 import CommandPalette from '@/Components/CommandPalette.vue';
+import { i18nPlugin } from '@/i18n';
 
 // N6: registrar service worker para Web Push
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
@@ -28,7 +29,7 @@ createInertiaApp({
             import.meta.glob('./Pages/**/*.vue'),
         ),
     setup({ el, App, props, plugin }) {
-        return createApp({
+        const app = createApp({
             render: () => [
                 h(App, props),
                 h(ToastContainer),
@@ -36,8 +37,13 @@ createInertiaApp({
             ],
         })
             .use(plugin)
-            .use(ZiggyVue)
-            .mount(el);
+            .use(ZiggyVue);
+
+        // Instalar i18n DESPUÉS de Inertia plugin (para tener usePage disponible).
+        // Pasamos la primera página al install para sincronizar con backend.
+        app.use(i18nPlugin, { initialPage: props.initialPage || null });
+
+        return app.mount(el);
     },
     progress: {
         color: '#1A306D',

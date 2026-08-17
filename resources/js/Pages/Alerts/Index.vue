@@ -53,11 +53,11 @@ const confirmDelete = () => {
 
         <div class="py-8">
             <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <PageHeader title="Alerts" :subtitle="`${alerts.total || 0} alerts in your system`">
+                <PageHeader :title="t('alerts.title')" :subtitle="t('alerts.subtitle_count', { count: alerts.total || 0 })">
                     <template #actions>
                         <div class="inline-flex rounded-lg bg-white p-1 shadow-sm ring-1 ring-gray-200">
-                            <button @click="filter = t('common.pending')" :class="['rounded-md px-3 py-1.5 text-sm font-semibold transition', filter === t('common.pending') ? 'bg-estoril-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-50']">Pending</button>
-                            <button @click="filter = t('common.all')" :class="['rounded-md px-3 py-1.5 text-sm font-semibold transition', filter === t('common.all') ? 'bg-estoril-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-50']">All</button>
+                            <button @click="filter = 'pending'" :class="['rounded-md px-3 py-1.5 text-sm font-semibold transition', filter === 'pending' ? 'bg-estoril-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-50']">{{ t('common.pending') }}</button>
+                            <button @click="filter = 'all'" :class="['rounded-md px-3 py-1.5 text-sm font-semibold transition', filter === 'all' ? 'bg-estoril-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-50']">{{ t('common.all') }}</button>
                         </div>
                     </template>
                 </PageHeader>
@@ -78,24 +78,24 @@ const confirmDelete = () => {
                                 <p class="mt-1 text-xs text-gray-400">{{ date(alert.created_at) }}</p>
                             </div>
                             <div class="flex items-center gap-1">
-                                <button v-if="!alert.resolved" @click="askResolve(alert)" class="rounded-md bg-emerald-50 p-1.5 text-emerald-600 hover:bg-emerald-100" title="Resolve">
+                                <button v-if="!alert.resolved" @click="askResolve(alert)" class="rounded-md bg-emerald-50 p-1.5 text-emerald-600 hover:bg-emerald-100" :title="t('alerts.resolve')">
                                     <CheckIcon class="h-4 w-4" />
                                 </button>
-                                <Link :href="route('alerts.show', alert.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-estoril-50 hover:text-estoril-600" title="View">
+                                <Link :href="route('alerts.show', alert.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-estoril-50 hover:text-estoril-600" :title="t('common.view')">
                                     <EyeIcon class="h-4 w-4" />
                                 </Link>
-                                <button @click="askDelete(alert)" class="rounded-md p-1.5 text-gray-400 hover:bg-rose-50 hover:text-rose-600" title="Delete">
+                                <button @click="askDelete(alert)" class="rounded-md p-1.5 text-gray-400 hover:bg-rose-50 hover:text-rose-600" :title="t('common.delete')">
                                     <TrashIcon class="h-4 w-4" />
                                 </button>
                             </div>
                         </div>
                     </div>
-                    <EmptyState v-else icon="ðŸ””" title="All clear!" description="No pending alerts. Your fleet is running smoothly." />
+                    <EmptyState v-else icon="🔔" :title="t('alerts.all_clear')" :description="t('alerts.all_clear_desc')" />
 
                     <!-- Pagination -->
                     <div v-if="alerts.links && alerts.last_page > 1" class="flex items-center justify-between border-t border-gray-200 bg-gray-50 px-6 py-3">
                         <div class="text-sm text-gray-700">
-                            Showing <span class="font-semibold">{{ alerts.from }}</span> to <span class="font-semibold">{{ alerts.to }}</span> of <span class="font-semibold">{{ alerts.total }}</span>
+                            {{ t('common.showing') }} <span class="font-semibold">{{ alerts.from }}</span> {{ t('common.to') }} <span class="font-semibold">{{ alerts.to }}</span> {{ t('common.of') }} <span class="font-semibold">{{ alerts.total }}</span>
                         </div>
                         <div class="flex items-center gap-1">
                             <component v-for="link in alerts.links" :key="link.label" :is="link.url ? Link : 'span'" :href="link.url || '#'" :class="[
@@ -115,9 +115,9 @@ const confirmDelete = () => {
 
         <ConfirmDialog
             :show="showResolve"
-            title="Resolve alert"
-            :message="`Mark this alert as resolved? It will be archived from the pending list.`"
-            confirm-text="Mark resolved"
+            :title="t('alerts.resolve_alert')"
+            :message="t('alerts.resolve_alert_msg')"
+            :confirm-text="t('alerts.mark_resolved')"
             variant="info"
             @close="showResolve = false"
             @confirm="confirmResolve"
@@ -125,9 +125,9 @@ const confirmDelete = () => {
 
         <ConfirmDialog
             :show="showDelete"
-            title="Delete alert"
-            message="This alert will be permanently removed."
-            confirm-text="Delete"
+            :title="t('alerts.delete_alert')"
+            :message="t('alerts.delete_alert_msg')"
+            :confirm-text="t('common.delete')"
             variant="danger"
             @close="showDelete = false"
             @confirm="confirmDelete"

@@ -10,10 +10,10 @@
 **Problema:** carpeta desordenada (19 MD sueltos), SKILL.md de 1.251 líneas (63% consulta diferible), 12+ interrupciones por encargo por micro-plans, cache de informes previos rota.
 **Solución:**
 - Carpeta reorganizada en bloques numerados: `01-arranque` · `02-flujos` · `03-informes` · `04-negocio` · `05-operaciones` · `06-reglas` (raíz solo SKILL/CHANGELOG/ROADMAP).
-- `planificador.md` nuevo (asistente + plan de barrido + prompt improver + asesor de filtros) → SKILL.md de 1.251 a ~987 líneas.
+- `../01-arranque/planificador.md` nuevo (asistente + plan de barrido + prompt improver + asesor de filtros) → `../SKILL.md` de 1.251 a ~987 líneas.
 - **Protocolo de Mando:** usuario aprueba cada fase; IA ejecuta la fase completa; pausa solo en emergencias (4-6 interrupciones vs 12+).
 - **PASO 0 cache:** antes de navegar se consulta encargos + modelos-medidos + indice.json → no re-buscar lo hecho <3 semanas.
-- `memoria/encargos.md` y `memoria/filtros-portales.md` nuevos.
+- `encargos.md` y `filtros-portales.md` nuevos.
 **Validación:** grep de referencias cruzadas OK (solo intrafolder sin ruta). ZIP re-empaquetado (198 KB) y subido al Desktop.
 
 ---
@@ -58,7 +58,7 @@
 
 ### Mejora #7: Cascada de informes + plantilla INFORME MODELO (2026-08-12)
 **Problema:** Claude saltaba del resumen informal al "¿evalúo el candidato X?" sin entregar el informe MODELO con enlaces (caso real Astra OPC). El usuario no podía revisar los candidatos.
-**Solución:** Regla dura: INFORME MODELO + top 5 con ENLACES + CP1 SIEMPRE antes de Fase 2. Plantilla completa en `SKILL.md`. Cascada: B→MODELO→CP1→elegir→A→UNIDAD→CP3→dossier→ZIP.
+**Solución:** Regla dura: INFORME MODELO + top 5 con ENLACES + CP1 SIEMPRE antes de Fase 2. Plantilla completa en `../SKILL.md`. Cascada: B→MODELO→CP1→elegir→A→UNIDAD→CP3→dossier→ZIP.
 **Beneficio:** El usuario revisa candidatos con enlaces antes de decidir. Los informes salen en orden.
 **Validación:** SKILL.md §CASCADA + §INFORME TIPO MODELO. `../05-operaciones/operaciones.md` Flujo B con CP1.
 

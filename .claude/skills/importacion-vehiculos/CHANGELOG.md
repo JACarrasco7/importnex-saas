@@ -9,7 +9,7 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ### 🗂️ Reorganización física de la carpeta (FASE 0)
 - Carpetas numeradas por orden de lectura: `01-arranque/` · `02-flujos/` · `03-informes/` · `04-negocio/` · `05-operaciones/` · `06-reglas/` · `memoria/` · `references/` · `scripts/` · `assets/`.
-- Raíz limpia: solo `SKILL.md` + `CHANGELOG.md` + `ROADMAP.md`. `MEMORIA.md` → `memoria/`.
+- Raíz limpia: solo `SKILL.md` + `CHANGELOG.md` + `ROADMAP.md`. El índice de memoria pasó de la raíz a `memoria/MEMORIA.md`.
 - **Todas las referencias cruzadas** entre MD actualizadas a las rutas nuevas (grep validado; intrafolder siguen sin ruta).
 
 ### 🧠 Memoria (FASE A)
@@ -32,8 +32,16 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 ### 🔧 Fixes de contradicciones (FASE C)
 - CP2 unificado ("tras comparables, antes de veredicto"). · JSON Flujo C con nombre único `scouting_<fecha>.json`. · Umbral tramo 8-14k mínimo 10% ≠ objetivo 12%. · Resumen anti-patrones completo hasta A16 (faltaban A15/A16). · Frontmatter con `version: 3.1.0`.
 
+### 🧪 Auditoría de consistencia + mejoras adicionales (16-ago, segunda pasada)
+- **38 referencias rotas corregidas** (rutas `../` mal formadas tras la reorganización) en `01-arranque/*`, `05-operaciones/*`, `memoria/*`, `SKILL.md` y `CHANGELOG.md`.
+- **`scripts/verify_skill_refs.py` (NUEVO)**: valida que todas las referencias cruzadas entre `.md` apunten a archivos existentes (0 rotas tras las correcciones).
+- **`scripts/sync_indice.py` (NUEVO)**: regenera `indice.json` del Desktop desde `memoria/encargos.md` (mantiene el PASO 0 cache en sync).
+- **Trigger de `memoria/vendedores-confianza.md`**: al cerrar negociación, volcar resultado del vendedor (respuesta, fiabilidad, venta/ghosting). Sección nueva en `05-operaciones/operaciones_cierre.md`.
+- **Caducidad en `memoria/encargos.md`**: regla "refrescar antes de" vencida → marcar re-investigar en PASO 0.
+- **Eliminada duplicación del mapa de caminos** (estaba en EL CAMINO y repetido en PROTOCOLO DE MANDO).
+
 ### 📄 Archivos tocados
-- `SKILL.md` (reestructuración + Protocolo de Mando + PASO 0 + fixes) · `01-arranque/planificador.md` (NUEVO) · `memoria/encargos.md` (NUEVO) · `memoria/filtros-portales.md` (NUEVO) · `memoria/modelos-medidos.md` · `memoria/MEMORIA.md` · `05-operaciones/operaciones.md` · `02-flujos/playbook_filtrado.md` · `03-informes/comparables.md` · `CHANGELOG.md`.
+- `SKILL.md` (reestructuración + Protocolo de Mando + PASO 0 + fixes) · `01-arranque/planificador.md` (NUEVO) · `memoria/encargos.md` (NUEVO) · `memoria/filtros-portales.md` (NUEVO) · `memoria/modelos-medidos.md` · `memoria/MEMORIA.md` · `05-operaciones/operaciones.md` · `02-flujos/playbook_filtrado.md` · `03-informes/comparables.md` · `scripts/verify_skill_refs.py` (NUEVO) · `scripts/sync_indice.py` (NUEVO) · `05-operaciones/operaciones_cierre.md` · `01-arranque/briefing_encargo.md` · `01-arranque/guia_prompts.md` · `memoria/retrospectiva.md` · `memoria/mejoras-aplicadas.md` · `CHANGELOG.md`.
 
 ## [3.0.0] - 2026-08-16 — Asistente de planificación + Auditoría de cierre de conversación
 
@@ -183,7 +191,7 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ### 🟢 Cobertura Milanuncios al 100%
 - Confirmado navegando: **`&pagina=N`** carga el listado completo y **respeta los filtros** (contenedor `.ma-AdList`, parámetro `pagina`).
-- `trampas-encontradas.md`: virtualización marcada **RESUELTA** — la paginación por URL es la vía principal; el scroll infinito NO es fiable.
+- `memoria/trampas-encontradas.md`: virtualización marcada **RESUELTA** — la paginación por URL es la vía principal; el scroll infinito NO es fiable.
 - `02-flujos/paginas_reales.md`: URL de filtros reales (`anoh`, `cajacambio`, `engineHpTo`, `fuels`, `hasta`, `kilometersTo`, `puertas`, `orden`) + `pagina=N` + `nextToken` (degradado).
 
 ## [2.9.5] - 2026-08-15 — Limpieza de inconsistencias residuales
@@ -420,7 +428,7 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 - Exit code 0 = sesión OK; exit code ≠ 0 = NO arrancar
 
 ### 📐 §2.3 — Single source of truth IEDMT
-- `03-informes/contrato.md` §`costes`: el bloque IEDMT ahora referencia [`04-negocio/costes.md §IEDMT`](../04-negocio/costes.md#-iedmt-orden-hac15012025-vigor-1-ene-2026) en lugar de duplicar la fórmula
+- `03-informes/contrato.md` §`costes`: el bloque IEDMT ahora referencia [`04-negocio/costes.md §IEDMT`](04-negocio/costes.md#-iedmt-orden-hac15012025-vigor-1-ene-2026) en lugar de duplicar la fórmula
 - `iedmt_metodologia` redefinido: cadena corta con PVP/antigüedad/CO₂/cifras resultantes (ejemplo real), sin desglose de fórmula
 - Single source of truth mantenida en `04-negocio/costes.md` (Orden HAC/1501/2025)
 

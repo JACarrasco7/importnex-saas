@@ -126,7 +126,7 @@ async function detectModels() {
                                             type="password"
                                             autocomplete="off"
                                             spellcheck="false"
-                                            placeholder="Paste your key here…"
+                                            :placeholder="t('organization.paste_key')"
                                             :class="[inputClass, 'pl-10']" />
                                     </div>
                                     <button
@@ -167,13 +167,13 @@ async function detectModels() {
                                 <strong>{{ organization.ai_provider }}</strong>
                                 <span v-if="organization.ai_model"> · {{ organization.ai_model }}</span>
                                 <span v-else> · default model</span>
-                                <span v-if="!organization.ai_api_key" class="ml-2 inline-flex items-center rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">No key yet</span>
+                                <span v-if="!organization.ai_api_key" class="ml-2 inline-flex items-center rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">{{ t('organization.no_key_yet') }}</span>
                             </div>
                         </div>
                     </FormSection>
 
                     <div class="flex items-center justify-end gap-3 rounded-2xl bg-gray-50 px-6 py-4 ring-1 ring-gray-200">
-                        <Link :href="route('organization.show', organization.id)" class="text-sm font-semibold text-gray-700 hover:text-gray-900">Cancel</Link>
+                        <Link :href="route('organization.show', organization.id)" class="text-sm font-semibold text-gray-700 hover:text-gray-900">{{ t('common.cancel') }}</Link>
                         <button type="submit" :disabled="form.processing" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500 disabled:opacity-50">
                             <CheckIcon class="h-4 w-4" />
                             {{ form.processing ? 'Saving...' : 'Save changes' }}

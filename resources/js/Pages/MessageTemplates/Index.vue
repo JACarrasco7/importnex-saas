@@ -85,7 +85,7 @@ const langVariant = (lang) => {
                                             <button @click="copyToClipboard(tpl.content)" class="rounded-md p-1.5 text-gray-400 hover:bg-estoril-50 hover:text-estoril-600" title="Copy">
                                                 <ClipboardDocumentIcon class="h-4 w-4" />
                                             </button>
-                                            <Link :href="route('message-templates.show', tpl.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600" title="View">
+                                            <Link :href="route('message-templates.show', tpl.id)" class="rounded-md p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600" :title="t('common.view')">
                                                 <EyeIcon class="h-4 w-4" />
                                             </Link>
                                         </div>
