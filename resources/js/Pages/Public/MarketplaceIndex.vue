@@ -559,10 +559,10 @@ onMounted(() => {
         <!-- CTA / Contacto -->
         <section id="contacto" class="bg-linear-to-br from-asphalt-900 to-estoril-900 py-16">
             <div class="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-                <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+                <h2 class="text-center text-3xl font-bold tracking-tight text-white sm:text-4xl">
                     {{ t('marketplace.section_contact') }}
                 </h2>
-                <p class="mx-auto mt-3 max-w-2xl text-lg text-gray-300">
+                <p class="mx-auto mt-3 max-w-2xl text-center text-lg text-gray-300">
                     {{ t('marketplace.section_contact_desc') }}
                 </p>
                 <div class="mt-8 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-4">
@@ -583,7 +583,7 @@ onMounted(() => {
                         <span class="text-center">{{ t('marketplace.cta_email') }}</span>
                     </a>
                 </div>
-                <p class="mt-8 text-sm text-gray-400">
+                <p class="mt-8 text-center text-sm text-gray-400">
                     {{ t('marketplace.footer_line') }}
                 </p>
             </div>
