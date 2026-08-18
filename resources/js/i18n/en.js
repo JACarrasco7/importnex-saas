@@ -1,6 +1,36 @@
 // Frontend translations - English
 // Use: t('nav.dashboard')
 export default {
+  mercado: {
+    title: 'Under-order catalog',
+    subtitle: 'Vehicles located in the European market that we can bring to you on demand. Each reference shows the origin price — the final price delivered in Huelva is customised.',
+    cta_marketplace: 'See verified cars in the marketplace',
+    filtro_segmento: 'All segments',
+    filtro_cliente: 'For which customer',
+    con_margen: 'Only with import margin',
+    comparar: 'Compare',
+    sin_modelos: 'No models published in this selection yet.',
+    me_interesa: "I'm interested",
+    puesto_en_huelva: 'Price in Huelva',
+    lead_title: "I'm interested ·",
+    lead_sub: 'Leave your contact and we will send you the info about this reference.',
+    lead_nombre: 'Name (optional)',
+    lead_contacto: 'Email or phone',
+    lead_presupuesto: 'Budget in € (optional)',
+    lead_mensaje: 'Anything else? (optional)',
+    enviar: 'Send',
+    cancelar: 'Cancel',
+    cerrar: 'Close',
+    coste_title: 'Price in Huelva ·',
+    calculando: 'Calculating...',
+    precio_origen: 'Origin price',
+    mediana_es: 'Median ES',
+    hueco: 'Market gap',
+    comparativa: 'Comparison',
+    version: 'Version',
+    segmento: 'Segment',
+    cliente: 'Customer',
+  },
   ai_chat: {
     title: 'Chat AI',
     using: 'Using'

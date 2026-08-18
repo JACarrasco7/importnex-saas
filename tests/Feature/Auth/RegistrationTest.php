@@ -26,6 +26,6 @@ class RegistrationTest extends TestCase
         ]);
 
         $this->assertAuthenticated();
-        $response->assertRedirect(route('organization.create', absolute: false));
+        $response->assertRedirect(route('onboarding.index', absolute: false));
     }
 }

@@ -3,7 +3,7 @@
 > Define el formato exacto del JSON que se entrega a `dev.aktive.cloud/importnexcore`.
 > Cargar al generar el paquete final o al escribir el JSON de un coche.
 >
-> **Adaptado a los 4 flujos** (A: UNIDAD, B: MODELO, C: MERCADO, D: DESCUBRIMIENTO). El Flujo D no genera JSON de contrato (su entregable es el INFORME DE MODELOS); su embudo deriva a Flujo B/A.
+> **Adaptado a los 5 flujos** (A: UNIDAD, B: MODELO, C: MERCADO, D: DESCUBRIMIENTO, E: STOCK). El Flujo D no genera JSON de contrato (su entregable es el INFORME DE MODELOS); su embudo deriva a Flujo B/A. El Flujo E genera `stock_<fecha>.json` (catálogo) — sin publicidad ni valoración.
 
 ---
 

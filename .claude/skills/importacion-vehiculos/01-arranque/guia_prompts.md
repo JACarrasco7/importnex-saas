@@ -177,6 +177,100 @@ Si el usuario tiene prisa y responde "no preguntes, busca tú", Claude asume def
 
 ---
 
+## � ENTENDER antes de MEJORAR (17-ago-2026) — FASE 0 obligatoria
+
+> **Diferencia clave:** MEJORAR (secciones de abajo) completa parámetros y estructura el prompt. ENTENDER es previo y distinto: **asegurarse de que has captado QUÉ quiere el usuario antes de ejecutar nada.** Si no entiendes la petición, no la mejores: ACLÁRALA.
+> Fallo real 17-ago: el prompt "stock recurrente de publicaciones" se interpretó como marketing (anuncios IG) cuando el usuario quería BÚSQUEDA de catálogo. Faltó confirmar la intención ANTES de todo.
+
+### Método ENTENDER (3 sub-pasos, ~1 mensaje)
+1. **PARAFRASEAR** en 1 línea: "He entendido: quieres X, para Y, entregable Z". Si el usuario confirma, listo.
+2. **PREGUNTAR LO PRECISO**: solo si hay duda real de intención (qué entregable, para qué, alcance). Máx 2-3 preguntas. Nada de "¿continúo?" ni preguntas por inercia.
+3. **CONFIRMAR EXPECTATIVA de formato** si el usuario lo menciona (docx, PDF, anuncios, tabla...): la skill entrega Markdown+JSON+PDF; si el usuario espera otra cosa, se aclara ahí.
+
+### Preguntas precisas de comprensión (ejemplos)
+| Señal de que NO entiendes | Pregunta precisa |
+|---|---|
+| Dijo "publicaciones" / "anuncios" / "posts" | "¿Quieres que BUSQUE coches (catálogo) o que genere los anuncios para publicar?" |
+| Dijo "algo rentable" / "lo que sea" | "¿Para reventa con margen, para un cliente concreto, o para llamar la atención (marketing)?" |
+| Pide un formato que no es el estándar (.docx, tabla...) | "La skill entrega Markdown+PDF+JSON. ¿Te vale o necesitas otro formato?" |
+| Mezcla varias peticiones | "¿Lo hacemos en fases? Primero X, luego Y, con tu OK entre medias." |
+
+> **Regla de oro:** si puedes explicar en 1 línea qué harás y el usuario la aprueba, YA ENTENDISTE. Solo entonces pasa a MEJORAR (parámetros), cache y plan de fase.
+>
+> **Después de ENTENDER → FIJAR MODELOS antes de buscar** (ver `planificador.md` PASO 3b): se acuerda la lista de modelos candidatos con su encaje ES/DE (dónde sale mejor comprar cada uno) y se espera tu OK antes de valorar ninguna unidad. No es solo buscar coches: es decidir QUÉ modelos tienen sentido primero.
+
+### 📥 ACK (acuse de recibo) — SIEMPRE, en TODO encargo, 1 línea
+
+> **Incluso sin ambigüedad, Claude abre el encargo con un ACK de 1 línea** para que el usuario corrija en 1 palabra si hay desvío. No es un "¿continúo?": es **confirmar la comprensión antes de gastar tokens**.
+
+```
+📥 ENTENDIDO — [QUÉ] · [PARA QUÉ] · [ENTREGABLE] · [FLUJO]
+Si no es esto, dime en 1 palabra qué cambio y arranco.
+```
+
+**Ejemplos (siempre con el verbo correcto):**
+- 📥 ENTENDIDO — BUSCAR coches (catálogo) · para montar stock · informe de búsqueda Markdown+PDF+JSON · Flujo E.
+- 📥 ENTENDIDO — EVALUAR esta URL · para un cliente · informe unidad + dossier + ZIP · Flujo A.
+- 📥 ENTENDIDO — BUSCAR Golf GTI · para reventa · informe modelo + top 5 · Flujo B.
+- 📥 ENTENDIDO — CALCULAR cuánto cuesta importar · para decidir · desglose de costes · sin navegar.
+
+**Reglas del ACK:**
+1. El ACK se pone ANTES de PASO 0 cache y ANTES del plan de fase. Es lo primero que lee el usuario.
+2. Si el usuario responde "sí"/"OK" → seguir. Si corrige algo del ACK → corregir SOLO eso y seguir (no re-hacer el ACK completo).
+3. El verbo del ACK viene de la tabla intención→flujo: **BUSCAR / EVALUAR / PUBLICAR / CALCULAR / ASESORAR**. Usar el verbo correcto ya descarta la mitad de confusiones.
+
+### 🌳 Árbol de decisión de comprensión (preguntar SOLO si falta)
+
+```
+¿Sé QUÉ quiere (verbo)?        NO → "¿Qué quieres: buscar coches, evaluar una URL, publicar anuncios o calcular coste?"
+   └ SÍ ↓
+¿Sé PARA QUÉ (finalidad)?       NO → "¿Para reventa, para un cliente o para ti?"
+   └ SÍ ↓
+¿Sé el ENTREGABLE (formato)?    NO → "¿Qué entregable esperas: informe, dossier, anuncios o ZIP?"
+   └ SÍ ↓
+¿Sé el ALCANCE (cuánto/cuántos)? NO → "¿Un coche, un modelo o un escaneo de mercado?"
+   └ SÍ ↓
+📥 ACK de 1 línea → cache → plan de fase
+```
+
+> **Anti-inercia:** si los 4 datos están claros, NO se hace ninguna pregunta — solo el ACK. Preguntar por preguntar es el fallo contrario (desperdicia tokens y cabrea al usuario).
+
+## �🧭 Dimensión de INTENCIÓN y ENTREGABLE (17-ago-2026) — se aplica SIEMPRE
+
+> El Prompt Improver clásico (arriba) completa PARÁMETROS que faltan (año, km, presupuesto). Esta dimensión aclara la **INTENCIÓN y el ENTREGABLE que espera el usuario**. Se ejecuta en TODO encargo, aunque los parámetros estén completos.
+
+### Los 3 datos de intención a confirmar (si hay ambigüedad)
+1. **QUÉ quiere el usuario**: buscar coches / evaluar / publicar / calcular coste / asesorar.
+2. **QUÉ entregable espera**: informe de búsqueda · dossier cliente · anuncios/copy RRSS · ficha marketplace · PDF · JSON/ZIP Laravel.
+3. **PARA QUÉ**: tráfico/leads (marketing) · reventa (margen) · cliente final (encargo) · uso personal.
+
+### Tabla de intención → flujo → entregable (contrastar SIEMPRE)
+
+| El usuario dice… | Flujo | Entregable correcto |
+|---|---|---|
+| "evalúa esta URL" | A (UNIDAD) | Informe unidad + dossier + ZIP |
+| "busca [modelo]" | B (MODELO) | Informe modelo + top 5 |
+| "qué merece la pena / escanea mercado" | C (MERCADO) | Informe búsqueda |
+| "cliente sin modelo + presupuesto" | D (DESCUBRIMIENTO) | Informe de modelos por país |
+| "stock recurrente / catálogo bajo pedido / busca por categorías" | E (STOCK) | Informe de búsqueda (Markdown+PDF+JSON) — SIN copy RRSS |
+
+### Regla de oro de intención
+**Ante ambigüedad entre BÚSQUEDA y MARKETING (o cualquier par de entregables), PREGUNTAR antes de ejecutar — 1 pregunta, en la misma línea que el plan de fase.** Nunca mezclar ambos en un solo entregable. Si el usuario pide ambos, separar en 2 fases con checkpoint entre ellas.
+
+### ⚡ Colisiones de intención (pares que se mezclan — separar SIEMPRE)
+
+| Colisión típica | Detección | Separación correcta |
+|---|---|---|
+| **BÚSQUEDA vs MARKETING** | "stock/publicaciones/para RRSS" + "busca coches" | Fase 1: informe de búsqueda → checkpoint → Fase 2: copy RRSS solo si lo pide |
+| **EVALUAR vs BUSCAR** | URL pegada + "también mira otros" | Primero Flujo A (URL) → luego Flujo B/C para alternativas |
+| **UN modelo vs VARIOS** | "busca X e Y" / "compáralos" | Comparativa primero → informes individuales del elegido |
+| **IMPORTAR vs COMPRAR NACIONAL** | no especifica origen | Preguntar origen (DE vs ES) o buscar en ambos y comparar |
+| **INFORME vs PUBLICAR** | "dime qué hay" + "haz el anuncio" | Informe primero, publicar después (nunca en el mismo entregable) |
+
+> **Regla:** si en un mismo mensaje conviven DOS verbos de la tabla intención→flujo, es una colisión → dividir en fases con checkpoint. No intentar resolver las dos a la vez.
+
+---
+
 ## 🚦 Reglas duras del Prompt Improver
 
 1. **NUNCA** mejorar un prompt que ya está completo (desperdicia tokens).

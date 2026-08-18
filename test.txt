@@ -1,0 +1,9 @@
+
+routes\web.php:25:use App\Http\Controllers\MessageTemplateController;
+routes\web.php:288:    // Message Templates
+routes\web.php:289:    Route::get('/message-templates', 
+[MessageTemplateController::class, 'index'])->name('message-templates.index');
+routes\web.php:290:    Route::get('/message-templates/{messageTemplate}', 
+[MessageTemplateController::class, 'show'])->name('message-templates.show');
+
+

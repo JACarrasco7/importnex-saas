@@ -51,6 +51,16 @@
 - Precio ES de referencia = **Coches.net**.
 - Antes de recomendar un candidato con "precio desde", cruzar SIEMPRE con mobile.de/Coches.net.
 
+### 🚩 Banda de precio en ambos mercados aplasta el hueco (CRÍTICO · 18-ago-2026)
+**Portal:** todos
+**Síntoma real:** La v1/v2 del estudio concluyó "Seat/Cupra → España más barata, nunca importar" usando mediana CON banda ≥20k en ambos mercados. El usuario lo refutó con datos: **Cupra León más barato ES = 19.500 €, más barato DE = 15-16.000 €**. La banda ≥20k recortó la cola barata alemana (igual que el error del Golf de la v2), y la mediana resultante daba un hueco falso.
+**Causa raíz:** Aplicar la misma banda absoluta a ES y DE recorta simultáneamente la mitad cara del mercado caro y la barata del barato → la mediana no mide el hueco real (mide el techo del filtro).
+**Mitigación OBLIGATORIA:**
+1. **El hueco y el precio_desde (suelo) se miran SIN banda** en ambos mercados. La banda solo sirve para hablar del presupuesto con el cliente.
+2. **La nacionalidad de la marca NO es criterio de arbitraje.** Seat/Cupra se fabrican en Martorell pero el mercado DE sigue teniendo unidades más baratas (mayor parque/rotación). No asumir "España más barata" por ser marca nacional.
+3. Antes de declarar "ES más barato que DE", comparar SIEMPRE el **precio_desde sin banda** de ambos lados, no solo la mediana con filtro.
+4. Regla metodológica de la v2 sigue vigente: control de año en ambos mercados + hueco sin banda.
+
 ---
 
 ## ⚠️ Trampas potenciales (1-2 apariciones)

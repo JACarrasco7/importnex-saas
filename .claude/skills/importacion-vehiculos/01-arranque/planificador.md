@@ -10,33 +10,82 @@
 
 > **El problema:** El usuario dice "busca algo para 15.000 €" o "qué merece la pena" y la IA lanza 50+ peticiones sin dirección clara. Se queman tokens y el resultado no es útil.
 > **La solución:** La IA ayuda al usuario a construir un PLAN paso a paso con estrategia de embudo, filtrando progresivamente desde muy abierto a muy específico.
+>
+> 🧠 **FASE 0 · ENTENDER es la base de todo (17-ago-2026):** antes de cache, flujo o plan, se hace el **ACK de comprensión** (1 línea) y las preguntas precisas SOLO si falta QUÉ/PARA QUÉ/ENTREGABLE/ALCANCE. Sin entender la petición, mejorar el prompt o planificar es quemar tokens. Ver `guia_prompts.md` §ACK y §Árbol de decisión.
 
-### Protocolo en 4 pasos
+### Protocolo (FASE 0 + 6 pasos)
 
 ```
+PASO 0 — ENTENDER la petición (FASE 0 · 17-ago-2026) — ANTES de nada
+  └─ PARAFRASEAR en 1 línea lo que el usuario quiere: qué → para qué → entregable esperado
+       "He entendido: quieres [stock/catálogo/evaluación] de [modelos], para [tráfico/reventa/cliente],
+        entregable [informe/anuncios/PDF]"
+  └─ DETECTAR ambigüedad de intención (qué entregable, para qué) → 1-2 preguntas PRECISAS
+  └─ Preguntas de comprensión SOLO si hay duda real de QUÉ quiere (nunca por inercia)
+  └─ Si el usuario menciona un entregable (docx, posts, PDF...) → anotarlo como EXPECTATIVA a confirmar
+  └─ 📥 ACK de 1 línea SIEMPRE (incluso sin ambigüedad): "ENTENDIDO — [QUÉ] · [PARA QUÉ] · [ENTREGABLE] · [FLUJO]"
+       → el usuario corrige en 1 palabra o da OK. Ver 01-arranque/guia_prompts.md §ACK.
+  └─ NO navegar, NO cache, NO planificar hasta que la petición esté clara (entender antes de ejecutar)
+
 PASO 1 — DETECTAR el tipo de encargo (flujo automático) → `../SKILL.md` §Detección
   └─ ¿URL concreta? → Flujo A (evaluación unitaria, sin ayuda de planificación)
-  └─ ¿Modelo concreto? → Paso 2 (mejorar prompt si falta críticos)
+  └─ ¿Modelo concreto? → Paso 3 (mejorar prompt si falta críticos)
   └─ ¿Solo presupuesto + requisitos? → Flujo D (sondeo de modelos primero)
-  └─ ¿"Qué merece la pena"? → Flujo C + Paso 2 (definir segmentos juntos)
+  └─ ¿"Qué merece la pena"? → Flujo C + Paso 3 (definir segmentos juntos)
 
-PASO 0 — CHECK DE CACHE (siempre, antes de planificar)
+PASO 2 — CHECK DE CACHE (siempre, antes de planificar)
   └─ ¿El modelo/cliente ya tiene encargo o medición previa?
   └─ Leer `../memoria/encargos.md` + `../memoria/modelos-medidos.md` + `indice.json` (Desktop)
   └─ Si <3 semanas → mostrar resumen + preguntar ¿delta / refrescar / nuevo? (NO re-buscar)
 
-PASO 2 — MEJORAR el prompt (Prompt Improver)
+PASO 3 — MEJORAR el prompt (Prompt Improver)
   └─ Detectar vaguedad: <50 chars o <3 parámetros
   └─ Proponer prompt mejorado con completar críticos
   └─ Preguntar SOLO lo que falta (máx 4 cosas)
   └─ Opción "busca tú / lo que puedas"
 
-PASO 3 — PLANIFICAR la estrategia de embudo (Plan de fase)
-  └─ Mostrar el PLAN DE BARRIDO (mercados, filtros, bandas, fuentes, asesor de filtros)
-  └─ Explicar el enfoque: del MÁS abierto al MÁS específico
-  └─ Pedir OK ANTES de ejecutar la fase (Protocolo de Mando, ver `../SKILL.md`)
+PASO 3b — FIJAR MODELOS candidatos (17-ago-2026) — checkpoint ANTES de buscar
+  └─ Propósito: fijar QUÉ modelos tiene sentido traer ANTES de valorar unidades concretas.
+       "No es solo buscar coches: es saber qué modelos encajan en el mercado ES vs DE."
+  └─ Fuente (en orden): 1) `datos_mercado.json` (mapa de la skill hermana estudio-mercado: veredicto+hueco+demanda por modelo)
+       2) semilla `../memoria/modelos-medidos.md` · 3) segmento del encargo + ejemplos del briefing (ilustrativos, A19)
+       Si el mapa no existe o caducó (refrescar_antes_de_categoria pasado) → fallback a modelos-medidos + declarar "sin estudio de mercado"
+  └─ LOOKUP por slug/alias (L1): normalizar el nombre del modelo (minúsculas, sin tildes, golf-7≡golf-vii, sin marca)
+       y buscar en `datos_mercado.json` por `slug` o dentro de `alias`. Si no hay match, es modelo nuevo → se añadirá al cerrar
+  └─ Para cada modelo candidato, indicar el ENCAJE DE MERCADO (breve):
+       - Oferta en DE (fuerte/débil) · Oferta en ES (fuerte/débil)
+       - Dónde sale mejor comprar (DE por costes de importación vs ES directo) → `../04-negocio/costes.md` §Origen
+       - Rango de precio aprox. (cache o listados rápidos; nunca fichas)
+  └─ PRESENTAR la lista de modelos (3-10) y ESPERAR OK (checkpoint):
+       el usuario confirma, quita o añade modelos → solo entonces buscar/valorar
+  └─ El criterio de selección depende de la categoría (Flujo E, regla 1c):
+       showstoppers = atractivo/impacto · rotación = hueco+demanda · gemas = accesibilidad.
+       Nunca un único criterio (ej. hueco %) para todas las categorías.
+  └─ L6 · El mapa ASESORA, el usuario DECIDE: si el mapa marca 🔴 pero el usuario insiste (ej. marketing visual),
+       avisar el veredicto en 1 línea y ejecutar igual. Nunca bloquear ni insistir.
+  └─ Si el usuario no sabe qué modelos quiere: proponer TÚ la selección con criterio de mercado, justificada en 2-3 líneas
+  └─ NUNCA pasar a buscar/valorar unidades sin la lista de modelos fijada (salvo Flujo A: el modelo ya está fijado por la URL)
 
-PASO 4 — EJECUTAR la fase en cascada con checkpoints
+PASO 4 — PLAN DE BÚSQUEDA OBLIGATORIO (17-ago-2026) — ANTES de cualquier navegación
+  └─ Se aplica a TODOS los flujos (A/B/C/D/E), no solo a encargos vagos: si el modelo está claro,
+       el plan es más corto pero SIEMPRE se muestra y se aprueba antes de abrir el primer portal.
+  └─ Estructura del PLAN (3-5 líneas + tabla de filtros):
+       1. OBJETIVO: qué buscar · para qué · entregable
+       2. MERCADOS: DE / ES / ambos (según mapa u origen)
+       3. FILTROS (asesor de filtros, `../memoria/filtros-portales.md`): qué aplica por URL vs clic
+          · año mín · km máx · potencia mín (doble pasada si tope de gama) · precio ≤ techo (M1/M2/M3)
+       4. EMBUDO: bandas de precio a recorrer (suelo → techo) · segmentación (segmento/rango/tipo_cliente
+          del mapa) · por lotes (1 categoría o segmento cada vez con checkpoint, si el encargo es grande)
+       5. PRESUPUESTO: peticiones estimadas por fase (sondeo → barrido → detalle)
+       6. OK del usuario ANTES de ejecutar (Protocolo de Mando)
+  └─ Plantilla del plan a mostrar:
+       "📋 PLAN — [objetivo]
+        · Mercados: DE+ES · Filtros: ≥[año] · ≤[km] · [potencia] · ≤[techo]€ (por URL: X, Y / por clic: Z)
+        · Embudo: banda [a]-[b] → [b]-[c] € · segmento [X] · por lotes: [categoría] primero
+        · Presupuesto: ~N peticiones (sondeo) + ~N (barrido)
+        · ¿Aprobado?"
+
+PASO 5 — EJECUTAR la fase en cascada con checkpoints
   └─ Fase 1 → Informe + lista de candidatos + checkpoint
   └─ Usuario elige → Fase 2 → Informe unidad + checkpoint
   └─ Veredicto → Dossier + ZIP
@@ -144,13 +193,14 @@ FIN
 
 ### Reglas para el asistente de planificación
 
-1. **PASO 0 (cache) SIEMPRE** antes de planificar — no re-buscar lo ya hecho.
-2. **PASO 1 (detectar) SIEMPRE ANTES de cualquier búsqueda.** No adivinar, preguntar.
-3. **PASO 2 (mejorar) solo si es vago.** <50 chars o <3 parámetros.
-4. **PASO 3 (planificar) SIEMPRE incluye checkpoints explícitos.** "CP-D: elige modelos", "CP1: elige candidato".
-5. **PASO 4 (ejecutar) la fase completa, en cascada, con el OK del usuario ANTES** (Protocolo de Mando). Dentro de la fase no se vuelve a preguntar salvo emergencia.
-6. **Mantener siempre la opción "busca tú / lo que puedas".** No bloquear por falta de detalle.
-7. **Documentar el plan en el cuaderno de sesión.** Para que las correcciones del usuario afecten a búsquedas futuras.
+1. **PASO 0 (ENTENDER) SIEMPRE primero** — confirmar QUÉ quiere el usuario (ACK de 1 línea) antes de cache/flujo/plan.
+2. **PASO 2 (cache) SIEMPRE** antes de planificar — no re-buscar lo ya hecho.
+3. **PASO 1 (detectar) SIEMPRE ANTES de cualquier búsqueda.** No adivinar, preguntar.
+4. **PASO 3 (mejorar) solo si es vago.** <50 chars o <3 parámetros.
+5. **PASO 4 (planificar) SIEMPRE incluye checkpoints explícitos.** "CP-D: elige modelos", "CP1: elige candidato".
+6. **PASO 5 (ejecutar) la fase completa, en cascada, con el OK del usuario ANTES** (Protocolo de Mando). Dentro de la fase no se vuelve a preguntar salvo emergencia.
+7. **Mantener siempre la opción "busca tú / lo que puedas".** No bloquear por falta de detalle.
+8. **Documentar el plan en el cuaderno de sesión.** Para que las correcciones del usuario afecten a búsquedas futuras.
 
 ---
 

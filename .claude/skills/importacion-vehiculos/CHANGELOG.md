@@ -5,6 +5,104 @@ Todos los cambios notables en el skill `importacion-vehiculos` se documentarán 
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [3.1.7] - 2026-08-18 — Selectores estables de filtros AutoUncle (`name`)
+
+> **Origen:** el usuario facilitó el HTML del sidebar de AutoUncle. Los `id` llevan hash (cambian), pero los **`name` son estables** → `[name="..."]`. AutoUncle sigue siendo solo rotación/validación (A8: nunca precio de referencia), pero aporta filtro de **equipamiento** (`popularOptions`).
+
+### 🇩🇪 Selectores AutoUncle
+- **`paginas_reales.md`** — sección "Sidebar de filtros — selects y checkboxes con `name` ESTABLE": `minPrice`/`maxPrice`, `minYear`/`maxYear`, `fuelTypes` (El/El_Hybrid/Benzin/Diesel), `minKm`/`maxKm`, `gear`, y **`popularOptions`** (hasAppleCarPlay, hasAndroidAuto, hasBluetooth, hasSeatHeat, hasParkingCamera, hasParking, hasDistanceControl, hasTowBar).
+- **`playbook_filtrado.md`** — tabla "Selectores ESTABLES de filtros en AutoUncle" + regla de máximo equipamiento (CarPlay + Android Auto + asientos + cámara + ACC).
+
+## [3.1.6] - 2026-08-18 — Selectores estables de filtros kleinanzeigen.de
+
+> **Origen:** el usuario facilitó el HTML real del sidebar de kleinanzeigen (`/s-autos/c216`). Tiene **3 tipos de filtro** con selectores distintos.
+
+### 🇩🇪 Selectores kleinanzeigen
+- **`paginas_reales.md`** — sección kleinanzeigen reescrita: Tipo 1 (atributos por URL `+autos.<attr>_s:<valor>`), Tipo 2 (rangos con `id` `brwse-attr-*`), Tipo 3 (equipamiento con `checkbox-autos.*` + botón Übernehmen `[data-cy=clickable-options-apply-button]`).
+- **`playbook_filtrado.md`** — tabla "Selectores ESTABLES de filtros en kleinanzeigen.de" + regla de máximo equipamiento (sunroof+seat_heating+xenon_led+navi+full_service_history → Übernehmen).
+- ⚠️ Diferencia clave: kleinanzeigen SÍ tiene botón aplicar para equipamiento (Coches.net no).
+
+## [3.1.5] - 2026-08-18 — Selectores estables de filtros Coches.net (acordeón)
+
+> **Origen:** el usuario facilitó el HTML del sidebar de filtros de Coches.net. A diferencia de mobile.de, **NO hay página de filtros aparte**: el sidebar (`.mt-SearchSidebar-filters`) son acordeones en el listado con **`id` estable** por grupo, y los filtros **se aplican al marcar** (en vivo, sin botón).
+
+### 🇪🇸 Selectores Coches.net
+- **`playbook_filtrado.md`** — nueva tabla "Selectores ESTABLES de filtros en Coches.net": `vehicleTypeGroup`, `makeGroup`, `priceGroup`, `onlineServicesGroup`, `locationGroup`, `sellerGroup`, `yearGroup`, `kmsGroup`, `bodyTypeGroup`, `motorGroup`, `environmentalLabelGroup`, `electricGroup`, `equipmentGroup` (equipamiento), `colorGroup`.
+- **`paginas_reales.md`** — sección "Sidebar de filtros — acordeón con IDs ESTABLES" con el método (clic `groupTrigger` → marcar → se aplica solo) y el proxy de máximo equipamiento (techo solar + cámara, SIN cuadro digital).
+
+## [3.1.4] - 2026-08-18 — Selectores estables de filtros mobile.de ES (data-testid)
+
+> **Origen:** el usuario facilitó el HTML real de la página de filtros de mobile.de ES (`/es/s/auto`). Los `data-testid` son selectores ESTABLES (no cambian con el CSS ofuscado) → Claude puede filtrar con `page.getByTestId()` / `[data-testid=...]` sin fallar.
+
+### 🔬 Selectores estables
+- **`playbook_filtrado.md`** — nueva tabla "Selectores ESTABLES de filtros en mobile.de ES": `make-incl-0`, `model-incl-0`, `model-description-incl-0`, `category-filter`, `seats-filter`, `door-filter`, `price-filter`, `first_registration-filter`, `mileage-filter`, `condition-filter`, `maintenance_features-filter`, `seller_type-filter`, `general_inspection-filter`, `previous_owners-filter`, `country-filter`, `location-filter`, `radius-filter`.
+- **Filtros de EQUIPAMIENTO (máximo equipamiento):** en Interior → `Panel de instrumentos digital` (cuadro digital), `Pantalla Head-up`, `Calefacción de asiento`, Android Auto/CarPlay, navegación; en Extras → techo corredizo/panorámico, faros LED, portón eléctrico.
+- **Regla full reproducible:** marcar los 5 checkboxes (cuadro digital + HUD + calefacción asiento + techo panorámico + faros LED) para comparar full vs full.
+- **`paginas_reales.md`** — sección nueva "mobile.de ES — página de filtros completa" con la estructura de las 6 secciones y los data-testid.
+
+## [3.1.3] - 2026-08-18 — Equipamiento máximo + corrección Seat/Cupra
+
+> **Origen:** feedback del usuario sobre el estudio de mercado: (1) comparar SIEMPRE a máximo equipamiento (la unidad DE suele venir full: cuadro digital, techo, LED — lo más demandado entre jóvenes), y (2) la conclusión "Seat/Cupra → España más barata, nunca importar" era falsa (la banda ≥20k en ambos mercados recortó la cola barata DE; Cupra suelo ES 19.500 € vs DE 15-16k).
+
+### 🛠️ Equipamiento máximo por defecto
+- **`SKILL.md`** — referencia rápida: "comparar a MÁXIMO equipamiento por defecto; un ES más barato sin ese equipamiento NO es comparable → ajustar con primas".
+- **`03-informes/comparables.md`** — prima nueva de **cuadro digital** (+500-1.000 €, la más demandada) + regla de equipamiento máximo antes de dar un hueco.
+- **`../estudio-mercado/SKILL.md`** — sección "EQUIPAMIENTO" con el método por portal (mobile.de `Ausstattung` sí filtra cuadro digital; Coches.net solo techo solar → proxy + 1-2 fichas de muestra).
+
+### 🚫 Corrección regla Seat/Cupra
+- **`../estudio-mercado/SKILL.md`** — sección "REGLA SEAT/CUPRA — CORREGIDA": la nacionalidad de la marca NO es criterio de arbitraje; medir precio_desde SIN banda en ambos mercados.
+- **`memoria/trampas-encontradas.md`** — nueva trampa "banda en ambos mercados aplasta el hueco".
+- **`memoria/mejoras-aplicadas.md`** — Mejora #16.
+- **`datos_mercado.json`** (Desktop) — Cupra León corregido: suelos reales, `pendiente_fase2=true`, nota de re-medición.
+- **Volcado `modelos_medidos_2026-08-17_v2.md`** — regla 3 re-corregida.
+
+### 🧹 Limpieza
+- Eliminado `estudio-mercado.skill.zip` + `.bak` anidados en la carpeta fuente de la skill (se auto-incluían al re-empaquetar).
+
+## [3.1.2] - 2026-08-17 — Regla A21 (enlaces SIEMPRE) + FASE 0 ENTENDER reforzada
+
+> **Origen:** insistencia del usuario en dos frentes: (1) "todo lo que haga debe venir con link a anuncios y fuentes" (la regla que más repite) y (2) mejorar la comprensión de la petición antes de buscar (FASE 0 ENTENDER).
+
+### 🔴 Regla A21 nueva (anti-patrón #21)
+- **A21 — Entregar sin enlaces (anuncio + fuentes):** TODO lo que se entregue lleva el enlace directo al anuncio (ficha del vehículo) y las fuentes con su URL. Candidatos, comparables, comparativas, informes, dossier, JSON y ZIP. Un dato sin su enlace NO se entrega como concluido.
+- **Al cerrar cualquier entrega, re-verificar con lupa:** si cualquier candidato/comparable/fuente carece de enlace, el trabajo está incompleto.
+
+### 🧠 FASE 0 · ENTENDER reforzada (comprensión antes de ejecutar)
+- **📥 ACK de 1 línea obligatorio en TODO encargo** (incluso sin ambigüedad): `ENTENDIDO — [QUÉ] · [PARA QUÉ] · [ENTREGABLE] · [FLUJO]`. El usuario corrige en 1 palabra o da OK. Ver `01-arranque/guia_prompts.md` §ACK.
+- **Árbol de decisión de comprensión**: QUÉ → PARA QUÉ → ENTREGABLE → ALCANCE. Solo se pregunta lo que falta; si está claro, cero preguntas.
+- **Tabla de colisiones de intención**: pares que se mezclan (búsqueda vs marketing, evaluar vs buscar, un modelo vs varios...) y cómo separarlos en fases.
+- Integrado en `01-arranque/planificador.md` PASO 0, `01-arranque/guia_prompts.md` y línea de flujo del `SKILL.md`.
+
+### 📄 Archivos tocados
+- `SKILL.md` (frontmatter 3.1.2, referencia rápida, §ANTI-PATRONES resumen + nota A21, §FOTOS REALES punto 5, flujo de arranque, checklist ×2) · `06-reglas/anti_patrones.md` (tabla, detalle, verificación rápida, origen) · `01-arranque/guia_prompts.md` (ACK, árbol, colisiones) · `01-arranque/planificador.md` (PASO 0) · `CHANGELOG.md`.
+
+## [3.1.1] - 2026-08-17 — Flujo E STOCK + anti-patrones A17-A20 + auditoría ampliada
+
+> **Origen:** primer encargo real de prueba (stock recurrente de publicaciones). Reveló que la skill fallaba en casos fuera de los 4 flujos: entregó .docx, usó AutoScout24 para precio (violando su propia trampa A8), abrió fichas en exceso, ignoró la cache y no disparó la auditoría de cierre.
+
+### 🆕 Flujo E · STOCK (búsqueda, NO marketing)
+- Nuevo flujo para "stock recurrente / catálogo bajo pedido / busca coches por categorías".
+- `02-flujos/stock-marketing.md` (NUEVO): reglas duras + 3 categorías + plantilla de ficha de BÚSQUEDA + proceso con checkpoint cada X.
+- **Separación crítica**: búsqueda de coches = informe de búsqueda (Markdown + PDF de marca + JSON). Marketing/anuncios = flujo posterior SEPARADO, solo si se pide explícitamente. NUNCA .docx ni copy IG/FB en el flujo de búsqueda.
+- Ejemplos del briefing = ilustrativos (A19), explorar todo el segmento.
+
+### 🛡️ Anti-patrones nuevos
+- **A17 Listado-first**: en comparativas/C/E, trabajar con listados; abrir ficha solo 2-3 ejemplos. Aprovechar sellos de precio del listado.
+- **A18 Equipamiento no inventado**: solo publicar equipamiento verificado; marcar lo dudoso "por confirmar".
+- **A19 Ejemplos = ilustrativos**: no acotarse a los ejemplos del usuario, explorar todo el segmento.
+- **A20 No mezclar búsqueda con marketing**: copy IG/FB solo si se pide explícitamente después.
+
+### 🔧 Fixes de la prueba
+- **Auditoría de cierre ampliada**: trigger a "cualquier output final" (candidato, informe stock, informe mercado, aborto) — antes solo "elegir candidato único".
+- **PASO 0 cache reforzado**: aplica a TODOS los flujos, incluido E.
+- **Waypoint 📍 obligatorio en cada mensaje**, sin excepción.
+- **Entregable Flujo E = informe de búsqueda** (no .docx): Markdown + PDF de investigación con plantilla de marca (`assets/plantilla_pdf_marca.html`) + JSON.
+- **Regla dura universal**: todo encargo → UN flujo → su camino. Si no encaja en A/B/C/D/E → PREGUNTAR, nunca improvisar.
+- Tabla de flujos 4 → 5, detección automática con Flujo E primero, mapa de caminos con Flujo E, conteo anti-patrones 16 → 20.
+
+### 📄 Archivos tocados
+- `SKILL.md` (tabla flujos, detección, PASO 0, Protocolo de Mando, EL CAMINO, auditoría de cierre, anti-patrones) · `02-flujos/stock-marketing.md` (NUEVO) · `06-reglas/anti_patrones.md` (A17, A18, A19, A20) · `CHANGELOG.md`.
+
 ## [3.1.0] - 2026-08-16 — Reorganización física, Protocolo de Mando, PASO 0 cache, planificador
 
 ### 🗂️ Reorganización física de la carpeta (FASE 0)

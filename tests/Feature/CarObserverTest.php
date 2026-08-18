@@ -43,14 +43,14 @@ class CarObserverTest extends TestCase
         $this->assertSame(80, $inspections->count());
     }
 
-    public function test_creating_car_seeds_seventeen_document_slots(): void
+    public function test_creating_car_seeds_nineteen_document_slots(): void
     {
         $org = $this->makeOrg();
 
         $car = Car::factory()->create(['organization_id' => $org->id]);
 
-        $this->assertSame(17, $car->documents()->count());
-        $this->assertSame(17, $car->documents()->where('status', 'pending')->count());
+        $this->assertSame(19, $car->documents()->count());
+        $this->assertSame(19, $car->documents()->where('status', 'pending')->count());
     }
 
     public function test_traffic_light_stays_unchanged_when_no_market_avg(): void
@@ -177,13 +177,14 @@ class CarObserverTest extends TestCase
     public function test_definitions_count_matches_seeded_rows(): void
     {
         $this->assertSame(86, app(CarChecklistDefinitions::class)->totalCount());
-        $this->assertSame(17, app(CarDocumentDefinitions::class)->totalCount());
+        $this->assertSame(19, app(CarDocumentDefinitions::class)->totalCount());
     }
 
     private function makeOrg(): Organization
     {
         $org = Organization::factory()->create();
         User::factory()->create(['organization_id' => $org->id]);
+
         return $org;
     }
 }

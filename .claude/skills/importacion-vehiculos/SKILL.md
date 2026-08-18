@@ -1,6 +1,6 @@
 ---
 name: importacion-vehiculos
-version: 3.1.0
+version: 3.1.7
 description: >
   Negocio JJ Import Motors (Huelva): servicio de búsqueda e importación de coches
   (desde Alemania y dentro de España). NO compra stock, solo oferta el servicio
@@ -33,7 +33,7 @@ triggers:
 
 Localizar coches (desde Alemania y dentro de España) y **ofertar el servicio de importación/gestión** a clientes. **NO compramos stock** — solo honorarios por el servicio. El cliente es quien compra el coche.
 
-> 📁 **Compañeros:** `02-flujos/navegacion_real.md` (MÉTODO PREFERIDO — navegar como humano) · `02-flujos/paginas_reales.md` (estructura REAL capturada de los 7 portales) · `02-flujos/playbook_filtrado.md` (técnicas de filtrado/búsqueda para Claude Desktop) · `02-flujos/extractores.md` (URLs, trampas, diccionario) · `03-informes/contrato.md` (JSON + esqueleto) · `05-operaciones/operaciones.md` (carpetas, scripts) · **`06-reglas/anti_patrones.md`** (reglas duras 16)
+> 📁 **Compañeros:** `02-flujos/navegacion_real.md` (MÉTODO PREFERIDO — navegar como humano) · `02-flujos/paginas_reales.md` (estructura REAL capturada de los 7 portales) · `02-flujos/playbook_filtrado.md` (técnicas de filtrado/búsqueda para Claude Desktop) · `02-flujos/extractores.md` (URLs, trampas, diccionario) · `03-informes/contrato.md` (JSON + esqueleto) · `05-operaciones/operaciones.md` (carpetas, scripts) · **`06-reglas/anti_patrones.md`** (reglas duras 21) · **`../estudio-mercado/SKILL.md`** (skill hermana: genera el mapa de mercado `datos_mercado.json` que da el criterio de selección)
 > 
 > 📚 **Módulos especializados:** `03-informes/comparables.md` (ajuste 9 claves) · `04-negocio/costes.md` (IEDMT + desglose) · `04-negocio/riesgos.md` (motores problemáticos) · `05-operaciones/operaciones_cierre.md` (cierre + KPIs + sync)
 >
@@ -53,9 +53,12 @@ Umbrales mínimos (EXIT 3): Nicho 8% | Rotación 10% | Tramo 8-14k 10%
 Costes fijos: ver `04-negocio/costes.md` (transporte + ausfuhr + ITV + honorarios) — §1.4 single source of truth
 Fuentes: 7 (Wallapop, Milanuncios, Coches.net, mobile.de, AS24.de, AutoUncle, kleinanzeigen.de)
 Método: navegación real estilo humano SIEMPRE primero → ver `02-flujos/navegacion_real.md`
+Equipamiento: comparar a MÁXIMO equipamiento por defecto (la unidad DE suele venir full: cuadro digital, techo, LED). Un ES "más barato" sin ese equipamiento NO es comparable → ajustar con primas de `03-informes/comparables.md`
 Playbook de filtrado: `02-flujos/playbook_filtrado.md` · estructura real: `02-flujos/paginas_reales.md`
 Trampas top 3: countryCode SIEMPRE | navegación real primero (screenshot+clic), degradado si no se ve | mobile.de directo NUNCA saltar
-Anti-patrones bloqueados: 16 (A1-A16, ver §Anti-patrones)
+Anti-patrones bloqueados: 21 (A1-A21, ver §Anti-patrones)
+ENLACES: TODO lo que se entregue lleva enlace al anuncio (ficha) y fuentes con URL (A21)
+📥 ACK ENTENDER: 1 línea de comprensión antes de todo encargo (qué → para qué → entregable) — `01-arranque/guia_prompts.md` §ACK
 Camino fijo: waypoint 📍 en cada mensaje · desviaciones = misión lateral con retorno ↩⃾ (A14)
 Plan de fase 3-5 líneas ANTES de cada fase (Protocolo de Mando) · cuaderno de sesión en informes\_sesion\
 Protocolo de Mando: usuario aprueba cada fase · IA ejecuta la fase completa · pausa solo en emergencias
@@ -71,7 +74,7 @@ Mando: PROTOCOLO DE MANDO — usuario aprueba cada fase, IA ejecuta la fase comp
 
 ---
 
-## 🎯 LOS 4 FLUJOS — leer PRIMERO
+## 🎯 LOS 5 FLUJOS — leer PRIMERO
 
 | Flujo | Disparador | Profundidad | Output | ZIP Laravel |
 |---|---|---|---|---|
@@ -79,6 +82,9 @@ Mando: PROTOCOLO DE MANDO — usuario aprueba cada fase, IA ejecuta la fase comp
 | **B: MODELO** | "busca [modelo]" sin URL | Fase 1 + Fase 2 si pasa | Informe MODELO + top 5 | ❌ No |
 | **C: MERCADO** | "qué merece la pena", "top modelos" | Solo Fase 1, N modelos | Informe BUSQUEDA | ❌ No |
 | **D: DESCUBRIMIENTO** | Cliente SIN modelo concreto (presupuesto + requisitos: año/km/cv/combustible) | Sondeo barato ES+DE — SOLO modelos y motorizaciones, sin anuncios | Informe de MODELOS por país × año | ❌ No |
+| **E: STOCK** | "stock recurrente", "catálogo bajo pedido", "busca coches por categorías/segmentos" | Listados → informe de búsqueda (NO anuncios) | Informe de STOCK (Markdown+PDF+JSON) | ❌ No (catálogo, no valoración) |
+
+> **Flujo E · STOCK (17-ago-2026):** ver `02-flujos/stock-marketing.md`. **Es BÚSQUEDA de coches, NO marketing**: entregable = informe de búsqueda con datos de mercado (nº anuncios, mediana, hueco), NUNCA anuncios/copy IG/FB. El marketing es un flujo posterior separado. Reglas: listado-first (A17) + sellos de precio + ejemplos ilustrativos no lista cerrada (A19) + checkpoint cada X.
 
 > **CASCADA (12-ago-2026):** Flujo B **nunca** salta a "¿evalúo el candidato X?" sin entregar antes el INFORME MODELO + top 5 con enlaces + CP1. El usuario elige el candidato → **se convierte a Flujo A** → ahí sí: informe UNIDAD + dossier + folleto + ZIP. Los informes NO salen todos a la vez, son en cascada con checkpoint entre fases.
 
@@ -87,6 +93,9 @@ Mando: PROTOCOLO DE MANDO — usuario aprueba cada fase, IA ejecuta la fase comp
 ### Detección automática de flujo
 
 ```
+¿Es "stock/catálogo/busca coches por categorías/segmentos" (BUSCAR coches, no publicar)?
+├── SÍ → FLUJO E (STOCK) — ver 02-flujos/stock-marketing.md
+├── NO ↓
 ¿Hay URL en el input?
 ├── SÍ → FLUJO A (UNIDAD)
 ├── NO ↓
@@ -98,6 +107,8 @@ Mando: PROTOCOLO DE MANDO — usuario aprueba cada fase, IA ejecuta la fase comp
 ├── NO ↓
 → FLUJO C (MERCADO) — preguntar preferencias al usuario
 ```
+
+**🔴 REGLA DURA UNIVERSAL (17-ago-2026):** todo encargo se asigna a **UN flujo** (A/B/C/D/E) y sigue SU camino con Protocolo de Mando (plan de fase → OK → ejecutar → waypoint 📍 → auditoría de cierre). **Si el encargo NO encaja en ninguno de los 5 flujos, PREGUNTAR al usuario qué flujo aplicar — NUNCA improvisar.** Fallo real 17-ago: "stock recurrente" no encajaba (no existía Flujo E) y Claude improvisó un .docx fuera del camino. Tras añadir Flujo E, si vuelve a aparecer un caso no previsto, la regla es preguntar antes de ejecutar.
 
 ### 🔍 FLUJO D · DESCUBRIMIENTO — cliente sin modelo (15-ago-2026)
 
@@ -148,17 +159,20 @@ D sondeo → INFORME DE MODELOS (país × año × motorización)
 6. **El requisito de potencia es mínimo (≥Xcv):** filtrar por kW/cv mínimos, no buscar una variante concreta; versiones 125/130/150 cumplen +120cv.
 7. **D1 NO pagina (eficiencia):** D1a enumera con 2 lecturas por mercado (asc = suelo + desc = techo) + facetas de marca + semilla `memoria/modelos-medidos.md`; D1b difiere el precio-desde a 1 consulta por modelo solo si falta. El anuncio individual solo se investiga cuando el embudo es pequeño (Flujo A/B).
 
-**Antes de navegar en Flujo A/B → PASO 0 CACHE + briefing de encargo:**
+**Antes de navegar en CUALQUIER flujo (A/B/C/D/E) → PASO 0 CACHE + briefing de encargo:**
 
-### 🗂️ PASO 0 — CHECK DE CACHE (16-ago-2026) — NO re-buscar lo ya hecho
+### 🗂️ PASO 0 — CHECK DE CACHE (16-ago-2026, ampliado 17-ago) — NO re-buscar lo ya hecho
 
-> **Se ejecuta SIEMPRE al recibir un encargo, ANTES de cualquier navegación o plan de fase.**
+> **Se ejecuta SIEMPRE al recibir un encargo, ANTES de cualquier navegación o plan de fase — en TODOS los flujos, incluido E (stock/marketing).**
+> Fallo real 17-ago: encargo de stock re-buscó el Astra OPC (ya medido 10-ago) y el Golf GTI (pendiente desde 12-ago) sin ofrecer delta. El PASO 0 no estaba asociado al arranque de flujos no-estándar.
 
 ```
 ¿Ya existe investigación de este modelo/cliente?
 1. Leer `memoria/encargos.md` (¿encargo previo del cliente o del modelo?)
 2. Leer `memoria/modelos-medidos.md` (¿medición previa? — campo refrescar_antes_de)
-3. Cruce con `indice.json` (Desktop) + `datos_mercado.json` (regla frescura <3 semanas)
+3. Cruce con `indice.json` (Desktop) + `datos_mercado.json` (regla frescura <3 semanas).
+   → `datos_mercado.json` lo genera la skill hermana `estudio-mercado`, **ruta pactada (L2): `C:/Users/jacar/Desktop/JJImportMotors/datos_mercado.json`**.
+   → Si NO existe o caducó: avisar "mapa no encontrado/caducado; considera ejecutar estudio-mercado", usar `memoria/modelos-medidos.md` como fallback y marcar el criterio como "sin estudio de mercado".
 
 CASOS:
 - Informe <3 semanas (refrescar_antes_de en futuro) → mostrar resumen + preguntar:
@@ -179,12 +193,13 @@ CASOS:
 
 ## 💡 PLANIFICACIÓN DE ENCARGOS — ver `01-arranque/planificador.md` (16-ago-2026)
 
-> **Toda la planificación vive en `01-arranque/planificador.md`**: Asistente de planificación (4 pasos) + Plan de barrido + Prompt Improver + Asesor de filtros + embudo visualizado.
+> **Toda la planificación vive en `01-arranque/planificador.md`**: Asistente de planificación (FASE 0 + pasos) + Plan de barrido + Prompt Improver + Asesor de filtros + embudo visualizado.
 >
-> **Regla:** en encargos abiertos/vagos ("busca algo para 15.000 €", "qué merece la pena") se aplica el **Protocolo en 4 pasos** del planificador:
-> **PASO 0 cache → PASO 1 detectar flujo → PASO 2 mejorar prompt (si vago) → PASO 3 plan de fase (OK del usuario) → PASO 4 ejecutar en cascada.**
+> **Regla (17-ago-2026):** el **PLAN DE BÚSQUEDA con filtros y embudo es OBLIGATORIO en TODO encargo, antes de navegar** (todos los flujos, no solo los vagos). Se aplica el **protocolo** del planificador:
+> **PASO 0 ENTENDER la petición (📥 ACK de 1 línea SIEMPRE + preguntas precisas solo si hay duda de QUÉ/PARA QUÉ/ENTREGABLE — ver `01-arranque/guia_prompts.md` §ACK y §Árbol de decisión) → PASO 1 detectar flujo → PASO 2 cache → PASO 3 refinar briefing + aclarar intención/entregable (SIEMPRE, ver `01-arranque/guia_prompts.md` §Intención) → PASO 3b FIJAR MODELOS candidatos con encaje ES/DE y OK del usuario (ver `01-arranque/planificador.md` PASO 3b) → PASO 4 PLAN DE BÚSQUEDA (filtros URL/clic + bandas + segmentación + lotes, con OK del usuario — ver `01-arranque/planificador.md` PASO 4) → PASO 5 ejecutar en cascada.**
+> **NUNCA abrir el primer portal sin el plan aprobado** (fallo real 17-ago: se navegó con filtros implícitos y el usuario pidió "proponer el plan antes de nada"). El plan se apoya en el mapa de mercado (`datos_mercado.json`) para la segmentación y priorización.
 >
-> Cargar `01-arranque/planificador.md` completo antes de navegar en cualquier encargo no-URL. Referencias: briefing (`01-arranque/briefing_encargo.md`), plantillas de prompt (`01-arranque/guia_prompts.md`), filtros por portal (`memoria/filtros-portales.md`).
+> Cargar `01-arranque/planificador.md` completo antes de navegar en cualquier encargo. Referencias: briefing (`01-arranque/briefing_encargo.md`), plantillas de prompt (`01-arranque/guia_prompts.md`), filtros por portal (`memoria/filtros-portales.md`).
 
 ---
 
@@ -251,6 +266,9 @@ FLUJO B: 1 plan de fase → 2 EJECUTAR Fase 1 (3 fuentes) → 3 INFORME MODELO+t
           → 6 INFORME UNIDAD → CP3 veredicto → dossier → ZIP (→ FIN)
 
 FLUJO A: 1 plan de fase → 2 EJECUTAR Fase 1+2 → 3 INFORME UNIDAD → CP3 → dossier → ZIP
+
+FLUJO E: 1 plan de fase (categorías + nº) → 2 EJECUTAR listados (no fichas, A17)
+          → 3 INFORME STOCK (Markdown + PDF + JSON) → auditoría de cierre → encargos.md
 ```
 
 ### Protocolo de waypoint (en cada mensaje)
@@ -353,7 +371,7 @@ Durante la conversación, Claude debe actualizar la memoria cuando detecte:
 | Situación | Archivo a actualizar |
 |---|---|
 | Cierras o abortas un encargo | `memoria/encargos.md` (cliente→flujo→resultado→refrescar antes de) |
-| Mides un modelo nuevo o evalúas una URL | `memoria/modelos-medidos.md` (12 campos, con `refrescar antes de`) |
+| Mides un modelo nuevo o evalúas una URL | `memoria/modelos-medidos.md` (12 campos, con `refrescar antes de`) **+ `datos_mercado.json`** (ver §MAPA DE MERCADO abajo: la medición profunda de Flujo A/B alimenta el mapa) |
 | Verificas un filtro/URL que funciona (o falla) en un portal | `memoria/filtros-portales.md` (fecha + parámetro) |
 | Detectas una trampa nueva en un portal | `memoria/trampas-encontradas.md` |
 | Un vendedor responde bien/mal o se negocia | `memoria/vendedores-confianza.md` |
@@ -365,6 +383,24 @@ Durante la conversación, Claude debe actualizar la memoria cuando detecte:
 **Cuándo actualizar:** en cuanto ocurre (no esperar al final). Al cerrar la conversación, verifica que la memoria está al día.
 
 **Detalles completos:** ver `memoria/MEMORIA.md` del skill.
+
+### 🗺️ MAPA DE MERCADO — integración con la skill `estudio-mercado` (17-ago-2026)
+
+> **Comunicación bidireccional** entre skills vía `datos_mercado.json` (lo genera `../estudio-mercado/`; esquema en `../estudio-mercado/schema_datos_mercado.md`).
+
+**LEER el mapa — TODOS los flujos, no solo los ambiguos:**
+- ⚡ **Eficiencia (17-ago-2026):** cargar `datos_mercado.json` UNA vez al inicio de la sesión y mantenerlo en contexto; releer SOLO justo antes de escribir (merge E10). No re-leer el JSON en cada paso.
+- **Flujo A (URL):** al evaluar una unidad, el mapa da CONTEXTO inmediato del modelo (mediana DE/ES, hueco bruto/neto, rotación, demanda, veredicto) → mejora los comparables y el veredicto sin navegar extra. Si el modelo no está en el mapa, la medición de esta evaluación LO AÑADE (feedback).
+- **Flujo B (modelo):** antes del barrido de 7 fuentes, mirar el mapa → si el modelo tiene veredicto 🔴 (hueco neto <0, ES mejor), avisar ANTES de gastar peticiones ("el mapa dice que este modelo no tiene negocio de importación, ¿seguro que investigo?"). Ahorra barridos completos.
+- **Flujo C/D/E (ambiguos):** PASO 0 cache + PASO 3b FIJAR MODELOS (ya cubierto en `01-arranque/planificador.md`).
+
+**ESCRIBIR en el mapa — feedback de toda medición profunda (L3, 17-ago-2026):**
+- **Flujo B (modelo barrido 7 fuentes):** tiene medianas reales → al cerrar, volcar/actualizar la entrada del modelo en `datos_mercado.json` con `fuente_medicion: flujo_b` (medianas frescas + `refrescar_antes_de_categoria` = hoy + cadencia de su categoría).
+- **Flujo A (URL evaluada):** mide UNA unidad → NO escribe medianas (corrompería la estadística). SOLO añade entrada nueva (si el modelo no existe) o actualiza `nota`/`enlaces_muestra`, con `fuente_medicion: flujo_a`.
+- **Regla de frescura:** si el mapa ya tiene el modelo fresco (< cadencia), no se re-vuelca; solo se actualiza `nota` si aporta algo nuevo.
+- **Ruta pactada (L2):** `C:/Users/jacar/Desktop/JJImportMotors/datos_mercado.json`. Si no existe al cerrar → crear con `schema_version` y `ruta_canonica`; si existe → releer y MERGE por `slug` (no sobrescribir otras entradas).
+- Actualizar también `memoria/modelos-medidos.md` como hasta ahora (registro histórico); el JSON es la capa consumible por ambas skills.
+- **Aprendizaje automático (17-ago-2026):** ① si el precio de un anuncio real está >15% bajo `mediana_de` y el mapa es 🟢 → marcar `oportunidad: true`. ② si el veredicto del mapa contradice el resultado real del cierre → anotar la calibración en `nota`. ③ si el modelo NO está en el mapa (sin match de `slug`/`alias`) → añadirlo con `fuente_medicion: flujo_a` y medianas null (lo medirá el próximo estudio).
 
 ### 🔁 APRENDIZAJE CONTINUO — retrospectiva al cerrar sesión (12-ago-2026)
 
@@ -397,11 +433,12 @@ SESIÓN <fecha> — <modelo/encargo>
 | 3 | **Correcciones** | Nº de correcciones del usuario + causa raíz (briefing incompleto / plan mal calibrado / fuente que falló) |
 | 4 | **Checkpoints** | ¿Se respetaron CP-D/CP1/CP2/CP3? ¿Cuál se saltó y qué costó? |
 | 5 | **Resultado** | Candidato final (modelo, precio, origen, score) + dato de mercado aprendido |
+| 6 | **Mapa de mercado** | ¿Volqué la medición a `datos_mercado.json`? ¿con qué `fuente_medicion` (`flujo_b`/`flujo_a`)? ¿actualicé o añadí entrada? (L4 — OBLIGATORIA) |
 
 **Salidas obligatorias (3):**
 1. `memoria/retrospectiva.md` → entrada de sesión con las 5 dimensiones (plantilla de cierre).
 2. `memoria/modelos-medidos.md` → el modelo elegido con precio real verificado + fecha.
-3. `memoria/encargos.md` → el encargo registrado (flujo, resultado, `refrescar antes de` = hoy +3 semanas) + ejecutar `py scripts/sync_indice.py` para actualizar `indice.json`.
+3. `memoria/encargos.md` → el encargo registrado (flujo, resultado, `refrescar antes de` = hoy + cadencia de su categoría: 2-4 sem) + ejecutar `py scripts/sync_indice.py` para actualizar `indice.json`.
 4. **Cada corrección/fallo ≥ 1** → trampa en `memoria/trampas-encontradas.md` o anti-patrón propuesto en `06-reglas/anti_patrones.md` (proponer el texto al usuario, no editar a ciegas).
 5. Si se verificó/negó un filtro o URL de portal durante la sesión → `memoria/filtros-portales.md` (fecha + parámetro).
 
@@ -429,6 +466,7 @@ Al detectar flujo, declara al usuario el presupuesto estimado:
 | **B: MODELO** | 15-20 | 20-30 | 50 |
 | **C: MERCADO** | 12-18 por modelo | — | 100 (7 modelos) |
 | **D: DESCUBRIMIENTO** | D1 sondeo 4-8 | — (D2 informe, sin navegar) | 8 + embudo a B (15-50) o A (35-70) |
+| **E: STOCK** | Listados 15-25 (no fichas, A17) | — | 25 (3 categorías) |
 
 **Frase de apertura:**
 > "Esto gastará ~{N} peticiones. ¿Procedo?"
@@ -692,6 +730,8 @@ ENCARGO (Flujo B: MODELO)
 **4. Organización = SIEMPRE por marca/modelo.**
 - Todo lo que genera Claude se guarda en `informes\<marca>\<modelo>\` (y `laravel\export\` para los JSON) — nunca suelto ni en AppData. Normalizar nombres (minúsculas, sin tildes, guiones).
 
+**🔴 5. REGLA A21 — ENLACES EN TODO (17-ago-2026 · la que el usuario más repite):** NO existe entrega sin enlaces. **Todo** candidato, comparable, fila de tabla, comparativa, informe, dossier, JSON y ZIP incluye **el enlace directo al anuncio** (ficha del vehículo, no búsqueda/filtro — A6) **y las fuentes con su URL** (sección "Fuentes consultadas" con cada portal y estado). Un dato, cifra o afirmación sin su enlace/fuente NO se entrega como concluido: se declara cómo se obtuvo o se pregunta. Revisar la entrega final con lupa: si cualquier candidato carece de enlace, el trabajo está incompleto.
+
 
 ### ⚡ EJECUCIÓN EN CASCADA — tras aprobar el plan de fase (16-ago-2026, ver §PROTOCOLO DE MANDO)
 
@@ -816,7 +856,9 @@ LO DEMÁS: sin cambios significativos.
 
 ## 🛡️ ANTI-PATRONES BLOQUEADOS
 
-Las 16 reglas duras (A1-A16) viven en `06-reglas/anti_patrones.md`. Cargarlas cuando se duda de una práctica o antes de cerrar un informe.
+Las 21 reglas duras (A1-A21) viven en `06-reglas/anti_patrones.md`. Cargarlas cuando se duda de una práctica o antes de cerrar un informe.
+
+> 🔴 **A21 — ENLACES SIEMPRE (17-ago-2026 · regla que el usuario más repite):** TODO lo que se entregue —candidatos, comparables, comparativas, informes, dossier, JSON/ZIP— lleva SIEMPRE el **enlace directo al anuncio** (ficha del vehículo) y las **fuentes con su URL**. Un dato sin su enlace no se entrega como concluido: se indica cómo se obtuvo o se pide permiso. Sin enlaces la entrega NO vale.
 
 **Resumen rápido:**
 - **A1** No descartar por silencio (sello `man`, no exclusión)
@@ -835,6 +877,7 @@ Las 16 reglas duras (A1-A16) viven en `06-reglas/anti_patrones.md`. Cargarlas cu
 - **A14** Nunca abandonar el camino en silencio: desviación → responder → ↩⃾ volver al paso; cambio de destino → 🔀 declararlo
 - **A15** La búsqueda web/snippets NO es método de sondeo — D1 SIEMPRE con navegación real (datos inconsistentes)
 - **A16** El sondeo D1 es por FILTROS, no por modelo: una pasada con los filtros del encargo devuelve TODOS los modelos; prohibido elegir 3-4 a mano ni dejar "otros por explorar" sin sondear. Potencia = mínimo ≥Xcv, no solo la variante tope.
+- **A21** ENLACES SIEMPRE (17-ago-2026): TODO lo que se entregue lleva enlace directo al anuncio (ficha) + fuentes con URL. Candidatos, comparables, comparativas, informes, dossier, JSON y ZIP. Un dato sin su enlace NO se entrega como concluido. Es la regla que el usuario más repite.
 
 ---
 
@@ -895,13 +938,15 @@ Las 16 reglas duras (A1-A16) viven en `06-reglas/anti_patrones.md`. Cargarlas cu
 | **A: UNIDAD** | `informe.json` dentro del ZIP | `{_meta, vehiculo, anuncio, investigacion, balance, veredicto, costes, mercado, avisos, publicidad}` — un solo coche, contrato completo |
 | **B: MODELO** | `informe.json` suelto en `export/` | Misma estructura que A, pero SIN `publicidad` (no se generan esqueletos de venta). El usuario decide si promover a Flujo A después. |
 | **C: MERCADO** | `informe.json` agregado | `{_meta, modelos: [{modelo, segmento, hueco_pct, n_uds_de, vendibilidad_estimada, mejor_anuncio_url}, ...]}` — N entradas, sin detalle por unidad. Se guarda en `export/scouting_<fecha>.json` para histórico. |
+| **E: STOCK** | `stock_<fecha>.json` en `export/` | `{_meta, categorias: [{nombre, modelos: [{modelo, n_uds_de, n_uds_es, mediana_de, mediana_es, hueco_pct, veredicto, enlace_ejemplo}], ...}]}` — catálogo por categorías para Laravel. Sin `publicidad`. |
 
 ---
 
 ## ✅ CHECKLIST
 
 **Antes de gastar**
-- [ ] Detecté el flujo correcto (A/B/C/D)
+- [ ] Detecté el flujo correcto (A/B/C/D/E)
+- [ ] **A21: pensé qué enlaces llevará la entrega (anuncio + fuentes) antes de cerrar**
 - [ ] Tabla cobertura con las fuentes que apliquen al flujo
 - [ ] Consulté `indice.json` y comprobé frescura
 - [ ] Miré el registro de clientes (Flujo B)
@@ -910,7 +955,9 @@ Las 16 reglas duras (A1-A16) viven en `06-reglas/anti_patrones.md`. Cargarlas cu
 - [ ] Si amplié filtros del encargo (año, km, precio), lo declaré ANTES (A13)
 - [ ] Waypoint 📍 en cada mensaje · tras cada desviación retomé el paso (A14)
 - [ ] **PASO 0 cache**: consulté `memoria/encargos.md` + `memoria/modelos-medidos.md` + `indice.json` (frescura <3 sem)
+- [ ] **Mapa de mercado** (`datos_mercado.json`, ruta pactada): lo consulté para contexto del modelo (A/B) o para fijar modelos (C/D/E) · si medí un modelo, volqué la medición al mapa al cerrar con `fuente_medicion` (L4) y lo registré en el checklist de la auditoría de cierre
 - [ ] Cuaderno de sesión al día (correcciones con hora, releído antes de cada plan de fase)
+- [ ] **PLAN DE BÚSQUEDA mostrado y aprobado ANTES de abrir el primer portal** (filtros URL/clic · bandas · segmentación · lotes · presupuesto · OK) — ver `01-arranque/planificador.md` PASO 4
 - [ ] Plan de fase aprobado por el usuario ANTES de cada fase (Protocolo de Mando)
 - [ ] Auditoría de fase pasada al completar cada paso (entregable · camino · correcciones · cobertura)
 - [ ] Auditoría de cierre al elegir candidato único o abortar (eficiencia · embudo · correcciones · checkpoints · resultado → 3 salidas)
@@ -932,6 +979,7 @@ Las 16 reglas duras (A1-A16) viven en `06-reglas/anti_patrones.md`. Cargarlas cu
 - [ ] Ahorro contra mediana **y** cuartil bajo (A4)
 - [ ] Precio máximo de compra en informe (A5)
 - [ ] Tablas con columna ENLACE (A6)
+- [ ] **A21: todo dato/candidato/comparable lleva enlace al anuncio + fuentes con URL** (sin enlaces la entrega no vale)
 
 **Al cerrar**
 - [ ] Actualicé `datos/registro_cierres.json` → Ver `05-operaciones/operaciones_cierre.md`

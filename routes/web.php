@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AiChatController;
 use App\Http\Controllers\AlertController;
+use App\Http\Controllers\Api\PublicMarketController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\CarChecklistController;
 use App\Http\Controllers\CarController;
@@ -22,6 +23,7 @@ use App\Http\Controllers\JJImportFolletoController;
 use App\Http\Controllers\KpiController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\MarketingController;
+use App\Http\Controllers\MercadoController;
 use App\Http\Controllers\MessageTemplateController;
 use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\OnboardingController;
@@ -120,19 +122,41 @@ Route::prefix('marketplace')->name('marketplace.')->group(function () {
     Route::get('/{car}', [PublicMarketplaceController::class, 'show'])->name('show');
 });
 
-Route::middleware('auth', 'has.organization')->group(function () {
-    Route::get('organization/create', [OrganizationController::class, 'create'])
-        ->name('organization.create');
-    Route::post('organization', [OrganizationController::class, 'store'])
-        ->name('organization.store');
-});
+// Public catalog "bajo pedido" from the market map (skill estudio-mercado)
+// URL: /mercado — public catalog of under-order vehicles
+Route::get('/mercado', [MercadoController::class, 'index'])->name('mercado.index');
 
+// #2 — Lead capture desde el catálogo público + #3 — calculadora de coste
+Route::post('/mercado/{marketModel}/interes', [MercadoController::class, 'storeLead'])
+    ->middleware('throttle:api-heavy')
+    ->where('marketModel', '[0-9]+')
+    ->name('mercado.interest');
+Route::get('/mercado/{marketModel}/coste', [MercadoController::class, 'coste'])
+    ->where('marketModel', '[0-9]+')
+    ->name('mercado.coste');
+
+// #6 — API pública del catálogo (sin auth, modelos publicados)
+Route::get('/api/public/market', [PublicMarketController::class, 'index'])
+    ->name('mercado.public-api');
+Route::get('/api/public/market/stats', [PublicMarketController::class, 'stats'])
+    ->name('mercado.public-api.stats');
 Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, '__invoke'])
         ->name('dashboard');
 
     // Dashboard de KPIs del skill importacion-vehiculos (§3.8)
     Route::get('/kpis', [KpiController::class, '__invoke'])->name('kpis.index');
+
+    // Mapa de mercado — panel admin (skill estudio-mercado)
+    Route::get('/mercado/admin', [MercadoController::class, 'admin'])->name('mercado.admin');
+    Route::get('/mercado/admin/leads', [MercadoController::class, 'leads'])->name('mercado.admin.leads');
+    Route::get('/mercado/admin/reportes', [MercadoController::class, 'reportes'])->name('mercado.admin.reportes');
+    Route::patch('/mercado/admin/{marketModel}', [MercadoController::class, 'update'])
+        ->where('marketModel', '[0-9]+')
+        ->name('mercado.admin.update');
+    Route::patch('/mercado/admin/leads/{marketLead}', [MercadoController::class, 'updateLead'])
+        ->where('marketLead', '[0-9]+')
+        ->name('mercado.admin.lead.update');
 
     // Onboarding wizard (redirige a dashboard si ya está completado)
     Route::get('/onboarding', [OnboardingController::class, 'index'])

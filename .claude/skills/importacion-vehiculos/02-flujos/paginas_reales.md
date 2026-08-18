@@ -56,6 +56,22 @@ Secciones a leer: **"Fahrzeugdaten"** (km, Erstzulassung, Leistung, Getriebe, Fa
 
 **Truco:** la URL con `ms=` NO filtra siempre (a veces muestra total). Más fiable usar el **buscador superior** o los filtros de cabecera.
 
+### 🇪🇸 mobile.de ES — página de filtros completa (18-ago-2026)
+
+> Versión en español de la **búsqueda avanzada**: `https://www.mobile.de/es/s/auto?s=Car&vc=Car&ref=quickSearch`
+> En esta página se ven TODOS los filtros (botón "Más filtros"). Es la **fuente de selectores `data-testid` estables** (ver `playbook_filtrado.md` §Selectores ESTABLES).
+> Para filtrar por URL igual funciona: `ms=<make>;<model>;;` · `fr=<año>:` · `p=<min>:<max>` · `fu=PETROL|DIESEL|HYBRID` · `pw=<kW>:` · `q=<texto>` · `sb=p&od=up` (precio asc).
+
+**Estructura de la página (por secciones):**
+1. **Datos básicos:** Fabricante (`make-incl-0`) → Modelo (`model-incl-0`) → Variante (texto, ej "GTI") · Tipo de vehículo (checkboxes: Cabrio, OffRoad, SmallCar, EstateCar, Limousine, SportsCar, Van) · Asientos · Puertas · **Precio** (desde/hasta) · **Primera matriculación** · **Kilometraje** · Estado (Nuevo/Usado) · Mantenimiento.
+2. **Vendedor y datos técnicos:** Vendedor (concesionario/particular/empresa) · ITV válida · Propietarios · País · Ciudad/CP · **Combustible** (checkboxes) · **Potencia** (cv o kW, min/max) · Cilindrada · Tracción · Transmisión (Automático/Semiautomático/Manual).
+3. **Consumo y exterior:** consumo combinado · pegatina emisiones · color exterior · acoplamiento remolque · sensores de aparcamiento · cámara / **cámara 360°** · control de crucero (adaptativo).
+4. **Extras (equipamiento):** techo corredizo/panorámico, faros LED/xenón/láser, llantas, portón eléctrico, paquete invierno, suspensión deportiva, luces adaptativas, etc.
+5. **Interior:** color interior · material (Alcantara/cuero) · **`Panel de instrumentos digital`** (cuadro digital) · **`Pantalla Head-up`** · **`Calefacción de asiento`** · Android Auto · Apple CarPlay · navegación · asientos deportivos/ventilados/masaje · carga inducción · volante multifunción.
+6. **Detalles de la oferta:** valoración concesionario · anuncio online desde · garantía · descuentos · comercial/exportación · dañados · programa usados certificados.
+
+> **Regla:** al buscar "máximo equipamiento", marcar en Interior `Panel de instrumentos digital` + `Pantalla Head-up` + `Calefacción de asiento` y en Extras `Techo panorámico` + `Faros LED` (los 5 = unidad full reproducible).
+
 ---
 
 ## 🇩🇪 AutoScout24.de — verificación cruzada ✅
@@ -127,6 +143,21 @@ Ofertas · **Precio nominal - Más barato** · Precio - Más alto · **Bajada de
 
 **Joyas únicas:** "Días en venta" (rotación directa), "Cambio de precio" (negociabilidad). Úsalo como **fuente primaria para rotación**.
 
+### 🧭 Sidebar de filtros — selects y checkboxes con `name` ESTABLE (18-ago-2026)
+
+> Los `id` de AutoUncle llevan hash (cambian), pero los **`name` son estables** → Claude los usa con selector `[name="..."]`. Es un **agregador** (A8: NUNCA referencia de precio; SOLO rotación + validación de hueco).
+
+| Filtro | Selector (`name`) | Valores |
+|---|---|---|
+| Precio min/max | `[name="minPrice"]` / `[name="maxPrice"]` | select (200…100.000 €) |
+| Año min/max | `[name="minYear"]` / `[name="maxYear"]` | select (1950-2026) |
+| Combustible | `[name="fuelTypes"]` | checkboxes: `El` (Eléctrico), `El_Hybrid` (Híbrido), `Benzin` (Gasolina), `Diesel` (Diésel) |
+| Kilometraje min/max | `[name="minKm"]` / `[name="maxKm"]` | select (0…400.000) |
+| Cambio | `[name="gear"]` | radio: Cualquier / Automático / Manual |
+| **Opciones populares (equipamiento)** | `[name="popularOptions"]` | checkboxes: `hasAppleCarPlay`, `hasAndroidAuto`, `hasBluetooth`, `hasAutoGear`, `hasSeatHeat` (asientos calefactados), `hasParkingCamera` (cámara trasera), `hasParking` (sensores), `hasDistanceControl` (ACC), `hasTowBar` (enganche) |
+
+> **Máximo equipamiento en AutoUncle:** marcar en `popularOptions` `hasAppleCarPlay` + `hasAndroidAuto` + `hasSeatHeat` + `hasParkingCamera` + `hasDistanceControl`. Marca/Modelo/Versión son combobox de autocompletado (placeholder "Elija marca") → escribir texto + elegir sugerencia.
+
 ---
 
 ## 🇩🇪 kleinanzeigen.de — chollos particulares ✅
@@ -142,6 +173,31 @@ https://www.kleinanzeigen.de/s-<marca>-<modelo>/k0
 ### Cabecera
 - **`<h1>`:** "**1 - 25 von N Ergebnissen für "<búsqueda>" in Deutschland**" = total.
 - Subfiltro: "Angebote (4.138)" vs "Gesuche (43)" → dejar en Angebote.
+
+### 🧭 Sidebar de filtros — 3 tipos distintos (18-ago-2026)
+
+> El sidebar de kleinanzeigen (URL `https://www.kleinanzeigen.de/s-autos/c216`) tiene **3 tipos de filtro con selectores distintos**:
+
+**Tipo 1 · Enlaces de atributo (marca, combustible, cambio, carrocería, puertas, estado, anbieter...) — se navega directo por URL, sin clic:**
+- Cada opción es un `<a href=".../c216+autos.marca_s:valor">` → el filtro se aplica al navegar.
+- Marca: `autos.marke_s:volkswagen` · Combustible: `autos.fuel_s:benzin|diesel|hybrid|elektro` · Cambio: `autos.shift_s:automatik|manuell` · Carrocería: `autos.typ_s:limousine|kombi|suv|cabrio|coupe|kleinwagen` · Puertas: `autos.anzahl_tueren_s:4_5` · Estado: `autos.schaden_s:nein|ja` · Anbieter: `anbieter:privat|gewerblich`.
+- **Combinables en la URL** con `+`: `.../c216+autos.marke_s:seat+autos.fuel_s:benzin` (marca Seat + gasolina).
+
+**Tipo 2 · Rango numérico (precio, km, año, potencia, HU) — inputs con ID estable `brwse-attr-*`:**
+- Precio: inputs `srchrslt-brwse-price-min` / `srchrslt-brwse-price-max` (placeholder "Von"/"Bis") + botón aplicar.
+- Kilometraje: `brwse-attr-autos.km_i-min` / `-max` (presets 5.000…150.000).
+- Año (Erstzulassungsjahr): `brwse-attr-autos.ez_i-min` / `-max` (1960-2026).
+- Potencia (Leistung): `brwse-attr-autos.power_i-min` / `-max` (34…252 PS).
+- HU válida: `brwse-attr-autos.tuevy_i-min`.
+- **Al rellenar + clic en el botón flecha (submit) → se aplica.**
+
+**Tipo 3 · Checkboxes de equipamiento (Außenausstattung / Innenausstattung / Sicherheit) — con ID estable `checkbox-autos.*` + botón "Übernehmen":**
+- Exterior: `checkbox-autos.trailer_coupling_b` (enganche) · `park_assistant_b` (Einparkhilfe) · `alluminium_rims_b` (llantas) · `xenon_led_light_b` (faros Xenon/LED).
+- Interior: `air_conditioning_b` (clima) · `navi_b` · `radio_tuner_b` · `bluetooth_b` · `handsfree_speaker_b` · **`sunroof_b` (techo)** · **`seat_heating_b` (calefacción asientos)** · `speed_control_b` (Tempomat) · `non_smoking_b`.
+- Seguridad: `abs_b` · `full_service_history_b` (Scheckheft).
+- ⚠️ **A diferencia de Coches.net, aquí SÍ hay botón aplicar**: tras marcar checkboxes → clic en `[data-cy="clickable-options-apply-button"]` ("Übernehmen").
+
+> **Máximo equipamiento en kleinanzeigen:** marcar `checkbox-autos.sunroof_b` + `checkbox-autos.seat_heating_b` + `checkbox-autos.xenon_led_light_b` + `checkbox-autos.navi_b` + `checkbox-autos.full_service_history_b` → Übernehmen.
 
 ### Tarjeta de anuncio
 ```
@@ -179,6 +235,32 @@ DESCRIPCIÓN (preview)
 - **Combustible:** Diésel · Eléctrico · Gas · GLP · Gas natural · Gasolina · Híbrido · Híbrido enchufable.
 - **Carrocería:** 4x4 · Berlina · Cabrio · Coupé · Familiar · Monovolumen · Pick Up.
 - Atajos: particulares · 7 plazas · automáticos · hasta 1.000/2.000/.../10.000 € · colores · regiones.
+
+### 🧭 Sidebar de filtros — acordeón con IDs ESTABLES (18-ago-2026)
+
+> Coches.net **NO tiene página de filtros aparte**: el sidebar se abre en el propio listado (`.mt-SearchSidebar-filters`) con **acordeones** que se expanden al hacer clic en su `groupTrigger`. Cada grupo tiene un **`id` estable** (no cambia con el CSS) → Claude los usa con selector `#<id>` o por el texto del grupo.
+> ⚠️ **"Filtros se aplican al marcarlos"**: en Coches.net los checkboxes se aplican **en vivo al marcar** (no hay botón "aplicar"). Tras cada marcado, el contador se actualiza solo.
+
+| Grupo (sidebar) | ID estable (`id="..."`) | Contenido |
+|---|---|---|
+| Tipo de coche | `vehicleTypeGroup` | Nuevos/Km0/Usados, tipo |
+| Marca y modelo | `makeGroup` | marcas → modelos (anidado) |
+| Precio | `priceGroup` | desde/hasta |
+| Servicios online | `onlineServicesGroup` | financiación, garantía... |
+| Ubicación | `locationGroup` | provincia/región |
+| Vendedores | `sellerGroup` | particulares / profesionales |
+| Año | `yearGroup` | desde/hasta |
+| Kilómetros | `kmsGroup` | desde/hasta |
+| Carrocería | `bodyTypeGroup` | berlina/SUV/familiar/coupé... |
+| Motor | `motorGroup` | combustible + potencia (CV) |
+| Etiqueta DGT | `environmentalLabelGroup` | CERO/ECO/C/B |
+| Eléctricos | `electricGroup` | autonomía/carga |
+| **Equipamiento** | `equipmentGroup` | techo solar, cámara, GPS, etc. (el único para equipamiento) |
+| Color | `colorGroup` | colores exteriores |
+
+**Cómo expandir un grupo:** clic en el `button.mt-FiltersGroupedByAccordion-groupTrigger` dentro del grupo con ese `id`. Al expandirse se ven los checkboxes/inputs. Marcar → se aplica solo (recuento en vivo).
+
+> **Equipamiento en Coches.net es LIMITADO** (solo `equipmentGroup`: techo solar, cámara, GPS, climatizador... **NO hay cuadro digital**). Para máximo equipamiento: marcar techo solar + cámara como proxy, o validar el nivel en 1-2 fichas (excepción puntual a A17).
 
 ### Tarjeta de anuncio
 ```

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Car;
 use App\Models\Organization;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -49,10 +50,28 @@ class PublicMarketplaceController extends Controller
         $verdicts = Car::VERDICTS;
         $lights = ['green', 'amber', 'red', 'neutral'];
 
+        // Opciones de filtro cacheadas (invalidadas por CarObserver al cambiar marketplace)
+        $filterOptions = Cache::remember('marketplace.filter_options', 1800, function () {
+            $base = fn () => Car::query()
+                ->whereHas('organization', fn ($q) => $q->where('is_public', true))
+                ->where('is_marketplace', true)
+                ->whereIn('status', ['Delivered'])
+                ->whereIn('verdict', ['Buy', 'Buy if price drops']);
+
+            return [
+                'brands' => $base()->distinct()->orderBy('brand')->pluck('brand')->values(),
+                'fuels' => $base()->whereNotNull('fuel')->distinct()->orderBy('fuel')->pluck('fuel')->values(),
+                'transmissions' => $base()->whereNotNull('transmission')->distinct()->orderBy('transmission')->pluck('transmission')->values(),
+                'doors' => $base()->whereNotNull('doors')->distinct()->orderBy('doors')->pluck('doors')->values(),
+                'colors' => $base()->whereNotNull('color')->distinct()->orderBy('color')->pluck('color')->values(),
+            ];
+        });
+
         return Inertia::render('Public/MarketplaceIndex', [
             'cars' => $cars,
             'verdicts' => $verdicts,
             'lights' => $lights,
+            'filterOptions' => $filterOptions,
             'filters' => $request->only(['search', 'verdict', 'traffic_light', 'min_price', 'max_price', 'year_min', 'year_max']),
         ]);
     }

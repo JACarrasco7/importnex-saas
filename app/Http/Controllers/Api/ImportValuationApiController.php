@@ -215,6 +215,7 @@ class ImportValuationApiController extends Controller
                     'organization_id' => $org->id,
                 ]
             );
+            $wasCreated = $scouting->wasRecentlyCreated;
 
             // Eliminar modelos anteriores si es actualización
             $scouting->modelos()->delete();
@@ -241,10 +242,10 @@ class ImportValuationApiController extends Controller
             ]);
 
             return response()->json([
-                'status' => 'created',
+                'status' => $wasCreated ? 'created' : 'updated',
                 'scouting_id' => $scouting->scouting_id,
                 'modelos_count' => $scouting->modelos()->count(),
-            ], 201);
+            ], $wasCreated ? 201 : 200);
 
         } catch (\Throwable $e) {
             Log::error('ImportValuationApiController::storeMercado failed', ['error' => $e->getMessage()]);
@@ -693,16 +694,17 @@ class ImportValuationApiController extends Controller
         $org = $request->attributes->get('import_org');
 
         try {
-            $scoutings = ScoutingMercado::with('modelos')
-                ->where('organization_id', $org->id)
-                ->orderByDesc('generado_el')
-                ->limit(max(1, min(100, (int) $request->query('limit', 20))))
-                ->get();
+            $limit = max(1, min(100, (int) $request->query('limit', 20)));
+            $query = ScoutingMercado::with('modelos')
+                ->where('organization_id', $org->id);
+
+            $total = (clone $query)->count();
+            $scoutings = $query->orderByDesc('generado_el')->limit($limit)->get();
 
             return response()->json([
                 'status' => 'ok',
                 'organization_id' => $org->id,
-                'total' => $scoutings->count(),
+                'total' => $total,
                 'scoutings' => $scoutings->map(fn ($s) => [
                     'id' => $s->id,
                     'scouting_id' => $s->scouting_id,

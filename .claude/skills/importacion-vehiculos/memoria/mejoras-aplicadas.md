@@ -6,6 +6,22 @@
 
 ## 🎯 Mejoras de funcionalidad
 
+### Mejora #16: Equipamiento máximo + corrección Seat/Cupra (2026-08-18 · v3.1.3)
+**Problema (feedback usuario 18-ago):**
+1. El estudio comparaba precios sin igualar equipamiento: un ES "3% más barato a igual año" pero sin cuadro digital/techo NO es comparable con el DE full. El equipamiento (cuadro digital sobre todo) es lo que más mueve a jóvenes/compradores de coche moderno.
+2. La v2 concluyó "nunca ofertar Seat/Cupra (España más barata)" por mediana con banda ≥20k en ambos mercados → la banda recortó la cola barata DE. Dato real del usuario: Cupra León suelo ES 19.500 € vs DE 15-16.000 €.
+
+**Solución:**
+- Regla "comparar a MÁXIMO equipamiento por defecto" en `../estudio-mercado/SKILL.md` + `../03-informes/comparables.md` (prima de cuadro digital +500-1.000 €, la más demandada).
+- Regla "la nacionalidad de la marca NO es criterio de arbitraje" + medir SIEMPRE precio_desde sin banda en ambos mercados.
+- Nueva trampa en `memoria/trampas-encontradas.md`: "banda de precio en ambos mercados aplasta el hueco".
+- `datos_mercado.json`: Cupra León marcado `pendiente_fase2` + nota de corrección + suelos reales (15.500 DE / 19.500 ES).
+**Validación:** JSON válido, 19 modelos, corrección anotada en el volcado `modelos_medidos_2026-08-17_v2.md`.
+
+---
+
+## 🎯 Mejoras de funcionalidad
+
 ### Mejora #15: Reorganización total + Protocolo de Mando + PASO 0 cache (2026-08-16 · v3.1.0)
 **Problema:** carpeta desordenada (19 MD sueltos), SKILL.md de 1.251 líneas (63% consulta diferible), 12+ interrupciones por encargo por micro-plans, cache de informes previos rota.
 **Solución:**

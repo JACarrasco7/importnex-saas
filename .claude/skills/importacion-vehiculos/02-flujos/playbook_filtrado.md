@@ -150,6 +150,88 @@ PASO 3 — CRUCE (unión, NO intersección)
 
 **Quita el filtro "Beschädigte Fahrzeuge: Nicht anzeigen"** solo si buscas siniestros baratos para reexportar.
 
+### 🔬 Selectores ESTABLES de filtros en mobile.de ES (`data-testid` · 18-ago-2026)
+
+> El HTML de mobile.de ES (`/es/s/auto?s=Car&vc=Car`) usa **`data-testid` estables** para los filtros. A diferencia de las clases CSS ofuscadas, estos selectores no cambian con el build → **Claude los usa directamente con `page.getByTestId()` o selector `[data-testid="..."]`**. Son la forma más fiable de filtrar.
+
+| Filtro | `data-testid` | Valores/uso |
+|---|---|---|
+| Fabricante | `make-incl-0` | select: value = id marca (VW 25200, Audi 1900, Cupra 3, Seat 22500...) |
+| Modelo | `model-incl-0` | select (se rellena al elegir marca) |
+| Variante (texto libre) | `model-description-incl-0` | input, ej "GTI" |
+| Tipo de vehículo | `category-filter` | checkboxes: Cabrio, OffRoad, SmallCar, EstateCar, Limousine, SportsCar, Van, OtherCar |
+| Nº asientos | `seats-filter` | min/max (2-10) |
+| Nº puertas | `door-filter` | TWO_OR_THREE / FOUR_OR_FIVE / SIX_OR_SEVEN |
+| **Precio** | `price-filter` | min/max (presets 500€…90.000€) |
+| **Primera matriculación** | `first_registration-filter` | min/max por año (1970-2026) |
+| **Kilometraje** | `mileage-filter` | min/max (5.000…200.000 km) |
+| Estado | `condition-filter` | NEW / USED |
+| Mantenimiento | `maintenance_features-filter` | WARRANTY, FULL_SERVICE_HISTORY, NEW_SERVICE, NONSMOKER_VEHICLE |
+| Vendedor | `seller_type-filter` | DEALER / FSBO (particular) / COMM_FSBO (empresa) |
+| ITV válida | `general_inspection-filter` | 0-18 meses |
+| Propietarios | `previous_owners-filter` | Hasta 1/2/3/4 |
+| País | `country-filter` | DE por defecto (importación) |
+| Ciudad/CP | `location-filter` | autocompletar |
+| Radio | `radius-filter` | 10-500 km |
+
+**Filtros de EQUIPAMIENTO (la clave para máximo equipamiento):**
+- En la sección **Extras** (checkbox): `Techo corredizo`, `Techo panorámico`, `Faros LED`, `Llantas de aleación`, `Portón eléctrico`, `Paquete de invierno`, `Suspensión deportiva`, `Luces adaptativas`...
+- En la sección **Interior** (checkbox): **`Panel de instrumentos digital`** (= cuadro digital, el más demandado), **`Pantalla Head-up`**, **`Calefacción de asiento`**, **`Android Auto`**, **`Apple CarPlay`**, **`Sistema de navegación`**, **`Asientos deportivos`**, **`Carga de inducción`**, **`Volante multifunción`**, **`Control de crucero adaptativo`**, **`Cámara de 360°`** (en Sensores).
+- En **Datos técnicos**: combustible (checkboxes Gasolina/Diesel/Híbrido...), **Potencia** (min/max cv o kW), cilindrada, tracción (4x4/delantera/trasera), transmisión (Automático/Semiautomático/Manual).
+
+> **Regla máxima equipamiento (18-ago):** para comparar full vs full, marcar en Interior `Panel de instrumentos digital` + `Pantalla Head-up` + `Calefacción de asiento`, y en Extras `Techo panorámico` + `Faros LED`. Esos 5 checkboxes definen una unidad "full" reproducible.
+
+### 🇪🇸 Selectores ESTABLES de filtros en Coches.net (`id` de acordeón · 18-ago-2026)
+
+> Coches.net **NO tiene página de filtros aparte**: el sidebar (`.mt-SearchSidebar-filters`) son **acordeones** en el propio listado, cada uno con un **`id` estable**. **Los filtros se aplican al marcar** (en vivo, sin botón). Claude expande el grupo clicando su `groupTrigger` y marca los checkboxes.
+
+| Grupo | `id` | Para qué sirve |
+|---|---|---|
+| Tipo de coche | `vehicleTypeGroup` | Nuevo/Km0/Usado |
+| Marca y modelo | `makeGroup` | marca → modelo anidado |
+| Precio | `priceGroup` | desde/hasta |
+| Servicios online | `onlineServicesGroup` | financiación/garantía |
+| Ubicación | `locationGroup` | provincia |
+| Vendedores | `sellerGroup` | particulares/profesionales |
+| Año | `yearGroup` | desde/hasta |
+| Kilómetros | `kmsGroup` | desde/hasta |
+| Carrocería | `bodyTypeGroup` | berlina/SUV/familiar/coupé |
+| Motor | `motorGroup` | combustible + potencia CV |
+| Etiqueta DGT | `environmentalLabelGroup` | CERO/ECO/C/B |
+| Eléctricos | `electricGroup` | autonomía |
+| **Equipamiento** | `equipmentGroup` | **techo solar, cámara, GPS** (el único de equipamiento; SIN cuadro digital) |
+| Color | `colorGroup` | colores |
+
+**Máximo equipamiento en ES (proxy):** marcar en `equipmentGroup` techo solar + cámara (no hay cuadro digital en Coches.net); el nivel full real se confirma en 1-2 fichas (excepción puntual a A17).
+
+### 🇩🇪 Selectores ESTABLES de filtros en kleinanzeigen.de (18-ago-2026)
+
+> kleinanzeigen (URL `https://www.kleinanzeigen.de/s-autos/c216`) tiene **3 tipos de filtro** con selectores distintos:
+
+| Tipo | Selector | Ejemplo |
+|---|---|---|
+| **Atributos (marca/fuel/cambio/tipo/puertas/estado/anbieter)** | **URL directa** `+autos.<attr>_s:<valor>` | `autos.marke_s:seat+autos.fuel_s:benzin` → Seat gasolina. Combinables con `+` |
+| **Rango (precio/km/año/potencia/HU)** | Inputs con **`id` estable** `brwse-attr-*` | Precio `srchrslt-brwse-price-min/-max` · Km `brwse-attr-autos.km_i-min/-max` · Año `brwse-attr-autos.ez_i-min/-max` · Potencia `brwse-attr-autos.power_i-min/-max` |
+| **Equipamiento (checkboxes)** | Inputs con **`id`** `checkbox-autos.*` + botón **"Übernehmen"** `[data-cy="clickable-options-apply-button"]` | Exterior `trailer_coupling_b`/`xenon_led_light_b` · Interior **`sunroof_b` (techo)**/`seat_heating_b`/`navi_b`/`bluetooth_b` · Seguridad `full_service_history_b` |
+
+> ⚠️ **En kleinanzeigen SÍ hay botón aplicar** (Übernehmen) para los checkboxes de equipamiento — a diferencia de Coches.net. Marcar checkboxes → clic en `[data-cy="clickable-options-apply-button"]`.
+> **Máximo equipamiento:** `sunroof_b` + `seat_heating_b` + `xenon_led_light_b` + `navi_b` + `full_service_history_b` → Übernehmen.
+
+### 🇩🇪 Selectores ESTABLES de filtros en AutoUncle (`name` · 18-ago-2026)
+
+> Los `id` de AutoUncle llevan hash (cambian), pero los **`name` son estables** → `[name="..."]`. Agregador: SOLO rotación + validación (A8, NUNCA precio de referencia).
+
+| Filtro | Selector | Valores |
+|---|---|---|
+| Precio | `[name="minPrice"]` / `[name="maxPrice"]` | select 200-100k |
+| Año | `[name="minYear"]` / `[name="maxYear"]` | select 1950-2026 |
+| Combustible | `[name="fuelTypes"]` | `El`·`El_Hybrid`·`Benzin`·`Diesel` |
+| Kilometraje | `[name="minKm"]` / `[name="maxKm"]` | select 0-400k |
+| Cambio | `[name="gear"]` | radio Cualquier/Auto/Manual |
+| **Equipamiento** | `[name="popularOptions"]` | `hasAppleCarPlay`·`hasAndroidAuto`·`hasBluetooth`·`hasSeatHeat`·`hasParkingCamera`·`hasParking`·`hasDistanceControl`·`hasTowBar` |
+
+> **Máximo equipamiento AutoUncle:** `hasAppleCarPlay` + `hasAndroidAuto` + `hasSeatHeat` + `hasParkingCamera` + `hasDistanceControl`. Marca/Modelo/Versión = combobox autocompletado (placeholder "Elija marca").
+
 ### AutoScout24.de — filtros útiles
 - `fregfrom` (URL) o filtro "Erstzulassung von"
 - Potencia: km/Leistung (kW) → acota para no ver versiones base
@@ -268,7 +350,7 @@ Un coche es **chollo priorizable** si tiene ≥3 de estas señales visibles:
 Antes de abrir el navegador, plantéate y di en voz alta:
 
 ```
-1. ¿Qué flujo? (A/B/C/D) → define profundidad
+1. ¿Qué flujo? (A/B/C/D/E) → define profundidad
 2. ¿Qué fuentes tocan? (3 Fase 1 ó 7 Fase 2)
 3. ¿Qué datos mínimos necesito? (precio, km, año, días publicado, CO₂)
 4. ¿Cuál es mi budget de capturas? (A=70, B=50, C=100, D=8+embudo)

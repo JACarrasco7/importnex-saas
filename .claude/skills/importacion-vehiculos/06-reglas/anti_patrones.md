@@ -5,7 +5,7 @@
 
 ---
 
-## 🛡️ Los 16 anti-patrones
+## 🛡️ Los 21 anti-patrones
 
 | # | Anti-patrón | Regla dura |
 |---|---|---|
@@ -25,10 +25,32 @@
 | **A14** | Abandonar el camino en silencio | "El flujo es un camino numerado con waypoint 📍 en cada mensaje. Una pregunta lateral del usuario es una misión lateral: se responde y se RETOMA el paso (↩⃾ Vuelvo al paso N). Si tras una desviación el entregable de la fase no llegó, es un fallo. Un cambio de destino real se declara (🔀 Cambio de camino)." |
 | **A15** | Sondeo D1 con búsqueda web | "El sondeo de modelos del Flujo D se hace SIEMPRE con navegación real a Coches.net + mobile.de con los filtros del encargo. La búsqueda web (snippets/agregadores) NO es método de sondeo: da cifras inconsistentes que contradicen la navegación real (caso 15-ago: Focus ES '~9.900 €' cuando la navegación real daba 3.000-6.990 €; 308 DE '10.980-12.600 €' sin confirmar). Degradado solo con portal bloqueado + reintentos (A2/A7)." |
 | **A16** | Selección manual de modelos en D1 | "El sondeo es por FILTROS, no por modelo: una pasada con los filtros del encargo devuelve TODOS los modelos que caben. Prohibido elegir 3-4 a mano y dejar 'otros por explorar' sin sondear. Listar TODOS los que salen. La potencia es mínimo (≥Xcv) → versiones 125/130/150 valen igual; nunca sondear solo la variante tope." |
+| **A17** | Abrir fichas en comparativas/listados | "Listado-first (17-ago-2026): en comparativas / Flujo C / Flujo E, trabajar con LISTADOS por defecto; abrir ficha de anuncio solo 2-3 unidades como ejemplo (las de mejor precio relativo, confirmado con el usuario). Prohibido perseguir el permalink de cada unidad — quema peticiones sin aportar. Aprovechar los sellos de precio visibles EN el listado (Coches.net: 'Buen precio'=4 / 'Precio justo'=3 · mobile.de/AS24: 'Sehr guter/Guter/Fairer Preis') para elegir las mejores muestras y entender el mercado sin abrir fichas. El detalle individual es de Flujo A/B, cuando el embudo es pequeño." |
+| **A18** | Equipamiento inventado | "Solo publicar equipamiento VERIFICADO en la ficha real del anuncio; lo que viene del slug/título se marca 'por confirmar'. PROHIBIDO inventar equipamiento, sobre todo anacrónico (caso real 17-ago: MINI Cooper 2011 con 'Apple CarPlay', que no existía de fábrica en 2011). Contenido falso en publicaciones públicas = riesgo legal." |
+| **A19** | Acotarse a los ejemplos del usuario | "Los modelos que el usuario nombra como ejemplo de una categoría NO limitan la búsqueda. Explorar TODO el segmento y añadir modelos no nombrados. NUNCA limitarse a los 5-6 ejemplos dados (caso real 17-ago: showstoppers se quedó en los 7 ejemplos, sin añadir i30N, Megane RS, etc.)." |
+| **A20** | Mezclar búsqueda con marketing | "Buscar coches = informe de búsqueda con datos de mercado (nº anuncios, mediana, hueco). Generar anuncios/copy IG-FB/fichas de publicación SOLO si el usuario lo pide explícitamente DESPUÉS. NUNCA inventar el formato de publicación si el usuario solo pidió localizar coches (caso real 17-ago: se entregó un .docx lleno de copy IG/FB cuando el usuario solo quería buscar coches)." |
+| **A21** | Entregar sin enlaces (anuncio + fuentes) | "TODO lo que se entregue lleva el enlace directo al anuncio (ficha del vehículo) y las fuentes con su URL. Candidatos, comparables, comparativas, informes, dossier, JSON y ZIP. Un dato sin su enlace NO se entrega como concluido. Es la regla que el usuario más repite: sin enlaces la entrega NO vale." |
 
 ---
 
 ## 🔍 Detalle de cada uno
+
+### A21 — Entregar sin enlaces (anuncio + fuentes) (17-ago-2026)
+
+**Error típico:** Claude entrega tablas de candidatos con precio/año/km pero sin las URLs de los anuncios, o informes sin la lista de fuentes consultadas con sus enlaces. El usuario no puede verificar nada y tiene que buscar cada coche a mano.
+
+**Regla (la que el usuario más repite — NUNCA saltarla):**
+1. **Cada candidato/comparable lleva SIEMPRE su enlace directo al anuncio** (ficha del vehículo, no búsqueda/filtro — A6). En tablas, en comparativas, en informes, en dossier, en JSON (`mercado.comparables[].url`) y en ZIP.
+2. **Cada informe incluye la sección "Fuentes consultadas"** con todas las fuentes del flujo, su estado (OK / 0 resultados / bloqueada+intentos) y su enlace cuando aplique.
+3. **Un dato/cifra/afirmación sin su enlace NO se entrega como concluido**: se declara cómo se obtuvo o se pide permiso para omitirlo.
+4. **Al cerrar cualquier entrega, re-verificar con lupa**: si cualquier candidato, comparable o fuente carece de enlace, el trabajo está incompleto y hay que completarlo antes de entregar.
+
+**Casos reales:**
+- ❌ Tabla de top 5 sin columna de enlaces → el usuario no puede abrir los anuncios.
+- ❌ Informe de unidad sin "Fuentes consultadas" → no se sabe qué se miró y qué no.
+- ✅ Todo candidato con su ficha (`mobile.de/fahrzeuge/details.html?id=<id>`, slug Coches.net, `/app/item/<id>` Wallapop) + lista de fuentes al final.
+
+---
 
 ### A1 — Descartar por silencio
 
@@ -142,8 +164,13 @@ Antes de cerrar cualquier informe, verificar:
 - [ ] ¿Veredicto contra cuartil bajo también? (A4)
 - [ ] ¿Informe Flujo A tiene precio máximo? (A5)
 - [ ] ¿Todas las tablas tienen columna ENLACE? (A6)
+- [ ] **¿TODO lo entregado lleva enlace al anuncio + fuentes con URL? (A21)**
 - [ ] ¿Sondeo D1 con navegación real, no búsqueda web? (A15)
 - [ ] ¿Informe D2 lista TODOS los modelos del filtro, sin "otros por explorar"? (A16)
+- [ ] ¿En Flujo C/E trabajé con listados, no abriendo fichas de cada unidad? (A17)
+- [ ] ¿El equipamiento publicado está VERIFICADO en la ficha, no inventado? (A18)
+- [ ] ¿Exploré TODO el segmento, no solo los ejemplos del usuario? (A19)
+- [ ] ¿No mezclé búsqueda con marketing (copy IG/FB)? (A20)
 
 ---
 
@@ -160,3 +187,8 @@ Antes de cerrar cualquier informe, verificar:
 | A13 (ext) | Usar rango más restrictivo que el aprobado (2016+ tras aprobar 2012+) | 15-ago-2026 |
 | A15 | Sondeo D1 con búsqueda web — datos inconsistentes vs navegación real | 15-ago-2026 |
 | A16 | Selección manual de modelos en D1 ("otros por explorar") | 15-ago-2026 |
+| A17 | Abrir fichas en comparativas/listados (stock: permalink de cada unidad) | 17-ago-2026 |
+| A18 | Equipamiento inventado/anacrónico (MINI 2011 con "Apple CarPlay") | 17-ago-2026 |
+| A19 | Acotarse a los ejemplos del usuario (no explorar el segmento completo) | 17-ago-2026 |
+| A20 | Mezclar búsqueda con marketing (entregar copy IG/FB sin que lo pidan) | 17-ago-2026 |
+| A21 | Entregar sin enlaces de anuncio/fuentes (la regla que el usuario más repite) | 17-ago-2026 |

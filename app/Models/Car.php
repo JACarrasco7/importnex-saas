@@ -142,8 +142,39 @@ class Car extends Model
         return $query->where('traffic_light', $color);
     }
 
+    /**
+     * El IEDMT (impuesto de matriculación) solo se paga al IMPORTAR un coche
+     * de otro país. Si la unidad es de origen español (compra nacional), no
+     * se devenga: el método devuelve 0 y el coste total no lo suma.
+     *
+     * Sin `pais_origen` (legacy) se asume importación — el negocio es
+     * principalmente DE→ES y así se preserva el comportamiento previo.
+     */
+    public function isImport(): bool
+    {
+        $pais = strtolower((string) ($this->pais_origen ?? ''));
+
+        // Sin origen → asumir importación (comportamiento previo).
+        if ($pais === '') {
+            return true;
+        }
+
+        // Explícitamente español → compra nacional, sin IEDMT.
+        if ($pais === 'es' || str_contains($pais, 'espa')) {
+            return false;
+        }
+
+        // Cualquier otro país (de, alemania, ...) → importación.
+        return true;
+    }
+
     public function calculateIEDMT()
     {
+        // Unidad española: sin IEDMT (no hay importación).
+        if (! $this->isImport()) {
+            return 0;
+        }
+
         if (! $this->co2) {
             return 0;
         }

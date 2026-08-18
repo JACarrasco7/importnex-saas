@@ -150,7 +150,7 @@ class ScoutingMercadoImportTest extends TestCase
             ['X-Import-Token' => $this->token]
         );
 
-        $response->assertStatus(201);
+        $response->assertStatus(200); // actualización → 200 (no 201)
 
         $scouting->refresh();
         $this->assertEquals(3, $scouting->modelos_escaneados);
