@@ -5,6 +5,23 @@ Todos los cambios notables en el skill `importacion-vehiculos` se documentarán 
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [3.2.7] - 2026-08-18 — Detección de chollos con selectores por portal
+
+> **Motivo:** la sección "🎯 Detección de chollos" era texto genérico; ahora cada señal lleva su selector estable (cierra el ciclo filtros → tarjeta → chollo).
+
+### 🎯 Chollos
+- Tabla señales × portal con selectores reales: **rating precio** (mobile.de `PriceRatingBadge--label` VERY_GOOD/GOOD · Coches.net `mt-CardAdPrice-cashLabel` "Buen precio" 4/5 · AutoUncle `aria-label` 4-5) · **días >60** (AutoUncle Clock `._CikIC` · Milanuncios `.ma-AdCardV2-time`) · **bajada** (mobile.de `strike-through-price` · Coches.net `-22%` · kleinanzeigen `p.line-through` · AutoUncle `price-history` · Milanuncios `--iterationInline`) · **VB** (kleinanzeigen · Wallapop "Negociable") · **privado** (mobile.de Privatanbieter · kleinanzeigen `posterType=PRIVATE` · Wallapop private) · **1 dueño** · **TÜV NEU** · **"Por debajo del mercado"** (AutoUncle `._2OgvT`).
+- Lectura rápida de chollo en 1 vistazo por portal + combinación ganadora (rating buen precio + días >60 + privado + VB → CONTACTAR YA).
+
+## [3.2.6] - 2026-08-18 — Tabla maestra de IDs para deduplicación
+
+> **Motivo:** consolidar en `playbook_filtrado.md` §DEDUPLICACIÓN el ID estable de cada portal (antes disperso en cada "leer la tarjeta").
+
+### 🔗 Dedup
+- **Tabla maestra ID por portal**: mobile.de `a[data-testid$="-link"]` href `id=<ID>` · Coches.net `div[data-ad-id]` · kleinanzeigen `article[data-adid]` · AutoUncle `/es/d/<ID>-...` · Wallapop `/item/slug-<ID>` · Milanuncios `/marca-modelo-<ID>.htm`.
+- Regla: **ID** = mismo anuncio 2x en un portal (dedup inmediato, dobles pasadas kW); **huella** (año/km±2%/cv/precio±3%/combustible) = mismo coche entre portales distintos (los IDs no coinciden). Foto + huella exacta = duplicado seguro (mismo concesionario).
+- **AutoScout24 queda FUERA del estudio** (portal no prioritario para el usuario).
+
 ## [3.2.5] - 2026-08-18 — Contenedor de anuncios mobile.de ES (tarjeta real)
 
 > **Origen:** el usuario facilitó el HTML del listado `div[data-testid="card-layout-wrapper"]` (`top-`/`base-`/`tic-result-listing-N`, con orden `sb=&od=` y paginación).

@@ -117,6 +117,47 @@
 
 ---
 
+## 🚗 Seat León gasolina (2016+) — SIN BANDA medido
+
+### Seat León gasolina 2016+ · 2026-08-18 (control de año + sin banda)
+- **Tipo:** MODELO (control: 2019+ en ambos mercados, SIN banda)
+- **N anuncios DE:** 753 · **N anuncios ES:** 4.727
+- **Mediana DE:** 20.920 € · **Mediana ES:** 19.400 €
+- **Hueco bruto:** −7,8% (ES mejor) → **Hueco neto:** −15,4%
+- **Suelo verificado:** DE 8.000 € · ES 8.000 € (origen `categorias.gemas_economicas`)
+- **Veredicto:** 🟡 Dudoso para importación (ES mejor) — **gema nacional** (compra cliente directo en ES)
+- **Mejor candidato (si importara):** habría que esperar — la banda 8-17k con control 2019+ dio −7,7% neto; sin banda es peor
+- **Fuentes cubiertas:** 2/7 (mobile.de + Coches.net) · **Peticiones usadas:** ~10
+- **Refrescar antes de:** 2026-09-14 (caduca gemas +4 sem)
+- **Notas:**
+  - **CONFIRMA** el patrón "marca nacional": León gasolina más barato en ES (Martorell, stock abundante).
+  - **NO descartar la regla** — se mantiene la corrección 18-ago de la Cupra (suelo DE 15-16k → ahí sí hay hueco real, distinto al caso León gasolina).
+  - Map: `datos_mercado.json → hueco_sin_banda[1]` + `categorias.gemas_economicas[5]`.
+
+---
+
+## 🚙 Cupra León — pendiente RE-MEDIR sin banda + máximo equipamiento (18-ago)
+
+### Cupra León (veredicto NO fiable)
+- **Tipo:** MODELO · **Última medición:** 2026-08-17 (mediana con banda `≥20k` en AMBOS mercados)
+- **N anuncios DE:** 5.321 · **N anuncios ES:** 655 (586 son 2023+)
+- **Mediana DE:** 30.790 € · **Mediana ES:** 27.970 €
+- **Hueco bruto:** −10,1% (banda ≥20k) → **Hueco neto:** −20,6%
+- **Suelo registrado:** DE 15.500 € · ES 19.500 €
+- **Veredicto actual:** 🟢 verde (medición sesgada, NO de fiar)
+- **Motivo RE-MEDIR:** la banda ≥20k recortó la cola barata DE → sesgo metodológico (mismo error que Golf v2). La regla Seat/Cupra dice **mirar el suelo sin banda**: DE 15-16k vs ES 19,5k → **hueco POSITIVO probable**.
+- **Refrescar antes de:** 2026-08-31 (showstoppers caduca)
+- **Plan:**
+  1. ES (Coches.net): `cupra-leon?MinPrice=15500&fi=Price&or=1` SIN techo de banda → recoger mediana real, marca equipamiento (en Coches.net solo hay techo solar como proxy full).
+  2. DE (mobile.de): `ms=3;6;;&sb=p&od=up` SIN `p=` mínimo + checkboxes full (cuadro digital+Head-up+calefacción+techo+LED) + `pw=:` para aislar VZ. Suelo 15.500 € abajo.
+  3. Recalcular hueco bruto y neto (coste_importacion 2.929 + IEDMT 1.800).
+  4. Reemplazar entrada en `datos_mercado.json` con `fuente_medicion: estudio`, `pendiente_fase2: false`, `confianza_precio: 3-4`.
+- **Notas:**
+  - Categoría: showstopper · segmento: deportivo · rango: 25k+ · tipo_cliente: impacto_showstopper / deporte_ocio / premium_imagen.
+  - Si el nuevo hueco sale ≥10% bruto y ≥0% neto → verde real con suelo de 15.500 €.
+
+---
+
 ## 🚗 VW Golf GTI (pendiente)
 
 ### Pendiente medir

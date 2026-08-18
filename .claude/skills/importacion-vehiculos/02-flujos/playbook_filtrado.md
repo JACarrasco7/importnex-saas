@@ -481,20 +481,24 @@ Referencias rápidas:
 
 ---
 
-## 🎯 Detección de chollos (señales combinadas)
+## 🎯 Detección de chollos (señales combinadas + selectores por portal)
 
-Un coche es **chollo priorizable** si tiene ≥3 de estas señales visibles:
+Un coche es **chollo priorizable** si tiene ≥3 señales. Cada señal ya tiene **selector estable** (ver "leer la tarjeta" de cada portal):
 
-1. **Etiqueta "Sehr guter Preis"** (mobile.de/AS24) o "Buen precio" (Coches.net)
-2. **Días en venta >60** (AutoUncle/kleinanzeigen) → vendedor agotado, regateable
-3. **Bajada de precio reciente** (AutoUncle %, kleinanzeigen precio anterior)
-4. **"VB"** o "Verhandlungsbasis" (kleinanzeigen) → negociable explícito
-5. **Privatanbieter** sin concesionario → sin margen comercial
-6. **2. Hand** (mobile.de) o "1 Hand" → un dueño, suele cuidarse mejor
-7. **TÜV NEU** o "ITV nueva" → gastado en homologar, señala buen estado
-8. **Precio < cuartil bajo** del modelo
+| # | Señal | mobile.de | Coches.net | kleinanzeigen | AutoUncle | Wallapop | Milanuncios |
+|---|---|---|---|---|---|---|---|
+| 1 | **Rating precio del portal** | `PriceRatingBadge--label`: "Muy buen precio"(VERY_GOOD)·"Buen precio"(GOOD) | `mt-CardAdPrice-cashLabel`: "Buen precio"(4/5)·"Precio justo"(3/5) | — | `aria-label` del enlace "\| Buen precio" (4=Buen, 5=Super) | — | — |
+| 2 | **Días en venta >60** (rotación) | — | — | — | botón Clock `._CikIC` "49" | — | `.ma-AdCardV2-time` |
+| 3 | **Bajada reciente** | `strike-through-price` (tachado) | `mt-CardAdPrice-priceDropPercentage` "-22%" + `...OriginalPrice` | `p.line-through` (tachado) | `[data-testid="listing-item--price-history"]` "↓ -X%" | — | `.ma-AdPrice--iterationInline` + `[aria-label="Bajada de precio"]` |
+| 4 | **Negociable (VB)** | — | — | "26.000 € VB" (VB=Verhandlungsbasis) | — | "Negociable" | "Precio a consultar" |
+| 5 | **Privado sin concesionario** | `seller-info`: "Privatanbieter" | — | `posterType=PRIVATE` (JSON) | — | `seller_type=private` | — |
+| 6 | **1 dueño / 2. Hand** | `listing-details-attributes` `<strong>Sin accidentes</strong>`/2. Hand | tags | — | — | — | tags "1 dueño" |
+| 7 | **TÜV NEU / ITV nueva** | `maintenance_features-filter` `NEW_SERVICE` | tags "En stock" | badge "TÜV NEU" | — | — | `.ma-AdCardListingV2Extras-item` (garantía) |
+| 8 | **Por debajo del mercado X €** | — | — | — | `._CikIC` → `span._2OgvT` "2.330 €" | — | — |
 
-**Combinación ganadora:** etiqueta buen precio + días >60 + privado + VB → **CONTACTAR YA**.
+> **Lectura rápida de chollo en 1 vistazo por portal:** mobile.de = rating `PriceRatingBadge` + tachado · Coches.net = "Buen precio" + "-%" · kleinanzeigen = VB + tachado · AutoUncle = rating 4-5 + "Por debajo del mercado" + días · Milanuncios = "Bajada de precio" · Wallapop = negociable (poco fiable, validar por keywords).
+
+**Combinación ganadora:** rating buen precio + días >60 + privado + VB → **CONTACTAR YA**.
 
 ---
 
@@ -572,6 +576,25 @@ Si huella ya existe → es duplicado → contar 1 vez, anotar fuentes
 ```
 
 **Output:** "8 coches únicos en España (12 anuncios contando duplicados: 4 en Wallapop, 5 en Milanuncios, 3 en Coches.net)"
+
+### Tabla maestra — ID estable por portal (18-ago-2026)
+
+> Los IDs NO son comunes entre portales (cada uno publica el suyo). Esta tabla sirve para **identificar de forma estable cada anuncio dentro de su portal** (evitar contar 2x al mezclar listados/dobles pasadas) y para localizar el mismo coche al cruzar por huella.
+
+| Portal | Cómo extraer el ID | Formato |
+|---|---|---|
+| mobile.de | `a[data-testid$="-link"]` href | `detalles.html?id=<ID>` (numérico) |
+| Coches.net | `div[data-ad-id]` | numérico (`70666366`) |
+| kleinanzeigen | `article[data-adid]` | numérico (`3483153805`) |
+| AutoUncle | `a[href^="/es/d/"]` | `/es/d/<ID>-slug-...` (primer segmento) |
+| Wallapop | `a[href^="/item/"]` | `/item/slug-<ID>` (último segmento) |
+| Milanuncios | `.ma-AdCardListingV2-TitleLink[href]` | `/marca-modelo-<ID>.htm` (número del slug) |
+| AutoScout24 | — | (portal NO prioritario, fuera del estudio) |
+
+**Cuándo usar ID vs huella:**
+- **ID** → mismo anuncio visto 2 veces en un portal (mismo concesionario, listados mezclados, doble pasada kW) → dedup inmediato.
+- **Huella** → mismo coche en portales DISTINTOS (los IDs no coinciden) → el cruce real.
+- Regla extra: el mismo concesionario suele usar la misma foto en varios portales → foto + huella exacta = duplicado seguro.
 
 **Cuándo aplicar:**
 - **Fase 1:** Después de recolectar Coches.net + mobile.de + AutoUncle
