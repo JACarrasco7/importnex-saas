@@ -1,6 +1,6 @@
 ---
 name: importacion-vehiculos
-version: 3.1.7
+version: 3.2.0
 description: >
   Negocio JJ Import Motors (Huelva): servicio de búsqueda e importación de coches
   (desde Alemania y dentro de España). NO compra stock, solo oferta el servicio

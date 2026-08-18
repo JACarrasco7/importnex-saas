@@ -173,9 +173,9 @@ class PlantillasValoracionRenderTest extends TestCase
             'traffic_light' => 'green',
         ]);
 
-        // 1px GIF en base64 para simular fotos del coche.
+        // 1px GIF en base64 para simular fotos del coche (5 = 1 hero + 4 grid).
         $gif = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-        $fotos = array_fill(0, 4, $gif);
+        $fotos = array_fill(0, 5, $gif);
 
         $html = View::make('jj-import.folleto-coche', [
             'e' => $e,
@@ -190,21 +190,26 @@ class PlantillasValoracionRenderTest extends TestCase
         // Portada / precio protagonista
         $this->assertStringContainsString('FOLLETO DEL COCHE', $html);
         $this->assertStringContainsString('14.900 €', $html);
-        // KPI grid
+        // KPI grid (protagonistas: precio, km, año — sin duplicar ficha)
         $this->assertStringContainsString('Kilómetros', $html);
         $this->assertStringContainsString('120.000', $html);
+        $this->assertStringContainsString('Odómetro verificado', $html);
         // Veredicto con semáforo verde
         $this->assertStringContainsString('Veredicto:', $html);
         $this->assertStringContainsString('Excelente compra', $html);
         $this->assertStringContainsString('#10b981', $html);
-        // Galería: hero + grid de 4 (primera grande + 3 del grid)
+        // Galería: hero + grid de 4 (clase four, primera grande 2x2)
         $this->assertStringContainsString('hero-photo', $html);
-        $this->assertStringContainsString('gallery', $html);
-        $this->assertStringContainsString('class="shot"', $html);
-        // Ficha técnica completa (SPEC grid)
+        $this->assertStringContainsString('gallery four', $html);
+        $this->assertSame(4, substr_count($html, 'class="shot"'));
+        // Ficha técnica completa: el resto de specs (NO repite Año/KM)
         $this->assertStringContainsString('Ficha técnica', $html);
         $this->assertStringContainsString('spec-row', $html);
         $this->assertStringContainsString('200 CV', $html);
+        $this->assertStringContainsString('Gasolina', $html);
+        // Año y KM NO aparecen en la ficha técnica (solo en KPI) → 1 ocurrencia cada uno
+        $this->assertSame(1, substr_count($html, 'Primera matriculación'), 'Año solo debe estar en el KPI');
+        $this->assertStringNotContainsString('spec-row">KM', $html, 'KM no debe repetirse en ficha técnica');
         // Highlights como tarjetas
         $this->assertStringContainsString('arg-card', $html);
         $this->assertStringContainsString('Coche en perfecto estado', $html);

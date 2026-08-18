@@ -345,12 +345,59 @@ https://www.milanuncios.com/coches-de-segunda-mano/?anoh=2013&cajacambio=manual&
 ### Cabecera
 - Contador visible: "**8.991 anuncios**" + "Ordenado por relevancia".
 
-### Tarjeta de anuncio
-```
-"Precio al contado (IVA Incluido)"       ← contado visible
-€<precio contado> | (opcional cuota)
-€<precio> | <MARCA - MODELO> | <km> kms | <año>
-```
+### 🧭 Modal de filtros — selectores estables (18-ago-2026)
+
+> Botón "**Filtros**" abre el modal `.sui-MoleculeModal` (`.ma-FormFiltersPopoverModal`, título `#ma-FormFiltersPopover-title` "Filtros"). Los campos desplegables (marca, etiqueta, combustible, plazas, color) requieren **3 pasos**: clic en el campo (`[data-testid=...]`) → seleccionar opción/checkbox → botón "**Aplicar filtro**" (`.ma-FormSearchButtonBar-button`). Al final confirmar con el botón grande `[data-testid="FORM_LIST_FILTERS_V2_SEARCH_BUTTON"]` ("Ver +10.000 anuncios").
+
+| Filtro | Selector | Valores/uso |
+|---|---|---|
+| Categoría | `[data-testid="cat"]` · buscador `#categories-category-tree-picker-suggester-input` | `[data-value="Coches"]` (default) |
+| **Marca** | `[data-testid="carMake"]` · buscador `input[placeholder="Buscar marca"]` | option `[data-value="VOLKSWAGEN"]`, `[data-value="CUPRA"]`, `[data-value="SEAT"]`, `[data-value="AUDI"]`... (MAYÚSCULAS) |
+| Ubicación | `[data-testid="location"]` | "Toda España" o provincia |
+| Contado/Financiado | radio `aria-labelledby="financedPrice"` | `[aria-label="Contado"]` (defecto) / `[aria-label="Financiado"]` |
+| **Precio** | `#price-from` / `#price-to` | inputs `type=number` directos (€) |
+| Anuncios con rebaja | switch `#isPriceDropped` | solo anuncios que bajaron de precio |
+| **Kilómetros** | `#kms-from` / `#kms-to` | inputs directos (km) |
+| **Año** | `#year-from` / `#year-to` | inputs directos |
+| Potencia | `#potencia-from` / `#potencia-to` | inputs directos (CV) |
+| Cambio | radio `aria-labelledby="cajacambio"` | `[aria-label="Manual"]` / `[aria-label="Automático"]` |
+| Etiqueta ambiental | `[data-testid="environmentalLabel"]` | checkboxes `#0`(CERO) · `#ECO` · `#C` · `#B` · `#NO_LABEL`(Etiqueta A/sin) |
+| Combustible | `[data-testid="fuels"]` | checkboxes `#diesel` · `#gasoline` · `#electric` · `#hybrid` · `#plug_in_hybrid` · `#glp` · `#other` |
+| Tipo vendedor | radio `aria-labelledby="vendedor"` | `[aria-label="Particular"]` / `[aria-label="Profesional"]` |
+| Con garantía | switch `#hasWarranty` | garantía 1-2 años |
+| Certificado marca | switch `#isCertified` | revisado por expertos |
+| Nº puertas | radio `aria-labelledby="numpuertas"` | `[aria-label="2"]`-`[aria-label="5"]` |
+| Plazas | `[data-testid="seats"]` | checkboxes `#FOUR_SEATS` · `#FIVE_SEATS`... |
+| Color | `[data-testid="color"]` | option `[data-value="Negro"]`, `[data-value="Blanco"]`... |
+| Tipo anuncio | radio `aria-labelledby="demanda"` | `[aria-label="Oferta"]` (defecto) / `[aria-label="Demanda"]` |
+
+> **Botones:** limpiar `.ma-FormListFiltersV2-cleanFilters` · aceptar `[data-testid="FORM_LIST_FILTERS_V2_SEARCH_BUTTON"]` · cerrar `.sui-MoleculeModal-close`.
+> ⚠️ **Milanuncios NO tiene filtro de equipamiento** → máximo equipamiento por `keywords=` o validando fichas. Suele ser **negociable** (chollos ES).
+
+### 🃏 Contenedor de anuncios — selectores estables (18-ago-2026)
+
+> Listado = `.ma-AdList` (`data-testid="AD_LIST"`). Cada tarjeta = `article.ma-AdCardV2` (`data-testid="AD_CARD"`). Scroll infinito: los huecos vacíos son skeletons `.sui-PerfDynamicRendering-placeholder` (`[data-testid="cardSkeleton"]`) → **ignorar**.
+
+| Dato | Selector | Notas |
+|---|---|---|
+| Título | `h2.ma-AdCardV2-title` (en `.ma-AdCardListingV2-TitleLink`) | marca modelo (ej. "NISSAN JUKE...") |
+| Enlace ficha | `.ma-AdCardListingV2-TitleLink[href]` | `/marca-de-segunda-mano/modelo-ID.htm` → el **ID numérico** sirve para deduplicar |
+| Fotos | `figcaption.ma-AdCardV2-photoCaption` | nº de fotos (número) |
+| Badge patrocinado | `.ma-AdCardV2-headerListing-caption--highlighted` ("Destacado") | ⚠️ **NO contar como señal de precio** |
+| **Precio contado** | `.ma-AdMultiplePrice` → bloque `.ma-AdMultiplePrice-cashPriceTitle` "Precio al contado" → `.ma-AdPrice-value` | **usar SIEMPRE el contado** (IVA incluido) |
+| Precio financiado | `.ma-AdMultiplePrice-financedPriceTitle` → su `.ma-AdPrice-value` | ignorar (infla el precio) |
+| **Bajada de precio** | `.ma-AdPrice--iterationInline`: `ma-AdPrice-iterationPreviousValue` (tachado) → `ma-AdPrice-iterationNewValue` (nuevo) + `[role="img"][aria-label="Bajada de precio"]` | 🎯 **señal de chollo/negociable** |
+| Ubicación | `address.ma-AdLocation` `.ma-AdLocation-text` | ej. "Betera (Valencia)" |
+| Extras | `.ma-AdCardListingV2Extras-item` | ej. "Garantía 12 meses (1 año)" |
+| **Km/año/combustible** | `ul.ma-AdTagList li .ma-AdTag-label` (`title`) | 3 tags: "97.000 kms" · "2017" · "gasolina" |
+| Descripción | `p.ma-AdCardV2-description` | texto del vendedor |
+| Tiempo | `p.ma-AdCardV2-time` | ej. "Hace 3 días" |
+| Favorito | `button[data-testid="AD_CARD_FAVORITE_BUTTON"]` | ignorar |
+
+> ⚠️ **Tarjeta incompleta** (ej. NISSAN JUKE del HTML: sin `href` en el título, sin `.ma-AdCardV2-time`, sin tags): anuncio aún sin montar o placeholder → `man`.
+> ⚠️ **Carrusel `.ma-ContentListingCarousel`** (tarjetas `.ma-AdCardCarousel`, "Anuncios recientes de particulares"): son **recomendaciones, NO parte de la búsqueda** → no contar.
+> ⚠️ **Anuncios publicitarios**: `.ma-ContentListing-advertising-banner` / `-native` (`#ad-inline-*`) → ignorar siempre.
+> 🎯 **Filtros one-tap** `.ma-FormOneTapFilter-tag`: "Con garantía" · "Con garantía de 1 año" · "Con garantía de 2 años" · "Con posibilidad de financiación" · "Coches revisados por expertos".
 
 ### Filtros
 Barra: Coches · Toda España · Precio · Todas las marcas. Botón "Filtros" abre modal.

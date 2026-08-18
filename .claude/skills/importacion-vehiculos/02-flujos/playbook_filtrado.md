@@ -274,6 +274,58 @@ PASO 3 — CRUCE (unión, NO intersección)
 - `Page Down` 5-8 veces hasta agotar scroll
 - Filtra por provincia si el cliente es local
 
+### 🇪🇸 Selectores ESTABLES del modal de filtros Milanuncios (18-ago-2026)
+
+> Modal `.sui-MoleculeModal` (`.ma-FormFiltersPopoverModal`). Los campos desplegables (marca, etiqueta, combustible, plazas, color) requieren **3 pasos**: clic en el campo (`[data-testid=...]`) → seleccionar opción → botón **"Aplicar filtro"** (`.ma-FormSearchButtonBar-button`). Confirmar con el botón inferior `[data-testid="FORM_LIST_FILTERS_V2_SEARCH_BUTTON"]` ("Ver +N anuncios").
+
+| Filtro | Selector | Valores |
+|---|---|---|
+| Categoría | `[data-testid="cat"]` + buscador `#categories-category-tree-picker-suggester-input` | `[data-value="Coches"]` |
+| **Marca** | `[data-testid="carMake"]` + buscador `input[placeholder="Buscar marca"]` | option `[data-value="VOLKSWAGEN"]` `[data-value="CUPRA"]` `[data-value="SEAT"]` `[data-value="AUDI"]` (MAYÚSCULAS) |
+| Ubicación | `[data-testid="location"]` | "Toda España" / provincia |
+| Contado/Financiado | radio `role="radiogroup" aria-labelledby="financedPrice"` | botón `[aria-label="Contado"]` / `[aria-label="Financiado"]` |
+| **Precio** | `#price-from` / `#price-to` (type=number) | rango directo € |
+| Anuncios con rebaja | switch `#isPriceDropped` (`role="switch"`) | bajadas de precio |
+| **Km** | `#kms-from` / `#kms-to` | rango directo |
+| **Año** | `#year-from` / `#year-to` | rango directo |
+| Potencia | `#potencia-from` / `#potencia-to` | rango directo (CV) |
+| Cambio | radio `aria-labelledby="cajacambio"` | `[aria-label="Manual"]` / `[aria-label="Automático"]` |
+| Etiqueta ambiental | `[data-testid="environmentalLabel"]` + checkbox `#0`(CERO) `#ECO` `#C` `#B` `#NO_LABEL`(A) | multi + "Aplicar filtro" |
+| Combustible | `[data-testid="fuels"]` + checkbox `#diesel` `#gasoline` `#electric` `#hybrid` `#plug_in_hybrid` `#glp` `#other` | multi + "Aplicar filtro" |
+| Tipo vendedor | radio `aria-labelledby="vendedor"` | `[aria-label="Particular"]` / `[aria-label="Profesional"]` |
+| Con garantía | switch `#hasWarranty` | |
+| Certificado marca | switch `#isCertified` | |
+| Puertas | radio `aria-labelledby="numpuertas"` | `[aria-label="2"]`..`[aria-label="5"]` |
+| Plazas | `[data-testid="seats"]` + checkbox `#FOUR_SEATS` `#FIVE_SEATS`... | multi + "Aplicar filtro" |
+| Color | `[data-testid="color"]` | option `[data-value="Negro"]` `[data-value="Blanco"]`... |
+| Tipo anuncio | radio `aria-labelledby="demanda"` | `[aria-label="Oferta"]` (defecto) / `[aria-label="Demanda"]` |
+
+> **Botones:** limpiar `.ma-FormListFiltersV2-cleanFilters` · aceptar `[data-testid="FORM_LIST_FILTERS_V2_SEARCH_BUTTON"]` · cerrar `.sui-MoleculeModal-close`.
+> ⚠️ **Milanuncios NO tiene filtro de equipamiento** → máximo equipamiento por `keywords=` o validando fichas.
+> **Suelo:** los filtros también funcionan en URL (`hasta`/`desde`, `anoh`, `kilometersTo`, `fuels`, `cajacambio`, `engineHpTo`, `puertas`) — ver `paginas_reales.md`.
+
+### 🇪🇸 Milanuncios — leer la tarjeta (18-ago-2026)
+
+| Dato | Selector | Notas |
+|---|---|---|
+| Contenedor | `.ma-AdList` (`data-testid="AD_LIST"`) | tarjetas `article.ma-AdCardV2` (`data-testid="AD_CARD"`) |
+| Título | `h2.ma-AdCardV2-title` | en `.ma-AdCardListingV2-TitleLink` |
+| Enlace ficha | `.ma-AdCardListingV2-TitleLink[href]` | `/marca-de-segunda-mano/modelo-ID.htm` → ID para **deduplicar** |
+| Patrocinado | `.ma-AdCardV2-headerListing-caption--highlighted` | "Destacado" → NO contar como señal de precio |
+| **Precio contado** | `.ma-AdMultiplePrice-cashPriceTitle` → `.ma-AdPrice-value` | ⚠️ usar SIEMPRE contado (IVA incl) |
+| Precio financiado | `.ma-AdMultiplePrice-financedPriceTitle` → `.ma-AdPrice-value` | ignorar (infla) |
+| **Bajada** | `.ma-AdPrice-iterationPreviousValue` → `.ma-AdPrice-iterationNewValue` | 🎯 chollo/negociable |
+| Km/año/comb. | `ul.ma-AdTagList li .ma-AdTag-label[title]` | 3 tags: km · año · combustible |
+| Extras | `.ma-AdCardListingV2Extras-item` | ej. "Garantía 12 meses" |
+| Ubicación | `address.ma-AdLocation` `.ma-AdLocation-text` | |
+| Descripción | `p.ma-AdCardV2-description` | |
+| Tiempo | `p.ma-AdCardV2-time` | "Hace N días" |
+| Skeletons | `.sui-PerfDynamicRendering-placeholder` `[data-testid="cardSkeleton"]` | scroll infinito → ignorar |
+| Carrusel | `.ma-ContentListingCarousel` `.ma-AdCardCarousel` | recomendaciones → NO contar |
+| Ads | `.ma-ContentListing-advertising-*` (`#ad-inline-*`) | ignorar siempre |
+
+> Tarjeta sin `href` + sin `.ma-AdCardV2-time` = anuncio incompleto → `man`. One-tap: `.ma-FormOneTapFilter-tag` (garantías, financiación, revisados).
+
 ### kleinanzeigen — descubrir chollos
 - **Sort "Niedrigster Preis"** → chollos arriba
 - Mirar **precio actual vs precio anterior** (bajada visible en tarjeta)

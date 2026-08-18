@@ -5,6 +5,33 @@ Todos los cambios notables en el skill `importacion-vehiculos` se documentarán 
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [3.2.0] - 2026-08-18 — Contenedor de anuncios Milanuncios (tarjeta real)
+
+> **Origen:** el usuario facilitó el HTML del listado `.ma-AdList`. Hasta ahora solo se documentaba el modal de filtros; falta la **lectura de la tarjeta** (precio contado, bajada, tags, dedup).
+
+### 🇪🇸 Leer tarjeta Milanuncios
+- **`paginas_reales.md`** — sección "Contenedor de anuncios — selectores estables": `.ma-AdCardV2` (`data-testid="AD_CARD"`), precio contado vs financiado (usar **contado**, IVA incl.), bajada de precio `.ma-AdPrice-iteration*` (chollo/negociable), tags `.ma-AdTag-label`, ID del href para **deduplicar**, skeletons/carrusel/ads a ignorar.
+- **`playbook_filtrado.md`** — tabla "Milanuncios — leer la tarjeta".
+- Claves: patrocinado "Destacado" NO cuenta como señal · tarjeta sin `href`/sin tiempo = `man` · carrusel = recomendaciones.
+
+## [3.1.9] - 2026-08-18 — Selectores estables del modal de filtros Milanuncios
+
+> **Origen:** el usuario facilitó el HTML del modal `.sui-MoleculeModal` (`ma-FormFiltersPopoverModal`). Campos desplegables = 3 pasos (clic campo → opción → "Aplicar filtro").
+
+### 🇪🇸 Selectores Milanuncios
+- **`paginas_reales.md`** — sección "Modal de filtros — selectores estables": categoría/marca/ubicación por `data-testid`, rangos directos `#price-from`/`#price-to`·`#kms-from`·`#year-from`·`#potencia-from`, switches `#isPriceDropped`·`#hasWarranty`·`#isCertified`, radios por `aria-label`, etiqueta DGT (`#0`/`#ECO`/`#C`/`#B`/`#NO_LABEL`), combustible, plazas (`#FOUR_SEATS`...), color, tipo anuncio.
+- **`playbook_filtrado.md`** — tabla "Selectores ESTABLES del modal de filtros Milanuncios".
+- ⚠️ **Milanuncios NO tiene filtro de equipamiento** → máximo equipamiento por `keywords=` o validando fichas. Negociable (chollos ES).
+
+## [3.1.8] - 2026-08-18 — Selectores estables de filtros Wallapop
+
+> **Origen:** el usuario facilitó el HTML del sidebar de Wallapop (`/coches-segunda-mano`). Usa **web components** `walla-*` con `name`/`id` estables.
+
+### 🇪🇸 Selectores Wallapop
+- **`paginas_reales.md`** — sección "Sidebar de filtros — sliders + radios/checkboxes estables": rangos con `<wallapop-range-selector>` (`#fromSelector`/`#toSelector`), fecha (`time_filter-radio-group-single-selection`), marca/modelo (radio por `id`), etiqueta DGT (`zero`/`eco`/`c`/`b`), carrocería, combustible, cambio, vendedor (`seller_type-radio-group-single-selection`).
+- **`playbook_filtrado.md`** — tabla "Selectores ESTABLES de filtros en Wallapop".
+- ⚠️ **Wallapop NO tiene filtro de equipamiento** → máximo equipamiento por `keywords=` o validando fichas.
+
 ## [3.1.7] - 2026-08-18 — Selectores estables de filtros AutoUncle (`name`)
 
 > **Origen:** el usuario facilitó el HTML del sidebar de AutoUncle. Los `id` llevan hash (cambian), pero los **`name` son estables** → `[name="..."]`. AutoUncle sigue siendo solo rotación/validación (A8: nunca precio de referencia), pero aporta filtro de **equipamiento** (`popularOptions`).

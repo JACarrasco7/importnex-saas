@@ -59,6 +59,25 @@
         }
     }
 
+    // La ficha técnica NO repite las protagonistas del KPI (Año / KM):
+    // esas ya van arriba en grande. El resto (color, puertas, CO2, VIN...)
+    // queda en la tabla técnica para no duplicar.
+    $specs_table = [];
+    $kpi_keys = ['año', 'km', 'kilometro', 'kilómetro'];
+    foreach ($all_specs as $spec) {
+        $l = mb_strtolower($spec['k']);
+        $dup = false;
+        foreach ($kpi_keys as $kl) {
+            if (str_contains($l, $kl)) {
+                $dup = true;
+                break;
+            }
+        }
+        if (! $dup) {
+            $specs_table[] = $spec;
+        }
+    }
+
     $titulo = $e->uno('TITULO') ?: trim(($car->brand ?? '').' '.($car->model ?? ''));
     $claim  = $e->uno('CLAIM');
 
@@ -166,17 +185,23 @@
         .hero-photo .price-float .value { font-size: 30px; font-weight: 900; color: #E8590C; line-height: 1.05; text-shadow: 0 2px 10px rgba(0,0,0,0.6); }
         .hero-photo .price-float .caption { font-size: 9.5px; color: #cbd5e1; }
 
-        /* ── GALERÍA (adaptativa: 1 → hero, ≥2 → grid) ────────── */
+        /* ── GALERÍA (adaptativa, hasta 5 fotos) ────────────────── */
         .gallery { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
         .gallery .shot {
             border-radius: 10px; overflow: hidden; border: 1px solid rgba(143,163,217,0.25);
             background: #14265a; aspect-ratio: 4/3;
         }
         .gallery .shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        /* Con 2-3 fotos la primera destaca en grande */
-        .gallery.multi .shot:first-child { grid-column: span 2; grid-row: span 2; }
+        /* 2 fotos → una ancha a lo ancho */
+        .gallery.one .shot { grid-column: span 4; }
+        /* 3 fotos → dos medianas lado a lado */
+        .gallery.two .shot { grid-column: span 2; }
+        /* 4 fotos → primera destacada ancha + 2 normales */
+        .gallery.three .shot:first-child { grid-column: span 2; }
+        /* 5 fotos → primera grande 2x2 + 3 normales (grid perfecto) */
+        .gallery.four .shot:first-child { grid-column: span 2; grid-row: span 2; }
 
-        /* ── KPI GRID ──────────────────────────────────────────── */
+        /* ── KPI GRID (4 protagonistas) ─────────────────────────── */
         .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
         .kpi-card {
             background: linear-gradient(180deg, rgba(15,23,42,0.85) 0%, rgba(15,23,42,0.55) 100%);
@@ -309,24 +334,34 @@
         </div>
         @endif
 
-        {{-- ── GALERÍA (2+ fotos) ────────────────────────────────── --}}
-        @if(count($fotos) >= 2)
-        <div class="gallery {{ count($fotos) < 4 ? 'multi' : '' }}">
-            @foreach($fotos as $i => $foto)
-                @if($i > 0 && $i < 4)
+        {{-- ── GALERÍA (hasta 5 fotos: 1 hero + 4 grid) ─────────── --}}
+        @php
+            $grid_fotos = array_slice($fotos, 1, 4);
+            $grid_count = count($grid_fotos);
+            $gallery_class = $grid_count === 1 ? 'one' : ($grid_count === 2 ? 'two' : ($grid_count === 3 ? 'three' : 'four'));
+        @endphp
+        @if($grid_count > 0)
+        <div class="gallery {{ $gallery_class }}">
+            @foreach($grid_fotos as $foto)
                 <div class="shot"><img src="{{ $foto }}" alt="{{ $titulo }}"></div>
-                @endif
             @endforeach
         </div>
         @endif
 
-        {{-- ── KPI GRID ───────────────────────────────────────────── --}}
+        {{-- ── KPI GRID (4 protagonistas, sin duplicar ficha) ────── --}}
         <div class="kpi-grid">
             @if($kpi_precio)
                 <div class="kpi-card">
                     <div class="k">Precio final</div>
                     <div class="v"><span style="color:#E8590C;">{{ $kpi_precio }}</span></div>
                     <div class="s">Llave en mano</div>
+                </div>
+            @endif
+            @if($kpi_ahorro)
+                <div class="kpi-card">
+                    <div class="k">Ahorro</div>
+                    <div class="v" style="color:#4ade80;">{{ $kpi_ahorro }}</div>
+                    <div class="s">vs. mercado español</div>
                 </div>
             @endif
             @if($kpi_km)
@@ -343,24 +378,6 @@
                     <div class="s">Primera matriculación</div>
                 </div>
             @endif
-            @if($kpi_fuel)
-                <div class="kpi-card">
-                    <div class="k">Combustible</div>
-                    <div class="v">{{ $kpi_fuel }}</div>
-                </div>
-            @endif
-            @if($kpi_power)
-                <div class="kpi-card">
-                    <div class="k">Potencia</div>
-                    <div class="v">{{ $kpi_power }}</div>
-                </div>
-            @endif
-            @if($kpi_gearbox)
-                <div class="kpi-card">
-                    <div class="k">Cambio</div>
-                    <div class="v">{{ $kpi_gearbox }}</div>
-                </div>
-            @endif
         </div>
 
         {{-- ── VEREDICTO ──────────────────────────────────────────── --}}
@@ -370,12 +387,12 @@
             <span class="verdict-sub">Verificado por JJ Import Motors</span>
         </div>
 
-        {{-- ── SPECS COMPLETAS ────────────────────────────────────── --}}
-        @if(count($all_specs))
+        {{-- ── SPECS COMPLETAS (sin repetir Año/KM del KPI) ───────── --}}
+        @if(count($specs_table))
         <div class="section">
             <div class="h2">Ficha técnica</div>
             <div class="specs-grid">
-                @foreach($all_specs as $spec)
+                @foreach($specs_table as $spec)
                     <div class="spec-row"><span class="k">{{ $spec['k'] }}</span><span class="v">{{ $spec['v'] }}</span></div>
                 @endforeach
             </div>
