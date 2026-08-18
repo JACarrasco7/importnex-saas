@@ -59,16 +59,16 @@
         }
     }
 
-    // La ficha técnica NO repite las protagonistas del KPI (Año / KM):
-    // esas ya van arriba en grande. El resto (color, puertas, CO2, VIN...)
-    // queda en la tabla técnica para no duplicar.
+    // La ficha técnica NO repite las protagonistas del KPI (Año / KM) ni
+    // muestra las emisiones CO2: esas ya van arriba en grande o no aportan
+    // al folleto comercial. El resto (color, puertas, VIN...) queda en la tabla.
     $specs_table = [];
-    $kpi_keys = ['año', 'km', 'kilometro', 'kilómetro'];
+    $exclude_specs = ['año', 'km', 'kilometro', 'kilómetro', 'co2', 'emision'];
     foreach ($all_specs as $spec) {
         $l = mb_strtolower($spec['k']);
         $dup = false;
-        foreach ($kpi_keys as $kl) {
-            if (str_contains($l, $kl)) {
+        foreach ($exclude_specs as $ex) {
+            if (str_contains($l, $ex)) {
                 $dup = true;
                 break;
             }
@@ -77,6 +77,13 @@
             $specs_table[] = $spec;
         }
     }
+
+    // ── Datos de valoración del coche (para "Nuestra valoración") ──
+    $val_reasoning = trim((string) ($car->verdict_reasoning ?? ''));
+    $val_valuation = trim((string) ($car->valuation ?? ''));
+    $val_recommendation = trim((string) ($car->recommendation ?? ''));
+    $val_pros = is_array($car->pros ?? null) ? array_filter(array_map('trim', $car->pros)) : [];
+    $val_cons = is_array($car->cons ?? null) ? array_filter(array_map('trim', $car->cons)) : [];
 
     $titulo = $e->uno('TITULO') ?: trim(($car->brand ?? '').' '.($car->model ?? ''));
     $claim  = $e->uno('CLAIM');
@@ -185,21 +192,18 @@
         .hero-photo .price-float .value { font-size: 30px; font-weight: 900; color: #E8590C; line-height: 1.05; text-shadow: 0 2px 10px rgba(0,0,0,0.6); }
         .hero-photo .price-float .caption { font-size: 9.5px; color: #cbd5e1; }
 
-        /* ── GALERÍA (adaptativa, hasta 5 fotos) ────────────────── */
+        /* ── GALERÍA (adaptativa, hasta 5 fotos, todas iguales) ──── */
         .gallery { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
         .gallery .shot {
             border-radius: 10px; overflow: hidden; border: 1px solid rgba(143,163,217,0.25);
             background: #14265a; aspect-ratio: 4/3;
         }
         .gallery .shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        /* 2 fotos → una ancha a lo ancho */
+        /* 2 fotos en grid → una ancha a lo ancho */
         .gallery.one .shot { grid-column: span 4; }
         /* 3 fotos → dos medianas lado a lado */
         .gallery.two .shot { grid-column: span 2; }
-        /* 4 fotos → primera destacada ancha + 2 normales */
-        .gallery.three .shot:first-child { grid-column: span 2; }
-        /* 5 fotos → primera grande 2x2 + 3 normales (grid perfecto) */
-        .gallery.four .shot:first-child { grid-column: span 2; grid-row: span 2; }
+        /* 4-5 fotos → las 4 del grid son IGUALES (solo la hero es grande) */
 
         /* ── KPI GRID (4 protagonistas) ─────────────────────────── */
         .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
@@ -249,21 +253,34 @@
         .spec-row .k { font-size: 9px; color: #64748b; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600; flex-shrink: 0; }
         .spec-row .v { font-size: 12px; color: #e2e8f0; font-weight: 600; text-align: right; }
 
-        /* ── HIGHLIGHTS (tarjetas) ─────────────────────────────── */
-        .args-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 16px; }
-        .arg-card {
+        /* ── VALORACIÓN (razonamiento + pros/cons) ──────────────── */
+        .reasoning-card {
+            background: linear-gradient(135deg, rgba(26,48,109,0.3) 0%, rgba(15,23,42,0.5) 100%);
+            border: 1px solid rgba(143,163,217,0.25); border-left: 4px solid {{ $tl_color }};
+            border-radius: 12px; padding: 14px 16px; margin-bottom: 12px;
+        }
+        .reasoning-card .rt { font-size: 11px; font-weight: 800; color: #f1f5f9; }
+        .reasoning-card .rd { font-size: 11.5px; color: #cbd5e1; line-height: 1.55; margin-top: 4px; }
+
+        .pc-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px; }
+        .pc-col { border-radius: 12px; padding: 12px 14px; }
+        .pc-col .pt { font-size: 9px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+        .pc-col.pros { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); }
+        .pc-col.pros .pt { color: #4ade80; }
+        .pc-col.cons { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.28); }
+        .pc-col.cons .pt { color: #f87171; }
+        .pc-item { display: flex; align-items: flex-start; gap: 8px; font-size: 11px; color: #e2e8f0; line-height: 1.4; padding: 3px 0; }
+        .pc-item::before { font-weight: 800; flex-shrink: 0; }
+        .pc-col.pros .pc-item::before { content: '✓'; color: #4ade80; }
+        .pc-col.cons .pc-item::before { content: '✕'; color: #f87171; }
+
+        .note-card {
             display: flex; align-items: flex-start; gap: 10px;
-            background: linear-gradient(135deg, rgba(26,48,109,0.25) 0%, rgba(15,23,42,0.5) 100%);
-            border: 1px solid rgba(143,163,217,0.22); border-radius: 12px; padding: 12px 14px;
+            background: rgba(232,89,12,0.1); border: 1px solid rgba(232,89,12,0.3);
+            border-radius: 12px; padding: 12px 14px; margin-bottom: 16px;
         }
-        .arg-card .check {
-            flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%;
-            background: rgba(16,185,129,0.18); border: 1px solid rgba(16,185,129,0.5);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 11px; color: #34d399; font-weight: 800;
-        }
-        .arg-card .t { font-size: 12px; font-weight: 700; color: #f1f5f9; }
-        .arg-card .d { font-size: 10.5px; color: #94a3b8; line-height: 1.4; margin-top: 2px; }
+        .note-card .nt { font-size: 11.5px; font-weight: 700; color: #f0a06b; }
+        .note-card .nd { font-size: 11px; color: #cbd5e1; line-height: 1.5; margin-top: 2px; }
 
         /* ── EQUIPAMIENTO (lista con check, 2 col) ─────────────── */
         .equip-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px 16px; margin-bottom: 16px; }
@@ -399,31 +416,54 @@
         </div>
         @endif
 
-        {{-- ── HIGHLIGHTS (tarjetas) ──────────────────────────────── --}}
-        @if(count($e->filas('ARGUMENTO')))
+        {{-- ── VALORACIÓN (por qué este coche) ───────────────────── --}}
+        @if($val_reasoning || $val_valuation || $val_recommendation || count($val_pros) || count($val_cons))
         <div class="section">
-            <div class="h2">Por qué te interesa</div>
-            <div class="args-grid">
-                @foreach($e->filas('ARGUMENTO') as $arg)
-                    <div class="arg-card">
-                        <span class="check">✓</span>
-                        <div>
-                            @if(!empty($arg[0]))
-                                <div class="t">{{ $arg[0] }}</div>
-                            @endif
-                            @if(!empty($arg[1]))
-                                <div class="d">{{ $arg[1] }}</div>
-                            @endif
-                        </div>
-                    </div>
-                @endforeach
-                @foreach($e->filas('INCLUYE') as $inc)
-                    <div class="arg-card">
-                        <span class="check">✓</span>
-                        <div class="t">{{ $inc[0] ?? '' }}</div>
-                    </div>
-                @endforeach
+            <div class="h2">Nuestra valoración</div>
+
+            @if($val_reasoning)
+                <div class="reasoning-card">
+                    <div class="rt">Por qué {{ $tl_label }}</div>
+                    <div class="rd">{{ $val_reasoning }}</div>
+                </div>
+            @endif
+
+            @if(count($val_pros) || count($val_cons))
+            <div class="pc-grid">
+                @if(count($val_pros))
+                <div class="pc-col pros">
+                    <div class="pt">A favor</div>
+                    @foreach($val_pros as $pro)
+                        <div class="pc-item">{{ $pro }}</div>
+                    @endforeach
+                </div>
+                @endif
+                @if(count($val_cons))
+                <div class="pc-col cons">
+                    <div class="pt">En contra</div>
+                    @foreach($val_cons as $con)
+                        <div class="pc-item">{{ $con }}</div>
+                    @endforeach
+                </div>
+                @endif
             </div>
+            @endif
+
+            @if($val_recommendation)
+                <div class="note-card">
+                    <div>
+                        <div class="nt">Recomendación</div>
+                        <div class="nd">{{ $val_recommendation }}</div>
+                    </div>
+                </div>
+            @elseif($val_valuation)
+                <div class="note-card">
+                    <div>
+                        <div class="nt">Valoración</div>
+                        <div class="nd">{{ $val_valuation }}</div>
+                    </div>
+                </div>
+            @endif
         </div>
         @endif
 

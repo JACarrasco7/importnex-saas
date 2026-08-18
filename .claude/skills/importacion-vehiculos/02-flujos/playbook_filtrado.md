@@ -248,7 +248,24 @@ PASO 3 — CRUCE (unión, NO intersección)
 - **Sort "En venta - Más antiguo"** → anuncios estancados (margen para regatear)
 - Filtros: combustible, km, año, potencia
 
-### 🇪🇸 Selectores ESTABLES de filtros en Wallapop (18-ago-2026)
+### �🇪 AutoUncle — leer la tarjeta (18-ago-2026)
+
+| Dato | Selector | Notas |
+|---|---|---|
+| Enlace ficha | `a[href^="/es/d/"]` | `/es/d/222400250-usado-...` → **ID** para deduplicar |
+| **Rating precio (1-5)** | `aria-label` enlace: "\| Buen precio" | Super(5) · Buen(4) · Justo(3) · Un poco caro(2) · Caro(1) |
+| Atributos | `ul._PuGQy > li._ZTpYr` | año/km·acabado·combustible·carrocería·cambio·CV·CO2·consumo |
+| Badge cambio | `.x4zE1._hbiHx[data-type]` | `positive`="-5%" · `neutral`="Nuevo" |
+| **Precio actual** | `._i2QOc` | vs `._O_cMy` (referencia, tachado) |
+| **Por debajo del mercado** | botón `._CikIC` `span._2OgvT` | 🎯 ahorro € → chollo |
+| **Cambio de precio** | `[data-testid="listing-item--price-history"]` | "↓ -X%" |
+| **Días en venta** | botón `._CikIC` (Clock) | 🎯 rotación |
+| Concesionario/Ubicación | `[data-testid="source-label"]` + `div[data-font="body-small"]` | verificado = escudo |
+| Contador total | `._oCbI6` | "1 - 25 de 1.974.089" → oferta total |
+
+> ⚠️ Sufijos CSS (`_i2QOc`) cambian por build → usar `data-*`/`aria-label`/`data-testid` (sin hash). Carrusel "Ofertas seleccionadas" (`a._DF8g3`) = patrocinado → NO contar. Ads `#sr_N` → ignorar. A8: AutoUncle SOLO rotación/validación.
+
+### �🇪🇸 Selectores ESTABLES de filtros en Wallapop (18-ago-2026)
 
 > Wallapop (`https://es.wallapop.com/coches-segunda-mano`) usa **web components** `walla-*` con `name`/`id` estables. Los rangos son `<wallapop-range-selector>` con sliders `#fromSelector`/`#toSelector`.
 
@@ -268,6 +285,22 @@ PASO 3 — CRUCE (unión, NO intersección)
 
 > ⚠️ **Wallapop NO tiene filtro de equipamiento** → máximo equipamiento por `keywords=` (ej. "techo", "virtual cockpit") o validando fichas.
 > **Suelo:** `order_by=price_asc` en URL (abajo).
+
+### 🇪🇸 Wallapop — leer la tarjeta (18-ago-2026)
+
+| Dato | Selector | Notas |
+|---|---|---|
+| Enlace ficha | `a[href^="/item/"]` | `/item/seat-leon-2000-1292407193` → **ID** para deduplicar |
+| **Precio** | `strong[aria-label="Item price"]` | 🎯 sin hash, nunca falla |
+| Título | `h3[class*="item-card_ItemCard__title"]` | |
+| **Atributos** | `label[class*="item-card_ItemCard__attributes"]` | "Diésel · Manual · 90 caballos · 2000 · 305.000 km" |
+| Descripción | `p[class*="item-card_ItemCard__description"]` | equipamiento aquí |
+| Fotos | `span[class*="imageCounter"]` | "1 / 9" |
+| Vendedor | `span[class*="item-card-seller_ItemCardSeller__sellerName"]` | particulares = chollos |
+| Rating | `<wallapop-rating-indicator>` (shadow) | leer `aria-label="5/5 stars.23 'reviews'"` |
+
+> ⚠️ Sufijos CSS Modules (`__gajNu`) cambian por build → usar prefijos `item-card_*` + `[aria-label]`. Web components `walla-*` = shadow DOM.
+> ⚠️ Landing SEO (`seo-landing_*`, "Ver N productos más") = Novedades, NO búsqueda activa → usar `/search?keywords=`.
 
 ### Wallapop — maximizar muestra
 - `order_by=price_asc` en URL (chollos arriba)

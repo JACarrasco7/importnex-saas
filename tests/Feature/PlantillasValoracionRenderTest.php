@@ -160,9 +160,9 @@ class PlantillasValoracionRenderTest extends TestCase
             '[SPEC] Potencia | 200 CV',
             '[SPEC] Cambio | Manual',
             '[SPEC] Color | Azul',
+            '[SPEC] Emisiones CO2 | 192 g/km',
             '[PRECIO] 14.900 €',
             '[AHORRO] 1.500 €',
-            '[ARGUMENTO] Coche en perfecto estado | sin detalles',
             '[EQUIPAMIENTO] Techo panorámico',
             '[EQUIPAMIENTO] Navegación',
         ]);
@@ -171,6 +171,10 @@ class PlantillasValoracionRenderTest extends TestCase
         $car = new Car([
             'pais_origen' => 'Alemania',
             'traffic_light' => 'green',
+            'verdict_reasoning' => 'Precio 1.500 € bajo mercado con 120.000 km verificados y motor sin averías.',
+            'pros' => ['Precio bajo de mercado', 'Historial sin averías'],
+            'cons' => ['Kilometraje medio-alto'],
+            'recommendation' => 'Cierra rápido: buen margen frente al mercado español.',
         ]);
 
         // 1px GIF en base64 para simular fotos del coche (5 = 1 hero + 4 grid).
@@ -198,21 +202,28 @@ class PlantillasValoracionRenderTest extends TestCase
         $this->assertStringContainsString('Veredicto:', $html);
         $this->assertStringContainsString('Excelente compra', $html);
         $this->assertStringContainsString('#10b981', $html);
-        // Galería: hero + grid de 4 (clase four, primera grande 2x2)
+        // Galería: hero + grid de 4 IGUALES (solo la hero es grande)
         $this->assertStringContainsString('hero-photo', $html);
         $this->assertStringContainsString('gallery four', $html);
         $this->assertSame(4, substr_count($html, 'class="shot"'));
-        // Ficha técnica completa: el resto de specs (NO repite Año/KM)
+        // Ficha técnica: resto de specs, SIN repetir Año/KM ni mostrar CO2
         $this->assertStringContainsString('Ficha técnica', $html);
         $this->assertStringContainsString('spec-row', $html);
         $this->assertStringContainsString('200 CV', $html);
         $this->assertStringContainsString('Gasolina', $html);
-        // Año y KM NO aparecen en la ficha técnica (solo en KPI) → 1 ocurrencia cada uno
-        $this->assertSame(1, substr_count($html, 'Primera matriculación'), 'Año solo debe estar en el KPI');
+        $this->assertStringNotContainsString('Emisiones CO2', $html, 'CO2 no debe mostrarse en el folleto');
         $this->assertStringNotContainsString('spec-row">KM', $html, 'KM no debe repetirse en ficha técnica');
-        // Highlights como tarjetas
-        $this->assertStringContainsString('arg-card', $html);
-        $this->assertStringContainsString('Coche en perfecto estado', $html);
+        // Año solo en el KPI (1 ocurrencia)
+        $this->assertSame(1, substr_count($html, 'Primera matriculación'));
+        // Nuestra valoración: razonamiento + pros/cons + recomendación
+        $this->assertStringContainsString('Nuestra valoración', $html);
+        $this->assertStringContainsString('Por qué Excelente compra', $html);
+        $this->assertStringContainsString('Precio 1.500 € bajo mercado', $html);
+        $this->assertStringContainsString('A favor', $html);
+        $this->assertStringContainsString('Historial sin averías', $html);
+        $this->assertStringContainsString('En contra', $html);
+        $this->assertStringContainsString('Kilometraje medio-alto', $html);
+        $this->assertStringContainsString('Recomendación', $html);
         // Equipamiento como lista con check
         $this->assertStringContainsString('equip-item', $html);
         $this->assertStringContainsString('Techo panorámico', $html);

@@ -120,23 +120,31 @@ https://www.autouncle.es/es/coches-segunda-mano/<Marca>/<Modelo>
 - **`<h1>`:** "**<marca> <modelo>: resumen de N coches de ocasión en venta**" = total.
 - "**Mostrando 1 - N de N resultados**" bajo el listado.
 
-### Tarjeta de anuncio (datos completos)
-```
-[Usado (año)] <Marca> <Modelo> <CV>
-GLD <año>            ← antiguo timer (categoria)
-<año>
-<km> km
-<cilindrada>L <combustible>
-<carrocería>         ← Utilitario/Berlina/SUV...
-<cambio>             ← Manual/Automático
-<CV> CV (<kW> kW)
-[Detalles]
-€<precio>
-"Cambio de precio: X%"   ← variación % visible
-"Días en venta: N"        ← ¡ROTACIÓN visible! (factor 1 vendibilidad)
-Portal origen: "Catawiki"/"mobile.de"/"AS24"
-"<CP> <ciudad>"
-```
+### 🃏 Contenedor de anuncios — selectores estables (18-ago-2026)
+
+> Grid de resultados: `article._qzVn4` (cada tarjeta). Los sufijos CSS (`_qzVn4`, `_i2QOc`) cambian por build; usar **aria-labels + `data-testid` + `data-rating` + `[data-font]`** (estables). `data-*` y `aria-*` NO tienen hash.
+
+| Dato | Selector | Notas |
+|---|---|---|
+| **Enlace ficha** | `a._p9jqN[href^="/es/d/"]` | `/es/d/222400250-usado-2025-skoda-kamiq-116-cv` → **ID AutoUncle** para deduplicar |
+| **Rating precio (1-5)** | `aria-label` del enlace: "Ver detalles de ... \| Buen precio" | categoría: Super precio(5) · Buen precio(4) · Precio justo(3) · Un poco caro(2) · Caro(1) |
+| Título | `h3[data-font="body-base"]` | "Usado (2025) Skoda Kamiq 116 CV \| Buen precio" |
+| Versión/equipamiento | `p[data-font="body-small"]` | "Kamiq Select 85 KW LED KAMERA PDC" |
+| **Atributos** | `ul._PuGQy > li._ZTpYr` | año/km · acabado · combustible · carrocería · cambio · CV(kW) · Clase CO2 · emisiones · L/100km |
+| Badge cambio | `.x4zE1._hbiHx[data-type]` | `positive` = "-5%" (bajada) · `neutral` = "Nuevo" |
+| Fotos | `.yMhZe` | "1 / 4" |
+| **Precio actual** | `._i2QOc` | "20.770 €" |
+| Precio referencia (tachado) | `._O_cMy` | "21.870 €" (valor de mercado AutoUncle) |
+| **Por debajo del mercado** | botón `._CikIC` → `span.__1SuX`="Por debajo del mercado" + `span._2OgvT`="2.330 €" | 🎯 cuánto ahorra → chollo |
+| **Cambio de precio** | botón `[data-testid="listing-item--price-history"]` | "↓ -5%" (historial) |
+| **Días en venta** | botón `._CikIC` (icono Clock) | "49" → 🎯 ROTACIÓN directa |
+| Concesionario | botón `[data-testid="source-label"]` | nombre (verificado = escudo) |
+| Ubicación | `div[data-font="body-small"][data-weight="regular"]` | "45892 Gelsenkirchen, Nordrhein-Westfalen" |
+
+> **Paginación:** `?page=N&s[available_for_online_sales]=false` (nav `._glhdq`). **Contador total:** `._oCbI6` "Mostrando 1 - 25 de 1.974.089 resultados" → oferta total del mercado.
+> ⚠️ **Rating AutoUncle** (1-5) ya valida el precio del coche → úsalo como señal de chollo, pero A8: AutoUncle es SOLO rotación/validación, NUNCA fuente de precio del estudio.
+> ⚠️ **Carrusel "Ofertas seleccionadas"** (`section._j4UAK`, "Concesionarios verificados", `a._DF8g3`) = **patrocinado** → NO contar como búsqueda activa.
+> ⚠️ **Ads:** `.DRMsM` (`#sr_1`..`#sr_4`) → ignorar.
 
 ### Orden (combobox, 15 opciones)
 Ofertas · **Precio nominal - Más barato** · Precio - Más alto · **Bajada de precio reciente** · **En venta - Más reciente/antiguo** (= días publicado) · Año · Kilometraje · Autonomía (EV).
@@ -286,13 +294,25 @@ https://es.wallapop.com/search?category_id=100&keywords=<marca>%20<modelo>&order
 ```
 ⚠️ `/app/search` redirige a `/search`. Órdenes URL: `most_relevance` · `price_asc` · `price_desc` · `newest` · `closest`.
 
-### Tarjeta (muy limpia)
-```
-TÍTULO: "Volkswagen Golf GTI Performance 2.0 TSI 230CV BMT"
-<año> · <km> km · <combustible> · <cv> cv
-€<precio>
-[Destacado]           ← patrocinado (no contar como señal de precio)
-```
+### 🃏 Contenedor de anuncios — selectores estables (18-ago-2026)
+
+> Cada tarjeta = `a.item-card_ItemCard--horizontal__gajNu` (`href="/item/<slug>-<ID>"`). Grid = `.item-card-grid_ItemCardGrid__Rd15w` (`aria-label="Items list"`). Los sufijos `__XXXXX` (CSS Modules) cambian por build; usar los `aria-label`/**prefijos** `item-card_*` (estables) + el `href`.
+
+| Dato | Selector | Notas |
+|---|---|---|
+| **Enlace ficha** | `a[href^="/item/"]` | `/item/seat-leon-2000-1292407193` → **ID numérico** para deduplicar |
+| **Precio** | `strong[aria-label="Item price"]` | 🎯 muy estable (sin hash): "1.700 €" |
+| Título | `h3[class*="item-card_ItemCard__title"]` | "SEAT Leon 2000" |
+| **Atributos** | `label[class*="item-card_ItemCard__attributes"]` | texto plano: "Diésel · Manual · 90 caballos · 2000 · 305.000 km" (combustible · cambio · cv · año · km) |
+| Descripción | `p[class*="item-card_ItemCard__description"]` | texto del vendedor (equipamiento aquí) |
+| Fotos | `span[class*="imageCounter"]` | "1 / 9" (nº de fotos) |
+| Vendedor | `span[class*="item-card-seller_ItemCardSeller__sellerName"]` | nombre (particulares = chollos) |
+| Rating vendedor | `<wallapop-rating-indicator>` | shadow DOM: `aria-label="5/5 stars.23 'reviews'"` → score + nº reviews |
+
+> ⚠️ **Selectores CSS Modules**: el sufijo `__gajNu`/`__pVpdc` cambia en cada build, pero el **prefijo** (`item-card_ItemCard__price`, `item-card_ItemCard__title`...) es estable. Para el precio NUNCA falla `[aria-label="Item price"]`.
+> ⚠️ **Web components `walla-*`**: `<wallapop-rating-indicator>`, `<walla-icon>` tienen shadow DOM — el rating se lee del `aria-label` del contenedor interno.
+> ⚠️ Este HTML es de la **landing SEO** (`seo-landing_SeoLandingPage__main`, botón "Ver 728.154 productos más") — es "Novedades", NO la búsqueda activa. Usar `/search?keywords=` para medir.
+> **Equipamiento** (techo, cuadro, cámara...) solo aparece en la descripción → validar fichas o `keywords=`.
 
 ### Filtros
 Botón "Filtros" abre modal. Acepta cookies al cargar.

@@ -5,6 +5,24 @@ Todos los cambios notables en el skill `importacion-vehiculos` se documentarán 
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [3.2.2] - 2026-08-18 — Contenedor de anuncios AutoUncle (tarjeta real)
+
+> **Origen:** el usuario facilitó el HTML de la página de resultados completa (~20 tarjetas `article._qzVn4`, carrusel patrocinado, paginación).
+
+### 🇩🇪 Leer tarjeta AutoUncle
+- **`paginas_reales.md`** — sección "Contenedor de anuncios — selectores estables": enlace `a[href^="/es/d/"]` (ID para **deduplicar**), **rating precio (1-5)** en `aria-label` del enlace + `data-rating` ("Buen precio"/"Super precio"), precio actual `._i2QOc` vs referencia tachado `._O_cMy`, **"Por debajo del mercado X €"** (`span._2OgvT`) = chollo, cambio de precio `[data-testid="listing-item--price-history"]`, **días en venta** (rotación), atributos `ul._PuGQy > li._ZTpYr`, concesionario `[data-testid="source-label"]`, contador total `._oCbI6` (oferta total), paginación `?page=N&s[available_for_online_sales]=false`.
+- **`playbook_filtrado.md`** — tabla "AutoUncle — leer la tarjeta".
+- Claves: sufijos CSS Modules (`_qzVn4`, `_i2QOc`) NO estables → usar `aria-label`/`data-testid`/`data-rating` (sin hash); carrusel "Ofertas seleccionadas" (`a._DF8g3`) = patrocinado → NO contar; ads `#sr_N` → ignorar; A8: AutoUncle SOLO rotación/validación, NUNCA fuente de precio del estudio (rating y "por debajo del mercado" = señal de chollo).
+
+## [3.2.1] - 2026-08-18 — Contenedor de anuncios Wallapop (tarjeta real)
+
+> **Origen:** el usuario facilitó el HTML del grid `.item-card-grid_ItemCardGrid` (tarjetas `a.item-card_ItemCard--horizontal`). Complementa los filtros de v3.1.8 con la **lectura de la tarjeta**.
+
+### 🇪🇸 Leer tarjeta Wallapop
+- **`paginas_reales.md`** — sección "Contenedor de anuncios — selectores estables": precio `[aria-label="Item price"]` (sin hash, nunca falla), atributos en `label[class*=item-card_ItemCard__attributes]` (combustible·cambio·cv·año·km), título/descripción/vendedor por prefijo `item-card_*`, **ID del href para deduplicar**, rating en shadow DOM de `wallapop-rating-indicator`.
+- **`playbook_filtrado.md`** — tabla "Wallapop — leer la tarjeta".
+- Claves: sufijos CSS Modules cambian por build (usar prefijos + `aria-label`); landing SEO = Novedades, no búsqueda activa; equipamiento solo en descripción.
+
 ## [3.2.0] - 2026-08-18 — Contenedor de anuncios Milanuncios (tarjeta real)
 
 > **Origen:** el usuario facilitó el HTML del listado `.ma-AdList`. Hasta ahora solo se documentaba el modal de filtros; falta la **lectura de la tarjeta** (precio contado, bajada, tags, dedup).
