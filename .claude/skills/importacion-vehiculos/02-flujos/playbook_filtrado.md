@@ -248,6 +248,27 @@ PASO 3 — CRUCE (unión, NO intersección)
 - **Sort "En venta - Más antiguo"** → anuncios estancados (margen para regatear)
 - Filtros: combustible, km, año, potencia
 
+### 🇪🇸 Selectores ESTABLES de filtros en Wallapop (18-ago-2026)
+
+> Wallapop (`https://es.wallapop.com/coches-segunda-mano`) usa **web components** `walla-*` con `name`/`id` estables. Los rangos son `<wallapop-range-selector>` con sliders `#fromSelector`/`#toSelector`.
+
+| Filtro | Selector | Valores |
+|---|---|---|
+| Fecha | `[name="time_filter-radio-group-single-selection"]` | `today`·`lastWeek`·`lastMonth` |
+| **Precio** | `<wallapop-range-selector>` `#fromSelector`/`#toSelector` | slider 0-100k |
+| **Marca** | `[name="brand-radio-group-single-selection-regular"]` | radio por marca: `id="Audi"`, `id="SEAT"`, `id="CUPRA"`... (+ `#search-input`) |
+| **Modelo** | `[name="model-radio-group-single-selection-regular"]` | al elegir marca |
+| **Km** | `<wallapop-range-selector>` | 0-250k |
+| **Año** | `<wallapop-range-selector>` | 1980-2026 |
+| Etiqueta DGT | `[id="zero"][id="eco"][id="c"][id="b"]` | checkboxes |
+| Carrocería | `[id="sedan"][id="family_car"][id="4X4"][id="coupe_cabrio"]` | checkboxes |
+| Combustible | `[id="gasoline"][id="gasoil"][id="hybride"][id="hybride_plugin"]` | checkboxes |
+| Cambio | `[id="manual"][id="automatic"][id="semiautomatic"]` | checkboxes |
+| Vendedor | `[name="seller_type-radio-group-single-selection"]` | `private`·`professional` |
+
+> ⚠️ **Wallapop NO tiene filtro de equipamiento** → máximo equipamiento por `keywords=` (ej. "techo", "virtual cockpit") o validando fichas.
+> **Suelo:** `order_by=price_asc` en URL (abajo).
+
 ### Wallapop — maximizar muestra
 - `order_by=price_asc` en URL (chollos arriba)
 - `Page Down` 5-8 veces hasta agotar scroll

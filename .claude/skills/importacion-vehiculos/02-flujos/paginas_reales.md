@@ -297,6 +297,32 @@ TÍTULO: "Volkswagen Golf GTI Performance 2.0 TSI 230CV BMT"
 ### Filtros
 Botón "Filtros" abre modal. Acepta cookies al cargar.
 
+### 🧭 Sidebar de filtros — sliders + radios/checkboxes estables (18-ago-2026)
+
+> URL del sidebar: `https://es.wallapop.com/coches-segunda-mano`. Los filtros son **web components** (`walla-*`) con `name`/`id` **estables**. Los rangos usan `<wallapop-range-selector>` con inputs `#fromSelector` / `#toSelector` (arrastrar los sliders).
+
+| Filtro | Selector | Valores/uso |
+|---|---|---|
+| Fecha publicación | `name="time_filter-radio-group-single-selection"` | radio: `today` (Hoy) · `lastWeek` (7 días) · `lastMonth` (30 días) |
+| **Precio** | `<wallapop-range-selector>` + `#fromSelector`/`#toSelector` | slider 0-100.000 € |
+| **Marca** | radio `name="brand-radio-group-single-selection-regular"` | un radio por marca: `id="Audi"`, `id="BMW"`, `id="SEAT"`, `id="CUPRA"`, `id="Volkswagen"`... (con buscador `#search-input`) |
+| **Modelo** | radio `name="model-radio-group-single-selection-regular"` | se rellena al elegir marca |
+| **Kilometraje** | `<wallapop-range-selector>` + `#fromSelector`/`#toSelector` | slider 0-250.000 km |
+| **Año** | `<wallapop-range-selector>` | slider 1980-2026 |
+| Garantía incluida | `#toggle-filter` (checkbox `name="toggle-filter"`) | toggle garantía ≥1 año |
+| Distintivo ambiental | checkboxes `id="zero"` (CERO) · `id="eco"` (ECO) · `id="c"` (C) · `id="b"` (B) · `id="not_available"` | etiqueta DGT |
+| Color | checkboxes `id="black"` · `gray` · `white` · `blue` · `red` · `green` · `beige`... | colores |
+| Plazas | `<wallapop-range-selector>` | slider 1-8 |
+| Puertas | `<wallapop-range-selector>` | slider 2-6 |
+| Caballos | `<wallapop-range-selector>` | slider 0-450 cv |
+| Carrocería | checkboxes `id="small_car"` · `coupe_cabrio` · `sedan` · `family_car` · `mini_van` · `4X4` · `van` · `convertible_car` | tipo |
+| Combustible | checkboxes `id="gasoline"` · `gasoil` · `electric-hybrid` · `hybride` · `hybride_plugin` · `lpg` · `cng` · `others` | |
+| Cambio | checkboxes `id="manual"` · `automatic` · `semiautomatic` | |
+| Tipo vendedor | radio `name="seller_type-radio-group-single-selection"` | `private` (Particular) · `professional` (Profesional) |
+
+> ⚠️ **Equipamiento en Wallapop NO existe como filtro** — no hay checkboxes de techo/cuadro digital (solo los listados lo muestran en el texto). Para máximo equipamiento, buscar por palabras clave en `keywords=` (ej. `techo`, `virtual cockpit`) o filtrar por marca/modelo y validar en las fichas.
+> **Orden URL:** `order_by=price_asc` para ver el suelo (ya documentado arriba).
+
 **Patrón:** scroll infinito (`Page Down` hasta ~20-25 anuncios). Sin contador global visible. Anuncios incompletos → `man`.
 
 ---

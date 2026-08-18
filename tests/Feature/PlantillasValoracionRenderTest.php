@@ -157,9 +157,14 @@ class PlantillasValoracionRenderTest extends TestCase
             '[SPEC] KM | 120.000',
             '[SPEC] Año | 2013',
             '[SPEC] Combustible | Gasolina',
+            '[SPEC] Potencia | 200 CV',
+            '[SPEC] Cambio | Manual',
+            '[SPEC] Color | Azul',
             '[PRECIO] 14.900 €',
             '[AHORRO] 1.500 €',
             '[ARGUMENTO] Coche en perfecto estado | sin detalles',
+            '[EQUIPAMIENTO] Techo panorámico',
+            '[EQUIPAMIENTO] Navegación',
         ]);
 
         $e = Esqueleto::desde($contenido);
@@ -168,11 +173,15 @@ class PlantillasValoracionRenderTest extends TestCase
             'traffic_light' => 'green',
         ]);
 
+        // 1px GIF en base64 para simular fotos del coche.
+        $gif = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+        $fotos = array_fill(0, 4, $gif);
+
         $html = View::make('jj-import.folleto-coche', [
             'e' => $e,
             'car' => $car,
             'logo_base64' => null,
-            'fotos' => [],
+            'fotos' => $fotos,
             'telefono_1' => '675 70 14 39',
             'telefono_2' => '691 48 59 27',
             'email' => 'jjimportmotors@gmail.com',
@@ -188,6 +197,21 @@ class PlantillasValoracionRenderTest extends TestCase
         $this->assertStringContainsString('Veredicto:', $html);
         $this->assertStringContainsString('Excelente compra', $html);
         $this->assertStringContainsString('#10b981', $html);
+        // Galería: hero + grid de 4 (primera grande + 3 del grid)
+        $this->assertStringContainsString('hero-photo', $html);
+        $this->assertStringContainsString('gallery', $html);
+        $this->assertStringContainsString('class="shot"', $html);
+        // Ficha técnica completa (SPEC grid)
+        $this->assertStringContainsString('Ficha técnica', $html);
+        $this->assertStringContainsString('spec-row', $html);
+        $this->assertStringContainsString('200 CV', $html);
+        // Highlights como tarjetas
+        $this->assertStringContainsString('arg-card', $html);
+        $this->assertStringContainsString('Coche en perfecto estado', $html);
+        // Equipamiento como lista con check
+        $this->assertStringContainsString('equip-item', $html);
+        $this->assertStringContainsString('Techo panorámico', $html);
+        $this->assertStringContainsString('Navegación', $html);
         // CTA + QR
         $this->assertStringContainsString('¿Te interesa este coche?', $html);
         $this->assertStringContainsString('Escanea', $html);

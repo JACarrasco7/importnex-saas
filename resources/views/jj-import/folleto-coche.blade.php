@@ -49,6 +49,16 @@
     $kpi_power   = $spec_val('Potencia');
     $kpi_gearbox = $spec_val('Cambio');
 
+    // ── Todas las SPEC (para el grid completo) ──
+    $all_specs = [];
+    foreach ($specs as $s) {
+        $label = trim((string) ($s[0] ?? ''));
+        $value = trim((string) ($s[1] ?? ''));
+        if ($label !== '' && $value !== '') {
+            $all_specs[] = ['k' => $label, 'v' => $value];
+        }
+    }
+
     $titulo = $e->uno('TITULO') ?: trim(($car->brand ?? '').' '.($car->model ?? ''));
     $claim  = $e->uno('CLAIM');
 
@@ -156,8 +166,18 @@
         .hero-photo .price-float .value { font-size: 30px; font-weight: 900; color: #E8590C; line-height: 1.05; text-shadow: 0 2px 10px rgba(0,0,0,0.6); }
         .hero-photo .price-float .caption { font-size: 9.5px; color: #cbd5e1; }
 
+        /* ── GALERÍA (adaptativa: 1 → hero, ≥2 → grid) ────────── */
+        .gallery { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+        .gallery .shot {
+            border-radius: 10px; overflow: hidden; border: 1px solid rgba(143,163,217,0.25);
+            background: #14265a; aspect-ratio: 4/3;
+        }
+        .gallery .shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        /* Con 2-3 fotos la primera destaca en grande */
+        .gallery.multi .shot:first-child { grid-column: span 2; grid-row: span 2; }
+
         /* ── KPI GRID ──────────────────────────────────────────── */
-        .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
         .kpi-card {
             background: linear-gradient(180deg, rgba(15,23,42,0.85) 0%, rgba(15,23,42,0.55) 100%);
             border: 1px solid rgba(143,163,217,0.22); border-radius: 12px; padding: 12px 14px; text-align: center;
@@ -194,11 +214,36 @@
         .list li::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #8fa3d9; margin-top: 5px; flex-shrink: 0; }
         .list li strong { color: #f1f5f9; }
 
-        .equip { display: flex; flex-wrap: wrap; gap: 6px; }
-        .chip {
-            background: rgba(26,48,109,0.25); border: 1px solid rgba(143,163,217,0.25);
-            color: #cbd5e1; padding: 4px 10px; border-radius: 100px; font-size: 9.5px; font-weight: 500;
+        /* ── SPECS COMPLETAS (grid clave-valor) ────────────────── */
+        .specs-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px 18px;
+            background: rgba(15,23,42,0.5); border: 1px solid rgba(143,163,217,0.18);
+            border-radius: 12px; padding: 14px 16px; margin-bottom: 16px;
         }
+        .spec-row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 3px 0; border-bottom: 1px dashed rgba(143,163,217,0.12); }
+        .spec-row .k { font-size: 9px; color: #64748b; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600; flex-shrink: 0; }
+        .spec-row .v { font-size: 12px; color: #e2e8f0; font-weight: 600; text-align: right; }
+
+        /* ── HIGHLIGHTS (tarjetas) ─────────────────────────────── */
+        .args-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 16px; }
+        .arg-card {
+            display: flex; align-items: flex-start; gap: 10px;
+            background: linear-gradient(135deg, rgba(26,48,109,0.25) 0%, rgba(15,23,42,0.5) 100%);
+            border: 1px solid rgba(143,163,217,0.22); border-radius: 12px; padding: 12px 14px;
+        }
+        .arg-card .check {
+            flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%;
+            background: rgba(16,185,129,0.18); border: 1px solid rgba(16,185,129,0.5);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; color: #34d399; font-weight: 800;
+        }
+        .arg-card .t { font-size: 12px; font-weight: 700; color: #f1f5f9; }
+        .arg-card .d { font-size: 10.5px; color: #94a3b8; line-height: 1.4; margin-top: 2px; }
+
+        /* ── EQUIPAMIENTO (lista con check, 2 col) ─────────────── */
+        .equip-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px 16px; margin-bottom: 16px; }
+        .equip-item { display: flex; align-items: flex-start; gap: 8px; font-size: 11px; color: #cbd5e1; line-height: 1.35; padding: 3px 0; }
+        .equip-item::before { content: '✓'; color: #4ade80; font-weight: 800; flex-shrink: 0; font-size: 11px; line-height: 1.35; }
 
         /* ── CTA + QR ──────────────────────────────────────────── */
         .cta-row { display: grid; grid-template-columns: 1.6fr 1fr; gap: 12px; }
@@ -264,6 +309,17 @@
         </div>
         @endif
 
+        {{-- ── GALERÍA (2+ fotos) ────────────────────────────────── --}}
+        @if(count($fotos) >= 2)
+        <div class="gallery {{ count($fotos) < 4 ? 'multi' : '' }}">
+            @foreach($fotos as $i => $foto)
+                @if($i > 0 && $i < 4)
+                <div class="shot"><img src="{{ $foto }}" alt="{{ $titulo }}"></div>
+                @endif
+            @endforeach
+        </div>
+        @endif
+
         {{-- ── KPI GRID ───────────────────────────────────────────── --}}
         <div class="kpi-grid">
             @if($kpi_precio)
@@ -314,27 +370,53 @@
             <span class="verdict-sub">Verificado por JJ Import Motors</span>
         </div>
 
-        {{-- ── HIGHLIGHTS ─────────────────────────────────────────── --}}
-        @if(count($e->filas('INCLUYE')) || count($e->filas('ARGUMENTO')))
+        {{-- ── SPECS COMPLETAS ────────────────────────────────────── --}}
+        @if(count($all_specs))
         <div class="section">
-            <div class="h2">Por qué te interesa</div>
-            <ul class="list">
-                @foreach($e->filas('ARGUMENTO') as $arg)
-                    <li><strong>{{ $arg[0] ?? '' }}</strong> {{ $arg[1] ?? '' }}</li>
+            <div class="h2">Ficha técnica</div>
+            <div class="specs-grid">
+                @foreach($all_specs as $spec)
+                    <div class="spec-row"><span class="k">{{ $spec['k'] }}</span><span class="v">{{ $spec['v'] }}</span></div>
                 @endforeach
-                @foreach($e->filas('INCLUYE') as $inc)
-                    <li>{{ $inc[0] ?? '' }}</li>
-                @endforeach
-            </ul>
+            </div>
         </div>
         @endif
 
+        {{-- ── HIGHLIGHTS (tarjetas) ──────────────────────────────── --}}
+        @if(count($e->filas('ARGUMENTO')))
+        <div class="section">
+            <div class="h2">Por qué te interesa</div>
+            <div class="args-grid">
+                @foreach($e->filas('ARGUMENTO') as $arg)
+                    <div class="arg-card">
+                        <span class="check">✓</span>
+                        <div>
+                            @if(!empty($arg[0]))
+                                <div class="t">{{ $arg[0] }}</div>
+                            @endif
+                            @if(!empty($arg[1]))
+                                <div class="d">{{ $arg[1] }}</div>
+                            @endif
+                        </div>
+                    </div>
+                @endforeach
+                @foreach($e->filas('INCLUYE') as $inc)
+                    <div class="arg-card">
+                        <span class="check">✓</span>
+                        <div class="t">{{ $inc[0] ?? '' }}</div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
+        {{-- ── EQUIPAMIENTO (lista con check) ─────────────────────── --}}
         @if(count($e->filas('EQUIPAMIENTO')))
         <div class="section">
-            <div class="h2">Equipamiento destacado</div>
-            <div class="equip">
+            <div class="h2">Equipamiento</div>
+            <div class="equip-grid">
                 @foreach($e->filas('EQUIPAMIENTO') as $eq)
-                    <span class="chip">{{ $eq[0] ?? '' }}</span>
+                    <div class="equip-item">{{ $eq[0] ?? '' }}</div>
                 @endforeach
             </div>
         </div>
