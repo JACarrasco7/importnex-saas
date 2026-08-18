@@ -207,22 +207,34 @@ https://www.kleinanzeigen.de/s-<marca>-<modelo>/k0
 
 > **Máximo equipamiento en kleinanzeigen:** marcar `checkbox-autos.sunroof_b` + `checkbox-autos.seat_heating_b` + `checkbox-autos.xenon_led_light_b` + `checkbox-autos.navi_b` + `checkbox-autos.full_service_history_b` → Übernehmen.
 
-### Tarjeta de anuncio
-```
-<edad días>           ← días publicado (al inicio)
-<CP> <ciudad>
-TÍTULO: "VW Golf 7 GTI Clubsport | Schalensitze..."
-DESCRIPCIÓN (preview)
-<precio actual> € | <precio anterior> €    ← ¡BAJADA DE PRECIO visible!
-<km> km | EZ MM/AAAA
-"VB"                  ← Verhandlungsbasis = negociable
-"Heute, 16:30"        ← fecha si reciente
-```
+### 🃏 Contenedor de anuncios — selectores estables (18-ago-2026)
+
+> Grid: `<ul id="srchrslt-adtable">` → `<li data-clickable="card">` → `article[data-adid]`. **`data-adid` + `data-href` = selectores ESTABLES** (clases Tailwind `text-title3`/`font-strong` fijas, sin hash). ⚠️ kleinanzeigen NO tiene clases CSS Modules hasheadas → los estilos son estáticos.
+
+| Dato | Selector | Notas |
+|---|---|---|
+| **Tarjeta** | `article[data-adid]` | dentro de `li[data-clickable="card"]` |
+| **ID (deduplicar)** | `article[data-adid]` | `3483153805` → mismo coche en otros portales |
+| Enlace ficha | `a[href^="/s-anzeige/"]` | `/s-anzeige/opel-meriva-.../3483153805-216-2596` |
+| Título | `h3 a[href^="/s-anzeige/"]` | "Opel Meriva 1.6 Benzin Automatik – Gepflegt – TÜV neu!" |
+| Descripción | `p.text-onSurfaceSubdued` | equipamiento/estado aquí |
+| **Precio** | `p.font-strong.text-secondary` | "2.500 €" · "26.000 € VB" (VB = negociable) |
+| **Precio anterior (tachado)** | `p.line-through.text-onSurfaceNonessential` | "2.550 €" → 🎯 **BAJADA = chollo** (JSON: `startingPrice` vs `price`) |
+| **Atributos** | `span[data-dhl-promotion]` | "141.000 km" · "EZ 08/2008" (km + matriculación) |
+| Ubicación | `span` tras icono `locationOutline` | "49681 Garrel" |
+| Fecha | `span` tras icono `calendarOutline` | "Heute, 18:07" (solo recientes) |
+| Nº fotos | `div.absolute.bottom-xsmall` | "7", "18"… |
+| **TOP** | `div.rounded-small.bg-accent` | ⚠️ pago, NO señal de chollo |
+| **PRO (concesionario)** | `div.bg-accent > .text-onAccent` "PRO" + `a[href^="/pro/"]` | comercial vs particular (`posterType` JSON: `PRIVATE`/`COMMERCIAL`) |
+
+> **Paginación:** `#pagination-container` → URLs `/s-autos/seite:N/c216` (página actual = span `font-strong` con `bg-interactive`; "Nächste" = `a[aria-label="Nächste"]`).
+> ⚠️ **Ads a ignorar:** `#srpb-top-banner`, `div[data-liberty-position-name^="srpb-result-list-"]` (`#srpb-result-list-3/8/10/13/18/23`), `#srpb-middle` — son iframes Google Ads intercalados en el listado.
 
 ### Orden (selector)
-**Neueste** · **Niedrigster Preis** · Höchster Preis.
+- Por defecto: **Relevanz** (`sortingField=MOBILEDE_RECOMMENDED` en la URL). Opciones: **Neueste** · **Niedrigster Preis** · Höchster Preis.
+- **Para el estudio: cambiar a "Niedrigster Preis" (más barato)** vía URL `&sortingField=PRICE_ASC`.
 
-**Joyas:** precio actual vs anterior (bajada = margen negociable) + edad anuncio en días. Chollos de particulares (sin IVA recuperable).
+**Joyas:** precio actual vs anterior (bajada = margen negociable) + **precio tachado** = señal de chollo. Chollos de particulares (`posterType=PRIVATE`, sin IVA recuperable). El JSON de cada tarjeta (`<astro-island>` `resultAds`) expone: `price`, `startingPrice`, `posterType`, `topAd`, `priorityAd` — ideal para deduplicar y detectar bajadas sin parsear CSS.
 
 ---
 

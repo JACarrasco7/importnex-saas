@@ -163,6 +163,7 @@ class PlantillasValoracionRenderTest extends TestCase
             '[SPEC] Emisiones CO2 | 192 g/km',
             '[PRECIO] 14.900 €',
             '[AHORRO] 1.500 €',
+            '[VALORACION] Coche muy completo, revisado y con historial verificado. Precio por debajo de la media del mercado español.',
             '[EQUIPAMIENTO] Techo panorámico',
             '[EQUIPAMIENTO] Navegación',
         ]);
@@ -171,10 +172,11 @@ class PlantillasValoracionRenderTest extends TestCase
         $car = new Car([
             'pais_origen' => 'Alemania',
             'traffic_light' => 'green',
-            'verdict_reasoning' => 'Precio 1.500 € bajo mercado con 120.000 km verificados y motor sin averías.',
+            // Datos INTERNOS que NUNCA deben filtrarse al cliente.
+            'verdict_reasoning' => 'El margen de reventa es sólido.',
+            'recommendation' => 'Cierra rápido: negocia el transporte para mantener el margen.',
             'pros' => ['Precio bajo de mercado', 'Historial sin averías'],
             'cons' => ['Kilometraje medio-alto'],
-            'recommendation' => 'Cierra rápido: buen margen frente al mercado español.',
         ]);
 
         // 1px GIF en base64 para simular fotos del coche (5 = 1 hero + 4 grid).
@@ -215,15 +217,18 @@ class PlantillasValoracionRenderTest extends TestCase
         $this->assertStringNotContainsString('spec-row">KM', $html, 'KM no debe repetirse en ficha técnica');
         // Año solo en el KPI (1 ocurrencia)
         $this->assertSame(1, substr_count($html, 'Primera matriculación'));
-        // Nuestra valoración: razonamiento + pros/cons + recomendación
+        // Nuestra valoración: texto presentable + pros/cons (sin datos internos)
         $this->assertStringContainsString('Nuestra valoración', $html);
-        $this->assertStringContainsString('Por qué Excelente compra', $html);
-        $this->assertStringContainsString('Precio 1.500 € bajo mercado', $html);
+        $this->assertStringContainsString('Por qué este coche', $html);
+        $this->assertStringContainsString('Precio por debajo de la media del mercado español', $html);
         $this->assertStringContainsString('A favor', $html);
         $this->assertStringContainsString('Historial sin averías', $html);
         $this->assertStringContainsString('En contra', $html);
         $this->assertStringContainsString('Kilometraje medio-alto', $html);
-        $this->assertStringContainsString('Recomendación', $html);
+        // Los datos INTERNOS (verdict_reasoning / recommendation) NUNCA se filtran
+        $this->assertStringNotContainsString('margen', mb_strtolower($html), 'No exponer datos de margen al cliente');
+        $this->assertStringNotContainsString('Cierra rápido', $html);
+        $this->assertStringNotContainsString('negocia', mb_strtolower($html));
         // Equipamiento como lista con check
         $this->assertStringContainsString('equip-item', $html);
         $this->assertStringContainsString('Techo panorámico', $html);

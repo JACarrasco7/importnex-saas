@@ -78,10 +78,13 @@
         }
     }
 
-    // ── Datos de valoración del coche (para "Nuestra valoración") ──
-    $val_reasoning = trim((string) ($car->verdict_reasoning ?? ''));
-    $val_valuation = trim((string) ($car->valuation ?? ''));
-    $val_recommendation = trim((string) ($car->recommendation ?? ''));
+    // ── Texto de valoración PARA EL CLIENTE ──
+    // Nada de margen/honorarios/negociación: el folleto es un documento de
+    // venta. La skill puede dejar un bloque [VALORACION] presentable en el
+    // esqueleto; si no, caemos al `valuation` del coche (valoración de
+    // mercado) o a nada. verdict_reasoning/recommendation son INTERNOS y
+    // nunca se exponen aquí.
+    $val_sales_text = trim((string) ($e->uno('VALORACION') ?: ($car->valuation ?? '')));
     $val_pros = is_array($car->pros ?? null) ? array_filter(array_map('trim', $car->pros)) : [];
     $val_cons = is_array($car->cons ?? null) ? array_filter(array_map('trim', $car->cons)) : [];
 
@@ -416,15 +419,15 @@
         </div>
         @endif
 
-        {{-- ── VALORACIÓN (por qué este coche) ───────────────────── --}}
-        @if($val_reasoning || $val_valuation || $val_recommendation || count($val_pros) || count($val_cons))
+        {{-- ── VALORACIÓN (para el cliente, sin datos internos) ───── --}}
+        @if($val_sales_text || count($val_pros) || count($val_cons))
         <div class="section">
             <div class="h2">Nuestra valoración</div>
 
-            @if($val_reasoning)
+            @if($val_sales_text)
                 <div class="reasoning-card">
-                    <div class="rt">Por qué {{ $tl_label }}</div>
-                    <div class="rd">{{ $val_reasoning }}</div>
+                    <div class="rt">Por qué este coche</div>
+                    <div class="rd">{{ $val_sales_text }}</div>
                 </div>
             @endif
 
@@ -447,22 +450,6 @@
                 </div>
                 @endif
             </div>
-            @endif
-
-            @if($val_recommendation)
-                <div class="note-card">
-                    <div>
-                        <div class="nt">Recomendación</div>
-                        <div class="nd">{{ $val_recommendation }}</div>
-                    </div>
-                </div>
-            @elseif($val_valuation)
-                <div class="note-card">
-                    <div>
-                        <div class="nt">Valoración</div>
-                        <div class="nd">{{ $val_valuation }}</div>
-                    </div>
-                </div>
             @endif
         </div>
         @endif

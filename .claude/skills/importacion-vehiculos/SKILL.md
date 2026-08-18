@@ -1,6 +1,6 @@
 ---
 name: importacion-vehiculos
-version: 3.2.2
+version: 3.2.3
 description: >
   Negocio JJ Import Motors (Huelva): servicio de búsqueda e importación de coches
   (desde Alemania y dentro de España). NO compra stock, solo oferta el servicio
@@ -910,7 +910,7 @@ Las 21 reglas duras (A1-A21) viven en `06-reglas/anti_patrones.md`. Cargarlas cu
 ├── informe.json                    ← JSON completo del CONTRATO (`03-informes/contrato.md`)
 ├── manifest.json                   ← Metadatos del paquete
 ├── contenido/
-│   ├── ficha-publicitaria.txt      ← Esqueleto [BLOQUE] → folleto.blade.php
+│   ├── ficha-publicitaria.txt      ← Esqueleto [BLOQUE] → ficha-coche + folleto del coche (el bloque [VALORACION] alimenta "Nuestra valoración" del folleto, SOLO texto de venta al cliente, sin datos internos)
 │   ├── dossier-cliente.txt        ← Esqueleto [BLOQUE] → documento del cliente (ficha-coche) en Laravel
 │   ├── informe-interno.txt         ← Esqueleto [BLOQUE] → informe-interno.blade.php (PDF equipo)
 │   ├── redes-sociales.txt          ← [GANCHO] [POST_LARGO] [STORIES] [HASHTAGS]

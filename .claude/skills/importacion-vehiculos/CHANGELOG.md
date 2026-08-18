@@ -5,6 +5,15 @@ Todos los cambios notables en el skill `importacion-vehiculos` se documentarán 
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [3.2.3] - 2026-08-18 — Contenedor de anuncios kleinanzeigen (tarjeta real)
+
+> **Origen:** el usuario facilitó el HTML del listado `<ul id="srchrslt-adtable">` (`li[data-clickable="card"]` → `article[data-adid]`, con paginación `seite:N` y ads intercalados).
+
+### 🇩🇪 Leer tarjeta kleinanzeigen
+- **`paginas_reales.md`** — sección "Contenedor de anuncios — selectores estables": **`article[data-adid]`** (ID para **deduplicar**), enlace `a[href^="/s-anzeige/"]`, precio `p.font-strong.text-secondary`, **precio anterior tachado `p.line-through` = bajada/chollo**, atributos `span[data-dhl-promotion]` (km + EZ), ubicación/fecha por iconos, badges **TOP/PRO** (pago, NO señal), paginación `/s-autos/seite:N/c216`, **JSON de cada tarjeta** (`resultAds`: `price`/`startingPrice`/`posterType`/`topAd`/`priorityAd`).
+- **`playbook_filtrado.md`** — tabla "kleinanzeigen — leer la tarjeta".
+- Claves: clases Tailwind estáticas (sin hash) → estables; ads intercalados `#srpb-top-banner` / `[data-liberty-position-name^="srpb-result-list-"]` / `#srpb-middle` → ignorar; precio tachado = chollo; `posterType=PRIVATE` = particular sin IVA.
+
 ## [3.2.2] - 2026-08-18 — Contenedor de anuncios AutoUncle (tarjeta real)
 
 > **Origen:** el usuario facilitó el HTML de la página de resultados completa (~20 tarjetas `article._qzVn4`, carrusel patrocinado, paginación).

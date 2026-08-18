@@ -217,6 +217,20 @@ PASO 3 — CRUCE (unión, NO intersección)
 > ⚠️ **En kleinanzeigen SÍ hay botón aplicar** (Übernehmen) para los checkboxes de equipamiento — a diferencia de Coches.net. Marcar checkboxes → clic en `[data-cy="clickable-options-apply-button"]`.
 > **Máximo equipamiento:** `sunroof_b` + `seat_heating_b` + `xenon_led_light_b` + `navi_b` + `full_service_history_b` → Übernehmen.
 
+### 🇩🇪 kleinanzeigen — leer la tarjeta (18-ago-2026)
+
+| Dato | Selector | Notas |
+|---|---|---|
+| **ID (dedup)** | `article[data-adid]` | `3483153805` → mismo coche en otros portales |
+| Enlace/Título | `h3 a[href^="/s-anzeige/"]` | `/s-anzeige/<slug>-<ID>-216-<sub>` |
+| **Precio** | `p.font-strong.text-secondary` | "2.500 €" · "26.000 € VB" (VB=negociable) |
+| **Bajada (tachado)** | `p.line-through.text-onSurfaceNonessential` | 🎯 chollo (JSON `startingPrice` vs `price`) |
+| Atributos | `span[data-dhl-promotion]` | km + "EZ MM/AAAA" |
+| **TOP / PRO** | `div.bg-accent` · `a[href^="/pro/"]` | ⚠️ TOP/PRO = pago, NO señal de chollo |
+| Paginación | `#pagination-container` | `/s-autos/seite:N/c216` |
+
+> ⚠️ Clases Tailwind estáticas (sin hash) → estables. Ads intercalados: `#srpb-top-banner`, `[data-liberty-position-name^="srpb-result-list-"]`, `#srpb-middle` → ignorar. JSON de cada tarjeta (`resultAds`): `price`/`startingPrice`/`posterType`/`topAd`/`priorityAd`.
+
 ### 🇩🇪 Selectores ESTABLES de filtros en AutoUncle (`name` · 18-ago-2026)
 
 > Los `id` de AutoUncle llevan hash (cambian), pero los **`name` son estables** → `[name="..."]`. Agregador: SOLO rotación + validación (A8, NUNCA precio de referencia).

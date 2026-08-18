@@ -262,6 +262,7 @@ Lista de strings. Mostrar siempre junto a la ficha.
   "publicidad": {
     "titular": "Opel Astra OPC 280 CV — el GTI que nadie espera",
     "claim": "280 caballos, un solo dueño y papeles al día.",
+    "valoracion": "OPC muy completo: 280 CV, único dueño y mantenimiento al día. Entra en las ZBE gracias a la etiqueta C y su precio está por debajo de la media del mercado español.",
     "argumentos": [
       "**Etiqueta C de la DGT:** entra en ZBE sin restricciones.",
       "**Muy poco uso:** 8.800 km/año de media."
@@ -272,6 +273,8 @@ Lista de strings. Mostrar siempre junto a la ficha.
 ```
 
 **`argumentos` nunca del `balance.a_favor`.** Eso es análisis interno (margen, reputación vendedor, riesgo) y no se muestra al cliente. Énfasis con `**negrita**` (no HTML).
+
+**`valoracion` → bloque `[VALORACION]`** de `ficha-publicitaria.txt`, que alimenta la sección "Nuestra valoración" del folleto del coche. 1-2 frases de venta para el cliente (estado, equipamiento, precio vs. mercado). **Prohibido** lenguaje interno: margen, honorarios, negociación, estrategia de venta.
 
 ---
 
@@ -552,11 +555,13 @@ class Esqueleto
 
 | Archivo | Bloques esperados |
 |---|---|
-| `ficha-publicitaria.txt` | TITULO, SUBTITULO, PRECIO, AHORRO, ESPECIFICACIONES, ETIQUETA, DESTACADOS, DESCRIPCION, QUE_INCLUYE, AVISO_LEGAL, FOTOS, CONTACTO |
+| `ficha-publicitaria.txt` | TITULO, CLAIM, SPEC (Etiqueta \| Valor), ETIQUETA_DGT, PRECIO, PRECIO_CAPTION, PLAZO, AHORRO, ARGUMENTO (titulo \| detalle), INCLUYE, EQUIPAMIENTO, **VALORACION**, FOTOS, CONTACTO |
 | `informe-interno.txt` | Ver `informe_tecnico.md` §formato-txt (15 secciones, ~60 bloques). **Los bloques `MARGEN`, `VENTA`, `IEDMT_SENSIBILIDAD`, `SCORE_DIM`, `RIESGO`, `BANDERA_ROJA/AMARILLA`, `COBERTURA`, `CAND_*`, `NEG_*`, `COMP_AJUSTE`, `VENDIBILIDAD_FACTOR`, `ACCION` se renderizan como filas/tablas en `informe-interno.blade.php`.** |
 | `dossier-cliente.txt` | Ver `dossier_cliente.md` §formato-txt (15 secciones, ~50 bloques). **Los bloques `FICHA_TECNICA`, `EQUIPAMIENTO`, `MERCADO_*`, `COSTE_LINEA`, `TIMELINE_SEMANA`, `FAQ_Q/A`, `PASOS`, `GARANTIA_*`, `ESTADO_*`, `DE_VS_ES`, `EVAL_*` se renderizan en el documento del cliente de Laravel (`ficha-coche.blade.php`); `dossier.blade.php` NO existe.** |
 | `redes-sociales.txt` | GANCHO, POST_LARGO, POST_CORTO, STORIES, HASHTAGS, PIE_FOTO |
 | `anuncio-portales.txt` | TITULO, DESCRIPCION, FICHA_RAPIDA, QUE_INCLUYE, AVISO_LEGAL |
+
+> **`VALORACION` (folleto del coche):** 1-2 frases de venta PARA EL CLIENTE sobre por qué este coche vale la pena (estado, equipamiento, precio vs. mercado). **Prohibido** hablar de margen, honorarios, negociación con el vendedor, estrategia de venta o cualquier dato interno. Es lo que el folleto (`folleto-coche.blade.php`) muestra en "Nuestra valoración". Si no se incluye, el folleto cae al `valuation` del coche o no muestra esa sección. Los campos `verdict_reasoning` y `recommendation` son INTERNOS (informe interno) y **nunca** van al folleto del cliente.
 
 > **Nota ingestor:** `ValuationPackageIngestor` guarda **cualquier `.txt` dentro de `contenido/`** del ZIP en `cars/{id}/contenido/`. Por tanto `dossier-cliente.txt` se persiste automáticamente sin tocar el ingestor. Rutas disponibles: `cars.ficha`, `cars.dossier` (autenticado), `cars.informe-interno` (solo owner/operator).
 
