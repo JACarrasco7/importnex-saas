@@ -5,6 +5,24 @@ Todos los cambios notables en el skill `importacion-vehiculos` se documentarán 
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [3.2.5] - 2026-08-18 — Contenedor de anuncios mobile.de ES (tarjeta real)
+
+> **Origen:** el usuario facilitó el HTML del listado `div[data-testid="card-layout-wrapper"]` (`top-`/`base-`/`tic-result-listing-N`, con orden `sb=&od=` y paginación).
+
+### 🇩🇪 Leer tarjeta mobile.de
+- **`paginas_reales.md`** — sección "Contenedor de anuncios — selectores estables `data-testid`": **ID del href `detalles.html?id=<ID>` para deduplicar**, título `span[data-testid="listing-title-card-view"]` + versión `...__subTitle`, **precio `span[data-testid="price-label"]`** ("€¹"=bruto/"zzgl. MwSt."=neto), **bajada `span[data-testid="strike-through-price"]`**, **rating precio `div.PriceRatingBadge--label`** (Muy buen/Buen/Precio justo/Sin calificación → chollo), atributos `[data-testid="listing-details-attributes"]`, vendedor `[data-testid="seller-info"]`, **sello OEM `[data-testid="oem-seal-listing"]`**, orden `[data-testid="sorting-menu-dropdown"]` (`sb=p&od=up` = precio bajo), paginación `[data-testid="pagination:next"/:previous"]`.
+- **`playbook_filtrado.md`** — tabla "mobile.de — leer la tarjeta".
+- Claves: **`data-testid` + prefijos `*-module__` estables, sufijos `__xxxxx` con hash → NO usar**; tarjetas `top-*`/`tic-*` = patrocinadas, `base-*` = orgánicas; ads `SRP_TABLECELL_*`/`SRP_INPAGE_VIDEO` y carrusel `SimilarTopListings` ("Otros vehículos de este concesionario") → ignorar; rating precio = señal de chollo.
+
+## [3.2.4] - 2026-08-18 — Contenedor de anuncios Coches.net (tarjeta real)
+
+> **Origen:** el usuario facilitó el HTML del grid `section.mt-AdsList-content` (`div[data-ad-id]`, con paginación `pg=N`, skeletons lazy y ads intercalados).
+
+### 🇪🇸 Leer tarjeta Coches.net
+- **`paginas_reales.md`** — sección "Contenedor de anuncios — selectores estables": `div[data-ad-id]` (ID para **deduplicar**), título `h2[data-testid="card-ad-title"]`, **precio contado `p[data-testid="card-adPrice-price"]`** (SIEMPRE contado, NO financiado), **rating precio** `span.mt-CardAdPrice-cashLabel` ("Buen precio"=4/5·"Precio justo"=3/5 → chollo), **bajada** `mt-CardAdPrice-priceDropPercentage`+`...OriginalPrice`, atributos `ul.mt-CardAd-attr li`, etiqueta DGT `...EnvironmentalLabel img` (b/eco/c/0), vendedor `span.sui-AtomBadge-text`, paginación `/search/?Section1Id=2500&pg=N`.
+- **`playbook_filtrado.md`** — tabla "Coches.net — leer la tarjeta".
+- Claves: `data-testid`/prefijos `mt-*`/`sui-*` estables (sin hash); **skeletons `div.sui-PerfDynamicRendering-placeholder` = sin cargar** → scroll antes de leer; financiado (cuota `/mes*` + TAE) → ignorar; ads `--tallAd`(`#ad-right-*`)·`--native--mobile`(`#ad-inline-*`)·`#ad-textads` → ignorar; rating "Buen precio" ya valida el precio.
+
 ## [3.2.3] - 2026-08-18 — Contenedor de anuncios kleinanzeigen (tarjeta real)
 
 > **Origen:** el usuario facilitó el HTML del listado `<ul id="srchrslt-adtable">` (`li[data-clickable="card"]` → `article[data-adid]`, con paginación `seite:N` y ads intercalados).

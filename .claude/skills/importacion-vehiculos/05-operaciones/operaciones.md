@@ -7,7 +7,7 @@
 
 ## 🗺️ MAPA DE PDFs — TIPOS y DÓNDE SE CREA CADA UNO (movido de SKILL.md, 15-ago-2026)
 
-> **Hay 7 PDFs en total: 3 los genera CLAUDE (investigación) y 4 los genera LARAVEL (venta/documento).**
+> **Hay 8 PDFs en total: 3 los genera CLAUDE (investigación) y 5 los genera LARAVEL (venta/documento).**
 > **El briefing PDF ya NO existe** (eliminado 15-ago-2026). El status de cliente 'Briefing' (pipeline) y `../01-arranque/briefing_encargo.md` (cuestionario previo) NO son el PDF briefing y se mantienen.
 
 | # | PDF | Tipo | Quién lo genera | De qué sale | Dónde se crea |
@@ -26,6 +26,7 @@
 2. **Laravel NUNCA genera los PDFs de investigación** — los hace Claude en el Desktop con la plantilla de marca.
 3. El **informe interno** (margen, honorarios, URLs de comparables) es SOLO equipo; el **dossier/ficha/folleto** es para el cliente (sin margen).
 4. Los esqueletos `.txt` (`contenido/*.txt`) son la ÚNICA entrada de Laravel: `ficha-publicitaria.txt`, `informe-interno.txt`, `dossier-cliente.txt`. El **folleto del coche reutiliza `ficha-publicitaria.txt`** — no requiere esqueleto propio.
+5. **Claude decide el contenido de cada esqueleto** (qué poner y qué NO en el folleto/cliente — A22). Laravel **solo maqueta**: no añade ni quita contenido. En el folleto del cliente NUNCA va margen, honorarios, negociación ni `verdict_reasoning`/`recommendation`.
 
 ---
 

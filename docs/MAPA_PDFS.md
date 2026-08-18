@@ -1,7 +1,14 @@
 # Mapa de PDFs — JJ Import Motors / ImportnexCore
 
-> Actualizado: 2026-08-15 · Aplica a skill `importacion-vehiculos` v2.9.9+ y Laravel.
+> Actualizado: 2026-08-18 · Aplica a skill `importacion-vehiculos` v2.9.9+ y Laravel.
 > El **briefing PDF ya NO existe** (eliminado 15-ago-2026). El status de cliente 'Briefing' y `briefing_encargo.md` no son el PDF briefing.
+
+## Flujo (quién decide qué)
+
+1. **Claude genera los 2 PDFs de investigación** (búsqueda + unidad) para el equipo.
+2. **Claude genera el TEXTO** de todos los demás documentos (esqueletos `.txt [MARCADOR]` del ZIP) y **decide qué se pone y qué NO** en cada uno — especialmente en el folleto del cliente.
+3. **Laravel solo maqueta**: convierte los esqueletos `.txt` en PDF con Blade + Browsershot cuando el coche está en inventario. **No decide contenido.**
+4. El **folleto del coche** se genera desde `ficha-publicitaria.txt` (bloque `[VALORACION]` = texto de venta presentable). **Nunca** van al folleto/cliente datos internos: margen, honorarios, negociación, `verdict_reasoning`, `recommendation` (A22).
 
 ## Resumen: 8 PDFs en dos familias
 
@@ -10,7 +17,7 @@
 | **Investigación** (3) | **Claude** (Desktop) | El usuario / equipo | Búsqueda, candidatos, análisis técnico, veredicto |
 | **Venta / documento** (5) | **Laravel** (Blade + Browsershot) | Cliente / público / equipo | Ficha, folleto del coche, dossier, informe interno, folleto institucional |
 
-Regla de oro: **Claude no genera los PDFs de venta y Laravel no genera los de investigación.**
+Regla de oro: **Claude no genera los PDFs de venta y Laravel no genera los de investigación. Claude escribe los esqueletos; Laravel solo los maqueta.**
 
 ## PDFs que genera CLAUDE (investigación)
 

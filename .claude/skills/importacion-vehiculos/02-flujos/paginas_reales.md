@@ -34,22 +34,28 @@ https://www.mobile.de/fahrzeuge/search.html?dam=false&isSearchRequest=true&ms=<m
 - **Preis (niedrigster zuerst)** ← el que usar para base
 - Preis (höchster zuerst) · Kilometerstand · Erstzulassung · Inserate (älteste/neueste zuerst = días publicado)
 
-### Tarjeta de anuncio
-```
-[NEU / Gesponsert / Top]              ← etiquetas (Gesponsert NO contar)
-TÍTULO: "Volkswagen Golf 7 GTI Clubsport..."
-PRECIO: "24.900 €" + sello: "Sehr guter Preis" / "Guter Preis" / "Hoher Preis"
-   · "€¹" = bruto (IVA incl) · "zzgl. MwSt." = neto (IVA aparte)
-   · "ggf. zzgl. Lieferkosten", "Lieferung möglich"
-DATOS: "[Unfallfrei • ] EZ MM/AAAA • km • kW (PS) • Combustible"
-   Ej: "EZ 04/2016 • 84.900 km • 265 kW (360 PS) • Benzin"
-TAGS (imagen+texto): "380PS Software", "2. Hand", "LED,RKam,PANO,Virtual", "TÜV&INSP. NEU+GARANTIE"
-VENDEDOR:
-   · Händler: nombre + "4.9 Sterne (96)" + "31275 Lehrte"
-   · Privatanbieter: "47805 Krefeld, Privatanbieter" (sin estrellas)
-BOTONES: Kontakt / Parken
-ENLACE ficha: /fahrzeuge/details.html?id=<id>
-```
+### 🃏 Contenedor de anuncios — selectores estables `data-testid` (18-ago-2026)
+
+> Grid: `div[data-testid="card-layout-wrapper"]` → `div[data-testid="result-list"]` → `article` con `div[data-testid]`. Los `data-testid` + prefijos `*-module__` son **ESTABLES** (sufijos `__xxxxx` con hash → NO usar). Tipos de tarjeta: `top-result-listing-N` (Top, patrocinado) · `base-result-listing-N` (orgánico) · `tic-result-listing-N` (patrocinado).
+
+| Dato | Selector | Notas |
+|---|---|---|
+| **ID (deduplicar)** | `a[data-testid$="-link"]` href `.../detalles.html?id=<ID>&...` | `456860545` → mismo coche en otros portales |
+| Título | `span[data-testid="listing-title-card-view"]` | "Volkswagen Tiguan" (marca+modelo) |
+| Versión | `span.ListingTitle-module__...__subTitle` | "1.4TSI 4Motion DSG Highline+LED+VIRTUAL" (equipamiento aquí) |
+| **Precio** | `span[data-testid="price-label"]` | "15.995 €" · "€¹" = bruto (IVA incl.) · "zzgl. MwSt." = neto |
+| **Bajada (tachado)** | `span[data-testid="strike-through-price"]` | "16.990 €" → 🎯 chollo |
+| **Rating precio** | `div.PriceRatingBadge--label` | "Muy buen precio"(VERY_GOOD_PRICE)·"Buen precio"(GOOD_PRICE)·"Precio justo"(REASONABLE_PRICE)·"Sin calificación" → **chollo** |
+| **Atributos** | `div[data-testid="listing-details-attributes"]` | `<strong>Sin accidentes</strong> • PR 04/2016 • 128.400 km • 55 kW (75 cv) • Gasolina` |
+| Emisiones | `div.ListingDetails-module__...__emissionDetails` | "4,8 l/100km • 108 g CO₂/km • CO₂ clase C" |
+| **Vendedor** | `div[data-testid="seller-info"]` | `...__dealerName` + `...__dealerLocation` ("DE-25337 Elmshorn") + rating "4.6 estrellas" `(668)` |
+| **Sello OEM** | `div[data-testid="oem-seal-listing"]` → `img[data-testid="image-seal"]` | concesionario oficial certificado (VW PKW, etc.) |
+| Badges | `[data-testid="sponsored-badge"]` "Patrocinado" · badge "NUEVO" · corner "Top" | ⚠️ pago, NO señal de chollo |
+| Servicios | `span.serviceBadge-module__...__ServiceBadge` | "Entrega posible" |
+
+> **Orden:** `select[data-testid="sorting-menu-dropdown"]` → **`sb=p&od=up` = Precio (más bajo primero)** ← usar para el estudio. Otras: `sb=rel`(estándar)·`sb=p&od=down`(alto)·`sb=ml`(km)·`sb=fr`(matriculación)·`sb=doc`(listados). Se aplica por URL.
+> **Paginación:** `div[data-testid="srp-pagination"]` → `nav[aria-label="Más ofertas"]`; siguiente/anterior = `[data-testid="pagination:next"/"pagination:previous"]`; actual = `[aria-label="Página N"][disabled]`; contador "1/50". **`<h1>`** "1.587.476 Ofertas" = total global (NO usar).
+> ⚠️ **Ignorar:** ads `[data-testid="SRP_TABLECELL_UPPER"]`·`SRP_TABLECELL_LOWER`·`SRP_INPAGE_VIDEO` (Gpt) · carrusel "Otros vehículos de este concesionario" (`SimilarTopListings`, `[data-testid="Carousel"]`) → NO contar.
 
 ### Ficha (details.html?id=)
 Secciones a leer: **"Fahrzeugdaten"** (km, Erstzulassung, Leistung, Getriebe, Farbe, Schadstoffklasse, Anzahl Fahrzeughalter, **CO₂** si existe) · **"Ausstattung"** (equipamiento) · precio (bruto/neto) · advertencias "Unfallschaden", "Nicht unfallfrei", "NUR AN AUTOHÄNDLER".
@@ -282,16 +288,30 @@ https://www.kleinanzeigen.de/s-<marca>-<modelo>/k0
 
 > **Equipamiento en Coches.net es LIMITADO** (solo `equipmentGroup`: techo solar, cámara, GPS, climatizador... **NO hay cuadro digital**). Para máximo equipamiento: marcar techo solar + cámara como proxy, o validar el nivel en 1-2 fichas (excepción puntual a A17).
 
-### Tarjeta de anuncio
-```
-TÍTULO: "AUDI Q2 S line 30 TDI"
-ETIQUETA PRECIO: "Buen precio" / "Precio justo"   ← priceRankIndicator VISIBLE
-PRECIO: "21.990 €"
-   · Financiado: "Financiado: 18.990 € · 251,90 €/mes*" → usar el CONTADO
-EXTRAS: "Garantía 1 año" · "IVA incluido" · "Reservable"
-DATOS: "Diesel | 2021 | 90.507 km | 116 cv | Madrid"
-VENDEDOR: "Profesional 4.2" (valoración) · "1/17" (foto/total) · botón "Comparar"
-```
+### 🃏 Contenedor de anuncios — selectores estables (18-ago-2026)
+
+> Grid: `section.mt-AdsList-content` → `div.mt-ListAds-gridLayout` → `div.mt-ListAds-gridLayout-gridItem` → `div[data-ad-id]`. **`data-ad-id` + `data-testid` = selectores ESTABLES** (prefijos `mt-*`/`sui-*` fijos, sin hash).
+
+| Dato | Selector | Notas |
+|---|---|---|
+| **Tarjeta** | `div[data-ad-id]` | dentro de `div.mt-ListAds-gridLayout-gridItem` |
+| **ID (deduplicar)** | `[data-ad-id]` | `70666366` → mismo coche en otros portales |
+| Título | `h2[data-testid="card-ad-title"] a` | "LAND-ROVER Range Rover Evoque 2.2L SD4 4x4 Dynamic" |
+| **Precio contado** | `p[data-testid="card-adPrice-price"]` | 🎯 **SIEMPRE el contado** |
+| **Rating precio** | `span.mt-CardAdPrice-cashLabel` | "Buen precio" (4/5 verdes) · "Precio justo" (3/5) → **Coches.net ya valida el precio** = señal de chollo |
+| **Bajada** | `span.mt-CardAdPrice-priceDropPercentage` + `...OriginalPrice` | "-22%" + "16.000 €" → 🎯 chollo |
+| Financiado | `div.mt-CardAdPrice-financed` | ⚠️ cuota `/mes*` + TAE — IGNORAR, usar contado |
+| Extras | `span.mt-CardAdPrice-infoItem` | "Garantía 1 año" · "IVA incluido" |
+| **Atributos** | `ul.mt-CardAd-attr li.mt-CardAd-attrItem` | combustible · año · km · cv · ciudad |
+| Etiqueta DGT | `li.mt-CardAd-attrItemEnvironmentalLabel img` | src `.../eco-label-icons/b.svg`·`eco.svg`·`c.svg`·`0.svg` (B/ECO/C/CERO) |
+| Tags | `ul.mt-CardAd-tags li.mt-CardAd-tag` | "Km0" · "Nuevo" · "En stock" · "Reservable" |
+| **Vendedor** | `span.sui-AtomBadge-text` | "Profesional 4.2" (rating concesionario) |
+| Fotos | `span.mt-GalleryBasic-sliderCounterText` | "1/23" · "1/6" |
+| Vídeo | `span[aria-label="Vídeo disponible"]` | opcional |
+
+> **Paginación:** `div.mt-AdsList-pagination` → `nav[aria-label="Paginación"]` → `ul.sui-MoleculePagination`. URLs `/search/?Section1Id=2500&pg=N` (actual = `[aria-current="page"]`, siguiente = `a[aria-label="Página siguiente"]`). **Orden:** botón `#search-sort-button-label` (defecto "Los anuncios más relevantes").
+> ⚠️ **Ignorar:** `div.mt-ListAds-gridLayout-gridItem--tallAd` ("Publicidad", `#ad-right-*`), `div.mt-ListAds-item--native--mobile` (`#ad-inline-*`), `div.mt-ListAds-item--textads` (`#ad-textads`), `div.mt-AdSpace`.
+> ⚠️ **Skeletons:** `div.sui-PerfDynamicRendering-placeholder` = tarjetas **sin cargar** (tienen `data-ad-id` pero sin datos) → hacer scroll para que carguen antes de leer.
 
 **Clave:** "Buen precio" = `4`, "Precio justo" = `3` (priceRankIndicator). Úsalo como señal. CV directo (no kW).
 **Doble pasada:** Coches.net muestra CV en la tarjeta (`116 cv`). Para topes de gama mal etiquetados, usar el filtro **"Potencia"** (en CV) además de la búsqueda por texto → ver `playbook_filtrado.md` §Doble pasada.

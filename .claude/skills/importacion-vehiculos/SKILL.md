@@ -1,6 +1,6 @@
 ---
 name: importacion-vehiculos
-version: 3.2.3
+version: 3.2.5
 description: >
   Negocio JJ Import Motors (Huelva): servicio de búsqueda e importación de coches
   (desde Alemania y dentro de España). NO compra stock, solo oferta el servicio
@@ -701,7 +701,7 @@ ENCARGO (Flujo B: MODELO)
 
 ### 🗺️ MAPA DE PDFs y 📁 RUTAS DE GUARDADO — ver `05-operaciones/operaciones.md`
 
-> **Detalle completo movido a `05-operaciones/operaciones.md`** (tabla 7 PDFs, reglas duras, rutas de guardado, aclaraciones `informe.json`).
+> **Detalle completo movido a `05-operaciones/operaciones.md`** (tabla 8 PDFs, reglas duras, rutas de guardado, aclaraciones `informe.json`).
 > **Resumen crítico (no negociable):**
 > 1. Claude genera los **PDFs de investigación** (búsqueda/unidad) y los **esqueletos `.txt` [MARCADOR]**; Laravel genera los PDFs de **venta** (dossier, ficha, folleto) con Blade + Browsershot.
 > 2. `.md` del usuario → `informes\<marca>\<modelo>\` · JSON/ZIP → `laravel\` (NUNCA AppData\Roaming\Claude).
@@ -815,12 +815,17 @@ TRAS ELEGIR CANDIDATO (nueva fase aprobada → ejecutar)
 **_outputs del informe UNIDAD (archivos .txt en ZIP):**
 - `informe-interno.txt` (análisis JJ Import Motors · ver `03-informes/informe_tecnico.md`)
 - `dossier-cliente.txt` (PDF profesional para cliente · ver `03-informes/dossier_cliente.md`) — solo si veredicto 🟢/🔵
-- `ficha-publicitaria.txt` (venta en portales · contrato.md §publicidad)
+- `ficha-publicitaria.txt` (venta en portales + folleto del coche · contrato.md §publicidad — incluye `[VALORACION]`, texto de venta presentable para el folleto)
 - `redes-sociales.txt` + `anuncio-portales.txt` (ver contrato.md)
 
 **Cuándo emitir dossier cliente:** 🟢 Comprar siempre · 🔵 Comprar si baja de precio siempre · 🟡 Dudoso solo si el cliente pidió evaluarlo · 🔴 Descartar nunca (carta breve en su lugar).
 
-**⚠️ Quién genera cada PDF (12-ago-2026):** Claude genera los **esqueletos `.txt` [MARCADOR]** dentro del ZIP. Los PDFs finales (`dossier`, `ficha-publicitaria`, `folleto`) los **genera Laravel** (Blade + Browsershot) cuando el coche ya está en el sistema. Claude NO genera PDFs, NO genera el folleto publicitario ni la ficha durante la investigación — esos salen del panel cuando el coche está en inventario.
+**⚠️ QUIÉN GENERA CADA PDF (revisado 18-ago-2026):**
+- **Claude SOLO genera 2 PDFs** (siempre para el equipo): el **informe de búsqueda** y el **informe de unidad** (`informe_busqueda_*.pdf` / `informe_unidad_*.pdf`, con plantilla de marca + Chrome).
+- **Claude genera el TEXTO (esqueletos `.txt` [MARCADOR])** de TODOS los demás documentos: `ficha-publicitaria.txt` (ficha + folleto del coche), `informe-interno.txt`, `dossier-cliente.txt`. **Claude decide qué se pone y qué NO** en cada uno — especialmente en el folleto del cliente.
+- **Laravel SOLO maqueta**: convierte los esqueletos `.txt` en PDF (Blade + Browsershot) cuando el coche ya está en inventario. Laravel **no decide contenido**: muestra lo que Claude escribió.
+- **El folleto del coche** (`folleto-coche.blade.php`) se genera desde `ficha-publicitaria.txt`. Claude escribe el bloque `[VALORACION]` (1-2 frases de venta) y `[ARGUMENTO]`/`[EQUIPAMIENTO]` presentables. **PROHIBIDO** en el folleto/cliente: margen, honorarios, negociación, estrategia de venta, `verdict_reasoning`, `recommendation` — son internos (informe interno) y nunca van al folleto.
+- Claude NO genera los PDFs de venta (ficha, folleto, dossier, informe interno) durante la investigación — esos salen del panel cuando el coche está en inventario.
 
 ---
 

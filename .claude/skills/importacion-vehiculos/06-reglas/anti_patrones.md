@@ -5,7 +5,7 @@
 
 ---
 
-## 🛡️ Los 21 anti-patrones
+## 🛡️ Los 22 anti-patrones
 
 | # | Anti-patrón | Regla dura |
 |---|---|---|
@@ -30,6 +30,7 @@
 | **A19** | Acotarse a los ejemplos del usuario | "Los modelos que el usuario nombra como ejemplo de una categoría NO limitan la búsqueda. Explorar TODO el segmento y añadir modelos no nombrados. NUNCA limitarse a los 5-6 ejemplos dados (caso real 17-ago: showstoppers se quedó en los 7 ejemplos, sin añadir i30N, Megane RS, etc.)." |
 | **A20** | Mezclar búsqueda con marketing | "Buscar coches = informe de búsqueda con datos de mercado (nº anuncios, mediana, hueco). Generar anuncios/copy IG-FB/fichas de publicación SOLO si el usuario lo pide explícitamente DESPUÉS. NUNCA inventar el formato de publicación si el usuario solo pidió localizar coches (caso real 17-ago: se entregó un .docx lleno de copy IG/FB cuando el usuario solo quería buscar coches)." |
 | **A21** | Entregar sin enlaces (anuncio + fuentes) | "TODO lo que se entregue lleva el enlace directo al anuncio (ficha del vehículo) y las fuentes con su URL. Candidatos, comparables, comparativas, informes, dossier, JSON y ZIP. Un dato sin su enlace NO se entrega como concluido. Es la regla que el usuario más repite: sin enlaces la entrega NO vale." |
+| **A22** | Filtrar datos internos al folleto/cliente | "El folleto del coche (y cualquier documento del cliente: ficha, dossier) SOLO lleva texto de venta presentable. PROHIBIDO margen, honorarios, negociación con el vendedor, estrategia de venta, `verdict_reasoning`, `recommendation` — son internos (informe interno) y nunca van al folleto. Claude decide el contenido del esqueleto (`[VALORACION]`, `[ARGUMENTO]`, `[EQUIPAMIENTO]`) pensando en el cliente; Laravel solo maqueta lo que Claude escribe." |
 
 ---
 
@@ -38,6 +39,16 @@
 ### A21 — Entregar sin enlaces (anuncio + fuentes) (17-ago-2026)
 
 **Error típico:** Claude entrega tablas de candidatos con precio/año/km pero sin las URLs de los anuncios, o informes sin la lista de fuentes consultadas con sus enlaces. El usuario no puede verificar nada y tiene que buscar cada coche a mano.
+
+### A22 — Filtrar datos internos al folleto/cliente (18-ago-2026)
+
+**Error típico:** el folleto del coche mostraba el `verdict_reasoning` y la `recommendation` de la verificación IA, que contienen lenguaje interno de negocio ("margen de reventa", "Cierra rápido", "Negocia el transporte"). El folleto es un documento de venta al cliente: esos datos son del informe interno y NUNCA se exponen.
+
+**Regla:**
+1. El folleto se genera desde `ficha-publicitaria.txt`. Claude escribe el contenido (bloques `[VALORACION]`, `[ARGUMENTO]`, `[EQUIPAMIENTO]`, `[SPEC]`) como texto de venta presentable.
+2. Prohibido en el folleto/cliente: margen, honorarios, negociación, estrategia de venta, comparables internos, `verdict_reasoning`, `recommendation`.
+3. Laravel solo maqueta (Blade + Browsershot): no decide contenido, muestra lo que Claude escribió.
+4. Los únicos PDFs que genera Claude son los informes de investigación (búsqueda + unidad), para el equipo.
 
 **Regla (la que el usuario más repite — NUNCA saltarla):**
 1. **Cada candidato/comparable lleva SIEMPRE su enlace directo al anuncio** (ficha del vehículo, no búsqueda/filtro — A6). En tablas, en comparativas, en informes, en dossier, en JSON (`mercado.comparables[].url`) y en ZIP.

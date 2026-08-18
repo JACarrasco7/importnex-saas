@@ -181,7 +181,24 @@ PASO 3 — CRUCE (unión, NO intersección)
 
 > **Regla máxima equipamiento (18-ago):** para comparar full vs full, marcar en Interior `Panel de instrumentos digital` + `Pantalla Head-up` + `Calefacción de asiento`, y en Extras `Techo panorámico` + `Faros LED`. Esos 5 checkboxes definen una unidad "full" reproducible.
 
-### 🇪🇸 Selectores ESTABLES de filtros en Coches.net (`id` de acordeón · 18-ago-2026)
+### �🇪 mobile.de — leer la tarjeta (18-ago-2026)
+
+| Dato | Selector | Notas |
+|---|---|---|
+| **ID (dedup)** | `a[data-testid$="-link"]` href `id=<ID>` | `456860545` → mismo coche en otros portales |
+| Título | `span[data-testid="listing-title-card-view"]` | marca+modelo; versión en `...__subTitle` |
+| **Precio** | `span[data-testid="price-label"]` | "€¹"=bruto(IVA incl.) · "zzgl. MwSt."=neto |
+| **Bajada (tachado)** | `span[data-testid="strike-through-price"]` | 🎯 chollo |
+| **Rating precio** | `div.PriceRatingBadge--label` | Muy buen/Buen/Precio justo/Sin calificación → chollo |
+| Atributos | `div[data-testid="listing-details-attributes"]` | "Sin accidentes • PR 04/2016 • km • kW(cv) • Combustible" |
+| Vendedor | `div[data-testid="seller-info"]` | nombre + "DE-#### Ciudad" + "X estrellas (N)" |
+| **Sello OEM** | `div[data-testid="oem-seal-listing"]` | concesionario oficial certificado |
+| Orden | `[data-testid="sorting-menu-dropdown"]` | `sb=p&od=up` = precio más bajo |
+| Paginación | `[data-testid="pagination:next"/:previous"]` | actual=`[aria-label="Página N"][disabled]` |
+
+> ⚠️ `data-testid` + prefijos `*-module__` estables (sufijos `__xxxxx` hash → NO). Tarjetas `top-*`/`tic-*` = patrocinadas; `base-*` = orgánicas. Ads `SRP_TABLECELL_*`/`SRP_INPAGE_VIDEO` y carrusel "Otros vehículos de este concesionario" (`SimilarTopListings`) → ignorar.
+
+### �🇪🇸 Selectores ESTABLES de filtros en Coches.net (`id` de acordeón · 18-ago-2026)
 
 > Coches.net **NO tiene página de filtros aparte**: el sidebar (`.mt-SearchSidebar-filters`) son **acordeones** en el propio listado, cada uno con un **`id` estable**. **Los filtros se aplican al marcar** (en vivo, sin botón). Claude expande el grupo clicando su `groupTrigger` y marca los checkboxes.
 
@@ -204,7 +221,23 @@ PASO 3 — CRUCE (unión, NO intersección)
 
 **Máximo equipamiento en ES (proxy):** marcar en `equipmentGroup` techo solar + cámara (no hay cuadro digital en Coches.net); el nivel full real se confirma en 1-2 fichas (excepción puntual a A17).
 
-### 🇩🇪 Selectores ESTABLES de filtros en kleinanzeigen.de (18-ago-2026)
+### �🇸 Coches.net — leer la tarjeta (18-ago-2026)
+
+| Dato | Selector | Notas |
+|---|---|---|
+| **ID (dedup)** | `div[data-ad-id]` | `70666366` → mismo coche en otros portales |
+| Título | `h2[data-testid="card-ad-title"] a` | |
+| **Precio contado** | `p[data-testid="card-adPrice-price"]` | 🎯 SIEMPRE contado, no financiado |
+| **Rating precio** | `span.mt-CardAdPrice-cashLabel` | "Buen precio"(4/5)·"Precio justo"(3/5) → chollo |
+| **Bajada** | `span.mt-CardAdPrice-priceDropPercentage` + `...OriginalPrice` | "-22%" + "16.000 €" → chollo |
+| Atributos | `ul.mt-CardAd-attr li.mt-CardAd-attrItem` | combustible·año·km·cv·ciudad |
+| Etiqueta DGT | `li.mt-CardAd-attrItemEnvironmentalLabel img` | `b.svg`(B)·`eco.svg`(ECO)·`c.svg`(C)·`0.svg`(CERO) |
+| Vendedor | `span.sui-AtomBadge-text` | "Profesional 4.2" |
+| Paginación | `nav[aria-label="Paginación"]` | `/search/?Section1Id=2500&pg=N` |
+
+> ⚠️ **Skeletons** `div.sui-PerfDynamicRendering-placeholder` = sin cargar → scroll primero. **Financiado** (`div.mt-CardAdPrice-financed`, cuota `/mes*` + TAE) → ignorar. Ads: `--tallAd`(`#ad-right-*`)·`--native--mobile`(`#ad-inline-*`)·`#ad-textads` → ignorar. Rating "Buen precio" ya valida el precio del anuncio.
+
+### �🇩🇪 Selectores ESTABLES de filtros en kleinanzeigen.de (18-ago-2026)
 
 > kleinanzeigen (URL `https://www.kleinanzeigen.de/s-autos/c216`) tiene **3 tipos de filtro** con selectores distintos:
 
