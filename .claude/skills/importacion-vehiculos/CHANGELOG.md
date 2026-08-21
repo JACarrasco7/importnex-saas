@@ -5,6 +5,18 @@ Todos los cambios notables en el skill `importacion-vehiculos` se documentarán 
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [3.3.1] - 2026-08-21 — PASO 0b refinado tras dry-run (matriz por flujo + mini-estudio inline)
+
+> **Motivo:** dry-run de 6 escenarios detectó: el 0b bloqueaba absurdamente el Flujo C (que ES un estudio), dejaba pasar mediciones no fiables (verde con confianza 2), y contradecía la regla L6 (el usuario manda).
+
+### 🛑 PASO 0b v2
+- **Condición de "mercado verificado" completa:** veredicto 🟢/🟡 **Y** confianza_precio ≥3 **Y** pendiente_fase2=false **Y** no caducado. Caso real: cupra-leon verde con confianza 2 → NO cuenta.
+- **Matriz por flujo:** A exento · B requiere → **mini-estudio inline** (1 listado ES + 1 DE + cruce = 4-6 peticiones, vuelca `fuente_medicion: mini_estudio`, NUNCA aborta) · C/E son estudios de facto (sin bloqueo, vuelcan al mapa) · D registra propuestos como `pendiente_estudio`.
+- **Cláusula "el usuario manda" (L6):** si insiste en buscar sin estudio/🔴 → aviso 1 línea + proceder + nota en el mapa. El pipeline es el camino por defecto, no camisa de fuerza.
+- **`como_deben_ser_las_sesiones.md`**: nueva §"Excepciones y atajos por flujo" con la matriz + plantilla del mini-estudio inline.
+- **`schema_datos_mercado.md`**: enum `fuente_medicion` + `mini_estudio` · tabla de transiciones de `estado_cola` por fuente.
+- **`datos_mercado.json`**: `cola_trabajo` INICIALIZADA (35 modelos de los 6 segmentos, estados reales, `siguiente_estudio=vw-golf-75-tcr`; `seat-leon-cupra` Mk3 separado de `cupra-leon` Mk4). Backup `.bak-21ago`.
+
 ## [3.3.0] - 2026-08-21 — Pipeline conjunto con estudio-mercado (modelo por modelo)
 
 > **Motivo:** se buscaron "Compactos deportivos" durante 3 días sin mercado verificado → unidades que no encajaban y límite de 5h. La búsqueda a ciegas está PROHIBIDA.

@@ -5,6 +5,11 @@ Todos los cambios notables en el skill `estudio-mercado` se documentarán en est
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.3.1] - 2026-08-21 — Refinado tras dry-run: transiciones por fuente + enum mini_estudio
+
+- **schema_datos_mercado.md**: `fuente_medicion` añade `mini_estudio` (medición inline del Flujo B, confianza 2-3) · nueva tabla "Estado resultante según quién mide" (estudio→estudiado · mini_estudio→estudiado · flujo_b→buscado · flujo_a→buscado/pendiente_estudio · flujo_e_delta→estudiado).
+- **`datos_mercado.json`**: `cola_trabajo` inicializada con 35 modelos de los 6 segmentos y `siguiente_estudio=vw-golf-75-tcr`.
+
 ## [0.3.0] - 2026-08-21 — Pipeline conjunto con importacion-vehiculos (modelo por modelo)
 
 > **Motivo:** la búsqueda por segmentos de golpe ("Compactos deportivos") durante 3 días no dio resultado (límite 5h, unidades que no encajan). El estudio debe ir modelo por modelo.

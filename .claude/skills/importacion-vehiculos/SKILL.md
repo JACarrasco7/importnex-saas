@@ -1,6 +1,6 @@
 ---
 name: importacion-vehiculos
-version: 3.3.0
+version: 3.3.1
 description: >
   Negocio JJ Import Motors (Huelva): servicio de búsqueda e importación de coches
   (desde Alemania y dentro de España). NO compra stock, solo oferta el servicio
@@ -181,21 +181,41 @@ CASOS:
 - Sin datos → investigación nueva normal
 ```
 
-**🛑 PASO 0b — CHECK DE MERCADO OBLIGATORIO (21-ago-2026) — NO buscar sin criterio:**
+**🛑 PASO 0b — CHECK DE MERCADO OBLIGATORIO (21-ago-2026, refinado 21-ago v2) — NO buscar sin criterio:**
 
-> **Antes de Flujo B/C/D/E (buscar unidades o sondear modelos), comprobar que el modelo tiene ESTUDIO DE MERCADO en `datos_mercado.json`.**
-> Fallo real 18-21 ago: se buscaron "Compactos deportivos" durante 3 días sin mercado verificado → unidades que no encajaban y límite de 5h. La búsqueda a ciegas está PROHIBIDA.
+> **Antes de buscar unidades o sondear modelos, comprobar el estudio de mercado.** Fallo real 18-21 ago: 3 días buscando "Compactos deportivos" sin mercado → unidades que no encajaban y límite de 5h.
 
+**Condición de "mercado verificado"** (TODAS deben cumplirse):
 ```
-1. ¿El modelo está en `datos_mercado.json` con `veredicto` 🟢/🟡 y `estado_cola` = estudiado|pendiente_busqueda?
-   → SÍ → buscar unidades (Flujo B) con el perfil objetivo del usuario.
-   → NO o 🔴 → NO buscar: avisar "este modelo no tiene mercado verificado / no sale".
-       · Si `estado_cola = pendiente_estudio` → ejecutar estudio-mercado primero (mercado antes que búsqueda).
-       · Si 🔴 (neto <0) → marcar `descartado` y proponer siguiente_* del mapa.
-   → Excepción: Flujo A (URL concreta) NO necesita mercado previo (es evaluación de una unidad dada).
+veredicto 🟢/🟡  Y  confianza_precio ≥ 3  Y  pendiente_fase2 = false  Y  refrescar_antes_de no caducado
+```
+> ⚠️ Caso real: `cupra-leon` tiene veredicto "verde" pero confianza 2 + pendiente_fase2=true → NO cuenta como verificado (re-medir primero). El veredicto SOLO no basta.
+
+**Matriz por flujo:**
+
+| Flujo | ¿Requiere mercado previo? | Si no lo tiene |
+|---|---|---|
+| **A (URL)** | ❌ Exento (unidad concreta dada) | Al cerrar: volcar medición al mapa (L4); modelo nuevo con medianas → `estado_cola: buscado`, sin medianas → `pendiente_estudio` |
+| **B (modelo)** | ✅ SÍ | **MINI-ESTUDIO INLINE** (ver abajo) y continuar. NO abortar el encargo |
+| **C (mercado/top)** | ❌ Es un estudio de facto (sondea listados = mide) | Sin bloqueo, pero al cerrar VOLCAR mediciones al mapa (`fuente_medicion: flujo_e_delta` o `estudio`) y actualizar cola |
+| **D (descubrimiento)** | ❌ Es descubrimiento por filtros | Los modelos propuestos en el informe MODELOS se registran en la cola como `pendiente_estudio` |
+| **E (stock)** | ❌ Igual que C | Igual que C |
+
+**⚡ MINI-ESTUDIO INLINE (21-ago-2026)** — cuando el Flujo B necesita mercado que no existe:
+```
+1. ES (Coches.net): 1 listado ordenado precio asc → oferta_es + suelo + mediana visual
+2. DE (mobile.de): 1 listado sb=p&od=up SOLO orgánicas → oferta_de + suelo + mediana
+3. Cruce rápido: hueco bruto + neto → veredicto provisional
+4. Volcar al mapa: fuente_medicion: "mini_estudio", confianza_precio: 2-3,
+   nota "mini-estudio inline (poca profundidad); re-medir con estudio completo si el modelo prospera"
+   estado_cola: estudiado (si 🟢/🟡) o descartado (si 🔴 neto<0)
+Coste: 4-6 peticiones. NUNCA bloquea el encargo del usuario.
+```
+
+**Cláusula "el usuario manda" (L6 + Protocolo de Mando):** si el modelo está sin estudio/🔴 y el usuario INSISTE en buscarlo → avisar el veredicto en 1 línea y **proceder igual**, anotando en el mapa `nota: "búsqueda sin estudio/contradiciendo mapa, a criterio del usuario (L6)"`. Nunca bloquear ni insistir.
+
 2. Método de trabajo completo (un modelo por pasada, checkpoints, anti-bucle):
    → ver `02-flujos/como_deben_ser_las_sesiones.md` (MD maestro de sesiones) — OBLIGATORIO leerlo.
-```
 
 **Regla dura:** si hay cache reciente (<3 semanas), **NO** re-hacer las 7 fuentes. Se ofrece delta primero. Ahorro de tokens completo en ese caso.
 

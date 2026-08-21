@@ -126,6 +126,33 @@ FASE E · CIERRE (2 min)
 
 ---
 
+## 🔓 Excepciones y atajos por flujo (21-ago-2026, tras dry-run)
+
+> El pipeline rígido (mercado antes que búsqueda) NO bloquea nunca el encargo del usuario. Matriz de aplicación:
+
+| Flujo | ¿Mercado previo? | Atajo si falta |
+|---|---|---|
+| **A (URL)** | Exento | Al cerrar: vuelco al mapa; modelo nuevo con medianas → `buscado`, sin → `pendiente_estudio` |
+| **B (modelo)** | Requerido | **Mini-estudio inline** (1 listado ES + 1 DE + cruce = 4-6 peticiones) → vuelco con `fuente_medicion: mini_estudio` → continuar. NUNCA abortar |
+| **C (mercado/top)** | No — ES el estudio | Sondea y vuelca cada modelo tocado (`flujo_e_delta`) + cola actualizada |
+| **D (descubrimiento)** | No — es descubrimiento | Los modelos del informe MODELOS entran a la cola como `pendiente_estudio` |
+| **E (stock)** | No — igual que C | Igual que C |
+
+**"Mercado verificado" = veredicto 🟢/🟡 Y confianza_precio ≥3 Y pendiente_fase2=false Y no caducado.** Un veredicto verde con confianza 2 (caso `cupra-leon` pre-corrección) NO cuenta.
+
+**El usuario manda (L6 + Protocolo de Mando):** si insiste en buscar un modelo sin estudio o marcado 🔴 → aviso de 1 línea y **proceder**, anotando en el mapa `nota: "a criterio del usuario (L6)"`. El pipeline es el camino por defecto, no una camisa de fuerza.
+
+**Mini-estudio inline (plantilla):**
+```
+1. Coches.net: ?fi=Price&or=1 → oferta_es + suelo + mediana visual (1-2 lecturas)
+2. mobile.de: &sb=p&od=up solo base-result-listing-* → oferta_de + suelo + mediana (1-2 lecturas)
+3. Cruce: hueco bruto/neto → veredicto provisional
+4. Volcar al mapa (mini_estudio, confianza 2-3) + estado_cola
+   → continuar con la búsqueda del Flujo B en la MISMA sesión
+```
+
+---
+
 ## 📦 Output por modelo (siempre igual, siempre comparable)
 
 ```

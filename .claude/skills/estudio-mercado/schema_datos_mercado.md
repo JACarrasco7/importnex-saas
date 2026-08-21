@@ -123,7 +123,7 @@
 | `transferencias_mes_dgt` / `matriculaciones_kba` | int | ⚠️ | Capa 1 (L8); null si no se consultó |
 | `veredicto` | "verde"\|"amarillo"\|"rojo" | ✅ | Según criterio de la categoría |
 | `mejor_mercado` | "DE"\|"ES"\|"paridad" | ✅ | Resultado del cruce (neto); NO duplicar con otro campo de origen |
-| `fuente_medicion` | "estudio"\|"flujo_b"\|"flujo_a"\|"flujo_e_delta" | ✅ | L3: quién midió esta entrada |
+| `fuente_medicion` | "estudio"\|"flujo_b"\|"flujo_a"\|"flujo_e_delta"\|"mini_estudio" | ✅ | L3: quién midió esta entrada. `mini_estudio` = medición rápida inline (4-6 peticiones) hecha por importacion-vehiculos cuando el Flujo B necesita mercado sin estudio previo (confianza 2-3) |
 | `confianza_precio` | int (1-5) | ⚠️ | 1=anuncio, 5=tasación pro (Capa 3). El 🟢 puede exigir confianza ≥3 |
 | `oportunidad` | bool | ⚠️ | true si `precio_desde_de` >15% bajo `mediana_de` y veredicto verde (chollo) |
 | `enlaces_muestra` | string[] | ✅ | 1-2 enlaces de ejemplo (A21) |
@@ -158,6 +158,16 @@ Opcionales (Capa 3, futuro): `tasacion_pro` (int €), `tasacion_pro_fuente` ("D
 3. Al cerrar una pasada, la skill actualiza el estado y el puntero (`siguiente_*`).
 4. Si un modelo está `pendiente_busqueda` y su `refrescar_antes_de_categoria` caducó → volver a `pendiente_estudio`.
 5. Método de trabajo completo: ver `../importacion-vehiculos/02-flujos/como_deben_ser_las_sesiones.md`.
+
+**Estado resultante según quién mide (transiciones por fuente):**
+
+| Origen de la medición | `fuente_medicion` | `estado_cola` resultante |
+|---|---|---|
+| estudio-mercado (pasada completa ES+DE+cruce) | `estudio` | `estudiado` (o `descartado` si 🔴 neto<0) |
+| Mini-estudio inline (Flujo B sin mapa, 4-6 peticiones) | `mini_estudio` | `estudiado` (confianza 2-3) o `descartado` |
+| Flujo B (barrido 7 fuentes de un modelo) | `flujo_b` | `buscado` |
+| Flujo A (unidad evaluada, modelo nuevo con medianas) | `flujo_a` | `buscado`; sin medianas → `pendiente_estudio` |
+| Flujo C/E (escaneo multi-modelo = estudio de facto) | `flujo_e_delta` | `estudiado` por cada modelo tocado |
 
 ---
 
