@@ -40,7 +40,6 @@ const { t } = useTranslations();
 const props = defineProps({
     car: Object,
     derived: Object,
-    clients: Object,
 });
 
 const uploadProgress = ref(false);
@@ -49,12 +48,20 @@ const showDeleteDoc = ref(false);
 const photoToDelete = ref(null);
 const docToDelete = ref(null);
 
-// Vincular coche directamente a un cliente del CRM (boca a boca / manual)
-const selectedClientId = ref('');
-const linkClient = () => {
-    if (!selectedClientId.value) return;
-    useForm({}).post(route('cars.link-client', { car: props.car.id, client: selectedClientId.value }), {
-        onError: () => { selectedClientId.value = ''; },
+// Crear solicitud para este coche (boca a boca / manual): la solicitud crea el cliente
+const showCreateRequest = ref(false);
+const createRequestForm = useForm({
+    name: '',
+    email: '',
+    phone: '',
+    requirements: '',
+});
+const submitCreateRequest = () => {
+    createRequestForm.post(route('cars.create-request', props.car.id), {
+        onSuccess: () => {
+            showCreateRequest.value = false;
+            createRequestForm.reset();
+        },
     });
 };
 
@@ -882,28 +889,78 @@ const onDocKeyChange = () => {
                     </ul>
                 </div>
 
-                <!-- Vincular cliente del CRM directamente (boca a boca / manual) -->
-                <div v-if="activeSection === 'resumen' && !car.client && clients?.length" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
+                <!-- Crear solicitud para este coche (boca a boca / manual) -->
+                <div v-if="activeSection === 'resumen' && !car.client" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-                        <h3 class="text-base font-semibold text-gray-900">{{ t('cars.link_client_title') }}</h3>
-                        <span class="text-xs text-gray-500">{{ t('cars.link_client_help') }}</span>
+                        <h3 class="text-base font-semibold text-gray-900">{{ t('cars.create_request_title') }}</h3>
+                        <span class="text-xs text-gray-500">{{ t('cars.create_request_help') }}</span>
                     </div>
-                    <div class="flex items-center gap-3 p-4">
-                        <select
-                            v-model="selectedClientId"
-                            class="w-full rounded-lg border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-estoril-500 focus:ring-estoril-500"
-                        >
-                            <option value="" disabled>{{ t('cars.link_client_placeholder') }}</option>
-                            <option v-for="c in clients" :key="c.id" :value="c.id">{{ c.name }}</option>
-                        </select>
+                    <div v-if="!showCreateRequest" class="p-4">
                         <button
                             type="button"
-                            :disabled="!selectedClientId"
-                            class="shrink-0 rounded-lg bg-estoril-600 px-3 py-2 text-xs font-semibold text-white hover:bg-estoril-500 disabled:cursor-not-allowed disabled:opacity-50"
-                            @click="linkClient"
+                            class="rounded-lg bg-estoril-600 px-3 py-2 text-xs font-semibold text-white hover:bg-estoril-500"
+                            @click="showCreateRequest = true"
                         >
-                            {{ t('cars.link_client_button') }}
+                            {{ t('cars.create_request_button') }}
                         </button>
+                    </div>
+                    <div v-else class="space-y-3 p-4">
+                        <div>
+                            <label class="mb-1 block text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.client_name') }}</label>
+                            <input
+                                v-model="createRequestForm.name"
+                                type="text"
+                                class="w-full rounded-lg border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-estoril-500 focus:ring-estoril-500"
+                                :placeholder="t('cars.create_request_name_placeholder')"
+                            />
+                            <p v-if="createRequestForm.errors.name" class="mt-1 text-xs text-red-600">{{ createRequestForm.errors.name }}</p>
+                        </div>
+                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            <div>
+                                <label class="mb-1 block text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.client_email') }}</label>
+                                <input
+                                    v-model="createRequestForm.email"
+                                    type="email"
+                                    class="w-full rounded-lg border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-estoril-500 focus:ring-estoril-500"
+                                />
+                                <p v-if="createRequestForm.errors.email" class="mt-1 text-xs text-red-600">{{ createRequestForm.errors.email }}</p>
+                            </div>
+                            <div>
+                                <label class="mb-1 block text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.client_phone') }}</label>
+                                <input
+                                    v-model="createRequestForm.phone"
+                                    type="text"
+                                    class="w-full rounded-lg border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-estoril-500 focus:ring-estoril-500"
+                                />
+                                <p v-if="createRequestForm.errors.phone" class="mt-1 text-xs text-red-600">{{ createRequestForm.errors.phone }}</p>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.linked_request_notes') }}</label>
+                            <textarea
+                                v-model="createRequestForm.requirements"
+                                rows="3"
+                                class="w-full rounded-lg border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-estoril-500 focus:ring-estoril-500"
+                                :placeholder="t('cars.create_request_req_placeholder')"
+                            ></textarea>
+                        </div>
+                        <div class="flex justify-end gap-2">
+                            <button
+                                type="button"
+                                class="rounded-lg bg-white px-3 py-2 text-xs font-semibold text-gray-600 shadow-sm ring-1 ring-gray-300 hover:bg-gray-50"
+                                @click="showCreateRequest = false"
+                            >
+                                {{ t('cars.cancel') }}
+                            </button>
+                            <button
+                                type="button"
+                                :disabled="createRequestForm.processing || !createRequestForm.name"
+                                class="rounded-lg bg-estoril-600 px-3 py-2 text-xs font-semibold text-white hover:bg-estoril-500 disabled:cursor-not-allowed disabled:opacity-50"
+                                @click="submitCreateRequest"
+                            >
+                                {{ t('cars.create_request_submit') }}
+                            </button>
+                        </div>
                     </div>
                 </div>
 

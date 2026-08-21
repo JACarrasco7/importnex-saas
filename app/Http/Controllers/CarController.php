@@ -134,10 +134,6 @@ class CarController extends Controller
 
         return Inertia::render('Cars/Show', [
             'car' => $car,
-            'clients' => Client::query()
-                ->where('organization_id', $car->organization_id)
-                ->orderBy('name')
-                ->get(['id', 'name']),
             'derived' => [
                 'total_cost' => $car->calculateTotalCost(),
                 'iedmt' => $car->calculateIEDMT(),
@@ -342,54 +338,86 @@ class CarController extends Controller
     }
 
     /**
-     * Vincula este coche directamente a un cliente del CRM (boca a boca, sin
-     * solicitud previa). Si el cliente tiene una solicitud activa compatible,
-     * la marca como en curso; si no tiene ninguna, crea una mínima para que el
-     * expediente quede completo (cliente ↔ solicitud ↔ vehículo).
+     * Crea una SOLICITUD para este coche (boca a boca / manual): la solicitud
+     * es el acto primario — de ella nace el cliente (se busca por email/phone
+     * o se crea), se vincula al coche y pasa a "en curso".
+     *
+     * Regla (21-ago-2026): se crea la solicitud y con eso se crea el cliente.
+     * NUNCA al revés (cliente suelto que luego inventa una solicitud).
      */
-    public function linkClient(Car $car, Client $client): RedirectResponse
+    public function createRequest(Car $car, Request $request): RedirectResponse
     {
-        abort_unless(
-            (int) $client->organization_id === (int) $car->organization_id,
-            403,
-            'El cliente pertenece a otra organización.'
-        );
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:50'],
+            'requirements' => ['nullable', 'string', 'max:2000'],
+        ]);
 
-        return DB::transaction(function () use ($car, $client) {
+        return DB::transaction(function () use ($car, $data) {
+            $client = $this->resolveClientFromData($data, $car->organization_id);
+
+            $carRequest = CarRequest::create([
+                'organization_id' => $car->organization_id,
+                'client_id' => $client->id,
+                'name' => $data['name'],
+                'email' => $data['email'] ?? null,
+                'phone' => $data['phone'] ?? null,
+                'brand' => $car->brand,
+                'model' => $car->model,
+                'status' => 'in_progress',
+                'requirements' => $data['requirements']
+                    ?? 'Solicitud creada desde la ficha del vehículo (boca a boca / manual).',
+                'notes' => '['.now()->format('d/m/Y H:i')."] Vinculado a vehículo #{$car->id} ({$car->brand} {$car->model}).",
+            ]);
+
             $car->client_id = $client->id;
             $car->save();
 
-            $activeRequest = CarRequest::query()
-                ->where('organization_id', $car->organization_id)
-                ->where('client_id', $client->id)
-                ->whereIn('status', ['pending', 'contacted', 'in_progress'])
-                ->orderByDesc('created_at')
+            return redirect()->route('cars.show', $car->id)
+                ->with('success', 'Solicitud creada y cliente vinculado al vehículo.');
+        });
+    }
+
+    /**
+     * Busca un cliente por email (y por teléfono como fallback); si no existe,
+     * lo crea a partir de los datos dados. Compatible con MySQL y SQLite.
+     */
+    private function resolveClientFromData(array $data, int $organizationId): Client
+    {
+        $email = $data['email'] ?? null;
+        $phone = $data['phone'] ?? null;
+
+        if ($email) {
+            $client = Client::where('organization_id', $organizationId)
+                ->where('contact_info', 'like', '%"email":"'.$email.'"%')
                 ->first();
 
-            if ($activeRequest) {
-                $activeRequest->status = 'in_progress';
-                $activeRequest->notes = trim(($activeRequest->notes ? $activeRequest->notes."\n" : '')
-                    .'['.now()->format('d/m/Y H:i')."] Vinculado a vehículo #{$car->id} ({$car->brand} {$car->model}).");
-                $activeRequest->save();
-            } else {
-                // Sin solicitud previa → crear una mínima (boca a boca / manual)
-                CarRequest::create([
-                    'organization_id' => $car->organization_id,
-                    'client_id' => $client->id,
-                    'name' => $client->name,
-                    'email' => null,
-                    'phone' => null,
-                    'brand' => $car->brand,
-                    'model' => $car->model,
-                    'status' => 'in_progress',
-                    'requirements' => 'Solicitud creada manualmente al vincular el vehículo (sin formulario previo).',
-                    'notes' => '['.now()->format('d/m/Y H:i')."] Vinculado a vehículo #{$car->id} ({$car->brand} {$car->model}).",
-                ]);
+            if ($client) {
+                return $client;
             }
+        }
 
-            return redirect()->route('cars.show', $car->id)
-                ->with('success', 'Cliente vinculado al vehículo.');
-        });
+        if ($phone) {
+            $normalizedPhone = preg_replace('/[^0-9]/', '', $phone);
+            $client = Client::where('organization_id', $organizationId)
+                ->where('contact_info', 'like', '%"phone":"%'.substr($normalizedPhone, -9).'%')
+                ->first();
+
+            if ($client) {
+                return $client;
+            }
+        }
+
+        return Client::create([
+            'organization_id' => $organizationId,
+            'name' => $data['name'],
+            'contact_info' => json_encode([
+                'email' => $email,
+                'phone' => $phone,
+            ]),
+            'status' => 'New',
+        ]);
     }
 
     /**
