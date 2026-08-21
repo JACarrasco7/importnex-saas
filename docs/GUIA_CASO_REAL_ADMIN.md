@@ -4,6 +4,19 @@
 > Tú eres el admin y sigues los pasos en orden. Marca cada casilla al verificar.
 > Versión: 2026-08-21 · App local: `http://127.0.0.1:8000` · Producción: `https://jjimportmotors.on-forge.com`
 
+## ✅ Estado de la validación (21-ago-2026)
+
+Las **6 etapas se probaron de punta a punta** en local y todo funciona. Se corrigieron durante la prueba:
+
+| Bug encontrado | Fix (commit `67a6e6e`) |
+|---|---|
+| Compartir tracking con email → **500 "No hint path defined for [mail]"** | `tracking-shared.blade.php` reescrito en HTML plano (sin `mail::`) |
+| Ficha del coche mostraba el **contacto como JSON crudo** (`{"email":...}`) | `clientContactDisplay` parsea el JSON en `Show.vue` |
+| Modal compartir no **auto-rellenaba el email** del cliente | `clientEmailFromContact` extrae de `contact_info` |
+
+> ⚠️ Los 2 fixes de `Show.vue` necesitan `npm run build` (lánzalo tú). El del email (Blade) ya está activo.
+> En producción ya está desplegado el commit `67a6e6e`.
+
 ---
 
 ## El caso
@@ -145,6 +158,7 @@ El flujo completo tiene **6 etapas**. Cada una termina con un **entregable** que
 | `/tracking` muestra datos internos | — | avísame (bug de fuga) |
 | `/contrato/{token}/pdf` → 500 en local | falta Chrome/Browsershot | en producción Forge sí lo tiene; en local usa el test o Chrome instalado |
 | El PDF no abre el QR | coche sin tracking compartido | comparte tracking primero (Etapa 3) |
+| Compartir con email → 500 "No hint path [mail]" | ~~blade usaba `mail::` sin vendor:publish~~ | **ARREGLADO en `67a6e6e`** (HTML plano). Si lo ves de nuevo, avísame |
 
 ---
 
