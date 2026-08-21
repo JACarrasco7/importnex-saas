@@ -5,6 +5,17 @@ Todos los cambios notables en el skill `importacion-vehiculos` se documentarán 
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [3.3.2] - 2026-08-21 — Fixes de auditoría (C1-C4 + contadores)
+
+> **Motivo:** auditoría independiente del pipeline detectó 4 críticos + medios. Aplicados:
+
+- **C1/C3 (JSON)**: `hyundai-i30n`→`hyundai-i30-n`; añadidos a la cola los modelos medidos ausentes (`mercedes-a45-amg`/`bmw-serie-1-m135`/`toyota-auris-hibrido-2016` → `pendiente_busqueda`; el resto medido → `estudiado`). `siguiente_busqueda=bmw-serie-1-m135` (hueco +12,7).
+- **C2 (JSON)**: `vw-golf-r`/`audi-s3`/`ford-focus-st` (ya medidos) pasan de `pendiente_estudio` a `estudiado`.
+- **C4 (PASO 0b)**: el mini-estudio inline ahora exige **SIN BANDA** (regla Seat/Cupra + Hallazgo 2) y **NO limpia `pendiente_fase2`** ni cierra entradas con nota de re-medición.
+- **cupra-leon (JSON)**: veredicto `verde`→`amarillo` (verde con confianza 2 violaba la propia regla; pendiente de re-medición completa).
+- **Auditoría de cierre**: "5 dimensiones"→"6" (la tabla ya tenía 6 filas) y "Salidas obligatorias (3)"→"(5)" (la lista ya tenía 5).
+- **MD sesiones**: reglas anti-bucle + sesión corta (`estudiando`) + merge de cola + alias de modelo (dry-run 1).
+
 ## [3.3.1] - 2026-08-21 — PASO 0b refinado tras dry-run (matriz por flujo + mini-estudio inline)
 
 > **Motivo:** dry-run de 6 escenarios detectó: el 0b bloqueaba absurdamente el Flujo C (que ES un estudio), dejaba pasar mediciones no fiables (verde con confianza 2), y contradecía la regla L6 (el usuario manda).

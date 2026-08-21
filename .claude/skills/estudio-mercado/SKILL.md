@@ -1,6 +1,6 @@
 ---
 name: estudio-mercado
-version: 0.3.1
+version: 0.3.2
 description: >
   Estudio profundo del mercado de coches de 2ª mano en España y Alemania para
   JJ Import Motors. Genera un mapa de mercado persistente (datos_mercado.json)
@@ -310,7 +310,7 @@ Para cada modelo/versión, el mapa guarda (esquema completo en `schema_datos_mer
 10. `transferencias_mes_dgt` / `matriculaciones_kba` — estadísticas Capa 1 (L8).
 11. `veredicto` — 🟢/🟡/🔴 según criterio de su categoría.
 12. `mejor_mercado` — DE / ES / paridad.
-13. `fuente_medicion` — estudio / flujo_b / flujo_a / flujo_e_delta (L3).
+13. `fuente_medicion` — estudio / flujo_b / flujo_a / flujo_e_delta / mini_estudio (L3).
 14. `confianza_precio` (1-5) y `oportunidad` (chollo) — calidad del dato + alertas.
 15. `nota` — matices (motorizaciones no comparables, pendiente de doble pasada...).
 16. `tasacion_pro` — (Capa 3, opcional) precio de tasación DAT/Eurotax.
@@ -349,7 +349,7 @@ Para cada modelo/versión, el mapa guarda (esquema completo en `schema_datos_mer
 - **A19** no acotarse a los ejemplos: explorar TODO el segmento.
 - **A21** todo dato lleva su enlace/fuente.
 - **L6 · El mapa asesora, el usuario decide (17-ago-2026):** si el veredicto del mapa es 🔴 pero el usuario quiere el modelo igual (ej. marketing visual), avisar en 1 línea y ejecutar. Nunca bloquear ni insistir.
-- **L3 · fuentes de medición:** `estudio` (esta skill), `flujo_b`, `flujo_a`, `flujo_e_delta` (skill hermana). Las medianas solo las escriben estudio/flujo_b; flujo_a solo añade/nota/enlaces.
+- **L3 · fuentes de medición:** `estudio` (esta skill), `flujo_b`, `flujo_a`, `flujo_e_delta`, `mini_estudio` (skill hermana). Las medianas las escriben estudio / flujo_b / mini_estudio; flujo_a solo añade/nota/enlaces.
 
 ---
 

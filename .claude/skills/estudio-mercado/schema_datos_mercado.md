@@ -18,8 +18,8 @@
   },
   "cola_trabajo": {
     "siguiente_estudio": "vw-golf-75-tcr",
-    "siguiente_busqueda": null,
-    "estados": { "vw-golf-75-tcr": "pendiente_estudio", "cupra-leon": "pendiente_busqueda" }
+    "siguiente_busqueda": "bmw-serie-1-m135",
+    "estados": { "vw-golf-75-tcr": "pendiente_estudio", "cupra-leon": "pendiente_estudio" }
   },
   "ruta_canonica": "C:/Users/jacar/Desktop/JJImportMotors/datos_mercado.json",
   "fuentes": {
@@ -132,7 +132,7 @@
 | `equipamiento_de` / `equipamiento_es` | string[] | ⚠️ | Ítems clave reales (techo, cuadro digital, LED, HUD...) — verificado en ficha/listado |
 | `equipamiento_ajuste_eur` | int | ⚠️ | Ajuste aplicado al precio ES si no compara nivel (primas de `comparables.md`) |
 | `nota` | string | ⚠️ | Matices, pendientes, motorizaciones no comparables |
-| `estado_cola` | string | ✅ | Estado en la cola de trabajo (21-ago-2026): `pendiente_estudio` \| `estudiado` \| `pendiente_busqueda` \| `buscado` \| `descartado`. Lo gestionan AMBAS skills (ver MD sesiones) |
+| `estado_cola` | string | ⚠️ | Estado en la cola de trabajo (21-ago-2026): `pendiente_estudio` \| `estudiando` \| `estudiado` \| `pendiente_busqueda` \| `buscado` \| `descartado`. Fuente de verdad: `cola_trabajo.estados` (este campo del objeto es espejo informativo, NO dual-write obligatorio) |
 
 Opcionales (Capa 3, futuro): `tasacion_pro` (int €), `tasacion_pro_fuente` ("DAT"\|"Eurotax").
 
@@ -147,6 +147,7 @@ Opcionales (Capa 3, futuro): `tasacion_pro` (int €), `tasacion_pro_fuente` ("D
 | Estado | Quién lo pone | Significado | Acción siguiente |
 |---|---|---|---|
 | `pendiente_estudio` | Usuario/propuesta | Falta medir su mercado (hueco/demanda/rotación) | estudio-mercado lo mide (1 pasada modelo-por-modelo) |
+| `estudiando` | estudio-mercado / mini-estudio | Medición EN CURSO (sesión corta o a medias) — guardado parcial si se interrumpe | Reanudar en la siguiente sesión (leer `nota`/progreso) |
 | `estudiado` | estudio-mercado | Mercado medido y volcado al mapa | importacion-vehiculos puede buscar unidades si veredicto 🟢/🟡 |
 | `pendiente_busqueda` | estudio-mercado tras 🟢/🟡 | Hay hueco, toca buscar unidades | importacion-vehiculos Flujo B (1 modelo por pasada) |
 | `buscado` | importacion-vehiculos | Unidades buscadas y candidatos entregados | Feedback: volcar medición real al mapa (L3/L4) |
@@ -158,6 +159,8 @@ Opcionales (Capa 3, futuro): `tasacion_pro` (int €), `tasacion_pro_fuente` ("D
 3. Al cerrar una pasada, la skill actualiza el estado y el puntero (`siguiente_*`).
 4. Si un modelo está `pendiente_busqueda` y su `refrescar_antes_de_categoria` caducó → volver a `pendiente_estudio`.
 5. Método de trabajo completo: ver `../importacion-vehiculos/02-flujos/como_deben_ser_las_sesiones.md`.
+6. **Sesión corta o interrumpida (auditoría 21-ago):** si se corta a mitad de FASE B (estudio) o D (búsqueda), marcar el modelo `estudiando` con `nota` del progreso (fase alcanzada, listados leídos, pendientes) para reanudar en la siguiente sesión — nunca dejar el progreso solo en el chat.
+7. **Merge de la cola entre sesiones (auditoría 21-ago):** al escribir `cola_trabajo`, NO sobrescribir los estados de modelos que esta sesión no tocó: leer el JSON actual y hacer MERGE por slug (mismo principio E10 que las entradas). Solo cambian `siguiente_*` y los `estados.<slug>` que esta sesión modificó.
 
 **Estado resultante según quién mide (transiciones por fuente):**
 

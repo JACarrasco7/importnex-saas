@@ -93,6 +93,10 @@ FASE E · CIERRE (2 min)
 | Captchas/página caída ×2 | Marcar bloqueada · seguir con otra fuente · reintentar al final | Si todas caen, abortar sesión |
 | Modelo sin hueco neto (neto <0) | Avisar ANTES de gastar peticiones → `descartado` | Solo re-estudiar si cambia el mercado |
 | 5h de sesión alcanzadas | Guardar estado en la cola (`siguiente_*` + `estado_cola`) y continuar en la próxima sesión | El progreso nunca se pierde |
+| **Sesión corta (<5h) interrumpida** | Marcar el modelo `estudiando` con `nota` del progreso (fase alcanzada, listados leídos, pendientes) para reanudar | No dejar el progreso solo en el chat |
+| **Dos sesiones en paralelo / merge** | Al escribir la cola, MERGE por slug: solo cambian los `estados` que esta sesión tocó y `siguiente_*` (E10) | Nunca sobrescribir estados de modelos ajenos |
+
+> **Alias de modelo (dry-run 1):** al crear la entrada de un modelo por primera vez (ej. "Golf 7.5 TCR"), añadir `alias` razonables (`golf-75-tcr`, `golf-tcr`, `golf 7.5 tcr`) para que el lookup L1 no falle y no se dupliquen slugs.
 
 ---
 

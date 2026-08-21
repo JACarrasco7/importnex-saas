@@ -1,6 +1,6 @@
 ---
 name: importacion-vehiculos
-version: 3.3.1
+version: 3.3.2
 description: >
   Negocio JJ Import Motors (Huelva): servicio de búsqueda e importación de coches
   (desde Alemania y dentro de España). NO compra stock, solo oferta el servicio
@@ -201,14 +201,18 @@ veredicto 🟢/🟡  Y  confianza_precio ≥ 3  Y  pendiente_fase2 = false  Y  r
 | **D (descubrimiento)** | ❌ Es descubrimiento por filtros | Los modelos propuestos en el informe MODELOS se registran en la cola como `pendiente_estudio` |
 | **E (stock)** | ❌ Igual que C | Igual que C |
 
-**⚡ MINI-ESTUDIO INLINE (21-ago-2026)** — cuando el Flujo B necesita mercado que no existe:
+**⚡ MINI-ESTUDIO INLINE (21-ago-2026, refinado auditoría)** — cuando el Flujo B necesita mercado que no existe:
 ```
 1. ES (Coches.net): 1 listado ordenado precio asc → oferta_es + suelo + mediana visual
 2. DE (mobile.de): 1 listado sb=p&od=up SOLO orgánicas → oferta_de + suelo + mediana
+   ⚠️ SIEMPRE SIN BANDA de precio (nunca MinPrice/p= mínimo): medir SUELO (asc) y mediana.
+   → Regla Seat/Cupra + Hallazgo 2 (banda aplasta el hueco): la banda recorta la cola barata.
 3. Cruce rápido: hueco bruto + neto → veredicto provisional
 4. Volcar al mapa: fuente_medicion: "mini_estudio", confianza_precio: 2-3,
    nota "mini-estudio inline (poca profundidad); re-medir con estudio completo si el modelo prospera"
    estado_cola: estudiado (si 🟢/🟡) o descartado (si 🔴 neto<0)
+   ⚠️ Si pendiente_fase2=true o la entrada tiene nota de re-medición → el mini-estudio
+   NO limpia el flag ni cierra pendiente_fase2: el modelo requiere ESTUDIO COMPLETO.
 Coste: 4-6 peticiones. NUNCA bloquea el encargo del usuario.
 ```
 
@@ -461,7 +465,7 @@ SESIÓN <fecha> — <modelo/encargo>
 
 > **Trigger:** el usuario elige UN candidato y el Flujo A termina (informe unidad + dossier + ZIP) — o dice "este es" / "cerramos". También si el encargo se **aborta** sin elección: se audita igualmente (aprender por qué no cerró). Es el cierre del embudo: el único momento donde se puede medir si el embudo AHORRÓ de verdad.
 
-**Las 5 dimensiones (respuestas cortas, SIN navegar — solo mirar hacia atrás):**
+**Las 6 dimensiones (respuestas cortas, SIN navegar — solo mirar hacia atrás):**
 
 | # | Dimensión | Qué medir |
 |---|---|---|
@@ -472,7 +476,7 @@ SESIÓN <fecha> — <modelo/encargo>
 | 5 | **Resultado** | Candidato final (modelo, precio, origen, score) + dato de mercado aprendido |
 | 6 | **Mapa de mercado** | ¿Volqué la medición a `datos_mercado.json`? ¿con qué `fuente_medicion` (`flujo_b`/`flujo_a`)? ¿actualicé o añadí entrada? (L4 — OBLIGATORIA) |
 
-**Salidas obligatorias (3):**
+**Salidas obligatorias (5):**
 1. `memoria/retrospectiva.md` → entrada de sesión con las 5 dimensiones (plantilla de cierre).
 2. `memoria/modelos-medidos.md` → el modelo elegido con precio real verificado + fecha.
 3. `memoria/encargos.md` → el encargo registrado (flujo, resultado, `refrescar antes de` = hoy + cadencia de su categoría: 2-4 sem) + ejecutar `py scripts/sync_indice.py` para actualizar `indice.json`.

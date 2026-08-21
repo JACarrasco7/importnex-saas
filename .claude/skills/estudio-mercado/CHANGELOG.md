@@ -5,6 +5,11 @@ Todos los cambios notables en el skill `estudio-mercado` se documentarán en est
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.3.2] - 2026-08-21 — Fixes de auditoría (C1-C4 + medios)
+
+- **schema**: estado `estudiando` añadido al enum (sesión corta/interrumpida) · regla 6 de merge de la cola entre sesiones (E10, solo tocar lo de esta sesión) · `estado_cola` degradado a ⚠️ (fuente de verdad = `cola_trabajo.estados`) · ejemplo de `cola_trabajo` corregido (`cupra-leon=pendiente_estudio`).
+- **SKILL.md**: L3 ampliado (medianas las escriben estudio/flujo_b/**mini_estudio**) · §Métricas #13 enum con `mini_estudio`.
+
 ## [0.3.1] - 2026-08-21 — Refinado tras dry-run: transiciones por fuente + enum mini_estudio
 
 - **schema_datos_mercado.md**: `fuente_medicion` añade `mini_estudio` (medición inline del Flujo B, confianza 2-3) · nueva tabla "Estado resultante según quién mide" (estudio→estudiado · mini_estudio→estudiado · flujo_b→buscado · flujo_a→buscado/pendiente_estudio · flujo_e_delta→estudiado).
