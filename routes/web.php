@@ -219,6 +219,12 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
         ->where('carRequest', '[0-9]+')
         ->name('cars.match-request');
 
+    // Vincular coche directamente a un cliente del CRM (boca a boca / manual)
+    Route::post('/cars/{car}/link-client/{client}', [CarController::class, 'linkClient'])
+        ->where('car', '[0-9]+')
+        ->where('client', '[0-9]+')
+        ->name('cars.link-client');
+
     // Car Photos
     Route::post('/cars/{car}/photos', [CarPhotoController::class, 'store'])->name('cars.photos.store');
     Route::delete('/cars/{car}/photos/{photo}', [CarPhotoController::class, 'destroy'])->name('cars.photos.destroy');

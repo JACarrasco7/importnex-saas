@@ -40,6 +40,7 @@ const { t } = useTranslations();
 const props = defineProps({
     car: Object,
     derived: Object,
+    clients: Object,
 });
 
 const uploadProgress = ref(false);
@@ -47,6 +48,15 @@ const showDeletePhoto = ref(false);
 const showDeleteDoc = ref(false);
 const photoToDelete = ref(null);
 const docToDelete = ref(null);
+
+// Vincular coche directamente a un cliente del CRM (boca a boca / manual)
+const selectedClientId = ref('');
+const linkClient = () => {
+    if (!selectedClientId.value) return;
+    useForm({}).post(route('cars.link-client', { car: props.car.id, client: selectedClientId.value }), {
+        onError: () => { selectedClientId.value = ''; },
+    });
+};
 
 // Compartir seguimiento público con el cliente
 const showTrackingModal = ref(false);
@@ -870,6 +880,31 @@ const onDocKeyChange = () => {
                             </Link>
                         </li>
                     </ul>
+                </div>
+
+                <!-- Vincular cliente del CRM directamente (boca a boca / manual) -->
+                <div v-if="activeSection === 'resumen' && !car.client && clients?.length" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
+                    <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+                        <h3 class="text-base font-semibold text-gray-900">{{ t('cars.link_client_title') }}</h3>
+                        <span class="text-xs text-gray-500">{{ t('cars.link_client_help') }}</span>
+                    </div>
+                    <div class="flex items-center gap-3 p-4">
+                        <select
+                            v-model="selectedClientId"
+                            class="w-full rounded-lg border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-estoril-500 focus:ring-estoril-500"
+                        >
+                            <option value="" disabled>{{ t('cars.link_client_placeholder') }}</option>
+                            <option v-for="c in clients" :key="c.id" :value="c.id">{{ c.name }}</option>
+                        </select>
+                        <button
+                            type="button"
+                            :disabled="!selectedClientId"
+                            class="shrink-0 rounded-lg bg-estoril-600 px-3 py-2 text-xs font-semibold text-white hover:bg-estoril-500 disabled:cursor-not-allowed disabled:opacity-50"
+                            @click="linkClient"
+                        >
+                            {{ t('cars.link_client_button') }}
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Assigned Client -->

@@ -154,4 +154,125 @@ class CarMatchRequestTest extends TestCase
         $this->assertNull($car->fresh()->client_id);
         $this->assertSame('pending', $request->fresh()->status);
     }
+
+    public function test_match_request_creates_client_when_request_has_none(): void
+    {
+        [$user, $org] = $this->actingUser();
+        $car = Car::factory()->create([
+            'organization_id' => $org->id,
+            'brand' => 'Opel',
+            'model' => 'Astra',
+        ]);
+        // Solicitud SIN cliente (datos viejos / manuales)
+        $request = CarRequest::create([
+            'organization_id' => $org->id,
+            'name' => 'Cliente Huérfano',
+            'email' => 'huerfano@example.com',
+            'phone' => '600123456',
+            'brand' => 'Opel',
+            'model' => 'Astra',
+            'budget_min' => 10000,
+            'budget_max' => 15000,
+            'status' => 'pending',
+        ]);
+
+        $response = $this->actingAs($user)
+            ->post(route('cars.match-request', ['car' => $car->id, 'carRequest' => $request->id]));
+
+        $response->assertRedirect(route('cars.show', $car->id));
+
+        $request->refresh();
+        $this->assertNotNull($request->client_id, 'La solicitud debe tener cliente tras vincular.');
+        $this->assertDatabaseHas('clients', [
+            'id' => $request->client_id,
+            'name' => 'Cliente Huérfano',
+            'organization_id' => $org->id,
+        ]);
+        $this->assertDatabaseHas('cars', ['id' => $car->id, 'client_id' => $request->client_id]);
+        $this->assertSame('in_progress', $request->status);
+    }
+
+    public function test_link_client_assigns_client_and_creates_request_if_none(): void
+    {
+        [$user, $org] = $this->actingUser();
+        $client = Client::create([
+            'organization_id' => $org->id,
+            'name' => 'Cliente Boca a Boca',
+            'status' => 'new',
+        ]);
+        $car = Car::factory()->create([
+            'organization_id' => $org->id,
+            'brand' => 'Opel',
+            'model' => 'Astra',
+        ]);
+
+        $response = $this->actingAs($user)
+            ->post(route('cars.link-client', ['car' => $car->id, 'client' => $client->id]));
+
+        $response->assertRedirect(route('cars.show', $car->id));
+        $this->assertDatabaseHas('cars', ['id' => $car->id, 'client_id' => $client->id]);
+        $this->assertDatabaseHas('car_requests', [
+            'client_id' => $client->id,
+            'brand' => 'Opel',
+            'model' => 'Astra',
+            'status' => 'in_progress',
+        ]);
+    }
+
+    public function test_link_client_reuses_active_request_of_client(): void
+    {
+        [$user, $org] = $this->actingUser();
+        $client = Client::create([
+            'organization_id' => $org->id,
+            'name' => 'Cliente con Solicitud',
+            'status' => 'new',
+        ]);
+        CarRequest::create([
+            'organization_id' => $org->id,
+            'client_id' => $client->id,
+            'name' => 'Cliente con Solicitud',
+            'brand' => 'Opel',
+            'status' => 'pending',
+        ]);
+        $car = Car::factory()->create([
+            'organization_id' => $org->id,
+            'brand' => 'Opel',
+            'model' => 'Astra',
+        ]);
+
+        $response = $this->actingAs($user)
+            ->post(route('cars.link-client', ['car' => $car->id, 'client' => $client->id]));
+
+        $response->assertRedirect(route('cars.show', $car->id));
+        $this->assertDatabaseHas('cars', ['id' => $car->id, 'client_id' => $client->id]);
+
+        // El cliente SOLO tiene una solicitud (la activa, reutilizada → en curso)
+        $this->assertSame(1, CarRequest::where('client_id', $client->id)->count());
+        $this->assertSame('in_progress', CarRequest::where('client_id', $client->id)->first()->status);
+    }
+
+    public function test_link_client_from_other_organization_is_forbidden(): void
+    {
+        [$user, $org] = $this->actingUser();
+        $otherOrg = Organization::factory()->create();
+
+        $car = Car::factory()->create([
+            'organization_id' => $org->id,
+            'brand' => 'Opel',
+            'model' => 'Astra',
+        ]);
+        $client = Client::create([
+            'organization_id' => $otherOrg->id,
+            'name' => 'Hacker',
+            'status' => 'new',
+        ]);
+
+        $response = $this->actingAs($user)
+            ->post(route('cars.link-client', ['car' => $car->id, 'client' => $client->id]));
+
+        // El global scope de Client (tenant) devuelve 404 (modelo no resoluble)
+        // en lugar de 403: igual de seguro, no revela que el cliente existe.
+        $this->assertTrue(in_array($response->getStatusCode(), [403, 404], true));
+        $this->assertNull($car->fresh()->client_id);
+    }
 }
