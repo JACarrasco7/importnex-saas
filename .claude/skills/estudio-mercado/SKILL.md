@@ -1,6 +1,6 @@
 ---
 name: estudio-mercado
-version: 0.2.1
+version: 0.3.0
 description: >
   Estudio profundo del mercado de coches de 2ª mano en España y Alemania para
   JJ Import Motors. Genera un mapa de mercado persistente (datos_mercado.json)
@@ -238,6 +238,28 @@ FASE 4 — GUARDAR el mapa:
 ```
 
 **Presupuesto objetivo:** 1-2 peticiones por modelo y mercado (listados, no fichas). Un estudio de 3 categorías × 10 modelos ≈ 60-80 peticiones, UNA vez cada 2-4 semanas según categoría (el refresco en delta gasta mucho menos).
+
+### 🔄 PIPELINE CONJUNTO con `importacion-vehiculos` (21-ago-2026) — UN MODELO POR PASADA
+
+> **El problema (18-21 ago-2026):** barrer un segmento entero ("Compactos deportivos" = GTI + Cupra + Astra OPC + Focus ST + i30N + Mégane RS...) en una sola sesión supera el límite de 5h, mezcla generaciones y devuelve unidades que NO encajan. La búsqueda a ciegas está PROHIBIDA.
+
+**Regla de oro:** el estudio y la búsqueda trabajan **modelo por modelo** (marca + versión), NO por segmento. El segmento solo PRIORIZA.
+
+```
+① Segmentación (prompt maestro) → lista de modelos concretos por segmento
+② ESTUDIO (esta skill): 1 modelo por pasada → veredicto + estado_cola=estudiado
+   PARADA: mostrar resultado al usuario
+③ BÚSQUEDA (importacion-vehiculos): 1 modelo por pasada (SOLO si 🟢/🟡 con hueco)
+   → Flujo B → candidatos → estado_cola=buscado
+④ Feedback: la búsqueda vuelca mediciones reales al mapa (fuente_medicion: flujo_b)
+```
+
+**Reglas:**
+1. Al cerrar cada modelo en esta skill, actualizar `cola_trabajo` en `datos_mercado.json`: `estado_cola` (`estudiado`/`descartado`) + puntero `siguiente_*` (enrutador: ver `schema_datos_mercado.md` §Cola de trabajo).
+2. Cada pasada = 1 modelo: ES (Coches.net) + DE (mobile.de) + cruce. ~5 min. Nunca más de 1 modelo por mensaje de resultado.
+3. Si el modelo ya está `pendiente_busqueda` o `buscado` en la cola → NO re-medir (PASO 0 cache de la skill hermana).
+4. Entre modelo y modelo: PARADA OBLIGATORIA para que el usuario valide encaje (ver formato de salida).
+5. Documento maestro del flujo de trabajo: `../importacion-vehiculos/02-flujos/como_deben_ser_las_sesiones.md` (obligatorio leerlo al inicio de sesión).
 
 ### ⚡ EFICIENCIA del estudio (17-ago-2026)
 - **Facetas de marca/modelo con conteo** (como D1a de importación): enumerar el mercado sin abrir listados → solo los modelos con señal de interés pasan a lectura de listado.

@@ -44,14 +44,17 @@ PASO 3 — MEJORAR el prompt (Prompt Improver)
   └─ Preguntar SOLO lo que falta (máx 4 cosas)
   └─ Opción "busca tú / lo que puedas"
 
-PASO 3b — FIJAR MODELOS candidatos (17-ago-2026) — checkpoint ANTES de buscar
+PASO 3b — FIJAR MODELOS candidatos (17-ago-2026, ampliado 21-ago) — checkpoint ANTES de buscar
   └─ Propósito: fijar QUÉ modelos tiene sentido traer ANTES de valorar unidades concretas.
        "No es solo buscar coches: es saber qué modelos encajan en el mercado ES vs DE."
-  └─ Fuente (en orden): 1) `datos_mercado.json` (mapa de la skill hermana estudio-mercado: veredicto+hueco+demanda por modelo)
+  └─ Fuente (en orden): 1) `datos_mercado.json` (mapa de la skill hermana estudio-mercado: veredicto+hueco+demanda por modelo + **cola_trabajo `siguiente_*`**)
        2) semilla `../memoria/modelos-medidos.md` · 3) segmento del encargo + ejemplos del briefing (ilustrativos, A19)
        Si el mapa no existe o caducó (refrescar_antes_de_categoria pasado) → fallback a modelos-medidos + declarar "sin estudio de mercado"
   └─ LOOKUP por slug/alias (L1): normalizar el nombre del modelo (minúsculas, sin tildes, golf-7≡golf-vii, sin marca)
        y buscar en `datos_mercado.json` por `slug` o dentro de `alias`. Si no hay match, es modelo nuevo → se añadirá al cerrar
+  └─ **COLA DE TRABAJO (21-ago-2026):** usar `cola_trabajo.estados` para saber el estado de cada modelo
+       (pendiente_estudio / estudiado / pendiente_busqueda / buscado / descartado). NO buscar unidades de un modelo
+       en `pendiente_estudio` (primero estudio-mercado) ni en `descartado` (sin hueco). Enrutador: `siguiente_*`.
   └─ Para cada modelo candidato, indicar el ENCAJE DE MERCADO (breve):
        - Oferta en DE (fuerte/débil) · Oferta en ES (fuerte/débil)
        - Dónde sale mejor comprar (DE por costes de importación vs ES directo) → `../04-negocio/costes.md` §Origen
@@ -65,6 +68,9 @@ PASO 3b — FIJAR MODELOS candidatos (17-ago-2026) — checkpoint ANTES de busca
        avisar el veredicto en 1 línea y ejecutar igual. Nunca bloquear ni insistir.
   └─ Si el usuario no sabe qué modelos quiere: proponer TÚ la selección con criterio de mercado, justificada en 2-3 líneas
   └─ NUNCA pasar a buscar/valorar unidades sin la lista de modelos fijada (salvo Flujo A: el modelo ya está fijado por la URL)
+  └─ 📅 UN MODELO POR PASADA (21-ago-2026): el checkpoint es modelo a modelo, no segmento a segmento.
+       "Compactos deportivos" se descompone en Golf TCR → Golf 8 Clubsport → Cupra VZ → ... uno a uno con
+       parada obligatoria entre cada uno (ver `../02-flujos/como_deben_ser_las_sesiones.md`).
 
 PASO 4 — PLAN DE BÚSQUEDA OBLIGATORIO (17-ago-2026) — ANTES de cualquier navegación
   └─ Se aplica a TODOS los flujos (A/B/C/D/E), no solo a encargos vagos: si el modelo está claro,

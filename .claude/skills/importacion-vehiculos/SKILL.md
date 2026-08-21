@@ -1,6 +1,6 @@
 ---
 name: importacion-vehiculos
-version: 3.2.7
+version: 3.3.0
 description: >
   Negocio JJ Import Motors (Huelva): servicio de búsqueda e importación de coches
   (desde Alemania y dentro de España). NO compra stock, solo oferta el servicio
@@ -181,6 +181,22 @@ CASOS:
 - Sin datos → investigación nueva normal
 ```
 
+**🛑 PASO 0b — CHECK DE MERCADO OBLIGATORIO (21-ago-2026) — NO buscar sin criterio:**
+
+> **Antes de Flujo B/C/D/E (buscar unidades o sondear modelos), comprobar que el modelo tiene ESTUDIO DE MERCADO en `datos_mercado.json`.**
+> Fallo real 18-21 ago: se buscaron "Compactos deportivos" durante 3 días sin mercado verificado → unidades que no encajaban y límite de 5h. La búsqueda a ciegas está PROHIBIDA.
+
+```
+1. ¿El modelo está en `datos_mercado.json` con `veredicto` 🟢/🟡 y `estado_cola` = estudiado|pendiente_busqueda?
+   → SÍ → buscar unidades (Flujo B) con el perfil objetivo del usuario.
+   → NO o 🔴 → NO buscar: avisar "este modelo no tiene mercado verificado / no sale".
+       · Si `estado_cola = pendiente_estudio` → ejecutar estudio-mercado primero (mercado antes que búsqueda).
+       · Si 🔴 (neto <0) → marcar `descartado` y proponer siguiente_* del mapa.
+   → Excepción: Flujo A (URL concreta) NO necesita mercado previo (es evaluación de una unidad dada).
+2. Método de trabajo completo (un modelo por pasada, checkpoints, anti-bucle):
+   → ver `02-flujos/como_deben_ser_las_sesiones.md` (MD maestro de sesiones) — OBLIGATORIO leerlo.
+```
+
 **Regla dura:** si hay cache reciente (<3 semanas), **NO** re-hacer las 7 fuentes. Se ofrece delta primero. Ahorro de tokens completo en ese caso.
 
 1. Extraer parámetros dados (modelo, año mín, km máx, presupuesto...).
@@ -198,6 +214,7 @@ CASOS:
 > **Regla (17-ago-2026):** el **PLAN DE BÚSQUEDA con filtros y embudo es OBLIGATORIO en TODO encargo, antes de navegar** (todos los flujos, no solo los vagos). Se aplica el **protocolo** del planificador:
 > **PASO 0 ENTENDER la petición (📥 ACK de 1 línea SIEMPRE + preguntas precisas solo si hay duda de QUÉ/PARA QUÉ/ENTREGABLE — ver `01-arranque/guia_prompts.md` §ACK y §Árbol de decisión) → PASO 1 detectar flujo → PASO 2 cache → PASO 3 refinar briefing + aclarar intención/entregable (SIEMPRE, ver `01-arranque/guia_prompts.md` §Intención) → PASO 3b FIJAR MODELOS candidatos con encaje ES/DE y OK del usuario (ver `01-arranque/planificador.md` PASO 3b) → PASO 4 PLAN DE BÚSQUEDA (filtros URL/clic + bandas + segmentación + lotes, con OK del usuario — ver `01-arranque/planificador.md` PASO 4) → PASO 5 ejecutar en cascada.**
 > **NUNCA abrir el primer portal sin el plan aprobado** (fallo real 17-ago: se navegó con filtros implícitos y el usuario pidió "proponer el plan antes de nada"). El plan se apoya en el mapa de mercado (`datos_mercado.json`) para la segmentación y priorización.
+> **🔄 PIPELINE CONJUNTO (21-ago-2026):** el flujo de trabajo es SIEMPRE segmentación → estudio-mercado (un modelo por pasada) → búsqueda (un modelo por pasada) → feedback. NO barrer segmentos de golpe. Ver **`02-flujos/como_deben_ser_las_sesiones.md`** (MD maestro de sesiones) y `../estudio-mercado/schema_datos_mercado.md` §Cola de trabajo (enrutador `siguiente_*`).
 >
 > Cargar `01-arranque/planificador.md` completo antes de navegar en cualquier encargo. Referencias: briefing (`01-arranque/briefing_encargo.md`), plantillas de prompt (`01-arranque/guia_prompts.md`), filtros por portal (`memoria/filtros-portales.md`).
 

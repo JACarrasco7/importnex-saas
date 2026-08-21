@@ -65,7 +65,7 @@ class CarChecklistDefinitions
             ['key' => 'glass_window_fr',    'name' => 'Ventanilla delantera der.: fecha fabricación y estado',      'priority' => 'minor'],
             ['key' => 'glass_window_rl',    'name' => 'Ventanilla trasera izq.: fecha fabricación y estado',        'priority' => 'minor'],
             ['key' => 'glass_window_rr',    'name' => 'Ventanilla trasera der.: fecha fabricación y estado',        'priority' => 'minor'],
-            ['key' => 'glass_sunroof',      'name' => 'Techo solar/panorámico (si tiene): estanqueidad y mecanismo','priority' => 'minor'],
+            ['key' => 'glass_sunroof',      'name' => 'Techo solar/panorámico (si tiene): estanqueidad y mecanismo', 'priority' => 'minor'],
             ['key' => 'glass_dates_match',  'name' => 'Todas las fechas de cristales coinciden entre sí',            'priority' => 'critical'],
         ],
         'Óxido, bajos y estructura' => [
@@ -90,7 +90,7 @@ class CarChecklistDefinitions
             ['key' => 'int_seatbelts',      'name' => 'Cinturones: funcionan bien, sin deshilachados',              'priority' => 'critical'],
             ['key' => 'int_climate',        'name' => 'Climatizador: frío y calor reales en todas las salidas',    'priority' => 'important'],
             ['key' => 'int_windows_mirror', 'name' => 'Elevalunas y espejos eléctricos: todos funcionan',          'priority' => 'minor'],
-            ['key' => 'int_infotainment',   'name' => 'Pantalla/infoentretenimiento: enciende, sin píxeles muertos','priority' => 'minor'],
+            ['key' => 'int_infotainment',   'name' => 'Pantalla/infoentretenimiento: enciende, sin píxeles muertos', 'priority' => 'minor'],
             ['key' => 'int_trunk',          'name' => 'Maletero: suelo, forros y rueda de repuesto/kit',           'priority' => 'minor'],
             ['key' => 'int_odors',          'name' => 'Olores: sin humedad, tabaco ni combustible',                 'priority' => 'important'],
         ],
@@ -106,7 +106,7 @@ class CarChecklistDefinitions
             ['key' => 'mec_battery',        'name' => 'Batería 12V: fecha fabricación y estado de carga',           'priority' => 'important'],
             ['key' => 'mec_engine_mounts',  'name' => 'Soportes de motor: sin holguras',                            'priority' => 'minor'],
             ['key' => 'mec_brakes',         'name' => 'Frenos: discos y pastillas, sin vibración al frenar',         'priority' => 'critical'],
-            ['key' => 'mec_suspension',     'name' => 'Suspensión: sin ruidos en badenes, sin fugas amortiguadores','priority' => 'important'],
+            ['key' => 'mec_suspension',     'name' => 'Suspensión: sin ruidos en badenes, sin fugas amortiguadores', 'priority' => 'important'],
             ['key' => 'mec_clutch',         'name' => 'Embrague: recorrido y agarre correctos (si manual)',         'priority' => 'important'],
             ['key' => 'mec_auto_gearbox',   'name' => 'Cambio automático: cambios suaves, sin tirones',             'priority' => 'important'],
             ['key' => 'mec_egr_dpf',        'name' => 'EGR/DPF (diésel): sin síntomas de obstrucción',              'priority' => 'important'],
@@ -121,7 +121,7 @@ class CarChecklistDefinitions
         ],
         'Prueba y verificación' => [
             ['key' => 'ver_road_test',      'name' => 'Prueba en carretera (ciudad y carretera)',                   'priority' => 'critical'],
-            ['key' => 'ver_vin_match',      'name' => 'VIN coincide (chasis, parabrisas, papeles, etiqueta puerta)','priority' => 'critical'],
+            ['key' => 'ver_vin_match',      'name' => 'VIN coincide (chasis, parabrisas, papeles, etiqueta puerta)', 'priority' => 'critical'],
             ['key' => 'ver_km_consistent',  'name' => 'Kilometraje coherente con el desgaste general',               'priority' => 'important'],
             ['key' => 'ver_service_book',   'name' => 'Libro de mantenimiento (Scheckheft) revisado',               'priority' => 'important'],
             ['key' => 'ver_recalls',        'name' => 'Recalls pendientes (por VIN)',                               'priority' => 'critical'],
@@ -156,15 +156,16 @@ class CarChecklistDefinitions
                 ];
             }
         }
+
         return $rows;
     }
 
-    public function milestones(): array
+    public static function milestones(): array
     {
         return self::MILESTONES;
     }
 
-    public function inspections(): array
+    public static function inspections(): array
     {
         return self::INSPECTIONS;
     }
@@ -172,5 +173,29 @@ class CarChecklistDefinitions
     public function totalCount(): int
     {
         return count(self::MILESTONES) + array_sum(array_map('count', self::INSPECTIONS));
+    }
+
+    /**
+     * Grupos de inspección con `key` (slug), `name` (label ES) y `match_name`
+     * (el valor que `CarChecklist.section` guarda en BD legacy — coincide con
+     * `INSPECTIONS` keys en su forma original).
+     *
+     * @return array<int, array{key:string, name:string, match_name:string}>
+     */
+    public static function inspectionGroups(): array
+    {
+        $rows = [];
+        $i = 0;
+        foreach (array_keys(self::INSPECTIONS) as $name) {
+            $slug = 'sec_'.$i++;
+            $rows[] = [
+                'key' => $slug,
+                'name' => $name,
+                // CarChecklist.section guarda este mismo string (`name` del grupo).
+                'match_name' => $name,
+            ];
+        }
+
+        return $rows;
     }
 }

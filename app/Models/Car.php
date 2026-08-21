@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 class Car extends Model
 {
@@ -32,6 +33,8 @@ class Car extends Model
         'market_avg', 'market_min', 'market_max', 'estimated_saving',
         'research_source', 'schema_version',
         'comparables_list', 'fotos_json', 'notes', 'organization_id', 'client_id',
+        'tracking_token', 'tracking_shared_at', 'tracking_shared_with_email',
+        'tracking_revoked_at', 'tracking_views', 'expected_delivery_date',
         'ai_analysis_json', 'ai_verified_at',
     ];
 
@@ -44,6 +47,9 @@ class Car extends Model
         'co2_confirmado' => 'boolean',
         'is_marketplace' => 'boolean',
         'verdict_at' => 'datetime',
+        'tracking_shared_at' => 'datetime',
+        'tracking_revoked_at' => 'datetime',
+        'expected_delivery_date' => 'date',
         'lat' => 'decimal:8', 'lng' => 'decimal:8',
         'purchase_price' => 'decimal:2', 'new_price' => 'decimal:2',
         'manual_tax_base' => 'decimal:2', 'transport' => 'decimal:2',
@@ -79,6 +85,12 @@ class Car extends Model
     public const KANBAN_STATUSES = [
         'Located', 'Valuing', 'Offered', 'Reserved', 'Purchased',
         'In_transit', 'Processing', 'Delivered',
+    ];
+
+    /** Estados en los que el tracking público está disponible para el cliente. */
+    public const TRACKABLE_STATUSES = [
+        'Purchased', 'In_transit', 'Processing',
+        'Pending review', 'Verifying', 'Delivered',
     ];
 
     public const CURRENT_SCHEMA_VERSION = 1;
@@ -277,5 +289,80 @@ class Car extends Model
             'date' => null,
         ], $data);
         $this->research = $research;
+    }
+
+    // ───────────────────────────────────────────────────────────────────────
+    // Tracking público del proceso (URL compartida con el cliente)
+    // ───────────────────────────────────────────────────────────────────────
+
+    /** Coches con token válido, no revocado y en estado trackeable. */
+    public function scopePublicTracking($query)
+    {
+        return $query
+            ->whereNotNull('tracking_token')
+            ->whereNull('tracking_revoked_at')
+            ->whereIn('status', self::TRACKABLE_STATUSES);
+    }
+
+    /** Genera un token único de 40 caracteres. NO persiste (uso interno). */
+    public static function generateTrackingToken(): string
+    {
+        do {
+            $token = Str::random(40);
+        } while (self::withoutGlobalScopes()->where('tracking_token', $token)->exists());
+
+        return $token;
+    }
+
+    /** Genera un token nuevo, lo persiste y devuelve la URL pública completa. */
+    public function regenerateTrackingToken(): string
+    {
+        $this->tracking_token = self::generateTrackingToken();
+        $this->save();
+
+        return $this->tracking_url;
+    }
+
+    /** Marca como compartido: timestamp + email opcional + URL lista. */
+    public function shareTracking(?string $email = null): string
+    {
+        if (! $this->tracking_token) {
+            $this->tracking_token = self::generateTrackingToken();
+        }
+        $this->tracking_shared_at = now();
+        $this->tracking_revoked_at = null;
+        $this->tracking_shared_with_email = $email;
+        $this->save();
+
+        return $this->tracking_url;
+    }
+
+    /** Soft revoke: el token sigue existiendo pero deja de ser público. */
+    public function revokeTracking(): void
+    {
+        $this->tracking_revoked_at = now();
+        $this->save();
+    }
+
+    public function getTrackingUrlAttribute(): string
+    {
+        if (! $this->tracking_token) {
+            return '';
+        }
+
+        $base = rtrim(config('app.url', ''), '/');
+
+        return $base.'/tracking/'.$this->tracking_token;
+    }
+
+    public function getIsTrackingSharedAttribute(): bool
+    {
+        return ! empty($this->tracking_token) && empty($this->tracking_revoked_at);
+    }
+
+    public function getIsPublicTrackableAttribute(): bool
+    {
+        return $this->is_tracking_shared
+            && in_array($this->status, self::TRACKABLE_STATUSES, true);
     }
 }

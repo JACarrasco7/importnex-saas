@@ -16,6 +16,11 @@
     "vw": { "modelos": ["vw-golf-7-gti"], "total": 1 },
     "audi": { "modelos": ["audi-a5-sb-50-tdi"], "total": 1 }
   },
+  "cola_trabajo": {
+    "siguiente_estudio": "vw-golf-75-tcr",
+    "siguiente_busqueda": null,
+    "estados": { "vw-golf-75-tcr": "pendiente_estudio", "cupra-leon": "pendiente_busqueda" }
+  },
   "ruta_canonica": "C:/Users/jacar/Desktop/JJImportMotors/datos_mercado.json",
   "fuentes": {
     "es": { "portal": "coches.net", "consulta": "2026-08-17", "estado": "OK" },
@@ -127,8 +132,32 @@
 | `equipamiento_de` / `equipamiento_es` | string[] | ⚠️ | Ítems clave reales (techo, cuadro digital, LED, HUD...) — verificado en ficha/listado |
 | `equipamiento_ajuste_eur` | int | ⚠️ | Ajuste aplicado al precio ES si no compara nivel (primas de `comparables.md`) |
 | `nota` | string | ⚠️ | Matices, pendientes, motorizaciones no comparables |
+| `estado_cola` | string | ✅ | Estado en la cola de trabajo (21-ago-2026): `pendiente_estudio` \| `estudiado` \| `pendiente_busqueda` \| `buscado` \| `descartado`. Lo gestionan AMBAS skills (ver MD sesiones) |
 
 Opcionales (Capa 3, futuro): `tasacion_pro` (int €), `tasacion_pro_fuente` ("DAT"\|"Eurotax").
+
+---
+
+## Cola de trabajo compartida (21-ago-2026)
+
+> La `cola_trabajo` es el **enrutador que dice "cuál es el siguiente"** para que las dos skills (estudio-mercado e importacion-vehiculos) trabajen en cascada sin pisarse ni repetir.
+
+**Estados de cada modelo (`estados.<slug>`):**
+
+| Estado | Quién lo pone | Significado | Acción siguiente |
+|---|---|---|---|
+| `pendiente_estudio` | Usuario/propuesta | Falta medir su mercado (hueco/demanda/rotación) | estudio-mercado lo mide (1 pasada modelo-por-modelo) |
+| `estudiado` | estudio-mercado | Mercado medido y volcado al mapa | importacion-vehiculos puede buscar unidades si veredicto 🟢/🟡 |
+| `pendiente_busqueda` | estudio-mercado tras 🟢/🟡 | Hay hueco, toca buscar unidades | importacion-vehiculos Flujo B (1 modelo por pasada) |
+| `buscado` | importacion-vehiculos | Unidades buscadas y candidatos entregados | Feedback: volcar medición real al mapa (L3/L4) |
+| `descartado` | Cualquiera | Sin hueco o sin encaje | No tocar; solo re-estudiar si cambia el mercado |
+
+**Reglas:**
+1. `siguiente_estudio` = el modelo `pendiente_estudio` con prioridad (caducidad más próxima o prioridad del usuario).
+2. `siguiente_busqueda` = el modelo `pendiente_busqueda` más prioritario.
+3. Al cerrar una pasada, la skill actualiza el estado y el puntero (`siguiente_*`).
+4. Si un modelo está `pendiente_busqueda` y su `refrescar_antes_de_categoria` caducó → volver a `pendiente_estudio`.
+5. Método de trabajo completo: ver `../importacion-vehiculos/02-flujos/como_deben_ser_las_sesiones.md`.
 
 ---
 

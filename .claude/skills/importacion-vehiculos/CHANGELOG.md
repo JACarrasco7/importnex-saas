@@ -5,6 +5,17 @@ Todos los cambios notables en el skill `importacion-vehiculos` se documentarán 
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [3.3.0] - 2026-08-21 — Pipeline conjunto con estudio-mercado (modelo por modelo)
+
+> **Motivo:** se buscaron "Compactos deportivos" durante 3 días sin mercado verificado → unidades que no encajaban y límite de 5h. La búsqueda a ciegas está PROHIBIDA.
+
+### 🔄 Pipeline conjunto (MD maestro + cola de trabajo)
+- **NUEVO `02-flujos/como_deben_ser_las_sesiones.md`** — MD maestro de todas las sesiones: 1 modelo por pasada (nunca segmento de golpe), 5 fases con PARADA obligatoria (preparación → estudio → encaje → búsqueda → cierre), reglas anti-bucle, checklist de inicio de sesión y formato de salida estándar.
+- **PASO 0b — CHECK DE MERCADO OBLIGATORIO** en SKILL.md: antes de Flujo B/C/D/E, el modelo debe tener `veredicto` 🟢/🟡 y `estado_cola`=estudiado/pendiente_busqueda en `datos_mercado.json`. Si no → NO buscar (mercado primero o descartar). Excepción: Flujo A (URL concreta).
+- **PASO 3b ampliado** (`01-arranque/planificador.md`): usa `cola_trabajo.estados` + enrutador `siguiente_*`; checkpoint modelo a modelo, no segmento a segmento.
+- **Cola de trabajo compartida** (en `estudio-mercado/schema_datos_mercado.md` §Cola de trabajo): estados `pendiente_estudio` → `estudiado` → `pendiente_busqueda` → `buscado` → `descartado` + punteros `siguiente_estudio`/`siguiente_busqueda`.
+- **SKILL.md**: bump 3.2.7 → **3.3.0** + §PIPELINE CONJUNTO en planificación.
+
 ## [3.2.7] - 2026-08-18 — Detección de chollos con selectores por portal
 
 > **Motivo:** la sección "🎯 Detección de chollos" era texto genérico; ahora cada señal lleva su selector estable (cierra el ciclo filtros → tarjeta → chollo).

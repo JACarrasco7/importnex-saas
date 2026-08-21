@@ -12,6 +12,7 @@ use App\Http\Controllers\CarMapController;
 use App\Http\Controllers\CarMarketingController;
 use App\Http\Controllers\CarPhotoController;
 use App\Http\Controllers\CarRequestController;
+use App\Http\Controllers\CarSharingController;
 use App\Http\Controllers\CarVerificationController;
 use App\Http\Controllers\ClientContactLogController;
 use App\Http\Controllers\ClientController;
@@ -33,6 +34,7 @@ use App\Http\Controllers\PaqueteValoracionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicCarRequestController;
 use App\Http\Controllers\PublicMarketplaceController;
+use App\Http\Controllers\PublicTrackingController;
 use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\StripeWebhookController;
@@ -251,6 +253,17 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     // Informe interno: SOLO equipo, nunca expuesto al cliente.
     Route::get('/cars/{car}/informe-interno', [PaqueteValoracionController::class, 'interno'])->name('cars.informe-interno');
 
+    // Compartir/revocar el seguimiento público con el cliente.
+    Route::post('/cars/{car}/share-tracking', [CarSharingController::class, 'share'])
+        ->where('car', '[0-9]+')
+        ->name('cars.share-tracking');
+    Route::delete('/cars/{car}/tracking', [CarSharingController::class, 'revoke'])
+        ->where('car', '[0-9]+')
+        ->name('cars.revoke-tracking');
+    Route::post('/cars/{car}/tracking/regenerate', [CarSharingController::class, 'regenerate'])
+        ->where('car', '[0-9]+')
+        ->name('cars.regenerate-tracking');
+
     // Marketing overview
     Route::get('/marketing', [MarketingController::class, 'index'])->name('marketing.index');
 
@@ -347,6 +360,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 // JJ Import Motors folleto PDF
 Route::get('/jj-import/folleto', [JJImportFolletoController::class, 'download'])->name('jj-import.folleto');
+
+// Tracking público del proceso de importación (sin auth).
+Route::get('/tracking/{token}', [PublicTrackingController::class, 'show'])
+    ->where('token', '[A-Za-z0-9_-]{20,80}')
+    ->name('public.tracking.show');
 
 // Marketplace item 12: newsletter public (sin auth, con rate limit)
 Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');

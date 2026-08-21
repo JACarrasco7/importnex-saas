@@ -6,14 +6,19 @@
 
         <title inertia>{{ config('app.name', 'Laravel') }}</title>
 
-        <!-- Critical CSS inline (above-the-fold styles) — improves FCP/LCP -->
+        <!-- Critical CSS inline (above-the-fold styles) — improves FCP/LCP.
+             Envuelto en @layer base para que las utilidades de Tailwind v4
+             (que viven en @layer utilities) puedan pisarlo; sin capa,
+             reglas como mx-auto no funcionan en h1/p. -->
         <style>
-            *,*::before,*::after{box-sizing:border-box}
-            html{-webkit-text-size-adjust:100%;tab-size:4;font-family:Figtree,ui-sans-serif,system-ui,sans-serif;line-height:1.5}
-            body{margin:0;line-height:inherit;background:#fff;color:#111827}
-            h1,h2,h3,h4,h5,h6,p,figure,blockquote,dl,dd{margin:0}
-            .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0}
-            .min-h-screen{min-height:100vh}
+            @layer base {
+                *,*::before,*::after{box-sizing:border-box}
+                html{-webkit-text-size-adjust:100%;tab-size:4;font-family:Figtree,ui-sans-serif,system-ui,sans-serif;line-height:1.5}
+                body{margin:0;line-height:inherit;background:#fff;color:#111827}
+                h1,h2,h3,h4,h5,h6,p,figure,blockquote,dl,dd{margin:0}
+                .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0}
+                .min-h-screen{min-height:100vh}
+            }
         </style>
 
         <!-- SEO Meta Tags -->

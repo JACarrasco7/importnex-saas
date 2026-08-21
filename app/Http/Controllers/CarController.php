@@ -146,6 +146,15 @@ class CarController extends Controller
                 'matching_requests' => $car->client ? [] : $this->matchingRequests($car),
                 'linked_request' => $this->linkedRequest($car),
                 'laravel_pdfs' => $this->laravelPdfs($car),
+                'tracking' => [
+                    'is_shared' => $car->is_tracking_shared,
+                    'is_public_trackable' => $car->is_public_trackable,
+                    'url' => $car->tracking_url,
+                    'token' => $car->tracking_token,
+                    'shared_at' => $car->tracking_shared_at?->toIso8601String(),
+                    'shared_with_email' => $car->tracking_shared_with_email,
+                    'views' => (int) $car->tracking_views,
+                ],
             ],
         ]);
     }
