@@ -36,7 +36,7 @@ class JJImportFolletoController extends Controller
             $logoPath = public_path('images/jj-import/logo-horizontal-blanco.png');
             $logoBase64 = 'data:image/png;base64,'.base64_encode(file_get_contents($logoPath));
 
-            $qrUrl = 'https://jjimportmotors.on-forge.com/request/jj-import-motors';
+            $qrUrl = route('public.car-request.index', ['slug' => 'jj-import-motors']);
             $qrSvg = QrCode::format('svg')
                 ->size(280)
                 ->margin(1)

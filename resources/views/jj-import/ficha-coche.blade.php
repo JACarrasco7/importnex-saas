@@ -14,7 +14,7 @@
     $telefono_1 = $telefono_1 ?? '675 70 14 39';
     $telefono_2 = $telefono_2 ?? '691 48 59 27';
     $email = $email ?? 'jjimportmotors@gmail.com';
-    $qr_url = $e->uno('QR') ?? 'https://jjimportmotors.on-forge.com/request/jj-import-motors';
+    $qr_url = $e->uno('QR') ?? route('public.car-request.index', ['slug' => 'jj-import-motors']);
 
     $qr_svg = $qr_svg ?? null;
     if (!$qr_svg) {

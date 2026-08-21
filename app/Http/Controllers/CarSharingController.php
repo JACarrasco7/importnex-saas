@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\TrackingSharedMail;
 use App\Models\Car;
+use App\Services\ContractService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -26,6 +27,13 @@ class CarSharingController extends Controller
             'email' => ['nullable', 'email', 'max:255'],
             'expected_delivery_date' => ['nullable', 'date'],
         ]);
+
+        // El coche debe estar en un estado del proceso ya iniciado. No usar
+        // is_public_trackable aquí: exigiría token previo y bloquearía el primer share.
+        if (! in_array($car->status, Car::TRACKABLE_STATUSES, true)) {
+            return back()->with('error', __('tracking.shared.not_trackable_status'))
+                ->withInput();
+        }
 
         $url = $car->shareTracking($data['email'] ?? null);
 
@@ -52,5 +60,19 @@ class CarSharingController extends Controller
         $car->regenerateTrackingToken();
 
         return back()->with('success', __('tracking.shared.regenerated'));
+    }
+
+    /** Crea (o reutiliza) un ContractAcceptance y devuelve la URL pública. */
+    public function createContract(Request $request, Car $car): RedirectResponse
+    {
+        if (! $car->client_id) {
+            return back()->with('error', __('tracking.contract.need_client'));
+        }
+
+        $contract = app(ContractService::class)->ensureForCar($car);
+
+        return back()->with('success', __('tracking.contract.created', [
+            'url' => $contract->public_url,
+        ]));
     }
 }

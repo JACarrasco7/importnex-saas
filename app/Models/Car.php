@@ -139,6 +139,17 @@ class Car extends Model
         return $this->hasMany(CarMarketingContent::class);
     }
 
+    public function contractAcceptances()
+    {
+        return $this->hasMany(ContractAcceptance::class);
+    }
+
+    /** Última aceptación de contrato del coche (o null). */
+    public function latestContractAcceptance()
+    {
+        return $this->hasOne(ContractAcceptance::class)->latestOfMany('accepted_at');
+    }
+
     public function scopeActive($query)
     {
         return $query->whereIn('status', self::ACTIVE_STATUSES);
@@ -309,7 +320,9 @@ class Car extends Model
     {
         do {
             $token = Str::random(40);
-        } while (self::withoutGlobalScopes()->where('tracking_token', $token)->exists());
+            // withoutGlobalScope('organization') — evita colisión con otra org;
+            // sin desactivar SoftDeletes (un token de coche borrado sigue ocupado).
+        } while (self::withoutGlobalScope('organization')->withTrashed()->where('tracking_token', $token)->exists());
 
         return $token;
     }

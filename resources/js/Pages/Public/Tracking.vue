@@ -75,14 +75,17 @@ const expectedDate = computed(() =>
 </script>
 
 <template>
-    <Head :title="t('public.tracking.title', { brand: car.brand, model: car.model })" />
+    <Head :title="t('public.tracking.title', { brand: car.brand, model: car.model })">
+        <meta name="robots" content="noindex,nofollow" />
+        <meta name="referrer" content="no-referrer" />
+    </Head>
 
     <div class="min-h-screen bg-gradient-to-br from-asphalt-50 via-white to-estoril-50/30">
         <header class="border-b border-estoril-100/40 bg-white/80 backdrop-blur-md">
             <div class="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
                 <div class="flex items-center gap-3">
                     <img
-                        :src="'/img/logo-jj-import-motors.png'"
+                        :src="'/images/jj-import/logo-insignia.png'"
                         :alt="'JJ Import Motors'"
                         class="h-10 w-auto"
                     />
@@ -204,10 +207,11 @@ const expectedDate = computed(() =>
                                     'flex h-10 w-10 items-center justify-center rounded-full ring-2',
                                     m.completed
                                         ? 'bg-estoril-600 text-white ring-estoril-600'
-                                        : 'bg-white text-asphalt-400 ring-asphalt-200',
+                                        : 'bg-white text-asphalt-500 ring-asphalt-200',
                                 ]"
+                                :aria-label="m.name + (m.completed ? ' ✓' : '')"
                             >
-                                <component :is="iconForMilestone(m.key)" class="h-5 w-5" />
+                                <component :is="iconForMilestone(m.key)" class="h-5 w-5" aria-hidden="true" />
                             </div>
                             <span
                                 v-if="idx < car.milestones.length - 1"

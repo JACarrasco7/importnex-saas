@@ -69,6 +69,37 @@ class ShareTrackingTest extends TestCase
         ])->assertRedirect(route('login'));
     }
 
+    public function test_share_blocked_when_status_not_trackable(): void
+    {
+        [$car, $user] = $this->makeContext();
+        $car->forceFill(['status' => 'Located'])->save();
+
+        $this->actingAs($user)
+            ->from(route('cars.show', $car))
+            ->post(route('cars.share-tracking', $car), [
+                'email' => 'cliente@example.com',
+            ])
+            ->assertRedirect(route('cars.show', $car))
+            ->assertSessionHas('error');
+
+        $car->refresh();
+        $this->assertNull($car->tracking_token);
+    }
+
+    public function test_create_contract_requires_client(): void
+    {
+        [$car, $user] = $this->makeContext();
+        $car->forceFill(['client_id' => null])->save();
+
+        $this->actingAs($user)
+            ->from(route('cars.show', $car))
+            ->post(route('cars.contract.create', $car))
+            ->assertRedirect(route('cars.show', $car))
+            ->assertSessionHas('error');
+
+        $this->assertSame(0, $car->contractAcceptances()->count());
+    }
+
     public function test_validation_rejects_bad_email(): void
     {
         [$car, $user] = $this->makeContext();

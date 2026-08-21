@@ -93,7 +93,7 @@ class CarController extends Controller
 
     public function show(Car $car): Response
     {
-        $car->load(['photos', 'documents', 'expenses', 'checklists', 'client']);
+        $car->load(['photos', 'documents', 'expenses', 'checklists', 'client', 'contractAcceptances']);
 
         // Pre-compute derived data for the enriched valuation UI
         $car->researchGaps;       // touch accessor
@@ -146,6 +146,7 @@ class CarController extends Controller
                 'matching_requests' => $car->client ? [] : $this->matchingRequests($car),
                 'linked_request' => $this->linkedRequest($car),
                 'laravel_pdfs' => $this->laravelPdfs($car),
+                'contract' => $this->contractSummary($car),
                 'tracking' => [
                     'is_shared' => $car->is_tracking_shared,
                     'is_public_trackable' => $car->is_public_trackable,
@@ -198,6 +199,30 @@ class CarController extends Controller
                 'route' => route('cars.informe-interno', $car->id),
                 'available' => $has('informe-interno.txt'),
             ],
+        ];
+    }
+
+    /**
+     * Resumen del contrato (último creado) para mostrar el panel en Cars/Show.
+     * Si no hay ninguno, devuelve null y la UI muestra el botón "Generar".
+     *
+     * @return array{public_url:string, pdf_url:string, accepted_at:?string, hash:string}|null
+     */
+    private function contractSummary(Car $car): ?array
+    {
+        $contract = $car->contractAcceptances()->latest('accepted_at')->latest('id')->first();
+        if (! $contract) {
+            return null;
+        }
+
+        return [
+            'public_url' => $contract->public_url,
+            'pdf_url' => $contract->accepted_at
+                ? route('public.contract.pdf', $contract->public_token)
+                : null,
+            'accepted_at' => $contract->accepted_at?->toIso8601String(),
+            'hash' => $contract->contract_hash,
+            'version' => $contract->contract_version,
         ];
     }
 

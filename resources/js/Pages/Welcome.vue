@@ -23,9 +23,9 @@ defineProps({
 });
 
 const stats = [
-    { value: '80%', label: t('welcome.spreadsheet_savings') },
-    { value: '3x', label: t('welcome.turnover') },
-    { value: '24/7', label: t('welcome.ai_assistance') },
+    { value: '9', label: t('welcome.stat_modules') },
+    { value: '1', label: t('welcome.stat_marketplace') },
+    { value: 'EUR', label: t('welcome.stat_stripe') },
 ];
 
 const trustSources = [
@@ -57,6 +57,38 @@ const testimonials = [
         quote: 'Las alertas automáticas me han salvado operaciones que se me habrían escapado. Integración con Stripe, además, es top.',
     },
 ];
+
+const howWorksSteps = [
+    { icon: UsersIcon, title: 'welcome.how_works_step1_title', desc: 'welcome.how_works_step1_desc' },
+    { icon: TruckIcon, title: 'welcome.how_works_step2_title', desc: 'welcome.how_works_step2_desc' },
+    { icon: ChartBarIcon, title: 'welcome.how_works_step3_title', desc: 'welcome.how_works_step3_desc' },
+];
+
+const pricingStarter = [
+    'welcome.pricing_starter_f1',
+    'welcome.pricing_starter_f2',
+    'welcome.pricing_starter_f3',
+];
+
+const pricingPro = [
+    'welcome.pricing_pro_f1',
+    'welcome.pricing_pro_f2',
+    'welcome.pricing_pro_f3',
+    'welcome.pricing_pro_f4',
+];
+
+const pricingEnt = [
+    'welcome.pricing_ent_f1',
+    'welcome.pricing_ent_f2',
+    'welcome.pricing_ent_f3',
+];
+
+const faqItems = [
+    { q: 'welcome.faq_saas_q1', a: 'welcome.faq_saas_a1' },
+    { q: 'welcome.faq_saas_q2', a: 'welcome.faq_saas_a2' },
+    { q: 'welcome.faq_saas_q3', a: 'welcome.faq_saas_a3' },
+    { q: 'welcome.faq_saas_q4', a: 'welcome.faq_saas_a4' },
+];
 </script>
 
 <template>
@@ -81,6 +113,9 @@ const testimonials = [
                         {{ t('nav.dashboard') }}
                     </Link>
                     <template v-else>
+                        <Link :href="route('pricing')" class="hidden rounded-lg px-3 py-2 text-sm font-semibold text-asphalt-700 hover:text-estoril-700 lg:inline-flex dark:text-asphalt-200 dark:hover:text-estoril-300">
+                            {{ t('welcome.nav_pricing') }}
+                        </Link>
                         <Link :href="route('login')" class="hidden rounded-lg px-3 py-2 text-sm font-semibold text-asphalt-700 hover:text-estoril-700 sm:inline-flex dark:text-asphalt-200 dark:hover:text-estoril-300">
                             {{ t('auth.login') }}
                         </Link>
@@ -120,12 +155,10 @@ const testimonials = [
                     </div>
 
                     <!-- Titular -->
-                    <h1 class="mt-6 text-4xl font-bold tracking-tight text-asphalt-900 sm:text-5xl lg:text-6xl dark:text-white">
-                        {{ t('welcome.run_business') }}
-                        <span class="relative inline-block whitespace-nowrap">
-                            <span class="bg-gradient-to-r from-estoril-600 via-estoril-500 to-estoril-400 bg-clip-text text-transparent">
-                                {{ t('welcome.on_autopilot') }}
-                            </span>
+                    <h1 class="mt-6 max-w-3xl text-4xl font-bold tracking-tight text-asphalt-900 sm:text-5xl lg:text-6xl dark:text-white">
+                        <span class="block">{{ t('welcome.run_business') }}</span>
+                        <span class="relative mt-1 inline-block bg-gradient-to-r from-estoril-600 via-estoril-500 to-estoril-400 bg-clip-text text-transparent">
+                            {{ t('welcome.on_autopilot') }}
                             <svg aria-hidden="true" class="absolute -bottom-1 left-0 w-full text-estoril-400 dark:text-estoril-500" viewBox="0 0 300 12" fill="none">
                                 <path d="M2 9c50-7 100-7 150 0s100 7 148 0" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
                             </svg>
@@ -151,7 +184,6 @@ const testimonials = [
                         >
                             <BoltIcon class="h-4 w-4 text-estoril-600 dark:text-estoril-400" />
                             {{ t('welcome.cta_view_example') }}
-                            <span class="ml-1 hidden rounded-full bg-estoril-100 px-1.5 py-0.5 text-[10px] font-semibold text-estoril-700 sm:inline-block dark:bg-estoril-900/40 dark:text-estoril-300">JJ Import Motors</span>
                         </Link>
                     </div>
 
@@ -161,6 +193,22 @@ const testimonials = [
                             <p class="text-2xl font-bold text-estoril-700 sm:text-3xl dark:text-estoril-300">{{ s.value }}</p>
                             <p class="mt-1 text-xs text-asphalt-600 sm:text-sm dark:text-asphalt-400">{{ s.label }}</p>
                         </div>
+                    </div>
+
+                    <!-- Trust-badge (multi-tenant / privacy-first) -->
+                    <div class="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-asphalt-600 sm:max-w-xl dark:text-asphalt-400">
+                        <span class="inline-flex items-center gap-1.5">
+                            <svg class="h-3.5 w-3.5 text-green-600 dark:text-green-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+                            {{ t('welcome.hero_trust_iso') }}
+                        </span>
+                        <span class="inline-flex items-center gap-1.5">
+                            <svg class="h-3.5 w-3.5 text-estoril-600 dark:text-estoril-400" viewBox="0 0 20 20" fill="currentColor"><path d="M13 7H7v6h6V7z"/><path fill-rule="evenodd" d="M7 2a1 1 0 00-1 1v1H5a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H8V3a1 1 0 00-1-1zm0 5h6v6H7V7z" clip-rule="evenodd" /></svg>
+                            {{ t('welcome.hero_trust_cancel') }}
+                        </span>
+                        <span class="inline-flex items-center gap-1.5">
+                            <svg class="h-3.5 w-3.5 text-estoril-600 dark:text-estoril-400" viewBox="0 0 20 20" fill="currentColor"><path d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm3.293 1.293a1 1 0 011.414 0L10 9.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" /></svg>
+                            {{ t('welcome.hero_trust_mail') }}
+                        </span>
                     </div>
                 </div>
 
@@ -186,7 +234,7 @@ const testimonials = [
                         </p>
                     </div>
 
-                    <!-- Mockup principal: ficha de coche en el CRM -->
+                    <!-- Mockup principal: panel de resumen del negocio (sin billing SaaS) -->
                     <div class="relative overflow-hidden rounded-2xl bg-white shadow-2xl shadow-asphalt-900/10 ring-1 ring-asphalt-200 dark:bg-asphalt-800 dark:ring-asphalt-700 dark:shadow-asphalt-950/50">
                         <!-- header -->
                         <div class="flex items-center justify-between border-b border-asphalt-200/60 px-5 py-3 dark:border-asphalt-700/60">
@@ -194,72 +242,78 @@ const testimonials = [
                                 <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-estoril-600 to-estoril-800">
                                     <TruckIcon class="h-4 w-4 text-white" />
                                 </div>
-                                <span class="text-sm font-semibold text-asphalt-900 dark:text-white">BMW 320d M-Sport</span>
+                                <span class="text-sm font-semibold text-asphalt-900 dark:text-white">{{ t('welcome.mockup_dash_title') }}</span>
                             </div>
-                            <!-- traffic light -->
                             <span class="inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-semibold text-green-700 dark:bg-green-900/30 dark:text-green-300">
-                                <span class="h-1.5 w-1.5 rounded-full bg-green-500"></span> verde
+                                <span class="h-1.5 w-1.5 rounded-full bg-green-500"></span> {{ t('welcome.mockup_dash_live') }}
                             </span>
                         </div>
 
-                        <!-- Cuerpo ficha -->
+                        <!-- Cuerpo: KPIs del negocio -->
                         <div class="space-y-3 p-5">
-                            <!-- Foto del coche (placeholder render) -->
-                            <div class="relative h-32 overflow-hidden rounded-lg bg-gradient-to-br from-asphalt-200 to-asphalt-400 dark:from-asphalt-700 dark:to-asphalt-900">
-                                <svg aria-hidden="true" viewBox="0 0 240 100" class="h-full w-full">
-                                    <rect x="0" y="78" width="240" height="22" fill="#1A306D" fill-opacity="0.1" />
-                                    <path d="M40,68 Q40,52 58,46 L78,40 Q98,36 118,38 L150,38 Q172,38 186,46 L200,52 Q210,56 210,68 L210,80 Q208,86 200,86 L172,86 Q170,90 166,90 L150,90 Q146,90 144,86 L100,86 Q98,90 94,90 L78,90 Q74,90 72,86 L46,86 Q40,86 40,80 Z" fill="#3a4f9e" stroke="#1A306D" stroke-width="0.5" />
-                                    <path d="M78,46 L92,32 Q108,28 124,30 L150,30 Q166,30 180,40 L186,46 L78,46 Z" fill="#dce3f5" fill-opacity="0.85" stroke="#1A306D" stroke-width="0.5" />
-                                    <ellipse cx="46" cy="64" rx="3" ry="2" fill="#fbbf24" />
-                                    <ellipse cx="206" cy="64" rx="3" ry="2" fill="#fbbf24" />
-                                    <circle cx="70" cy="86" r="8" fill="#1e1f21" />
-                                    <circle cx="70" cy="86" r="3.5" fill="#7e7f83" />
-                                    <circle cx="172" cy="86" r="8" fill="#1e1f21" />
-                                    <circle cx="172" cy="86" r="3.5" fill="#7e7f83" />
-                                </svg>
-                                <div class="absolute left-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white">Foto 1 / 12</div>
-                                <div class="absolute right-2 top-2 rounded-full bg-white/90 px-2 py-0.5 text-[9px] font-semibold text-asphalt-700 shadow-sm">Fase: investigating</div>
-                            </div>
-
-                            <!-- Datos clave -->
-                            <div class="grid grid-cols-3 gap-2 text-[10px]">
-                                <div class="rounded bg-asphalt-50 p-1.5 dark:bg-asphalt-900/40">
-                                    <p class="text-asphalt-500 dark:text-asphalt-400">Año</p>
-                                    <p class="font-semibold text-asphalt-900 dark:text-white">2022</p>
+                            <div class="grid grid-cols-3 gap-2">
+                                <div class="rounded-lg bg-estoril-50 p-3 dark:bg-estoril-900/30">
+                                    <p class="text-[10px] uppercase tracking-wider text-estoril-700 dark:text-estoril-300">{{ t('welcome.mockup_dash_kpi_cars') }}</p>
+                                    <p class="mt-1 text-xl font-bold text-estoril-800 dark:text-estoril-200">142</p>
                                 </div>
-                                <div class="rounded bg-asphalt-50 p-1.5 dark:bg-asphalt-900/40">
-                                    <p class="text-asphalt-500 dark:text-asphalt-400">Km</p>
-                                    <p class="font-semibold text-asphalt-900 dark:text-white">52.840</p>
+                                <div class="rounded-lg bg-platinum-100 p-3 dark:bg-asphalt-700/60">
+                                    <p class="text-[10px] uppercase tracking-wider text-asphalt-600 dark:text-asphalt-300">{{ t('welcome.mockup_dash_kpi_clients') }}</p>
+                                    <p class="mt-1 text-xl font-bold text-asphalt-900 dark:text-white">38</p>
                                 </div>
-                                <div class="rounded bg-asphalt-50 p-1.5 dark:bg-asphalt-900/40">
-                                    <p class="text-asphalt-500 dark:text-asphalt-400">Potencia</p>
-                                    <p class="font-semibold text-asphalt-900 dark:text-white">190 CV</p>
+                                <div class="rounded-lg bg-amber-50 p-3 dark:bg-amber-900/20">
+                                    <p class="text-[10px] uppercase tracking-wider text-amber-700 dark:text-amber-300">{{ t('welcome.mockup_dash_kpi_deals') }}</p>
+                                    <p class="mt-1 text-xl font-bold text-amber-800 dark:text-amber-200">12</p>
                                 </div>
                             </div>
 
-                            <!-- Comparativa inversión del cliente (SaaS: ROI) -->
-                            <div class="rounded-lg border border-asphalt-200/60 bg-white p-3 dark:border-asphalt-700/60 dark:bg-asphalt-900/40">
-                                <div class="flex items-center justify-between text-xs">
+                            <!-- Gráfico margen/ingresos -->
+                            <div class="rounded-lg border border-asphalt-200/60 bg-white p-4 dark:border-asphalt-700/60 dark:bg-asphalt-900/40">
+                                <div class="flex items-center justify-between">
                                     <div>
-                                        <p class="text-[10px] text-asphalt-500 dark:text-asphalt-400">{{ t('welcome.mockup_saas_kpis_title') }}</p>
-                                        <p class="text-base font-bold text-asphalt-900 dark:text-white">{{ t('welcome.mockup_saas_kpis_value') }}</p>
+                                        <p class="text-xs text-asphalt-500 dark:text-asphalt-400">{{ t('welcome.mockup_dash_chart') }}</p>
+                                        <p class="text-lg font-semibold text-asphalt-900 dark:text-white">€284.500</p>
                                     </div>
-                                    <ArrowTrendingUpIcon class="h-4 w-4 text-estoril-500" />
-                                    <div class="text-right">
-                                        <p class="text-[10px] text-asphalt-500 dark:text-asphalt-400">{{ t('welcome.mockup_saas_cost_title') }}</p>
-                                        <p class="text-base font-bold text-estoril-700 dark:text-estoril-300">{{ t('welcome.mockup_saas_cost_value') }}</p>
-                                    </div>
+                                    <span class="inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-semibold text-green-700 dark:bg-green-900/30 dark:text-green-300">
+                                        <ArrowTrendingUpIcon class="h-3 w-3" />+24%
+                                    </span>
                                 </div>
-                                <div class="mt-2 flex items-center justify-between text-[10px]">
-                                    <span class="rounded bg-amber-50 px-1.5 py-0.5 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">{{ t('welcome.mockup_saas_roi') }}</span>
-                                </div>
+                                <svg viewBox="0 0 200 50" class="mt-3 h-12 w-full">
+                                    <defs>
+                                        <linearGradient id="spark" x1="0" x2="1">
+                                            <stop offset="0" stop-color="#1A306D" />
+                                            <stop offset="1" stop-color="#5c73bd" />
+                                        </linearGradient>
+                                    </defs>
+                                    <polyline fill="none" stroke="url(#spark)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="0,38 18,30 36,33 54,22 72,25 90,15 108,18 126,10 144,14 162,6 180,9 200,3" />
+                                    <polyline fill="url(#spark)" fill-opacity="0.12" stroke="none" points="0,38 18,30 36,33 54,22 72,25 90,15 108,18 126,10 144,14 162,6 180,9 200,3 200,50 0,50" />
+                                </svg>
                             </div>
 
-                            <!-- Costes fijos SaaS -->
-                            <div class="space-y-1 text-[10px] text-asphalt-700 dark:text-asphalt-300">
-                                <div class="flex justify-between"><span class="text-asphalt-500 dark:text-asphalt-400">{{ t('welcome.mockup_saas_plan') }}</span><span class="font-semibold">Pro · {{ t('welcome.mockup_saas_plan_price') }}</span></div>
-                                <div class="flex justify-between"><span class="text-asphalt-500 dark:text-asphalt-400">{{ t('welcome.mockup_saas_seats') }}</span><span class="font-semibold">{{ t('welcome.mockup_saas_seats_value') }}</span></div>
-                                <div class="flex justify-between"><span class="text-asphalt-500 dark:text-asphalt-400">{{ t('welcome.mockup_saas_storage') }}</span><span class="font-semibold">{{ t('welcome.mockup_saas_storage_value') }}</span></div>
+                            <!-- Tracking con el cliente: solicitudes recientes -->
+                            <div>
+                                <p class="text-xs font-semibold uppercase tracking-wider text-asphalt-500 dark:text-asphalt-400">{{ t('welcome.mockup_dash_requests') }}</p>
+                                <div class="mt-2 space-y-1.5">
+                                    <div class="flex items-center justify-between rounded-lg border border-asphalt-200/60 bg-white p-2.5 dark:border-asphalt-700/60 dark:bg-asphalt-900/40">
+                                        <div class="flex items-center gap-3">
+                                            <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-estoril-500 to-estoril-700 text-[10px] font-bold text-white">MG</div>
+                                            <div>
+                                                <p class="text-xs font-semibold text-asphalt-900 dark:text-white">María G. · BMW X3</p>
+                                                <p class="text-[10px] text-asphalt-500 dark:text-asphalt-400">{{ t('welcome.mockup_dash_req_pending') }}</p>
+                                            </div>
+                                        </div>
+                                        <span class="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">{{ t('welcome.mockup_dash_tag_pending') }}</span>
+                                    </div>
+                                    <div class="flex items-center justify-between rounded-lg border border-asphalt-200/60 bg-white p-2.5 dark:border-asphalt-700/60 dark:bg-asphalt-900/40">
+                                        <div class="flex items-center gap-3">
+                                            <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-asphalt-600 to-asphalt-800 text-[10px] font-bold text-white">CM</div>
+                                            <div>
+                                                <p class="text-xs font-semibold text-asphalt-900 dark:text-white">Carlos M. · Audi Q5</p>
+                                                <p class="text-[10px] text-asphalt-500 dark:text-asphalt-400">{{ t('welcome.mockup_dash_req_progress') }}</p>
+                                            </div>
+                                        </div>
+                                        <span class="rounded bg-estoril-100 px-1.5 py-0.5 text-[10px] font-semibold text-estoril-700 dark:bg-estoril-900/40 dark:text-estoril-300">{{ t('welcome.mockup_dash_tag_progress') }}</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -515,21 +569,130 @@ const testimonials = [
                         </div>
                     </div>
 
-                    <!-- === ICON: CRM === -->
-                    <div class="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-sm ring-1 ring-asphalt-200 transition hover:-translate-y-1 hover:shadow-md hover:ring-estoril-300 dark:bg-asphalt-800/60 dark:ring-asphalt-700 dark:hover:ring-estoril-600/50">
-                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-estoril-50 ring-1 ring-estoril-200/60 dark:bg-estoril-900/40 dark:ring-estoril-700/40">
-                            <UsersIcon class="h-6 w-6 text-estoril-700 dark:text-estoril-300" />
-                        </div>
-                        <h3 class="mt-5 text-lg font-semibold text-asphalt-900 dark:text-white">{{ t('nav.crm') }}</h3>
-                        <p class="mt-1.5 text-sm text-asphalt-600 dark:text-asphalt-300">{{ t('welcome.feat_crm_desc') }}</p>
-                        <ul class="mt-4 space-y-1.5 text-sm text-asphalt-700 dark:text-asphalt-300">
-                            <li class="flex items-center gap-2"><CheckIcon class="h-4 w-4 text-estoril-600 dark:text-estoril-400" />{{ t('welcome.feat_crm_check1') }}</li>
-                            <li class="flex items-center gap-2"><CheckIcon class="h-4 w-4 text-estoril-600 dark:text-estoril-400" />{{ t('welcome.feat_crm_check2') }}</li>
-                            <li class="flex items-center gap-2"><CheckIcon class="h-4 w-4 text-estoril-600 dark:text-estoril-400" />{{ t('welcome.feat_crm_check3') }}</li>
+                    <!-- (CRM duplicado eliminado — el grid queda en 6 cards: Inventario, CRM, Mapa, Finanzas, IA, Alertas) -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ============== CÓMO FUNCIONA (3 pasos del software) ============== -->
+        <section class="relative py-20">
+            <div class="mx-auto max-w-7xl px-6">
+                <div class="mx-auto max-w-2xl text-center">
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-estoril-100 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-estoril-700 dark:bg-estoril-900/40 dark:text-estoril-300">
+                        <BoltIcon class="h-3 w-3" />{{ t('welcome.how_works_tag') }}
+                    </span>
+                    <h2 class="mt-4 text-3xl font-bold tracking-tight text-asphalt-900 sm:text-4xl dark:text-white">
+                        {{ t('welcome.how_works_title') }}
+                    </h2>
+                    <p class="mt-4 text-lg text-asphalt-600 dark:text-asphalt-300">
+                        {{ t('welcome.how_works_subtitle') }}
+                    </p>
+                </div>
+
+                <ol class="relative mt-14 grid grid-cols-1 gap-6 md:grid-cols-3">
+                    <div aria-hidden="true" class="absolute left-0 right-0 top-7 hidden h-px bg-gradient-to-r from-transparent via-asphalt-300 to-transparent dark:via-asphalt-700 md:block"></div>
+                    <li v-for="(step, i) in howWorksSteps" :key="step.title" class="group relative flex flex-col items-center text-center">
+                        <span class="relative z-10 flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-md ring-2 ring-estoril-200 dark:bg-asphalt-800 dark:ring-estoril-700">
+                            <component :is="step.icon" class="h-6 w-6 text-estoril-700 dark:text-estoril-300" />
+                            <span class="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-estoril-700 text-[10px] font-bold text-white">{{ i + 1 }}</span>
+                        </span>
+                        <h3 class="mt-4 text-base font-semibold text-asphalt-900 dark:text-white">{{ t(step.title) }}</h3>
+                        <p class="mt-1.5 text-sm text-asphalt-600 dark:text-asphalt-400">{{ t(step.desc) }}</p>
+                    </li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- ============== PRECIOS (planes SaaS) ============== -->
+        <section class="relative py-20" id="precios">
+            <div class="mx-auto max-w-7xl px-6">
+                <div class="mx-auto max-w-2xl text-center">
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-estoril-100 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-estoril-700 dark:bg-estoril-900/40 dark:text-estoril-300">
+                        <ChartBarIcon class="h-3 w-3" />{{ t('welcome.pricing_tag') }}
+                    </span>
+                    <h2 class="mt-4 text-3xl font-bold tracking-tight text-asphalt-900 sm:text-4xl dark:text-white">
+                        {{ t('welcome.pricing_title') }}
+                    </h2>
+                    <p class="mt-4 text-lg text-asphalt-600 dark:text-asphalt-300">
+                        {{ t('welcome.pricing_subtitle') }}
+                    </p>
+                </div>
+
+                <div class="mt-14 grid grid-cols-1 gap-6 md:grid-cols-3">
+                    <!-- Starter -->
+                    <div class="relative flex flex-col rounded-2xl bg-white p-6 shadow-sm ring-1 ring-asphalt-200 dark:bg-asphalt-800/60 dark:ring-asphalt-700">
+                        <h3 class="text-lg font-semibold text-asphalt-900 dark:text-white">Starter</h3>
+                        <p class="mt-1 text-xs text-asphalt-500 dark:text-asphalt-400">{{ t('welcome.pricing_starter_desc') }}</p>
+                        <p class="mt-4 flex items-baseline gap-1">
+                            <span class="text-4xl font-bold text-asphalt-900 dark:text-white">29€</span>
+                            <span class="text-sm text-asphalt-500 dark:text-asphalt-400">/{{ t('welcome.pricing_month') }}</span>
+                        </p>
+                        <ul class="mt-6 flex-1 space-y-2 text-sm text-asphalt-700 dark:text-asphalt-300">
+                            <li v-for="f in pricingStarter" :key="f" class="flex items-center gap-2"><CheckIcon class="h-4 w-4 shrink-0 text-estoril-600 dark:text-estoril-400" />{{ t(f) }}</li>
                         </ul>
+                        <Link :href="route('register')" class="mt-6 inline-flex items-center justify-center rounded-lg border border-estoril-300 px-4 py-2 text-sm font-semibold text-estoril-700 hover:bg-estoril-50 dark:border-estoril-700 dark:text-estoril-300 dark:hover:bg-estoril-900/30">
+                            {{ t('welcome.pricing_cta_start') }}
+                        </Link>
                     </div>
 
-                    <!-- (Logística y Entrega eliminadas — servicios de la organización, no del SaaS) -->
+                    <!-- Professional (destacado) -->
+                    <div class="relative flex flex-col rounded-2xl bg-gradient-to-br from-estoril-700 to-estoril-900 p-6 shadow-lg shadow-estoril-900/20 ring-2 ring-estoril-500 dark:shadow-estoril-950/50">
+                        <span class="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-amber-400 px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-950">{{ t('welcome.pricing_popular') }}</span>
+                        <h3 class="text-lg font-semibold text-white">Professional</h3>
+                        <p class="mt-1 text-xs text-estoril-200">{{ t('welcome.pricing_pro_desc') }}</p>
+                        <p class="mt-4 flex items-baseline gap-1">
+                            <span class="text-4xl font-bold text-white">99€</span>
+                            <span class="text-sm text-estoril-200">/{{ t('welcome.pricing_month') }}</span>
+                        </p>
+                        <ul class="mt-6 flex-1 space-y-2 text-sm text-estoril-100">
+                            <li v-for="f in pricingPro" :key="f" class="flex items-center gap-2"><CheckIcon class="h-4 w-4 shrink-0 text-estoril-300" />{{ t(f) }}</li>
+                        </ul>
+                        <Link :href="route('register')" class="mt-6 inline-flex items-center justify-center rounded-lg bg-white px-4 py-2 text-sm font-semibold text-estoril-700 shadow hover:bg-estoril-50">
+                            {{ t('welcome.pricing_cta_start') }}
+                        </Link>
+                    </div>
+
+                    <!-- Enterprise -->
+                    <div class="relative flex flex-col rounded-2xl bg-white p-6 shadow-sm ring-1 ring-asphalt-200 dark:bg-asphalt-800/60 dark:ring-asphalt-700">
+                        <h3 class="text-lg font-semibold text-asphalt-900 dark:text-white">Enterprise</h3>
+                        <p class="mt-1 text-xs text-asphalt-500 dark:text-asphalt-400">{{ t('welcome.pricing_ent_desc') }}</p>
+                        <p class="mt-4 flex items-baseline gap-1">
+                            <span class="text-4xl font-bold text-asphalt-900 dark:text-white">299€</span>
+                            <span class="text-sm text-asphalt-500 dark:text-asphalt-400">/{{ t('welcome.pricing_month') }}</span>
+                        </p>
+                        <ul class="mt-6 flex-1 space-y-2 text-sm text-asphalt-700 dark:text-asphalt-300">
+                            <li v-for="f in pricingEnt" :key="f" class="flex items-center gap-2"><CheckIcon class="h-4 w-4 shrink-0 text-estoril-600 dark:text-estoril-400" />{{ t(f) }}</li>
+                        </ul>
+                        <Link :href="route('register')" class="mt-6 inline-flex items-center justify-center rounded-lg border border-estoril-300 px-4 py-2 text-sm font-semibold text-estoril-700 hover:bg-estoril-50 dark:border-estoril-700 dark:text-estoril-300 dark:hover:bg-estoril-900/30">
+                            {{ t('welcome.pricing_cta_contact') }}
+                        </Link>
+                    </div>
+                </div>
+
+                <p class="mt-8 text-center text-sm text-asphalt-500 dark:text-asphalt-400">
+                    {{ t('welcome.pricing_trial_hint') }}
+                    <Link :href="route('pricing')" class="font-semibold text-estoril-600 hover:text-estoril-700 dark:text-estoril-300">{{ t('welcome.pricing_view_all') }}</Link>
+                </p>
+            </div>
+        </section>
+
+        <!-- ============== FAQ ============== -->
+        <section class="relative py-20">
+            <div class="mx-auto max-w-3xl px-6">
+                <div class="mx-auto max-w-2xl text-center">
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-estoril-100 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-estoril-700 dark:bg-estoril-900/40 dark:text-estoril-300">
+                        <ShieldCheckIcon class="h-3 w-3" />{{ t('welcome.faq_tag') }}
+                    </span>
+                    <h2 class="mt-4 text-3xl font-bold tracking-tight text-asphalt-900 sm:text-4xl dark:text-white">
+                        {{ t('welcome.faq_title') }}
+                    </h2>
+                </div>
+
+                <div class="mt-12 divide-y divide-asphalt-200 dark:divide-asphalt-700">
+                    <div v-for="(item, i) in faqItems" :key="item.q" class="py-5">
+                        <h3 class="text-base font-semibold text-asphalt-900 dark:text-white">{{ t(item.q) }}</h3>
+                        <p class="mt-2 text-sm text-asphalt-600 dark:text-asphalt-300">{{ t(item.a) }}</p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -572,10 +735,6 @@ const testimonials = [
                                 <Link :href="route('register')" class="group inline-flex items-center justify-center gap-2 rounded-lg bg-white px-6 py-3 text-base font-semibold text-estoril-700 shadow hover:bg-estoril-50">
                                     {{ t('welcome.cta_try_free') }}
                                     <ArrowRightIcon class="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                                </Link>
-                                <Link :href="route('marketplace.index')" class="inline-flex items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/10 px-6 py-3 text-base font-semibold text-white backdrop-blur-sm hover:bg-white/20">
-                                    {{ t('welcome.cta_view_example') }}
-                                    <span class="ml-1 hidden rounded-full bg-white/15 px-1.5 py-0.5 text-[10px] font-semibold sm:inline-block">JJ Import Motors</span>
                                 </Link>
                             </div>
                         </div>

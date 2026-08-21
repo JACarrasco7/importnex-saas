@@ -33,6 +33,7 @@ use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\PaqueteValoracionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicCarRequestController;
+use App\Http\Controllers\PublicContractController;
 use App\Http\Controllers\PublicMarketplaceController;
 use App\Http\Controllers\PublicTrackingController;
 use App\Http\Controllers\PushSubscriptionController;
@@ -264,6 +265,11 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
         ->where('car', '[0-9]+')
         ->name('cars.regenerate-tracking');
 
+    // Generar contrato para que el cliente lo firme.
+    Route::post('/cars/{car}/contract', [CarSharingController::class, 'createContract'])
+        ->where('car', '[0-9]+')
+        ->name('cars.contract.create');
+
     // Marketing overview
     Route::get('/marketing', [MarketingController::class, 'index'])->name('marketing.index');
 
@@ -365,6 +371,13 @@ Route::get('/jj-import/folleto', [JJImportFolletoController::class, 'download'])
 Route::get('/tracking/{token}', [PublicTrackingController::class, 'show'])
     ->where('token', '[A-Za-z0-9_-]{20,80}')
     ->name('public.tracking.show');
+
+// Contrato público de prestación de servicios (sin auth).
+Route::prefix('contrato/{token}')->where(['token' => '[A-Za-z0-9_-]{20,80}'])->name('public.contract.')->group(function () {
+    Route::get('/', [PublicContractController::class, 'show'])->name('show');
+    Route::post('/aceptar', [PublicContractController::class, 'accept'])->name('accept');
+    Route::get('/pdf', [PublicContractController::class, 'pdf'])->name('pdf');
+});
 
 // Marketplace item 12: newsletter public (sin auth, con rate limit)
 Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');

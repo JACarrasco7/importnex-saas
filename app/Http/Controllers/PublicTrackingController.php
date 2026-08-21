@@ -63,14 +63,20 @@ class PublicTrackingController extends Controller
         }
         RateLimiter::hit($key, 60);
 
-        $car = Car::withoutGlobalScopes()
+        // withoutGlobalScope('organization') — NO withoutGlobalScopes() sin args,
+        // que también desactivaría SoftDeletes y expondría coches borrados.
+        $car = Car::withoutGlobalScope('organization')
             ->publicTracking()
             ->where('tracking_token', $token)
             ->firstOrFail();
 
-        $car->increment('tracking_views');
+        // No inflar views con bots (M4).
+        $isBot = $this->looksLikeBot(request()->userAgent());
+        if (! $isBot) {
+            $car->increment('tracking_views');
+        }
 
-        $car->load(['photos', 'organization']);
+        $car->load(['organization']);
 
         // Hitos del proceso con fecha completada (si aplica).
         $milestoneDefs = CarChecklistDefinitions::milestones();
@@ -141,21 +147,30 @@ class PublicTrackingController extends Controller
             ];
         }
 
-        // Solo las fotos que se exponen en el marketplace (data:image base64).
-        $photos = $car->photos()->orderBy('sort_order')->limit(8)->get()->map(function ($photo) {
-            $abs = str_starts_with($photo->url, '/storage/')
-                ? public_path($photo->url)
-                : storage_path('app/public/'.ltrim($photo->url, '/'));
-            if (! file_exists($abs)) {
-                return null;
-            }
-            $mime = mime_content_type($abs) ?: 'image/jpeg';
+        // Solo fotos de marketing (nunca defectos/documentos internos).
+        // Base64 en línea para que el navegador no dependa de auth en storage.
+        $photos = $car->photos()
+            ->whereIn('photo_type', ['exterior', 'interior', 'engine'])
+            ->orderBy('sort_order')
+            ->limit(8)
+            ->get()
+            ->map(function ($photo) {
+                $abs = str_starts_with($photo->url, '/storage/')
+                    ? public_path($photo->url)
+                    : storage_path('app/public/'.ltrim($photo->url, '/'));
+                if (! file_exists($abs)) {
+                    return null;
+                }
+                $mime = mime_content_type($abs) ?: 'image/jpeg';
 
-            return [
-                'url' => 'data:'.$mime.';base64,'.base64_encode(file_get_contents($abs)),
-                'is_cover' => (bool) $photo->is_cover,
-            ];
-        })->filter()->values()->all();
+                return [
+                    'url' => 'data:'.$mime.';base64,'.base64_encode(file_get_contents($abs)),
+                    'is_cover' => (bool) $photo->is_cover,
+                ];
+            })
+            ->filter()
+            ->values()
+            ->all();
 
         return Inertia::render('Public/Tracking', [
             'car' => [
@@ -183,6 +198,16 @@ class PublicTrackingController extends Controller
                 'phone' => '+34 675 70 14 39',
                 'email' => 'jjimportmotors@gmail.com',
             ],
-        ])->withViewData('tracking_token', $token);
+        ]);
+    }
+
+    /** Detección básica de bots para no inflar contadores. */
+    private function looksLikeBot(?string $ua): bool
+    {
+        if (! $ua) {
+            return false;
+        }
+
+        return (bool) preg_match('/bot|crawl|spider|slurp|curl|wget|python-requests|headless/i', $ua);
     }
 }

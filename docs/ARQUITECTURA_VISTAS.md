@@ -26,7 +26,7 @@ Este documento describe cómo se reparte la aplicación entre **parte pública**
 
 | URL | Nombre | Controlador | Vista Inertia |
 |---|---|---|---|
-| `/` | (ninguno) | cierre en `web.php` → `redirect('/marketplace')` | — |
+| `/` | `home` | cierre en `web.php` → `Inertia::render('Welcome')` (landing SaaS) | `Welcome.vue` |
 | `/marketplace` | `marketplace.index` | `PublicMarketplaceController@index` | `Public/MarketplaceIndex.vue` |
 | `/marketplace/{car}` | `marketplace.show` | `PublicMarketplaceController@show` | `Public/MarketplaceShow.vue` |
 | `/request/{slug}` | `public.car-request.index` | `PublicCarRequestController@index` | `Public/CarRequestForm.vue` |

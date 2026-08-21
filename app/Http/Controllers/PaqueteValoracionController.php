@@ -142,8 +142,12 @@ class PaqueteValoracionController extends Controller
             $lines[] = '[ARGUMENTO] '.$car->description;
         }
 
-        if ($car->purchase_price) {
-            $lines[] = '[PRECIO] '.number_format((float) $car->purchase_price, 0, ',', '.');
+        // Precio TOTAL real para el cliente (compra + transporte + ITV + COC +
+        // DGT + honorarios). Nunca purchase_price solo en un documento de venta:
+        // sería un precio incompleto y engañoso (A4).
+        $total = $car->calculateTotalCost();
+        if ($total > 0) {
+            $lines[] = '[PRECIO] '.number_format($total, 0, ',', '.');
         }
 
         return implode("\n", $lines);
