@@ -5,6 +5,13 @@ Todos los cambios notables en el skill `importacion-vehiculos` se documentarán 
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [3.3.3] - 2026-08-21 — Ejemplo real plan+conversación en el MD de sesiones
+
+> **Motivo:** el usuario pidió ejemplos concretos para que las sesiones sean eficientes en tokens.
+
+- **`02-flujos/como_deben_ser_las_sesiones.md`**: nueva §"💬 EJEMPLO REAL — plan + conversación completa (Golf 7.5 TCR)" con: 1) plan compacto (~120 tokens) 2) conversación completa paso a paso con las paradas 3) tabla de eficiencia de tokens (qué NO hacer vs hacer) 4) métrica objetivo ~450-550 tokens por modelo.
+- Checklist de inicio referencia al ejemplo.
+
 ## [3.3.2] - 2026-08-21 — Fixes de auditoría (C1-C4 + contadores)
 
 > **Motivo:** auditoría independiente del pipeline detectó 4 críticos + medios. Aplicados:
