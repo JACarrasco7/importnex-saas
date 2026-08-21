@@ -103,6 +103,64 @@ class CarMatchRequestTest extends TestCase
         $this->assertStringContainsString("Vinculado a vehículo #{$car->id}", $request->fresh()->notes);
     }
 
+    public function test_match_request_marks_car_reserved_when_in_previous_phase(): void
+    {
+        [$user, $org] = $this->actingUser();
+        $client = Client::create([
+            'organization_id' => $org->id,
+            'name' => 'Cliente Reserva',
+            'status' => 'new',
+        ]);
+        $car = Car::factory()->create([
+            'organization_id' => $org->id,
+            'brand' => 'Opel',
+            'model' => 'Astra',
+            'status' => 'Located',
+        ]);
+        $request = CarRequest::create([
+            'organization_id' => $org->id,
+            'client_id' => $client->id,
+            'name' => 'Cliente Reserva',
+            'brand' => 'Opel',
+            'status' => 'pending',
+        ]);
+
+        $response = $this->actingAs($user)
+            ->post(route('cars.match-request', ['car' => $car->id, 'carRequest' => $request->id]));
+
+        $response->assertRedirect(route('cars.show', $car->id));
+        $this->assertSame('Reserved', $car->fresh()->status);
+    }
+
+    public function test_match_request_does_not_downgrade_advanced_status(): void
+    {
+        [$user, $org] = $this->actingUser();
+        $client = Client::create([
+            'organization_id' => $org->id,
+            'name' => 'Cliente Compra',
+            'status' => 'new',
+        ]);
+        $car = Car::factory()->create([
+            'organization_id' => $org->id,
+            'brand' => 'Opel',
+            'model' => 'Astra',
+            'status' => 'Purchased',
+        ]);
+        $request = CarRequest::create([
+            'organization_id' => $org->id,
+            'client_id' => $client->id,
+            'name' => 'Cliente Compra',
+            'brand' => 'Opel',
+            'status' => 'pending',
+        ]);
+
+        $response = $this->actingAs($user)
+            ->post(route('cars.match-request', ['car' => $car->id, 'carRequest' => $request->id]));
+
+        $response->assertRedirect(route('cars.show', $car->id));
+        $this->assertSame('Purchased', $car->fresh()->status);
+    }
+
     public function test_show_excludes_matching_requests_from_other_organizations(): void
     {
         [$user, $org] = $this->actingUser();
@@ -199,6 +257,7 @@ class CarMatchRequestTest extends TestCase
             'organization_id' => $org->id,
             'brand' => 'Opel',
             'model' => 'Astra',
+            'status' => 'Located',
         ]);
 
         $response = $this->actingAs($user)->post(route('cars.create-request', $car->id), [
@@ -227,6 +286,7 @@ class CarMatchRequestTest extends TestCase
             'organization_id' => $org->id,
         ]);
         $this->assertDatabaseHas('cars', ['id' => $car->id, 'client_id' => $request->client_id]);
+        $this->assertSame('Reserved', $car->fresh()->status);
     }
 
     public function test_create_request_reuses_existing_client_by_email(): void

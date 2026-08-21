@@ -73,7 +73,7 @@ const trackingForm = useForm({
 });
 const openTrackingModal = () => {
     trackingForm.email = props.derived?.tracking?.shared_with_email
-        || props.car.client?.email
+        || clientEmailFromContact(props.car?.client)
         || '';
     showTrackingModal.value = true;
 };
@@ -154,6 +154,38 @@ const photoForm = useForm({ photo_type: 'exterior', photos: [] });
 const docForm = useForm({ doc_type: 'invoice', doc_key: '', name: '', documents: [] });
 
 const { currency, date, statusLabel, statusVariant, trafficLightVariant } = useFormat();
+
+// El formulario público guarda contact_info como JSON {email, phone};
+// los clientes creados a mano usan texto libre. Mostramos formateado.
+const clientContactDisplay = computed(() => {
+    const raw = props.car?.client?.contact_info;
+    if (!raw) return '—';
+    if (typeof raw === 'object') {
+        return [raw.email, raw.phone].filter(Boolean).join(' · ');
+    }
+    try {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') {
+            return [parsed.email, parsed.phone].filter(Boolean).join(' · ') || raw;
+        }
+    } catch (e) {
+        // no es JSON → texto plano
+    }
+    return raw;
+});
+
+// Extrae el email del cliente desde contact_info (JSON del form público o texto).
+const clientEmailFromContact = (client) => {
+    const raw = client?.contact_info;
+    if (!raw) return '';
+    if (typeof raw === 'object') return raw.email || '';
+    try {
+        const parsed = JSON.parse(raw);
+        return parsed?.email || '';
+    } catch (e) {
+        return /[\w.+-]+@[\w-]+\.[\w.]+/.test(raw) ? raw.match(/[\w.+-]+@[\w-]+\.[\w.]+/)[0] : '';
+    }
+};
 
 const submitPhotos = () => {
     uploadProgress.value = true;
@@ -347,6 +379,35 @@ const onDocKeyChange = () => {
                     <Badge :variant="trafficLightVariant(car.traffic_light)" dot>{{ car.traffic_light }}</Badge>
                     <Badge :variant="statusVariant(car.status)">{{ statusLabel(t, car.status) }}</Badge>
                     <span v-if="car.year" class="text-sm text-gray-500">{{ car.year }}</span>
+                </div>
+
+                <!-- Banner de cliente/solicitud vinculado (feedback inmediato) -->
+                <div v-if="car.client" class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+                    <div class="flex items-center gap-3">
+                        <UserCircleIcon class="h-8 w-8 text-emerald-600" />
+                        <div class="min-w-0">
+                            <p class="text-sm font-semibold text-emerald-900">
+                                {{ t('cars.linked_to_client') }} {{ car.client.name }}
+                            </p>
+                            <p class="text-xs text-emerald-700">
+                                <template v-if="derived?.linked_request">
+                                    {{ t('cars.linked_request') }} #{{ derived.linked_request.id }}
+                                    · <Badge :variant="statusVariant(derived.linked_request.status)" size="sm">{{ t('car_requests.status.' + derived.linked_request.status, derived.linked_request.status) }}</Badge>
+                                </template>
+                                <template v-else>
+                                    {{ t('cars.no_request_linked') }}
+                                </template>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex shrink-0 gap-2">
+                        <Link :href="route('clients.show', car.client.id)" class="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-500">
+                            {{ t('cars.view_client') }} →
+                        </Link>
+                        <Link v-if="derived?.linked_request" :href="route('car-requests.show', derived.linked_request.id)" class="inline-flex items-center gap-1 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-emerald-700 shadow-sm ring-1 ring-emerald-200 hover:bg-emerald-100">
+                            {{ t('cars.view_request') }} →
+                        </Link>
+                    </div>
                 </div>
 
                 <!-- Section tabs -->
@@ -988,7 +1049,7 @@ const onDocKeyChange = () => {
                             <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                 <div>
                                     <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.client_contact') }}</dt>
-                                    <dd class="mt-1 text-sm text-gray-800">{{ car.client.contact_info || '—' }}</dd>
+                                    <dd class="mt-1 text-sm text-gray-800">{{ clientContactDisplay }}</dd>
                                 </div>
                                 <div>
                                     <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.client_looking_for') }}</dt>

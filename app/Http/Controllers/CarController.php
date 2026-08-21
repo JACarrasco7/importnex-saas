@@ -325,6 +325,8 @@ class CarController extends Controller
             }
 
             $car->client_id = $carRequest->client_id;
+            // Al vincular a un cliente, el coche queda RESERVADO para él (visible en kanban).
+            $this->markCarReserved($car);
             $car->save();
 
             $carRequest->status = 'in_progress';
@@ -333,7 +335,7 @@ class CarController extends Controller
             $carRequest->save();
 
             return redirect()->route('cars.show', $car->id)
-                ->with('success', 'Vehículo vinculado a la solicitud.');
+                ->with('success', 'Vehículo vinculado a la solicitud y reservado para el cliente.');
         });
     }
 
@@ -372,11 +374,25 @@ class CarController extends Controller
             ]);
 
             $car->client_id = $client->id;
+            // Al crear la solicitud y vincular, el coche queda RESERVADO para el cliente.
+            $this->markCarReserved($car);
             $car->save();
 
             return redirect()->route('cars.show', $car->id)
                 ->with('success', 'Solicitud creada y cliente vinculado al vehículo.');
         });
+    }
+
+    /**
+     * Pasa el coche a "Reserved" (reservado para cliente) si aún está en una
+     * fase previa del pipeline (Located/Valuing/Offered). No toca estados ya
+     * avanzados (Purchased/In_transit/Processing/Delivered) ni la entrega.
+     */
+    private function markCarReserved(Car $car): void
+    {
+        if (in_array($car->status, ['Located', 'Valuing', 'Offered'], true)) {
+            $car->status = 'Reserved';
+        }
     }
 
     /**

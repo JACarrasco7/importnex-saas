@@ -207,6 +207,8 @@ export default {
     linked_request_status: 'Status',
     linked_request_notes: 'Notes',
     view_request: 'View request',
+    linked_to_client: 'Linked to client',
+    no_request_linked: 'No linked request yet',
     delete_photo: 'Delete photo?',
     delete_photo_msg: 'This will permanently remove the photo.',
     delete_document: 'Delete document?',

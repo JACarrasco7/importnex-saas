@@ -204,6 +204,8 @@ export default {
     linked_request_status: 'Estado',
     linked_request_notes: 'Notas',
     view_request: 'Ver solicitud',
+    linked_to_client: 'Vinculado al cliente',
+    no_request_linked: 'Sin solicitud vinculada aún',
     delete_photo: '¿Eliminar foto?',
     delete_photo_msg: 'Esta acción eliminará la foto permanentemente.',
     delete_document: '¿Eliminar documento?',
