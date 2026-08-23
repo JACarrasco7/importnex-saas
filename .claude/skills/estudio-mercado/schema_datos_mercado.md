@@ -95,6 +95,8 @@
 > **Ejemplo verificado:** hueco_pct 11,3 = (26500−23500)/26500 · hueco_neto_pct 5,4 = (26500−(23500+1579))/26500. Los números del ejemplo SIEMPRE deben poder reproducirse con las fórmulas de `SKILL.md` §Cálculo.
 > **Normalización (L1):** `slug` = minúsculas, sin tildes, `-` por espacios, `golf-7`≡`golf-vii`, sin prefijo de marca ("vw-golf-7" NO "volkswagen-golf-7"). `alias` recoge las variantes reales del usuario/portales para que el lookup siempre acierte.
 
+> ⚠️ **REGLA BOM (23-ago-2026):** si el JSON se escribe/edita con PowerShell, `Set-Content -Encoding UTF8` (PS 5.1) añade **BOM** y `json_decode` de PHP falla → `market:import` da "JSON inválido: Syntax error". Escribir SIEMPRE sin BOM: `[System.IO.File]::WriteAllText($path, $json, [System.Text.UTF8Encoding]::new($false))`. Igual que los ZIPs. Verificado: 23-ago tras volcar el estudio Golf 7.5.
+
 ---
 
 ## Campos obligatorios (por objeto modelo)
