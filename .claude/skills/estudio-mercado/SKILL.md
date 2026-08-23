@@ -1,6 +1,6 @@
 ---
 name: estudio-mercado
-version: 0.3.9
+version: 0.3.10
 description: >
   Estudio profundo del mercado de coches de 2ª mano en España y Alemania para
   JJ Import Motors. Genera un mapa de mercado persistente (datos_mercado.json)
@@ -219,6 +219,8 @@ FASE 1 — ES (Coches.net, navegación real):
   └─ rotacion_dias_de (AutoUncle/días publicados) separado de ES (L9)
   └─ Doble pasada por kW para topes de gama (GTI/R/M/AMG/RS/OPC) — ver playbook
 
+**🔴 REGLA DURA DE FILTRADO (23-ago-2026 v0.3.10):** en Coches.net **NUNCA** filtrar por el campo de texto libre `Versions[]`/`Version=` (depende del etiquetado del vendedor, mezcla generaciones). **SIEMPRE** usar filtros individuales estructurados por URL: `PowerHpFrom-To` / `MinYear` / `MaxKms` / `Fueltype2List` / `ArrBodyType` / `minDoors` / `TransmissionTypeId` + `fi=Price&or=1`. En mobile.de: filtros estructurados (`makeModelVariant1Ids`, `kwFrom`, `kmFrom-To`, `yearFrom-To`, `damageVehicle_damageUndecided=ONLY_DAMAGE_FREE`) + doble pasada por kW. **Si la IA usa el campo de versión de texto, el estudio entero es INVÁLIDO y hay que rehacerlo.** Detalle en `../importacion-vehiculos/02-flujos/playbook_filtrado.md`.
+
 FASE 3 — CRUCE y veredicto:
   └─ hueco_pct (bruto) = (mediana_es − mediana_de) / mediana_es × 100  ← comparable con historial y umbrales
   └─ hueco_neto_pct = con costes de importación (fórmulas en §Cálculo)
@@ -359,6 +361,8 @@ Para cada modelo/versión, el mapa guarda (esquema completo en `schema_datos_mer
 - **Trigger manual:** el usuario pide "actualiza el estudio de mercado" o antes de una campaña de stock.
 - **Cruce con `importacion-vehiculos`:** su PASO 0 mira `refrescar_antes_de_categoria` de cada modelo → si caducó, ofrece refresco antes de usarlo.
 - **Categoría sin datos:** declararlo explícitamente ("categoría X sin estudio → ofrecer delta"), nunca dejarlo en silencio.
+
+**🔴 REGLA DURA DE CACHE (23-ago-2026 v0.3.10):** antes de estudiar un modelo, **RELEER `datos_mercado.json` y comprobar `refrescar_antes_de_categoria`**. Si la fecha es FUTURA y `confianza_precio ≥ 3` → **NO re-medir**, devolver el resultado cacheado con 1 línea: "Cache vigente (refresca el DD/MM, confianza N)". Si está caducado o confianza <3 → medir de cero. Si no hay entrada en el JSON → medir de cero. **NUNCA gastar peticiones re-calculando un modelo cacheado** — el estudio ya vale y los datos están en el mapa.
 
 ---
 

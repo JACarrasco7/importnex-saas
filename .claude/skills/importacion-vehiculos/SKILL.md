@@ -1,6 +1,6 @@
 ---
 name: importacion-vehiculos
-version: 3.3.7
+version: 3.3.8
 description: >
   Negocio JJ Import Motors (Huelva): servicio de búsqueda e importación de coches
   (desde Alemania y dentro de España). NO compra stock, solo oferta el servicio
@@ -128,6 +128,15 @@ Mando: PROTOCOLO DE MANDO — usuario aprueba cada fase, IA ejecuta la fase comp
 ```
 
 **🔴 REGLA DURA UNIVERSAL (17-ago-2026):** todo encargo se asigna a **UN flujo** (A/B/C/D/E) y sigue SU camino con Protocolo de Mando (plan de fase → OK → ejecutar → waypoint 📍 → auditoría de cierre). **Si el encargo NO encaja en ninguno de los 5 flujos, PREGUNTAR al usuario qué flujo aplicar — NUNCA improvisar.** Fallo real 17-ago: "stock recurrente" no encajaba (no existía Flujo E) y Claude improvisó un .docx fuera del camino. Tras añadir Flujo E, si vuelve a aparecer un caso no previsto, la regla es preguntar antes de ejecutar.
+
+**🔴 REGLA DURA DE FILTRADO (23-ago-2026 v3.3.8):** en Coches.net **NUNCA** filtrar por el campo de texto libre `Versions[]`/`Version=` (depende del etiquetado del vendedor, mezcla generaciones: "GTI" captura Mk7/Mk7.5/Mk8, "Clubsport" captura Mk7/Mk8, "R" captura pre-FL/Mk8). **SIEMPRE** usar el método oficial: 1) marca + modelo, 2) **filtros individuales estructurados por URL** (`PowerHpFrom-To` / `MinYear` / `MaxKms` / `Fueltype2List` / `ArrBodyType` / `minDoors` / `TransmissionTypeId`) + `fi=Price&or=1`. **NUNCA fiarse del campo de versión de texto.** Mismo principio en mobile.de: usar SIEMPRE filtros estructurados (`makeModelVariant1Ids`, `kwFrom`, `kmFrom-To`, `yearFrom-To`, `damageVehicle_damageUndecided=ONLY_DAMAGE_FREE`, etc.) y cruzar con **doble pasada por kW** para no perder coches genuinos mal etiquetados. Detalle completo en `02-flujos/playbook_filtrado.md`. **Si la IA usa el campo de versión de texto, el sondeo entero es INVÁLIDO y hay que rehacerlo.**
+
+**🔴 REGLA DURA DE COBERTURA MÍNIMA (23-ago-2026 v3.3.8):** para dar un **veredicto de negocio** en Flujo A o B, la cobertura mínima es:
+- **≥3 candidatos verificados** entre las 7 fuentes (DE+ES).
+- **≥1 fuente por mercado** (al menos 1 DE y 1 ES, o solo DE si el usuario eligió solo DE).
+- **Score cobertura ≥ 4/10** (declarado en el informe).
+
+Si no se llega al mínimo → **NO dar veredicto**. Poner: *"Cobertura insuficiente (X candidatos / Y fuentes). Ampliar búsqueda o ajustar filtros antes de decidir."* y PARAR. **NUNCA inventar veredicto con muestra <3.**
 
 ---
 

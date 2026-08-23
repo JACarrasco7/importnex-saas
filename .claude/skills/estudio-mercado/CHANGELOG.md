@@ -5,6 +5,24 @@ Todos los cambios notables en el skill `estudio-mercado` se documentarán en est
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.3.10] - 2026-08-23 — Filtros estructurados SIEMPRE + regla de cache dura
+
+> **Motivo:** el usuario recordó que el campo de versión de texto de Coches.net es trampa conocida (mezcla generaciones). Reforzar como regla dura. Además, evitar re-medir cache vigente.
+
+### 🔴 SKILL.md — Regla dura de filtrado (nueva)
+- En Coches.net **NUNCA** filtrar por `Versions[]`/`Version=` (mezcla Mk7/Mk7.5/Mk8).
+- **SIEMPRE** filtros individuales estructurados por URL (`PowerHpFrom-To` / `MinYear` / `MaxKms` / `Fueltype2List` / `ArrBodyType` / `minDoors` / `TransmissionTypeId` + `fi=Price&or=1`).
+- En mobile.de: filtros estructurados + doble pasada por kW.
+- **Si la IA usa el campo de versión de texto, el estudio entero es INVÁLIDO.**
+
+### 🔴 SKILL.md — Regla dura de cache (nueva)
+- Antes de estudiar un modelo, **RELEER `datos_mercado.json` y comprobar `refrescar_antes_de_categoria`**.
+- Si fecha es FUTURA + `confianza_precio ≥ 3` → **NO re-medir**, devolver cache con 1 línea.
+- Si caducado o confianza <3 → medir de cero.
+- **NUNCA gastar peticiones re-calculando cache vigente.**
+
+---
+
 ## [0.3.9] - 2026-08-23 — "Mejor preguntar 1 vez que inventar 1 dato"
 
 > **Motivo:** la IA recibía reglas con "por defecto 1.500 € de gastos", "asume versión según el mercado" y decidía por su cuenta. El usuario prefiere que **pregunte** en decisiones de negocio (versión, año, km, precio, equipamiento, perfil) en vez de asumir.

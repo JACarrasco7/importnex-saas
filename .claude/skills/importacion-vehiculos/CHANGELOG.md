@@ -5,6 +5,25 @@ Todos los cambios notables en el skill `importacion-vehiculos` se documentarán 
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [3.3.8] - 2026-08-23 — Filtros estructurados SIEMPRE + cobertura mínima
+
+> **Motivo:** el usuario recordó que el campo de versión de texto de Coches.net es trampa conocida. Reforzar como regla dura. Además, evitar veredictos con muestra insuficiente.
+
+### 🔴 SKILL.md — Regla dura de filtrado (nueva)
+- En Coches.net **NUNCA** filtrar por `Versions[]`/`Version=` (mezcla generaciones).
+- **SIEMPRE** filtros individuales estructurados por URL (`PowerHpFrom-To` / `MinYear` / `MaxKms` / `Fueltype2List` / `ArrBodyType` / `minDoors` / `TransmissionTypeId` + `fi=Price&or=1`).
+- En mobile.de: filtros estructurados + doble pasada por kW.
+- **Si la IA usa el campo de versión de texto, el sondeo entero es INVÁLIDO y hay que rehacerlo.**
+
+### 🔴 SKILL.md — Regla dura de cobertura mínima (nueva)
+- Para veredicto de negocio en Flujo A o B: **≥3 candidatos verificados** entre las 7 fuentes.
+- **≥1 fuente por mercado** (1 DE y 1 ES, o solo DE si el usuario eligió solo DE).
+- **Score cobertura ≥ 4/10**.
+- Si no se llega al mínimo → **NO dar veredicto**. Poner "Cobertura insuficiente (X/Y)" y PARAR.
+- **NUNCA inventar veredicto con muestra <3.**
+
+---
+
 ## [3.3.7] - 2026-08-23 — "Mejor preguntar 1 vez que inventar 1 dato" + checklist por flujo
 
 > **Motivo:** la IA recibía mandatos vagos ("estudia X", "busca X", "evalúa X") y decidía por su cuenta. Mismo problema que en `estudio-mercado` v0.3.9. Se aplica el mismo patrón de rigor + preguntar primero.
