@@ -7,6 +7,8 @@
 > - **PDF SOLO si el usuario lo pide explícitamente** (lectura fuera de pantalla). El PDF NO lleva enlaces funcionales → en su lugar, en cada candidato se imprime la URL **visible** (no "ver [enlace]"). NUNCA generar MD+PDF a la vez por defecto: se duplican.
 > - El detalle metodológico/cobertura va **al final**, no al principio.
 >
+> ⚠️ **La nube NUNCA afirma "sincronizado con `datos_mercado.json`" (23-ago-2026, C):** la sesión que investiga (Claude Desktop, nube) no tiene acceso al JSON del Desktop del usuario — no puede verificar si el mapa ya refleja estos datos. En su lugar, escribir: *"Datos listos para volcar — pendiente de fusión al mapa (lo hace Copilot en VS Code)"*. El volcado real y su confirmación SOLO existen del lado que sí abre el JSON.
+>
 > Guardar en `informes\mercado\<modelo>_<fecha>.md`.
 
 ---
@@ -99,5 +101,40 @@
 - **Cobertura:** GTI/TCR/Clubsport completos (10-14 c/u DE); **Golf R DE parcial** (solo página 1/6, ~95 anuncios sin revisar) → su hueco real podría ser mayor.
 - **Tamaño de muestra:** 2-9 verificados por lado → aproximación suelo-a-suelo, no mediana robusta.
 - **Pendiente:** cubrir páginas 2-6 de Golf R DE antes de ofertar basado en su suelo alemán.
+
+---
+
+## 📦 BLOQUE DE VOLCADO (obligatorio, 23-ago-2026)
+
+> **Contrato de entrega nube→local (E):** este bloque es lo único que Copilot necesita leer para fusionar el estudio al mapa sin re-interpretar el informe. Un objeto JSON por variante/modelo, con los campos mínimos del schema (`schema_datos_mercado.md`). Usar `null` si un dato no se midió — NUNCA inventar.
+
+```json
+[
+  {
+    "slug": "vw-golf-75-gti",
+    "modelo": "VW Golf 7.5 GTI",
+    "version": "230/245cv",
+    "fecha_medicion": "2026-08-23",
+    "precio_desde_de": 15999,
+    "precio_desde_es": 19690,
+    "suelo_de_verificado": true,
+    "suelo_es_verificado": true,
+    "hueco_pct": 18.7,
+    "hueco_neto_pct": 12.9,
+    "veredicto": "verde",
+    "confianza_precio": 4,
+    "pendiente_fase2": false,
+    "fuente_medicion": "estudio",
+    "enlaces_muestra": ["https://www.mobile.de/es/vehículos/detalles.html?id=40947884798464"]
+  }
+]
+```
+
+**Reglas del bloque:**
+1. **1 objeto por variante/slug**, aunque el informe hable de 4 en una tabla conjunta arriba.
+2. `slug` sigue la normalización L1 del schema (minúsculas, sin tildes, sin marca duplicada).
+3. `suelo_de_verificado` / `suelo_es_verificado` (bool) — refleja la fiabilidad ✅/👁️ de la §CONCLUSIÓN. Si es `false`, `confianza_precio` no debe subir de 3.
+4. Si el informe **completa/corrige** una variante ya existente en el mapa (no es la primera vez), añadir `"actualiza_existente": true` — evita que Copilot trate el volcado como alta nueva y le recuerda comprobar duplicados (ver §Cola de trabajo del schema, campo `reemplazado_por`).
+5. Este bloque va SIEMPRE al final del informe, tras §COBERTURA — nunca sustituye a la tabla legible de la §CONCLUSIÓN, la complementa para volcado mecánico.
 
 ---

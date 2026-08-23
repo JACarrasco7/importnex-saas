@@ -5,6 +5,24 @@ Todos los cambios notables en el skill `estudio-mercado` se documentarán en est
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.3.5] - 2026-08-23 — Auditoría flujo de volcado: contrato nube→local + fixes críticos
+
+> **Motivo:** auditoría independiente del flujo investigación→informe→volcado detectó 3 críticos que falseaban datos en `datos_mercado.json` y en el bucle skill↔SaaS.
+
+### 🔴 Fixes críticos
+- **`market:export` ya no borra la cola de trabajo** (Laravel): preserva `cola_trabajo`, `hueco_sin_banda`, `notas_metodologicas`, `candidatos_pendientes_de_estudio`, `alcance_pasada`, `costes_referencia`, `contexto_macro` del JSON existente al exportar desde la BD — antes un `market:export` los sobrescribía en silencio.
+- **Golf R duplicado resuelto**: `vw-golf-r` (agregado, 🟡 obsoleto) marcado con `reemplazado_por: "vw-golf-75-r"` (nuevo campo, documentado en el schema) para que el SaaS y el enrutador no muestren dos veredictos contradictorios del mismo modelo.
+- **`estado_cola` desincronizado corregido**: `vw-golf-75-r` tenía 3 fuentes contradictorias (objeto/cola/nota). Ahora consistente: `pendiente_busqueda` en los 3 sitios.
+- **Mojibake reparado**: 12 campos con UTF-8 doble/triple codificado (`vehÃculos`, `â‚¬`, `Ãƒâ€š...`) causado por ediciones repetidas con PowerShell. Reparado con `iconv` iterativo (CP1252↔UTF-8) validando integridad numérica contra backup — 0 restantes, 0 pérdida de datos.
+
+### 📄 Contrato nube→local
+- **`informe_mercado.md`**: nueva sección obligatoria "📦 BLOQUE DE VOLCADO" — 1 objeto JSON por variante con los campos mínimos del schema, al final del informe. Cierra el volcado mecánico sin reinterpretar el informe.
+- **Advertencia "la nube nunca afirma sincronizado"**: Claude Desktop no puede verificar el JSON del Desktop del usuario — el informe debe decir "pendiente de fusión" en vez de "sincronizado" (evita la falsa sensación de sincronía vista en el informe del Golf R).
+- **`MarketModel::FUENTES_MEDICION`** ahora incluye `mini_estudio` (ya estaba en el schema, faltaba en el modelo Eloquent).
+
+### 🛠️ Reglas nuevas documentadas
+- **Regla mojibake** en `schema_datos_mercado.md`: preferir PHP sobre PowerShell para editar el JSON (no reinterpreta bytes); reparación con `iconv` iterativo si ya ocurrió.
+
 ## [0.3.4] - 2026-08-23 — Plantilla informe: suelo de listado vs verificado
 
 - **`informe_mercado.md`**: nueva nota "🏷️ Fiabilidad de cada suelo" — cada precio lleva ✅ (verificado en ficha) o 👁️ (de listado, pendiente). El suelo oficial es el ✅ más bajo; los 👁️ se anotan aparte como posibles suelos inferiores.

@@ -26,7 +26,7 @@ class MarketModel extends Model
 
     public const MEJORES_MERCADOS = ['DE', 'ES', 'paridad'];
 
-    public const FUENTES_MEDICION = ['estudio', 'flujo_b', 'flujo_a', 'flujo_e_delta'];
+    public const FUENTES_MEDICION = ['estudio', 'flujo_b', 'flujo_a', 'flujo_e_delta', 'mini_estudio'];
 
     protected $fillable = [
         'organization_id',

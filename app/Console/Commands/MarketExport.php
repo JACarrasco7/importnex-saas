@@ -63,7 +63,20 @@ class MarketExport extends Command
             'categorias' => $categorias,
         ];
 
+        // 🔴 C1 (auditoría 23-ago): NO sobrescribir las claves que el SaaS no
+        // gestiona. El mapa JSON vive en el Desktop y lo editan Copilot/Claude
+        // (cola de trabajo, metodología, huecos sin banda...). Un export limpio
+        // las borraría. Se preservan del JSON actual, si existe.
         $file = $this->resolveFile();
+        if (File::exists($file)) {
+            $existing = json_decode(File::get($file), true) ?? [];
+            foreach (['cola_trabajo', 'hueco_sin_banda', 'notas_metodologicas', 'candidatos_pendientes_de_estudio', 'alcance_pasada', 'costes_referencia', 'contexto_macro', 'actualizado'] as $key) {
+                if (array_key_exists($key, $existing)) {
+                    $payload[$key] = $existing[$key];
+                }
+            }
+        }
+
         File::ensureDirectoryExists(dirname($file));
         File::put($file, json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 

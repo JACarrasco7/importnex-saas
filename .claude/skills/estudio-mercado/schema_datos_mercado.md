@@ -97,6 +97,8 @@
 
 > ⚠️ **REGLA BOM (23-ago-2026):** si el JSON se escribe/edita con PowerShell, `Set-Content -Encoding UTF8` (PS 5.1) añade **BOM** y `json_decode` de PHP falla → `market:import` da "JSON inválido: Syntax error". Escribir SIEMPRE sin BOM: `[System.IO.File]::WriteAllText($path, $json, [System.Text.UTF8Encoding]::new($false))`. Igual que los ZIPs. Verificado: 23-ago tras volcar el estudio Golf 7.5.
 
+> ⚠️ **REGLA MOJIBAKE (23-ago-2026):** editar el JSON con PowerShell repetidamente (leer con `Get-Content -Raw`, tocar campos, `ConvertTo-Json` de vuelta) puede **doble/triple-codificar UTF-8** si algún paso interpreta los bytes UTF-8 como Windows-1252 (aparecen `Ã©`, `â‚¬`, `Ãƒâ€š`...). Prevención: preferir **PHP** (`json_decode`/`json_encode` con `JSON_UNESCAPED_UNICODE`) para editar el mapa en vez de PowerShell — PHP no reinterpreta bytes al leer/escribir. Reparación si ya ocurrió: iterar `iconv('UTF-8', 'CP1252', $s)` hasta que el resultado deje de ser UTF-8 válido, quedándose con la última ronda válida (el mojibake se "pela" capa a capa). Verificar con un diff de conteos/números contra un backup antes de dar por bueno.
+
 ---
 
 ## Campos obligatorios (por objeto modelo)
@@ -135,6 +137,7 @@
 | `equipamiento_ajuste_eur` | int | ⚠️ | Ajuste aplicado al precio ES si no compara nivel (primas de `comparables.md`) |
 | `nota` | string | ⚠️ | Matices, pendientes, motorizaciones no comparables |
 | `estado_cola` | string | ⚠️ | Estado en la cola de trabajo (21-ago-2026): `pendiente_estudio` \| `estudiando` \| `estudiado` \| `pendiente_busqueda` \| `buscado` \| `descartado`. Fuente de verdad: `cola_trabajo.estados` (este campo del objeto es espejo informativo, NO dual-write obligatorio) |
+| `reemplazado_por` | string (slug) | ⚠️ | (23-ago-2026) Si un slug agregado/impreciso queda sustituido por una entrada granular más fiable (ej. `vw-golf-r` agregado → `vw-golf-75-r` granular), marcar aquí el slug ganador. `market:import` NO debe usarse para negocio mientras este campo esté presente; el enrutador y los informes deben preferir siempre el slug apuntado |
 
 Opcionales (Capa 3, futuro): `tasacion_pro` (int €), `tasacion_pro_fuente` ("DAT"\|"Eurotax").
 
