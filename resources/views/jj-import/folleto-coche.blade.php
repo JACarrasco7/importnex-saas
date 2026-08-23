@@ -128,9 +128,19 @@
             background:
                 radial-gradient(ellipse at 100% 0%, rgba(143, 163, 217, 0.12) 0%, transparent 45%),
                 linear-gradient(180deg, #0f1d42 0%, #14265a 50%, #0f1d42 100%);
+            /* Repite el degradado en CADA página impresa */
+            background-attachment: fixed;
         }
 
         .container { max-width: 1080px; margin: 0 auto; position: relative; z-index: 1; }
+
+        /* Evita que las secciones se partan a mitad de página */
+        .hero-photo, .gallery, .kpi-grid, .verdict-band, .section,
+        .specs-grid, .reasoning-card, .pc-grid, .note-card, .equip-grid,
+        .cta-row, .legal {
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
 
         .header {
             display: flex; justify-content: space-between; align-items: center;

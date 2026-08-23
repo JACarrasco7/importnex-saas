@@ -52,6 +52,29 @@
     $pais = strtolower((string) ($car->pais_origen ?? ''));
     $origen = (str_contains($pais, 'alem') || $pais === 'de') ? 'de'
         : ((str_contains($pais, 'espa') || $pais === 'es') ? 'es' : null);
+
+    // ── Contenido de IA del modelo Car (enriquece la ficha aunque el
+    //    esqueleto .txt no traiga esas secciones). Nunca margen/honorarios. ──
+    $ia_desc   = trim((string) ($e->uno('DESCRIPCION') ?: ($car->description ?? '')));
+    $ia_val    = trim((string) ($e->uno('VALORACION') ?: ($car->valuation ?? '')));
+    $ia_porque = trim((string) ($e->uno('POR_QUE') ?: ($car->recommendation ?? '')));
+    $ia_pros   = is_array($car->pros ?? null) ? array_filter(array_map('trim', (array) $car->pros)) : [];
+    $ia_cons   = is_array($car->cons ?? null) ? array_filter(array_map('trim', (array) $car->cons)) : [];
+    $ia_tips   = is_array($car->tips ?? null) ? array_filter(array_map('trim', (array) $car->tips)) : [];
+    $ia_redfl  = is_array($car->red_flags ?? null) ? array_filter(array_map('trim', (array) $car->red_flags)) : [];
+
+    // Comparativa de mercado (€ formateado en español).
+    $fmt = fn ($n) => $n !== null ? number_format((float) $n, 0, ',', '.') : null;
+    $ia_market_min  = $fmt($car->market_min ?? null);
+    $ia_market_avg  = $fmt($car->market_avg ?? null);
+    $ia_market_max  = $fmt($car->market_max ?? null);
+    $ia_ahorro      = $fmt($car->estimated_saving ?? null);
+    $ia_mercado     = ($ia_market_min || $ia_market_max || $ia_market_avg);
+
+    // Veredicto del experto presentable al cliente (green/amber/red/neutral).
+    $tl = strtolower((string) ($car->traffic_light ?? ''));
+    $veredicto_cliente = ['green' => 'Excelente compra', 'amber' => 'Buena opción', 'red' => 'Con cautela', 'neutral' => 'Sin veredicto'][$tl] ?? null;
+    $veredicto_color = ['green' => '#10b981', 'amber' => '#f59e0b', 'red' => '#ef4444', 'neutral' => '#94a3b8'][$tl] ?? null;
 @endphp
 
 <!DOCTYPE html>
@@ -79,6 +102,10 @@
             background:
                 radial-gradient(ellipse at 100% 0%, rgba(143, 163, 217, 0.12) 0%, transparent 45%),
                 linear-gradient(180deg, #0f1d42 0%, #14265a 50%, #0f1d42 100%);
+            /* Repite el degradado en CADA página impresa (Chrome/headless):
+               sin esto, el 50% cae a mitad del documento y la última página
+               sale con otro tono. */
+            background-attachment: fixed;
         }
 
         body::before {
@@ -94,6 +121,13 @@
         }
 
         .container { position: relative; z-index: 1; max-width: 1060px; margin: 0 auto; }
+
+        /* Evita que las secciones se partan a mitad de página */
+        .kpi-grid, .specs-strip, .price-band, .section, .cta-row, .legal,
+        .verdict-card, .proscons, .mercado-card, .tips-card, .ia-porque {
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
 
         .header {
             display: flex; justify-content: space-between; align-items: center;
@@ -250,6 +284,45 @@
             display: inline-block; background: #1a5fb4; color: #fff; font-weight: 800;
             padding: 2px 8px; border-radius: 4px; font-size: 11px; margin-left: 8px; vertical-align: middle;
         }
+
+        /* ── SECCIONES IA (enriquecen la ficha desde el modelo Car) ── */
+        .ia-desc { font-size: 11px; color: #cbd5e1; line-height: 1.6; text-align: justify; }
+
+        .verdict-card {
+            display: flex; align-items: center; gap: 12px;
+            background: linear-gradient(135deg, rgba(16,185,129,0.10) 0%, rgba(26,48,109,0.12) 100%);
+            border: 1px solid rgba(143,163,217,0.25); border-radius: 12px; padding: 12px 16px; margin-bottom: 16px;
+        }
+        .verdict-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .verdict-t { font-size: 10px; color: #8fa3d9; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+        .verdict-v { font-size: 15px; font-weight: 800; color: #f8fafc; }
+
+        .proscons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+        .pc-col { border-radius: 12px; padding: 12px 14px; }
+        .pc-col.pros { background: rgba(16,185,129,0.07); border: 1px solid rgba(16,185,129,0.25); }
+        .pc-col.cons { background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.22); }
+        .pc-title { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+        .pc-col.pros .pc-title { color: #34d399; }
+        .pc-col.cons .pc-title { color: #f87171; }
+        .pc-list { list-style: none; }
+        .pc-list li { font-size: 10px; color: #cbd5e1; line-height: 1.5; padding: 3px 0; display: flex; gap: 6px; }
+        .pc-list li::before { content: '✓'; color: #34d399; flex-shrink: 0; }
+        .pc-col.cons .pc-list li::before { content: '✗'; color: #f87171; }
+
+        .mercado-card {
+            display: grid; grid-template-columns: repeat(3, 1fr) auto; gap: 10px; align-items: center;
+            background: rgba(15,23,42,0.6); border: 1px solid rgba(143,163,217,0.25);
+            border-radius: 12px; padding: 12px 16px; margin-bottom: 16px;
+        }
+        .mercado-card .m-label { font-size: 8px; color: #64748b; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 700; }
+        .mercado-card .m-val { font-size: 15px; font-weight: 800; color: #f1f5f9; }
+        .mercado-card .m-ahorro { background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); border-radius: 10px; padding: 8px 12px; text-align: center; }
+        .mercado-card .m-ahorro .m-val { color: #4ade80; }
+
+        .tips-card { background: rgba(26,48,109,0.2); border: 1px solid rgba(143,163,217,0.2); border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; }
+        .tips-card ul { list-style: none; }
+        .tips-card li { font-size: 10px; color: #cbd5e1; line-height: 1.5; padding: 3px 0; display: flex; gap: 6px; }
+        .tips-card li::before { content: '💡'; flex-shrink: 0; }
     </style>
 </head>
 <body>
@@ -387,6 +460,80 @@
             </div>
             @endif
         @endforeach
+
+        {{-- ═══ SECCIONES DE IA (enriquecen la ficha desde el modelo Car) ═══ --}}
+
+        @if($ia_desc)
+            <div class="section">
+                <div class="h2">Descripción</div>
+                <p class="ia-desc">{{ $ia_desc }}</p>
+            </div>
+        @endif
+
+        @if($veredicto_cliente)
+            <div class="verdict-card">
+                <span class="verdict-dot" style="background:{{ $veredicto_color }};"></span>
+                <div>
+                    <div class="verdict-t">Valoración del experto</div>
+                    <div class="verdict-v">{{ $veredicto_cliente }}</div>
+                </div>
+            </div>
+        @endif
+
+        @if($ia_porque)
+            <div class="section ia-porque">
+                <div class="h2">¿Por qué este coche?</div>
+                <p class="ia-desc">{!! \App\Support\Esqueleto::negrita($ia_porque) !!}</p>
+            </div>
+        @endif
+
+        @if($ia_val)
+            <div class="section">
+                <div class="h2">Nuestra valoración</div>
+                <p class="ia-desc">{!! \App\Support\Esqueleto::negrita($ia_val) !!}</p>
+            </div>
+        @endif
+
+        @if($ia_pros || $ia_cons)
+            <div class="proscons">
+                @if($ia_pros)
+                    <div class="pc-col pros">
+                        <div class="pc-title">A favor</div>
+                        <ul class="pc-list">
+                            @foreach($ia_pros as $p)<li>{{ $p }}</li>@endforeach
+                        </ul>
+                    </div>
+                @endif
+                @if($ia_cons)
+                    <div class="pc-col cons">
+                        <div class="pc-title">A tener en cuenta</div>
+                        <ul class="pc-list">
+                            @foreach($ia_cons as $c)<li>{{ $c }}</li>@endforeach
+                        </ul>
+                    </div>
+                @endif
+            </div>
+        @endif
+
+        @if($ia_mercado)
+            <div class="mercado-card">
+                <div><div class="m-label">Mínimo mercado</div><div class="m-val">{{ $ia_market_min ?? '—' }}</div></div>
+                <div><div class="m-label">Precio medio</div><div class="m-val">{{ $ia_market_avg ?? '—' }}</div></div>
+                <div><div class="m-label">Máximo mercado</div><div class="m-val">{{ $ia_market_max ?? '—' }}</div></div>
+                @if($ia_ahorro)
+                    <div class="m-ahorro"><div class="m-label">Ahorro estimado</div><div class="m-val">€{{ $ia_ahorro }}</div></div>
+                @endif
+            </div>
+        @endif
+
+        @if($ia_tips)
+            <div class="tips-card">
+                <div class="h2">Consejos del experto</div>
+                <ul>
+                    @foreach($ia_tips as $tip)<li>{{ $tip }}</li>@endforeach
+                </ul>
+            </div>
+        @endif
 
         @if($e->uno('CTA'))
         <div class="cta-row">
