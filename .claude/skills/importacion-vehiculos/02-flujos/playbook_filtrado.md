@@ -221,6 +221,58 @@ PASO 3 — CRUCE (unión, NO intersección)
 
 **Máximo equipamiento en ES (proxy):** marcar en `equipmentGroup` techo solar + cámara (no hay cuadro digital en Coches.net); el nivel full real se confirma en 1-2 fichas (excepción puntual a A17).
 
+### 🇪🇸 Coches.net — MÉTODO OFICIAL: filtros individuales por URL (23-ago-2026)
+
+> **REGLA (23-ago-2026, validada con el usuario):** en Coches.net **NUNCA** filtrar por el campo de texto libre `Versions[]`/`Version=` (depende del etiquetado del vendedor, "funciona con IA y puede fallar", mezcla generaciones: captura "GTI" de Mk7/Mk7.5/Mk8, "Clubsport" de Mk7/Mk8, "R" de pre-FL/Mk8). **El método oficial es: 1) marca + modelo, 2) filtros individuales estructurados por URL** (potencia/combustible/año/km/carrocería/puertas/cambio). Orden por URL `fi=Price&or=1` **SÍ funciona de forma fiable** (corrige lo documentado antes).
+
+**Parámetros de URL confirmados (Coches.net):**
+
+| Filtro | Parámetro | Valores confirmados |
+|---|---|---|
+| Marca | `MakeIds[0]=` | Volkswagen = 47 |
+| Modelo | `ModelIds[0]=` | Golf = 89 |
+| Año desde | `MinYear=` | ej. 2017 |
+| Año hasta | `MaxYear=` | ej. 2019 |
+| Km máximo | `MaxKms=` | ej. 160000 |
+| Combustible | `Fueltype2List=` | Gasolina = 2 · Diésel = 1 |
+| Potencia mínima (CV) | `PowerHpFrom=` | ej. 200 |
+| Potencia máxima (CV) | `PowerHpTo=` | ej. 295 |
+| Carrocería | `ArrBodyType=` | Berlina = 1 |
+| Puertas mínimas | `minDoors=` | ej. 5 |
+| Cambio | `TransmissionTypeId=` | Automático = 1 · Manual = 2 (probar) |
+| Orden | `fi=Price&or=1` | Precio contado ascendente (fiable) |
+| Página | `pg=` | ej. 2 · `Section1Id=2500` fijo |
+
+**Plantilla base (Golf gasolina ≥200cv ≤160k km ≥2017, precio asc):**
+```
+https://www.coches.net/segunda-mano/?MakeIds[0]=47&ModelIds[0]=89&Fueltype2List=2&PowerHpFrom=200&MaxKms=160000&MinYear=2017&fi=Price&or=1
+```
+**Con carrocería+puertas+cambio (para aislar "5p automático", la config de importación):**
+```
+https://www.coches.net/segunda-mano/?ArrBodyType=1&minDoors=5&Fueltype2List=2&PowerHpFrom=200&MaxKms=160000&TransmissionTypeId=1&MakeIds[0]=47&ModelIds[0]=89&MinYear=2017&fi=Price&or=1
+```
+
+**🔬 Aislar variantes por POTENCIA (rango exacto CV) — la clave para no usar texto libre:**
+
+| Variante | Rango `PowerHpFrom-To` | Notas |
+|---|---|---|
+| Golf GTI 230cv (Mk7.5) | 228-232 | 230cv |
+| Golf GTI 245cv Performance (Mk7.5) | 243-247 | 245cv |
+| Golf GTI TCR 290cv | 285-295 | Solo 5p DSG |
+| Golf GTI Clubsport 265cv (Mk7 pre-FL) | 260-270 | **Solo Mk7 pre-facelift** (2016-2017); con `MaxYear=2017` |
+| Golf R 310cv (Mk7.5) | 305-315 | Facelift 2017-2019 |
+| Golf R 300cv (pre-FL) | 297-303 | Descartar activamente (Mk7 pre-facelift) |
+
+**⚠️ Trampas al leer los listados (detectadas 23-ago):**
+1. **"GTI 210cv" NO es GTI** — el GTI Mk7.5 es 230/245cv. 210cv = 2.0 TSI normal (o ficha corrupta, ver caso 13.000€ con slug año 2011 vs ficha 2020).
+2. **"GTI 220cv" = Mk7 PRE-facelift** matriculado tarde → descartar como variante Mk7.5 (el pre-FL era 220cv exacto).
+3. **"245cv 2023" = Mk8** fuera de alcance (estudio Mk7.5 ≤2020); además etiqueta ECO en GTI gasolina = imposible (señal de ficha mal rellenada).
+4. **Precio financiado < contado:** anclar SIEMPRE el contado de la ficha (hasta -2.000€ en 3 casos).
+5. **Coche publicado en ES pero físicamente en DE sin matricular** → no es suelo ES genuino.
+6. **Kilometraje y año inconsistentes** (150.000km en 2 años, año slug≠ficha) → descartar sin verificar.
+
+> ⚠️ **Distinguir SIEMPRE "suelo de listado" (no verificado) vs "suelo verificado en ficha".** El anti-bot corta tras 5-6 fichas → los candidatos restantes quedan "de listado" (solo precio/año/km), nunca inventar puertas/cambio/techo/cuadro digital. En el informe, marcar ambos suelos con su fiabilidad.
+
 ### �🇸 Coches.net — leer la tarjeta (18-ago-2026)
 
 | Dato | Selector | Notas |

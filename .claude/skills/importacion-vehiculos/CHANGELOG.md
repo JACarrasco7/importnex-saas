@@ -5,6 +5,17 @@ Todos los cambios notables en el skill `importacion-vehiculos` se documentarán 
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [3.3.4] - 2026-08-23 — Coches.net: método oficial de filtros individuales por URL
+
+> **Motivo:** auditoría con el usuario detectó que el estudio Golf 7.5 dejó fuera 3 GTI genuinos de listado (19.990/20.200/20.490€) porque el sondeo usaba texto libre y el anti-bot cortó la verificación. El usuario confirmó el método correcto.
+
+### 🔬 Coches.net por URL estructurada
+- **NUEVA sección en `playbook_filtrado.md`**: "Coches.net — MÉTODO OFICIAL: filtros individuales por URL". Regla: NUNCA usar `Versions[]` texto libre; SIEMPRE marca+modelo + filtros individuales (`MakeIds`/`ModelIds`/`MinYear`/`MaxKms`/`Fueltype2List`/`PowerHpFrom-To`/`ArrBodyType`/`minDoors`/`TransmissionTypeId` + `fi=Price&or=1`).
+- **Tabla de rangos de potencia por variante** para aislar sin texto libre: GTI 230 (228-232) · GTI Perf 245 (243-247) · TCR 290 (285-295) · Clubsport 265 (260-270 + MaxYear=2017) · R 310 (305-315) · R 300 pre-FL (297-303, descartar).
+- **Trampas de listado**: 210cv NO es GTI · 220cv = Mk7 pre-FL matriculado tarde · 245cv 2023 = Mk8 (fuera) · financiado<contado · "ES" físicamente en DE · km/año inconsistentes.
+- **Regla suelo de listado vs verificado**: el anti-bot corta en 5-6 fichas → los que quedan son "de listado" (solo precio/año/km), nunca inventar datos. Distinguir SIEMPRE en el informe.
+- `datos_mercado.json`: nota GTI con los 3 candidatos de listado a verificar.
+
 ## [3.3.3] - 2026-08-21 — Ejemplo real plan+conversación en el MD de sesiones
 
 > **Motivo:** el usuario pidió ejemplos concretos para que las sesiones sean eficientes en tokens.

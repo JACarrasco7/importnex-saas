@@ -5,6 +5,11 @@ Todos los cambios notables en el skill `estudio-mercado` se documentarán en est
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.3.4] - 2026-08-23 — Plantilla informe: suelo de listado vs verificado
+
+- **`informe_mercado.md`**: nueva nota "🏷️ Fiabilidad de cada suelo" — cada precio lleva ✅ (verificado en ficha) o 👁️ (de listado, pendiente). El suelo oficial es el ✅ más bajo; los 👁️ se anotan aparte como posibles suelos inferiores.
+- Encaja con el método oficial de Coches.net por URL (importacion-vehiculos v3.3.4).
+
 ## [0.3.3] - 2026-08-23 — Plantilla de informe de mercado al grano + regla MD vs PDF
 
 > **Motivo:** el informe de estudio (ej. Golf 7.5) se generaba con estructura ad-hoc: 10 secciones metodológicas, la conclusión al final, candidatos "a ver" escondidos en tablas largas y duplicación MD+PDF (enlaces muertos en PDF).

@@ -36,6 +36,8 @@
 ² Suelo con reserva (accidente reparado en oficial) · 28.900€ = suelo limpio comparable.
 ³ Suelo con reservas mecánicas · 16.899€ = suelo limpio DE.
 
+> **🏷️ Fiabilidad de cada suelo:** junto a cada precio, indicar si es **verificado en ficha** (✅) o **de listado** (👁️ sin verificar, solo precio/año/km del listado — el anti-bot cortó antes de abrir la ficha). El suelo "oficial" del estudio es siempre el ✅ más bajo; el 👁️ se anota aparte como "posible suelo inferior pendiente de verificar".
+
 ---
 
 ## 🎯 CANDIDATOS A VER (los que merecen la pena, con enlace)
