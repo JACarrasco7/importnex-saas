@@ -12,6 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -310,33 +311,85 @@ class CarController extends Controller
      */
     public function matchRequest(Car $car, CarRequest $carRequest): RedirectResponse
     {
-        abort_unless(
-            (int) $carRequest->organization_id === (int) $car->organization_id,
-            403,
-            'La solicitud pertenece a otra organización.'
-        );
+        Log::info('cars.match-request: start', [
+            'car_id' => $car->id,
+            'car_org' => $car->organization_id,
+            'car_client_before' => $car->client_id,
+            'car_request_id' => $carRequest->id,
+            'car_request_org' => $carRequest->organization_id,
+            'car_request_status' => $carRequest->status,
+            'car_request_client' => $carRequest->client_id,
+            'car_request_brand' => $carRequest->brand,
+            'car_request_model' => $carRequest->model,
+        ]);
 
-        return DB::transaction(function () use ($car, $carRequest) {
-            // Fallback: si la solicitud no tiene cliente (datos viejos o manuales),
-            // crearlo a partir de sus datos para que el coche nunca quede sin cliente.
-            if (! $carRequest->client_id) {
-                $client = $this->createClientFromRequestData($carRequest);
-                $carRequest->client_id = $client->id;
-            }
+        if ((int) $carRequest->organization_id !== (int) $car->organization_id) {
+            Log::warning('cars.match-request: 403 cross-org', [
+                'car_id' => $car->id,
+                'car_org' => $car->organization_id,
+                'car_request_id' => $carRequest->id,
+                'car_request_org' => $carRequest->organization_id,
+            ]);
+            abort(403, 'La solicitud pertenece a otra organización.');
+        }
 
-            $car->client_id = $carRequest->client_id;
-            // Al vincular a un cliente, el coche queda RESERVADO para él (visible en kanban).
-            $this->markCarReserved($car);
-            $car->save();
-
-            $carRequest->status = 'in_progress';
-            $carRequest->notes = trim(($carRequest->notes ? $carRequest->notes."\n" : '')
-                .'['.now()->format('d/m/Y H:i')."] Vinculado a vehículo #{$car->id} ({$car->brand} {$car->model}).");
-            $carRequest->save();
+        // El coche ya tiene cliente → no se puede vincular otro sin desvincular primero.
+        if ($car->client_id && $car->client_id !== $carRequest->client_id) {
+            Log::warning('cars.match-request: car already linked to another client', [
+                'car_id' => $car->id,
+                'existing_client_id' => $car->client_id,
+                'incoming_request_id' => $carRequest->id,
+                'incoming_client_id' => $carRequest->client_id,
+            ]);
 
             return redirect()->route('cars.show', $car->id)
-                ->with('success', 'Vehículo vinculado a la solicitud y reservado para el cliente.');
-        });
+                ->with('error', 'Este coche ya tiene un cliente vinculado. Desvincúlalo primero si quieres cambiarlo.');
+        }
+
+        try {
+            return DB::transaction(function () use ($car, $carRequest) {
+                // Fallback: si la solicitud no tiene cliente (datos viejos o manuales),
+                // crearlo a partir de sus datos para que el coche nunca quede sin cliente.
+                if (! $carRequest->client_id) {
+                    $client = $this->createClientFromRequestData($carRequest);
+                    $carRequest->client_id = $client->id;
+                    Log::info('cars.match-request: client created from request data', [
+                        'car_request_id' => $carRequest->id,
+                        'new_client_id' => $client->id,
+                    ]);
+                }
+
+                $car->client_id = $carRequest->client_id;
+                // Al vincular a un cliente, el coche queda RESERVADO para él (visible en kanban).
+                $this->markCarReserved($car);
+                $car->save();
+
+                $carRequest->status = 'in_progress';
+                $carRequest->notes = trim(($carRequest->notes ? $carRequest->notes."\n" : '')
+                    .'['.now()->format('d/m/Y H:i')."] Vinculado a vehículo #{$car->id} ({$car->brand} {$car->model}).");
+                $carRequest->save();
+
+                Log::info('cars.match-request: OK', [
+                    'car_id' => $car->id,
+                    'car_request_id' => $carRequest->id,
+                    'final_client_id' => $car->client_id,
+                ]);
+
+                return redirect()->route('cars.show', $car->id)
+                    ->with('success', 'Vehículo vinculado a la solicitud y reservado para el cliente.');
+            });
+        } catch (\Throwable $e) {
+            Log::error('cars.match-request: exception', [
+                'car_id' => $car->id,
+                'car_request_id' => $carRequest->id,
+                'message' => $e->getMessage(),
+                'class' => get_class($e),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return redirect()->route('cars.show', $car->id)
+                ->with('error', 'No se pudo vincular el vehículo: '.$e->getMessage());
+        }
     }
 
     /**

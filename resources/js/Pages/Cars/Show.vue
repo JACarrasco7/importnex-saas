@@ -65,6 +65,34 @@ const submitCreateRequest = () => {
     });
 };
 
+// Vincular coche ↔ solicitud compatible (botón por solicitud en la lista)
+const linkingId = ref(null);
+const linkError = ref(null);
+const linkSuccess = ref(null);
+const linkForm = useForm({});
+const linkRequest = (req) => {
+    if (linkingId.value !== null) return;
+    linkingId.value = req.id;
+    linkError.value = null;
+    linkSuccess.value = null;
+    linkForm.post(route('cars.match-request', { car: props.car.id, carRequest: req.id }), {
+        preserveScroll: true,
+        onSuccess: (page) => {
+            linkSuccess.value = t('cars.matching_link_success');
+            linkError.value = null;
+            linkingId.value = null;
+        },
+        onError: (errors) => {
+            const first = errors && Object.keys(errors)[0];
+            linkError.value = first ? errors[first] : t('cars.matching_link_error_generic');
+            linkingId.value = null;
+        },
+        onFinish: () => {
+            linkingId.value = null;
+        },
+    });
+};
+
 // Compartir seguimiento público con el cliente
 const showTrackingModal = ref(false);
 const trackingForm = useForm({
@@ -938,16 +966,26 @@ const onDocKeyChange = () => {
                                     <span>{{ t('car_requests.status.' + req.status, req.status) }}</span>
                                 </p>
                             </div>
-                            <Link
-                                :href="route('cars.match-request', { car: car.id, carRequest: req.id })"
-                                method="post"
-                                as="button"
-                                class="shrink-0 rounded-lg bg-estoril-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-estoril-500"
+                            <button
+                                type="button"
+                                :disabled="linkingId === req.id || !!car.client"
+                                class="shrink-0 rounded-lg bg-estoril-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-estoril-500 disabled:cursor-not-allowed disabled:opacity-50"
+                                @click="linkRequest(req)"
                             >
-                                {{ t('cars.matching_link') }}
-                            </Link>
+                                <span v-if="linkingId === req.id">…</span>
+                                <span v-else>{{ t('cars.matching_link') }}</span>
+                            </button>
                         </li>
                     </ul>
+                </div>
+
+                <!-- Feedback vincular -->
+                <div v-if="linkError" class="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+                    <strong class="block">{{ t('cars.matching_link_error_title') }}</strong>
+                    {{ linkError }}
+                </div>
+                <div v-if="linkSuccess" class="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+                    {{ linkSuccess }}
                 </div>
 
                 <!-- Crear solicitud para este coche (boca a boca / manual) -->
