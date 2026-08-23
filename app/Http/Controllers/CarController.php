@@ -13,7 +13,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
@@ -164,30 +163,23 @@ class CarController extends Controller
 
     /**
      * PDFs que genera LARAVEL (Blade + Browsershot) a partir de los esqueletos
-     * .txt del ZIP. Se listan en la pestaña Documentos para diferenciarlos de
-     * los PDFs que genera Claude (informe de búsqueda/unidad).
+     * .txt del ZIP (o con fallback desde los datos del coche). Se listan en la
+     * pestaña Documentos para diferenciarlos de los PDFs que genera Claude.
+     *
+     * Los 3 están SIEMPRE disponibles: las rutas sirven el esqueleto del ZIP
+     * si existe y, si no, generan el documento desde los datos del coche
+     * (PaqueteValoracionController tiene fallbacks propios).
      *
      * @return array<int, array{key: string, label: string, route: string, available: bool}>
      */
     private function laravelPdfs(Car $car): array
     {
-        $contenidoDir = 'cars/'.$car->id.'/contenido';
-        $has = function (string $file) use ($contenidoDir): bool {
-            foreach (['local', 'public'] as $disk) {
-                if (Storage::disk($disk)->exists($contenidoDir.'/'.$file)) {
-                    return true;
-                }
-            }
-
-            return false;
-        };
-
         return [
             [
                 'key' => 'ficha',
                 'label' => 'Ficha cliente',
                 'route' => route('cars.ficha', $car->id),
-                'available' => $has('ficha-publicitaria.txt'),
+                'available' => true,
             ],
             [
                 'key' => 'folleto',
@@ -199,7 +191,7 @@ class CarController extends Controller
                 'key' => 'informe_interno',
                 'label' => 'Informe interno',
                 'route' => route('cars.informe-interno', $car->id),
-                'available' => $has('informe-interno.txt'),
+                'available' => true,
             ],
         ];
     }

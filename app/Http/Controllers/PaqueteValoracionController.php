@@ -268,7 +268,16 @@ class PaqueteValoracionController extends Controller
 
         $chrome = ChromePath::resolve();
         if (! $chrome) {
-            return response($html, 200)->header('Content-Type', 'text/html');
+            // Sin Chrome headless no hay PDF: servimos el HTML como descarga
+            // (imprimible / "Guardar como PDF" desde el navegador) en lugar de
+            // abrir una página que parece un fallo.
+            Log::warning('PaqueteValoracion PDF sin Chrome, sirviendo HTML descargable', [
+                'vista' => $vista,
+            ]);
+
+            return response($html, 200)
+                ->header('Content-Type', 'text/html; charset=utf-8')
+                ->header('Content-Disposition', 'attachment; filename="'.$nombreArchivo.'.html"');
         }
 
         $pdfPath = storage_path('app/private/tmp/'.uniqid('pdf_', true).'.pdf');
@@ -297,7 +306,9 @@ class PaqueteValoracionController extends Controller
             @unlink($pdfPath);
             Log::warning('PaqueteValoracion PDF failed', ['error' => $e->getMessage()]);
 
-            return response($html, 200)->header('Content-Type', 'text/html');
+            return response($html, 200)
+                ->header('Content-Type', 'text/html; charset=utf-8')
+                ->header('Content-Disposition', 'attachment; filename="'.$nombreArchivo.'.html"');
         }
     }
 }
