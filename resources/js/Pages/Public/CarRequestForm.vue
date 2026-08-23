@@ -38,8 +38,20 @@ const form = useForm({
     website: '', // honeypot field
 });
 
-const fuelTypes = computed(() => Object.values(t('cars.fuel_options')));
-const transmissions = computed(() => Object.values(t('cars.transmission_options')));
+const fuelTypes = computed(() => {
+    const obj = t('cars.fuel_options');
+    if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
+        return Object.entries(obj).map(([value, label]) => ({ value, label }));
+    }
+    return (obj || []).map((label) => ({ value: label, label }));
+});
+const transmissions = computed(() => {
+    const obj = t('cars.transmission_options');
+    if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
+        return Object.entries(obj).map(([value, label]) => ({ value, label }));
+    }
+    return (obj || []).map((label) => ({ value: label, label }));
+});
 const bodyTypes = computed(() => t('cars.body_type_options'));
 const colors = computed(() => t('cars.color_options'));
 
@@ -261,7 +273,7 @@ const submit = () => {
                                 </label>
                                 <select v-model="form.fuel" class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600 dark:border-asphalt-600 dark:bg-asphalt-800 dark:text-white">
                                     <option value="">{{ t('car_request_form.any_option') }}</option>
-                                    <option v-for="fuel in fuelTypes" :key="fuel" :value="fuel">{{ fuel }}</option>
+                                    <option v-for="fuel in fuelTypes" :key="fuel.value" :value="fuel.value">{{ fuel.label }}</option>
                                 </select>
                                 <p v-if="form.errors.fuel" class="mt-1 text-sm text-rose-600">{{ form.errors.fuel }}</p>
                             </div>
@@ -282,7 +294,7 @@ const submit = () => {
                                 </label>
                                 <select v-model="form.transmission" class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600 dark:border-asphalt-600 dark:bg-asphalt-800 dark:text-white">
                                     <option value="">{{ t('car_request_form.any_option') }}</option>
-                                    <option v-for="trans in transmissions" :key="trans" :value="trans">{{ trans }}</option>
+                                    <option v-for="trans in transmissions" :key="trans.value" :value="trans.value">{{ trans.label }}</option>
                                 </select>
                                 <p v-if="form.errors.transmission" class="mt-1 text-sm text-rose-600">{{ form.errors.transmission }}</p>
                             </div>
