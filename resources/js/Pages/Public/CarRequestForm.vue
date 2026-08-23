@@ -27,7 +27,6 @@ const form = useForm({
     mileage_max: '',
     power_min: '',
     power_max: '',
-    engine_type: '',
     fuel: '',
     transmission: '',
     body_type: '',
@@ -39,10 +38,9 @@ const form = useForm({
     website: '', // honeypot field
 });
 
-const fuelTypes = computed(() => t('cars.fuel_options'));
-const transmissions = computed(() => t('cars.transmission_options'));
+const fuelTypes = computed(() => Object.values(t('cars.fuel_options')));
+const transmissions = computed(() => Object.values(t('cars.transmission_options')));
 const bodyTypes = computed(() => t('cars.body_type_options'));
-const engineTypes = computed(() => t('cars.engine_type_options'));
 const colors = computed(() => t('cars.color_options'));
 
 const submitting = ref(false);
@@ -260,10 +258,9 @@ const submit = () => {
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
                                     {{ t('car_request_form.field_fuel') }}
-                                    <span class="ml-0.5 text-rose-600" aria-hidden="true">*</span>
                                 </label>
-                                <select v-model="form.fuel" required class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600 dark:border-asphalt-600 dark:bg-asphalt-800 dark:text-white">
-                                    <option value="">{{ t('car_request_form.select_option') }}</option>
+                                <select v-model="form.fuel" class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600 dark:border-asphalt-600 dark:bg-asphalt-800 dark:text-white">
+                                    <option value="">{{ t('car_request_form.any_option') }}</option>
                                     <option v-for="fuel in fuelTypes" :key="fuel" :value="fuel">{{ fuel }}</option>
                                 </select>
                                 <p v-if="form.errors.fuel" class="mt-1 text-sm text-rose-600">{{ form.errors.fuel }}</p>
@@ -282,21 +279,12 @@ const submit = () => {
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
                                     {{ t('car_request_form.field_transmission') }}
-                                    <span class="ml-0.5 text-rose-600" aria-hidden="true">*</span>
                                 </label>
-                                <select v-model="form.transmission" required class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600 dark:border-asphalt-600 dark:bg-asphalt-800 dark:text-white">
-                                    <option value="">{{ t('car_request_form.select_option') }}</option>
+                                <select v-model="form.transmission" class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600 dark:border-asphalt-600 dark:bg-asphalt-800 dark:text-white">
+                                    <option value="">{{ t('car_request_form.any_option') }}</option>
                                     <option v-for="trans in transmissions" :key="trans" :value="trans">{{ trans }}</option>
                                 </select>
                                 <p v-if="form.errors.transmission" class="mt-1 text-sm text-rose-600">{{ form.errors.transmission }}</p>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">{{ t('car_request_form.field_engine_type') }}</label>
-                                <select v-model="form.engine_type" class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600 dark:border-asphalt-600 dark:bg-asphalt-800 dark:text-white">
-                                    <option value="">{{ t('car_request_form.any_option') }}</option>
-                                    <option v-for="engine in engineTypes" :key="engine" :value="engine">{{ engine }}</option>
-                                </select>
-                                <p v-if="form.errors.engine_type" class="mt-1 text-sm text-rose-600">{{ form.errors.engine_type }}</p>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -344,10 +332,9 @@ const submit = () => {
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
                                     {{ t('car_request_form.field_seats') }}
-                                    <span class="ml-0.5 text-rose-600" aria-hidden="true">*</span>
                                 </label>
-                                <select v-model="form.seats" required class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600 dark:border-asphalt-600 dark:bg-asphalt-800 dark:text-white">
-                                    <option value="">{{ t('car_request_form.select_option') }}</option>
+                                <select v-model="form.seats" class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600 dark:border-asphalt-600 dark:bg-asphalt-800 dark:text-white">
+                                    <option value="">{{ t('car_request_form.any_option') }}</option>
                                     <option :value="5">5</option>
                                     <option :value="7">7</option>
                                     <option :value="9">9</option>
@@ -357,10 +344,9 @@ const submit = () => {
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
                                     {{ t('car_request_form.field_color') }}
-                                    <span class="ml-0.5 text-rose-600" aria-hidden="true">*</span>
                                 </label>
-                                <select v-model="form.color" required class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600 dark:border-asphalt-600 dark:bg-asphalt-800 dark:text-white">
-                                    <option value="">{{ t('car_request_form.select_option') }}</option>
+                                <select v-model="form.color" class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600 dark:border-asphalt-600 dark:bg-asphalt-800 dark:text-white">
+                                    <option value="">{{ t('car_request_form.any_option') }}</option>
                                     <option v-for="color in colors" :key="color" :value="color">{{ color }}</option>
                                 </select>
                                 <p v-if="form.errors.color" class="mt-1 text-sm text-rose-600">{{ form.errors.color }}</p>
@@ -375,12 +361,10 @@ const submit = () => {
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
                                     {{ t('car_request_form.field_requirements') }}
-                                    <span class="ml-0.5 text-rose-600" aria-hidden="true">*</span>
                                 </label>
                                 <textarea
                                     v-model="form.requirements"
                                     rows="3"
-                                    required
                                     class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600 dark:border-asphalt-600 dark:bg-asphalt-800 dark:text-white"
                                     :placeholder="t('car_request_form.placeholder_requirements')"
                                 ></textarea>

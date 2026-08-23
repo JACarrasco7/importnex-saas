@@ -79,13 +79,13 @@ class PublicCarRequestController extends Controller
                 }
             }],
             'engine_type' => 'nullable|string|max:50',
-            'fuel' => 'required|string|max:50',
-            'transmission' => 'required|string|max:50',
+            'fuel' => 'nullable|string|max:50',
+            'transmission' => 'nullable|string|max:50',
             'body_type' => 'required|string|max:50',
             'doors' => 'nullable|integer|min:2|max:5',
             'seats' => 'required|integer|min:2|max:9',
             'color' => 'required|string|max:50',
-            'requirements' => 'required|string|max:2000',
+            'requirements' => 'nullable|string|max:2000',
             'notes' => 'nullable|string|max:2000',
         ], [
             'phone.regex' => 'El teléfono solo puede contener números, espacios, +, -, paréntesis.',
