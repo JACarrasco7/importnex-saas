@@ -1,6 +1,6 @@
 ---
 name: estudio-mercado
-version: 0.3.10
+version: 0.3.11
 description: >
   Estudio profundo del mercado de coches de 2ª mano en España y Alemania para
   JJ Import Motors. Genera un mapa de mercado persistente (datos_mercado.json)
@@ -42,7 +42,13 @@ description: >
 - Justificar el criterio ("Mercedes CLA entra porque hueco X% y demanda alta; Cupra no, porque paridad ES≈DE").
 - No re-sondear lo que el mapa ya tiene fresco (según `refrescar_antes_de_categoria` de cada modelo).
 
-**📍 RUTA PACTADA del mapa (L2 · 17-ago-2026):** el archivo vive SIEMPRE en `C:/Users/jacar/Desktop/JJImportMotors/datos_mercado.json` (campo `ruta_canonica` en el JSON). Si `importacion-vehiculos` no lo encuentra ahí → NO fallback silencioso: avisa "mapa de mercado no encontrado; considera ejecutar estudio-mercado" y continúa con `modelos-medidos.md` declarándolo. Ambas skills escriben/leen en esa misma ruta.
+**📍 RUTA PACTADA del mapa (L2 · 17-ago-2026, dual desde 23-ago-2026):** el archivo vive SIEMPRE en **AMBAS** rutas:
+1. `C:/Users/jacar/Desktop/JJImportMotors/datos_mercado.json` (ruta principal — usuario la abre a diario)
+2. `C:/laragon/www/importnexcore/.claude/skills/datos_mercado.json` (ruta espejo — workspace del proyecto)
+
+El campo `ruta_canonica` del JSON lista ambas rutas separadas por `|`. Si `importacion-vehiculos` no encuentra el JSON en ninguna → NO fallback silencioso: avisa "mapa de mercado no encontrado en ninguna ruta; considera ejecutar estudio-mercado" y continúa con `modelos-medidos.md` declarándolo. Ambas skills escriben/leen en esas mismas 2 rutas.
+
+**Regla de sincronización:** si una ruta está más actualizada que la otra (por mtime), Copilot (VS Code) la trata como fuente de verdad y copia a la otra. **NUNCA** divergir: la IA solo escribe en1 ruta y Copilot espeja.
 
 ### 🔁 Comunicación BIDIRECCIONAL — aprendizaje de cada encargo (17-ago-2026)
 
@@ -395,7 +401,7 @@ Para cada modelo/versión, el mapa guarda (esquema completo en `schema_datos_mer
 
 | Archivo | Formato | Destino |
 |---|---|---|
-| `datos_mercado.json` | JSON (mapa de mercado persistente) | **RUTA PACTADA** `C:/Users/jacar/Desktop/JJImportMotors/datos_mercado.json` (L2) |
+| `datos_mercado.json` | JSON (mapa de mercado persistente) | **RUTA DUAL** (L2):<br>1. `C:/Users/jacar/Desktop/JJImportMotors/datos_mercado.json`<br>2. `C:/laragon/www/importnexcore/.claude/skills/datos_mercado.json` |
 | `informe_mercado_<fecha>.md` | Markdown (documento de decisión para el usuario) | `informes\mercado\` |
 
 > **PLANTILLA OBLIGATORIA del informe (23-ago-2026):** usar `informe_mercado.md` (plantilla en esta carpeta).
@@ -415,8 +421,8 @@ Para cada modelo/versión, el mapa guarda (esquema completo en `schema_datos_mer
 > - SIEMPRE un único Markdown (`.md`). Los enlaces funcionan.
 > - PDF SOLO si el usuario lo pide explícito (en PDF se rompen los enlaces → copia la URL visible en la tabla).
 > - NUNCA duplicar el mismo informe. UN archivo por estudio.
-> - La nube **NO escribe** en `C:/Users/jacar/Desktop/...` (no tiene acceso). Al final, imprime:
->   *"Archivo: `informes/mercado/<archivo>.md`. Pásale este MD a Copilot en VS Code y dile 'importa este MD al mapa'."*
+> - La nube **NO escribe** en `C:/Users/jacar/Desktop/...` ni en `.claude/skills/...` (no tiene acceso a tu disco). Al final, imprime:
+>   *"Archivo: `informes/mercado/<archivo>.md`. Pásale este MD a Copilot en VS Code y dile 'importa este MD al mapa de mercado (ambas rutas)'."*
 >
 > El `datos_mercado.json` es la **fuente de verdad de criterio** para la skill hermana y el **origen de datos del SaaS Laravel** (comando `market:import`). Mantenerlo al día es la misión de esta skill.
 

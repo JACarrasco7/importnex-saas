@@ -5,6 +5,25 @@ Todos los cambios notables en el skill `estudio-mercado` se documentarán en est
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.3.11] - 2026-08-23 — Ruta dual del mapa (Desktop + workspace)
+
+> **Motivo:** el usuario quiere que `datos_mercado.json` viva en 2 rutas para tener copia accesible a diario sin abrir VS Code:
+> 1. `C:/Users/jacar/Desktop/JJImportMotors/datos_mercado.json` (ruta principal)
+> 2. `C:/laragon/www/importnexcore/.claude/skills/datos_mercado.json` (ruta espejo)
+
+### 📍 SKILL.md §RUTA PACTADA (L2)
+- Cambio de "ruta única" a **ruta dual**. El campo `ruta_canonica` lista ambas separadas por `|`.
+- Si `importacion-vehiculos` no encuentra el JSON en ninguna → NO fallback silencioso: avisa y continúa con `modelos-medidos.md`.
+- **Regla de sincronización:** la IA escribe en 1 ruta y Copilot (VS Code) espeja a la otra. NUNCA divergir.
+
+### 📤 SKILL.md §Output
+- Tabla de output actualizada con las 2 rutas.
+
+### 🤖 SKILL.md §Reglas de entrega
+- Mensaje de cierre literal actualizado: "importa este MD al mapa de mercado (ambas rutas)".
+
+---
+
 ## [0.3.10] - 2026-08-23 — Filtros estructurados SIEMPRE + regla de cache dura
 
 > **Motivo:** el usuario recordó que el campo de versión de texto de Coches.net es trampa conocida (mezcla generaciones). Reforzar como regla dura. Además, evitar re-medir cache vigente.

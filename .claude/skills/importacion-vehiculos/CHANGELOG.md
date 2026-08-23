@@ -5,6 +5,20 @@ Todos los cambios notables en el skill `importacion-vehiculos` se documentarán 
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [3.3.9] - 2026-08-23 — Ruta dual del mapa (Desktop + workspace)
+
+> **Motivo:** el usuario quiere que `datos_mercado.json` viva en 2 rutas para tener copia accesible a diario sin abrir VS Code. Mismo cambio que `estudio-mercado` v0.3.11.
+
+### 📍 SKILL.md §RUTA PACTADA dual
+- El mapa vive en AMBAS rutas:
+  1. `C:/Users/jacar/Desktop/JJImportMotors/datos_mercado.json` (principal)
+  2. `C:/laragon/www/importnexcore/.claude/skills/datos_mercado.json` (espejo)
+- Campo `ruta_canonica` lista ambas separadas por `|`.
+- Si no existe al cerrar → crear con `schema_version` y `ruta_canonica` en AMBAS.
+- Si existe → releer y MERGE por `slug`. La IA escribe en 1 y Copilot espeja. NUNCA divergir.
+
+---
+
 ## [3.3.8] - 2026-08-23 — Filtros estructurados SIEMPRE + cobertura mínima
 
 > **Motivo:** el usuario recordó que el campo de versión de texto de Coches.net es trampa conocida. Reforzar como regla dura. Además, evitar veredictos con muestra insuficiente.

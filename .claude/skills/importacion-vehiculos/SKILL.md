@@ -1,6 +1,6 @@
 ---
 name: importacion-vehiculos
-version: 3.3.8
+version: 3.3.9
 description: >
   Negocio JJ Import Motors (Huelva): servicio de búsqueda e importación de coches
   (desde Alemania y dentro de España). NO compra stock, solo oferta el servicio
@@ -308,7 +308,10 @@ D sondeo → INFORME DE MODELOS (país × año × motorización)
 1. Leer `memoria/encargos.md` (¿encargo previo del cliente o del modelo?)
 2. Leer `memoria/modelos-medidos.md` (¿medición previa? — campo refrescar_antes_de)
 3. Cruce con `indice.json` (Desktop) + `datos_mercado.json` (regla frescura <3 semanas).
-   → `datos_mercado.json` lo genera la skill hermana `estudio-mercado`, **ruta pactada (L2): `C:/Users/jacar/Desktop/JJImportMotors/datos_mercado.json`**.
+   → `datos_mercado.json` lo genera la skill hermana `estudio-mercado`, **ruta pactada dual (L2 · 23-ago-2026):**
+   - **`C:/Users/jacar/Desktop/JJImportMotors/datos_mercado.json`** (ruta principal — usuario la abre a diario).
+   - **`C:/laragon/www/importnexcore/.claude/skills/datos_mercado.json`** (ruta espejo — workspace del proyecto).
+   La IA escribe en1 y Copilot (VS Code) espeja a la otra. **NUNCA divergir.** Si una está más actualizada (mtime), Copilot la trata como fuente y sincroniza.
    → Si NO existe o caducó: avisar "mapa no encontrado/caducado; considera ejecutar estudio-mercado", usar `memoria/modelos-medidos.md` como fallback y marcar el criterio como "sin estudio de mercado".
 
 CASOS:
@@ -576,7 +579,11 @@ Durante la conversación, Claude debe actualizar la memoria cuando detecte:
 - **Flujo B (modelo barrido 7 fuentes):** tiene medianas reales → al cerrar, volcar/actualizar la entrada del modelo en `datos_mercado.json` con `fuente_medicion: flujo_b` (medianas frescas + `refrescar_antes_de_categoria` = hoy + cadencia de su categoría).
 - **Flujo A (URL evaluada):** mide UNA unidad → NO escribe medianas (corrompería la estadística). SOLO añade entrada nueva (si el modelo no existe) o actualiza `nota`/`enlaces_muestra`, con `fuente_medicion: flujo_a`.
 - **Regla de frescura:** si el mapa ya tiene el modelo fresco (< cadencia), no se re-vuelca; solo se actualiza `nota` si aporta algo nuevo.
-- **Ruta pactada (L2):** `C:/Users/jacar/Desktop/JJImportMotors/datos_mercado.json`. Si no existe al cerrar → crear con `schema_version` y `ruta_canonica`; si existe → releer y MERGE por `slug` (no sobrescribir otras entradas).
+- **Ruta pactada dual (L2 · 23-ago-2026):** el archivo vive en **AMBAS** rutas:
+  1. `C:/Users/jacar/Desktop/JJImportMotors/datos_mercado.json` (ruta principal — usuario abre a diario).
+  2. `C:/laragon/www/importnexcore/.claude/skills/datos_mercado.json` (ruta espejo — workspace del proyecto).
+
+  El campo `ruta_canonica` del JSON lista ambas rutas separadas por `|`. Si no existe al cerrar → crear con `schema_version` y `ruta_canonica` en **ambas**; si existe → releer y MERGE por `slug` (no sobrescribir otras entradas). **Regla de sincronización:** la IA escribe en 1 ruta y Copilot espeja a la otra. NUNCA divergir.
 - Actualizar también `memoria/modelos-medidos.md` como hasta ahora (registro histórico); el JSON es la capa consumible por ambas skills.
 - **Aprendizaje automático (17-ago-2026):** ① si el precio de un anuncio real está >15% bajo `mediana_de` y el mapa es 🟢 → marcar `oportunidad: true`. ② si el veredicto del mapa contradice el resultado real del cierre → anotar la calibración en `nota`. ③ si el modelo NO está en el mapa (sin match de `slug`/`alias`) → añadirlo con `fuente_medicion: flujo_a` y medianas null (lo medirá el próximo estudio).
 
