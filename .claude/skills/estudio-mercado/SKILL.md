@@ -1,6 +1,6 @@
 ---
 name: estudio-mercado
-version: 0.3.6
+version: 0.3.7
 description: >
   Estudio profundo del mercado de coches de 2ª mano en España y Alemania para
   JJ Import Motors. Genera un mapa de mercado persistente (datos_mercado.json)
@@ -291,6 +291,20 @@ HUECO NETO (hueco_neto_pct — con costes de importación, para decidir negocio)
 
 > **Uso:** `hueco_pct` para comparar con umbral Nicho ≥10% (EXIT 1 si <8%) y con el histórico. `hueco_neto_pct` para el veredicto de negocio. Ejemplo real: Golf GTI bruto 11,3% pero neto ~5% — el bruto pasa umbral, el neto dice que la importación apenas deja margen.
 > IEDMT según CO₂ y antigüedad: ver `importacion-vehiculos/04-negocio/costes.md` §IEDMT (coeficientes Anexo IV + tipos por emisiones). Para el estudio se usa un IEDMT estimado por segmento; el exacto se calcula en Flujo A cuando hay unidad concreta.
+
+### 💶 GASTOS FIJOS ESTIMADOS PARA EL INFORME (23-ago-2026, regla del usuario)
+
+> **El informe debe usar SIEMPRE una cifra redonda de 1.500 € de gastos fijos** (1.000 € transporte + 200 € ITV + 300 € gestoría/ausfuhr) para calcular el **"Puesto en Huelva"** y el **"Ahorro real"** en las tablas y resúmenes. Esta es la cifra que el usuario ve y con la que decide — no el cálculo técnico del `hueco_neto_pct`.
+>
+> **Por qué:** el estudio de mercado mira precios de compra. Los gastos de traer un coche son variables (CO₂, año, provincia). Para decidir si merece la pena importar un modelo, basta una cifra redonda. Cuando hay unidad concreta (Flujo A), se calcula IVA + IEDMT exacto.
+>
+> **Fórmula:**
+> - `puesto_huelva = precio_alemania + 1.500 €`
+> - `ahorro_real = suelo_es - puesto_huelva`
+>
+> **IVA de importación + IEDMT NO se incluyen** en el informe de estudio. Se mencionan en la sección "💶 DESGLOSE DE LOS 1.500 € DE GASTOS FIJOS" para que el usuario sepa qué falta.
+>
+> **Si el usuario dice "usa 2.000 € porque mis gastos son más altos"**, recalcular todas las tablas. Si dice "no sumes nada", dejar la columna "Puesto en Huelva" fuera pero mantener el resto.
 
 ---
 

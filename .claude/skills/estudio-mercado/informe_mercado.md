@@ -34,18 +34,19 @@
 
 ### Tabla resumen — cuánto ahorras trayéndolo desde Alemania
 
-> Columnas: Versión · Precio más bajo en Alemania · Precio más bajo en España · Ahorro una vez traído · Conviene.
+> Columnas: Versión · Precio más bajo en Alemania · Precio puesto en Huelva (DE + gastos) · Precio más bajo en España · Ahorro real frente a España · ¿Conviene?
 
-| Versión | Suelo Alemania | Suelo España | Ahorro neto¹ | ¿Conviene? |
-|---|---:|---:|---:|:---:|
-| GTI (230/245cv) | 15.999 € | 19.690 € | **1.200 €** | ✅ sí, pero justo |
-| GTI TCR (290cv) | 19.699 € | 28.900 €² | **3.700 €** | ✅ sí |
-| GTI Clubsport (265cv, **Mk7**) | 16.499 € | 22.490 € | **2.500 €** | ⚠️ ojo, no es 7.5 |
-| Golf R (310cv) | 16.899 €³ | 22.880 € | **4.000 €** | ✅ **el mejor** |
+| Versión | Suelo Alemania | **Puesto en Huelva¹** | Suelo España | Ahorro real² | ¿Conviene? |
+|---|---:|---:|---:|---:|:---:|
+| GTI (230/245cv) | 15.999 € | **17.499 €** | 19.690 € | **2.191 €** | ✅ sí |
+| GTI TCR (290cv) | 19.699 € | **21.199 €** | 28.900 €³ | **7.701 €** | ✅ **muy bien** |
+| GTI Clubsport (265cv, **Mk7**) | 16.499 € | **17.999 €** | 22.490 € | **4.491 €** | ⚠️ ojo, no es 7.5 |
+| Golf R (310cv) | 16.899 €⁴ | **18.399 €** | 22.880 € | **4.481 €** | ✅ **el mejor** |
 
-¹ Traerlo descontado (transporte + ITV + gestoría). Sin IVA de importación, se calcula para cada coche.
-² Suelo con accidente reparado en taller oficial en 28.900 €. Los 23.695 € son "precio con reserva".
-³ Suelo sin verificar motor (anuncio dice 310cv, no se abrió ficha). El suelo limpio verificado es 16.899 €.
+¹ **Puesto en Huelva = precio Alemania + 1.500 € de gastos fijos** (1.000 € transporte + 200 € ITV + 300 € gestoría/ausfuhr). IVA de importación aparte, se calcula para cada coche según su CO₂ y año.
+² **Ahorro real = suelo España − puesto en Huelva** (lo que te ahorras de verdad vs comprar en ES).
+³ Suelo con accidente reparado en taller oficial en 28.900 €. Los 23.695 € son "precio con reserva".
+⁴ Suelo sin verificar motor (anuncio dice 310cv, no se abrió ficha). El suelo limpio verificado es 16.899 €.
 
 > **Leyenda de fiabilidad** (junto a cada precio):
 > - ✅ **Verificado** = se abrió la ficha y se confirmó el estado.
@@ -57,34 +58,46 @@
 ## 🎯 LOS 2 MEJORES ANUNCIOS POR VERSIÓN (para ver ahora)
 
 > Solo los que pasan filtro: precio fiable, equipamiento acorde y vendedor decente. Click en el enlace → ves el anuncio original.
+>
+> **Columna "Puesto en Huelva"**: precio alemán + 1.500 € de gastos fijos estimados (1.000 € transporte + 200 € ITV + 300 € gestoría/ausfuhr). **IVA de importación aparte** (depende del CO₂ y año del coche, se calcula cuando hay unidad concreta).
+>
+> **Columna "Ahorro real"**: suelo España − puesto en Huelva. Es lo que te ahorras de verdad.
 
 ### GTI (230/245cv)
 
-| Precio | Año | Km | Por qué mola | Enlace |
-|---:|---|---:|---|---|
-| 15.999 € | 2017 | 106.726 | Suelo Alemania, 5 puertas DSG, cuadro digital, sin accidentes | https://www.mobile.de/es/vehículos/detalles.html?id=40947884798464 |
-| 19.690 € | 2017 | 155.361 | Suelo España, 3 puertas manual, 245cv Performance | https://www.coches.net/volkswagen-golf-gti-performance-20-tsi-245cv-5p-gasolina-2017-en-madrid-71274163-covo.aspx |
+| Precio | Puesto Huelva | Año | Km | Por qué mola | Enlace |
+|---:|---:|---|---:|---|---|
+| 15.999 € | **17.499 €** | 2017 | 106.726 | Suelo Alemania, 5p DSG, cuadro digital, sin accidentes | https://www.mobile.de/es/vehículos/detalles.html?id=40947884798464 |
+| 19.690 € | — | 2017 | 155.361 | Suelo España, 3p manual, 245cv Performance | https://www.coches.net/volkswagen-golf-gti-performance-20-tsi-245cv-5p-gasolina-2017-en-madrid-71274163-covo.aspx |
+
+> Traer el GTI de Alemania te sale por **17.499 € puesto en Huelva** (sin IVA). El mismo coche en España cuesta **19.690 €** → te ahorras **2.191 €**.
 
 ### GTI TCR (290cv)
 
-| Precio | Año | Km | Por qué mola | Enlace |
-|---:|---|---:|---|---|
-| 19.699 € | 2019 | 149.702 | Suelo Alemania, 5p DSG, completo | https://www.mobile.de/es/vehículos/detalles.html?id=38717798642208 |
-| 28.900 € | 2019 | 117.949 | Suelo España limpio, con techo y cuadro digital | https://www.coches.net/volkswagen-golf-gti-tcr-20-tsi-213kw290cv-dsg-5p-gasolina-2019-en-madrid-71332726-covo.aspx |
+| Precio | Puesto Huelva | Año | Km | Por qué mola | Enlace |
+|---:|---:|---|---:|---|---|
+| 19.699 € | **21.199 €** | 2019 | 149.702 | Suelo Alemania, 5p DSG, completo | https://www.mobile.de/es/vehículos/detalles.html?id=38717798642208 |
+| 28.900 € | — | 2019 | 117.949 | Suelo España limpio, con techo y cuadro digital | https://www.coches.net/volkswagen-golf-gti-tcr-20-tsi-213kw290cv-dsg-5p-gasolina-2019-en-madrid-71332726-covo.aspx |
+
+> Traer el TCR te sale por **21.199 €** vs **28.900 €** en España → te ahorras **7.701 €**. El TCR tiene el hueco más grande de todos los Golf del estudio.
 
 ### GTI Clubsport (265cv) — **Mk7, no Mk7.5**
 
-| Precio | Año | Km | Por qué mola | Enlace |
-|---:|---|---:|---|---|
-| 16.499 € | 2016 | 153.000 | Suelo Alemania original, sin tocar | https://www.mobile.de/es/vehículos/detalles.html?id=452337727 |
-| 22.490 € | 2016 | 143.000 | Suelo España, techo solar, "precio justo" | https://www.coches.net/volkswagen-golf-gti-clubsport-20-tsi-265cv-bmt-dsg-5p-gasolina-2016-en-barcelona-71264521-covo.aspx |
+| Precio | Puesto Huelva | Año | Km | Por qué mola | Enlace |
+|---:|---:|---|---:|---|---|
+| 16.499 € | **17.999 €** | 2016 | 153.000 | Suelo Alemania original, sin tocar | https://www.mobile.de/es/vehículos/detalles.html?id=452337727 |
+| 22.490 € | — | 2016 | 143.000 | Suelo España, techo solar, "precio justo" | https://www.coches.net/volkswagen-golf-gti-clubsport-20-tsi-265cv-bmt-dsg-5p-gasolina-2016-en-barcelona-71264521-covo.aspx |
+
+> Traer el Clubsport Mk7 te sale por **17.999 €** vs **22.490 €** en España → te ahorras **4.491 €**. Ojo: Clubsport NO existe en Mk7.5 (si te ofrecen Clubsport 7.5 es un error).
 
 ### Golf R (310cv)
 
-| Precio | Año | Km | Por qué mola | Enlace |
-|---:|---|---:|---|---|
-| 16.899 € | 2017 | 176.147 | Suelo Alemania limpio, 5p DSG | https://www.mobile.de/es/vehículos/detalles.html?id=461400725 |
-| 22.880 € | 2017 | 130.000 | Suelo España "super precio", 3p DSG, techo | https://www.coches.net/volkswagen-golf-r-20-tsi-228kw-310cv-4motion-dsg-3p-gasolina-2017-en-sevilla-70611650-covo.aspx |
+| Precio | Puesto Huelva | Año | Km | Por qué mola | Enlace |
+|---:|---:|---|---:|---|---|
+| 16.899 € | **18.399 €** | 2017 | 176.147 | Suelo Alemania limpio, 5p DSG | https://www.mobile.de/es/vehículos/detalles.html?id=461400725 |
+| 22.880 € | — | 2017 | 130.000 | Suelo España "super precio", 3p DSG, techo | https://www.coches.net/volkswagen-golf-r-20-tsi-228kw-310cv-4motion-dsg-3p-gasolina-2017-en-sevilla-70611650-covo.aspx |
+
+> Traer el Golf R te sale por **18.399 €** vs **22.880 €** en España → te ahorras **4.481 €**. El Golf R es el ganador claro en relación riesgo/beneficio.
 
 ---
 
@@ -177,27 +190,34 @@
 ## 📋 RESUMEN PARA COPIAR (1 párrafo, listo para pegar)
 
 > Párrafo autocontenido. Lo que tú pondrías en un WhatsApp, en una nota o para enseñarle a un socio. Sin enlaces (se pierden al pegar en texto plano).
+>
+> Los precios "puesto en Huelva" incluyen 1.500 € de gastos fijos estimados (1.000 € transporte + 200 € ITV + 300 € gestoría/ausfuhr). **IVA de importación aparte** (se calcula para cada coche según CO₂ y año).
 
 ```
 Estudio del VW Golf 7.5 hecho. Las 4 versiones (GTI 230/245cv, GTI TCR 290cv,
-Clubsport Mk7 y Golf R 310cv) tienen precio más barato en Alemania. Traído
-sale entre 1.200 € y 4.000 € más barato que en España, una vez descontados
-los gastos (transporte + ITV + gestoría).
+Clubsport Mk7 y Golf R 310cv) salen más baratas trayéndolas desde Alemania.
 
-El claro ganador es el Golf R: 4.000 € de ahorro neto comprando en DE
-(16.899 € en Alemania vs 22.880 € en España, mismo año 2017, ~150k km).
+Precios "puesto en Huelva" (precio Alemania + 1.500 € de gastos, IVA aparte):
+
+- GTI 230/245cv: puesto en Huelva 17.499 € vs 19.690 € en España → ahorras 2.191 €
+- GTI TCR 290cv: puesto en Huelva 21.199 € vs 28.900 € en España → ahorras 7.701 €
+- GTI Clubsport Mk7: puesto en Huelva 17.999 € vs 22.490 € en España → ahorras 4.491 €
+- Golf R 310cv: puesto en Huelva 18.399 € vs 22.880 € en España → ahorras 4.481 €
+
+El ganador absoluto en hueco es el GTI TCR (7.700 € de ahorro). El ganador en
+relación riesgo/beneficio (mercado grande + hueco decente) es el Golf R.
 
 2 advertencias importantes:
 - Clubsport NO existe en 7.5 (es Mk7 de 2016-2017).
 - 5 de cada 14 anuncios DE del Golf R llevan "stage 1" silencioso. Todo anuncio
-  por debajo de 17.000 € hay que verificarlo ficha a ficha.
+  por debajo de 17.000 € en Alemania hay que verificarlo ficha a ficha.
 
-Comparado con el Astra J OPC (julio), el Golf R tiene un poco menos de
-hueco (22% vs 30%) pero mercado 6 veces más grande, así que mejor
-relación riesgo/beneficio.
+Comparado con el Astra J OPC (julio, 30% de hueco pero solo 8 anuncios en ES),
+el Golf R tiene menos hueco (22%) pero mercado 6 veces más grande → mejor
+oportunidad real.
 
-Siguiente paso lógico: si te convence el Golf R, mirar unidades concretas en
-la próxima sesión (Flujo A).
+Siguiente paso: si te convence el Golf R o el TCR, mirar unidades concretas
+en la próxima sesión.
 ```
 
 ---
@@ -210,6 +230,33 @@ informes/mercado/volKSwagen-golf-75_2026-08-23.md
 
 (El mapa de mercado en `datos_mercado.json` lo actualiza Copilot cuando le digas
 "importa este MD al mapa" — la nube no tiene acceso a tu disco.)
+
+---
+
+## 💶 DESGLOSE DE LOS 1.500 € DE GASTOS FIJOS (para que sepas qué incluye)
+
+> **Por qué una cifra redonda de 1.500 € y no el desglose técnico:** el estudio de mercado mira precios de compra en Alemania vs España. Los gastos de traer un coche son **variables según el coche concreto** (CO₂, año, peso, provincia de matriculación). Para decidir si **merece la pena importar** un modelo basta con esa cifra redonda.
+>
+> Cuando elijas una unidad concreta (Flujo A), entonces sí se calcula el IVA de importación + IEDMT exacto, basado en ficha técnica.
+
+| Concepto | Estimado | Notas |
+|---|---:|---|
+| Transporte Alemania → Huelva | 1.000 € | Camión cerrado, ≈7-10 días, depende de ruta |
+| ITV + homologación | 200 € | Tarifa estándar, sube si hay reformas |
+| Gestoría + ausfuhr | 300 € | Baja en Alemania + matriculación provisional |
+| **TOTAL gastos fijos** | **1.500 €** | Sin IVA de importación |
+
+**Lo que NO incluye (se calcula por coche en Flujo A):**
+- **IVA de importación:** 21% sobre el valor en aduana (precio compra + transporte + seguro). Se puede deducir si el coche es para revender con margen, pero como particular se paga.
+- **IEDMT (impuesto de matriculación):** depende del CO₂ y año del coche. Un GTI de 2017 con ≈170 g/km CO₂ paga alrededor de 700-1.000 €. Un TCR más potente, ≈1.500-2.000 €. Un Golf R, ≈1.800-2.500 €.
+- **Seguro de tránsito** (≈100 €) — opcional.
+- **Gestión de placas y matrícula española** (≈150 €).
+
+**Orden de magnitud realista total:**
+- Coche barato traerlo (sin IVA ni IEDMT): +1.500 €
+- Coche "traído y matricular" todo incluido: +3.500 € a +5.500 € dependiendo del modelo
+
+> Si quieres que el informe use una cifra distinta (ej. "suma 2.000 € porque mis gastos son más altos"), lo recalculo en 1 minuto.
 
 ---
 

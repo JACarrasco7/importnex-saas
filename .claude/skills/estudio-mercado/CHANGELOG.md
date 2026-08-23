@@ -5,6 +5,22 @@ Todos los cambios notables en el skill `estudio-mercado` se documentarán en est
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.3.7] - 2026-08-23 — "Puesto en Huelva" + ahorro real con gastos fijos de 1.500 €
+
+> **Motivo:** el usuario pidió ver de un vistazo cuánto le costaría el coche **puesto en casa**, no el cálculo técnico del `hueco_neto_pct` (que incluye IEDMT variable por CO₂). Para decidir si merece la pena importar, basta con una cifra redonda de gastos fijos.
+
+### 📄 Informe (`informe_mercado.md`)
+- **NUEVA columna "Puesto en Huelva"** en la tabla resumen y en las 4 tablas de candidatos. `puesto_huelva = precio_alemania + 1.500 €` (1.000 € transporte + 200 € ITV + 300 € gestoría/ausfuhr).
+- **NUEVA columna "Ahorro real"** = suelo España − puesto en Huelva. Es lo que el usuario se ahorra de verdad.
+- **NUEVA sección "💶 DESGLOSE DE LOS 1.500 € DE GASTOS FIJOS"** al final, antes de la metodología. Explica qué incluye (transporte, ITV, gestoría) y qué NO (IVA importación, IEDMT), con orden de magnitud realista (+3.500 € a +5.500 € "todo incluido").
+- **Resumen para copiar actualizado** con los nuevos números "puesto en Huelva" para WhatsApp/notas.
+
+### 📚 Reglas actualizadas
+- `SKILL.md` §Cálculo del hueco: nueva subsección "💶 GASTOS FIJOS ESTIMADOS PARA EL INFORME" con la regla, fórmula, qué se incluye y qué no.
+- `como_deben_ser_las_sesiones.md` §REGLAS DE ENTREGA punto 9: cifra de 1.500 € por defecto, recalcular si el usuario pide otra cifra.
+
+---
+
 ## [0.3.6] - 2026-08-23 — Informe para el usuario: desglose por variables, comparables, resumen para copiar
 
 > **Motivo:** el informe estaba escrito con jerga IA (sincronización, merge, fuente_medicion, bloque de volcado JSON) y el usuario tenía que interpretar términos técnicos para decidir. El informe es **para Jacar**, no para otra IA.
