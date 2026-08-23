@@ -83,8 +83,8 @@ class PublicCarRequestController extends Controller
             'transmission' => 'nullable|string|max:50',
             'body_type' => 'required|string|max:50',
             'doors' => 'nullable|integer|min:2|max:5',
-            'seats' => 'required|integer|min:2|max:9',
-            'color' => 'required|string|max:50',
+            'seats' => 'nullable|integer|min:2|max:9',
+            'color' => 'nullable|string|max:50',
             'requirements' => 'nullable|string|max:2000',
             'notes' => 'nullable|string|max:2000',
         ], [
