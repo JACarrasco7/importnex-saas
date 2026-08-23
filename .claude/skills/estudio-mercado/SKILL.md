@@ -1,6 +1,6 @@
 ---
 name: estudio-mercado
-version: 0.3.8
+version: 0.3.9
 description: >
   Estudio profundo del mercado de coches de 2ª mano en España y Alemania para
   JJ Import Motors. Genera un mapa de mercado persistente (datos_mercado.json)
@@ -199,13 +199,15 @@ description: >
 ## �🔀 Flujo de trabajo (una pasada de estudio)
 
 ```
-FASE 0 — ALCANCE del estudio (con el usuario):
+FASE 0 — ALCANCE del estudio (con el usuario, **PREGUNTAR PRIMERO**):
+  └─ **PREGUNTAR** antes de gastar peticiones (versión, año, km, precio, equipamiento). Formato en `informe_mercado.md` §CUÁNDO PREGUNTAR.
   └─ ¿Estudio COMPLETO por categorías o DIRIGIDO? (por marca / modelo / segmento / rango / tipo_cliente)
   └─ Si completo: ¿qué categorías? (showstoppers / rotación / gemas / todas)
   └─ Si dirigido: ¿qué marca/modelo/segmento/rango/cliente? (ej. "Audi", "Golf 8", "berlinas 14-25k", "primer coche")
   └─ ¿Rango de año/km/precio base? (si no, el mercado manda)
+  └─ ¿Gastos fijos para "Puesto en Huelva"? (por defecto 1.500 €, preguntar al usuario)
   └─ ¿Qué profundidad? (rápido: solo hueco · completo: hueco + rotación + demanda)
-  └─ ACK de 1 línea + OK del usuario
+  └─ ACK de 1 línea + OK del usuario — **NO empezar el estudio sin esto**
 
 FASE 1 — ES (Coches.net, navegación real):
   └─ Por categoría → listados ordenados por precio → recoger por modelo:

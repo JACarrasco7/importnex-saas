@@ -188,17 +188,20 @@ FASE E · CIERRE (2 min)
 □ Antes de escribir: ver §EJEMPLO REAL (plan + conversación) para el formato compacto de tokens
 ```
 
-## ⛔ REGLAS DE ORO — la nube NO improvisa, NO decide por su cuenta (23-ago-2026 v0.3.8)
+## ⛔ REGLAS DE ORO — la nube NO improvisa, NO decide por su cuenta (23-ago-2026 v0.3.9)
 
 > **Problema detectado (23-ago):** la IA recibía zonas con "si conviene, si hay muestra, si el usuario lo pide, opcionalmente…" → interpretaba y se salía del flujo. Esto se acabó.
 >
 > **A partir de ahora, toda decisión que pueda tener 2 formas está resuelta de antemano** en la plantilla `informe_mercado.md` (§REGLAS ESTRICTAS SI/ENTONCES) o aquí mismo. La nube **NO consulta, NO propone alternativas, NO improvisa**.
+>
+> **Principio v0.3.9 — "mejor preguntar 1 vez que inventar 1 dato":** las decisiones de negocio (versión, año, km, precio, equipamiento, perfil) **SE PREGUNTAN al usuario** antes de gastar peticiones. Las decisiones mecánicas (formato, secciones, checklist, gastos por defecto) **ya están resueltas** en la plantilla. La nube distingue unas de otras y NUNCA improvisa.
 
 ### 🔒 Comportamiento OBLIGATORIO en cada paso
 
 | Momento | Comportamiento OBLIGATORIO |
 |---|---|
 | Inicio de sesión | **LEER** este MD + `informe_mercado.md` + `schema_datos_mercado.md`. Sin esto, NO empezar. |
+| Cuando el usuario da un mandato vago ("estudia X", "busca X") | **PREGUNTAR** antes de gastar peticiones. Versión/año/km/equipamiento/precio. 1 sola tanda de preguntas, formato claro (ver `informe_mercado.md` §CUÁNDO PREGUNTAR). |
 | Antes de generar el informe | **APLICAR las 10 secciones en orden fijo** de la plantilla. Sin saltarse ninguna. |
 | Si falta muestra para segmentar | Poner 1 línea justificada y seguir. NO decidir "lo omito porque es largo". |
 | Si el usuario pide algo no contemplado | Hacerlo + añadir 1 línea: "He añadido [X] porque me lo has pedido explícitamente." |

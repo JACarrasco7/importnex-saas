@@ -15,13 +15,69 @@
 | Hay que decidir si incluir el desglose por variables | **SIEMPRE incluirlo.** Si no hay muestra suficiente (>2 anuncios por combinación) → poner 1 línea "No hay muestra suficiente para segmentar" y omitir la tabla. NO decidir "es opcional". |
 | Hay que decidir si incluir comparables | **SIEMPRE incluir al menos 1 comparable** de modelos ya estudiados (ver `modelos-medidos.md`). Si no hay ninguno, poner 1 línea "Sin comparables todavía" y seguir. |
 | Hay que decidir el formato del archivo | **SIEMPRE 1 único Markdown** (`<marca>-<modelo>_<YYYY-MM-DD>.md`). NO PDF, NO duplicados, NO varios formatos a la vez. |
-| Hay que decidir los gastos fijos | **Por defecto 1.500 €** (1.000 € transporte + 200 € ITV + 300 € gestoría/ausfuhr). SOLO cambiar si el usuario dice explícitamente "mis gastos son X €". NO asumir, NO preguntar. |
+| Hay que decidir los gastos fijos (1.500 € vs otro) | **PREGUNTAR** al usuario al inicio (ver §CUÁNDO PREGUNTAR). NO asumir 1.500 € ni inventar otra cifra. |
 | Hay que decidir el IVA de importación / IEDMT | **NO incluir en las tablas.** SOLO mencionar en la sección "💶 Desglose de los 1.500 €" con el orden de magnitud realista (+3.500 a +5.500 € todo incluido). NO calcular por coche. |
 | Hay que decidir si el suelo es fiable | Marcar ✅ (verificado en ficha) · 👁️ (solo listado) · ⚠️ (con reserva/siniestro/financiado). NUNCA sin marca. |
 | Hay cobertura incompleta (ej. "solo página 1/6") | **DECLARARLO siempre** en §COBERTURA con número exacto ("se han revisado X de Y anuncios"). NO omitir. |
 | Hay datos contradictorios entre el mapa y el informe | **PREVALECE el `datos_mercado.json`** (fuente de verdad). NO mezclar datos recordados de sesiones pasadas. |
 | El usuario no ha pedido algo que la plantilla obliga | **SE HACE IGUAL** (desglose, comparables, resumen para copiar, sección de gastos). NO preguntar "¿lo quieres?". |
 | El usuario pide algo NO contemplado en la plantilla | **HACERLO**, pero añadir 1 línea al final: "He añadido [X] porque me lo has pedido explícitamente." |
+| El usuario dice "estudia X" sin más detalle | **PREGUNTAR** al usuario antes de empezar (ver §CUÁNDO PREGUNTAR). NO asumir versión/año/precio/km. |
+| El usuario dice "completa el Golf R DE" sin más | **PREGUNTAR** qué versión exactamente (R 310cv, R 20 Years, R Performance...) y cuántos anuncios más quiere revisar. NO asumir. |
+| Hay 2 versiones razonables para elegir | **PREGUNTAR** al usuario. NO elegir la "más probable". |
+| La nube detecta un error en datos del JSON | **AVISAR** al usuario con 1 línea ("El JSON dice X pero el anuncio dice Y, ¿cuál uso?"). NO corregir sola. |
+
+---
+
+## ❓ §CUÁNDO PREGUNTAR (regla de oro — mejor preguntar 1 vez que inventar 1 dato)
+
+> **Principio (23-ago-2026 v0.3.9):** la nube prefiere **preguntar UNA sola vez** a inventar. Las decisiones de negocio (precios, versiones, año, km, perfil) NO se asumen. Las decisiones mecánicas (formato, secciones, checklist) ya están resueltas y NO se preguntan.
+
+### ✅ SIEMPRE preguntar (antes de empezar el estudio)
+
+| Si el usuario dice... | La nube PREGUNTA... |
+|---|---|
+| "Estudia el Golf" | ¿Qué versión? (GTI, TCR, Clubsport, R, R-Line) · ¿año mín/máx? · ¿km máx? · ¿precio máx? · ¿equipamiento imprescindible? |
+| "Mira el Astra OPC" | ¿Qué generación? (J, K) · ¿gasolina o diesel? · ¿kilometraje máx? · ¿manual o automático? |
+| "Busca un SUV compacto" | ¿Presupuesto? · ¿año mín? · ¿km máx? · ¿gasolina/diesel/híbrido? · ¿marca preferida? · ¿uso principal? |
+| "Hazme un estudio de mercado" | ¿De qué modelo/marca? (si no lo dice) |
+| "Completa el X" | ¿Qué parte exactamente? ¿qué versión? |
+| "Importa este MD" | ¿Es `informes/mercado/<archivo>.md`? ¿hay sesión activa o es en frío? |
+
+### ❌ NUNCA preguntar (ya está decidido por la plantilla)
+
+- Si incluir desglose por variables → **SIEMPRE sí**.
+- Si incluir comparables → **SIEMPRE sí**.
+- Formato del archivo → **SIEMPRE 1 .md**.
+- Orden de secciones → **fijo**.
+- Checklist al final → **siempre**.
+- Si el suelo es fiable → marcar ✅/👁️/⚠️, **nunca sin marca**.
+- Si la cobertura es incompleta → **declararla**.
+
+### 🤔 PREGUNTAR si hay 2+ opciones razonables
+
+| Situación | La nube PREGUNTA |
+|---|---|
+| 2 versiones encajan con el perfil | "¿Versión A o versión B?" |
+| 3+ motorizaciones para un modelo | "¿Gasolina o diesel? ¿potencia mín?" |
+| El usuario da precio "alrededor de 20k" | "¿Margen ±2k € o estricto?" |
+| El perfil del usuario es vago | "¿Buscas para ti o para revender?" |
+| Coche con 2 carrocerías (3p/5p, SB) | "¿Solo SB, solo 3p, o ambas?" |
+
+### 📝 FORMATO de la pregunta
+
+Cuando la nube tiene que preguntar, usa **este formato exacto** (1 línea por pregunta, sin rodeos):
+
+```
+Para no inventar datos, necesito confirmar 4 cosas:
+
+1. ¿Versión? (GTI 230cv / GTI 245cv Performance / TCR / R)
+2. ¿Año mín? (ej. 2017+)
+3. ¿Km máx? (ej. ≤150.000 km)
+4. ¿Equipamiento imprescindible? (techo solar / cuadro digital / LED / nada)
+
+(Una vez me respondas, lanzo el estudio sin más paradas hasta el informe final.)
+```
 
 ---
 

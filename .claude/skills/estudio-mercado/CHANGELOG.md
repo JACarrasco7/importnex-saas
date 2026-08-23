@@ -5,6 +5,29 @@ Todos los cambios notables en el skill `estudio-mercado` se documentarán en est
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.3.9] - 2026-08-23 — "Mejor preguntar 1 vez que inventar 1 dato"
+
+> **Motivo:** la IA recibía reglas con "por defecto 1.500 € de gastos", "asume versión según el mercado" y decidía por su cuenta. El usuario prefiere que **pregunte** en decisiones de negocio (versión, año, km, precio, equipamiento, perfil) en vez de asumir.
+
+### ❓ `informe_mercado.md` §CUÁNDO PREGUNTAR (nueva sección)
+- **SIEMPRE preguntar** cuando el usuario da un mandato vago: "estudia X", "busca X", "completa X" → preguntar versión, año, km, precio, equipamiento.
+- **NUNCA preguntar** decisiones mecánicas ya resueltas (formato, secciones, checklist, cobertura).
+- **PREGUNTAR si hay 2+ opciones razonables** (2 versiones, 3 motorizaciones, perfil vago, 2 carrocerías).
+- **Formato de la pregunta** literal: 1 línea por pregunta + recordatorio "(una vez respondas, lanzo el estudio sin más paradas)".
+
+### 🔧 Cambios en las reglas SI/ENTONCES
+- Fila "Hay que decidir los gastos fijos": antes "Por defecto 1.500 €", ahora **"PREGUNTAR al usuario al inicio"**.
+- 3 filas nuevas en la tabla: "El usuario dice 'estudia X' sin más detalle" → **PREGUNTAR**. "El usuario dice 'completa el Golf R DE' sin más" → **PREGUNTAR**. "Hay 2 versiones razonables" → **PREGUNTAR**. "La nube detecta un error en el JSON" → **AVISAR**.
+
+### 📚 `como_deben_ser_las_sesiones.md`
+- Nuevo **principio v0.3.9** al inicio: "mejor preguntar 1 vez que inventar 1 dato". Las decisiones de negocio SE PREGUNTAN; las mecánicas YA ESTÁN RESUELTAS.
+- Nueva fila en la tabla OBLIGATORIO: "Cuando el usuario da un mandato vago → PREGUNTAR antes de gastar peticiones".
+
+### 🔧 `SKILL.md` FASE 0
+- Renombrada a "**PREGUNTAR PRIMERO**". Nueva línea obligatoria: "¿Gastos fijos para 'Puesto en Huelva'? (por defecto 1.500 €, preguntar al usuario)". Y **NO empezar el estudio sin ACK del usuario**.
+
+---
+
 ## [0.3.8] - 2026-08-23 — Flujo ESTRICTO: la nube no improvisa, SI/ENTONCES + checklist obligatorio
 
 > **Motivo:** la IA recibía zonas con "si conviene, si hay muestra, si el usuario lo pide, opcionalmente…" y se salía del flujo. **Esto se acabó.** Cada decisión de 2 formas está resuelta de antemano; la nube NO consulta, NO propone alternativas, NO improvisa.
