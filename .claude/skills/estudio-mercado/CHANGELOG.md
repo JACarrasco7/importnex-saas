@@ -5,6 +5,30 @@ Todos los cambios notables en el skill `estudio-mercado` se documentarán en est
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.3.6] - 2026-08-23 — Informe para el usuario: desglose por variables, comparables, resumen para copiar
+
+> **Motivo:** el informe estaba escrito con jerga IA (sincronización, merge, fuente_medicion, bloque de volcado JSON) y el usuario tenía que interpretar términos técnicos para decidir. El informe es **para Jacar**, no para otra IA.
+
+### 📄 Informe (`informe_mercado.md`) reescrito de arriba abajo
+- **Tono de persona, no de IA.** Sin "sincronizado", "merge", "volcado", "fuente_medicion". Palabras de negocio.
+- **NUEVA sección obligatoria "📊 DESGLOSE POR VARIABLES"**: puertas (3p/5p), cambio (manual/DSG), techo solar y cuadro digital se cruzan con precios reales (cuántos hay + prima +/−). Cuando no hay muestra suficiente se dice en 1 línea y se omite la tabla.
+- **NUEVA sección "🧩 COMPARABLES"**: cruza el estudio actual con modelos ya medidos antes (ej. "Astra OPC julio = 30% de hueco, este Golf R = 22%, pero mercado 6× más grande"). Evita tener que abrir 3 informes para poner el dato en contexto.
+- **NUEVA sección "📋 RESUMEN PARA COPIAR"**: 1 párrafo autocontenido al final, sin enlaces, listo para WhatsApp/nota/WhatsApp al socio.
+- **Reordenado**: CONCLUSION primero, METODOLOGÍA al final (ya estaba, ahora sin BLOQUE DE VOLCADO JSON).
+- **Quitado el "📦 BLOQUE DE VOLCADO" JSON.** La nube no tiene acceso al disco del usuario; ahora la última línea dice literalmente: *"Archivo: `informes/mercado/<archivo>.md`. Pásale este MD a Copilot en VS Code y dile 'importa este MD al mapa'."*
+
+### 📚 Reglas de entrega actualizadas (`como_deben_ser_las_sesiones.md`)
+- Punto 5: mensaje final humanizado, sin jerga técnica.
+- Punto 6 (nuevo): **desglose por variables obligatorio** aunque el usuario no lo pida (ahí se ve el valor real).
+- Punto 7 (nuevo): **resumen para copiar** obligatorio.
+- Punto 8 (nuevo): **comparables con estudios anteriores** obligatorios.
+
+### 🔧 `SKILL.md` §Output
+- Mismas 8 secciones obligatorias documentadas en la skill principal.
+- Aclarado que la nube **NO escribe** en el disco del usuario (no tiene acceso).
+
+---
+
 ## [0.3.5] - 2026-08-23 — Auditoría flujo de volcado: contrato nube→local + fixes críticos
 
 > **Motivo:** auditoría independiente del flujo investigación→informe→volcado detectó 3 críticos que falseaban datos en `datos_mercado.json` y en el bucle skill↔SaaS.

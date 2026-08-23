@@ -232,9 +232,11 @@ FASE E · CIERRE (2 min)
 
 ---
 
-## 📄 REGLAS DE ENTREGA — anti-duplicación y contra el "mareo de archivos" (23-ago-2026)
+## 📄 REGLAS DE ENTREGA — escrito para el usuario, no para otra IA (23-ago-2026)
 
 > **Problema real detectado (23-ago):** el usuario recibió 8+ archivos por el mismo trabajo — 3 MD del mismo estudio (nube sin persistencia re-genera todo) + 1 PDF por cada MD (extensión Drive guarda PDF+MD a la vez) + un informe MODELO del Golf R separado cuando solo se le pidió **completar la cobertura de la sección 6 del estudio existente**. Nada quedó ni más resumido ni más legible.
+>
+> **Principio (23-ago-2026 v2):** el informe es **para Jacar**, no para otra IA. Lenguaje de negocio, sin jerga técnica. La estructura y el tono van en `informe_mercado.md` (la plantilla obliga).
 
 **Reglas duras de entrega (obligatorias):**
 
@@ -242,5 +244,9 @@ FASE E · CIERRE (2 min)
 2. **UN solo formato de entrega: Markdown (`.md`).** NO generar PDF salvo petición explícita (los enlaces no funcionan en PDF → inútil para candidatos con URL). NO múltiples copias del mismo documento.
 3. **Completar/ampliar una variante = ACTUALIZAR el informe existente, NUNCA crear otro informe.** Si el usuario pide "completa el Golf R DE", se actualiza la sección 6 del `estudio_golf75_*.md` (o se entrega el bloque actualizado para fusionar), no un `informe_modelo_golf-r_*.md` nuevo.
 4. **Un informe MODELO (Flujo B) SOLO cuando el usuario pide explícitamente "busca unidades del X"** — no cuando pide completar cobertura de mercado. Distinguir: *estudio de mercado* (suelos/hueco) vs *informe modelo* (candidatos 7 fuentes).
-5. **En la nube sin acceso al JSON:** entregar el informe `.md` + decir "la fusión al `datos_mercado.json` la hace Copilot en VS Code" (no intentar escribir la ruta de Windows).
-6. **Resumen al final:** el usuario debe poder copiar 1 párrafo con los datos clave (suelos, hueco, veredicto) sin re-leer el informe.
+5. **En la nube sin acceso al JSON:** entregar el informe `.md` y al final imprimir una sola línea clara para el usuario:
+   *"Archivo: `informes/mercado/<archivo>.md`. Cuando quieras volcarlo al mapa, pásale ese MD a Copilot en VS Code y dile 'importa este MD al mapa de mercado'."*
+   (NO intentar escribir la ruta de Windows. NO usar jerga de "sincronización" / "merge" / "volcado". Palabras de persona.)
+6. **Desglose por variables OBLIGATORIO.** Puertas (3p/5p), cambio (manual/DSG), techo solar, cuadro digital — siempre que haya muestra suficiente. Es donde se ve el valor real del coche y casi siempre se salta. Si no hay muestra, se dice en 1 línea y se omite la tabla.
+7. **Resumen para copiar al final:** el usuario debe poder copiar 1 párrafo con los datos clave (suelos, hueco, veredicto, advertencia principal) sin re-leer el informe. Sin enlaces (no funcionan pegados en WhatsApp/notas).
+8. **Comparables con modelos ya estudiados.** "El Astra OPC de julio tenía X hueco, este Golf R tiene Y → mejor/peor relación". Evita que el usuario tenga que abrir 3 informes para poner el dato en contexto.

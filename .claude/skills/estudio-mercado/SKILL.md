@@ -1,6 +1,6 @@
 ---
 name: estudio-mercado
-version: 0.3.5
+version: 0.3.6
 description: >
   Estudio profundo del mercado de coches de 2ª mano en España y Alemania para
   JJ Import Motors. Genera un mapa de mercado persistente (datos_mercado.json)
@@ -360,9 +360,25 @@ Para cada modelo/versión, el mapa guarda (esquema completo en `schema_datos_mer
 | `datos_mercado.json` | JSON (mapa de mercado persistente) | **RUTA PACTADA** `C:/Users/jacar/Desktop/JJImportMotors/datos_mercado.json` (L2) |
 | `informe_mercado_<fecha>.md` | Markdown (documento de decisión para el usuario) | `informes\mercado\` |
 
-> **PLANTILLA OBLIGATORIA del informe (23-ago-2026):** usar `informe_mercado.md` (plantilla en esta carpeta). Estructura fija y al grano: **🏁 CONCLUSIÓN** (resumen + tabla por variante, lo primero) → **🎯 CANDIDATOS A VER** (1-2 por variante con URL visible) → **📊 POR VARIANTE** (3-5 líneas c/u) → **⚠️ AVISOS** → **📋 COBERTURA/METODOLOGÍA** (al final). El lector debe decidir en 1 minuto sin leer toda la metodología.
+> **PLANTILLA OBLIGATORIA del informe (23-ago-2026):** usar `informe_mercado.md` (plantilla en esta carpeta).
+> El informe está **escrito para el usuario** (Jacar), no para otra IA. Lenguaje de negocio, sin jerga técnica.
+> Estructura fija:
 >
-> **MD vs PDF (23-ago-2026):** SIEMPRE Markdown (fuente, enlaces clicables). **PDF solo si el usuario lo pide explícitamente** — en el PDF los enlaces no funcionan, así que en la plantilla la URL de cada candidato se imprime **visible completa** (no "ver [enlace]"). NUNCA generar MD+PDF a la vez por defecto (se duplican).
+> 1. **🏁 CONCLUSIÓN** (4-6 líneas + tabla por versión, lo primero) → lector decide en 1 minuto.
+> 2. **🎯 LOS 2 MEJORES ANUNCIOS POR VERSIÓN** (precio + año + km + por qué mola + URL visible).
+> 3. **📊 DESGLOSE POR VARIABLES** (puertas / cambio / techo / cuadro digital) — **obligatorio cuando hay muestra**. Si el usuario no lo pidió, se incluye igual porque es donde se ve el valor real.
+> 4. **🧩 COMPARABLES** con modelos ya estudiados antes.
+> 5. **⚠️ TRAMPAS** que pueden costar dinero.
+> 6. **📋 RESUMEN PARA COPIAR** (1 párrafo sin enlaces, listo para WhatsApp/nota/WhatsApp al socio).
+> 7. **📁 ARCHIVO GENERADO** (la ruta del .md).
+> 8. **📋 COBERTURA Y METODOLOGÍA** al final (lo que NO necesita leer para decidir).
+>
+> **Reglas de entrega (humano, no IA):**
+> - SIEMPRE un único Markdown (`.md`). Los enlaces funcionan.
+> - PDF SOLO si el usuario lo pide explícito (en PDF se rompen los enlaces → copia la URL visible en la tabla).
+> - NUNCA duplicar el mismo informe. UN archivo por estudio.
+> - La nube **NO escribe** en `C:/Users/jacar/Desktop/...` (no tiene acceso). Al final, imprime:
+>   *"Archivo: `informes/mercado/<archivo>.md`. Pásale este MD a Copilot en VS Code y dile 'importa este MD al mapa'."*
 >
 > El `datos_mercado.json` es la **fuente de verdad de criterio** para la skill hermana y el **origen de datos del SaaS Laravel** (comando `market:import`). Mantenerlo al día es la misión de esta skill.
 
