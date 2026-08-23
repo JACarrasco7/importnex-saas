@@ -1,6 +1,6 @@
 ---
 name: importacion-vehiculos
-version: 3.3.5
+version: 3.3.6
 description: >
   Negocio JJ Import Motors (Huelva): servicio de búsqueda e importación de coches
   (desde Alemania y dentro de España). NO compra stock, solo oferta el servicio
@@ -32,6 +32,25 @@ triggers:
 # Búsqueda e importación de vehículos — JJ Import Motors
 
 Localizar coches (desde Alemania y dentro de España) y **ofertar el servicio de importación/gestión** a clientes. **NO compramos stock** — solo honorarios por el servicio. El cliente es quien compra el coche.
+
+> ## 🔴 REGLAS DURAS DE LOS ESQUELETOS (23-ago-2026)
+>
+> **SIEMPRE** que generes `ficha-publicitaria.txt` o `informe-interno.txt` debes incluir los bloques ejecutivos además del resto. Los blades de Laravel los renderizan: si faltan, los PDFs salen incompletos.
+>
+> **`ficha-publicitaria.txt` (cliente final):**
+> - `[DESCRIPCION]` — 60-120 palabras. Estado, acabado, mecánica, equipamiento destacado, historial. Tono cercano. **PROHIBIDO** margen / honorarios / negociación.
+> - `[POR_QUE]` — 2-4 frases de argumentos de compra para el cliente (precio/estado, demanda del acabado, costes de uso, rareza). **PROHIBIDO** lenguaje interno.
+> - Secciones dinámicas: 3-4 `[H2] Título` seguidas de `[INCLUYE]` / `[ARGUMENTO]` (con `**negrita**`) / `[EQUIPAMIENTO]` (chips).
+> - Cierre: `[CTA]`, `[CONTACTO]`, `[QR]`, `[QR_TEXTO]`, `[LEGAL]`.
+>
+> **`informe-interno.txt` (equipo):**
+> - Cabecera documental: `[VALIDO_HASTA]`, `[ORIGEN]`, `[VIN]`, `[URL_ANUNCIO]`, `[PRECIO_OBJETIVO]`.
+> - Cabecera ejecutiva: `[SEMAFORO]` (verde/ambar/rojo), `[DICTAMEN]`, `[CONFIANZA]`, `[RESUMEN]` (con `**negrita**`), `[RAZONAMIENTO]`, `[QUE_CAMBIARIA]`.
+> - Balance: `[A_FAVOR] argumento | alto|medio|bajo` y `[EN_CONTRA] argumento | alto|medio|bajo`.
+> - Auditoría por aspecto: bloques `[ASPECTO] nombre` seguidos de `[VALORACION]` (Positiva/Negativa/Neutral), `[TEXTO]`, `[FUENTE]`.
+> - Checklist: `[CHECK] ítem` repetido.
+>
+> Detalle de bloques en `03-informes/contrato.md` §Bloques por archivo y `03-informes/informe_tecnico.md` §Formato-txt.
 
 > 📁 **Compañeros:** `02-flujos/navegacion_real.md` (MÉTODO PREFERIDO — navegar como humano) · `02-flujos/paginas_reales.md` (estructura REAL capturada de los 7 portales) · `02-flujos/playbook_filtrado.md` (técnicas de filtrado/búsqueda para Claude Desktop) · `02-flujos/extractores.md` (URLs, trampas, diccionario) · `03-informes/contrato.md` (JSON + esqueleto) · `05-operaciones/operaciones.md` (carpetas, scripts) · **`06-reglas/anti_patrones.md`** (reglas duras 21) · **`../estudio-mercado/SKILL.md`** (skill hermana: genera el mapa de mercado `datos_mercado.json` que da el criterio de selección)
 > 
