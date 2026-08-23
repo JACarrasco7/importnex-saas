@@ -1691,6 +1691,8 @@ export default {
     brochure_label: 'Brochure',
     title: 'Request your car',
     any_option: 'Any',
+    fuel_help_title: 'JJ Import Motors tip',
+    fuel_help_body: 'If you mainly drive around the city, petrol is more efficient and quieter. If you do long trips or many kilometres per year, diesel usually pays off.',
     sending: 'Sending...',
     submit: 'Send request',
     select_option: 'Select an option'

@@ -79,7 +79,7 @@ class PublicCarRequestController extends Controller
                 }
             }],
             'engine_type' => 'nullable|string|max:50',
-            'fuel' => 'nullable|string|max:50',
+            'fuel' => 'required|string|max:50',
             'transmission' => 'nullable|string|max:50',
             'body_type' => 'required|string|max:50',
             'doors' => 'nullable|integer|min:2|max:5',

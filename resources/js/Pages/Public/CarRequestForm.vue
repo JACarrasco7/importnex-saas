@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { Head, useForm } from '@inertiajs/vue3';
-import { TruckIcon, CheckCircleIcon, DocumentArrowDownIcon } from '@heroicons/vue/24/outline';
+import { TruckIcon, CheckCircleIcon, DocumentArrowDownIcon, InformationCircleIcon } from '@heroicons/vue/24/outline';
 import MarketplaceLayout from '@/Layouts/MarketplaceLayout.vue';
 import { useTranslations } from '@/Composables/useTranslations';
 
@@ -268,11 +268,22 @@ const submit = () => {
                         <h3 class="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-900 dark:text-white">{{ t('car_request_form.section_tech') }}</h3>
                         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">
-                                    {{ t('car_request_form.field_fuel') }}
+                                <label class="mb-2 flex items-center gap-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    <span>{{ t('car_request_form.field_fuel') }}</span>
+                                    <span class="ml-0.5 text-rose-600" aria-hidden="true">*</span>
+                                    <span class="group relative ml-1 inline-flex">
+                                        <InformationCircleIcon class="h-4 w-4 cursor-help text-gray-400 transition-colors group-hover:text-estoril-600 dark:text-gray-500 dark:group-hover:text-estoril-400" />
+                                        <span
+                                            role="tooltip"
+                                            class="pointer-events-none invisible absolute left-1/2 top-full z-10 mt-2 w-64 -translate-x-1/2 rounded-lg bg-asphalt-900 px-3 py-2 text-xs leading-relaxed text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover:visible group-hover:opacity-100 dark:bg-asphalt-700"
+                                        >
+                                            <strong class="block pb-1">{{ t('car_request_form.fuel_help_title') }}</strong>
+                                            {{ t('car_request_form.fuel_help_body') }}
+                                        </span>
+                                    </span>
                                 </label>
-                                <select v-model="form.fuel" class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600 dark:border-asphalt-600 dark:bg-asphalt-800 dark:text-white">
-                                    <option value="">{{ t('car_request_form.any_option') }}</option>
+                                <select v-model="form.fuel" required class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600 dark:border-asphalt-600 dark:bg-asphalt-800 dark:text-white">
+                                    <option value="">{{ t('car_request_form.select_option') }}</option>
                                     <option v-for="fuel in fuelTypes" :key="fuel.value" :value="fuel.value">{{ fuel.label }}</option>
                                 </select>
                                 <p v-if="form.errors.fuel" class="mt-1 text-sm text-rose-600">{{ form.errors.fuel }}</p>

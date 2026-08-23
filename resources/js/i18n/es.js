@@ -1698,6 +1698,8 @@ export default {
     placeholder_requirements: 'GPS, cámara de aparcamiento, asientos de cuero, etc...',
     placeholder_notes: 'Cualquier otra información que consideres relevante...',
     any_option: 'Cualquiera',
+    fuel_help_title: 'Consejo JJ Import Motors',
+    fuel_help_body: 'Si circulas sobre todo por ciudad, la gasolina es más eficiente y silenciosa. Si haces viajes largos o muchos kilómetros al año, el diésel suele compensar.',
     sending: 'Enviando...',
     submit: 'Enviar solicitud',
     privacy: 'Tus datos serán utilizados solo para contactarte sobre tu solicitud.',
