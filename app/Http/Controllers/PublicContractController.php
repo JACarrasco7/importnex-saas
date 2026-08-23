@@ -166,6 +166,7 @@ class PublicContractController extends Controller
 
         try {
             Browsershot::html($html)
+                ->noSandbox()
                 ->setChromePath($chrome)
                 ->format('A4')
                 ->showBrowserHeaderAndFooter()

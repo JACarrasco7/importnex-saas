@@ -287,6 +287,7 @@ class PaqueteValoracionController extends Controller
 
         try {
             Browsershot::html($html)
+                ->noSandbox()
                 ->setNodeBinary(ChromePath::nodeBinary())
                 ->setChromePath($chrome)
                 ->format('A4')

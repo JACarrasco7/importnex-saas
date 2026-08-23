@@ -56,6 +56,7 @@ class JJImportFolletoController extends Controller
             ])->render();
 
             Browsershot::html($html)
+                ->noSandbox()
                 ->format('A4')
                 ->landscape(false)
                 ->margins(0, 0, 0, 0)
