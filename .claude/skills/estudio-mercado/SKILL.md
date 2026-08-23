@@ -1,6 +1,6 @@
 ---
 name: estudio-mercado
-version: 0.3.2
+version: 0.3.3
 description: >
   Estudio profundo del mercado de coches de 2ª mano en España y Alemania para
   JJ Import Motors. Genera un mapa de mercado persistente (datos_mercado.json)
@@ -358,8 +358,12 @@ Para cada modelo/versión, el mapa guarda (esquema completo en `schema_datos_mer
 | Archivo | Formato | Destino |
 |---|---|---|
 | `datos_mercado.json` | JSON (mapa de mercado persistente) | **RUTA PACTADA** `C:/Users/jacar/Desktop/JJImportMotors/datos_mercado.json` (L2) |
-| `informe_mercado_<fecha>.md` | Markdown (resumen para el usuario) | `informes\mercado\` |
+| `informe_mercado_<fecha>.md` | Markdown (documento de decisión para el usuario) | `informes\mercado\` |
 
+> **PLANTILLA OBLIGATORIA del informe (23-ago-2026):** usar `informe_mercado.md` (plantilla en esta carpeta). Estructura fija y al grano: **🏁 CONCLUSIÓN** (resumen + tabla por variante, lo primero) → **🎯 CANDIDATOS A VER** (1-2 por variante con URL visible) → **📊 POR VARIANTE** (3-5 líneas c/u) → **⚠️ AVISOS** → **📋 COBERTURA/METODOLOGÍA** (al final). El lector debe decidir en 1 minuto sin leer toda la metodología.
+>
+> **MD vs PDF (23-ago-2026):** SIEMPRE Markdown (fuente, enlaces clicables). **PDF solo si el usuario lo pide explícitamente** — en el PDF los enlaces no funcionan, así que en la plantilla la URL de cada candidato se imprime **visible completa** (no "ver [enlace]"). NUNCA generar MD+PDF a la vez por defecto (se duplican).
+>
 > El `datos_mercado.json` es la **fuente de verdad de criterio** para la skill hermana y el **origen de datos del SaaS Laravel** (comando `market:import`). Mantenerlo al día es la misión de esta skill.
 
 ---
@@ -376,7 +380,7 @@ Para cada modelo/versión, el mapa guarda (esquema completo en `schema_datos_mer
 
 ## 🚀 MEJORAS v2 — habilidades y bucle con el SaaS (17-ago-2026)
 
-1. **Informe de estudio por marca (plantilla).** Cuando el estudio es `por_marca`, el informe sigue una plantilla fija: resumen de la marca → modelos estudiados (tabla con hueco/veredicto/vendibilidad) → mejor candidato por segmento → notas por modelo. Guardar en `informes\mercado\<marca>_<fecha>.md`.
+1. **Informe de estudio por marca (plantilla).** Cuando el estudio es `por_marca`, el informe sigue la plantilla `informe_mercado.md` (resumen de la marca → modelos estudiados con hueco/veredicto/vendibilidad → mejor candidato por segmento → notas por modelo). Guardar en `informes\mercado\<marca>_<fecha>.md`. La conclusión SIEMPRE arriba, la metodología al final.
 2. **Priorización automática del estudio.** En FASE 0, si el usuario no acota, recomendar estudiar lo más caducado primero (leer `refrescar_antes_de` por categoría del JSON): "la siguiente pasada toca showstoppers (caduca el 31-08)". No preguntar a ciegas.
 3. **IEDMT estimado por tramo de CO₂.** Para el hueco neto, estimar IEDMT por segmento/motorización con la fórmula de `importacion-vehiculos/04-negocio/costes.md` §IEDMT (coef. Anexo IV + tipo por emisiones) y guardarlo en `iedmt_estimado`. El exacto se calcula en Flujo A con la unidad concreta.
 4. **Modo "solo validar".** Para un modelo con cache reciente, refresco ultraligero: 1 lectura por portal (mobile.de/Coches.net), confirmar que mediana y hueco siguen en rango, actualizar `refrescar_antes_de_categoria` y NO re-buscar. Ahorro máximo en el delta.

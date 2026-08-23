@@ -5,6 +5,20 @@ Todos los cambios notables en el skill `estudio-mercado` se documentarán en est
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.3.3] - 2026-08-23 — Plantilla de informe de mercado al grano + regla MD vs PDF
+
+> **Motivo:** el informe de estudio (ej. Golf 7.5) se generaba con estructura ad-hoc: 10 secciones metodológicas, la conclusión al final, candidatos "a ver" escondidos en tablas largas y duplicación MD+PDF (enlaces muertos en PDF).
+
+### 📄 Informe
+- **NUEVO `informe_mercado.md`** — plantilla obligatoria del informe de estudio, estructurada como documento de decisión (1 minuto de lectura):
+  1. 🏁 CONCLUSIÓN (resumen + tabla por variante con hueco bruto/neto + veredicto) — lo primero
+  2. 🎯 CANDIDATOS A VER (1-2 por variante, URL visible completa, por qué merece la pena)
+  3. 📊 POR VARIANTE (3-5 líneas c/u; la segmentación solo si afecta al precio)
+  4. ⚠️ AVISOS/TRAMPAS (solo las que cambian la decisión)
+  5. 📋 COBERTURA/METODOLOGÍA (al final, no al principio)
+- **Regla MD vs PDF:** SIEMPRE Markdown (fuente, enlaces clicables). PDF solo si el usuario lo pide explícitamente; en el PDF la URL va visible porque los enlaces no funcionan. NUNCA MD+PDF por defecto.
+- **SKILL.md**: §Output referencia la plantilla obligatoria + §MEJORAS #1 actualizada.
+
 ## [0.3.2] - 2026-08-21 — Fixes de auditoría (C1-C4 + medios)
 
 - **schema**: estado `estudiando` añadido al enum (sesión corta/interrumpida) · regla 6 de merge de la cola entre sesiones (E10, solo tocar lo de esta sesión) · `estado_cola` degradado a ⚠️ (fuente de verdad = `cola_trabajo.estados`) · ejemplo de `cola_trabajo` corregido (`cupra-leon=pendiente_estudio`).
