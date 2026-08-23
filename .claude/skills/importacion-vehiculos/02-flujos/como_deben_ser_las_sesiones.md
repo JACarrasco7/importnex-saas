@@ -188,6 +188,41 @@ FASE E · CIERRE (2 min)
 □ Antes de escribir: ver §EJEMPLO REAL (plan + conversación) para el formato compacto de tokens
 ```
 
+## ⛔ REGLAS DE ORO — la nube NO improvisa, NO decide por su cuenta (23-ago-2026 v0.3.8)
+
+> **Problema detectado (23-ago):** la IA recibía zonas con "si conviene, si hay muestra, si el usuario lo pide, opcionalmente…" → interpretaba y se salía del flujo. Esto se acabó.
+>
+> **A partir de ahora, toda decisión que pueda tener 2 formas está resuelta de antemano** en la plantilla `informe_mercado.md` (§REGLAS ESTRICTAS SI/ENTONCES) o aquí mismo. La nube **NO consulta, NO propone alternativas, NO improvisa**.
+
+### 🔒 Comportamiento OBLIGATORIO en cada paso
+
+| Momento | Comportamiento OBLIGATORIO |
+|---|---|
+| Inicio de sesión | **LEER** este MD + `informe_mercado.md` + `schema_datos_mercado.md`. Sin esto, NO empezar. |
+| Antes de generar el informe | **APLICAR las 10 secciones en orden fijo** de la plantilla. Sin saltarse ninguna. |
+| Si falta muestra para segmentar | Poner 1 línea justificada y seguir. NO decidir "lo omito porque es largo". |
+| Si el usuario pide algo no contemplado | Hacerlo + añadir 1 línea: "He añadido [X] porque me lo has pedido explícitamente." |
+| Si hay ambigüedad (ej. "estudia el Golf") | PARAR y preguntar UNA sola vez. NO asumir versión/año/precio. |
+| Antes de dar el informe por terminado | **RELLENAR el CHECKLIST final** de la plantilla con ✅/❌. NO entregar si hay ❌. |
+
+### 🚫 Comportamiento PROHIBIDO
+
+- ❌ Inventar datos, URLs, precios, candidatos.
+- ❌ Mezclar datos recordados con datos actuales del JSON.
+- ❌ Decidir formato (siempre 1 .md; PDF solo si el usuario lo pide explícito).
+- ❌ Decidir gastos (por defecto 1.500 €; cambiar SOLO si el usuario da otra cifra).
+- ❌ Saltar secciones de la plantilla "porque el informe ya es largo".
+- ❌ Cambiar el orden de las secciones (el orden es parte del contrato).
+- ❌ Usar jerga IA en el informe (sincronizado, merge, volcado, fuente_medicion).
+- ❌ Generar PDF, ZIP, ni formatos extra sin petición explícita.
+- ❌ Crear un informe modelo separado si el usuario solo pidió completar mercado.
+- ❌ Decir "sincronizado" o "volcado OK" si no ha verificado el JSON.
+- ❌ Añadir sesión narrativa ("he consultado 3 portales, he cruzado datos…") → solo el resultado.
+
+### 📏 Si la nube tiene una duda que NO está resuelta aquí
+
+**PARAR y preguntar UNA sola vez.** Nada de "interpretaré lo más razonable". Si la pregunta es trivial, decidir con la regla por defecto (1.500 € gastos, 1 .md, 10 secciones, etc.). Si la pregunta es de negocio (ej. "qué versión del Golf estudio"), preguntar al usuario.
+
 ---
 
 ## 🔓 Excepciones y atajos por flujo (21-ago-2026, tras dry-run)

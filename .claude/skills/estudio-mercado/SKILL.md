@@ -1,6 +1,6 @@
 ---
 name: estudio-mercado
-version: 0.3.7
+version: 0.3.8
 description: >
   Estudio profundo del mercado de coches de 2ª mano en España y Alemania para
   JJ Import Motors. Genera un mapa de mercado persistente (datos_mercado.json)
@@ -223,14 +223,32 @@ FASE 3 — CRUCE y veredicto:
   └─ Veredicto según categoría (tabla de criterios) + nota de mejor mercado (DE/ES)
   └─ Rotación (días en stock) + demanda (Google Trends, 1 consulta por modelo top)
 
-FASE 4 — GUARDAR el mapa:
-  └─ Escribir datos_mercado.json en la ruta pactada (L2), con `schema_version` y `ruta_canonica`
-  └─ Antes de escribir, RELEER el JSON actual y hacer MERGE por `slug` (no sobrescribir entradas de otra sesión — E10)
-  └─ Asignar `slug` canónico + `alias` a cada modelo (L1, normalización en §Esquema)
-  └─ Generar informe de mercado (markdown) para el usuario
-  └─ Actualizar `refrescar_antes_de_categoria` POR CATEGORÍA (L7): showstoppers +2 sem, rotación +3, gemas +4
-  └─ Sincronizar también `../importacion-vehiculos/memoria/modelos-medidos.md` (registro histórico compartido):
-       cada modelo del estudio entra con sus 12 campos para que la skill hermana lo tenga aunque el JSON falte
+FASE 4 — GUARDAR el mapa (estricta, sin decisiones libres):
+  └─ RELEER el JSON actual y hacer MERGE por `slug` (no sobrescribir — E10). Sin esto, PARAR.
+  └─ Asignar `slug` canónico + `alias` (L1).
+  └─ Actualizar `refrescar_antes_de_categoria` POR CATEGORÍA (L7): showstoppers +2 sem, rotación +3, gemas +4.
+  └─ Sincronizar `../importacion-vehiculos/memoria/modelos-medidos.md` con los 12 campos del modelo.
+
+FASE 5 — GENERAR EL INFORME (estricta, la nube NO improvisa):
+  └─ **Usar la plantilla `informe_mercado.md` AL PIE DE LA LETRA.**
+  └─ **Respetar las 10 secciones en orden fijo** (ver tabla en la plantilla).
+  └─ **NO saltarse secciones.** Si falta muestra, poner 1 línea justificada y seguir.
+  └─ **NO decidir formato.** SIEMPRE 1 .md. PDF solo si el usuario lo pide.
+  └─ **NO decidir gastos.** Por defecto 1.500 € (ver regla "💶 GASTOS FIJOS").
+  └─ **NO incluir jerga IA** (sincronizado, merge, volcado, fuente_medicion).
+  └─ **Rellenar el CHECKLIST final** de la plantilla con ✅/❌ antes de entregar.
+  └─ **Última línea del informe** (literal, sin cambios):
+     *"Archivo: `informes/mercado/<archivo>.md`. Pásale este MD a Copilot en VS Code y dile 'importa este MD al mapa'."*
+
+⛔ **PROHIBIDO en FASE 5** (la nube NO puede):
+  - Inventar datos que no están en el JSON.
+  - Mezclar datos recordados de informes anteriores.
+  - Cambiar el orden de las secciones.
+  - Cambiar los nombres de las secciones (los emojis son parte del contrato).
+  - Abreviar o fusionar secciones "porque el informe es largo".
+  - Decir "sincronizado" o "volcado OK" si no ha verificado el JSON.
+  - Generar PDF, ZIP, ni formatos extra.
+  - Añadir un informe modelo separado si el usuario solo pidió completar mercado.
 
 ### ⚠️ Regla de confianza (17-ago-2026)
 - Un veredicto 🟢 exige `confianza_precio ≥ 3` (precio de anuncio contrastado o tasación). Con confianza 1-2 (precio dudoso) el máximo permitido es 🟡.

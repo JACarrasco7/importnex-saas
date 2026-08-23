@@ -1,22 +1,80 @@
-# 📄 Plantilla de informe de mercado — estudio-mercado (23-ago-2026)
+# 📄 Plantilla de informe de mercado — estudio-mercado (23-ago-2026 v0.3.8)
 
-> **Para quién es este informe:** para **ti** (Jacar). Está escrito en lenguaje de negocio, no técnico. El objetivo es que en 1 minuto sepas: **¿cuál de estos coches merece la pena importar? ¿cuál es su precio real en Alemania y en España?**.
+> **Para quién es este informe:** para **ti** (Jacar). Lenguaje de negocio, sin jerga técnica. El objetivo es que en 1 minuto sepas: **¿cuál de estos coches merece la pena importar? ¿cuál es su precio real en Alemania y en España? ¿cuánto me costaría puesto en Huelva?**.
 >
-> **Qué tiene esta plantilla:**
-> 1. Veredicto arriba (lo primero).
-> 2. Tabla resumen por versión del coche.
-> 3. **Desglose por variables** (puertas, cambio, techo, cuadro digital) — obligatorio cuando hay datos.
-> 4. Comparables con modelos que ya conoces.
-> 5. Trampas que te pueden costar dinero.
-> 6. Resumen final para copiar/pegar.
-> 7. Metodología al final (lo que NO necesitas leer para decidir).
->
-> **MD vs PDF:**
-> - SIEMPRE Markdown (`.md`). Los enlaces funcionan.
-> - PDF SOLO si me lo pides explícito (los enlaces se rompen).
-> - UN solo archivo por estudio. NUNCA duplicar el mismo informe.
->
-> Guardar como: `informes\mercado\<marca>-<modelo>_<YYYY-MM-DD>.md`
+> **Regla de ORO (23-ago-2026 v0.3.8): la nube NO decide nada por su cuenta.** Cada decisión que pueda tomarse de dos formas está resuelta aquí con un SI/ENTONCES explícito. Si una situación no está contemplada, se PARA y pregunta. NO improvisa.
+
+---
+
+## 🚦 REGLAS ESTRICTAS SI/ENTONCES (la nube NO improvisa)
+
+> Estas reglas son **condicionales explícitas**. La nube las aplica en este orden y **NO se sale de ellas**:
+
+| Situación | Comportamiento OBLIGATORIO |
+|---|---|
+| Hay que decidir si incluir el desglose por variables | **SIEMPRE incluirlo.** Si no hay muestra suficiente (>2 anuncios por combinación) → poner 1 línea "No hay muestra suficiente para segmentar" y omitir la tabla. NO decidir "es opcional". |
+| Hay que decidir si incluir comparables | **SIEMPRE incluir al menos 1 comparable** de modelos ya estudiados (ver `modelos-medidos.md`). Si no hay ninguno, poner 1 línea "Sin comparables todavía" y seguir. |
+| Hay que decidir el formato del archivo | **SIEMPRE 1 único Markdown** (`<marca>-<modelo>_<YYYY-MM-DD>.md`). NO PDF, NO duplicados, NO varios formatos a la vez. |
+| Hay que decidir los gastos fijos | **Por defecto 1.500 €** (1.000 € transporte + 200 € ITV + 300 € gestoría/ausfuhr). SOLO cambiar si el usuario dice explícitamente "mis gastos son X €". NO asumir, NO preguntar. |
+| Hay que decidir el IVA de importación / IEDMT | **NO incluir en las tablas.** SOLO mencionar en la sección "💶 Desglose de los 1.500 €" con el orden de magnitud realista (+3.500 a +5.500 € todo incluido). NO calcular por coche. |
+| Hay que decidir si el suelo es fiable | Marcar ✅ (verificado en ficha) · 👁️ (solo listado) · ⚠️ (con reserva/siniestro/financiado). NUNCA sin marca. |
+| Hay cobertura incompleta (ej. "solo página 1/6") | **DECLARARLO siempre** en §COBERTURA con número exacto ("se han revisado X de Y anuncios"). NO omitir. |
+| Hay datos contradictorios entre el mapa y el informe | **PREVALECE el `datos_mercado.json`** (fuente de verdad). NO mezclar datos recordados de sesiones pasadas. |
+| El usuario no ha pedido algo que la plantilla obliga | **SE HACE IGUAL** (desglose, comparables, resumen para copiar, sección de gastos). NO preguntar "¿lo quieres?". |
+| El usuario pide algo NO contemplado en la plantilla | **HACERLO**, pero añadir 1 línea al final: "He añadido [X] porque me lo has pedido explícitamente." |
+
+---
+
+## ✅ CHECKLIST OBLIGATORIO ANTES DE ENTREGAR (la nube lo rellena y lo muestra)
+
+> **Antes de dar el informe por terminado**, la nube escribe este bloque al final (con ✅/❌ en cada línea). NO entregar si hay algún ❌ sin resolver.
+
+```
+✅ Check — Estructura completa:
+  ✅ §CONCLUSIÓN con párrafo + tabla resumen
+  ✅ §CANDIDATOS con 1-2 por versión + URL visible
+  ✅ §DESGLOSE POR VARIABLES (o "no hay muestra" justificado)
+  ✅ §COMPARABLES (al menos 1)
+  ✅ §TRAMPAS (al menos 1, si las hay)
+  ✅ §RESUMEN PARA COPIAR (1 párrafo)
+  ✅ §ARCHIVO GENERADO
+  ✅ §DESGLOSE 1.500 € GASTOS
+  ✅ §COBERTURA Y METODOLOGÍA (al final)
+
+✅ Check — Datos consistentes:
+  ✅ Suelos DE/ES con marca de fiabilidad (✅/👁️/⚠️)
+  ✅ Columna "Puesto en Huelva" = suelo DE + 1.500 €
+  ✅ Columna "Ahorro real" = suelo ES − puesto Huelva
+  ✅ URLs completas y visibles (no "ver [enlace]")
+  ✅ Sin jerga IA (sincronizado, merge, volcado, fuente_medicion)
+  ✅ Cobertura incompleta declarada con números
+
+✅ Check — Archivos:
+  ✅ UN solo .md, sin duplicados
+  ✅ Nombre: <marca>-<modelo>_<YYYY-MM-DD>.md
+  ✅ Sin PDF generado
+```
+
+---
+
+## 📐 ESTRUCTURA OBLIGATORIA DEL INFORME (orden fijo)
+
+> Las secciones van **exactamente en este orden**. NO reordenar. NO omitir.
+
+| # | Sección | Obligatoria | Si falta muestra |
+|---|---|:---:|---|
+| 1 | 🏁 CONCLUSIÓN (párrafo + tabla resumen) | ✅ | — |
+| 2 | 🎯 LOS 2 MEJORES ANUNCIOS POR VERSIÓN | ✅ | — |
+| 3 | 📊 DESGLOSE POR VARIABLES | ✅ | Poner 1 línea y omitir tablas |
+| 4 | 🧩 COMPARABLES | ✅ | Poner "Sin comparables todavía" |
+| 5 | ⚠️ TRAMPAS | ✅ si hay | Poner "Sin trampas detectadas" |
+| 6 | 📋 RESUMEN PARA COPIAR | ✅ | — |
+| 7 | 💶 DESGLOSE 1.500 € GASTOS | ✅ | — |
+| 8 | 📁 ARCHIVO GENERADO | ✅ | — |
+| 9 | 📋 COBERTURA Y METODOLOGÍA | ✅ | — |
+| 10 | ✅ CHECKLIST (auto-verificación) | ✅ | — |
+
+Guardar como: `informes\mercado\<marca>-<modelo>_<YYYY-MM-DD>.md`
 
 ---
 
@@ -269,3 +327,39 @@ informes/mercado/volKSwagen-golf-75_2026-08-23.md
 - **Cobertura incompleta del Golf R en Alemania:** solo página 1 de 6. Hace falta mirar las otras 5 antes de lanzar una campaña.
 - **Tamaño de muestra:** 2-9 verificados por lado. Es una foto del mercado hoy, no una mediana robusta.
 - **Pendiente:** cubrir las páginas 2-6 del Golf R en Alemania antes de ofertar basado en el suelo alemán.
+
+---
+
+## ✅ CHECKLIST — auto-verificación antes de entregar (obligatorio)
+
+> La nube rellena este bloque al final del informe con ✅ en cada línea. NO entregar si hay algún ❌ sin resolver.
+
+```
+✅ Estructura completa:
+  ✅ §CONCLUSIÓN con párrafo + tabla resumen
+  ✅ §CANDIDATOS con 1-2 por versión + URL visible
+  ✅ §DESGLOSE POR VARIABLES (o "no hay muestra" justificado)
+  ✅ §COMPARABLES (al menos 1)
+  ✅ §TRAMPAS (al menos 1 si las hay)
+  ✅ §RESUMEN PARA COPIAR (1 párrafo)
+  ✅ §ARCHIVO GENERADO
+  ✅ §DESGLOSE 1.500 € GASTOS
+  ✅ §COBERTURA Y METODOLOGÍA (al final)
+
+✅ Datos consistentes:
+  ✅ Suelos DE/ES con marca de fiabilidad (✅/👁️/⚠️)
+  ✅ Columna "Puesto en Huelva" = suelo DE + 1.500 €
+  ✅ Columna "Ahorro real" = suelo ES − puesto Huelva
+  ✅ URLs completas y visibles (no "ver [enlace]")
+  ✅ Sin jerga IA (sincronizado, merge, volcado, fuente_medicion)
+  ✅ Cobertura incompleta declarada con números
+
+✅ Archivos:
+  ✅ UN solo .md, sin duplicados
+  ✅ Nombre: <marca>-<modelo>_<YYYY-MM-DD>.md
+  ✅ Sin PDF generado
+
+✅ Mensaje de cierre:
+  ✅ Última línea: "Archivo: informes/mercado/<archivo>.md. Pásale
+     este MD a Copilot en VS Code y dile 'importa este MD al mapa'."
+```

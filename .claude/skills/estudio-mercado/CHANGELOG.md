@@ -5,6 +5,25 @@ Todos los cambios notables en el skill `estudio-mercado` se documentarán en est
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.3.8] - 2026-08-23 — Flujo ESTRICTO: la nube no improvisa, SI/ENTONCES + checklist obligatorio
+
+> **Motivo:** la IA recibía zonas con "si conviene, si hay muestra, si el usuario lo pide, opcionalmente…" y se salía del flujo. **Esto se acabó.** Cada decisión de 2 formas está resuelta de antemano; la nube NO consulta, NO propone alternativas, NO improvisa.
+
+### 🔒 Reglas estrictas SI/ENTONCES (`informe_mercado.md`)
+- **NUEVO §REGLAS ESTRICTAS SI/ENTONCES**: 10 condiciones con comportamiento obligatorio. Cubre: desglose por variables, comparables, formato, gastos fijos, IVA/IEDMT, fiabilidad, cobertura incompleta, prevalencia del JSON, secciones obligatorias, peticiones explícitas.
+- **NUEVO §CHECKLIST OBLIGATORIO ANTES DE ENTREGAR**: 3 bloques (Estructura / Datos / Archivos) con ✅/❌ que la nube DEBE rellenar y mostrar.
+- **NUEVO §ESTRUCTURA OBLIGATORIA**: tabla con las 10 secciones en orden fijo. Reordenar/fusionar está prohibido.
+- **NUEVO §CHECKLIST en el propio informe**: al final del informe la nube autocompleta con ✅/❌ cada punto (estructura, datos, archivos, mensaje de cierre).
+
+### ⛔ FASE 5 rígida en `SKILL.md`
+- Renombre FASE 4 ("GUARDAR el mapa") y FASE 5 ("GENERAR EL INFORME") para que estén separadas.
+- 8 prohibiciones explícitas en FASE 5 (inventar datos, mezclar recordados, decidir formato/gastos, saltarse secciones, cambiar orden, jerga IA, PDF/ZIP sin pedir, decir "sincronizado" sin verificar).
+
+### 📚 `como_deben_ser_las_sesiones.md`
+- **NUEVO §REGLAS DE ORO**: tabla con 6 comportamientos obligatorios + 10 prohibiciones. Si hay duda no resuelta → PARAR y preguntar UNA sola vez.
+
+---
+
 ## [0.3.7] - 2026-08-23 — "Puesto en Huelva" + ahorro real con gastos fijos de 1.500 €
 
 > **Motivo:** el usuario pidió ver de un vistazo cuánto le costaría el coche **puesto en casa**, no el cálculo técnico del `hueco_neto_pct` (que incluye IEDMT variable por CO₂). Para decidir si merece la pena importar, basta con una cifra redonda de gastos fijos.
