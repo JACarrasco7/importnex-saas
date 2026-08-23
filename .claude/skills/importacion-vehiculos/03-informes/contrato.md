@@ -555,13 +555,19 @@ class Esqueleto
 
 | Archivo | Bloques esperados |
 |---|---|
-| `ficha-publicitaria.txt` | TITULO, CLAIM, SPEC (Etiqueta \| Valor), ETIQUETA_DGT, PRECIO, PRECIO_CAPTION, PLAZO, AHORRO, ARGUMENTO (titulo \| detalle), INCLUYE, EQUIPAMIENTO, **VALORACION**, FOTOS, CONTACTO |
+| `ficha-publicitaria.txt` | TITULO, CLAIM, ETIQUETA_DGT, SPEC (Etiqueta \| Valor), PRECIO, PRECIO_CAPTION, PLAZO, PRECIO_NOTA, AHORRO, **H2 + INCLUYE/ARGUMENTO/EQUIPAMIENTO** (secciones), **DESCRIPCION**, **POR_QUE**, **VALORACION**, CTA, CONTACTO, QR, QR_TEXTO, LEGAL, FOTOS |
 | `informe-interno.txt` | Ver `informe_tecnico.md` §formato-txt (15 secciones, ~60 bloques). **Los bloques `MARGEN`, `VENTA`, `IEDMT_SENSIBILIDAD`, `SCORE_DIM`, `RIESGO`, `BANDERA_ROJA/AMARILLA`, `COBERTURA`, `CAND_*`, `NEG_*`, `COMP_AJUSTE`, `VENDIBILIDAD_FACTOR`, `ACCION` se renderizan como filas/tablas en `informe-interno.blade.php`.** |
 | `dossier-cliente.txt` | Ver `dossier_cliente.md` §formato-txt (15 secciones, ~50 bloques). **Los bloques `FICHA_TECNICA`, `EQUIPAMIENTO`, `MERCADO_*`, `COSTE_LINEA`, `TIMELINE_SEMANA`, `FAQ_Q/A`, `PASOS`, `GARANTIA_*`, `ESTADO_*`, `DE_VS_ES`, `EVAL_*` se renderizan en el documento del cliente de Laravel (`ficha-coche.blade.php`); `dossier.blade.php` NO existe.** |
 | `redes-sociales.txt` | GANCHO, POST_LARGO, POST_CORTO, STORIES, HASHTAGS, PIE_FOTO |
 | `anuncio-portales.txt` | TITULO, DESCRIPCION, FICHA_RAPIDA, QUE_INCLUYE, AVISO_LEGAL |
 
 > **`VALORACION` (folleto del coche):** 1-2 frases de venta PARA EL CLIENTE sobre por qué este coche vale la pena (estado, equipamiento, precio vs. mercado). **Prohibido** hablar de margen, honorarios, negociación con el vendedor, estrategia de venta o cualquier dato interno. Es lo que el folleto (`folleto-coche.blade.php`) muestra en "Nuestra valoración". Si no se incluye, el folleto cae al `valuation` del coche o no muestra esa sección. Los campos `verdict_reasoning` y `recommendation` son INTERNOS (informe interno) y **nunca** van al folleto del cliente.
+
+> **`DESCRIPCION` (ficha del coche):** descripción comercial de 60-120 palabras que vende el coche al cliente: estado, acabado, mecánica, equipamiento destacado, historial. Tono cercano y profesional, sin jerga interna. Si no se incluye, la ficha cae a `car->description`.
+
+> **`POR_QUE` (ficha del coche):** 2-4 frases "¿Por qué este coche?" — argumentos de compra claros para el cliente (equilibrio precio/estado, demanda del acabado, costes de uso, rareza). Si no se incluye, cae a `car->recommendation`. **Prohibido** lenguaje interno.
+
+> **Secciones `H2` (ficha):** cada `[H2] Título de sección` abre un bloque que admite `[INCLUYE]` (lista de incluidos), `[ARGUMENTO]` (punto con `**negrita**`) y `[EQUIPAMIENTO]` (chips). Úsalos para "Equipamiento de serie", "Por qué lo recomendamos", "Proceso de importación", etc. Máx. 3-4 secciones para no alargar el documento.
 
 > **Nota ingestor:** `ValuationPackageIngestor` guarda **cualquier `.txt` dentro de `contenido/`** del ZIP en `cars/{id}/contenido/`. Por tanto `dossier-cliente.txt` se persiste automáticamente sin tocar el ingestor. Rutas disponibles: `cars.ficha`, `cars.dossier` (autenticado), `cars.informe-interno` (solo owner/operator).
 
