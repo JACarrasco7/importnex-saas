@@ -87,10 +87,12 @@ class Car extends Model
         'In_transit', 'Processing', 'Delivered',
     ];
 
-    /** Estados en los que el tracking público está disponible para el cliente. */
+    /** Estados en los que el tracking público está disponible para el cliente.
+     *  El cliente sigue el proceso desde que el coche se localiza hasta la
+     *  entrega: el seguimiento acompaña toda la importación. */
     public const TRACKABLE_STATUSES = [
-        'Purchased', 'In_transit', 'Processing',
-        'Pending review', 'Verifying', 'Delivered',
+        'Located', 'Valuing', 'Offered', 'Reserved', 'Purchased',
+        'In_transit', 'Processing', 'Pending review', 'Verifying', 'Delivered',
     ];
 
     public const CURRENT_SCHEMA_VERSION = 1;

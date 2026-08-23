@@ -1102,6 +1102,14 @@ const onDocKeyChange = () => {
                                     </span>
                                 </div>
                                 <div class="flex flex-wrap gap-2 pt-1">
+                                    <a
+                                        :href="derived.tracking.url"
+                                        target="_blank"
+                                        class="inline-flex items-center gap-1 rounded-lg bg-estoril-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-estoril-500"
+                                    >
+                                        <GlobeEuropeAfricaIcon class="h-3 w-3" />
+                                        {{ t('cars.tracking.open') }}
+                                    </a>
                                     <button
                                         type="button"
                                         @click="openTrackingModal"
@@ -1173,6 +1181,17 @@ const onDocKeyChange = () => {
                                 <p v-if="derived.contract.accepted_at" class="text-[10px] text-emerald-700">
                                     {{ t('cars.contract.signed_at', { when: date(derived.contract.accepted_at) }) }}
                                 </p>
+                                <div class="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50/60 p-3">
+                                    <img
+                                        v-if="derived.contract.qr_svg"
+                                        :src="derived.contract.qr_svg"
+                                        alt="QR contrato"
+                                        class="h-24 w-24 shrink-0 rounded bg-white p-1 shadow-sm"
+                                    />
+                                    <p class="text-[11px] leading-relaxed text-gray-600">
+                                        {{ t('cars.contract.scan_qr') }}
+                                    </p>
+                                </div>
                                 <div class="flex flex-wrap gap-2 pt-1">
                                     <a :href="derived.contract.public_url" target="_blank" class="inline-flex items-center gap-1 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-estoril-700 shadow-sm ring-1 ring-estoril-200 hover:bg-estoril-50">
                                         {{ t('cars.contract.open') }}

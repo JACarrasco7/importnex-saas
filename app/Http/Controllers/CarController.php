@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class CarController extends Controller
 {
@@ -206,8 +207,10 @@ class CarController extends Controller
     /**
      * Resumen del contrato (último creado) para mostrar el panel en Cars/Show.
      * Si no hay ninguno, devuelve null y la UI muestra el botón "Generar".
+     * Incluye un QR (SVG data URI) para que el cliente escanee y abra el
+     * contrato desde el móvil sin escribir el enlace.
      *
-     * @return array{public_url:string, pdf_url:string, accepted_at:?string, hash:string}|null
+     * @return array{public_url:string, pdf_url:string, accepted_at:?string, hash:string, qr_svg:string}|null
      */
     private function contractSummary(Car $car): ?array
     {
@@ -215,6 +218,8 @@ class CarController extends Controller
         if (! $contract) {
             return null;
         }
+
+        $qr = QrCode::format('svg')->size(160)->margin(0)->generate($contract->public_url);
 
         return [
             'public_url' => $contract->public_url,
@@ -224,6 +229,7 @@ class CarController extends Controller
             'accepted_at' => $contract->accepted_at?->toIso8601String(),
             'hash' => $contract->contract_hash,
             'version' => $contract->contract_version,
+            'qr_svg' => 'data:image/svg+xml;base64,'.base64_encode($qr),
         ];
     }
 

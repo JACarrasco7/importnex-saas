@@ -72,7 +72,7 @@ class ShareTrackingTest extends TestCase
     public function test_share_blocked_when_status_not_trackable(): void
     {
         [$car, $user] = $this->makeContext();
-        $car->forceFill(['status' => 'Located'])->save();
+        $car->forceFill(['status' => 'Searching'])->save();
 
         $this->actingAs($user)
             ->from(route('cars.show', $car))
