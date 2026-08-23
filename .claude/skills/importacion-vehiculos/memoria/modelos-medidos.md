@@ -158,6 +158,28 @@
 
 ---
 
+## 🚗 VW Golf 7.5 — estudio granular (GTI · TCR · Clubsport · R) · 2026-08-23
+
+> Estudio de mercado suelo-a-suelo SIN banda (km ≤180.000), solo mobile.de + Coches.net. Informe completo: `Downloads/estudio_mercado_golf75_gti-tcr-clubsport-r_2026-08-22.md`. Mapa: 4 entradas granulares en `datos_mercado.json → categorias.showstoppers` + `hueco_sin_banda`.
+
+| Variante | Suelo DE | Suelo ES | Hueco bruto | Neto | Veredicto | Refrescar |
+|---|---|---|---|---|---|---|
+| **GTI** (230/245cv) | 15.999 € (106k km) | 19.690 € (3p manual) / 20.500 € (5p DSG+techo) | +18,7% | **+12,9%** | 🟢 verde · conf 4 | 2026-09-06 |
+| **GTI TCR** (290cv) | 19.699 € (149k km) | 23.695 € (con reserva) / 28.900 € (limpio) | +16,9% / +31,8% | **+12,1% / +27,9%** | 🟢 verde · conf 3 | 2026-09-06 |
+| **GTI Clubsport** (265cv, ⚠️ Mk7 pre-FL) | 16.499 € (153k km) | 22.490 € (techo, BCN) | +26,6% | **+21,6%** | 🟢 verde · conf 3 | 2026-09-06 |
+| **Golf R** (310cv) | 16.899 € limpio / 15.950 € con reservas | 22.880 € ("Super precio", SEV) | +26,1% / +30,3% | **+21,2% / +25,3%** | 🟡 amarillo · conf 2 | 2026-09-06 |
+
+- **Fuentes cubiertas:** 2/7 (mobile.de + Coches.net — resto reservado para unidades) · **Peticiones:** ~50 (2 sesiones)
+- **Claves del estudio:**
+  - ⚠️ **Clubsport SOLO existe Mk7 pre-facelift (2016-2017)** — nunca hubo Mk7.5. Corrige el informe por-generación del 20-ago.
+  - ⚠️ **Re-chipeo endémico** en R/Clubsport DE (36% fichas R con OPF quitado/potencia alterada; 2/5 Clubsport sin aviso en título) → leer descripción completa + potencia vs catálogo SIEMPRE. Los R de 14.400 € de la sesión anterior eran modificados (fuera).
+  - Coches.net: filtro `Version=` texto libre NO fiable → usar filtros estructurados (`PowerHpFrom/To` + `MinYear` + `MaxKms` + `fi=Price&or=1` — el orden por URL SÍ funciona).
+  - Precio financiado < contado (usar contado) · coche "ES" físicamente en DE sin matricular (Tarragona) no es suelo ES · techo vinilado ≠ techo solar.
+- **Pendiente:** Golf R DE páginas 2-6 (~95 anuncios) → por eso R queda 🟡 con `pendiente_fase2=true`.
+- **Cola:** GTI/TCR/Clubsport → `pendiente_busqueda` · R → `estudiado` · `siguiente_busqueda=vw-golf-7-clubsport`.
+
+---
+
 ## 🚗 VW Golf GTI (pendiente)
 
 ### Pendiente medir
