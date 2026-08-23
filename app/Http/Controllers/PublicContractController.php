@@ -58,42 +58,56 @@ class PublicContractController extends Controller
             'client_dni' => ['nullable', 'string', 'max:32'],
         ]);
 
-        // Transacción con lock: evita doble firma por requests concurrentes (M5).
-        $contract = DB::transaction(function () use ($token, $data, $request) {
-            $contract = $this->findContract($token);
+        try {
+            // Transacción con lock: evita doble firma por requests concurrentes (M5).
+            $contract = DB::transaction(function () use ($token, $data, $request) {
+                $contract = $this->findContract($token);
 
-            if ($contract->accepted_at) {
-                return null; // ya firmado
-            }
+                if ($contract->accepted_at) {
+                    return null; // ya firmado
+                }
 
-            // Actualizar snapshot con los datos que tecleó el firmante, para que
-            // el texto firmado (y su hash) coincidan EXACTAMENTE con lo que ve.
-            $name = $data['client_name'] ?? $contract->client_name;
-            $dni = $data['client_dni'] ?? $contract->client_dni;
+                // Actualizar snapshot con los datos que tecleó el firmante, para que
+                // el texto firmado (y su hash) coincidan EXACTAMENTE con lo que ve.
+                $name = $data['client_name'] ?? $contract->client_name;
+                $dni = $data['client_dni'] ?? $contract->client_dni;
 
-            $snapshot = $contract->snapshot ?? [];
-            if ($name) {
-                $snapshot['cliente_nombre'] = $name;
-            }
-            if ($dni) {
-                $snapshot['cliente_dni'] = $dni;
-            }
+                $snapshot = $contract->snapshot ?? [];
+                if ($name) {
+                    $snapshot['cliente_nombre'] = $name;
+                }
+                if ($dni) {
+                    $snapshot['cliente_dni'] = $dni;
+                }
 
-            $contract->snapshot = $snapshot;
-            $contract->client_name = $name;
-            $contract->client_dni = $dni;
+                $contract->snapshot = $snapshot;
+                $contract->client_name = $name;
+                $contract->client_dni = $dni;
 
-            // Recalcular el texto y el hash con los datos finales del firmante.
-            $text = $contract->getContractText();
-            $contract->contract_hash = ContractAcceptance::hashContract($text);
-            $contract->accepted_at = now();
-            $contract->accepted_ip = $request->ip();
-            $contract->user_agent = substr((string) $request->userAgent(), 0, 191);
-            $contract->locale = substr(app()->getLocale(), 0, 8);
-            $contract->save();
+                // Recalcular el texto y el hash con los datos finales del firmante.
+                $text = $contract->getContractText();
+                $contract->contract_hash = ContractAcceptance::hashContract($text);
+                $contract->accepted_at = now();
+                $contract->accepted_ip = $request->ip();
+                $contract->user_agent = substr((string) $request->userAgent(), 0, 191);
+                $contract->locale = substr(app()->getLocale(), 0, 8);
+                $contract->save();
 
-            return $contract;
-        });
+                return $contract;
+            });
+        } catch (\Throwable $e) {
+            Log::error('contract.accept: exception', [
+                'token_prefix' => substr($token, 0, 8),
+                'message' => $e->getMessage(),
+                'class' => get_class($e),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'ok' => false,
+                'message' => 'No se pudo procesar la firma. Inténtalo de nuevo.',
+            ], 500);
+        }
 
         if (! $contract) {
             return response()->json(['ok' => false, 'error' => 'ya_firmado'], 409);
@@ -128,10 +142,22 @@ class PublicContractController extends Controller
             'contractTextHtml' => $this->markdownToHtml($text),
             'hash' => $hash,
             'prestador' => config('contracts.prestador'),
-            'trackingUrl' => $contract->car->tracking_url,
+            'trackingUrl' => $contract->car?->tracking_url,
             'acceptedAt' => $contract->accepted_at->format('d/m/Y H:i:s'),
             'ip' => $contract->accepted_ip,
         ])->render();
+
+        // Sin Chrome headless no podemos rasterizar el PDF: devolvemos el HTML
+        // del contrato firmado (imprimible / exportable a PDF desde el navegador)
+        // en lugar de un 500. Mismo patrón que PaqueteValoracionController.
+        $chrome = ChromePath::resolve();
+        if (! $chrome) {
+            Log::warning('contract.pdf: chrome no disponible, devolviendo HTML', [
+                'contract_id' => $contract->id,
+            ]);
+
+            return response($html, 200)->header('Content-Type', 'text/html');
+        }
 
         $tmpHtml = tempnam(sys_get_temp_dir(), 'contract_').'.html';
         file_put_contents($tmpHtml, $html);
@@ -140,17 +166,27 @@ class PublicContractController extends Controller
 
         try {
             Browsershot::html($html)
-                ->setChromePath(ChromePath::resolve())
+                ->setChromePath($chrome)
                 ->format('A4')
                 ->showBrowserHeaderAndFooter()
                 ->headerHtml('<div style="font-size:9px;color:#6b7280;width:100%;padding:0 14mm;">JJ Import Motors · Contrato #'.$contract->id.'</div>')
                 ->footerHtml('<div style="font-size:8px;color:#9ca3af;width:100%;padding:0 14mm;text-align:center;">SHA256 '.substr($hash, 0, 32).'… · Firmado el '.$contract->accepted_at->format('d/m/Y H:i').' · IP '.$contract->accepted_ip.'</div>')
                 ->save($tmpPdf);
+        } catch (\Throwable $e) {
+            Log::error('contract.pdf: Browsershot falló, devolviendo HTML', [
+                'contract_id' => $contract->id,
+                'message' => $e->getMessage(),
+                'class' => get_class($e),
+            ]);
+            @unlink($tmpHtml);
+            @unlink($tmpPdf);
+
+            return response($html, 200)->header('Content-Type', 'text/html');
         } finally {
             @unlink($tmpHtml);
         }
 
-        $filename = 'Contrato_'.Str::slug($contract->car->brand).'_'.Str::slug($contract->car->model).'_'.substr($hash, 0, 8).'.pdf';
+        $filename = 'Contrato_'.Str::slug($contract->car?->brand ?? 'coche').'_'.Str::slug($contract->car?->model ?? 'importado').'_'.substr($hash, 0, 8).'.pdf';
         $content = file_get_contents($tmpPdf);
         @unlink($tmpPdf);
 
