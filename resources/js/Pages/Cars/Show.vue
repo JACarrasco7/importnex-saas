@@ -48,39 +48,27 @@ const showDeleteDoc = ref(false);
 const photoToDelete = ref(null);
 const docToDelete = ref(null);
 
-// Crear solicitud para este coche (boca a boca / manual): la solicitud crea el cliente
-const showCreateRequest = ref(false);
-const createRequestForm = useForm({
-    name: '',
-    email: '',
-    phone: '',
-    requirements: '',
-});
-const submitCreateRequest = () => {
-    createRequestForm.post(route('cars.create-request', props.car.id), {
-        onSuccess: () => {
-            showCreateRequest.value = false;
-            createRequestForm.reset();
-        },
-    });
-};
+// Vincular solicitud compatible (seleccionada por el admin desde un <select>)
+const selectedRequestId = ref('');
 
-// Vincular coche ↔ solicitud compatible (botón por solicitud en la lista)
+// Vincular coche ↔ solicitud compatible (seleccionada por el admin)
 const linkingId = ref(null);
 const linkError = ref(null);
 const linkSuccess = ref(null);
 const linkForm = useForm({});
-const linkRequest = (req) => {
-    if (linkingId.value !== null) return;
-    linkingId.value = req.id;
+const linkSelectedRequest = () => {
+    if (!selectedRequestId.value || linkingId.value !== null) return;
+    const reqId = Number(selectedRequestId.value);
+    linkingId.value = reqId;
     linkError.value = null;
     linkSuccess.value = null;
-    linkForm.post(route('cars.match-request', { car: props.car.id, carRequest: req.id }), {
+    linkForm.post(route('cars.match-request', { car: props.car.id, carRequest: reqId }), {
         preserveScroll: true,
         onSuccess: (page) => {
             linkSuccess.value = t('cars.matching_link_success');
             linkError.value = null;
             linkingId.value = null;
+            selectedRequestId.value = '';
         },
         onError: (errors) => {
             const first = errors && Object.keys(errors)[0];
@@ -950,116 +938,41 @@ const onDocKeyChange = () => {
                     </div>
                 </Teleport>
 
-                <!-- Solicitudes de clientes compatibles (matching por marca/modelo) -->
-                <div v-if="activeSection === 'resumen' && derived?.matching_requests?.length" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
+                <!-- Vincular solicitud compatible (seleccionada por el admin) -->
+                <div v-if="activeSection === 'resumen' && !car.client && derived?.selectable_requests?.length" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-                        <h3 class="text-base font-semibold text-gray-900">{{ t('cars.matching_requests') }}</h3>
-                        <span class="text-xs text-gray-500">{{ derived.matching_requests.length }}</span>
+                        <h3 class="text-base font-semibold text-gray-900">{{ t('cars.select_request_title') }}</h3>
+                        <span class="text-xs text-gray-500">{{ derived.selectable_requests.length }}</span>
                     </div>
-                    <ul class="divide-y divide-gray-200">
-                        <li v-for="req in derived.matching_requests" :key="req.id" class="flex items-center justify-between gap-3 px-6 py-3 hover:bg-gray-50">
-                            <div class="min-w-0 flex-1">
-                                <p class="truncate text-sm font-medium text-gray-900">{{ req.name || t('cars.matching_no_name') }}</p>
-                                <p class="text-xs text-gray-500">
-                                    <span v-if="req.brand">{{ req.brand }}{{ req.model ? ' ' + req.model : '' }} · </span>
-                                    <span v-if="req.budget_max">{{ t('cars.matching_budget') }} {{ currency(req.budget_max) }} · </span>
-                                    <span>{{ t('car_requests.status.' + req.status, req.status) }}</span>
-                                </p>
-                            </div>
+                    <div class="space-y-3 p-4">
+                        <select
+                            v-model="selectedRequestId"
+                            class="w-full rounded-lg border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-estoril-500 focus:ring-estoril-500"
+                        >
+                            <option value="">{{ t('cars.select_request_placeholder') }}</option>
+                            <option v-for="req in derived.selectable_requests" :key="req.id" :value="req.id">
+                                {{ req.name || t('cars.matching_no_name') }}{{ req.brand ? ' · ' + req.brand + (req.model ? ' ' + req.model : '') : '' }}{{ req.budget_max ? ' · ' + currency(req.budget_max) : '' }}
+                            </option>
+                        </select>
+                        <div class="flex items-center justify-between gap-3">
+                            <p class="text-xs text-gray-500">{{ t('cars.select_request_help') }}</p>
                             <button
                                 type="button"
-                                :disabled="linkingId === req.id || !!car.client"
-                                class="shrink-0 rounded-lg bg-estoril-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-estoril-500 disabled:cursor-not-allowed disabled:opacity-50"
-                                @click="linkRequest(req)"
+                                :disabled="!selectedRequestId || linkingId !== null"
+                                class="shrink-0 rounded-lg bg-estoril-600 px-4 py-2 text-xs font-semibold text-white hover:bg-estoril-500 disabled:cursor-not-allowed disabled:opacity-50"
+                                @click="linkSelectedRequest"
                             >
-                                <span v-if="linkingId === req.id">…</span>
+                                <span v-if="linkingId !== null">…</span>
                                 <span v-else>{{ t('cars.matching_link') }}</span>
                             </button>
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- Feedback vincular -->
-                <div v-if="linkError" class="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
-                    <strong class="block">{{ t('cars.matching_link_error_title') }}</strong>
-                    {{ linkError }}
-                </div>
-                <div v-if="linkSuccess" class="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-                    {{ linkSuccess }}
-                </div>
-
-                <!-- Crear solicitud para este coche (boca a boca / manual) -->
-                <div v-if="activeSection === 'resumen' && !car.client" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
-                    <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-                        <h3 class="text-base font-semibold text-gray-900">{{ t('cars.create_request_title') }}</h3>
-                        <span class="text-xs text-gray-500">{{ t('cars.create_request_help') }}</span>
-                    </div>
-                    <div v-if="!showCreateRequest" class="p-4">
-                        <button
-                            type="button"
-                            class="rounded-lg bg-estoril-600 px-3 py-2 text-xs font-semibold text-white hover:bg-estoril-500"
-                            @click="showCreateRequest = true"
-                        >
-                            {{ t('cars.create_request_button') }}
-                        </button>
-                    </div>
-                    <div v-else class="space-y-3 p-4">
-                        <div>
-                            <label class="mb-1 block text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.client_name') }}</label>
-                            <input
-                                v-model="createRequestForm.name"
-                                type="text"
-                                class="w-full rounded-lg border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-estoril-500 focus:ring-estoril-500"
-                                :placeholder="t('cars.create_request_name_placeholder')"
-                            />
-                            <p v-if="createRequestForm.errors.name" class="mt-1 text-xs text-red-600">{{ createRequestForm.errors.name }}</p>
                         </div>
-                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                            <div>
-                                <label class="mb-1 block text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.client_email') }}</label>
-                                <input
-                                    v-model="createRequestForm.email"
-                                    type="email"
-                                    class="w-full rounded-lg border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-estoril-500 focus:ring-estoril-500"
-                                />
-                                <p v-if="createRequestForm.errors.email" class="mt-1 text-xs text-red-600">{{ createRequestForm.errors.email }}</p>
-                            </div>
-                            <div>
-                                <label class="mb-1 block text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.client_phone') }}</label>
-                                <input
-                                    v-model="createRequestForm.phone"
-                                    type="text"
-                                    class="w-full rounded-lg border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-estoril-500 focus:ring-estoril-500"
-                                />
-                                <p v-if="createRequestForm.errors.phone" class="mt-1 text-xs text-red-600">{{ createRequestForm.errors.phone }}</p>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="mb-1 block text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.linked_request_notes') }}</label>
-                            <textarea
-                                v-model="createRequestForm.requirements"
-                                rows="3"
-                                class="w-full rounded-lg border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-estoril-500 focus:ring-estoril-500"
-                                :placeholder="t('cars.create_request_req_placeholder')"
-                            ></textarea>
-                        </div>
-                        <div class="flex justify-end gap-2">
-                            <button
-                                type="button"
-                                class="rounded-lg bg-white px-3 py-2 text-xs font-semibold text-gray-600 shadow-sm ring-1 ring-gray-300 hover:bg-gray-50"
-                                @click="showCreateRequest = false"
-                            >
-                                {{ t('cars.cancel') }}
-                            </button>
-                            <button
-                                type="button"
-                                :disabled="createRequestForm.processing || !createRequestForm.name"
-                                class="rounded-lg bg-estoril-600 px-3 py-2 text-xs font-semibold text-white hover:bg-estoril-500 disabled:cursor-not-allowed disabled:opacity-50"
-                                @click="submitCreateRequest"
-                            >
-                                {{ t('cars.create_request_submit') }}
-                            </button>
-                        </div>
+                        <p v-if="linkError" class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800">
+                            <strong class="block">{{ t('cars.matching_link_error_title') }}</strong>
+                            {{ linkError }}
+                        </p>
+                        <p v-if="linkSuccess" class="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+                            {{ linkSuccess }}
+                        </p>
                     </div>
                 </div>
 

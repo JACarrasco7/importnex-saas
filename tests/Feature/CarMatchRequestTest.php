@@ -22,7 +22,7 @@ class CarMatchRequestTest extends TestCase
         return [$user, $org];
     }
 
-    public function test_show_includes_matching_requests_by_brand_and_model(): void
+    public function test_show_includes_selectable_requests_from_organization(): void
     {
         [$user, $org] = $this->actingUser();
         $car = Car::factory()->create([
@@ -31,45 +31,54 @@ class CarMatchRequestTest extends TestCase
             'model' => 'Astra',
         ]);
 
-        // Compatible: misma marca, sin modelo concreto.
+        // Seleccionables: pendiente (sin importar marca/modelo).
         CarRequest::create([
             'organization_id' => $org->id,
             'name' => 'María',
             'brand' => 'Opel',
             'status' => 'pending',
         ]);
-        // Compatible: marca y modelo coinciden.
+        // Seleccionable: contactada.
         CarRequest::create([
             'organization_id' => $org->id,
             'name' => 'Juan',
-            'brand' => 'opel',
-            'model' => 'Astra J',
+            'brand' => 'VW',
             'status' => 'contacted',
         ]);
-        // Incompatible: otra marca.
-        CarRequest::create([
-            'organization_id' => $org->id,
-            'name' => 'Ana',
-            'brand' => 'VW',
-            'status' => 'pending',
-        ]);
-        // Incompatible: mismo modelo pero estado cerrado.
+        // NO seleccionable: estado cerrado.
         CarRequest::create([
             'organization_id' => $org->id,
             'name' => 'Pepe',
             'brand' => 'Opel',
-            'model' => 'Astra',
             'status' => 'completed',
+        ]);
+        // NO seleccionable: su cliente ya tiene otro coche asignado en la org.
+        $linkedClient = Client::create([
+            'organization_id' => $org->id,
+            'name' => 'Ocupado',
+            'status' => 'new',
+        ]);
+        Car::factory()->create([
+            'organization_id' => $org->id,
+            'brand' => 'Opel',
+            'model' => 'Corsa',
+            'client_id' => $linkedClient->id,
+        ]);
+        CarRequest::create([
+            'organization_id' => $org->id,
+            'client_id' => $linkedClient->id,
+            'name' => 'Ocupado',
+            'status' => 'pending',
         ]);
 
         $response = $this->actingAs($user)->get(route('cars.show', $car->id));
 
         $response->assertOk();
-        $matching = $response->viewData('page')['props']['derived']['matching_requests'];
-        $this->assertCount(2, $matching);
+        $selectable = $response->viewData('page')['props']['derived']['selectable_requests'];
+        $this->assertCount(2, $selectable);
         $this->assertSame(
             ['Juan', 'María'],
-            collect($matching)->pluck('name')->sort()->values()->all()
+            collect($selectable)->pluck('name')->sort()->values()->all()
         );
     }
 
@@ -161,7 +170,7 @@ class CarMatchRequestTest extends TestCase
         $this->assertSame('Purchased', $car->fresh()->status);
     }
 
-    public function test_show_excludes_matching_requests_from_other_organizations(): void
+    public function test_show_excludes_selectable_requests_from_other_organizations(): void
     {
         [$user, $org] = $this->actingUser();
         $otherOrg = Organization::factory()->create();
@@ -172,7 +181,7 @@ class CarMatchRequestTest extends TestCase
             'model' => 'Astra',
         ]);
 
-        // Solicitud de OTRA organización con misma marca/modelo: NO debe aparecer.
+        // Solicitud de OTRA organización: NO debe aparecer en el select.
         CarRequest::create([
             'organization_id' => $otherOrg->id,
             'name' => 'Hacker',
@@ -184,8 +193,8 @@ class CarMatchRequestTest extends TestCase
         $response = $this->actingAs($user)->get(route('cars.show', $car->id));
 
         $response->assertOk();
-        $matching = $response->viewData('page')['props']['derived']['matching_requests'];
-        $this->assertCount(0, $matching);
+        $selectable = $response->viewData('page')['props']['derived']['selectable_requests'];
+        $this->assertCount(0, $selectable);
     }
 
     public function test_match_request_from_other_organization_is_forbidden(): void

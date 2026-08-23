@@ -144,7 +144,7 @@ class CarController extends Controller
                 'inspections_progress' => $inspectionsProgress,
                 'inspections_by_section' => $inspectionsBySection,
                 'documents_by_group' => $documentsByGroup,
-                'matching_requests' => $car->client ? [] : $this->matchingRequests($car),
+                'selectable_requests' => $car->client ? [] : $this->selectableRequests($car),
                 'linked_request' => $this->linkedRequest($car),
                 'laravel_pdfs' => $this->laravelPdfs($car),
                 'contract' => $this->contractSummary($car),
@@ -228,30 +228,34 @@ class CarController extends Controller
     }
 
     /**
-     * Solicitudes de clientes compatibles con este coche: misma marca y, si la
-     * solicitud concreta modelo, que coincida también. Solo estados vivos
-     * (pendiente / contactada / en curso). Sirve para vincular el coche al
-     * cliente de la solicitud en un clic tras importarlo.
+     * Solicitudes seleccionables para vincular a este coche: todas las de la
+     * organización en estado pendiente/contactada (aún sin coche asignado).
+     * El usuario elige una desde un <select> en la ficha y la vincula en un
+     * clic. Excluye solicitudes cuyo cliente ya tiene otro coche asignado.
      *
      * @return array<int, array<string, mixed>>
      */
-    private function matchingRequests(Car $car): array
+    private function selectableRequests(Car $car): array
     {
         return CarRequest::query()
             // Multi-tenancy: CarRequest NO tiene global scope propio (a
             // diferencia de Car), así que el filtro por organización es
             // obligatorio aquí o se filtraría información de otros tenants.
             ->where('organization_id', $car->organization_id)
-            ->whereIn('status', ['pending', 'contacted', 'in_progress'])
+            ->whereIn('status', ['pending', 'contacted'])
+            // Incluir solicitudes sin cliente (client_id NULL) y excluir
+            // solo las cuyo cliente ya tiene otro coche asignado en la org.
             ->where(fn ($q) => $q
-                ->whereNull('brand')
-                ->orWhere('brand', 'like', '%'.$car->brand.'%'))
-            ->where(fn ($q) => $q
-                ->where(fn ($q2) => $q2->whereNull('model')->orWhere('model', ''))
-                ->orWhere('model', 'like', '%'.$car->model.'%'))
+                ->whereNull('client_id')
+                ->orWhereNotIn('client_id', function ($q2) use ($car) {
+                    $q2->select('client_id')
+                        ->from('cars')
+                        ->where('organization_id', $car->organization_id)
+                        ->whereNotNull('client_id');
+                }))
             ->with('client:id,name')
             ->orderByDesc('created_at')
-            ->limit(10)
+            ->limit(50)
             ->get(['id', 'client_id', 'name', 'brand', 'model', 'budget_max', 'status', 'created_at'])
             ->map(fn ($r) => [
                 'id' => $r->id,
