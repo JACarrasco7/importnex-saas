@@ -1,6 +1,6 @@
 ---
 name: importacion-vehiculos
-version: 3.3.6
+version: 3.3.7
 description: >
   Negocio JJ Import Motors (Huelva): servicio de búsqueda e importación de coches
   (desde Alemania y dentro de España). NO compra stock, solo oferta el servicio
@@ -128,6 +128,115 @@ Mando: PROTOCOLO DE MANDO — usuario aprueba cada fase, IA ejecuta la fase comp
 ```
 
 **🔴 REGLA DURA UNIVERSAL (17-ago-2026):** todo encargo se asigna a **UN flujo** (A/B/C/D/E) y sigue SU camino con Protocolo de Mando (plan de fase → OK → ejecutar → waypoint 📍 → auditoría de cierre). **Si el encargo NO encaja en ninguno de los 5 flujos, PREGUNTAR al usuario qué flujo aplicar — NUNCA improvisar.** Fallo real 17-ago: "stock recurrente" no encajaba (no existía Flujo E) y Claude improvisó un .docx fuera del camino. Tras añadir Flujo E, si vuelve a aparecer un caso no previsto, la regla es preguntar antes de ejecutar.
+
+---
+
+## ❓ §CUÁNDO PREGUNTAR (23-ago-2026 v3.3.7 — "mejor preguntar 1 vez que inventar 1 dato")
+
+> **Principio:** la nube prefiere **preguntar UNA sola vez** a inventar. Las decisiones de negocio (versión, año, km, precio, equipamiento, perfil, origen DE/ES, márgenes) **SE PREGUNTAN al usuario** antes de gastar peticiones. Las decisiones mecánicas (qué flujo aplicar, estructura del informe, secciones, checklist) **ya están resueltas** en los `02-flujos/*.md` y NUNCA se preguntan.
+
+### ✅ SIEMPRE preguntar (antes de gastar peticiones)
+
+| Si el usuario dice... | La nube PREGUNTA... |
+|---|---|
+| "Evalúa este coche" (sin URL) | URL completa del anuncio |
+| "Evalúa este anuncio" (sin más) | URL + precio visto + año + km + observaciones |
+| "Busca Golf" | Versión (GTI/TCR/R) + año + km + presupuesto + equipamiento + ¿DE o ES o ambos? |
+| "Busca un coche para cliente" | Presupuesto + año + km + cv + combustible + uso + marca preferida |
+| "Estudia el mercado" | Categoría (showstoppers/rotación/gemas) o marca/modelo concreto |
+| "Tengo un cliente..." | Presupuesto + perfil + ¿DE/ES/ambos? + ¿para él o para revender? |
+| "Calcula coste importación" | Coche concreto (ficha técnica) + año + CC + CO₂ |
+| "IEDMT de un Golf GTI 2017" | CC + CV + CO₂ + año exacto |
+| "Hazme un ZIP" | ¿Para qué coche? (si no está claro) |
+| El origen es ambiguo (DE vs ES) | ¿Alemania (importación) o España (compra nacional) o ambos? |
+| El perfil es vago ("coche familiar") | Presupuesto + año + km + nº hijos + diario/finde + ciudad/carretera |
+
+### ❌ NUNCA preguntar (ya está decidido por la skill)
+
+- Qué flujo aplicar (A/B/C/D/E) → **detección automática**.
+- Estructura del informe técnico → **15 secciones fijas** (`03-informes/informe_tecnico.md`).
+- Estructura del dossier cliente → **filtros ya definidos** (`03-informes/dossier_cliente.md`).
+- Estructura de la ficha publicitaria → **bloques ejecutivos ya definidos** (ver §REGLAS DURAS al inicio).
+- Fuentes a usar → **7 fuentes fijas** (mobile.de, Coches.net, AS24, AutoUncle, kleinanzeigen, Wallapop, Milanuncios).
+- Orden de navegación → **listado-first (A17)**.
+- Si incluir `top 5` → **siempre**.
+
+### 🤔 PREGUNTAR si hay 2+ opciones razonables
+
+| Situación | La nube PREGUNTA |
+|---|---|
+| 2 versiones encajan con el perfil | "¿Versión A o versión B?" |
+| 3+ motorizaciones | "¿Gasolina o diesel? ¿potencia mín?" |
+| Coche con 2 carrocerías (3p/5p, SB) | "¿Solo SB, solo 3p, o ambas?" |
+| Presupuesto "alrededor de 20k" | "¿Margen ±2k € o estricto?" |
+| Mercedes vs BMW vs Audi | "¿Alguna marca descartada?" |
+| El cliente es revendedor | "¿Qué margen objetivo? (ej. ≥15%)" |
+| Color del coche | "¿Algún color descartado? (tapicería/clásico)" |
+
+### 📝 FORMATO de la pregunta (obligatorio)
+
+```
+Para no inventar datos, necesito confirmar X cosas:
+
+1. ¿Pregunta 1?
+2. ¿Pregunta 2?
+3. ¿Pregunta 3?
+...
+N. ¿Pregunta N?
+
+(Una vez me respondas, lanzo el flujo sin más paradas hasta el checkpoint [CPx]).
+```
+
+### 📋 CHECKLIST OBLIGATORIO ANTES DE ENTREGAR (por flujo)
+
+> La nube rellena este bloque al final de CUALQUIER informe con ✅/❌. NO entregar si hay ❌.
+
+**Flujo A (UNIDAD):**
+```
+✅ Informe técnico (15 secciones + scoring 0-100)
+✅ Dossier cliente (filtrado, sin honorarios internos)
+✅ Ficha publicitaria (con bloques ejecutivos)
+✅ ZIP Laravel (si aplica)
+✅ Score confianza por fuente (7 estrellas)
+✅ Plan de mitigación por riesgo
+✅ Mensaje de cierre literal: "Informe completo. Dile a Copilot 'importa el ZIP' para fusionarlo con Laravel."
+```
+
+**Flujo B (MODELO):**
+```
+✅ Informe MODELO con top 5 candidatos + URLs
+✅ Cobertura 7 fuentes declaradas (con estrellas)
+✅ Score cobertura /10
+✅ Suelo + mediana + rotación + sello por mercado
+✅ CP1: usuario eligió candidato (si no, NO pasar a Flujo A)
+✅ Mensaje de cierre literal: "Top 5 listo. ¿Eliges candidato? Si sí → Flujo A."
+```
+
+**Flujo C (MERCADO):**
+```
+✅ Informe BUSQUEDA con N modelos
+✅ Por cada modelo: oferta + suelo + mediana + hueco + veredicto
+✅ Comparativa entre modelos
+✅ CP-C: usuario confirma modelos a ofertar
+✅ Mensaje de cierre literal: "Mapa de oportunidades listo. ¿Cuáles quieres ofertar?"
+```
+
+**Flujo D (DESCUBRIMIENTO):**
+```
+✅ Informe MODELOS con segmentación país × año × motor
+✅ Embudo en 3 pasos (D1a sondeo → D1b facetas → D2 informe)
+✅ CP-D: usuario eligió 2-3 modelos para pasar a Flujo B
+✅ Mensaje de cierre literal: "Modelos sondeados. Elige 2-3 para pasar a búsqueda."
+```
+
+**Flujo E (STOCK):**
+```
+✅ Informe STOCK (Markdown + JSON)
+✅ N modelos con oferta + suelo + mediana + hueco + veredicto
+✅ Sin marketing (NO copy IG/FB, NO anuncios)
+✅ Catálogo de oportunidades para oferta bajo pedido
+✅ Mensaje de cierre literal: "Catálogo listo. ¿Lo subimos a Laravel con market:import?"
+```
 
 ### 🔍 FLUJO D · DESCUBRIMIENTO — cliente sin modelo (15-ago-2026)
 

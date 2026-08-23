@@ -7,6 +7,20 @@
 
 ---
 
+## 🎯 Principio v3.3.7 — "Mejor preguntar 1 vez que inventar 1 dato" (23-ago-2026)
+
+> **Regla de oro:** la nube **pregunta UNA sola vez** en decisiones de negocio (versión, año, km, precio, equipamiento, perfil, origen DE/ES, márgenes). Las decisiones mecánicas (formato, secciones, checklist, fuentes a usar, orden de navegación) **ya están resueltas** y NO se preguntan.
+>
+> **Aplicación práctica:**
+> - Mandato vago ("estudia X", "busca X", "evalúa X") → **PREGUNTAR** antes de gastar 1 petición.
+> - 2 versiones/carrocerías razonables → **PREGUNTAR**.
+> - Perfil del cliente vago ("coche familiar") → **PREGUNTAR**.
+> - Estructura del informe / nº de fuentes / formato → **NO PREGUNTAR** (ya está definido en cada flujo).
+>
+> Si la duda no está resuelta en este MD ni en `SKILL.md` §CUÁNDO PREGUNTAR → **PARAR y preguntar UNA sola vez**.
+
+---
+
 ## 🎯 Principio rector: UN MODELO POR PASADA, NUNCA UN SEGMENTO DE GOLPE
 
 > ⚠️ **Error detectado 18-21 ago-2026:** barrer un segmento entero (ej. "Compactos deportivos" = GTI + Cupra + Astra OPC + Focus ST + i30N + Mégane RS...) en una sola sesión:

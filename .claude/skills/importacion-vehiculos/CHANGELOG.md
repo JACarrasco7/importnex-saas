@@ -5,6 +5,25 @@ Todos los cambios notables en el skill `importacion-vehiculos` se documentarán 
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [3.3.7] - 2026-08-23 — "Mejor preguntar 1 vez que inventar 1 dato" + checklist por flujo
+
+> **Motivo:** la IA recibía mandatos vagos ("estudia X", "busca X", "evalúa X") y decidía por su cuenta. Mismo problema que en `estudio-mercado` v0.3.9. Se aplica el mismo patrón de rigor + preguntar primero.
+
+### ❓ SKILL.md §CUÁNDO PREGUNTAR (nueva sección)
+- **SIEMPRE preguntar** en 10 situaciones: "evalúa este coche" sin URL, "busca Golf" sin versión, "busca para cliente" sin presupuesto, "IEDMT", "hazme un ZIP" sin contexto, origen DE/ES ambiguo, perfil familiar vago, etc.
+- **NUNCA preguntar** lo mecánico: flujo (A/B/C/D/E) auto-detectado, estructura del informe técnico (15 secciones fijas), 7 fuentes fijas, listado-first (A17), top 5 siempre.
+- **PREGUNTAR si hay 2+ opciones razonables**: 2 versiones encajan, 3+ motorizaciones, 2 carrocerías, presupuesto "alrededor de 20k", color, marca descartada, margen objetivo revendedor.
+- **Formato literal** de la pregunta + recordatorio "(una vez me respondas, lanzo el flujo sin más paradas hasta el checkpoint)".
+
+### 📋 Checklist por flujo (nuevo)
+- 5 bloques de checklist obligatorios antes de entregar: **Flujo A** (informe técnico 15 sec + dossier + ficha + ZIP), **Flujo B** (top 5 + cobertura 7 fuentes + CP1), **Flujo C** (N modelos + comparativa + CP-C), **Flujo D** (segmentación país×año×motor + embudo 3 pasos + CP-D), **Flujo E** (catálogo + JSON + market:import).
+- Cada bloque con ✅ que la nube autocompleta + mensaje de cierre literal específico del flujo.
+
+### 📚 `como_deben_ser_las_sesiones.md`
+- **NUEVO §Principio v3.3.7** al inicio: "mejor preguntar 1 vez que inventar 1 dato". Distingue decisiones de negocio (SE PREGUNTAN) de mecánicas (NO SE PREGUNTAN).
+
+---
+
 ## [3.3.5] - 2026-08-23 — Reglas de entrega anti-duplicación + Golf R cerrado (conf 4)
 
 > **Motivo:** el usuario recibió 8+ archivos por el mismo trabajo: 3 MD del mismo estudio (la nube sin persistencia regenera todo) + PDF por cada MD + un informe MODELO del R separado cuando solo se pidió completar cobertura. Nada quedó más resumido/legible.
