@@ -5,6 +5,22 @@ Todos los cambios notables en el skill `importacion-vehiculos` se documentarán 
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [3.3.5] - 2026-08-23 — Reglas de entrega anti-duplicación + Golf R cerrado (conf 4)
+
+> **Motivo:** el usuario recibió 8+ archivos por el mismo trabajo: 3 MD del mismo estudio (la nube sin persistencia regenera todo) + PDF por cada MD + un informe MODELO del R separado cuando solo se pidió completar cobertura. Nada quedó más resumido/legible.
+
+### 📄 Reglas de entrega (en `como_deben_ser_las_sesiones.md`)
+- NUNCA regenerar un estudio/encargo ya cerrado desde cero (delta o preguntar).
+- UN solo formato: Markdown. NO PDF (enlaces muertos) ni copias múltiples.
+- Completar una variante = ACTUALIZAR el informe existente, NO crear otro.
+- Informe MODELO (Flujo B) solo si el usuario pide explícitamente "busca unidades".
+- En la nube: entregar `.md` + avisar que la fusión al JSON la hace Copilot en VS Code.
+- Resumen final de 1 párrafo con datos clave.
+
+### 🏁 Golf R cerrado
+- `datos_mercado.json`: vw-golf-75-r → veredicto verde, confianza 4 (sube de amarillo/2), `pendiente_fase2=false`, suelo limpio DE 16.500€, cobertura DE 7/7 (129 anuncios), hueco +27,9/+23,0. Mejor hueco neto de la línea. `siguiente_busqueda=vw-golf-75-r`.
+- `modelos-medidos.md`: entrada Flujo B 7/7 con mejor candidato (16.500€, id=461349083).
+
 ## [3.3.4] - 2026-08-23 — Coches.net: método oficial de filtros individuales por URL
 
 > **Motivo:** auditoría con el usuario detectó que el estudio Golf 7.5 dejó fuera 3 GTI genuinos de listado (19.990/20.200/20.490€) porque el sondeo usaba texto libre y el anti-bot cortó la verificación. El usuario confirmó el método correcto.

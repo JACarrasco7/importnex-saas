@@ -178,6 +178,22 @@
 - **Pendiente:** Golf R DE páginas 2-6 (~95 anuncios) → por eso R queda 🟡 con `pendiente_fase2=true`.
 - **Cola:** GTI/TCR/Clubsport → `pendiente_busqueda` · R → `estudiado` · `siguiente_busqueda=vw-golf-7-clubsport`.
 
+### Golf R Mk7.5 (310cv) · 2026-08-23 · Flujo B 7/7
+- **Tipo:** MODELO (informe modelo completo) · **Origen:** Alemania (import)
+- **Cobertura:** 7/7 fuentes · **Peticiones:** alta (estudio + Flujo B)
+- **Suelo DE:** 15.950€ (con reservas mecánicas) / **16.500€ limpio** (manual, 191k km, 2º prop, ITV may-26)
+- **Suelo ES:** 22.880€ (Sevilla, "Super precio", 1 prop, panorámico)
+- **Hueco bruto:** +27,9% (limpio) / +30,3% (con reservas) · **Neto:** +23,0% / +25,3%
+- **Veredicto:** 🟢 verde (conf 4 — subió de amarillo al completar cobertura DE 7/7) · **Mejor mercado:** DE
+- **Mejor candidato:** 16.500€ mobile.de (id=461349083) — equilibrio riesgo/margen; verificar VIN/recalls + inspección (191k km)
+- **Refrescar antes de:** 2026-09-06
+- **Notas:**
+  - Mejor hueco neto de las 4 variantes Golf 7.5 (R +23,0 > Clubsport +21,6 > GTI +12,9).
+  - Cobertura DE completa: 129 anuncios / 7 páginas, orden asc confirmado, sin ocultos.
+  - ⚠️ 36% fichas DE con OPF quitado (verificar descripción) · filtro potencia captura GTI tuneados (comprobar 4Motion) · confusión generaciones (pre-FL 300cv / Mk8 320+).
+  - IEDMT por unidad + modalidad M1/M2/M3 pendientes si hay cliente.
+  - En cola: `pendiente_busqueda` · `siguiente_busqueda=vw-golf-75-r`.
+
 ---
 
 ## 🚗 VW Golf GTI (pendiente)

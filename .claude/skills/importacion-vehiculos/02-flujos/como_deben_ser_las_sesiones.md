@@ -229,3 +229,18 @@ FASE E · CIERRE (2 min)
 - estado_cola: [estudiado | buscado | descartado]
 - Próximo modelo sugerido: [X] (siguiente_* del mapa)
 ```
+
+---
+
+## 📄 REGLAS DE ENTREGA — anti-duplicación y contra el "mareo de archivos" (23-ago-2026)
+
+> **Problema real detectado (23-ago):** el usuario recibió 8+ archivos por el mismo trabajo — 3 MD del mismo estudio (nube sin persistencia re-genera todo) + 1 PDF por cada MD (extensión Drive guarda PDF+MD a la vez) + un informe MODELO del Golf R separado cuando solo se le pidió **completar la cobertura de la sección 6 del estudio existente**. Nada quedó ni más resumido ni más legible.
+
+**Reglas duras de entrega (obligatorias):**
+
+1. **NUNCA regenerar un estudio/encargo ya cerrado desde cero.** Si el mapa (`datos_mercado.json`) o `modelos-medidos.md` ya tiene el modelo con `refrescar_antes_de` vigente → hacer **delta** (solo cambios) o preguntar. La nube no persiste: si el usuario dice "retoma el estudio", **leer el informe previo que él pegue** y partir de ahí, NO re-hacerlo.
+2. **UN solo formato de entrega: Markdown (`.md`).** NO generar PDF salvo petición explícita (los enlaces no funcionan en PDF → inútil para candidatos con URL). NO múltiples copias del mismo documento.
+3. **Completar/ampliar una variante = ACTUALIZAR el informe existente, NUNCA crear otro informe.** Si el usuario pide "completa el Golf R DE", se actualiza la sección 6 del `estudio_golf75_*.md` (o se entrega el bloque actualizado para fusionar), no un `informe_modelo_golf-r_*.md` nuevo.
+4. **Un informe MODELO (Flujo B) SOLO cuando el usuario pide explícitamente "busca unidades del X"** — no cuando pide completar cobertura de mercado. Distinguir: *estudio de mercado* (suelos/hueco) vs *informe modelo* (candidatos 7 fuentes).
+5. **En la nube sin acceso al JSON:** entregar el informe `.md` + decir "la fusión al `datos_mercado.json` la hace Copilot en VS Code" (no intentar escribir la ruta de Windows).
+6. **Resumen al final:** el usuario debe poder copiar 1 párrafo con los datos clave (suelos, hueco, veredicto) sin re-leer el informe.
