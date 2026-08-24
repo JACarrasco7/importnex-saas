@@ -5,6 +5,25 @@ Todos los cambios notables en el skill `estudio-mercado` se documentarán en est
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.3.12] - 2026-08-24 — Segmentación amplia por variables (24-ago) + informe Golf 7.5 ejemplo
+
+> **Motivo:** la pasada en vivo del 23-24 ago del Golf 7.5 (GTI/TCR/Clubsport/R) demostró que el §3 "DESGLOSE POR VARIABLES" de la plantilla se quedaba corto: solo cubría combinaciones (3p+manual+sin techo: 4/14) con muestras muy pequeñas, mientras que la realidad permite segmentar por **eje único** (cambio, puertas, techo, cuadro digital) con conteos grandes (132 manuales sobre 717 ofertas GTI, 84% DSG Clubsport, etc.) + detección de limitaciones reales (cuadro digital no medible, puertas no en DE, trampa TransmissionTypeId Golf R). Se sube el listón de la plantilla y se guarda el informe generado como referencia.
+
+### 📄 `informe_mercado.md` — §3 DESGLOSE POR VARIABLES ampliado
+- **Subsección nueva §3.b "🔬 Segmentación amplia por ejes (24-ago-2026, opcional pero recomendado)"**: una tabla por eje (cambio / puertas / techo / cuadro digital) con `bucket | ofertas | % | suelo | comentarios`. Pensada para cuando el estudio se hace con muestra grande (≥50 ofertas por mercado) — escala mucho mejor que la tabla de combinaciones anterior.
+- **Subsección "📌 Limitaciones y trampas detectadas (siempre declarar)"**: cuadro digital no medible, puertas no en DE, trampa de etiquetado `TransmissionTypeId` en Golf R, etc. Cualquier limitación/fallo de portal se documenta aquí con `⚠️` antes que inventarse un dato.
+- **Actualizado el checklist** para que pida la nueva subsección si hay muestra grande, o 1 línea "no hay muestra suficiente" si no.
+
+### 📂 `informes-mercado/` — carpeta nueva con ejemplo real
+- **`volkswagen-golf-75_gti-tcr-clubsport-r_2026-08-23.md`**: informe completo del estudio Golf 7.5 (4 variantes) generado por Claude Desktop el 23-ago y ampliado el 24-ago con §5 segmentación por variables. Sirve como **referencia del nivel de profundidad esperado** para futuros estudios multi-variante.
+- **`_memoria_2026-08-24_segmentacion-variables.md`**: memoria de sesión con las 6 lecciones aprendidas en la pasada del 24-ago (URL mobile.de que SÍ funciona, extracción de tarjetas virtualizadas, etc.). Las más críticas (1, 2, 5, 6) ya están reflejadas en el playbook de `importacion-vehiculos` v3.4.0.
+
+### 🔧 SKILL.md
+- Bump versión 0.3.11 → **0.3.12** en frontmatter.
+- §Output referencia la nueva carpeta `informes-mercado/` para ejemplos reales.
+
+---
+
 ## [0.3.11] - 2026-08-23 — Ruta dual del mapa (Desktop + workspace)
 
 > **Motivo:** el usuario quiere que `datos_mercado.json` viva en 2 rutas para tener copia accesible a diario sin abrir VS Code:

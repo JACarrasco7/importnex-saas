@@ -89,7 +89,8 @@ Para no inventar datos, necesito confirmar 4 cosas:
 ✅ Check — Estructura completa:
   ✅ §CONCLUSIÓN con párrafo + tabla resumen
   ✅ §CANDIDATOS con 1-2 por versión + URL visible
-  ✅ §DESGLOSE POR VARIABLES (o "no hay muestra" justificado)
+  ✅ §DESGLOSE POR VARIABLES (combinaciones + §3.b segmentación amplia si muestra ≥50)
+  ✅ §3.c LIMITACIONES Y TRAMPAS DETECTADAS (siempre declarar, ⚠️ si no se pudo medir)
   ✅ §COMPARABLES (al menos 1)
   ✅ §TRAMPAS (al menos 1, si las hay)
   ✅ §RESUMEN PARA COPIAR (1 párrafo)
@@ -222,6 +223,8 @@ Guardar como: `informes\mercado\<marca>-<modelo>_<YYYY-MM-DD>.md`
 > **Cómo se lee:** cada variable se compara sola, manteniendo el resto fijo. Ejemplo: "el GTI 5p DSG es 800 € más barato que el 3p manual en Alemania", pero la DSG en España son +1.200 € más caras.
 >
 > **Si el usuario no pidió este desglose**, sigue saliendo igual: la segmentación siempre se incluye cuando hay muestra suficiente (>2 anuncios por combinación). Si el mercado no permite separarlo, se dice en 1 línea y se omite la tabla.
+>
+> **Subsección §3.b "Segmentación amplia por ejes" (24-ago-2026):** cuando el estudio se hace con **muestra grande (≥50 ofertas por mercado)**, además de las combinaciones anteriores se incluye una segmentación por **eje único** (cambio / puertas / techo / cuadro digital) con conteos grandes, % y suelo de cada bucket. Escala mucho mejor que la tabla de combinaciones y deja ver la cuota real de mercado (ej. "DSG 89% en Golf R DE"). **Plantilla abajo.**
 
 ### GTI (230/245cv) — Alemania
 
@@ -276,6 +279,65 @@ Guardar como: `informes\mercado\<marca>-<modelo>_<YYYY-MM-DD>.md`
 | 3p (vs 5p) | 1/3 | **-0 €** (raro, pero no penaliza) |
 | Techo solar | 1/3 | +1.200 € |
 | Menos de 100.000 km | 1/3 | +1.500 € |
+
+### 🔬 §3.b — Segmentación amplia por ejes (24-ago-2026, opcional pero recomendada si muestra grande)
+
+> **Cuándo incluirla:** muestra ≥50 ofertas por mercado en la variante. Si no, omitir y dejar solo las combinaciones de arriba.
+>
+> **Qué aporta:** en lugar de combinaciones (3p+manual+sin techo: 4/14) se segmenta por **eje único** manteniendo los demás libres, lo que da conteos grandes y revela la cuota real de mercado (ej. "DSG 89% en Golf R DE"). Referencia: informe Golf 7.5 v3 `informes-mercado/volkswagen-golf-75_gti-tcr-clubsport-r_2026-08-23.md` §5.
+
+**Plantilla por variante (replicar para cada variante del estudio):**
+
+```
+### <Variante> (rango potencia, año, km máx)
+
+**DE — mobile.de** (rango kW/cv exacto): <N ofertas>
+
+| Eje        | Bucket           | Ofertas | %    | Suelo | Comentario |
+|------------|------------------|--------:|-----:|------:|------------|
+| Cambio     | Manual           | <n>     | <%>  | <€>   |            |
+| Cambio     | Automático (DSG) | <n>     | <%>  | <€>   |            |
+| Puertas    | 3p               | <n>     | <%>  | <€>   | (si está disponible en DE) |
+| Puertas    | 5p               | <n>     | <%>  | <€>   |            |
+| Techo      | Con techo solar  | <n>     | <%>  | <€>   | (faceta mobile.de) |
+| Techo      | Sin techo solar  | <n>     | <%>  | <€>   |            |
+| Cuadro dig.| Con AID          | <n>     | <%>  | <€>   | (raro medirlo, ver §Limitaciones) |
+| Cuadro dig.| Sin AID          | <n>     | <%>  | <€>   |            |
+| **Total**  |                  | **<N>** |      |       |            |
+
+**ES — Coches.net** (rango CV exacto): <N ofertas>
+
+| Eje        | Bucket           | Ofertas | %    | Suelo | Comentario |
+|------------|------------------|--------:|-----:|------:|------------|
+| Cambio     | Manual           | <n>     | <%>  | <€>   |            |
+| Cambio     | Automático       | <n>     | <%>  | <€>   |            |
+| Puertas    | 3p               | <n>     | <%>  | <€>   |            |
+| Puertas    | 5p               | <n>     | <%>  | <€>   |            |
+| Techo      | Con techo        | <n>     | <%>  | <€>   | (Coches.net SÍ tiene este checkbox) |
+| Techo      | Sin techo        | <n>     | <%>  | <€>   |            |
+| Cuadro dig.| —                | —       | —    | —     | ⚠️ NO disponible en Coches.net |
+```
+
+### 📌 §3.c — Limitaciones y trampas detectadas (siempre declarar)
+
+> **Siempre incluir este bloque tras la segmentación.** Cualquier cosa que no se haya podido medir va aquí con ⚠️. Es mejor declarar limitación que inventarse un dato.
+
+**Plantilla de limitaciones conocidas (24-ago-2026):**
+
+```
+⚠️ **Techo y cuadro digital en ES:** Coches.net no tiene checkbox de cuadro
+   digital (limitación ya documentada); el de techo sí está.
+⚠️ **Puertas y cuadro digital en DE:** el combobox "Número de puertas" de
+   mobile.de (TWO_OR_THREE / FOUR_OR_FIVE / SIX_OR_SEVEN) no se ha podido
+   aplicar como filtro verificable ni por URL ni por clic esta sesión.
+   El checkbox "Panel de instrumentos digital" vive detrás de un "Más..."
+   que no expande. Se declara como limitación, no como dato ausente.
+⚠️ **Trampa TransmissionTypeId en Golf R:** el filtro `TransmissionTypeId=2`
+   (Manual) en Coches.net puede devolver fichas etiquetadas como "DSG" en su
+   propio título. Verificar ficha individual antes de presentar un "R manual".
+```
+
+> Cualquier otra trampa detectada (etiquetado erróneo, potencia alterada sin avisar, etc.) se añade con ⚠️ + 1 frase explicando el caso. **NUNCA** se inventa un dato para llenar una celda vacía — se declara limitación.
 
 ---
 
@@ -394,7 +456,8 @@ informes/mercado/volKSwagen-golf-75_2026-08-23.md
 ✅ Estructura completa:
   ✅ §CONCLUSIÓN con párrafo + tabla resumen
   ✅ §CANDIDATOS con 1-2 por versión + URL visible
-  ✅ §DESGLOSE POR VARIABLES (o "no hay muestra" justificado)
+  ✅ §DESGLOSE POR VARIABLES (combinaciones + §3.b si muestra ≥50)
+  ✅ §3.c LIMITACIONES detectadas (cuadro digital / puertas / TransmissionTypeId Golf R si aplica)
   ✅ §COMPARABLES (al menos 1)
   ✅ §TRAMPAS (al menos 1 si las hay)
   ✅ §RESUMEN PARA COPIAR (1 párrafo)

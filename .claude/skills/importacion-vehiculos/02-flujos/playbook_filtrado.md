@@ -138,7 +138,76 @@ PASO 3 — CRUCE (unión, NO intersección)
 
 ## �🔧 Filtros potentes por fuente (qué clicar para acotar)
 
-### mobile.de — filtros que valen oro
+### 🇩🇪 mobile.de — URL de resultados reales que SÍ funciona (24-ago-2026)
+
+> **Hallazgo crítico:** la URL que la IA solía usar por defecto (`www.mobile.de/es/s/auto?s=Car&vc=Car&ms=...`) entra en **modo "formulario avanzado"** y NO muestra las tarjetas de resultados. Muestra el conteo y los filtros pero NO las fichas orgánicas. El botón "Ofertas" de ese modo no navega a resultados reales vía click. **La URL que SÍ devuelve resultados reales** es la del buscador clásico en `suchen.mobile.de`.
+
+**URL base confirmada (orden por precio ascendente, filtros estructurados):**
+
+```
+https://suchen.mobile.de/fahrzeuge/search.html
+  ?dam=0
+  &fr=<añoDesde>%3A<añoHasta>
+  &isSearchRequest=true
+  &ml=%3A<kmMax>
+  &ms=<makeId>%3B<modelId>%3B%3B%3B
+  &od=up
+  &s=Car
+  &sb=p
+  &vc=Car
+  &pw=<kWdesde>%3A<kWhasta>
+  &tr=MANUAL_GEAR|AUTOMATIC_GEAR
+```
+
+**Claves (24-ago-2026):**
+- `ms=` va como `makeId;modelId;;;;` (make;model;vacío;vacío;vacío). **NO** como `make;;variante` (esa sintaxis probada al principio **fallaba** y devolvía 0 resultados).
+- `sb=p` (precio asc) **SÍ funciona** combinado con `ms` en esta URL — sin él, la página cae en modo formulario sin resultados.
+- `tr=MANUAL_GEAR` o `tr=AUTOMATIC_GEAR` para filtrar cambio individual (omitir `tr=` para ambos).
+- `pw=<kWdesde>%3A<kWhasta>` para filtrar por rango de potencia en kW (clave para la doble pasada).
+- `dam=0` (NO dañados), `isSearchRequest=true` (mantiene resultados aunque cambies filtros), `od=up` (orden: precio ascendente).
+
+**Plantilla Golf R 310cv Mk7.5 2017-2020, ≤180k km:**
+```
+https://suchen.mobile.de/fahrzeuge/search.html?dam=0&fr=2017%3A2020&isSearchRequest=true&ml=%3A180000&ms=25200%3B12603%3B%3B%3B&od=up&s=Car&sb=p&vc=Car&pw=224%3A232
+```
+(`makeId` VW=25200, `modelId` Golf Mk7.5=12603 — verificar IDs actualizados en mobile.de para cada modelo.)
+
+### 🇩🇪 mobile.de — extracción de tarjetas virtualizadas (24-ago-2026)
+
+> **Hallazgo crítico:** la página de resultados de mobile.de está **virtualizada**. `get_page_text` sobre la URL anterior solo devuelve el **panel de filtros** (nunca las tarjetas de coches). Para leer precios/títulos/km/año de los resultados hay que usar el panel de accesibilidad:
+
+```
+PASO 1 — Identificar el contenedor de resultados
+  find(query="container/list element that holds all the vehicle result cards")
+  → devuelve el ref_id del contenedor de la lista de resultados
+
+PASO 2 — Leer las tarjetas visibles dentro del contenedor
+  read_page(ref_id=<ref_id_contenedor>)
+  → devuelve el árbol accesible del contenedor: suele incluir
+    - 1 tarjeta patrocinada (arriba)
+    - 1-2 tarjetas orgánicas montadas (las que están en viewport)
+
+PASO 3 — Para ver más tarjetas
+  computer scroll(direction="down", amount=800) → re-leer con read_page
+  O screenshot de la página → lectura visual rápida de precio+título+km+año
+    (cuando el screenshot funcione)
+```
+
+**Limitaciones del método:**
+- Solo se leen las tarjetas **montadas en el viewport** (≈2-3 a la vez). Para contar todos los resultados hay que sumar leyendo por bloques tras scroll, **o** fiarse del contador del `<h1>` ("X Angebote").
+- El contador en `<h1>` puede oscilar entre consultas consecutivas por alta rotación de inventario (caso Golf R: osciló 142 ↔ 144). Anotar el rango, no el número exacto si hay duda.
+- **Patrocinadas** vs **orgánicas**: las patrocinadas están en `div[data-testid="top-*"]` o `tic-*`; las orgánicas en `base-*`. Solo las orgánicas cuentan para el estudio.
+
+### 🇩🇪 mobile.de — limitaciones de filtros (24-ago-2026)
+
+> **Filtros pendientes / no confirmados** — declarar como limitación abierta en el informe en vez de inventarse datos:
+
+| Filtro | Estado | Cómo afecta |
+|---|---|---|
+| **Número de puertas** (`door-filter` `TWO_OR_THREE` / `FOUR_OR_FIVE` / `SIX_OR_SEVEN`) | ⚠️ **No se ha podido aplicar como filtro verificable** ni por URL directa ni por clic+selección esta sesión | La segmentación por puertas en DE queda como limitación abierta. En ES (Coches.net) sí funciona (`minDoors=`) |
+| **Panel de instrumentos digital** (cuadro digital / Active Info Display) | ⚠️ Vive detrás de un enlace "Más..." en Conjuntos de funciones que no respondió a intentos de expansión | Sin filtro agregado fiable en ningún portal. Verificar ficha a ficha en Flujo B |
+
+### 🇩🇪 mobile.de — filtros que valen oro
 | Filtro | Cuándo | Cómo |
 |---|---|---|
 | **Preis bis** | Acotar a tu presupuesto | Combobox "bis" → preset o escribir |
@@ -239,7 +308,7 @@ PASO 3 — CRUCE (unión, NO intersección)
 | Potencia máxima (CV) | `PowerHpTo=` | ej. 295 |
 | Carrocería | `ArrBodyType=` | Berlina = 1 |
 | Puertas mínimas | `minDoors=` | ej. 5 |
-| Cambio | `TransmissionTypeId=` | Automático = 1 · Manual = 2 (probar) |
+| Cambio | `TransmissionTypeId=` | Automático = 1 · Manual = 2 (probar) · ⚠️ Golf R: las fichas devueltas bajo `=2` pueden llevar "DSG" en el título (mapeo no fiable en ese modelo específico) |
 | Orden | `fi=Price&or=1` | Precio contado ascendente (fiable) |
 | Página | `pg=` | ej. 2 · `Section1Id=2500` fijo |
 
@@ -272,6 +341,8 @@ https://www.coches.net/segunda-mano/?ArrBodyType=1&minDoors=5&Fueltype2List=2&Po
 6. **Kilometraje y año inconsistentes** (150.000km en 2 años, año slug≠ficha) → descartar sin verificar.
 
 > ⚠️ **Distinguir SIEMPRE "suelo de listado" (no verificado) vs "suelo verificado en ficha".** El anti-bot corta tras 5-6 fichas → los candidatos restantes quedan "de listado" (solo precio/año/km), nunca inventar puertas/cambio/techo/cuadro digital. En el informe, marcar ambos suelos con su fiabilidad.
+
+> ⚠️ **Trampa `TransmissionTypeId=2` en Golf R (24-ago-2026):** el filtro "Manual" de Coches.net (`TransmissionTypeId=2`) devolvió 3 fichas en Golf R (310cv) cuyo propio título dice "DSG". O el vendedor las etiquetó mal al publicar, o el mapeo del filtro no es fiable en el extremo "Manual" para este modelo. Para GTI y Clubsport el mapeo 1=Automático/2=Manual sí coincidió con los títulos. **Tratar `TransmissionTypeId=2` con cautela en Golf R específicamente** — verificar ficha individual antes de presentar un "Golf R manual español" al cliente.
 
 ### �🇸 Coches.net — leer la tarjeta (18-ago-2026)
 

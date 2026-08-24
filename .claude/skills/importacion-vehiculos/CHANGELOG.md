@@ -5,6 +5,24 @@ Todos los cambios notables en el skill `importacion-vehiculos` se documentarán 
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [3.4.0] - 2026-08-24 — URL mobile.de que SÍ funciona + extracción de tarjetas virtualizadas
+
+> **Motivo:** la pasada en vivo del 23-24 ago del Golf 7.5 (estudio de mercado multi-variante) descubrió que la URL clásica de mobile.de (`www.mobile.de/es/s/auto?s=Car&vc=Car&ms=...`) entra en **modo formulario avanzado** y NO muestra las tarjetas de resultados. Solo la URL `suchen.mobile.de/fahrzeuge/search.html?...` con `ms=makeId;modelId;;;;` y `sb=p` devuelve resultados reales. Además, la página es **virtualizada** (`get_page_text` solo lee el panel de filtros), así que la extracción de tarjetas necesita `find()` + `read_page()` + `computer scroll`. Se documenta también una nueva trampa de Coches.net: `TransmissionTypeId=2` (Manual) en Golf R devuelve fichas etiquetadas como "DSG" en el propio título.
+
+### 🔬 `playbook_filtrado.md` — nueva subsección mobile.de
+- **NUEVA §"🇩🇪 mobile.de — URL de resultados reales que SÍ funciona (24-ago-2026)"**: URL `https://suchen.mobile.de/fahrzeuge/search.html?dam=0&fr=<añoDesde>%3A<añoHasta>&isSearchRequest=true&ml=%3A<kmMax>&ms=<makeId>%3B<modelId>%3B%3B%3B&od=up&s=Car&sb=p&vc=Car&pw=<kWdesde>%3A<kWhasta>&tr=MANUAL_GEAR|AUTOMATIC_GEAR`. Claves: `ms=makeId;modelId;;;;` (NO `make;;variante`), `sb=p` (precio) + `ms` juntos. La URL `/es/s/auto` (sin pasar por `suchen.mobile.de`) es el modo formulario → muestra conteo pero no tarjetas, tiene botón "Ofertas" que no navega a resultados reales.
+- **NUEVA §"📜 mobile.de — extracción de tarjetas virtualizadas"**: `get_page_text` solo devuelve el panel de filtros. Para leer tarjetas hay que `find()` el contenedor ("container/list element that holds all the vehicle result cards") → `read_page(ref_id=...)`. Virtualizado: solo lee patrocinada + primera orgánica montada; para más, `computer scroll` + re-leer o `screenshot` (cuando funciona) para lectura visual rápida de precio+título+km+año.
+
+### ⚠️ Limitaciones documentadas (24-ago-2026)
+- **mobile.de — combobox "Número de puertas" (`TWO_OR_THREE`/`FOUR_OR_FIVE`/`SIX_OR_SEVEN`) NO se ha conseguido aplicar como filtro verificable** ni por URL ni por clic. Sigue como limitación abierta en el playbook.
+- **mobile.de — checkbox "Panel de instrumentos digital" (cuadro digital)**: vive detrás de un enlace "Más..." en Conjuntos de funciones que no respondió a intentos de expansión. Sigue sin filtro fiable en ningún portal para este equipamiento.
+- **Coches.net — `TransmissionTypeId=2` (Manual) NO fiable en Golf R**: las 3 fichas devueltas llevan "DSG" en el propio título. Para GTI y Clubsport el mapeo sí coincide. **Tratar `TransmissionTypeId=2` con cautela en Golf R específicamente** — verificar ficha antes de presentar un "Golf R manual" al cliente.
+
+### 🔧 SKILL.md
+- Bump versión 3.3.9 → **3.4.0** en frontmatter.
+
+---
+
 ## [3.3.9] - 2026-08-23 — Ruta dual del mapa (Desktop + workspace)
 
 > **Motivo:** el usuario quiere que `datos_mercado.json` viva en 2 rutas para tener copia accesible a diario sin abrir VS Code. Mismo cambio que `estudio-mercado` v0.3.11.

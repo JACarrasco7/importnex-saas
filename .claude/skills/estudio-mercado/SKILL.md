@@ -1,6 +1,6 @@
 ---
 name: estudio-mercado
-version: 0.3.11
+version: 0.3.12
 description: >
   Estudio profundo del mercado de coches de 2ª mano en España y Alemania para
   JJ Import Motors. Genera un mapa de mercado persistente (datos_mercado.json)
