@@ -85,8 +85,10 @@
     // mercado) o a nada. verdict_reasoning/recommendation son INTERNOS y
     // nunca se exponen aquí.
     $val_sales_text = trim((string) ($e->uno('VALORACION') ?: ($car->valuation ?? '')));
-    $val_pros = is_array($car->pros ?? null) ? array_filter(array_map('trim', $car->pros)) : [];
-    $val_cons = is_array($car->cons ?? null) ? array_filter(array_map('trim', $car->cons)) : [];
+    // La IA puede guardar pros/cons como strings o como objetos {text, weight}
+    // (esquema nuevo). Normalizamos a lista de strings para blindar el blade.
+    $val_pros = \App\Support\IaList::normalizar($car->pros ?? null);
+    $val_cons = \App\Support\IaList::normalizar($car->cons ?? null);
 
     $titulo = $e->uno('TITULO') ?: trim(($car->brand ?? '').' '.($car->model ?? ''));
     $claim  = $e->uno('CLAIM');

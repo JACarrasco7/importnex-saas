@@ -58,10 +58,12 @@
     $ia_desc   = trim((string) ($e->uno('DESCRIPCION') ?: ($car->description ?? '')));
     $ia_val    = trim((string) ($e->uno('VALORACION') ?: ($car->valuation ?? '')));
     $ia_porque = trim((string) ($e->uno('POR_QUE') ?: ($car->recommendation ?? '')));
-    $ia_pros   = is_array($car->pros ?? null) ? array_filter(array_map('trim', (array) $car->pros)) : [];
-    $ia_cons   = is_array($car->cons ?? null) ? array_filter(array_map('trim', (array) $car->cons)) : [];
-    $ia_tips   = is_array($car->tips ?? null) ? array_filter(array_map('trim', (array) $car->tips)) : [];
-    $ia_redfl  = is_array($car->red_flags ?? null) ? array_filter(array_map('trim', (array) $car->red_flags)) : [];
+    // La IA puede guardar listas como strings o como objetos {text, weight}.
+// Normalizamos a lista de strings para blindar el blade.
+$ia_pros   = \App\Support\IaList::normalizar($car->pros ?? null);
+$ia_cons   = \App\Support\IaList::normalizar($car->cons ?? null);
+$ia_tips   = \App\Support\IaList::normalizar($car->tips ?? null);
+$ia_redfl  = \App\Support\IaList::normalizar($car->red_flags ?? null);
 
     // Comparativa de mercado (€ formateado en español).
     $fmt = fn ($n) => $n !== null ? number_format((float) $n, 0, ',', '.') : null;
