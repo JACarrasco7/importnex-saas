@@ -279,8 +279,11 @@ FASE E · CIERRE (2 min)
 - Candidatos (2-3): [precio][año][km][equipamiento][vendedor] → URL
 - Veredicto: 🟢/🟡/🔴 · Mejor mercado: DE/ES/paridad · Encaja perfil: SÍ/NO
 - estado_cola: [estudiado | buscado | descartado]
+- query_reejecutable: [URL DE completa] · [URL ES completa]  ← OBLIGATORIO (24-ago)
 - Próximo modelo sugerido: [X] (siguiente_* del mapa)
 ```
+
+> 🔴 **REGLA DURA (24-ago-2026): `query_reejecutable` NUNCA vacío.** Toda medición volcada al mapa guarda la URL final con TODOS los parámetros de cada portal usado + `fecha_medicion` + `contador_resultados`. Lección Golf 7.5: con `query_reejecutable: []` fue imposible explicar la discrepancia 717 GTI vivos vs 13 guardados (¿filtro distinto? ¿mercado movido?). Sin la query, el sondeo NO es re-ejecutable ni auditable → el checklist de cierre lo BLOQUEA. Detalle y reglas de reconciliación de conteos en `playbook_filtrado.md` §TRATAMIENTO DE DATOS.
 
 ---
 

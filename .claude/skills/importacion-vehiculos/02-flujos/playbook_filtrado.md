@@ -16,7 +16,31 @@
 5. **Pareto:** 1 captura de página entera lee 10-20 tarjetas → no capturees tarjeta a tarjeta salvo fichas clave.
 6. **Captcha/cookies:** si los ves, UN clic (Aceptar/Einverstanden) y seguir. Si persiste → fuente bloqueada, siguiente.
 7. **DOBLE PASADA por potencia (CRÍTICO · 12-ago-2026):** el filtro por variante de texto (`OPC`, `GTI`, `M`...) se pierde coches genuinos mal etiquetados. SIEMPRE cruzar con una búsqueda por **kW/CV** (campo estructurado fiable). Detalle en §Doble pasada.
-8. **Unión, no intersección:** al cruzar búsquedas, unir listas por ID de anuncio. Los que solo salen en la 2ª son los chollos escondidos.
+8. **Unión, no intersección:** al cruzar búsquedas, unir listas — pero NO por ID de anuncio entre portales distintos (los IDs no son comparables): usar la **clave fuzzy** de §TRATAMIENTO DE DATOS 1️⃣. Los que solo salen en la 2ª pasada son los chollos escondidos.
+
+---
+
+## 🔲 MATRIZ FILTRO × PORTAL (referencia rápida transversal — 24-ago-2026)
+
+> El mismo sondeo (año/km/precio/potencia/cambio/puertas) en cada portal usa parámetros distintos. Esta matriz evita cruzar 6 secciones y equivocarse de parámetro. ⬜ = no documentado todavía en este skill (si lo necesitas y lo verificas, añádelo aquí).
+
+| Filtro | mobile.de (DE) | Coches.net (ES) | AutoScout24 (DE) | AutoUncle | kleinanzeigen (DE) | Wallapop (ES) |
+|---|---|---|---|---|---|---|
+| Marca+modelo | `ms=<makeId>;<modelId>;;;;` | `MakeIds[0]=`+`ModelIds[0]=` | ruta `/lst/<marca>/<modelo>/` | combobox | `autos.marke_s:` | radio `brand`→`model` |
+| Año desde | `fr=<y>:` | `MinYear=` | `fregfrom=` | `[name="minYear"]` | `brwse-attr-autos.ez_i-min` | range selector |
+| Año hasta | `fr=:<y>` | `MaxYear=` | `fregto=` | `[name="maxYear"]` | `brwse-attr-autos.ez_i-max` | range selector |
+| Km máx | `ml=:<km>` | `MaxKms=` | `kmto=` | `[name="maxKm"]` | `brwse-attr-autos.km_i-max` | range |
+| Potencia | `pw=<kWd>%3A<kWh>` | `PowerHpFrom/To=` (cv) | `powerfrom/powerto=`+`powertype=kw` | ⬜ | `brwse-attr-autos.power_i` | ⬜ (sin filtro) |
+| Precio máx | ⬜ (usar filtro página) | grupo `priceGroup` | `priceto=` | `[name="maxPrice"]` | `srchrslt-brwse-price-max` | `#toSelector` |
+| Cambio | `tr=MANUAL_GEAR` \| `AUTOMATIC_GEAR` | `TransmissionTypeId=1\|2` ⚠️ trampa Golf R | ⬜ | `[name="gear"]` radio | `autos.gearbox_s:` | `[id="manual"]`/`[id="automatic"]` |
+| Puertas | ⚠️ NO verificable (limitación) | `minDoors=` | ⬜ | ⬜ | `autos.doors_s:` ⬜ | ⬜ |
+| Combustible | ⬜ (chips Kraftstoffart) | `Fueltype2List=` | `fuel=` | `[name="fuelTypes"]` | `autos.fuel_s:` | `[id="gasoline"]` etc. |
+| Solo particulares | `seller_type` / `dam=0` no confundir | grupo `sellerGroup` | ⬜ | ⬜ | `autos.anbieter_s:privat` | `[name="seller_type..."]` |
+| Orden precio asc | `sb=p&od=up` | `fi=Price&or=1` | `sort=price` ⬜ | ⬜ | ⬜ | `order_by=price_asc` |
+| Página N | `pageNumber=N` | `pg=N` | `page=N` ⬜ | ⬜ | `/seite:N/` | ⬜ |
+| Equipamiento | ⚠️ solo constructor `/es/s/auto` (ver §flujo correcto) | `equipmentGroup` (solo techo/cámara/GPS) | ⬜ | `[name="popularOptions"]` | `checkbox-autos.*` + Übernehmen | ⬜ (keywords=) |
+
+> **Regla:** si un parámetro de la matriz está ⬜ y el sondeo lo necesita, verificarlo en vivo UNA vez y actualizar esta tabla (sección del portal correspondiente para el detalle de selectores).
 
 ---
 
@@ -28,7 +52,7 @@
 
 ```
 1. mobile.de (1 navegación + 2 capturas)
-   - URL con ms= + lang=de
+   - URL = plantilla canónica §"URL de resultados reales" (`suchen.mobile.de/fahrzeuge/search.html?...&ms=<makeId>;<modelId>;;;;&sb=p`) — NUNCA `/es/s/auto` (modo formulario sin tarjetas)
    - Aceptar cookies → screenshot
    - Filtro Kilometerstand bis + Erstzulassung von (clic combobox) → screenshot
    - Anotar: <h1> "X Angebote" + 5-8 precios bajos + lista (kW/PS, km, año)
@@ -48,8 +72,8 @@
 ### Búsqueda B: "encuentra los 3 mejores candidatos DE" (top fichas)
 
 ```
-1. mobile.de con filtros duros:
-   - Erstzulassung von: año mín + 2 años del candidato
+1. mobile.de con filtros duros (construidos por URL con la plantilla canónica `suchen...&sb=p`, no a clics):
+   - Erstzulassung von: año mín + 2 años del candidato (`fr=`)
    - Kilometerstand bis: +40% del km del candidato
    - Preis bis: precio máximo de compra + 10%
    - Getriebe: si candidato es manual → Schaltgetriebe
@@ -72,13 +96,79 @@
 ### Búsqueda C: "modelo X, top 5 globales" (Flujo B)
 
 ```
-1. mobile.de (buscador + filtros + listado) = 2 capturas → top 10 DE
+1. mobile.de (URL canónica suchen + sb=p + pw= por variante) = 2 capturas → top 10 DE
 2. AutoScout24.de (URL va_<version>) = 2 capturas → validar N total DE
 3. AutoUncle = 1 captura → días publicado + bajadas precio
 4. Coches.net (filtros + listado) = 2 capturas → mediana ES + priceRankIndicator
 
 → 7 capturas para Fase 1.
 ```
+
+---
+
+## 🧮 TRATAMIENTO DE DATOS — cómo procesar lo extraído (24-ago-2026)
+
+> Reglas duras para la fase posterior a la extracción: dedup, formato de ficha, persistencia de la query y reconciliación de conteos. Sin esto, los datos no son auditables ni re-ejecutables (lección Golf 7.5: `query_reejecutable=[]` en el JSON hizo imposible explicar por qué se medían 717 GTI vivos vs 13 guardados).
+
+### 1️⃣ Dedup ENTRE portales (clave fuzzy)
+
+Los IDs de anuncio NO son comparables entre portales (el `id=40947884798464` de mobile.de no existe en Coches.net). Deduplicar por **clave fuzzy**:
+
+```
+clave_dedup = marca + modelo_normalizado + año_matriculación + km (±2%) + potencia_kW (±3)
+```
+
+- 2 fichas con la misma clave = mismo coche en 2 portales → contar 1 vez, guardar ambas URLs.
+- Para candidato concreto (Flujo A/B): añadir CO₂ o color si disponibles (más precisión).
+- **Regla dura A8 reforzada:** AutoUncle es AGREGADOR de mobile.de/AS24 → su conteo NUNCA se suma al total DE (doble conteo sistemático). Solo rotación + validación.
+
+### 2️⃣ Ficha normalizada (formato destino único)
+
+Toda ficha procesada (para informes y para volcar al mapa) usa ESTE esquema, venga del portal que venga:
+
+```json
+{
+  "id_portal": "mobile.de|coches.net|as24|kleinanzeigen|wallapop|milanuncios|autouncle",
+  "id_anuncio": "<ID nativo del portal>",
+  "url": "<URL ficha>",
+  "titulo": "<título literal>",
+  "precio_contado_eur": 0,
+  "precio_bruto_flag": false,
+  "anio": 0, "km": 0, "kW": 0, "cv": 0,
+  "combustible": "gasolina|diesel|hibrido|electrico",
+  "cambio": "manual|dsg|automatico|null",
+  "puertas": "3p|5p|null",
+  "co2_gkm": null, "propietarios": null,
+  "equipamiento": ["techo","cuadro_digital","led","hud"],
+  "vendedor": "particular|concesionario|null",
+  "fiabilidad": "verificado_ficha|listado",
+  "fecha_lectura": "YYYY-MM-DD"
+}
+```
+
+- `precio_contado_eur` SIEMPRE contado (nunca financiado); `precio_bruto_flag: true` si "zzgl. MwSt." (neto, IVA aparte).
+- Campos que el portal no expone → `null` (NUNCA inventar — regla anti-bot ya existente).
+- `fiabilidad`: "verificado_ficha" (se abrió) vs "listado" (solo tarjeta) — regla suelo de listado vs verificado.
+
+### 3️⃣ Persistir la query (regla dura — bloqueante en cierre)
+
+**Toda medición que se vuelque a `datos_mercado.json` DEBE guardar en `query_reejecutable` la URL final con TODOS los parámetros** (no `[]`). Sin ella el sondeo no es re-ejecutable ni auditable:
+
+```
+query_reejecutable: ["https://suchen.mobile.de/fahrzeuge/search.html?dam=0&fr=2017%3A2020&...&pw=224%3A232",
+                     "https://www.coches.net/segunda-mano/?MakeIds[0]=47&PowerHpFrom=305&PowerHpTo=315&fi=Price&or=1"]
+```
+
++ `fecha_medicion` y `contador_resultados` de cada URL. El checklist de cierre lo verifica (campo NO vacío).
+
+### 4️⃣ Reconciliar conteos (portal vivo vs mapa guardado)
+
+Cuando el conteo en vivo difiere del guardado en el JSON (caso real: GTI 717 vivo vs 13 guardado):
+
+1. **Fuente de verdad = portal primario leído en la MISMA sesión** (mobile.de para DE, Coches.net para ES).
+2. **Discrepancia >10% vs mapa** → re-medir con la `query_reejecutable` guardada (si existe) para comparar MISMOS filtros. Si no existe, es imposible comparar → persistir la nueva query ya (regla 3️⃣).
+3. Si con la MISMA query el conteo difiere → el mercado se movió: actualizar el mapa con ambos valores + fechas.
+4. Si la query guardada usa filtros distintos a los actuales → documentar en `nota` qué filtro aplicaba ("filtro estrecho no documentado"), NO sobrescribir en silencio.
 
 ---
 
@@ -98,11 +188,12 @@ PASO 1 — Búsqueda por variante de texto (la normal)
   Resultado: 72 anuncios (muchos son "OPC-Line" o mal etiquetados)
 
 PASO 2 — Búsqueda por MODELO BASE + potencia (kW)
-  URL/filtro: <marca>-<modelo> SIN variante
-  + Filtro Leistung/kW: [potencia_tope − 10 kW, potencia_tope + 5 kW]
-    · Ej OPC 280 CV = 206 kW → filtrar 196–211 kW
-  + Erstzulassung ≥ año_mínimo
-  + Kilometerstand ≤ km_máximo
+  URL: plantilla canónica suchen con el modelo base (ms=<makeId>;<modelId>;;;;)
+  + pw=<kWdesde>%3A<kWhasta> derivado del cv EXACTO de la variante (ver tabla abajo)
+    · Ej OPC 280 CV = 206 kW → pw=196:211
+  + fr=<año mínimo> (Erstzulassung)
+  + ml=:<km máximo>
+  + sb=p&od=up (precio ascendente)
   Resultado: los OPC "disfrazados" de Astra normal
 
 PASO 3 — CRUCE (unión, NO intersección)
@@ -111,22 +202,34 @@ PASO 3 — CRUCE (unión, NO intersección)
   Los que están SOLO en la búsqueda 2 = chollos escondidos
 ```
 
-### Tabla de potencias para topes de gama habituales
+### Tabla de potencias para topes de gama habituales (pw= por variante EXACTA)
 
-| Modelo | CV | kW | Rango filtro kW |
-|---|---|---|---|
-| Opel Astra J OPC | 280 | 206 | 196–211 |
-| VW Golf GTI (7/7.5) | 230-245 | 169-180 | 160–185 |
-| VW Golf R | 300-320 | 221-235 | 212–240 |
-| BMW M240i | 340 | 250 | 240–255 |
-| Audi RS3 | 400 | 294 | 285–300 |
-| Mercedes A45 AMG | 381-421 | 280-310 | 270–315 |
-| Honda Civic Type R | 320 | 235 | 226–240 |
+> **Regla de derivación (24-ago):** SIEMPRE derivar `pw=` del **cv exacto de la variante**, no de un rango amplio. Fórmula: kW = cv × 0,7355. Plantilla: `pw=<cv×0,7355−4kW>%3A<cv×0,7355+4kW>` (±4 kW cubre redondeos del permiso). Usar el rango amplio de la tabla vieja mezcla generaciones (caso Golf R: 212-240 kW mete pre-FL 300cv y Mk8 320cv en la misma búsqueda).
 
-> ⚠️ Si no estás seguro de la potencia del modelo, búscala primero (km77/BOE o spec oficial) ANTES de la búsqueda 2. No inventes el rango.
+| Modelo (variante) | CV | kW | `pw=` plantilla | Notas |
+|---|---|---|---|---|
+| Opel Astra J OPC | 280 | 206 | `pw=196:211` | |
+| VW Golf GTI Mk7.5 | 230 | 169 | `pw=165:173` | |
+| VW Golf GTI Perf Mk7.5 | 245 | 180 | `pw=176:184` | GTI Mk8 = mismos 245cv, acotar `fr=` |
+| VW Golf R Mk7.5 | 310 | 228 | `pw=224:232` | ✅ validada 24-ago |
+| VW Golf R pre-FL Mk7 | 300 | 221 | `pw=217:225` | ⚠️ descartar activamente |
+| VW Golf 8 GTI | 245 | 180 | `pw=176:184` | + `fr=2021:2024` |
+| Audi S3 8V | 300 | 221 | `pw=217:225` | pre-FL 286cv → `pw=207:214` |
+| Audi RS3 8V | 400 | 294 | `pw=290:298` | |
+| BMW M135 F20 | 306 | 225 | `pw=221:229` | M140i 340cv → `pw=246:254` |
+| BMW M240i | 340 | 250 | `pw=246:254` | |
+| Mercedes A45 AMG | 381 | 280 | `pw=276:285` | S-Version 421cv → `pw=306:314` |
+| Hyundai i30N | 250 | 184 | `pw=180:188` | Perf 280cv → `pw=202:210` |
+| Cupra León VZ | 290 | 213 | `pw=209:217` | 300cv (2021+) → `pw=217:225` |
+| Ford Focus ST Mk3 | 250 | 184 | `pw=180:188` | |
+| Honda Civic Type R FK8 | 320 | 235 | `pw=231:239` | |
+| Renault Mégane RS | 280 | 206 | `pw=202:210` | Trophy 300cv → `pw=217:225` |
+
+> ⚠️ Si no estás seguro de la potencia del modelo, búscala primero (km77/BOE o spec oficial) ANTES de construir la URL. No inventes el rango.
+> ⚠️ Variante rechipada (stage 1): el vendedor declara potencia ALTERADA → el filtro pw= genuino NO la captura. La doble pasada es unión: la búsqueda 1 (texto) complementa. Comparar SIEMPRE potencia declarada vs catálogo (trampa Clubsport "450cv").
 
 ### Aplicación por portal
-- **mobile.de:** filtro `Leistung von/bis` (combobox o `ps` en URL)
+- **mobile.de:** parámetro `pw=<desde>%3A<hasta>` en la URL canónica (NO usar "ps", no existe en la plantilla suchen)
 - **AutoScout24.de:** filtro `Leistung` / `potencia`
 - **Coches.net:** filtro `Potencia CV` (aunque el título diga otra cosa)
 - **Resto:** aplicar misma lógica si el filtro de CV existe
@@ -206,6 +309,43 @@ PASO 3 — Para ver más tarjetas
 |---|---|---|
 | **Número de puertas** (`door-filter` `TWO_OR_THREE` / `FOUR_OR_FIVE` / `SIX_OR_SEVEN`) | ⚠️ **No se ha podido aplicar como filtro verificable** ni por URL directa ni por clic+selección esta sesión | La segmentación por puertas en DE queda como limitación abierta. En ES (Coches.net) sí funciona (`minDoors=`) |
 | **Panel de instrumentos digital** (cuadro digital / Active Info Display) | ⚠️ Vive detrás de un enlace "Más..." en Conjuntos de funciones que no respondió a intentos de expansión | Sin filtro agregado fiable en ningún portal. Verificar ficha a ficha en Flujo B |
+
+### 🆔 Tabla de IDs mobile.de (makeId;modelId) — 24-ago-2026
+
+> Los `makeId` siguen vigentes; los `modelId` NUEVOS (formato `12603`) son distintos de los modelGroup viejos (`29`). Verificados = probados con la URL canónica. El resto: descubrir con el procedimiento de abajo y AÑADIR a esta tabla al verificar.
+
+| Marca | makeId | Modelos (modelId) |
+|---|---|---|
+| VW | 25200 | Golf Mk7.5 = **12603** ✅ · Golf 8, Arteon, Tiguan = ⬜ por verificar |
+| Audi | 1900 | A3, S3, TT, RS3 = ⬜ por verificar |
+| BMW | 3500 | Serie 1, M135, M240i = ⬜ por verificar |
+| Mercedes | 17200 | Clase A, A45, CLA = ⬜ por verificar |
+| Seat | 22500 | León = ⬜ por verificar |
+| Cupra | 3 | León, Formentor = ⬜ por verificar |
+| Opel | 29000* | Astra J = ⬜ por verificar (*por confirmar) |
+| Ford | 24500* | Focus = ⬜ por verificar (*por confirmar) |
+| Hyundai | 35500* | i30N = ⬜ por verificar (*por confirmar) |
+
+**Procedimiento para descubrir makeId/modelId nuevos (3 pasos, ~2 capturas):**
+1. Navegar a `https://www.mobile.de/es/s/auto?s=Car&vc=Car` (la página SIRVE para esto: construir queries, no para ver tarjetas).
+2. Leer los `options value` del select `[data-testid="make-incl-0"]` → makeId de la marca. Elegir marca → el select `[data-testid="model-incl-0"]` se rellena → leer su `value` → modelId.
+3. Construir `ms=<makeId>;<modelId>;;;;` en la URL canónica suchen y **validar contra el `<h1>`** (debe decir el modelo correcto + "X Angebote" > 0). Si el `<h1>` muestra otra cosa → modelId mal.
+
+### 📄 Paginación con la URL canónica (24-ago-2026)
+
+- Parámetro de página: `&pageNumber=<N>` (2, 3, ...) sobre la URL suchen con todos los filtros. El botón siguiente es `[data-testid="pagination:next"]` (ya documentado en §leer la tarjeta).
+- **Protocolo por bloques (integrado con A12 bandas de precio):** página 1 → leer patrocinada + 2-3 orgánicas montadas → `computer scroll` 800 → re-lectura → repetir hasta fin de página → `pageNumber=2`. Para conteos grandes (>100) NO hace falta leer todas las tarjetas: contador del `<h1>` + suelo (orden asc) + 2-3 páginas de tarjetas bastan para el estudio.
+- Si solo interesa el SUELO (estudio de mercado): orden `sb=p&od=up` + página 1-2 → las más baratas ya están arriba (patrocinados aparte).
+
+### 🎛️ Flujo correcto: checkboxes "full" + resultados reales (24-ago-2026)
+
+**Contradicción resuelta:** los 5 checkboxes full (cuadro digital, HUD, calefacción, techo, LED) están documentados sobre `/es/s/auto` — la página que NO muestra tarjetas. El flujo correcto:
+
+1. **`/es/s/auto` es el CONSTRUCTOR de queries**: marcar checkboxes con `data-testid` (§Selectores estables) → leer el contador en vivo → sirve para saber cuántas unidades full hay.
+2. **Para ver TARJETAS con equipamiento filtrado**: dos vías:
+   a. Reconstruir la query en `suchen.mobile.de` (los checkboxes de `/es/s/auto` generan parámetros: techo panorámico → `acc=SUNROOF` etc. — probar y validar contra `<h1>`), o
+   b. Filtrar solo por variables estructuradas seguras (`ms`, `pw`, `fr`, `ml`, `tr`) y **verificar equipamiento ficha a ficha** en los 3-5 candidatos finales (más fiable y menos tokens).
+3. **Por defecto: vía (b)** — el estudio de mercado filtra por potencia/año/km; el equipamiento full se confirma en ficha (regla de máximo equipamiento ya existente).
 
 ### 🇩🇪 mobile.de — filtros que valen oro
 | Filtro | Cuándo | Cómo |

@@ -5,6 +5,44 @@ Todos los cambios notables en el skill `importacion-vehiculos` se documentarán 
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [3.4.1] - 2026-08-24 — Auditoría búsqueda/filtrado/tratamiento: 15 gaps resueltos
+
+> **Motivo:** auditoría enfocada en los 3 pilares del skill (búsqueda, filtrado, tratamiento de datos) detectó 15 gaps. Patrón dominante: **fragmentación por fecha** (3 generaciones de URLs mobile.de conviviendo en 3 archivos) + **persistencia incompleta** (query no guardada, sin dedup cross-portal, sin esquema de ficha).
+
+### 🔴 URLs contradictorias purgadas (GAP-01/02/13 — crítico)
+- **`extractores.md`**: tabla `ms` vieja (`25200;;29;GTI`) marcada **DEPRECADA** — esa sintaxis FALLA (0 resultados, hallazgo 24-ago). MakeIds migrados a tabla nueva; modelGroup viejos NO válidos.
+- **`paginas_reales.md`**: URL `www.mobile.de/...lang=de` marcada deprecada con puntero a la canónica.
+- **`navegacion_real.md`**: truco "si suchen falla → usa www" **CORREGIDO** (era al revés: www/es = modo formulario sin tarjetas).
+- **Búsquedas A/B/C del playbook**: ahora citan la plantilla canónica suchen+sb=p explícitamente.
+
+### 🆔 IDs mobile.de + descubrimiento (GAP-03/04)
+- Nueva **tabla makeId;modelId** en playbook (VW=25200, Golf Mk7.5=12603 verificados; resto ⬜).
+- **Procedimiento de 3 pasos** para descubrir IDs nuevos vía `/es/s/auto` (constructor de queries) + validación contra `<h1>`.
+
+### 📄 Paginación + checkboxes full resueltos (GAP-05/14)
+- Parámetro `pageNumber=N` documentado + protocolo por bloques (scroll→read→página sig.) integrado con A12.
+- **Contradicción resuelta**: `/es/s/auto` = CONSTRUCTOR de queries (conteo); tarjetas reales = suchen. Por defecto: filtrar estructurado + verificar equipamiento ficha a ficha.
+
+### 🧮 NUEVA sección TRATAMIENTO DE DATOS (GAP-09/10/11/12)
+- **Dedup cross-portal por clave fuzzy** (marca+modelo+año+km±2%+kW±3) — los IDs NO son comparables entre portales. Regla A8 reforzada: AutoUncle NUNCA suma al conteo DE (agregador).
+- **Esquema de ficha normalizada** (JSON destino único: precio_contado_eur, fiabilidad, equipamiento, fecha_lectura...).
+- **REGLA DURA `query_reejecutable` NUNCA vacío** (+ fecha_medicion + contador) — bloqueante en cierre. Lección Golf 7.5 (717 vs 13 inexplicable).
+- **Reconciliación de conteos**: fuente de verdad = portal primario en vivo; discrepancia >10% → re-medir con query guardada; nunca sobrescribir en silencio.
+
+### 🔲 Matriz filtro × portal (GAP-08)
+- Tabla única filas=filtro, columnas=6 portales, celdas=parámetro URL. Huecos marcados ⬜ (no inventados).
+
+### ⚡ Tabla potencias ampliada (GAP-07/15)
+- De 7 a 17 variantes (añadidos S3, M135/M140i, i30N, Cupra VZ, Focus ST, Mégane RS, Golf 8 GTI, A45 S...).
+- Nueva columna **`pw=` plantilla por variante EXACTA** + regla de derivación (kW = cv×0,7355 ±4kW) — el rango amplio viejo mezclaba generaciones (Golf R 212-240 metía pre-FL+Mk8).
+- Doble pasada PASO 2 reescrito con `pw=` real (eliminada referencia a "ps" inexistente).
+
+### Otros
+- Regla 8 de oro corregida: unión por clave fuzzy, no por ID cross-portal.
+- `como_deben_ser_las_sesiones.md`: regla dura query_reejecutable en el output por modelo.
+
+---
+
 ## [3.4.0] - 2026-08-24 — URL mobile.de que SÍ funciona + extracción de tarjetas virtualizadas
 
 > **Motivo:** la pasada en vivo del 23-24 ago del Golf 7.5 (estudio de mercado multi-variante) descubrió que la URL clásica de mobile.de (`www.mobile.de/es/s/auto?s=Car&vc=Car&ms=...`) entra en **modo formulario avanzado** y NO muestra las tarjetas de resultados. Solo la URL `suchen.mobile.de/fahrzeuge/search.html?...` con `ms=makeId;modelId;;;;` y `sb=p` devuelve resultados reales. Además, la página es **virtualizada** (`get_page_text` solo lee el panel de filtros), así que la extracción de tarjetas necesita `find()` + `read_page()` + `computer scroll`. Se documenta también una nueva trampa de Coches.net: `TransmissionTypeId=2` (Manual) en Golf R devuelve fichas etiquetadas como "DSG" en el propio título.
