@@ -329,52 +329,41 @@ class PaqueteValoracionController extends Controller
     }
 
     /**
-     * Envuelve el PDF en una vista HTML con <iframe>. Esto evita que Chrome
-     * muestre el banner "Abrir en aplicación" (que aparece al navegar
-     * directamente a un .pdf) y mantiene al usuario dentro de la pestaña
-     * de JJ Import Motors.
+     * Envuelve el PDF en una vista HTML que renderiza el documento con PDF.js
+     * (canvas). El PDF se incrusta como base64 en la propia página: NO hay
+     * navegación a un .pdf, NO hay fetch de sesión y NO hay handler de app
+     * de escritorio que pueda interceptarlo. Infalible ante PWA/chrome-apps.
      *
      * @param  'ficha'|'folleto'|'informe-interno'  $tipo
      */
     private function wrapper(string $titulo, Car $car, string $tipo, string $vista, array $datos)
     {
-        // Forzamos la generación del PDF para validar que existe y mostrar
-        // errores claros si Chrome falla. Si ok, devolvemos la vista con
-        // iframe que apunta al endpoint /raw (no se regenera al recargar).
-        $pdfResponse = $this->pdf($vista, $datos, $titulo.'_'.$this->slug($car));
+        $bytes = $this->pdfBytes($vista, $datos);
 
-        // Si la respuesta NO es PDF binario (fallback HTML porque no hay
-        // Chrome), la servimos tal cual.
-        $isPdf = str_starts_with((string) $pdfResponse->headers->get('Content-Type'), 'application/pdf');
-
-        if (! $isPdf) {
-            return $pdfResponse;
+        if ($bytes === null) {
+            // Sin Chrome o fallo de generación: servimos el HTML imprimible.
+            return response(View::make($vista, $datos)->render(), 200)
+                ->header('Content-Type', 'text/html; charset=utf-8');
         }
 
         return response()->view('jj-import.pdf-viewer', [
             'titulo' => $titulo.' · '.$car->brand.' '.$car->model,
-            'pdfSrc' => route('cars.'.$tipo.'.raw', $car),
-            'downloadUrl' => route('cars.'.$tipo.'.raw', $car).'?download=1',
+            'pdfBase64' => base64_encode($bytes),
             'filename' => $titulo.'_'.$this->slug($car).'.pdf',
         ]);
     }
 
-    private function pdf(string $vista, array $datos, string $nombreArchivo)
+    /**
+     * Genera el PDF (Browsershot + Chrome headless) y devuelve los bytes.
+     * null si no hay Chrome o falló la generación.
+     */
+    private function pdfBytes(string $vista, array $datos): ?string
     {
-        $html = View::make($vista, $datos)->render();
-
         $chrome = ChromePath::resolve();
         if (! $chrome) {
-            // Sin Chrome headless no hay PDF: servimos el HTML como descarga
-            // (imprimible / "Guardar como PDF" desde el navegador) en lugar de
-            // abrir una página que parece un fallo.
-            Log::warning('PaqueteValoracion PDF sin Chrome, sirviendo HTML descargable', [
-                'vista' => $vista,
-            ]);
+            Log::warning('PaqueteValoracion PDF sin Chrome', ['vista' => $vista]);
 
-            return response($html, 200)
-                ->header('Content-Type', 'text/html; charset=utf-8')
-                ->header('Content-Disposition', 'inline; filename="'.$nombreArchivo.'.html"');
+            return null;
         }
 
         $pdfPath = storage_path('app/private/tmp/'.uniqid('pdf_', true).'.pdf');
@@ -383,7 +372,7 @@ class PaqueteValoracionController extends Controller
         }
 
         try {
-            Browsershot::html($html)
+            Browsershot::html(View::make($vista, $datos)->render())
                 ->noSandbox()
                 ->setNodeBinary(ChromePath::nodeBinary())
                 ->setChromePath($chrome)
@@ -396,32 +385,35 @@ class PaqueteValoracionController extends Controller
                 ->scale(1)
                 ->savePdf($pdfPath);
 
-            // Truco anti-handler Windows:
-            //   ?download=1 → application/pdf + attachment (descarga normal)
-            //   sin ?download → application/octet-stream + inline
-            //     → Windows NO reconoce el MIME como PDF, NO lanza app externa,
-            //       Chrome lo muestra embebido en el iframe de nuestra app.
-            $isDownload = request()->boolean('download');
+            $bytes = file_get_contents($pdfPath) ?: null;
+            @unlink($pdfPath);
 
-            if ($isDownload) {
-                $resp = response()->download($pdfPath, $nombreArchivo.'.pdf');
-            } else {
-                $resp = response()->file($pdfPath, [
-                    'Content-Type' => 'application/octet-stream',
-                    'Content-Disposition' => 'inline; filename="'.$nombreArchivo.'.pdf"',
-                    'X-Content-Type-Options' => 'nosniff',
-                ]);
-            }
-            register_shutdown_function(fn () => @unlink($pdfPath));
-
-            return $resp;
+            return $bytes;
         } catch (\Throwable $e) {
             @unlink($pdfPath);
             Log::warning('PaqueteValoracion PDF failed', ['error' => $e->getMessage()]);
 
-            return response($html, 200)
+            return null;
+        }
+    }
+
+    /**
+     * Sirve el PDF como archivo (usado por los endpoints /raw, que solo se
+     * consumen desde el botón "Descargar" del viewer).
+     */
+    private function pdf(string $vista, array $datos, string $nombreArchivo)
+    {
+        $bytes = $this->pdfBytes($vista, $datos);
+
+        if ($bytes === null) {
+            return response(View::make($vista, $datos)->render(), 200)
                 ->header('Content-Type', 'text/html; charset=utf-8')
                 ->header('Content-Disposition', 'inline; filename="'.$nombreArchivo.'.html"');
         }
+
+        return response($bytes, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$nombreArchivo.'.pdf"',
+        ]);
     }
 }

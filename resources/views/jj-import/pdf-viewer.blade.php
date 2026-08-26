@@ -64,6 +64,10 @@
             overflow: hidden;
             flex-shrink: 0;
         }
+        .page-label {
+            font-size: 11px; color: #8fa3d9; letter-spacing: 0.5px;
+            text-transform: uppercase; font-weight: 600; margin-top: 6px;
+        }
         .page-slot canvas { display: block; width: 100%; height: 100%; }
         .loading {
             padding: 60px 20px; text-align: center; color: #8fa3d9; font-size: 13px;
@@ -103,10 +107,10 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
                 Cerrar
             </button>
-            <a href="{{ $downloadUrl }}" class="btn primary" download="{{ $filename }}" title="Descargar PDF">
+            <button type="button" id="btn-download" class="btn primary" title="Descargar PDF">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
                 Descargar
-            </a>
+            </button>
         </div>
     </div>
     <div class="stage" id="stage">
@@ -130,16 +134,38 @@
         pdfjsLib.GlobalWorkerOptions.workerSrc =
             'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.7.76/build/pdf.worker.min.mjs';
 
-        const pdfSrc = @json($pdfSrc);
+        const pdfBase64 = @json($pdfBase64);
+        const filename = @json($filename);
         const stage = document.getElementById('stage');
         const pageinfo = document.getElementById('pageinfo');
 
+        function b64ToUint8(b64) {
+            const bin = atob(b64);
+            const bytes = new Uint8Array(bin.length);
+            for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+            return bytes;
+        }
+
+        document.getElementById('btn-download').addEventListener('click', () => {
+            const blob = new Blob([b64ToUint8(pdfBase64)], { type: 'application/pdf' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 4000);
+        });
+
         async function load() {
             try {
-                const loadingTask = pdfjsLib.getDocument({ url: pdfSrc, isEvalSupported: false });
-                const pdf = await loadingTask.promise;
+                const pdf = await pdfjsLib.getDocument({
+                    data: b64ToUint8(pdfBase64),
+                    isEvalSupported: false,
+                }).promise;
 
-                const slotWidth = Math.min(900, stage.clientWidth - 48);
+                const slotWidth = Math.min(820, stage.clientWidth - 48);
 
                 for (let i = 1; i <= pdf.numPages; i++) {
                     const page = await pdf.getPage(i);
@@ -151,6 +177,11 @@
                     slot.className = 'page-slot';
                     slot.style.width = viewport.width + 'px';
                     slot.style.height = viewport.height + 'px';
+
+                    const label = document.createElement('div');
+                    label.className = 'page-label';
+                    label.textContent = 'Página ' + i + ' / ' + pdf.numPages;
+                    stage.appendChild(label);
 
                     const canvas = document.createElement('canvas');
                     canvas.width = Math.floor(viewport.width * devicePixelRatio);
@@ -180,9 +211,7 @@
                 const box = document.createElement('div');
                 box.className = 'error-box';
                 box.innerHTML = '<strong>No se pudo mostrar el documento.</strong><br><br>'
-                    + 'Puede que tu sesión haya caducado. Vuelve a la ficha y pulsa '
-                    + '<strong>Ficha cliente</strong> de nuevo. Si el problema continúa, '
-                    + 'usa el botón <strong>Descargar</strong> para abrirlo en tu lector PDF.';
+                    + 'Pulsa <strong>Descargar</strong> arriba para abrirlo en tu lector PDF.';
                 stage.appendChild(box);
             }
         }
