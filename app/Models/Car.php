@@ -146,6 +146,15 @@ class Car extends Model
         return $this->hasMany(ContractAcceptance::class);
     }
 
+    /**
+     * Links públicos (token) que el dealer puede compartir con el cliente
+     * para que vea la ficha + folleto del coche sin login.
+     */
+    public function publicLinks()
+    {
+        return $this->hasMany(CarPublicLink::class);
+    }
+
     /** Última aceptación de contrato del coche (o null). */
     public function latestContractAcceptance()
     {

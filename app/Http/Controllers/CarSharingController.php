@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\TrackingSharedMail;
 use App\Models\Car;
+use App\Models\CarPublicLink;
 use App\Services\ContractService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -74,5 +75,43 @@ class CarSharingController extends Controller
         return back()->with('success', __('tracking.contract.created', [
             'url' => $contract->public_url,
         ]));
+    }
+
+    /**
+     * Crea un link público (token) para que el cliente vea la ficha + folleto
+     * del coche en una sola página HTML sin login.
+     */
+    public function createPublicLink(Request $request, Car $car)
+    {
+        $existing = $car->publicLinks()->whereNull('revoked_at')->latest()->first();
+        if ($existing && $existing->isActive()) {
+            if ($request->wantsJson()) {
+                return response()->json(['url' => $existing->publicUrl()]);
+            }
+
+            return back()->with('success', 'Ya existe un enlace activo: '.$existing->publicUrl());
+        }
+
+        $link = CarPublicLink::generateFor($car);
+
+        if ($request->wantsJson()) {
+            return response()->json(['url' => $link->publicUrl()]);
+        }
+
+        return back()->with('success', 'Enlace público creado: '.$link->publicUrl());
+    }
+
+    /** Revoca un link público del coche. */
+    public function revokePublicLink(Car $car, CarPublicLink $link)
+    {
+        abort_unless($link->car_id === $car->id, 404);
+
+        $link->forceFill(['revoked_at' => now()])->save();
+
+        if (request()->wantsJson()) {
+            return response()->json(['ok' => true]);
+        }
+
+        return back()->with('success', 'Enlace revocado.');
     }
 }

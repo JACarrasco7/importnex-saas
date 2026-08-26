@@ -140,6 +140,40 @@ const copyContractUrl = async () => {
     }
 };
 
+// ── Public link (dossier ficha + folleto para el cliente) ────────────
+const publicLinkForm = useForm({});
+const creatingPublicLink = ref(false);
+const publicLinkCopied = ref(false);
+const activePublicLink = computed(() => props.derived?.public_link?.active || null);
+const lastPublicLink = computed(() => props.derived?.public_link?.last || null);
+const generatePublicLink = () => {
+    creatingPublicLink.value = true;
+    publicLinkForm.post(route('cars.create-public-link', props.car.id), {
+        preserveScroll: true,
+        onFinish: () => { creatingPublicLink.value = false; },
+    });
+};
+const revokePublicLink = (linkId) => {
+    if (!confirm(t('cars.public_link.confirm_revoke'))) return;
+    useForm({}).delete(route('cars.revoke-public-link', [props.car.id, linkId]), { preserveScroll: true });
+};
+const copyPublicLink = async () => {
+    const url = activePublicLink.value?.url || lastPublicLink.value?.url;
+    if (!url) return;
+    try {
+        await navigator.clipboard.writeText(url);
+    } catch (e) {
+        const el = document.createElement('textarea');
+        el.value = url;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+    }
+    publicLinkCopied.value = true;
+    setTimeout(() => (publicLinkCopied.value = false), 1800);
+};
+
 // Tabs de sección (para no hacer scroll gigante)
 const sections = [
     { id: 'resumen', label: t('cars.section_resumen') },
@@ -856,6 +890,54 @@ const onDocKeyChange = () => {
                                     <span v-else class="shrink-0 rounded-md bg-gray-100 px-3 py-1.5 text-xs font-semibold text-gray-400">{{ t('cars.pdfs_not_available') }}</span>
                                 </li>
                             </ul>
+                        </div>
+
+                        <!-- Compartir con cliente: dossier público ficha + folleto -->
+                        <div class="rounded-xl border border-estoril-200 bg-estoril-50/50">
+                            <div class="border-b border-estoril-200 bg-white px-4 py-3 flex items-start justify-between gap-3">
+                                <div>
+                                    <h4 class="text-sm font-semibold text-estoril-700 flex items-center gap-2">
+                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+                                        {{ t('cars.public_link.title') }}
+                                    </h4>
+                                    <p class="text-xs text-gray-600 mt-1 max-w-2xl">{{ t('cars.public_link.help') }}</p>
+                                </div>
+                            </div>
+                            <div class="px-4 py-3">
+                                <div v-if="activePublicLink" class="flex items-center gap-2 flex-wrap">
+                                    <span class="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-1 text-[11px] font-semibold text-green-700">
+                                        <span class="h-1.5 w-1.5 rounded-full bg-green-500"></span>
+                                        {{ t('cars.public_link.active') }}
+                                    </span>
+                                    <span v-if="activePublicLink.views_count > 0" class="text-xs text-gray-500">
+                                        {{ t('cars.public_link.views', { n: activePublicLink.views_count }) }}
+                                    </span>
+                                    <code class="flex-1 min-w-0 truncate rounded bg-white px-2.5 py-1.5 text-xs text-gray-700 ring-1 ring-gray-200 font-mono">
+                                        {{ activePublicLink.url }}
+                                    </code>
+                                    <button type="button" @click="copyPublicLink" class="inline-flex items-center gap-1 rounded-md bg-estoril-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-estoril-500">
+                                        {{ publicLinkCopied ? t('cars.public_link.copied') : t('cars.public_link.copy') }}
+                                    </button>
+                                    <a :href="activePublicLink.url" target="_blank" class="inline-flex items-center gap-1 rounded-md bg-white px-3 py-1.5 text-xs font-semibold text-estoril-700 ring-1 ring-estoril-200 hover:bg-estoril-50">
+                                        {{ t('cars.public_link.open') }}
+                                    </a>
+                                    <button type="button" @click="revokePublicLink(activePublicLink.id)" class="inline-flex items-center gap-1 rounded-md bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 ring-1 ring-red-200 hover:bg-red-100">
+                                        {{ t('cars.public_link.revoke') }}
+                                    </button>
+                                </div>
+                                <div v-else-if="lastPublicLink && lastPublicLink.revoked_at" class="flex items-center gap-2 flex-wrap">
+                                    <span class="inline-flex items-center gap-1 rounded-full bg-gray-200 px-2.5 py-1 text-[11px] font-semibold text-gray-700">
+                                        {{ t('cars.public_link.revoked') }}
+                                    </span>
+                                    <span class="text-xs text-gray-500">{{ lastPublicLink.views_count }} visitas antes de revocar</span>
+                                    <button type="button" @click="generatePublicLink" :disabled="creatingPublicLink" class="ml-auto inline-flex items-center gap-1 rounded-md bg-estoril-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-estoril-500 disabled:opacity-50">
+                                        {{ t('cars.public_link.share') }}
+                                    </button>
+                                </div>
+                                <button v-else type="button" @click="generatePublicLink" :disabled="creatingPublicLink" class="inline-flex items-center gap-1.5 rounded-md bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500 disabled:opacity-50">
+                                    {{ t('cars.public_link.share') }}
+                                </button>
+                            </div>
                         </div>
 
                         <div v-for="g in derived?.documents_by_group || []" :key="g.group" class="space-y-2">

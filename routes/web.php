@@ -270,6 +270,14 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::delete('/cars/{car}/tracking', [CarSharingController::class, 'revoke'])
         ->where('car', '[0-9]+')
         ->name('cars.revoke-tracking');
+
+    // Link público del dossier del coche (ficha + folleto en HTML) sin login.
+    Route::post('/cars/{car}/public-link', [CarSharingController::class, 'createPublicLink'])
+        ->where('car', '[0-9]+')
+        ->name('cars.create-public-link');
+    Route::delete('/cars/{car}/public-link/{link}', [CarSharingController::class, 'revokePublicLink'])
+        ->where(['car' => '[0-9]+', 'link' => '[0-9]+'])
+        ->name('cars.revoke-public-link');
     Route::post('/cars/{car}/tracking/regenerate', [CarSharingController::class, 'regenerate'])
         ->where('car', '[0-9]+')
         ->name('cars.regenerate-tracking');
@@ -391,5 +399,11 @@ Route::prefix('contrato/{token}')->where(['token' => '[A-Za-z0-9_-]{20,80}'])->n
 // Marketplace item 12: newsletter public (sin auth, con rate limit)
 Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
 Route::delete('/newsletter/unsubscribe', [NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
+
+// Dossier público del coche (sin auth, con token): ficha + folleto en HTML
+// para compartir con el cliente por WhatsApp.
+Route::get('/c/{token}', [PublicCarController::class, 'show'])
+    ->where('token', '[A-Za-z0-9_-]{20,80}')
+    ->name('public.car.show');
 
 require __DIR__.'/auth.php';

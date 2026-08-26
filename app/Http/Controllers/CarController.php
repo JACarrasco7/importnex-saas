@@ -148,6 +148,7 @@ class CarController extends Controller
                 'linked_request' => $this->linkedRequest($car),
                 'laravel_pdfs' => $this->laravelPdfs($car),
                 'contract' => $this->contractSummary($car),
+                'public_link' => $this->publicLinkSummary($car),
                 'tracking' => [
                     'is_shared' => $car->is_tracking_shared,
                     'is_public_trackable' => $car->is_public_trackable,
@@ -222,6 +223,35 @@ class CarController extends Controller
             'hash' => $contract->contract_hash,
             'version' => $contract->contract_version,
             'qr_svg' => 'data:image/svg+xml;base64,'.base64_encode($qr),
+        ];
+    }
+
+    /**
+     * Resumen de los links públicos (dossier ficha + folleto) del coche,
+     * para mostrar el estado en la pestaña Documentos y permitir revocar.
+     *
+     * @return array{active: ?array, last: ?array}
+     */
+    private function publicLinkSummary(Car $car): array
+    {
+        $links = $car->publicLinks()->latest('id')->limit(2)->get();
+        $active = $links->first(fn ($l) => $l->isActive());
+        $last = $links->first(fn ($l) => $l->revoked_at !== null);
+
+        $toArray = function ($l) {
+            return [
+                'id' => $l->id,
+                'url' => $l->publicUrl(),
+                'views_count' => (int) $l->views_count,
+                'last_viewed_at' => $l->last_viewed_at?->toIso8601String(),
+                'created_at' => $l->created_at->toIso8601String(),
+                'revoked_at' => $l->revoked_at?->toIso8601String(),
+            ];
+        };
+
+        return [
+            'active' => $active ? $toArray($active) : null,
+            'last' => $last ? $toArray($last) : null,
         ];
     }
 
