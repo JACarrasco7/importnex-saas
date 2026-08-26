@@ -36,6 +36,31 @@ class PaqueteValoracionController extends Controller
         $e = Esqueleto::desde($contenido);
         $qrUrl = $e->uno('QR') ?? route('public.car-request.index', ['slug' => 'jj-import-motors']);
 
+        return $this->wrapper('Ficha', $car, 'ficha', 'jj-import.ficha-coche', [
+            'e' => $e,
+            'car' => $car,
+            'logo_base64' => $this->logo(),
+            'fotos' => $this->fotos($car),
+            'qr_svg' => QrCode::format('svg')
+                ->size(220)->margin(1)->errorCorrection('H')
+                ->backgroundColor(255, 255, 255)->color(6, 16, 31)
+                ->generate($qrUrl),
+            'telefono_1' => '675 70 14 39',
+            'telefono_2' => '691 48 59 27',
+            'email' => 'jjimportmotors@gmail.com',
+        ]);
+    }
+
+    public function fichaRaw(Car $car)
+    {
+        $contenido = $this->leer($car, 'ficha-publicitaria.txt');
+        if ($contenido === null) {
+            $contenido = $this->fichaDesdeCar($car);
+        }
+
+        $e = Esqueleto::desde($contenido);
+        $qrUrl = $e->uno('QR') ?? route('public.car-request.index', ['slug' => 'jj-import-motors']);
+
         return $this->pdf('jj-import.ficha-coche', [
             'e' => $e,
             'car' => $car,
@@ -67,6 +92,31 @@ class PaqueteValoracionController extends Controller
         $e = Esqueleto::desde($contenido);
         $qrUrl = $e->uno('QR') ?? route('public.car-request.index', ['slug' => 'jj-import-motors']);
 
+        return $this->wrapper('Folleto', $car, 'folleto', 'jj-import.folleto-coche', [
+            'e' => $e,
+            'car' => $car,
+            'logo_base64' => $this->logo(),
+            'fotos' => $this->fotos($car),
+            'qr_svg' => QrCode::format('svg')
+                ->size(200)->margin(1)->errorCorrection('H')
+                ->backgroundColor(255, 255, 255)->color(6, 16, 31)
+                ->generate($qrUrl),
+            'telefono_1' => '675 70 14 39',
+            'telefono_2' => '691 48 59 27',
+            'email' => 'jjimportmotors@gmail.com',
+        ]);
+    }
+
+    public function folletoRaw(Car $car)
+    {
+        $contenido = $this->leer($car, 'ficha-publicitaria.txt');
+        if ($contenido === null) {
+            $contenido = $this->fichaDesdeCar($car);
+        }
+
+        $e = Esqueleto::desde($contenido);
+        $qrUrl = $e->uno('QR') ?? route('public.car-request.index', ['slug' => 'jj-import-motors']);
+
         return $this->pdf('jj-import.folleto-coche', [
             'e' => $e,
             'car' => $car,
@@ -89,23 +139,39 @@ class PaqueteValoracionController extends Controller
             abort(403);
         }
 
+        return $this->wrapper('Informe interno', $car, 'informe-interno', 'jj-import.informe-interno',
+            $this->internoDatos($car));
+    }
+
+    public function internoRaw(Car $car)
+    {
+        // Requisito duro: solo el equipo interno (rol owner/operator autenticado).
+        if (! auth()->check() || ! in_array(auth()->user()->role, ['owner', 'operator'], true)) {
+            abort(403);
+        }
+
+        return $this->pdf('jj-import.informe-interno',
+            $this->internoDatos($car),
+            'Informe_interno_'.$this->slug($car));
+    }
+
+    private function internoDatos(Car $car): array
+    {
         $contenido = $this->leer($car, 'informe-interno.txt');
         if ($contenido === null) {
-            // Fallback: si el ZIP no trajo esqueleto, generamos uno mínimo
-            // desde los datos del coche para que la ruta nunca quede vacía.
             $contenido = $this->esqueletoDesdeCar($car);
         }
 
         $e = Esqueleto::desde($contenido);
 
-        return $this->pdf('jj-import.informe-interno', [
+        return [
             'e' => $e,
             'car' => $car,
             'logo_base64' => $this->logo(),
             'telefono_1' => '675 70 14 39',
             'telefono_2' => '691 48 59 27',
             'email' => 'jjimportmotors@gmail.com',
-        ], 'Informe_interno_'.$this->slug($car));
+        ];
     }
 
     // ── helpers ──────────────────────────────────────────────────────────────
@@ -262,6 +328,37 @@ class PaqueteValoracionController extends Controller
         return preg_replace('/[^A-Za-z0-9]+/', '-', trim($car->brand.' '.$car->model)) ?? 'coche';
     }
 
+    /**
+     * Envuelve el PDF en una vista HTML con <iframe>. Esto evita que Chrome
+     * muestre el banner "Abrir en aplicación" (que aparece al navegar
+     * directamente a un .pdf) y mantiene al usuario dentro de la pestaña
+     * de JJ Import Motors.
+     *
+     * @param  'ficha'|'folleto'|'informe-interno'  $tipo
+     */
+    private function wrapper(string $titulo, Car $car, string $tipo, string $vista, array $datos)
+    {
+        // Forzamos la generación del PDF para validar que existe y mostrar
+        // errores claros si Chrome falla. Si ok, devolvemos la vista con
+        // iframe que apunta al endpoint /raw (no se regenera al recargar).
+        $pdfResponse = $this->pdf($vista, $datos, $titulo.'_'.$this->slug($car));
+
+        // Si la respuesta NO es PDF binario (fallback HTML porque no hay
+        // Chrome), la servimos tal cual.
+        $isPdf = str_starts_with((string) $pdfResponse->headers->get('Content-Type'), 'application/pdf');
+
+        if (! $isPdf) {
+            return $pdfResponse;
+        }
+
+        return response()->view('jj-import.pdf-viewer', [
+            'titulo' => $titulo.' · '.$car->brand.' '.$car->model,
+            'pdfSrc' => route('cars.'.$tipo.'.raw', $car),
+            'downloadUrl' => route('cars.'.$tipo.'.raw', $car).'?download=1',
+            'filename' => $titulo.'_'.$this->slug($car).'.pdf',
+        ]);
+    }
+
     private function pdf(string $vista, array $datos, string $nombreArchivo)
     {
         $html = View::make($vista, $datos)->render();
@@ -299,15 +396,19 @@ class PaqueteValoracionController extends Controller
                 ->scale(1)
                 ->savePdf($pdfPath);
 
-            // Inline → el navegador lo muestra embebido; el usuario decide
-            // desde ahí si descargarlo o imprimirlo.
-            $inline = response()->file($pdfPath, [
+            // ?download=1 → fuerza descarga; si no, inline (el iframe lo carga
+            // sin disparar el banner "Abrir en aplicación" de Chrome).
+            $disposition = request()->boolean('download')
+                ? 'attachment; filename="'.$nombreArchivo.'.pdf"'
+                : 'inline; filename="'.$nombreArchivo.'.pdf"';
+
+            $resp = response()->file($pdfPath, [
                 'Content-Type' => 'application/pdf',
-                'Content-Disposition' => 'inline; filename="'.$nombreArchivo.'.pdf"',
+                'Content-Disposition' => $disposition,
             ]);
             register_shutdown_function(fn () => @unlink($pdfPath));
 
-            return $inline;
+            return $resp;
         } catch (\Throwable $e) {
             @unlink($pdfPath);
             Log::warning('PaqueteValoracion PDF failed', ['error' => $e->getMessage()]);
