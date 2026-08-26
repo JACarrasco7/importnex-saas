@@ -48,17 +48,36 @@
         }
         .btn.primary:hover { background: linear-gradient(135deg, #2a3d87 0%, #1A306D 100%); }
         .btn svg { width: 14px; height: 14px; }
-        .frame-wrap {
+        .pageinfo { font-size: 12px; color: #8fa3d9; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        .stage {
             flex: 1; min-height: 0;
-            background: #14265a;
+            overflow: auto;
+            background: #0b1533;
+            display: flex; flex-direction: column; align-items: center;
+            gap: 18px; padding: 24px;
         }
-        .frame-wrap iframe {
-            width: 100%; height: 100%;
-            border: 0;
-            background: #1e3a8a;
+        .page-slot {
+            position: relative;
+            background: #fff;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+            border-radius: 4px;
+            overflow: hidden;
+            flex-shrink: 0;
         }
-        .frame-wrap embed {
-            width: 100%; height: 100%;
+        .page-slot canvas { display: block; width: 100%; height: 100%; }
+        .loading {
+            padding: 60px 20px; text-align: center; color: #8fa3d9; font-size: 13px;
+        }
+        .spinner {
+            width: 36px; height: 36px; margin: 0 auto 14px;
+            border: 3px solid rgba(143, 163, 217, 0.25); border-top-color: #8fa3d9;
+            border-radius: 50%; animation: spin 0.9s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .error-box {
+            max-width: 460px; margin: 60px auto; padding: 22px 24px;
+            background: rgba(232, 89, 12, 0.1); border: 1px solid rgba(232, 89, 12, 0.35);
+            border-radius: 12px; color: #fecaca; font-size: 13px; line-height: 1.5;
         }
     </style>
 </head>
@@ -79,6 +98,7 @@
         </div>
         <div class="title">{{ $titulo }}</div>
         <div class="actions">
+            <span class="pageinfo" id="pageinfo"></span>
             <button type="button" class="btn" onclick="window.close(); return false;" title="Cerrar pestaña">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
                 Cerrar
@@ -89,8 +109,85 @@
             </a>
         </div>
     </div>
-    <div class="frame-wrap">
-        <iframe src="{{ $pdfSrc }}" title="{{ $titulo }}"></iframe>
+    <div class="stage" id="stage">
+        <div class="loading">
+            <div class="spinner"></div>
+            Generando documento…
+        </div>
     </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "pdfjs-dist": "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.7.76/build/pdf.min.mjs",
+                "pdfjs-dist/build/pdf.worker.min.mjs": "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.7.76/build/pdf.worker.min.mjs"
+            }
+        }
+    </script>
+    <script type="module">
+        import * as pdfjsLib from 'pdfjs-dist';
+
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+            'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.7.76/build/pdf.worker.min.mjs';
+
+        const pdfSrc = @json($pdfSrc);
+        const stage = document.getElementById('stage');
+        const pageinfo = document.getElementById('pageinfo');
+
+        async function load() {
+            try {
+                const loadingTask = pdfjsLib.getDocument({ url: pdfSrc, isEvalSupported: false });
+                const pdf = await loadingTask.promise;
+
+                const slotWidth = Math.min(900, stage.clientWidth - 48);
+
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const base = page.getViewport({ scale: 1 });
+                    const scale = slotWidth / base.width;
+                    const viewport = page.getViewport({ scale });
+
+                    const slot = document.createElement('div');
+                    slot.className = 'page-slot';
+                    slot.style.width = viewport.width + 'px';
+                    slot.style.height = viewport.height + 'px';
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = Math.floor(viewport.width * devicePixelRatio);
+                    canvas.height = Math.floor(viewport.height * devicePixelRatio);
+                    canvas.style.width = viewport.width + 'px';
+                    canvas.style.height = viewport.height + 'px';
+
+                    slot.appendChild(canvas);
+                    stage.appendChild(slot);
+
+                    const ctx = canvas.getContext('2d');
+                    const renderTask = page.render({
+                        canvasContext: ctx,
+                        viewport,
+                        transform: devicePixelRatio !== 1
+                            ? [devicePixelRatio, 0, 0, devicePixelRatio, 0, 0]
+                            : undefined,
+                    });
+                    await renderTask.promise;
+                    page.cleanup();
+                }
+
+                pageinfo.textContent = pdf.numPages + ' páginas';
+            } catch (err) {
+                console.error(err);
+                stage.innerHTML = '';
+                const box = document.createElement('div');
+                box.className = 'error-box';
+                box.innerHTML = '<strong>No se pudo mostrar el documento.</strong><br><br>'
+                    + 'Puede que tu sesión haya caducado. Vuelve a la ficha y pulsa '
+                    + '<strong>Ficha cliente</strong> de nuevo. Si el problema continúa, '
+                    + 'usa el botón <strong>Descargar</strong> para abrirlo en tu lector PDF.';
+                stage.appendChild(box);
+            }
+        }
+
+        load();
+    </script>
 </body>
 </html>
