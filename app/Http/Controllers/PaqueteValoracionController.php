@@ -396,16 +396,22 @@ class PaqueteValoracionController extends Controller
                 ->scale(1)
                 ->savePdf($pdfPath);
 
-            // ?download=1 → fuerza descarga; si no, inline (el iframe lo carga
-            // sin disparar el banner "Abrir en aplicación" de Chrome).
-            $disposition = request()->boolean('download')
-                ? 'attachment; filename="'.$nombreArchivo.'.pdf"'
-                : 'inline; filename="'.$nombreArchivo.'.pdf"';
+            // Truco anti-handler Windows:
+            //   ?download=1 → application/pdf + attachment (descarga normal)
+            //   sin ?download → application/octet-stream + inline
+            //     → Windows NO reconoce el MIME como PDF, NO lanza app externa,
+            //       Chrome lo muestra embebido en el iframe de nuestra app.
+            $isDownload = request()->boolean('download');
 
-            $resp = response()->file($pdfPath, [
-                'Content-Type' => 'application/pdf',
-                'Content-Disposition' => $disposition,
-            ]);
+            if ($isDownload) {
+                $resp = response()->download($pdfPath, $nombreArchivo.'.pdf');
+            } else {
+                $resp = response()->file($pdfPath, [
+                    'Content-Type' => 'application/octet-stream',
+                    'Content-Disposition' => 'inline; filename="'.$nombreArchivo.'.pdf"',
+                    'X-Content-Type-Options' => 'nosniff',
+                ]);
+            }
             register_shutdown_function(fn () => @unlink($pdfPath));
 
             return $resp;
