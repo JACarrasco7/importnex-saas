@@ -687,7 +687,7 @@
         $potencia = $esqueleto?->uno('POTENCIA');
         $cambioTxt = $esqueleto?->uno('CAMBIO') ?? $car->transmission;
         $kmTxt = $car->km ? number_format($car->km, 0, ',', '.').' km' : null;
-        $anioTxt = $car->year ? $car->year->format('m/Y') : null;
+        $anioTxt = $car->year ?: null;
         $claimParts = array_filter([
             $potencia,
             $cambioTxt ? 'cambio '.strtolower($cambioTxt) : null,
