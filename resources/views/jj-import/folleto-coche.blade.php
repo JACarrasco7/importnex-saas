@@ -114,6 +114,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
         @page { size: A4; margin: 0; }
+        @page :first { margin: 0; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         html, body {
@@ -126,7 +127,7 @@
 
         body {
             position: relative;
-            padding: 26px 30px 50px 30px;
+            padding: 24px 28px 38px 28px;
             background:
                 radial-gradient(ellipse at 100% 0%, rgba(143, 163, 217, 0.12) 0%, transparent 45%),
                 linear-gradient(180deg, #0f1d42 0%, #14265a 50%, #0f1d42 100%);
@@ -146,10 +147,10 @@
 
         .header {
             display: flex; justify-content: space-between; align-items: center;
-            padding-bottom: 14px; border-bottom: 1px solid rgba(143, 163, 217, 0.2);
+            padding: 8px 0 14px 0; border-bottom: 1px solid rgba(143, 163, 217, 0.2);
             margin-bottom: 16px;
         }
-        .logo { height: 44px; width: auto; }
+        .logo { height: 44px; width: auto; max-width: 60%; }
         .badge-llave {
             display: inline-flex; align-items: center; gap: 7px;
             background: linear-gradient(135deg, #1A306D 0%, #2a3d87 100%);
@@ -207,18 +208,13 @@
         .hero-photo .price-float .value { font-size: 30px; font-weight: 900; color: #E8590C; line-height: 1.05; text-shadow: 0 2px 10px rgba(0,0,0,0.6); }
         .hero-photo .price-float .caption { font-size: 9.5px; color: #cbd5e1; }
 
-        /* ── GALERÍA (adaptativa, hasta 5 fotos, todas iguales) ──── */
-        .gallery { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+        /* ── GALERÍA — 2 columnas uniformes, todas las fotos iguales ── */
+        .gallery { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
         .gallery .shot {
             border-radius: 10px; overflow: hidden; border: 1px solid rgba(143,163,217,0.25);
-            background: #14265a; aspect-ratio: 4/3;
+            background: #14265a; aspect-ratio: 16/10;
         }
         .gallery .shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        /* 2 fotos en grid → una ancha a lo ancho */
-        .gallery.one .shot { grid-column: span 4; }
-        /* 3 fotos → dos medianas lado a lado */
-        .gallery.two .shot { grid-column: span 2; }
-        /* 4-5 fotos → las 4 del grid son IGUALES (solo la hero es grande) */
 
         /* ── KPI GRID (4 protagonistas) ─────────────────────────── */
         .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
@@ -370,10 +366,9 @@
         @php
             $grid_fotos = array_slice($fotos, 1, 4);
             $grid_count = count($grid_fotos);
-            $gallery_class = $grid_count === 1 ? 'one' : ($grid_count === 2 ? 'two' : ($grid_count === 3 ? 'three' : 'four'));
         @endphp
         @if($grid_count > 0)
-        <div class="gallery {{ $gallery_class }}">
+        <div class="gallery">
             @foreach($grid_fotos as $foto)
                 <div class="shot"><img src="{{ $foto }}" alt="{{ $titulo }}"></div>
             @endforeach

@@ -87,6 +87,7 @@ $ia_redfl  = \App\Support\IaList::normalizar($car->red_flags ?? null);
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
         @page { size: A4; margin: 0; }
+        @page :first { margin: 0; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         html, body {
@@ -100,7 +101,7 @@ $ia_redfl  = \App\Support\IaList::normalizar($car->red_flags ?? null);
 
         body {
             position: relative;
-            padding: 30px 34px 60px 34px;
+            padding: 28px 32px 40px 32px;
             background:
                 radial-gradient(ellipse at 100% 0%, rgba(143, 163, 217, 0.12) 0%, transparent 45%),
                 linear-gradient(180deg, #0f1d42 0%, #14265a 50%, #0f1d42 100%);
@@ -133,10 +134,10 @@ $ia_redfl  = \App\Support\IaList::normalizar($car->red_flags ?? null);
 
         .header {
             display: flex; justify-content: space-between; align-items: center;
-            padding-bottom: 16px; border-bottom: 1px solid rgba(143, 163, 217, 0.2);
+            padding: 8px 0 16px 0; border-bottom: 1px solid rgba(143, 163, 217, 0.2);
             margin-bottom: 22px;
         }
-        .logo { height: 46px; width: auto; }
+        .logo { height: 46px; width: auto; max-width: 60%; }
         .badge-llave {
             display: inline-flex; align-items: center; gap: 7px;
             background: linear-gradient(135deg, #1A306D 0%, #2a3d87 100%);
@@ -198,14 +199,13 @@ $ia_redfl  = \App\Support\IaList::normalizar($car->red_flags ?? null);
         </div>
         @endif
 
-        /* Galería */
-        .gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 18px; }
+        /* Galería — 2 columnas uniformes, todas las fotos al mismo tamaño */
+        .gallery { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 18px; }
         .gallery .shot {
             border-radius: 10px; overflow: hidden; border: 1px solid rgba(143, 163, 217, 0.2);
-            background: #14265a; aspect-ratio: 4/3;
+            background: #14265a; aspect-ratio: 16/10;
         }
-        .gallery .shot img { width: 100%; height: 100%; object-fit: cover; }
-        .gallery .shot:first-child { grid-column: span 2; grid-row: span 2; }
+        .gallery .shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
         /* Specs strip */
         .specs-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 18px; }

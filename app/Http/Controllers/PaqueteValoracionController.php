@@ -277,7 +277,7 @@ class PaqueteValoracionController extends Controller
 
             return response($html, 200)
                 ->header('Content-Type', 'text/html; charset=utf-8')
-                ->header('Content-Disposition', 'attachment; filename="'.$nombreArchivo.'.html"');
+                ->header('Content-Disposition', 'inline; filename="'.$nombreArchivo.'.html"');
         }
 
         $pdfPath = storage_path('app/private/tmp/'.uniqid('pdf_', true).'.pdf');
@@ -299,17 +299,22 @@ class PaqueteValoracionController extends Controller
                 ->scale(1)
                 ->savePdf($pdfPath);
 
-            $download = response()->download($pdfPath, $nombreArchivo.'.pdf');
+            // Inline → el navegador lo muestra embebido; el usuario decide
+            // desde ahí si descargarlo o imprimirlo.
+            $inline = response()->file($pdfPath, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="'.$nombreArchivo.'.pdf"',
+            ]);
             register_shutdown_function(fn () => @unlink($pdfPath));
 
-            return $download;
+            return $inline;
         } catch (\Throwable $e) {
             @unlink($pdfPath);
             Log::warning('PaqueteValoracion PDF failed', ['error' => $e->getMessage()]);
 
             return response($html, 200)
                 ->header('Content-Type', 'text/html; charset=utf-8')
-                ->header('Content-Disposition', 'attachment; filename="'.$nombreArchivo.'.html"');
+                ->header('Content-Disposition', 'inline; filename="'.$nombreArchivo.'.html"');
         }
     }
 }
