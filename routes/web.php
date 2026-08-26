@@ -402,7 +402,7 @@ Route::delete('/newsletter/unsubscribe', [NewsletterController::class, 'unsubscr
 
 // Dossier público del coche (sin auth, con token): ficha + folleto en HTML
 // para compartir con el cliente por WhatsApp.
-Route::get('/c/{token}', [PublicCarController::class, 'show'])
+Route::get('/c/{token}', '\App\Http\Controllers\PublicCarController@show')
     ->where('token', '[A-Za-z0-9_-]{20,80}')
     ->name('public.car.show');
 
