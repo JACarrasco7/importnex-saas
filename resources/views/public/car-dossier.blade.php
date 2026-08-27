@@ -183,6 +183,13 @@
             background: #14265a;
             transform: rotate(-1.2deg);
         }
+        .hero-photo-empty {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 16px; color: var(--platinum);
+            background: linear-gradient(135deg, rgba(143, 163, 217, 0.08) 0%, rgba(143, 163, 217, 0.02) 100%);
+            border: 1px dashed rgba(143, 163, 217, 0.25);
+        }
+        .hero-photo-empty span { font-size: 13px; font-weight: 600; opacity: 0.7; }
         .hero-photo img { width: 100%; height: 100%; object-fit: cover; }
         .hero-photo-badge {
             position: absolute; top: 16px; left: 16px;
@@ -682,7 +689,6 @@
     {{-- ── HERO ────────────────────────────────────────── --}}
     @php
         $precio = $car->sale_price ?? $car->purchase_price ?? 0;
-        $cuota = $precio > 0 ? round($precio / 60) : null;
         $potencia = $esqueleto?->uno('POTENCIA');
         $cambioTxt = $esqueleto?->uno('CAMBIO') ?? $car->transmission;
         $kmTxt = $car->km ? number_format($car->km, 0, ',', '.').' km' : null;
@@ -714,9 +720,9 @@
                 </div>
 
                 <div class="hero-actions">
-                    <a href="https://wa.me/34675701439?text={{ urlencode('Hola, me interesa el '.$car->brand.' '.$car->model.' que habéis compartido conmigo.') }}"
+                    <a href="https://wa.me/34675701439?text={{ urlencode('Hola, me interesa el '.$car->brand.' '.$car->model.'. ¿Podéis darme más información del servicio?') }}"
                        target="_blank" rel="noopener" class="btn primary">
-                        💬 Reservar por WhatsApp
+                        💬 Consultar por WhatsApp
                     </a>
                     <a href="tel:+34675701439" class="btn ghost">
                         📞 Llamar ahora
@@ -727,7 +733,14 @@
             @if(count($fotos) > 0)
                 <div class="hero-photo">
                     <img src="{{ $fotos[0] }}" alt="{{ $car->brand }} {{ $car->model }}">
-                    <div class="hero-photo-badge live">DISPONIBLE</div>
+                </div>
+            @else
+                <div class="hero-photo hero-photo-empty">
+                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.4">
+                        <path d="M5 17h14M5 17l2-8h10l2 8M5 17a2 2 0 002 2 2 2 0 002-2M15 17a2 2 0 002 2 2 2 0 002-2"/>
+                        <circle cx="8" cy="9" r="1.5"/><circle cx="16" cy="9" r="1.5"/>
+                    </svg>
+                    <span>Foto del vehículo disponible bajo petición</span>
                 </div>
             @endif
         </div>
@@ -782,7 +795,7 @@
             ['k' => 'Kilómetros', 'v' => $kmTxt ?? '—', 's' => 'Verificados', 'class' => ''],
             ['k' => 'Combustible', 'v' => ucfirst($car->fuel_type ?? '—'), 's' => null, 'class' => ''],
             ['k' => 'Cambio', 'v' => ucfirst($cambioTxt ?? '—'), 's' => null, 'class' => ''],
-            ['k' => 'Origen', 'v' => strtoupper($car->origin_country ?? '—'), 's' => 'Historial limpio', 'class' => 'green'],
+            ['k' => 'Procedencia', 'v' => $car->origin_country ?? '—', 's' => 'Historial limpio', 'class' => 'green'],
         ];
         $kpis = array_filter($kpis, fn($x) => !empty($x['v']) && $x['v'] !== '—');
     @endphp
@@ -792,7 +805,7 @@
                 @foreach($kpis as $k)
                     <div class="kpi">
                         <div class="kpi-k">{{ $k['k'] }}</div>
-                        <div class="kpi-v {{ $k['class'] }}">{{ $k['v'] }}</div>
+                        <div class="kpi-v @if($k['class']){{ $k['class'] }}@endif">{{ $k['v'] }}</div>
                         @if($k['s'])<div class="kpi-s">{{ $k['s'] }}</div>@endif
                     </div>
                 @endforeach
@@ -812,6 +825,16 @@
                 <div class="verdict-footer">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
                     Análisis actualizado el {{ now()->format('d/m/Y') }} · Basado en inspección física + datos del fabricante
+                </div>
+            </section>
+        @else
+            <section id="veredicto" class="verdict">
+                <div class="verdict-eyebrow">Veredicto JJ Import Motors</div>
+                <h2 class="verdict-h">Vehículo revisado y verificado</h2>
+                <p class="verdict-body">Te enviamos el dossier completo del vehículo con todos los detalles técnicos, historial, y nuestros comentarios profesionales. Llámanos para que te expliquemos los puntos fuertes y lo que debes tener en cuenta antes de decidir.</p>
+                <div class="verdict-footer">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+                    Dossier generado el {{ now()->format('d/m/Y') }} · Información profesional verificada
                 </div>
             </section>
         @endif
