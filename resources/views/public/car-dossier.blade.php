@@ -696,15 +696,15 @@
     <header class="hero">
         <div class="hero-inner">
             <div class="hero-left">
-                <div class="hero-eyebrow">⚡ Disponible para importación</div>
+                <div class="hero-eyebrow">⚡ Dossier exclusivo · Servicio de importación/búsqueda</div>
                 <h1 class="h1">
                     {{ $car->brand }}<br>
                     <span class="accent">{{ $car->model }}</span>
                 </h1>
                 @if(count($claimParts) > 0)
-                    <p class="claim">{{ implode(' · ', $claimParts) }} · Revisado y listo para entrega tras importación</p>
+                    <p class="claim">{{ implode(' · ', $claimParts) }} · {{ $car->origin_country === 'Alemania' ? 'Importado' : 'Búsqueda en España' }} y listo para entrega</p>
                 @else
-                    <p class="claim">Revisado y listo para entrega tras importación</p>
+                    <p class="claim">{{ $car->origin_country === 'Alemania' ? 'Importado' : 'Búsqueda en España' }} y listo para entrega</p>
                 @endif
 
                 <div class="price-card">
@@ -741,7 +741,7 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0112 2a8 8 0 018 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg>
                 </div>
                 <div class="trust-text">
-                    <strong>Importado desde {{ $car->origin_country ?? 'Alemania/España' }}</strong>
+                    <strong>{{ $car->origin_country === 'Alemania' ? 'Importado desde Alemania' : 'Búsqueda en España' }}</strong>
                     Historial completo y verificado
                 </div>
             </div>
@@ -823,7 +823,7 @@
                 <div class="incluye-item">
                     <span class="incluye-check">✓</span>
                     <div>
-                        <strong>Búsqueda y negociación</strong>
+                        <strong>{{ $car->origin_country === 'Alemania' ? 'Búsqueda e importación' : 'Búsqueda en España' }}</strong>
                         Buscamos el mejor coche para ti
                     </div>
                 </div>
@@ -831,14 +831,14 @@
                     <span class="incluye-check">✓</span>
                     <div>
                         <strong>Inspección previa</strong>
-                        Revisión del vehículo antes de importar
+                        Revisión del vehículo antes de {{ $car->origin_country === 'Alemania' ? 'importar' : 'comprar' }}
                     </div>
                 </div>
                 <div class="incluye-item">
                     <span class="incluye-check">✓</span>
                     <div>
                         <strong>Gestión completa</strong>
-                        Trámites, transporte y matriculación
+                        {{ $car->origin_country === 'Alemania' ? 'Trámites, transporte y matriculación' : 'Trámites y transporte' }}
                     </div>
                 </div>
                 <div class="incluye-item">
@@ -983,7 +983,7 @@
         <section class="cta-final">
             <div class="cta-eyebrow">¿Te interesa este coche?</div>
             <h2>Consultanos el servicio completo</h2>
-            <p>Este precio es el del vehículo. Nosotros gestionamos la importación y todos los trámites para que lo recibas listo en tu domicilio. Llámanos o escríbenos para más detalles.</p>
+            <p>Este precio es el del vehículo. Nosotros gestionamos {{ $car->origin_country === 'Alemania' ? 'la importación' : 'la compra' }} y todos los trámites para que lo recibas listo en tu domicilio. Llámanos o escríbenos para más detalles.</p>
             <div class="cta-buttons">
                 <a href="https://wa.me/34675701439?text={{ urlencode('Hola, me interesa importar el '.$car->brand.' '.$car->model.'. ¿Podéis darme más información del servicio?') }}"
                    target="_blank" rel="noopener" class="btn primary big">
