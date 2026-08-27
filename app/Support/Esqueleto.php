@@ -46,6 +46,25 @@ class Esqueleto
         return $this->nombrados[$nombre] ?? [];
     }
 
+    /** Lista de items: divide bloques por saltos de línea y limpia. */
+    public function lista(string $nombre): array
+    {
+        $bloques = $this->todos($nombre);
+        $items = [];
+
+        foreach ($bloques as $bloque) {
+            $lineas = preg_split('/\R+/', trim($bloque));
+            foreach ($lineas as $linea) {
+                $limpio = trim($linea);
+                if ($limpio !== '') {
+                    $items[] = $limpio;
+                }
+            }
+        }
+
+        return $items;
+    }
+
     /** Bloque de campos separados por ' | ', ya troceado. */
     public function filas(string $nombre): array
     {
