@@ -32,6 +32,7 @@ use App\Http\Controllers\OpenApiController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\PaqueteValoracionController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PublicCarController;
 use App\Http\Controllers\PublicCarRequestController;
 use App\Http\Controllers\PublicContractController;
 use App\Http\Controllers\PublicMarketplaceController;
@@ -402,7 +403,7 @@ Route::delete('/newsletter/unsubscribe', [NewsletterController::class, 'unsubscr
 
 // Dossier público del coche (sin auth, con token): ficha + folleto en HTML
 // para compartir con el cliente por WhatsApp.
-Route::get('/c/{token}', '\App\Http\Controllers\PublicCarController@show')
+Route::get('/c/{token}', [PublicCarController::class, 'show'])
     ->where('token', '[A-Za-z0-9_-]{20,80}')
     ->name('public.car.show');
 
