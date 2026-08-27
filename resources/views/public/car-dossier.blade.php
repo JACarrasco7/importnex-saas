@@ -672,7 +672,6 @@
                 <a href="#galeria" class="nav-link">Galería</a>
                 <a href="#veredicto" class="nav-link">Veredicto</a>
                 <a href="#detalles" class="nav-link">Detalles</a>
-                <a href="#financiacion" class="nav-link">Financiación</a>
             </div>
             <a href="tel:+34675701439" class="nav-cta">
                 📞 <span class="long">675 70 14 39</span>
@@ -697,21 +696,21 @@
     <header class="hero">
         <div class="hero-inner">
             <div class="hero-left">
-                <div class="hero-eyebrow">⚡ Dossier exclusivo · Stock limitado</div>
+                <div class="hero-eyebrow">⚡ Disponible para importación</div>
                 <h1 class="h1">
                     {{ $car->brand }}<br>
                     <span class="accent">{{ $car->model }}</span>
                 </h1>
                 @if(count($claimParts) > 0)
-                    <p class="claim">{{ implode(' · ', $claimParts) }} · Revisado y listo para entrega inmediata</p>
+                    <p class="claim">{{ implode(' · ', $claimParts) }} · Revisado y listo para entrega tras importación</p>
                 @else
-                    <p class="claim">Revisado por nuestro equipo y listo para entrega inmediata</p>
+                    <p class="claim">Revisado y listo para entrega tras importación</p>
                 @endif
 
                 <div class="price-card">
-                    <div class="price-label">Precio final · IVA incluido</div>
+                    <div class="price-label">Precio del vehículo</div>
                     <div class="price-value">{{ number_format($precio, 0, ',', '.') }} €</div>
-                    <div class="price-caption">Llave en mano · Sin sorpresas · Garantía 12 meses</div>
+                    <div class="price-caption">+ costes de servicio y gestión · Llave en mano</div>
                 </div>
 
                 <div class="hero-actions">
@@ -728,7 +727,7 @@
             @if(count($fotos) > 0)
                 <div class="hero-photo">
                     <img src="{{ $fotos[0] }}" alt="{{ $car->brand }} {{ $car->model }}">
-                    <div class="hero-photo-badge live">EN STOCK</div>
+                    <div class="hero-photo-badge live">DISPONIBLE</div>
                 </div>
             @endif
         </div>
@@ -742,7 +741,7 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0112 2a8 8 0 018 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg>
                 </div>
                 <div class="trust-text">
-                    <strong>Importado desde Alemania</strong>
+                    <strong>Importado desde {{ $car->origin_country ?? 'Alemania/España' }}</strong>
                     Historial completo y verificado
                 </div>
             </div>
@@ -751,8 +750,8 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
                 <div class="trust-text">
-                    <strong>Garantía 12 meses</strong>
-                    Cobertura mecánica completa
+                    <strong>Inspección previa</strong>
+                    Revisión antes de importación
                 </div>
             </div>
             <div class="trust-item">
@@ -760,8 +759,8 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
                 </div>
                 <div class="trust-text">
-                    <strong>Entrega en tu puerta</strong>
-                    Transporte incluido a Huelva
+                    <strong>Gestión completa</strong>
+                    Trámites y transporte incluidos
                 </div>
             </div>
             <div class="trust-item">
@@ -769,8 +768,8 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
                 </div>
                 <div class="trust-text">
-                    <strong>Financiación disponible</strong>
-                    Hasta 60 cuotas sin entrada
+                    <strong>Transparente</strong>
+                    Sin costes ocultos
                 </div>
             </div>
         </div>
@@ -819,34 +818,27 @@
 
         {{-- INCLUYE (lo que va incluido en el precio) --}}
         <section class="incluye">
-            <h3>Qué incluye este precio</h3>
+            <h3>Qué incluye nuestro servicio</h3>
             <div class="incluye-grid">
                 <div class="incluye-item">
                     <span class="incluye-check">✓</span>
                     <div>
-                        <strong>Transferencia a tu nombre</strong>
-                        Gestionamos todo el papeleo
+                        <strong>Búsqueda y negociación</strong>
+                        Buscamos el mejor coche para ti
                     </div>
                 </div>
                 <div class="incluye-item">
                     <span class="incluye-check">✓</span>
                     <div>
-                        <strong>IVA desgravable</strong>
-                        Si eres empresa o autónomo
+                        <strong>Inspección previa</strong>
+                        Revisión del vehículo antes de importar
                     </div>
                 </div>
                 <div class="incluye-item">
                     <span class="incluye-check">✓</span>
                     <div>
-                        <strong>Garantía mecánica 12 meses</strong>
-                        Cobertura en motor y caja
-                    </div>
-                </div>
-                <div class="incluye-item">
-                    <span class="incluye-check">✓</span>
-                    <div>
-                        <strong>Revisión pre-entrega</strong>
-                        150 puntos de inspección
+                        <strong>Gestión completa</strong>
+                        Trámites, transporte y matriculación
                     </div>
                 </div>
                 <div class="incluye-item">
@@ -860,7 +852,14 @@
                     <span class="incluye-check">✓</span>
                     <div>
                         <strong>Entrega a domicilio</strong>
-                        Huelva y provincia sin coste
+                        Te lo dejamos en tu puerta
+                    </div>
+                </div>
+                <div class="incluye-item">
+                    <span class="incluye-check">✓</span>
+                    <div>
+                        <strong>Acompañamiento</strong>
+                        Contigo durante todo el proceso
                     </div>
                 </div>
             </div>
@@ -976,37 +975,19 @@
             @endif
         @endif
 
-        {{-- FINANCIACIÓN --}}
-        @if($cuota)
-            <section id="financiacion" class="financ">
-                <div class="financ-inner">
-                    <div>
-                        <div class="section-title" style="color: #fed7aa;">Financiación</div>
-                        <h2>Desde {{ number_format($cuota, 0, ',', '.') }} €/mes</h2>
-                        <p>Te lo financiamos sin entrada y con cuotas flexibles. Aprobación en 24-48h, sin papeleos y con respuesta rápida. Cuotas orientativas a 60 meses · TAE variable según perfil.</p>
-                        <a href="https://wa.me/34675701439?text={{ urlencode('Hola, quiero financiación para el '.$car->brand.' '.$car->model.'. ¿Me ayudáis con una simulación?') }}"
-                           target="_blank" rel="noopener" class="btn ghost big">
-                            💬 Solicitar simulación
-                        </a>
-                    </div>
-                    <div class="financ-price">
-                        <div class="financ-from">Cuota mensual estimada</div>
-                        <div class="financ-amount"><small>desde</small> {{ number_format($cuota, 0, ',', '.') }} €</div>
-                        <div class="financ-detail">60 cuotas · Sin entrada · Aprobación rápida</div>
-                    </div>
-                </div>
-            </section>
-        @endif
+        {{-- FINANCIACIÓN (NO APLICA — SOLO SERVICIO) --}}
+        {{-- No mostramos financiación porque JJ Import Motors solo ofrece servicio de importación --}}
+
 
         {{-- CTA FINAL --}}
         <section class="cta-final">
-            <div class="cta-eyebrow">¿Listo para verlo?</div>
-            <h2>Reserva tu prueba sin compromiso</h2>
-            <p>Llámanos o escríbenos por WhatsApp. Te confirmamos disponibilidad, organizamos la prueba y te lo entregamos en tu domicilio.</p>
+            <div class="cta-eyebrow">¿Te interesa este coche?</div>
+            <h2>Consultanos el servicio completo</h2>
+            <p>Este precio es el del vehículo. Nosotros gestionamos la importación y todos los trámites para que lo recibas listo en tu domicilio. Llámanos o escríbenos para más detalles.</p>
             <div class="cta-buttons">
-                <a href="https://wa.me/34675701439?text={{ urlencode('Hola, me interesa el '.$car->brand.' '.$car->model.'. ¿Podemos quedar para verlo?') }}"
+                <a href="https://wa.me/34675701439?text={{ urlencode('Hola, me interesa importar el '.$car->brand.' '.$car->model.'. ¿Podéis darme más información del servicio?') }}"
                    target="_blank" rel="noopener" class="btn primary big">
-                    💬 Hablar por WhatsApp
+                    💬 Consultar por WhatsApp
                 </a>
                 <a href="tel:+34675701439" class="btn ghost big">
                     📞 675 70 14 39
@@ -1024,7 +1005,7 @@
             @endif
             <span class="brand-text">JJ Import Motors</span>
         </div>
-        <div class="slogan">Especialistas en importación de vehículos desde Alemania</div>
+        <div class="slogan">Especialistas en importación de vehículos desde Alemania y España</div>
         <div class="links">
             <a href="mailto:jjimportmotors@gmail.com">jjimportmotors@gmail.com</a>
             <span style="opacity: 0.4;">·</span>
@@ -1035,7 +1016,7 @@
             <span>Huelva, España</span>
         </div>
         <div class="copy">
-            © {{ date('Y') }} JJ Import Motors · Todos los precios incluyen IVA · Dossier generado el {{ now()->format('d/m/Y H:i') }}
+            © {{ date('Y') }} JJ Import Motors · Dossier generado el {{ now()->format('d/m/Y H:i') }}
         </div>
     </footer>
 
