@@ -1055,7 +1055,7 @@
                 'Versión' => $car->version,
             ];
             foreach ($extras as $k => $v) {
-                if ($v && ! collect($specRows)->contains(fn($r) => strtolower($r['k']) === strtolower($k))) {
+                if ($v && ! collect($specRows)->contains(fn($r) => mb_strtolower($r['k']) === mb_strtolower($k))) {
                     $specRows[] = ['k' => $k, 'v' => $v];
                 }
             }
