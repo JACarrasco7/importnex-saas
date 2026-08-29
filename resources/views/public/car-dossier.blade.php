@@ -71,6 +71,8 @@
             box-shadow: 0 4px 14px rgba(232, 89, 12, 0.4);
             flex-shrink: 0;
         }
+        .nav-cta .ic { width: 16px; height: 16px; }
+        .plazo-chip .ic { width: 13px; height: 13px; }
         .nav-cta:hover { background: #d44a08; transform: translateY(-1px); }
 
         /* ── HERO ──────────────────────────────────────── */
@@ -99,19 +101,20 @@
             gap: 60px; align-items: center;
         }
         .hero-eyebrow {
-            display: inline-flex; align-items: center; gap: 8px;
-            background: rgba(232, 89, 12, 0.15);
-            border: 1px solid rgba(232, 89, 12, 0.4);
-            color: #fed7aa;
-            padding: 7px 14px; border-radius: 100px;
-            font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+            display: inline-flex; align-items: center; gap: 9px;
+            background: rgba(232, 89, 12, 0.12);
+            border: 1px solid rgba(232, 89, 12, 0.35);
+            color: #fdba74;
+            padding: 7px 16px; border-radius: 100px;
+            font-size: 11px; font-weight: 700; letter-spacing: 1.4px;
             text-transform: uppercase;
-            margin-bottom: 20px;
-            animation: pulse 2.4s ease-in-out infinite;
+            margin-bottom: 16px;
         }
-        @keyframes pulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(232, 89, 12, 0.4); }
-            50% { box-shadow: 0 0 0 8px rgba(232, 89, 12, 0); }
+        .hero-eyebrow::before {
+            content: ''; width: 7px; height: 7px; border-radius: 50%;
+            background: var(--orange);
+            box-shadow: 0 0 0 3px rgba(232, 89, 12, 0.22);
+            flex-shrink: 0;
         }
         .h1 {
             font-size: clamp(40px, 6vw, 76px); font-weight: 800; line-height: 1.02;
@@ -232,6 +235,12 @@
             color: #fff; border-color: rgba(255, 255, 255, 0.18);
         }
         .btn.ghost:hover { background: rgba(255, 255, 255, 0.16); }
+        .btn .ic { width: 18px; height: 18px; flex-shrink: 0; }
+        .btn.wa {
+            background: #25D366; color: #06240f;
+            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.35);
+        }
+        .btn.wa:hover { background: #1fb959; transform: translateY(-2px); box-shadow: 0 10px 24px rgba(37, 211, 102, 0.45); }
 
         .hero-photo {
             position: relative;
@@ -250,26 +259,6 @@
         }
         .hero-photo-empty span { font-size: 13px; font-weight: 600; opacity: 0.7; }
         .hero-photo img { width: 100%; height: 100%; object-fit: cover; }
-        .hero-photo-badge {
-            position: absolute; top: 16px; left: 16px;
-            background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px);
-            color: #fff;
-            padding: 8px 14px; border-radius: 100px;
-            font-size: 11px; font-weight: 700; letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-        .hero-photo-badge.live {
-            background: rgba(16, 185, 129, 0.9);
-            display: inline-flex; align-items: center; gap: 6px;
-        }
-        .hero-photo-badge.live::before {
-            content: ''; width: 6px; height: 6px; border-radius: 50%;
-            background: #fff; animation: pulse-dot 1.6s ease-in-out infinite;
-        }
-        @keyframes pulse-dot {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-        }
 
         /* ── TRUST BAR ─────────────────────────────────── */
         .trust {
@@ -529,50 +518,6 @@
             margin-top: 2px;
         }
 
-        /* ── FINANCIACIÓN ─────────────────────────────── */
-        .financ {
-            background: linear-gradient(135deg, var(--estoril) 0%, var(--estoril-2) 100%);
-            border-radius: 24px;
-            padding: 44px 44px;
-            margin-bottom: 60px;
-            position: relative;
-            overflow: hidden;
-        }
-        .financ::before {
-            content: ''; position: absolute;
-            top: -50%; right: -10%;
-            width: 400px; height: 400px;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.06) 0%, transparent 70%);
-            pointer-events: none;
-        }
-        .financ-inner {
-            display: grid; grid-template-columns: 1.4fr 1fr; gap: 40px;
-            align-items: center;
-            position: relative;
-        }
-        .financ h2 {
-            font-size: clamp(24px, 3vw, 32px); font-weight: 800; color: #fff;
-            margin-bottom: 14px;
-        }
-        .financ p { color: #c7d4f5; font-size: 15px; line-height: 1.6; margin-bottom: 24px; }
-        .financ-price {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            border-radius: 16px;
-            padding: 28px 32px;
-            text-align: center;
-        }
-        .financ-from {
-            font-size: 11px; text-transform: uppercase; letter-spacing: 2px;
-            color: #c7d4f5; font-weight: 700; margin-bottom: 8px;
-        }
-        .financ-amount {
-            font-size: 42px; font-weight: 900; color: #fff;
-            line-height: 1; margin-bottom: 6px;
-        }
-        .financ-amount small { font-size: 18px; opacity: 0.7; font-weight: 700; }
-        .financ-detail { font-size: 12px; color: #c7d4f5; margin-top: 12px; }
-
         /* ── TIPS ─────────────────────────────────────── */
         .tips {
             background: rgba(26, 48, 109, 0.4);
@@ -585,7 +530,7 @@
             font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 20px;
             display: flex; align-items: center; gap: 10px;
         }
-        .tips h3::before { content: '💡'; font-size: 24px; }
+        .tips h3 svg { width: 22px; height: 22px; color: var(--gold); flex-shrink: 0; }
         .tips ul { list-style: none; }
         .tips li {
             font-size: 14px; color: #e5e7eb; line-height: 1.6;
@@ -738,7 +683,8 @@
                 <a href="#detalles" class="nav-link">Detalles</a>
             </div>
             <a href="tel:+34675701439" class="nav-cta">
-                📞 <span class="long">675 70 14 39</span>
+                <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+                <span class="long">675 70 14 39</span>
             </a>
         </div>
     </nav>
@@ -751,6 +697,7 @@
         $cambioTxt = $car->transmission ?: $esqueleto?->uno('CAMBIO');
         $kmTxt = $car->mileage ? number_format($car->mileage, 0, ',', '.').' km' : null;
         $anioTxt = $car->year ?: null;
+        if ($anioTxt && preg_match('/\d{4}/', $anioTxt, $mYear)) { $anioTxt = $mYear[0]; }
         $fuelMap = ['Gasoline' => 'Gasolina', 'Diesel' => 'Diésel', 'Hybrid' => 'Híbrido', 'Electric' => 'Eléctrico', 'LPG' => 'GLP', 'gasolina' => 'Gasolina', 'diesel' => 'Diésel'];
         $fuelTxt = isset($fuelMap[$car->fuel]) ? $fuelMap[$car->fuel] : ($car->fuel ?: null);
         $dgt = $esqueleto?->uno('ETIQUETA_DGT');
@@ -764,7 +711,7 @@
     <header class="hero">
         <div class="hero-inner">
             <div class="hero-left">
-                <div class="hero-eyebrow">⚡ Dossier exclusivo · {{ $esEspaña ? 'Búsqueda en España' : 'Importación desde '.$car->pais_origen }}</div>
+                <div class="hero-eyebrow">Dossier exclusivo · {{ $esEspaña ? 'Búsqueda en España' : 'Importación desde '.$car->pais_origen }}</div>
                 @if($dgt)
                     <div class="dgt-badge dgt-{{ strtolower($dgt) }}">
                         <span class="dgt-label">Etiqueta</span> {{ strtoupper($dgt) }}
@@ -799,17 +746,22 @@
                         <div class="price-note">{{ $precioNota }}</div>
                     @endif
                     @if($plazo)
-                        <div class="plazo-chip">⏱ {{ $plazo }}</div>
+                        <div class="plazo-chip">
+                            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            {{ $plazo }}
+                        </div>
                     @endif
                 </div>
 
                 <div class="hero-actions">
                     <a href="https://wa.me/34675701439?text={{ urlencode('Hola, me interesa el '.$car->brand.' '.$car->model.'. ¿Podéis darme más información del servicio?') }}"
-                       target="_blank" rel="noopener" class="btn primary">
-                        💬 Consultar por WhatsApp
+                       target="_blank" rel="noopener" class="btn wa">
+                        <svg class="ic" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.87 9.87 0 004.74 1.21h.01c5.46 0 9.9-4.45 9.9-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0012.04 2zm0 18.15c-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.26 8.26 0 01-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24 2.2 0 4.27.86 5.82 2.42a8.18 8.18 0 012.41 5.83c-.01 4.54-3.7 8.23-8.22 8.23zm4.52-6.16c-.25-.13-1.47-.72-1.69-.8-.23-.08-.39-.13-.56.12-.16.25-.64.81-.78.97-.15.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.01-.38.11-.51.11-.11.25-.29.37-.43.13-.15.17-.25.25-.42.08-.17.04-.31-.02-.43-.06-.13-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.42h-.48c-.17 0-.43.06-.66.31-.22.25-.86.85-.86 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.22-.16-.47-.28z"/></svg>
+                        Consultar por WhatsApp
                     </a>
                     <a href="tel:+34675701439" class="btn ghost">
-                        📞 Llamar ahora
+                        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+                        Llamar ahora
                     </a>
                 </div>
             </div>
@@ -1094,14 +1046,10 @@
             </section>
         @endif
 
-        {{-- FINANCIACIÓN (NO APLICA — SOLO SERVICIO) --}}
-        {{-- No mostramos financiación porque JJ Import Motors solo ofrece servicio de importación --}}
-
-
         {{-- TIPS (BD) --}}
         @if($car->tips && count($car->tips) > 0)
             <section class="tips">
-                <h3>Cosas que debes saber antes de comprar</h3>
+                <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 22h4M12 2a7 7 0 00-4 12.7c.6.5 1 1.4 1 2.3h6c0-.9.4-1.8 1-2.3A7 7 0 0012 2z"/></svg> Cosas que debes saber antes de comprar</h3>
                 <ul>
                     @foreach($car->tips as $t)
                         <li>{{ is_string($t) ? $t : ($t['text'] ?? '') }}</li>
@@ -1117,11 +1065,13 @@
             <p>Este precio es el del vehículo. Nosotros gestionamos {{ $esEspaña ? 'la compra' : 'la importación' }} y todos los trámites para que lo recibas listo en tu domicilio{{ $plazo ? ' en '.$plazo : '' }}.</p>
             <div class="cta-buttons">
                 <a href="https://wa.me/34675701439?text={{ urlencode('Hola, me interesa el '.$car->brand.' '.$car->model.'. ¿Podéis darme más información del servicio?') }}"
-                   target="_blank" rel="noopener" class="btn primary big">
-                    💬 Consultar por WhatsApp
+                   target="_blank" rel="noopener" class="btn wa big">
+                    <svg class="ic" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.87 9.87 0 004.74 1.21h.01c5.46 0 9.9-4.45 9.9-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0012.04 2zm0 18.15c-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.26 8.26 0 01-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24 2.2 0 4.27.86 5.82 2.42a8.18 8.18 0 012.41 5.83c-.01 4.54-3.7 8.23-8.22 8.23zm4.52-6.16c-.25-.13-1.47-.72-1.69-.8-.23-.08-.39-.13-.56.12-.16.25-.64.81-.78.97-.15.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.01-.38.11-.51.11-.11.25-.29.37-.43.13-.15.17-.25.25-.42.08-.17.04-.31-.02-.43-.06-.13-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.42h-.48c-.17 0-.43.06-.66.31-.22.25-.86.85-.86 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.22-.16-.47-.28z"/></svg>
+                    Consultar por WhatsApp
                 </a>
                 <a href="tel:+34675701439" class="btn ghost big">
-                    📞 675 70 14 39
+                    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+                    675 70 14 39
                 </a>
             </div>
         </section>
