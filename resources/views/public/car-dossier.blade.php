@@ -384,11 +384,14 @@
             gap: 18px;
         }
         .incluye-item {
-            display: flex; gap: 12px;
+            display: flex; gap: 12px; align-items: flex-start;
             font-size: 14px; color: #e5e7eb;
         }
         .incluye-item strong {
             display: block; color: #fff; font-size: 14px; margin-bottom: 2px;
+        }
+        .incluye-desc {
+            display: block; font-size: 12.5px; color: #9fb3d1; line-height: 1.45;
         }
         .incluye-check {
             width: 22px; height: 22px; border-radius: 50%;
@@ -396,6 +399,7 @@
             color: var(--green); flex-shrink: 0;
             display: flex; align-items: center; justify-content: center;
             font-size: 12px; font-weight: 700;
+            margin-top: 1px;
         }
 
         /* ── GALERÍA ───────────────────────────────────── */
@@ -424,6 +428,7 @@
             display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
             margin-bottom: 80px;
         }
+        .proscons.single { grid-template-columns: 1fr; }
         .pc-col {
             border-radius: 18px; padding: 30px 32px;
             border: 1px solid rgba(143, 163, 217, 0.25);
@@ -707,7 +712,6 @@
         $dgt = $esqueleto?->uno('ETIQUETA_DGT');
         $tituloFicha = $esqueleto?->uno('TITULO');
         $claimFicha = $esqueleto?->uno('CLAIM');
-        $precioCaption = $esqueleto?->uno('PRECIO_CAPTION');
         $precioNota = $esqueleto?->uno('PRECIO_NOTA');
         $plazo = $esqueleto?->uno('PLAZO');
         $claimParts = array_filter([$potencia, $fuelTxt, $kmTxt]);
@@ -749,8 +753,8 @@
                     @else
                         <div class="price-value price-on-request">A consultar</div>
                     @endif
-                    <div class="price-caption">{{ $precioCaption ?? '+ costes de servicio y gestión' }}</div>
-                    @if($precioNota)
+                    <div class="price-caption">+ gastos de gestión y servicio aparte</div>
+                    @if($precioNota && ! $esEspaña)
                         <div class="price-note">{{ $precioNota }}</div>
                     @endif
                     @if($plazo)
@@ -904,39 +908,36 @@
             </section>
         @endif
 
-        {{-- INCLUYE (contenido real de la ficha; fallback a servicio genérico) --}}
+        {{-- QUÉ INCLUYE EL SERVICIO --}}
         @php
-            $incluyeFicha = $esqueleto ? $esqueleto->todos('INCLUYE') : [];
-            $incluyeFallback = [
-                ['strong' => $esEspaña ? 'Búsqueda en España' : 'Búsqueda e importación', 'txt' => 'Buscamos el mejor coche para ti'],
-                ['strong' => 'Inspección previa', 'txt' => 'Revisión del vehículo antes de '.($esEspaña ? 'comprar' : 'importar')],
-                ['strong' => 'Gestión completa', 'txt' => $esEspaña ? 'Trámites y transporte' : 'Trámites, transporte y matriculación'],
-                ['strong' => 'Historial verificado', 'txt' => 'Origen y kilometraje confirmados'],
-                ['strong' => 'Entrega a domicilio', 'txt' => 'Te lo dejamos en tu puerta'],
-                ['strong' => 'Acompañamiento', 'txt' => 'Contigo durante todo el proceso'],
-            ];
+            $servicioItems = $esEspaña
+                ? [
+                    ['t' => 'Búsqueda y selección', 'd' => 'Localizamos y negociamos la mejor unidad en España para ti'],
+                    ['t' => 'Inspección y verificación', 'd' => 'Revisamos historial, kilometraje y estado antes de cerrar'],
+                    ['t' => 'Traslado hasta tu domicilio', 'd' => 'Nos encargamos del transporte y la logística'],
+                    ['t' => 'Gestoría y transferencia', 'd' => 'Toda la documentación a tu nombre, sin papeleos'],
+                    ['t' => 'Entrega llave en mano', 'd' => 'Lo recibes revisado y listo para circular'],
+                ]
+                : [
+                    ['t' => 'Búsqueda y selección', 'd' => 'Localizamos y negociamos la mejor unidad en Alemania'],
+                    ['t' => 'Inspección previa en origen', 'd' => 'Verificamos historial, estado y documentación antes de comprar'],
+                    ['t' => 'Importación y transporte', 'd' => 'Trámites de importación y traslado hasta Huelva'],
+                    ['t' => 'Matriculación en España', 'd' => 'Impuestos, ITV y matriculación a tu nombre'],
+                    ['t' => 'Entrega llave en mano', 'd' => 'Lo recibes matriculado y listo para circular'],
+                ];
         @endphp
         <section class="incluye">
-            <h3>Qué incluye este precio</h3>
+            <h3>Qué incluye nuestro servicio</h3>
             <div class="incluye-grid">
-                @if(count($incluyeFicha) > 0)
-                    @foreach($incluyeFicha as $item)
-                        <div class="incluye-item">
-                            <span class="incluye-check">✓</span>
-                            <div><strong>{{ $item }}</strong></div>
+                @foreach($servicioItems as $item)
+                    <div class="incluye-item">
+                        <span class="incluye-check">✓</span>
+                        <div>
+                            <strong>{{ $item['t'] }}</strong>
+                            <span class="incluye-desc">{{ $item['d'] }}</span>
                         </div>
-                    @endforeach
-                @else
-                    @foreach($incluyeFallback as $item)
-                        <div class="incluye-item">
-                            <span class="incluye-check">✓</span>
-                            <div>
-                                <strong>{{ $item['strong'] }}</strong>
-                                {{ $item['txt'] }}
-                            </div>
-                        </div>
-                    @endforeach
-                @endif
+                    </div>
+                @endforeach
             </div>
         </section>
 
@@ -955,42 +956,23 @@
             </section>
         @endif
 
-        {{-- PROS / CONS (desde BD: análisis con peso) --}}
-        @php
-            $prosDb = $car->pros ?? [];
-            $consDb = $car->cons ?? [];
-        @endphp
-        @if(count($prosDb) > 0 || count($consDb) > 0)
+        {{-- PUNTOS FUERTES (solo lo bueno; el análisis de riesgos queda interno) --}}
+        @php $prosDb = $car->pros ?? []; @endphp
+        @if(count($prosDb) > 0)
             <section>
-                <div class="section-title">Puntos clave</div>
-                <h2 class="section-h">Lo bueno y lo que debes saber</h2>
-                <div class="proscons">
-                    @if(count($prosDb) > 0)
-                        <div class="pc-col pros">
-                            <h3>Puntos a favor</h3>
-                            <ul>
-                                @foreach($prosDb as $p)
-                                    <li>
-                                        {{ $p['text'] ?? $p }}
-                                        @if(($p['weight'] ?? '') === 'high')<span class="w-badge w-high">clave</span>@endif
-                                    </li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
-                    @if(count($consDb) > 0)
-                        <div class="pc-col cons">
-                            <h3>Aspectos a considerar</h3>
-                            <ul>
-                                @foreach($consDb as $c)
-                                    <li>
-                                        {{ $c['text'] ?? $c }}
-                                        @if(($c['weight'] ?? '') === 'medium')<span class="w-badge w-med">revisar</span>@endif
-                                    </li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
+                <div class="section-title">Nuestro análisis</div>
+                <h2 class="section-h">Puntos fuertes de este coche</h2>
+                <div class="proscons single">
+                    <div class="pc-col pros">
+                        <ul>
+                            @foreach($prosDb as $p)
+                                <li>
+                                    {{ $p['text'] ?? $p }}
+                                    @if(($p['weight'] ?? '') === 'high')<span class="w-badge w-high">clave</span>@endif
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
                 </div>
             </section>
         @endif
