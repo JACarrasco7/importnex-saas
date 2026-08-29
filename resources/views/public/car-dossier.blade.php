@@ -6,7 +6,7 @@
     <title>{{ $car->brand }} {{ $car->model }} · JJ Import Motors</title>
     <meta name="robots" content="noindex, nofollow">
     <meta property="og:title" content="{{ $car->brand }} {{ $car->model }} · JJ Import Motors">
-    <meta property="og:description" content="{{ number_format(($car->sale_price ?? $car->purchase_price ?? 0), 0, ',', '.') }} € · Llave en mano · IVA incluido">
+    <meta property="og:description" content="{{ number_format(($car->sale_price ?? $car->purchase_price ?? 0), 0, ',', '.') }} € · {{ $car->mileage ? number_format($car->mileage, 0, ',', '.').' km' : '' }} · Dossier JJ Import Motors">
     @if(count($fotos) > 0)
         <meta property="og:image" content="{{ $fotos[0] }}">
     @endif
@@ -153,6 +153,65 @@
             line-height: 1; letter-spacing: -1px;
         }
         .price-caption { font-size: 12px; color: #cbd5e1; margin-top: 8px; }
+        .price-note { font-size: 10px; color: #94a3b8; margin-top: 6px; line-height: 1.4; max-width: 280px; }
+        .plazo-chip {
+            display: inline-flex; align-items: center; gap: 6px;
+            margin-top: 12px; padding: 6px 12px; border-radius: 100px;
+            background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.35);
+            color: #4ade80; font-size: 12px; font-weight: 700;
+        }
+        .hero-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+        .chip {
+            padding: 6px 14px; border-radius: 100px;
+            background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15);
+            font-size: 12.5px; font-weight: 600; color: #e5e7eb;
+            backdrop-filter: blur(6px);
+        }
+        .dgt-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 8px 16px; border-radius: 10px; margin-bottom: 18px;
+            font-weight: 900; font-size: 16px; letter-spacing: 1px;
+            border: 2px solid;
+        }
+        .dgt-badge .dgt-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; }
+        .dgt-0 { background: rgba(59, 130, 246, 0.15); border-color: #3b82f6; color: #93c5fd; }
+        .dgt-eco { background: rgba(16, 185, 129, 0.15); border-color: #10b981; color: #6ee7b7; }
+        .dgt-b { background: rgba(34, 197, 94, 0.15); border-color: #22c55e; color: #86efac; }
+        .dgt-c { background: rgba(250, 204, 21, 0.15); border-color: #facc15; color: #fde047; }
+        .verdict-badge {
+            display: inline-flex; align-items: center;
+            padding: 7px 16px; border-radius: 100px;
+            font-size: 12px; font-weight: 800; letter-spacing: 1px;
+            text-transform: uppercase; margin-bottom: 14px;
+        }
+        .v-green { background: rgba(16, 185, 129, 0.2); color: #4ade80; border: 1px solid rgba(16, 185, 129, 0.4); }
+        .v-orange { background: rgba(232, 89, 12, 0.2); color: #fdba74; border: 1px solid rgba(232, 89, 12, 0.4); }
+        .v-red { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
+        .argumentos-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+            margin-bottom: 80px;
+        }
+        .argumento-item {
+            display: flex; gap: 14px; align-items: flex-start;
+            background: rgba(143, 163, 217, 0.06);
+            border: 1px solid rgba(143, 163, 217, 0.2);
+            border-radius: 14px; padding: 20px 22px;
+            font-size: 14.5px; color: #e5e7eb; line-height: 1.55;
+        }
+        .argumento-check {
+            color: var(--gold); font-size: 18px; flex-shrink: 0;
+            background: rgba(244, 197, 66, 0.12);
+            width: 34px; height: 34px; border-radius: 50%;
+            display: inline-flex; align-items: center; justify-content: center;
+        }
+        .w-badge {
+            display: inline-block; margin-left: 8px; padding: 2px 8px;
+            border-radius: 100px; font-size: 10px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.5px; vertical-align: middle;
+        }
+        .w-high { background: rgba(16, 185, 129, 0.2); color: #4ade80; }
+        .w-med { background: rgba(250, 204, 21, 0.15); color: #fde047; }
+        .legal { font-size: 10.5px; color: #64748b; margin-top: 12px; line-height: 1.5; max-width: 720px; margin-left: auto; margin-right: auto; }
 
         .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
         .btn {
@@ -650,12 +709,10 @@
             .equip { grid-template-columns: 1fr; }
             .verdict { padding: 28px 22px; }
             .incluye { padding: 26px 22px; }
-            .financ { padding: 30px 22px; }
-            .financ-inner { grid-template-columns: 1fr; gap: 24px; }
+            .argumentos-grid { grid-template-columns: 1fr; margin-bottom: 50px; }
             .tips { padding: 24px 22px; }
             .cta-final { padding: 40px 22px; }
             .price-value { font-size: 36px; }
-            .financ-amount { font-size: 36px; }
             .h1 { font-size: 38px; }
         }
         @media (max-width: 480px) {
@@ -688,35 +745,62 @@
 
     {{-- ── HERO ────────────────────────────────────────── --}}
     @php
+        $esEspaña = ! $car->isImport();
         $precio = $car->sale_price ?? $car->purchase_price ?? 0;
-        $potencia = $esqueleto?->uno('POTENCIA');
-        $cambioTxt = $esqueleto?->uno('CAMBIO') ?? $car->transmission;
-        $kmTxt = $car->km ? number_format($car->km, 0, ',', '.').' km' : null;
+        $potencia = $esqueleto?->uno('POTENCIA') ?? ($car->cv ? $car->cv.' CV' : null);
+        $cambioTxt = $car->transmission ?: $esqueleto?->uno('CAMBIO');
+        $kmTxt = $car->mileage ? number_format($car->mileage, 0, ',', '.').' km' : null;
         $anioTxt = $car->year ?: null;
-        $claimParts = array_filter([
-            $potencia,
-            $cambioTxt ? 'cambio '.strtolower($cambioTxt) : null,
-            $kmTxt,
-        ]);
+        $fuelMap = ['Gasoline' => 'Gasolina', 'Diesel' => 'Diésel', 'Hybrid' => 'Híbrido', 'Electric' => 'Eléctrico', 'LPG' => 'GLP', 'gasolina' => 'Gasolina', 'diesel' => 'Diésel'];
+        $fuelTxt = isset($fuelMap[$car->fuel]) ? $fuelMap[$car->fuel] : ($car->fuel ?: null);
+        $dgt = $esqueleto?->uno('ETIQUETA_DGT');
+        $tituloFicha = $esqueleto?->uno('TITULO');
+        $claimFicha = $esqueleto?->uno('CLAIM');
+        $precioCaption = $esqueleto?->uno('PRECIO_CAPTION');
+        $precioNota = $esqueleto?->uno('PRECIO_NOTA');
+        $plazo = $esqueleto?->uno('PLAZO');
+        $claimParts = array_filter([$potencia, $fuelTxt, $kmTxt]);
     @endphp
     <header class="hero">
         <div class="hero-inner">
             <div class="hero-left">
-                <div class="hero-eyebrow">⚡ Dossier exclusivo · Servicio de importación/búsqueda</div>
+                <div class="hero-eyebrow">⚡ Dossier exclusivo · {{ $esEspaña ? 'Búsqueda en España' : 'Importación desde '.$car->pais_origen }}</div>
+                @if($dgt)
+                    <div class="dgt-badge dgt-{{ strtolower($dgt) }}">
+                        <span class="dgt-label">Etiqueta</span> {{ strtoupper($dgt) }}
+                    </div>
+                @endif
                 <h1 class="h1">
                     {{ $car->brand }}<br>
                     <span class="accent">{{ $car->model }}</span>
                 </h1>
-                @if(count($claimParts) > 0)
-                    <p class="claim">{{ implode(' · ', $claimParts) }} · {{ $car->origin_country === 'Alemania' ? 'Importado' : 'Búsqueda en España' }} y listo para entrega</p>
+                @if($claimFicha)
+                    <p class="claim">{{ $claimFicha }}</p>
+                @elseif(count($claimParts) > 0)
+                    <p class="claim">{{ implode(' · ', $claimParts) }} · {{ $esEspaña ? 'Disponible en España' : 'Listo para importar' }}</p>
                 @else
-                    <p class="claim">{{ $car->origin_country === 'Alemania' ? 'Importado' : 'Búsqueda en España' }} y listo para entrega</p>
+                    <p class="claim">{{ $esEspaña ? 'Disponible en España' : 'Listo para importar' }}</p>
+                @endif
+
+                @if(count($claimParts) > 0)
+                    <div class="hero-chips">
+                        @foreach($claimParts as $chip)
+                            <span class="chip">{{ $chip }}</span>
+                        @endforeach
+                        @if($cambioTxt)<span class="chip">{{ $cambioTxt }}</span>@endif
+                    </div>
                 @endif
 
                 <div class="price-card">
                     <div class="price-label">Precio del vehículo</div>
                     <div class="price-value">{{ number_format($precio, 0, ',', '.') }} €</div>
-                    <div class="price-caption">+ costes de servicio y gestión · Llave en mano</div>
+                    <div class="price-caption">{{ $precioCaption ?? '+ costes de servicio y gestión' }}</div>
+                    @if($precioNota)
+                        <div class="price-note">{{ $precioNota }}</div>
+                    @endif
+                    @if($plazo)
+                        <div class="plazo-chip">⏱ {{ $plazo }}</div>
+                    @endif
                 </div>
 
                 <div class="hero-actions">
@@ -754,7 +838,7 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0112 2a8 8 0 018 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg>
                 </div>
                 <div class="trust-text">
-                    <strong>{{ $car->origin_country === 'Alemania' ? 'Importado desde Alemania' : 'Búsqueda en España' }}</strong>
+                    <strong>{{ $esEspaña ? 'Búsqueda en España' : 'Importado desde '.$car->pais_origen }}</strong>
                     Historial completo y verificado
                 </div>
             </div>
@@ -764,7 +848,7 @@
                 </div>
                 <div class="trust-text">
                     <strong>Inspección previa</strong>
-                    Revisión antes de importación
+                    Revisión antes de {{ $esEspaña ? 'comprar' : 'importar' }}
                 </div>
             </div>
             <div class="trust-item">
@@ -793,9 +877,10 @@
         $kpis = [
             ['k' => 'Año', 'v' => $anioTxt, 's' => $car->year ? 'Primera matriculación' : null, 'class' => ''],
             ['k' => 'Kilómetros', 'v' => $kmTxt ?? '—', 's' => 'Verificados', 'class' => ''],
-            ['k' => 'Combustible', 'v' => ucfirst($car->fuel_type ?? '—'), 's' => null, 'class' => ''],
+            ['k' => 'Combustible', 'v' => $fuelTxt ?? '—', 's' => null, 'class' => ''],
             ['k' => 'Cambio', 'v' => ucfirst($cambioTxt ?? '—'), 's' => null, 'class' => ''],
-            ['k' => 'Procedencia', 'v' => $car->origin_country ?? '—', 's' => 'Historial limpio', 'class' => 'green'],
+            ['k' => 'Potencia', 'v' => $potencia ?? '—', 's' => null, 'class' => ''],
+            ['k' => 'Procedencia', 'v' => $car->pais_origen ?? '—', 's' => 'Historial limpio', 'class' => 'green'],
         ];
         $kpis = array_filter($kpis, fn($x) => !empty($x['v']) && $x['v'] !== '—');
     @endphp
@@ -817,74 +902,81 @@
     <main class="container">
 
         {{-- VEREDICTO --}}
-        @if($esqueleto && ($v = $esqueleto->uno('DICTAMEN')))
+        @php
+            $verdictMap = [
+                'Buy' => ['label' => 'Recomendado', 'class' => 'v-green'],
+                'Buy if price drops' => ['label' => 'Comprar si baja de precio', 'class' => 'v-orange'],
+                'Doubtful' => ['label' => 'Dudoso', 'class' => 'v-orange'],
+                'Discard' => ['label' => 'No recomendado', 'class' => 'v-red'],
+            ];
+            $verdictInfo = $verdictMap[$car->verdict] ?? null;
+            $dictamen = $esqueleto?->uno('DICTAMEN');
+        @endphp
+        @if($dictamen || $verdictInfo)
             <section id="veredicto" class="verdict">
                 <div class="verdict-eyebrow">Veredicto JJ Import Motors</div>
-                <h2 class="verdict-h">{{ $esqueleto->uno('RESUMEN') ?? 'Nuestra recomendación' }}</h2>
-                <p class="verdict-body">{{ $v }}</p>
+                @if($verdictInfo)
+                    <div class="verdict-badge {{ $verdictInfo['class'] }}">{{ $verdictInfo['label'] }}</div>
+                @endif
+                <h2 class="verdict-h">{{ $esqueleto?->uno('RESUMEN') ?? $tituloFicha ?? 'Nuestra recomendación' }}</h2>
+                <p class="verdict-body">{{ $dictamen ?? $car->verdict_reasoning ?? 'Hemos analizado este vehículo en detalle: historial, estado, documentación y precio frente al mercado. El resultado de ese análisis está resumido aquí. Consúltanos cualquier duda.' }}</p>
                 <div class="verdict-footer">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
-                    Análisis actualizado el {{ now()->format('d/m/Y') }} · Basado en inspección física + datos del fabricante
-                </div>
-            </section>
-        @else
-            <section id="veredicto" class="verdict">
-                <div class="verdict-eyebrow">Veredicto JJ Import Motors</div>
-                <h2 class="verdict-h">Vehículo revisado y verificado</h2>
-                <p class="verdict-body">Te enviamos el dossier completo del vehículo con todos los detalles técnicos, historial, y nuestros comentarios profesionales. Llámanos para que te expliquemos los puntos fuertes y lo que debes tener en cuenta antes de decidir.</p>
-                <div class="verdict-footer">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
-                    Dossier generado el {{ now()->format('d/m/Y') }} · Información profesional verificada
+                    Análisis actualizado el {{ ($car->verdict_at ?? now())->format('d/m/Y') }} · Basado en inspección + datos del fabricante
                 </div>
             </section>
         @endif
 
-        {{-- INCLUYE (lo que va incluido en el precio) --}}
+        {{-- POR QUÉ ESTE COCHE (argumentos de la ficha) --}}
+        @php $argumentos = $esqueleto ? $esqueleto->todos('ARGUMENTO') : []; @endphp
+        @if(count($argumentos) > 0)
+            <section id="argumentos">
+                <div class="section-title">Argumentos</div>
+                <h2 class="section-h">¿Por qué este coche?</h2>
+                <div class="argumentos-grid">
+                    @foreach($argumentos as $arg)
+                        <div class="argumento-item">
+                            <span class="argumento-check">★</span>
+                            <div>{!! App\Support\Esqueleto::negrita($arg) !!}</div>
+                        </div>
+                    @endforeach
+                </div>
+            </section>
+        @endif
+
+        {{-- INCLUYE (contenido real de la ficha; fallback a servicio genérico) --}}
+        @php
+            $incluyeFicha = $esqueleto ? $esqueleto->todos('INCLUYE') : [];
+            $incluyeFallback = [
+                ['strong' => $esEspaña ? 'Búsqueda en España' : 'Búsqueda e importación', 'txt' => 'Buscamos el mejor coche para ti'],
+                ['strong' => 'Inspección previa', 'txt' => 'Revisión del vehículo antes de '.($esEspaña ? 'comprar' : 'importar')],
+                ['strong' => 'Gestión completa', 'txt' => $esEspaña ? 'Trámites y transporte' : 'Trámites, transporte y matriculación'],
+                ['strong' => 'Historial verificado', 'txt' => 'Origen y kilometraje confirmados'],
+                ['strong' => 'Entrega a domicilio', 'txt' => 'Te lo dejamos en tu puerta'],
+                ['strong' => 'Acompañamiento', 'txt' => 'Contigo durante todo el proceso'],
+            ];
+        @endphp
         <section class="incluye">
-            <h3>Qué incluye nuestro servicio</h3>
+            <h3>Qué incluye este precio</h3>
             <div class="incluye-grid">
-                <div class="incluye-item">
-                    <span class="incluye-check">✓</span>
-                    <div>
-                        <strong>{{ $car->origin_country === 'Alemania' ? 'Búsqueda e importación' : 'Búsqueda en España' }}</strong>
-                        Buscamos el mejor coche para ti
-                    </div>
-                </div>
-                <div class="incluye-item">
-                    <span class="incluye-check">✓</span>
-                    <div>
-                        <strong>Inspección previa</strong>
-                        Revisión del vehículo antes de {{ $car->origin_country === 'Alemania' ? 'importar' : 'comprar' }}
-                    </div>
-                </div>
-                <div class="incluye-item">
-                    <span class="incluye-check">✓</span>
-                    <div>
-                        <strong>Gestión completa</strong>
-                        {{ $car->origin_country === 'Alemania' ? 'Trámites, transporte y matriculación' : 'Trámites y transporte' }}
-                    </div>
-                </div>
-                <div class="incluye-item">
-                    <span class="incluye-check">✓</span>
-                    <div>
-                        <strong>Historial verificado</strong>
-                        Origen y kilometraje confirmados
-                    </div>
-                </div>
-                <div class="incluye-item">
-                    <span class="incluye-check">✓</span>
-                    <div>
-                        <strong>Entrega a domicilio</strong>
-                        Te lo dejamos en tu puerta
-                    </div>
-                </div>
-                <div class="incluye-item">
-                    <span class="incluye-check">✓</span>
-                    <div>
-                        <strong>Acompañamiento</strong>
-                        Contigo durante todo el proceso
-                    </div>
-                </div>
+                @if(count($incluyeFicha) > 0)
+                    @foreach($incluyeFicha as $item)
+                        <div class="incluye-item">
+                            <span class="incluye-check">✓</span>
+                            <div><strong>{{ $item }}</strong></div>
+                        </div>
+                    @endforeach
+                @else
+                    @foreach($incluyeFallback as $item)
+                        <div class="incluye-item">
+                            <span class="incluye-check">✓</span>
+                            <div>
+                                <strong>{{ $item['strong'] }}</strong>
+                                {{ $item['txt'] }}
+                            </div>
+                        </div>
+                    @endforeach
+                @endif
             </div>
         </section>
 
@@ -903,55 +995,69 @@
             </section>
         @endif
 
-        {{-- PROS / CONS --}}
-        @if($esqueleto)
-            @php
-                $aFavor = $esqueleto->lista('A_FAVOR');
-                $enContra = $esqueleto->lista('EN_CONTRA');
-            @endphp
-            @if(count($aFavor) > 0 || count($enContra) > 0)
-                <section>
-                    <div class="section-title">Puntos clave</div>
-                    <h2 class="section-h">Lo bueno y lo que debes saber</h2>
-                    <div class="proscons">
-                        @if(count($aFavor) > 0)
-                            <div class="pc-col pros">
-                                <h3>Puntos a favor</h3>
-                                <ul>
-                                    @foreach($aFavor as $item)
-                                        <li>{{ $item }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
-                        @if(count($enContra) > 0)
-                            <div class="pc-col cons">
-                                <h3>Aspectos a considerar</h3>
-                                <ul>
-                                    @foreach($enContra as $item)
-                                        <li>{{ $item }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
-                    </div>
-                </section>
-            @endif
+        {{-- PROS / CONS (desde BD: análisis con peso) --}}
+        @php
+            $prosDb = $car->pros ?? [];
+            $consDb = $car->cons ?? [];
+        @endphp
+        @if(count($prosDb) > 0 || count($consDb) > 0)
+            <section>
+                <div class="section-title">Puntos clave</div>
+                <h2 class="section-h">Lo bueno y lo que debes saber</h2>
+                <div class="proscons">
+                    @if(count($prosDb) > 0)
+                        <div class="pc-col pros">
+                            <h3>Puntos a favor</h3>
+                            <ul>
+                                @foreach($prosDb as $p)
+                                    <li>
+                                        {{ $p['text'] ?? $p }}
+                                        @if(($p['weight'] ?? '') === 'high')<span class="w-badge w-high">clave</span>@endif
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                    @if(count($consDb) > 0)
+                        <div class="pc-col cons">
+                            <h3>Aspectos a considerar</h3>
+                            <ul>
+                                @foreach($consDb as $c)
+                                    <li>
+                                        {{ $c['text'] ?? $c }}
+                                        @if(($c['weight'] ?? '') === 'medium')<span class="w-badge w-med">revisar</span>@endif
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                </div>
+            </section>
         @endif
 
-        {{-- ESPECIFICACIONES --}}
+        {{-- ESPECIFICACIONES (SPEC de la ficha + datos de BD) --}}
         @php
             $specRows = [];
-            $specMap = [
-                'MARCA' => 'Marca', 'MODELO' => 'Modelo', 'VERSION' => 'Versión',
-                'ANIO' => 'Año', 'KM' => 'Kilómetros', 'POTENCIA' => 'Potencia',
-                'CAMBIO' => 'Cambio', 'COMBUSTIBLE' => 'Combustible',
-                'TRACCION' => 'Tracción', 'COLOR' => 'Color', 'PUERTAS' => 'Puertas',
-                'PLAZAS' => 'Plazas', 'ORIGEN' => 'Origen',
+            if ($esqueleto) {
+                foreach ($esqueleto->filas('SPEC') as $fila) {
+                    if (count($fila) >= 2) {
+                        $specRows[] = ['k' => $fila[0], 'v' => $fila[1]];
+                    }
+                }
+            }
+            $extras = [
+                'Color' => $car->color,
+                'Puertas' => $car->doors,
+                'Plazas' => $car->seats,
+                'Combustible' => $fuelTxt,
+                'Kilómetros' => $kmTxt,
+                'Procedencia' => $car->pais_origen,
+                'Versión' => $car->version,
             ];
-            foreach ($specMap as $key => $label) {
-                $val = $esqueleto?->uno($key);
-                if ($val) $specRows[] = ['k' => $label, 'v' => $val];
+            foreach ($extras as $k => $v) {
+                if ($v && ! collect($specRows)->contains(fn($r) => strtolower($r['k']) === strtolower($k))) {
+                    $specRows[] = ['k' => $k, 'v' => $v];
+                }
             }
         @endphp
         @if(count($specRows) > 0)
@@ -969,46 +1075,48 @@
             </section>
         @endif
 
-        {{-- EQUIPAMIENTO --}}
-        @if($esqueleto)
-            @php $equipamiento = $esqueleto->lista('EQUIPAMIENTO'); @endphp
-            @if(count($equipamiento) > 0)
-                <section>
-                    <div class="section-title">Equipamiento</div>
-                    <h2 class="section-h">Extras y opciones destacadas</h2>
-                    <div class="equip">
-                        @foreach($equipamiento as $item)
-                            <div class="equip-item">{{ $item }}</div>
-                        @endforeach
-                    </div>
-                </section>
-            @endif
-
-            {{-- TIPS --}}
-            @php $tips = $esqueleto->lista('TIPS'); @endphp
-            @if(count($tips) > 0)
-                <section class="tips">
-                    <h3>Cosas que debes saber antes de comprar</h3>
-                    <ul>
-                        @foreach($tips as $t)
-                            <li>{{ $t }}</li>
-                        @endforeach
-                    </ul>
-                </section>
-            @endif
+        {{-- EQUIPAMIENTO (ficha o BD) --}}
+        @php
+            $equipamiento = $esqueleto ? $esqueleto->lista('EQUIPAMIENTO') : [];
+            if (count($equipamiento) === 0 && $car->equipment) {
+                $equipamiento = $car->equipment;
+            }
+        @endphp
+        @if(count($equipamiento) > 0)
+            <section>
+                <div class="section-title">Equipamiento</div>
+                <h2 class="section-h">Extras y opciones destacadas</h2>
+                <div class="equip">
+                    @foreach($equipamiento as $item)
+                        <div class="equip-item">{{ is_string($item) ? $item : ($item['text'] ?? '') }}</div>
+                    @endforeach
+                </div>
+            </section>
         @endif
 
         {{-- FINANCIACIÓN (NO APLICA — SOLO SERVICIO) --}}
         {{-- No mostramos financiación porque JJ Import Motors solo ofrece servicio de importación --}}
 
 
+        {{-- TIPS (BD) --}}
+        @if($car->tips && count($car->tips) > 0)
+            <section class="tips">
+                <h3>Cosas que debes saber antes de comprar</h3>
+                <ul>
+                    @foreach($car->tips as $t)
+                        <li>{{ is_string($t) ? $t : ($t['text'] ?? '') }}</li>
+                    @endforeach
+                </ul>
+            </section>
+        @endif
+
         {{-- CTA FINAL --}}
         <section class="cta-final">
             <div class="cta-eyebrow">¿Te interesa este coche?</div>
             <h2>Consultanos el servicio completo</h2>
-            <p>Este precio es el del vehículo. Nosotros gestionamos {{ $car->origin_country === 'Alemania' ? 'la importación' : 'la compra' }} y todos los trámites para que lo recibas listo en tu domicilio. Llámanos o escríbenos para más detalles.</p>
+            <p>Este precio es el del vehículo. Nosotros gestionamos {{ $esEspaña ? 'la compra' : 'la importación' }} y todos los trámites para que lo recibas listo en tu domicilio{{ $plazo ? ' en '.$plazo : '' }}.</p>
             <div class="cta-buttons">
-                <a href="https://wa.me/34675701439?text={{ urlencode('Hola, me interesa importar el '.$car->brand.' '.$car->model.'. ¿Podéis darme más información del servicio?') }}"
+                <a href="https://wa.me/34675701439?text={{ urlencode('Hola, me interesa el '.$car->brand.' '.$car->model.'. ¿Podéis darme más información del servicio?') }}"
                    target="_blank" rel="noopener" class="btn primary big">
                     💬 Consultar por WhatsApp
                 </a>
@@ -1040,6 +1148,10 @@
         </div>
         <div class="copy">
             © {{ date('Y') }} JJ Import Motors · Dossier generado el {{ now()->format('d/m/Y H:i') }}
+            @php $legal = $esqueleto?->uno('LEGAL'); @endphp
+            @if($legal)
+                <div class="legal">{{ $legal }}</div>
+            @endif
         </div>
     </footer>
 
