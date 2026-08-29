@@ -738,7 +738,7 @@
                         @foreach($claimParts as $chip)
                             <span class="chip">{{ $chip }}</span>
                         @endforeach
-                        @if($cambioTxt)<span class="chip">{{ $cambioTxt }}</span>@endif
+                        @if($cambioTxt)<span class="chip">{{ ucfirst($cambioTxt) }}</span>@endif
                     </div>
                 @endif
 
