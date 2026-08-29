@@ -688,6 +688,7 @@
     {{-- ── HERO ────────────────────────────────────────── --}}
     @php
         $esEspaña = ! $car->isImport();
+        $origenTxt = $car->pais_origen ?: null;
         $precio = $car->purchase_price ?? 0;
         $potencia = $esqueleto?->uno('POTENCIA') ?? ($car->cv ? $car->cv.' CV' : null);
         $cambioTxt = $car->transmission ?: $esqueleto?->uno('CAMBIO');
@@ -714,7 +715,7 @@
     <header class="hero">
         <div class="hero-inner">
             <div class="hero-left">
-                <div class="hero-eyebrow">Dossier exclusivo · {{ $esEspaña ? 'Búsqueda en España' : 'Importación desde '.$car->pais_origen }}</div>
+                <div class="hero-eyebrow">Dossier exclusivo · {{ $esEspaña ? 'Búsqueda en España' : ($origenTxt ? 'Importación desde '.$origenTxt : 'Importación') }}</div>
                 @if($dgt)
                     <div class="dgt-badge dgt-{{ strtolower($dgt) }}">
                         <span class="dgt-label">Etiqueta</span> {{ strtoupper($dgt) }}
@@ -797,7 +798,7 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0112 2a8 8 0 018 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg>
                 </div>
                 <div class="trust-text">
-                    <strong>{{ $esEspaña ? 'Búsqueda en España' : 'Importado desde '.$car->pais_origen }}</strong>
+                    <strong>{{ $esEspaña ? 'Búsqueda en España' : ($origenTxt ? 'Importado desde '.$origenTxt : 'Importación') }}</strong>
                     Historial completo y verificado
                 </div>
             </div>
