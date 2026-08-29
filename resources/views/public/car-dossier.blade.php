@@ -6,7 +6,7 @@
     <title>{{ $car->brand }} {{ $car->model }} · JJ Import Motors</title>
     <meta name="robots" content="noindex, nofollow">
     <meta property="og:title" content="{{ $car->brand }} {{ $car->model }} · JJ Import Motors">
-    <meta property="og:description" content="{{ number_format(($car->sale_price ?? $car->purchase_price ?? 0), 0, ',', '.') }} € · {{ $car->mileage ? number_format($car->mileage, 0, ',', '.').' km' : '' }} · Dossier JJ Import Motors">
+    <meta property="og:description" content="{{ ($car->purchase_price ?? 0) > 0 ? number_format($car->purchase_price, 0, ',', '.').' € · ' : '' }}{{ $car->mileage ? number_format($car->mileage, 0, ',', '.').' km · ' : '' }}Dossier JJ Import Motors">
     @if(count($fotos) > 0)
         <meta property="og:image" content="{{ $fotos[0] }}">
     @endif
@@ -155,6 +155,7 @@
             -webkit-text-fill-color: transparent;
             line-height: 1; letter-spacing: -1px;
         }
+        .price-value.price-on-request { font-size: 30px; letter-spacing: 0; }
         .price-caption { font-size: 12px; color: #cbd5e1; margin-top: 8px; }
         .price-note { font-size: 10px; color: #94a3b8; margin-top: 6px; line-height: 1.4; max-width: 280px; }
         .plazo-chip {
@@ -225,11 +226,6 @@
             border: 1px solid transparent;
             transition: all 0.18s ease;
         }
-        .btn.primary {
-            background: var(--orange); color: #fff;
-            box-shadow: 0 6px 20px rgba(232, 89, 12, 0.4);
-        }
-        .btn.primary:hover { background: #d44a08; transform: translateY(-2px); box-shadow: 0 10px 24px rgba(232, 89, 12, 0.5); }
         .btn.ghost {
             background: rgba(255, 255, 255, 0.08);
             color: #fff; border-color: rgba(255, 255, 255, 0.18);
@@ -692,14 +688,21 @@
     {{-- ── HERO ────────────────────────────────────────── --}}
     @php
         $esEspaña = ! $car->isImport();
-        $precio = $car->sale_price ?? $car->purchase_price ?? 0;
+        $precio = $car->purchase_price ?? 0;
         $potencia = $esqueleto?->uno('POTENCIA') ?? ($car->cv ? $car->cv.' CV' : null);
         $cambioTxt = $car->transmission ?: $esqueleto?->uno('CAMBIO');
         $kmTxt = $car->mileage ? number_format($car->mileage, 0, ',', '.').' km' : null;
         $anioTxt = $car->year ?: null;
         if ($anioTxt && preg_match('/\d{4}/', $anioTxt, $mYear)) { $anioTxt = $mYear[0]; }
-        $fuelMap = ['Gasoline' => 'Gasolina', 'Diesel' => 'Diésel', 'Hybrid' => 'Híbrido', 'Electric' => 'Eléctrico', 'LPG' => 'GLP', 'gasolina' => 'Gasolina', 'diesel' => 'Diésel'];
-        $fuelTxt = isset($fuelMap[$car->fuel]) ? $fuelMap[$car->fuel] : ($car->fuel ?: null);
+        $fuelMap = [
+            'gasoline' => 'Gasolina', 'petrol' => 'Gasolina',
+            'diesel' => 'Diésel', 'gasoil' => 'Diésel', 'gasóleo' => 'Diésel',
+            'hybrid' => 'Híbrido', 'hibrido' => 'Híbrido', 'híbrido' => 'Híbrido',
+            'electric' => 'Eléctrico', 'electrico' => 'Eléctrico', 'eléctrico' => 'Eléctrico',
+            'lpg' => 'GLP', 'glp' => 'GLP', 'cng' => 'GNC', 'gnc' => 'GNC',
+        ];
+        $fuelKey = mb_strtolower(trim((string) $car->fuel));
+        $fuelTxt = $fuelMap[$fuelKey] ?? ($car->fuel ?: null);
         $dgt = $esqueleto?->uno('ETIQUETA_DGT');
         $tituloFicha = $esqueleto?->uno('TITULO');
         $claimFicha = $esqueleto?->uno('CLAIM');
@@ -740,7 +743,11 @@
 
                 <div class="price-card">
                     <div class="price-label">Precio del vehículo</div>
-                    <div class="price-value">{{ number_format($precio, 0, ',', '.') }} €</div>
+                    @if($precio > 0)
+                        <div class="price-value">{{ number_format($precio, 0, ',', '.') }} €</div>
+                    @else
+                        <div class="price-value price-on-request">A consultar</div>
+                    @endif
                     <div class="price-caption">{{ $precioCaption ?? '+ costes de servicio y gestión' }}</div>
                     @if($precioNota)
                         <div class="price-note">{{ $precioNota }}</div>
@@ -1061,7 +1068,7 @@
         {{-- CTA FINAL --}}
         <section class="cta-final">
             <div class="cta-eyebrow">¿Te interesa este coche?</div>
-            <h2>Consultanos el servicio completo</h2>
+            <h2>Consúltanos el servicio completo</h2>
             <p>Este precio es el del vehículo. Nosotros gestionamos {{ $esEspaña ? 'la compra' : 'la importación' }} y todos los trámites para que lo recibas listo en tu domicilio{{ $plazo ? ' en '.$plazo : '' }}.</p>
             <div class="cta-buttons">
                 <a href="https://wa.me/34675701439?text={{ urlencode('Hola, me interesa el '.$car->brand.' '.$car->model.'. ¿Podéis darme más información del servicio?') }}"
@@ -1107,12 +1114,12 @@
 
     {{-- ── LIGHTBOX ────────────────────────────────────── --}}
     @if(count($fotos) > 1)
-    <div class="lightbox" id="lightbox">
-        <button class="lightbox-close" onclick="closeLightbox()" aria-label="Cerrar">×</button>
-        <button class="lightbox-prev" onclick="prevPhoto()" aria-label="Anterior">‹</button>
-        <button class="lightbox-next" onclick="nextPhoto()" aria-label="Siguiente">›</button>
-        <img id="lightbox-img" src="" alt="">
-        <div class="lightbox-counter" id="lightbox-counter"></div>
+    <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Galería de fotos">
+        <button class="lightbox-close" onclick="closeLightbox()" aria-label="Cerrar galería">×</button>
+        <button class="lightbox-prev" onclick="prevPhoto()" aria-label="Foto anterior">‹</button>
+        <button class="lightbox-next" onclick="nextPhoto()" aria-label="Foto siguiente">›</button>
+        <img id="lightbox-img" src="" alt="{{ $car->brand }} {{ $car->model }}">
+        <div class="lightbox-counter" id="lightbox-counter" aria-live="polite"></div>
     </div>
     <script>
         (function() {
