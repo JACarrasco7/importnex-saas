@@ -4,11 +4,14 @@ namespace App\Services;
 
 use App\Models\Car;
 use App\Models\CarDocument;
+use App\Models\CarMarketingContent;
 use App\Models\Organization;
+use App\Support\Esqueleto;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
+use Symfony\Component\Finder\SplFileInfo;
 use ZipArchive;
 
 /**
@@ -37,16 +40,15 @@ class ValuationPackageIngestor
     public const PACKAGE_VERSION_2 = 2;
 
     private const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'avif', 'gif'];
+
     private const CONTENT_FOLDER = 'contenido';
 
-    public function __construct(private ValuationImporter $importer)
-    {
-    }
+    public function __construct(private ValuationImporter $importer) {}
 
     /**
      * Procesa el zip entero.
      *
-     * @return array{car: Car, was_new: bool, photos: int, documents: int, contents: int, warnings: array<int,string>}
+     * @return array{car: Car, was_new: bool, photos: int, documents: int, contents: int, marketing: int, warnings: array<int,string>}
      */
     public function ingest(string $zipPath, Organization $org): array
     {
@@ -55,11 +57,11 @@ class ValuationPackageIngestor
 
         try {
             $manifest = $this->readManifest($workDir);
-            $payload  = $this->readReport($workDir, $manifest);
+            $payload = $this->readReport($workDir, $manifest);
 
             $payload = $this->importer->validate($payload);
 
-            $car    = $this->importer->resolveCar($payload, $org);
+            $car = $this->importer->resolveCar($payload, $org);
             $wasNew = ! $car->exists;
 
             $packageVersion = (int) ($manifest['paquete_version'] ?? 1);
@@ -75,17 +77,26 @@ class ValuationPackageIngestor
 
             $this->importer->apply($car, $payload);
 
-            $photos    = $this->attachPhotos($car, $photoFiles, $warnings);
-            $contents  = $this->attachContent($car, $contentFiles, $warnings);
+            $photos = $this->attachPhotos($car, $photoFiles, $warnings);
+            // attachMarketing ANTES de attachContent: este último hace
+            // deleteDirectory sobre cars/{id}/contenido/ y podría borrar archivos
+            // que aún necesitamos. Los paths de $contentFiles apuntan al
+            // workDir temporal, no al storage, pero el orden defensivo es más
+            // claro y robusto.
+            $marketing = $this->attachMarketing($car, $contentFiles, $warnings);
+            $contents = $this->attachContent($car, $contentFiles, $warnings);
             $documents = $this->attachDocuments($car, $docFiles, $warnings);
 
+            $this->warnPackageGaps($car, $packageVersion, $contentFiles, $photos, $warnings);
+
             return [
-                'car'       => $car->refresh(),
-                'was_new'   => $wasNew,
-                'photos'    => $photos,
+                'car' => $car->refresh(),
+                'was_new' => $wasNew,
+                'photos' => $photos,
                 'documents' => $documents,
-                'contents'  => $contents,
-                'warnings'  => $warnings,
+                'contents' => $contents,
+                'marketing' => $marketing,
+                'warnings' => $warnings,
             ];
         } finally {
             File::deleteDirectory($workDir);
@@ -101,7 +112,7 @@ class ValuationPackageIngestor
             throw new RuntimeException('No se pudo abrir el .zip.');
         }
 
-        $workDir = storage_path('app/importnex/tmp/' . uniqid('pkg_', true));
+        $workDir = storage_path('app/importnex/tmp/'.uniqid('pkg_', true));
         File::makeDirectory($workDir, 0755, true);
 
         // Zip-slip: rechazamos rutas que se salgan del directorio de trabajo.
@@ -176,9 +187,9 @@ class ValuationPackageIngestor
 
             if ($path && File::exists($path)) {
                 $photos[$path] = [
-                    'path'  => $path,
+                    'path' => $path,
                     'order' => is_array($entry) ? (int) ($entry['orden'] ?? $index + 1) : $index + 1,
-                    'type'  => is_array($entry) ? ($entry['categoria'] ?? 'exterior') : 'exterior',
+                    'type' => is_array($entry) ? ($entry['categoria'] ?? 'exterior') : 'exterior',
                 ];
             }
         }
@@ -219,7 +230,7 @@ class ValuationPackageIngestor
 
                 if ($path && File::exists($path)) {
                     $docs[$path] = [
-                        'path'  => $path,
+                        'path' => $path,
                         'title' => is_array($entry)
                             ? ($entry['titulo'] ?? basename($path))
                             : basename($path),
@@ -257,9 +268,9 @@ class ValuationPackageIngestor
 
             if ($path && File::exists($path)) {
                 $contenidos[$path] = [
-                    'path'        => $path,
-                    'archivo'     => basename($path),
-                    'plantilla'   => is_array($entry) ? ($entry['plantilla'] ?? null) : null,
+                    'path' => $path,
+                    'archivo' => basename($path),
+                    'plantilla' => is_array($entry) ? ($entry['plantilla'] ?? null) : null,
                     'visibilidad' => is_array($entry) ? ($entry['visibilidad'] ?? null) : null,
                 ];
             }
@@ -276,14 +287,263 @@ class ValuationPackageIngestor
             }
 
             $contenidos[$path] = [
-                'path'        => $path,
-                'archivo'     => $file->getFilename(),
-                'plantilla'   => null,
+                'path' => $path,
+                'archivo' => $file->getFilename(),
+                'plantilla' => null,
                 'visibilidad' => null,
             ];
         }
 
         return array_values($contenidos);
+    }
+
+    /**
+     * Importa los esqueletos de marketing v2 (05-sep-2026) a `car_marketing_contents`.
+     *
+     * Esquema: cada fila es única por (car_id, channel, kind, slot).
+     *
+     *  - redes-sociales.txt → 3 redes × (3 posts + 3 stories) = hasta 18 filas:
+     *      · tiktok    [TIKTOK_POST_1..3] + [TIKTOK_STORY_1..3]    (viral 15-30s)
+     *      · instagram [INSTAGRAM_POST_1..3] + [INSTAGRAM_STORY_1..3] (visual)
+     *      · facebook  [FACEBOOK_POST_1..3] + [FACEBOOK_STORY_1..3] (informativo)
+     *    Cada red: hashtags propios (fallback [HASHTAGS] globales) y
+     *    [RED]_SUBIR_PASOS (se guarda solo en el post 1).
+     *
+     *  - anuncio-portales.txt → 1 ficha base reutilizada en 4 portales (4 filas
+     *    kind=ad slot=1): milanuncios, coches_net, wallapop, facebook marketplace.
+     *
+     * Robustez: solo crea filas con contenido real. Post vacío → warning;
+     * story vacío → se omite en silencio; portal sin TITULO o DESCRIPCION →
+     * warning y no se crea ninguno de los 4.
+     *
+     * Idempotente: updateOrCreate sobre (car_id, channel, kind, slot).
+     * Reimportar el mismo paquete sustituye, NO duplica. Status siempre `draft`;
+     * una fila en `published` se revierte a draft al reimportar (el operador
+     * debe revisar antes de republicar).
+     *
+     * @param  array<int, array{path:string, archivo:string, plantilla:?string, visibilidad:?string}>  $contenidos
+     * @param  array<int, string>  $warnings
+     */
+    private function attachMarketing(Car $car, array $contenidos, array &$warnings): int
+    {
+        if ($contenidos === []) {
+            return 0;
+        }
+
+        $redesPath = null;
+        $portalesPath = null;
+        foreach ($contenidos as $c) {
+            if ($c['archivo'] === 'redes-sociales.txt') {
+                $redesPath = $c['path'];
+            } elseif ($c['archivo'] === 'anuncio-portales.txt') {
+                $portalesPath = $c['path'];
+            }
+        }
+
+        if (! $redesPath && ! $portalesPath) {
+            return 0;
+        }
+
+        $redes = $redesPath ? Esqueleto::desde(File::get($redesPath)) : null;
+        $portales = $portalesPath ? Esqueleto::desde(File::get($portalesPath)) : null;
+
+        $saved = 0;
+        $now = now();
+
+        // ───────────────────────────────────────────────────────────────────
+        // redes-sociales.txt → 3 redes × (3 posts + 3 stories) = 18 filas
+        // Esquema por canal (3 redes): TikTok (viral, 15-30s), Instagram (visual),
+        // Facebook (informativo masivo). Cada red con su tono propio en cada slot.
+        // ───────────────────────────────────────────────────────────────────
+        if ($redes) {
+            // Hashtags globales: aplicables a las 3 redes.
+            // Esqueleto::lista() ya hace trim + filtra vacíos internamente.
+            $hashtagsGlobales = array_values($redes->lista('HASHTAGS'));
+            $pieFoto = array_values($redes->lista('PIE_FOTO'));
+            $gancho = trim((string) $redes->uno('GANCHO'));
+
+            if ($gancho === '') {
+                $warnings[] = 'redes-sociales.txt sin [GANCHO]: no se creó contenido de redes.';
+            }
+
+            // TikTok — viral, 15-30s reels. 3 posts + 3 stories.
+            $tiktokPosts = array_values(array_filter(array_map('trim', [
+                $redes->uno('TIKTOK_POST_1') ?? '',
+                $redes->uno('TIKTOK_POST_2') ?? '',
+                $redes->uno('TIKTOK_POST_3') ?? '',
+            ])));
+            $tiktokStories = array_values(array_filter(array_map('trim', [
+                $redes->uno('TIKTOK_STORY_1') ?? '',
+                $redes->uno('TIKTOK_STORY_2') ?? '',
+                $redes->uno('TIKTOK_STORY_3') ?? '',
+            ])));
+            $tiktokHashtags = array_values(array_filter(array_map('trim', $redes->lista('TIKTOK_HASHTAGS'))));
+            $tiktokHashtags = $tiktokHashtags ?: $hashtagsGlobales;
+            $tiktokSubirPasos = $redes->uno('TIKTOK_SUBIR_PASOS');
+
+            // Instagram — visual, copy medio. 3 posts + 3 stories.
+            $instagramPosts = array_values(array_filter(array_map('trim', [
+                $redes->uno('INSTAGRAM_POST_1') ?? '',
+                $redes->uno('INSTAGRAM_POST_2') ?? '',
+                $redes->uno('INSTAGRAM_POST_3') ?? '',
+            ])));
+            $instagramStories = array_values(array_filter(array_map('trim', [
+                $redes->uno('INSTAGRAM_STORY_1') ?? '',
+                $redes->uno('INSTAGRAM_STORY_2') ?? '',
+                $redes->uno('INSTAGRAM_STORY_3') ?? '',
+            ])));
+            $instagramHashtags = array_values(array_filter(array_map('trim', $redes->lista('INSTAGRAM_HASHTAGS'))));
+            $instagramHashtags = $instagramHashtags ?: $hashtagsGlobales;
+            $instagramSubirPasos = $redes->uno('INSTAGRAM_SUBIR_PASOS');
+
+            // Facebook — informativo masivo. 3 posts + 3 stories.
+            $facebookPosts = array_values(array_filter(array_map('trim', [
+                $redes->uno('FACEBOOK_POST_1') ?? '',
+                $redes->uno('FACEBOOK_POST_2') ?? '',
+                $redes->uno('FACEBOOK_POST_3') ?? '',
+            ])));
+            $facebookStories = array_values(array_filter(array_map('trim', [
+                $redes->uno('FACEBOOK_STORY_1') ?? '',
+                $redes->uno('FACEBOOK_STORY_2') ?? '',
+                $redes->uno('FACEBOOK_STORY_3') ?? '',
+            ])));
+            $facebookHashtags = array_values(array_filter(array_map('trim', $redes->lista('FACEBOOK_HASHTAGS'))));
+            $facebookHashtags = $facebookHashtags ?: $hashtagsGlobales;
+            $facebookSubirPasos = $redes->uno('FACEBOOK_SUBIR_PASOS');
+
+            // Helper local para crear las 3+3 filas de cada red social.
+            // Capturamos $car, $this, $redes, $red->lista etc. en el `use`.
+            $createSocialSet = function (string $channel, array $posts, array $stories, array $hashtags, ?string $subirPasos) use ($car, $gancho, $pieFoto, $now, &$saved, &$warnings) {
+                if ($gancho === '') {
+                    return;
+                }
+                // Crear hasta 3 posts (slot 1..3). Faltan slots → warning, no error.
+                for ($slot = 1; $slot <= 3; $slot++) {
+                    $copy = $posts[$slot - 1] ?? '';
+                    if ($copy === '') {
+                        $warnings[] = 'redes-sociales.txt sin ['.strtoupper($channel)."_POST_{$slot}]: no se creó el post {$slot} de {$channel}.";
+
+                        continue;
+                    }
+                    $this->upsertMarketing($car, $channel, [
+                        'kind' => CarMarketingContent::KIND_POST,
+                        'slot' => $slot,
+                        'title' => $gancho,
+                        'description' => $copy,
+                        'hashtags' => $hashtags,
+                        'photo_tips' => $slot === 1 ? $pieFoto : [],
+                        'subir_pasos' => $slot === 1 ? ($subirPasos ?? '') : '',
+                        'status' => CarMarketingContent::STATUS_DRAFT,
+                        'generated_at' => $now,
+                    ]);
+                    $saved++;
+                }
+                // Crear hasta 3 stories.
+                for ($slot = 1; $slot <= 3; $slot++) {
+                    $copy = $stories[$slot - 1] ?? '';
+                    if ($copy === '') {
+                        continue; // stories sin copy se omiten en silencio (no crítico)
+                    }
+                    $this->upsertMarketing($car, $channel, [
+                        'kind' => CarMarketingContent::KIND_STORY,
+                        'slot' => $slot,
+                        'title' => $gancho,
+                        'description' => $copy,
+                        'hashtags' => $hashtags,
+                        'photo_tips' => [],
+                        'subir_pasos' => '',
+                        'status' => CarMarketingContent::STATUS_DRAFT,
+                        'generated_at' => $now,
+                    ]);
+                    $saved++;
+                }
+            };
+
+            $createSocialSet('tiktok', $tiktokPosts, $tiktokStories, $tiktokHashtags, $tiktokSubirPasos);
+            $createSocialSet('instagram', $instagramPosts, $instagramStories, $instagramHashtags, $instagramSubirPasos);
+            $createSocialSet('facebook', $facebookPosts, $facebookStories, $facebookHashtags, $facebookSubirPasos);
+        }
+
+        // ───────────────────────────────────────────────────────────────────
+        // anuncio-portales.txt → 1 ficha base reutilizada en los 4 portales web.
+        // Misma TITULO + DESCRIPCION + FICHA_RAPIDA + QUE_INCLUYE + AVISO_LEGAL
+        // para milanuncios, coches_net, wallapop, facebook marketplace.
+        // SUBIR_PASOS indica cómo pegarlo en cada portal (1 entrada común).
+        // ───────────────────────────────────────────────────────────────────
+        if ($portales) {
+            $titulo = trim((string) $portales->uno('TITULO'));
+            $descripcion = trim((string) $portales->uno('DESCRIPCION'));
+            $subirPasos = $portales->uno('SUBIR_PASOS');
+
+            if ($titulo === '' || $descripcion === '') {
+                $warnings[] = 'anuncio-portales.txt sin [TITULO] o [DESCRIPCION]: no se crearon los anuncios de portales.';
+            }
+            if ($titulo !== '' && $descripcion !== '') {
+                foreach (CarMarketingContent::PORTAL_CHANNELS as $channel) {
+                    $this->upsertMarketing($car, $channel, [
+                        'kind' => CarMarketingContent::KIND_AD,
+                        'slot' => 1,
+                        'title' => $titulo,
+                        'description' => $descripcion,
+                        'hashtags' => [],
+                        'photo_tips' => [],
+                        'subir_pasos' => $subirPasos ?? '',
+                        'status' => CarMarketingContent::STATUS_DRAFT,
+                        'generated_at' => $now,
+                    ]);
+                    $saved++;
+                }
+            }
+        }
+
+        return $saved;
+    }
+
+    /**
+     * updateOrCreate sobre (car_id, channel, kind, slot). Si el registro
+     * existía con status=published, el ZIP lo devuelve a draft (es lo correcto:
+     * el operador debe revisar antes de republicar tras una reimportación).
+     * Todo lo que entra por aquí viene del ZIP (source=zip, fijo por el ingestor;
+     * el operador puede regenerar con IA y entonces source pasa a 'ai' vía
+     * CarMarketingController::generate).
+     */
+    private function upsertMarketing(Car $car, string $channel, array $attributes): CarMarketingContent
+    {
+        $kind = $attributes['kind'] ?? CarMarketingContent::KIND_AD;
+        $slot = $attributes['slot'] ?? 1;
+
+        return CarMarketingContent::updateOrCreate(
+            [
+                'car_id' => $car->id,
+                'channel' => $channel,
+                'kind' => $kind,
+                'slot' => $slot,
+            ],
+            array_merge($attributes, ['source' => CarMarketingContent::SOURCE_ZIP]),
+        );
+    }
+
+    /**
+     * A23 (03-sep-2026): fotos y marketing son OBLIGATORIOS en paquetes v2.
+     * Si falta alguno, el import entra pero se avisa — el operador tiene que
+     * saber que la ficha/módulo de marketing quedará cojo antes de publicar.
+     *
+     * @param  array<int, array{path:string, archivo:string, plantilla:?string, visibilidad:?string}>  $contenidos
+     * @param  array<int, string>  $warnings
+     */
+    private function warnPackageGaps(Car $car, int $packageVersion, array $contenidos, int $photos, array &$warnings): void
+    {
+        $hasMarketingTxt = collect($contenidos)->contains(
+            fn ($c) => in_array($c['archivo'], ['redes-sociales.txt', 'anuncio-portales.txt'], true),
+        );
+
+        if ($packageVersion >= self::PACKAGE_VERSION_2 && ! $hasMarketingTxt) {
+            $warnings[] = 'El paquete v2 no incluye marketing: faltan contenido/redes-sociales.txt y contenido/anuncio-portales.txt — el módulo de marketing quedará vacío para este coche.';
+        }
+
+        if ($photos === 0 && $car->photos()->count() === 0) {
+            $warnings[] = 'El paquete no incluye fotos y el coche no tenía galería — la ficha quedará sin fotos.';
+        }
     }
 
     /**
@@ -299,17 +559,17 @@ class ValuationPackageIngestor
             return 0;
         }
 
-        $dir = 'cars/' . $car->id . '/contenido';
+        $dir = 'cars/'.$car->id.'/contenido';
         Storage::disk('local')->deleteDirectory($dir);
 
         $saved = 0;
         foreach ($contenidos as $c) {
             try {
                 $archivo = $this->safeFilename($c['archivo']);
-                Storage::disk('local')->put($dir . '/' . $archivo, File::get($c['path']));
+                Storage::disk('local')->put($dir.'/'.$archivo, File::get($c['path']));
                 $saved++;
             } catch (\Throwable $e) {
-                $warnings[] = 'No se pudo guardar el contenido ' . $c['archivo'] . ': ' . $e->getMessage();
+                $warnings[] = 'No se pudo guardar el contenido '.$c['archivo'].': '.$e->getMessage();
                 Log::warning('Package content failed', ['car_id' => $car->id, 'error' => $e->getMessage()]);
             }
         }
@@ -347,13 +607,13 @@ class ValuationPackageIngestor
 
                 $car->photos()->create([
                     'organization_id' => $car->organization_id,
-                    'url'             => $target,
-                    'sort_order'      => $saved,
-                    'photo_type'      => $this->normalizePhotoType($photo['type']),
+                    'url' => $target,
+                    'sort_order' => $saved,
+                    'photo_type' => $this->normalizePhotoType($photo['type']),
                 ]);
             } catch (\Throwable $e) {
                 $saved--;
-                $warnings[] = 'No se pudo guardar la foto ' . basename($photo['path']) . ': ' . $e->getMessage();
+                $warnings[] = 'No se pudo guardar la foto '.basename($photo['path']).': '.$e->getMessage();
                 Log::warning('Package photo failed', ['car_id' => $car->id, 'error' => $e->getMessage()]);
             }
         }
@@ -384,12 +644,12 @@ class ValuationPackageIngestor
 
                 $attributes = [
                     'organization_id' => $car->organization_id,
-                    'name'            => $doc['title'],
-                    'doc_type'        => 'other',
-                    'group'           => CarDocument::GROUP_AI_REPORTS,
-                    'status'          => CarDocument::STATUS_RECEIVED,
-                    'url'             => $target,
-                    'uploaded_at'     => now(),
+                    'name' => $doc['title'],
+                    'doc_type' => 'other',
+                    'group' => CarDocument::GROUP_AI_REPORTS,
+                    'status' => CarDocument::STATUS_RECEIVED,
+                    'url' => $target,
+                    'uploaded_at' => now(),
                 ];
 
                 if ($existing) {
@@ -403,7 +663,7 @@ class ValuationPackageIngestor
 
                 $saved++;
             } catch (\Throwable $e) {
-                $warnings[] = 'No se pudo adjuntar ' . basename($doc['path']) . ': ' . $e->getMessage();
+                $warnings[] = 'No se pudo adjuntar '.basename($doc['path']).': '.$e->getMessage();
                 Log::warning('Package document failed', ['car_id' => $car->id, 'error' => $e->getMessage()]);
             }
         }
@@ -439,10 +699,10 @@ class ValuationPackageIngestor
     {
         $relative = ltrim(str_replace('\\', '/', $relative), '/');
 
-        $candidates = [$dir . '/' . $relative];
+        $candidates = [$dir.'/'.$relative];
 
         foreach (File::directories($dir) as $sub) {
-            $candidates[] = $sub . '/' . $relative;
+            $candidates[] = $sub.'/'.$relative;
         }
 
         foreach ($candidates as $candidate) {
@@ -459,10 +719,10 @@ class ValuationPackageIngestor
     {
         $relative = str_replace('\\', '/', substr($path, strlen($dir) + 1));
 
-        return str_contains('/' . strtolower($relative), '/' . strtolower($folder) . '/');
+        return str_contains('/'.strtolower($relative), '/'.strtolower($folder).'/');
     }
 
-    /** @return \Symfony\Component\Finder\SplFileInfo[] */
+    /** @return SplFileInfo[] */
     private function allFiles(string $dir): array
     {
         return File::allFiles($dir);

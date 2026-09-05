@@ -63,8 +63,8 @@
 
 | Métrica | Valor |
 |---|---|
-| Versión actual | 3.1.0 |
-| Fecha de release | 2026-08-16 |
+| Versión actual | 3.6.1 |
+| Fecha de release | 2026-09-05 |
 
 ---
 

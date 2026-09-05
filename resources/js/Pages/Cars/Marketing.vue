@@ -45,23 +45,61 @@ const CHANNELS = [
 ];
 
 const activeChannel = ref('milanuncios');
+const activeSlot = ref(1);          // para redes sociales: 1..3 (post/story #N)
+const activeKind = ref('post');      // para redes sociales: 'post' | 'story'
 const generating = ref(false);
 const saving = ref(false);
 const errorMsg = ref('');
 const successMsg = ref('');
 const showPreview = ref(false);
 
-// Find existing content for the active channel
-const currentContent = computed(() => {
-    return props.contents.find(c => c.channel === activeChannel.value) || null;
+const SOCIAL_SLOTS = 3; // 3 posts + 3 stories por canal
+const PORTAL_CHANNELS = new Set(['milanuncios', 'coches_net', 'wallapop']);
+const isSocial = computed(() => ['tiktok', 'instagram', 'facebook'].includes(activeChannel.value));
+const isPortal = computed(() => PORTAL_CHANNELS.has(activeChannel.value));
+
+// Facebook es híbrido: tiene posts/stories (social) + ficha de Marketplace (ad).
+// TikTok/Instagram solo posts/stories. Los portales puros solo ficha (ad).
+const socialKinds = computed(() => {
+    if (activeChannel.value === 'facebook') {
+        return [
+            { value: 'post', label: 'Publicaciones' },
+            { value: 'story', label: 'Stories' },
+            { value: 'ad', label: 'Marketplace' },
+        ];
+    }
+    return [
+        { value: 'post', label: 'Publicaciones' },
+        { value: 'story', label: 'Stories' },
+    ];
 });
 
-// Editable form fields
+// Contenido agrupado por (channel, kind, slot) para acceso rápido
+const contentMap = computed(() => {
+    const map = new Map();
+    for (const c of props.contents || []) {
+        const key = `${c.channel}|${c.kind || (isPortal.value ? 'ad' : 'post')}|${c.slot || 1}`;
+        map.set(key, c);
+    }
+    return map;
+});
+
+// Contenido de la combinación activa (channel + kind + slot para redes; channel solo para portales)
+const currentContent = computed(() => {
+    const ch = activeChannel.value;
+    if (isSocial.value) {
+        return contentMap.value.get(`${ch}|${activeKind.value}|${activeSlot.value}`) || null;
+    }
+    return contentMap.value.get(`${ch}|ad|1`) || null;
+});
+
+// Editable form fields (se sincronizan al cambiar de tab / kind / slot)
 const form = ref({
     title: '',
     description: '',
     hashtags: [],
     photo_tips: [],
+    subir_pasos: '',
 });
 
 const newHashtag = ref('');
@@ -74,6 +112,7 @@ function loadContent() {
             description: currentContent.value.description || '',
             hashtags: currentContent.value.hashtags || [],
             photo_tips: currentContent.value.photo_tips || [],
+            subir_pasos: currentContent.value.subir_pasos || '',
         };
     } else {
         form.value = {
@@ -81,11 +120,12 @@ function loadContent() {
             description: '',
             hashtags: [],
             photo_tips: [],
+            subir_pasos: '',
         };
     }
 }
 
-watch(activeChannel, loadContent);
+watch([activeChannel, activeKind, activeSlot], loadContent);
 
 // Re-sincroniza el formulario cuando cambian los contenidos (tras generar/guardar).
 // Vue re-evalúa currentContent al mutar props.contents, pero loadContent solo
@@ -122,6 +162,7 @@ function generate() {
 }
 
 function save() {
+    // El endpoint save actualiza la fila (car_id, channel, kind, slot) del contenido activo.
     saving.value = true;
     errorMsg.value = '';
     successMsg.value = '';
@@ -130,10 +171,13 @@ function save() {
         route('cars.marketing.save', props.car.id),
         {
             channel: activeChannel.value,
+            kind: isSocial.value ? activeKind.value : 'ad',
+            slot: isSocial.value ? activeSlot.value : 1,
             title: form.value.title,
             description: form.value.description,
             hashtags: form.value.hashtags,
             photo_tips: form.value.photo_tips,
+            subir_pasos: form.value.subir_pasos,
         },
         {
             preserveScroll: true,
@@ -204,6 +248,14 @@ function channelLabel(channel) {
     return CHANNELS.find(c => c.key === channel)?.label || channel;
 }
 
+function hasContent(channel) {
+    return props.contents.some(c => c.channel === channel);
+}
+
+function contentStatus(channel) {
+    return props.contents.find(c => c.channel === channel)?.status;
+}
+
 function renderPreview() {
     const channelComponents = {
         milanuncios: PreviewMilanuncios,
@@ -263,7 +315,50 @@ function renderPreview() {
                     >
                         <span>{{ ch.icon }}</span>
                         {{ ch.label }}
+                        <span
+                            v-if="hasContent(ch.key)"
+                            class="h-1.5 w-1.5 rounded-full"
+                            :class="contentStatus(ch.key) === 'published' ? 'bg-emerald-400' : 'bg-amber-300'"
+                            :title="contentStatus(ch.key) === 'published' ? 'Publicado' : 'Borrador'"
+                        ></span>
                     </button>
+                </div>
+
+                <!-- v2: Kind tabs (solo redes sociales) — Posts / Stories / Marketplace -->
+                <div v-if="isSocial" class="flex flex-wrap items-center gap-2">
+                    <div class="flex rounded-lg bg-gray-100 p-1">
+                        <button
+                            v-for="k in socialKinds"
+                            :key="k.value"
+                            @click="activeKind = k.value"
+                            :class="[
+                                'rounded-md px-3 py-1.5 text-xs font-semibold transition',
+                                activeKind === k.value ? 'bg-white text-estoril-700 shadow' : 'text-gray-500 hover:text-gray-700'
+                            ]"
+                        >
+                            {{ k.label }}
+                        </button>
+                    </div>
+                    <!-- Slot selector (solo post/story) -->
+                    <div v-if="activeKind !== 'ad'" class="flex gap-1">
+                        <button
+                            v-for="n in SOCIAL_SLOTS"
+                            :key="n"
+                            @click="activeSlot = n"
+                            :class="[
+                                'h-7 w-7 rounded-full text-xs font-semibold transition',
+                                activeSlot === n ? 'bg-estoril-600 text-white' : 'bg-white text-gray-600 ring-1 ring-gray-300 hover:bg-gray-50'
+                            ]"
+                            :title="activeKind === 'post' ? `Publicación ${n} de 3` : `Story ${n} de 3`"
+                        >
+                            {{ n }}
+                        </button>
+                    </div>
+                    <span v-if="currentContent" class="text-xs text-gray-400">
+                        {{ activeKind === 'ad' ? 'Ficha Marketplace' : `${activeKind === 'post' ? 'Publicación' : 'Story'} ${activeSlot}/3` }}
+                        · {{ channelStats(activeChannel).total }} piezas en {{ channelLabel(activeChannel) }}
+                    </span>
+                    <span v-else class="text-xs text-gray-400">Sin contenido para esta pieza — genéralo con IA o impórtalo del ZIP</span>
                 </div>
 
                 <!-- Content Editor -->
@@ -271,7 +366,15 @@ function renderPreview() {
                     <!-- Generate Button -->
                     <div class="flex items-center justify-between rounded-xl bg-white p-4 ring-1 ring-gray-200">
                         <div>
-                            <h3 class="font-semibold text-gray-900">{{ t('marketing.channel_label', { channel: channelLabel(activeChannel) }) }}</h3>
+                            <div class="flex items-center gap-2">
+                                <h3 class="font-semibold text-gray-900">{{ t('marketing.channel_label', { channel: channelLabel(activeChannel) }) }}</h3>
+                                <span v-if="currentContent?.source === 'zip'" class="rounded-full bg-estoril-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-estoril-800" :title="t('marketing.from_zip_help')">
+                                    {{ t('marketing.from_zip') }}
+                                </span>
+                                <span v-else-if="currentContent?.source === 'ai'" class="rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-violet-800" :title="t('marketing.from_ai_help')">
+                                    {{ t('marketing.from_ai') }}
+                                </span>
+                            </div>
                             <p class="text-xs text-gray-500">{{ t('marketing.generate_help') }}</p>
                         </div>
                         <button
@@ -442,6 +545,28 @@ function renderPreview() {
                     />
                 </div>
 
+                <!-- v2: Pasos para subir (instrucciones del ZIP / IA por pieza) -->
+                <FormSection v-if="form.subir_pasos" title="Pasos para subir">
+                    <div class="rounded-lg bg-estoril-50 p-4 ring-1 ring-estoril-100">
+                        <pre class="whitespace-pre-wrap font-sans text-sm text-estoril-900">{{ form.subir_pasos }}</pre>
+                        <div class="mt-2 flex justify-end">
+                            <button
+                                @click="copyToClipboard(form.subir_pasos)"
+                                class="inline-flex items-center gap-1 rounded-lg bg-white px-2 py-1 text-xs text-estoril-700 ring-1 ring-estoril-200 hover:bg-estoril-100"
+                            >
+                                <DocumentDuplicateIcon class="h-3 w-3" />
+                                Copiar pasos
+                            </button>
+                        </div>
+                    </div>
+                    <textarea
+                        v-model="form.subir_pasos"
+                        rows="3"
+                        placeholder="Instrucciones para subir esta pieza al canal…"
+                        class="mt-2 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-estoril-500 focus:ring-estoril-500"
+                    ></textarea>
+                </FormSection>
+
                 <!-- History -->
                 <FormSection :title="t('cars.ads_history')">
                     <div v-if="contents.length" class="space-y-3">
@@ -453,16 +578,25 @@ function renderPreview() {
                             <div class="flex items-center gap-3">
                                 <span class="text-lg">{{ CHANNELS.find(c => c.key === content.channel)?.icon || '📄' }}</span>
                                 <div>
-                                    <div class="font-medium text-gray-900">{{ CHANNELS.find(c => c.key === content.channel)?.label || content.channel }}</div>
+                                    <div class="font-medium text-gray-900">
+                                        {{ CHANNELS.find(c => c.key === content.channel)?.label || content.channel }}
+                                        <span v-if="content.kind === 'post'" class="ml-1 rounded bg-estoril-100 px-1.5 py-0.5 text-[10px] font-semibold text-estoril-800">Post {{ content.slot }}</span>
+                                        <span v-else-if="content.kind === 'story'" class="ml-1 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800">Story {{ content.slot }}</span>
+                                        <span v-else class="ml-1 rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-semibold text-gray-700">Ficha</span>
+                                    </div>
                                     <div class="text-xs text-gray-500">
                                         {{ content.status === 'published' ? t('cars.published') : t('cars.draft_label') }}
                                         · {{ new Date(content.updated_at).toLocaleDateString('es-ES') }}
                                     </div>
                                 </div>
                             </div>
-                            <Badge :variant="content.status === 'published' ? 'success' : 'warning'">
-                                {{ content.status === 'published' ? t('cars.published') : t('cars.draft_label') }}
-                            </Badge>
+                            <div class="flex items-center gap-2">
+                                <span v-if="content.source === 'zip'" class="rounded-full bg-estoril-100 px-2 py-0.5 text-[10px] font-semibold uppercase text-estoril-800">ZIP</span>
+                                <span v-else-if="content.source === 'ai'" class="rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-semibold uppercase text-violet-800">IA</span>
+                                <Badge :variant="content.status === 'published' ? 'success' : 'warning'">
+                                    {{ content.status === 'published' ? t('cars.published') : t('cars.draft_label') }}
+                                </Badge>
+                            </div>
                         </div>
                     </div>
                     <p v-else class="text-sm text-gray-400">{{ t('cars.ads_no_announcements') }}</p>

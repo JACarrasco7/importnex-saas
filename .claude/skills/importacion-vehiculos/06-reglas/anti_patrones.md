@@ -5,7 +5,7 @@
 
 ---
 
-## 🛡️ Los 22 anti-patrones
+## 🛡️ Los 23 anti-patrones
 
 | # | Anti-patrón | Regla dura |
 |---|---|---|
@@ -31,6 +31,7 @@
 | **A20** | Mezclar búsqueda con marketing | "Buscar coches = informe de búsqueda con datos de mercado (nº anuncios, mediana, hueco). Generar anuncios/copy IG-FB/fichas de publicación SOLO si el usuario lo pide explícitamente DESPUÉS. NUNCA inventar el formato de publicación si el usuario solo pidió localizar coches (caso real 17-ago: se entregó un .docx lleno de copy IG/FB cuando el usuario solo quería buscar coches)." |
 | **A21** | Entregar sin enlaces (anuncio + fuentes) | "TODO lo que se entregue lleva el enlace directo al anuncio (ficha del vehículo) y las fuentes con su URL. Candidatos, comparables, comparativas, informes, dossier, JSON y ZIP. Un dato sin su enlace NO se entrega como concluido. Es la regla que el usuario más repite: sin enlaces la entrega NO vale." |
 | **A22** | Filtrar datos internos al folleto/cliente | "El folleto del coche (y cualquier documento del cliente: ficha, dossier) SOLO lleva texto de venta presentable. PROHIBIDO margen, honorarios, negociación con el vendedor, estrategia de venta, `verdict_reasoning`, `recommendation` — son internos (informe interno) y nunca van al folleto. Claude decide el contenido del esqueleto (`[VALORACION]`, `[ARGUMENTO]`, `[EQUIPAMIENTO]`) pensando en el cliente; Laravel solo maqueta lo que Claude escribe." |
+| **A23** | ZIP sin fotos reales validadas o sin marketing (entrega inválida) | "El ZIP de Laravel (Flujo A) SIN fotos reales del anuncio o SIN los esqueletos `contenido/redes-sociales.txt` + `contenido/anuncio-portales.txt` es una **entrega INVÁLIDA** y NO se sube. La única vía válida es `scripts/empaquetar.py` (NUNCA armar ZIP a mano). Validación de fotos: HTTP 200 + `Content-Type: image/*` + >1 KB + dedup por hash. Una foto que falla genera warning y se continúa; NUNCA se sustituye por captura de pantalla. Marketing obligatorio: con `empaquetar.py` se generan SIEMPRE ambos `.txt` y se crean hasta 6 filas en `car_marketing_contents` (2 redes + 4 portales; el ingestor aplica guardas anti-fila-fantasma si un bloque viene vacío)." |
 
 ---
 
@@ -49,6 +50,28 @@
 2. Prohibido en el folleto/cliente: margen, honorarios, negociación, estrategia de venta, comparables internos, `verdict_reasoning`, `recommendation`.
 3. Laravel solo maqueta (Blade + Browsershot): no decide contenido, muestra lo que Claude escribió.
 4. Los únicos PDFs que genera Claude son los informes de investigación (búsqueda + unidad), para el equipo.
+
+### A23 — ZIP sin fotos reales validadas o sin marketing (entrega inválida) (03-sep-2026)
+
+**Error típico:** Claude arma el ZIP "a mano" (con `zip`/`7z`/Explorador de Windows) tras escribir el JSON y se olvida de las fotos o de los esqueletos de marketing. El ZIP se sube a Laravel sin fotos, sin `redes-sociales.txt` o sin `anuncio-portales.txt` y el módulo de marketing del panel queda vacío. Fallo real 03-sep-2026: varios encargos sin marketing al importar.
+
+**Regla:**
+1. **Vía única de armado:** SIEMPRE `python scripts/empaquetar.py export/flujo-a-<coche_id>.json`. NUNCA armar el ZIP a mano.
+2. **FOTOS obligatorias (mínimo 3):** descargadas desde `vehiculo.fotos[]` con UA navegador + `Referer` del anuncio. Validación: HTTP 200 + `Content-Type: image/*` + >1 KB + dedup por hash. Si una falla: warning y se continúa; NUNCA se sustituye por captura de pantalla.
+3. **MARKETING obligatorio SIEMPRE:** el script genera `contenido/redes-sociales.txt` (bloques GANCHO/POST_LARGO/POST_CORTO/STORIES/HASHTAGS/PIE_FOTO) y `contenido/anuncio-portales.txt` (TITULO/DESCRIPCION/FICHA_RAPIDA/QUE_INCLUYE/AVISO_LEGAL). El ingestor Laravel los parsea con `App\Support\Esqueleto` y crea hasta 6 filas en `car_marketing_contents` (instagram + tiktok + 4 portales) con `status=draft`.
+4. **Guardas anti-fila-fantasma del ingestor** (en `ValuationPackageIngestor::attachMarketing`): una fila SOLO se crea si el bloque clave trae contenido real:
+   - Instagram: `[GANCHO]` no vacío.
+   - TikTok: `[GANCHO]` no vacío Y (`[STORIES]` o `[POST_CORTO]`) no vacío.
+   - 4 portales: `[TITULO]` Y `[DESCRIPCION]` no vacíos (si falta uno, no se crea ninguno de los 4 para mantener coherencia entre canales del mismo anuncio).
+5. **Veredicto Comprar\* → dossier:** si el veredicto es `Comprar` o `Comprar si baja`, también se genera `contenido/dossier-cliente.txt` (15 secciones, ver `dossier_cliente.md`).
+6. **Modo `--strict` aborta** si 0 fotos válidas, dossier faltante o marketing incompleto. Modo normal: avisa pero genera el ZIP.
+7. **Reimport = siempre a `draft`:** si una fila estaba en `status=published` y se reimporta el ZIP, el ingestor la devuelve a `draft` (el operador debe revisar antes de republicar). Esto es intencional y testeado.
+
+**Casos reales:**
+- ❌ ZIP sin `fotos/` → Laravel crea el coche pero la galería queda vacía.
+- ❌ ZIP sin `contenido/redes-sociales.txt` → el módulo de marketing no muestra contenido para Instagram/TikTok.
+- ❌ ZIP armado a mano con `7z a coche.zip contenido/` → olvida el manifest, el ingestor cae a v1 y solo procesa `documentos/*.pdf` (carpeta vacía).
+- ✅ `python empaquetar.py export/flujo-a-bmw-320d.json` → genera `paquetes/bmw-320d.zip` con todo OK.
 
 **Regla (la que el usuario más repite — NUNCA saltarla):**
 1. **Cada candidato/comparable lleva SIEMPRE su enlace directo al anuncio** (ficha del vehículo, no búsqueda/filtro — A6). En tablas, en comparativas, en informes, en dossier, en JSON (`mercado.comparables[].url`) y en ZIP.
@@ -182,6 +205,8 @@ Antes de cerrar cualquier informe, verificar:
 - [ ] ¿El equipamiento publicado está VERIFICADO en la ficha, no inventado? (A18)
 - [ ] ¿Exploré TODO el segmento, no solo los ejemplos del usuario? (A19)
 - [ ] ¿No mezclé búsqueda con marketing (copy IG/FB)? (A20)
+- [ ] **¿El ZIP de Laravel trae fotos reales (≥3) + `contenido/redes-sociales.txt` + `contenido/anuncio-portales.txt`? (A23)**
+- [ ] **¿El ZIP se generó con `python scripts/empaquetar.py` y no a mano? (A23)**
 
 ---
 
@@ -203,3 +228,5 @@ Antes de cerrar cualquier informe, verificar:
 | A19 | Acotarse a los ejemplos del usuario (no explorar el segmento completo) | 17-ago-2026 |
 | A20 | Mezclar búsqueda con marketing (entregar copy IG/FB sin que lo pidan) | 17-ago-2026 |
 | A21 | Entregar sin enlaces de anuncio/fuentes (la regla que el usuario más repite) | 17-ago-2026 |
+| A22 | Filtrar datos internos al folleto (margen, honorarios, veredicto) | 18-ago-2026 |
+| A23 | ZIP sin fotos reales o sin marketing (entrega inválida) | 03-sep-2026 |

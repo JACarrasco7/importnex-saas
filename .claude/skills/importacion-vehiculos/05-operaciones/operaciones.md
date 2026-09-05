@@ -25,8 +25,19 @@
 1. **Claude NUNCA genera los PDFs de venta** (ficha, informe interno, folleto) — los hace Laravel con Blade + Browsershot tras recibir el ZIP.
 2. **Laravel NUNCA genera los PDFs de investigación** — los hace Claude en el Desktop con la plantilla de marca.
 3. El **informe interno** (margen, honorarios, URLs de comparables) es SOLO equipo; el **dossier/ficha/folleto** es para el cliente (sin margen).
-4. Los esqueletos `.txt` (`contenido/*.txt`) son la ÚNICA entrada de Laravel: `ficha-publicitaria.txt`, `informe-interno.txt`, `dossier-cliente.txt`. El **folleto del coche reutiliza `ficha-publicitaria.txt`** — no requiere esqueleto propio.
+4. Los esqueletos `.txt` (`contenido/*.txt`) son la ÚNICA entrada de Laravel: `ficha-publicitaria.txt`, `informe-interno.txt`, `dossier-cliente.txt` (solo veredicto Comprar*), **`redes-sociales.txt` y `anuncio-portales.txt`** (marketing — 03-sep-2026). El **folleto del coche reutiliza `ficha-publicitaria.txt`** — no requiere esqueleto propio.
 5. **Claude decide el contenido de cada esqueleto** (qué poner y qué NO en el folleto/cliente — A22). Laravel **solo maqueta**: no añade ni quita contenido. En el folleto del cliente NUNCA va margen, honorarios, negociación ni `verdict_reasoning`/`recommendation`.
+
+### 📣 Entregables de marketing (no son PDF) — 03-sep-2026
+
+| Archivo | Bloques | Qué alimenta en Laravel |
+|---|---|---|
+| `contenido/redes-sociales.txt` | `[GANCHO] [POST_LARGO] [POST_CORTO] [STORIES] [HASHTAGS] [PIE_FOTO]` | Tabla `car_marketing_contents` → canales **instagram** (GANCHO+POST_LARGO+HASHTAGS+PIE_FOTO) y **tiktok** (GANCHO+STORIES/POST_CORTO) |
+| `contenido/anuncio-portales.txt` | `[TITULO] [DESCRIPCION] [FICHA_RAPIDA] [QUE_INCLUYE] [AVISO_LEGAL]` | Tabla `car_marketing_contents` → canales **milanuncios, coches_net, wallapop, facebook** (mismo TITULO+DESCRIPCION) |
+
+- Ambos `.txt` son **OBLIGATORIOS** en el ZIP del Flujo A (A23): sin ellos el módulo de marketing del panel queda vacío.
+- Se importan con `status=draft` — el operador revisa y publica desde el panel (`/cars/{id}/marketing`).
+- El panel también puede **generar contenido con IA** para un canal (`cars.marketing.generate`): si se genera, sustituye el importado del ZIP (`updateOrCreate`). Ambos orígenes coexisten.
 
 ---
 
@@ -98,7 +109,7 @@ C:\Users\jacar\Desktop\JJImportMotors\
 
 2. 📦 SUBIR AL SISTEMA → el JSON se sube vía API (`/api/import-valuation` con `X-Import-Token`); el ZIP con fotos se sube desde el panel web (`POST /cars/import-valuation`).
    └─ Laravel (importnexcore) = REPOSITORIO ÚNICO y FUENTE DE VERDAD de:
-       ✓ PDFs de marketing (dossier, ficha, folleto — por Blade+Browsershot) · ✓ imágenes/fotos · ✓ JSON · ✓ dossier · ✓ folleto
+       ✓ PDFs de marketing (dossier, ficha, folleto — por Blade+Browsershot) · ✓ imágenes/fotos · ✓ JSON · ✓ dossier · ✓ folleto · ✓ contenido de redes/portales (`car_marketing_contents`, importado del ZIP)
 
 3. 📊 VER / MOSTRAR / GESTIONAR / ACTUALIZAR → TODO desde el sistema Laravel.
    └─ El sistema se encarga de las actualizaciones, iteraciones, nuevas versiones, etc.
@@ -111,6 +122,25 @@ C:\Users\jacar\Desktop\JJImportMotors\
 - El **repositorio de PDFs de marketing/imágenes/JSON es Laravel**. Claude genera el paquete y lo SUBE; además entrega al usuario los **PDFs de investigación** (búsqueda/unidad). Los PDFs de marketing (dossier/ficha/folleto) solo salen de Laravel.
 - Para **ver un informe/PDF/fotos** → consultar el sistema Laravel (nunca regenerar desde cero si ya está subido).
 - Claude NO consulta Laravel para "revisar" o "iterar". Cada entrega al sistema es el final del ciclo para Claude.
+
+---
+
+## 📥 QUÉ HACE LARAVEL AL IMPORTAR EL ZIP — flujo de ingestión (03-sep-2026)
+
+> `POST /cars/import-valuation` → `ValuationPackageIngestor::ingest()`. Una sola pasada, idempotente (reimportar el mismo ZIP sustituye, no duplica).
+
+| Paso | Qué hace | Dónde queda |
+|---|---|---|
+| 1. Crear/actualizar coche | Resuelve por VIN del `informe.json` (mismo VIN = mismo coche) + aplica campos del contrato | Tabla `cars` |
+| 2. Galería de fotos | `fotos/*.jpg` del ZIP → sustituye la galería anterior | `cars/{id}/photos/` (disco public) + tabla `car_photos` |
+| 3. Contenido .txt | `contenido/*.txt` → ficha, informe interno, dossier, redes, portales | `cars/{id}/contenido/` (disco local, privado) |
+| 4. **Marketing** | Parsea `redes-sociales.txt` + `anuncio-portales.txt` (`App\Support\Esqueleto`) → hasta 6 filas con `status=draft` (guardas: bloque clave vacío = no se crea la fila) | Tabla `car_marketing_contents` |
+| 5. Documentos | PDFs sueltos si el paquete los trae (v1) | `cars/{id}/documents/` |
+
+**Después de importar, el operador en Laravel:**
+1. Ficha del coche → `/cars/{id}` (galería + datos) · PDFs en `cars.ficha` / `cars.folleto` / `cars.informe-interno`.
+2. Marketing → `/cars/{id}/marketing`: revisa los 6 borradores importados, edita si quiere y publica por canal (`cars.marketing.publish`).
+3. Overview → `/marketing`: stats de coches con contenido / publicados / borradores.
 
 ---
 

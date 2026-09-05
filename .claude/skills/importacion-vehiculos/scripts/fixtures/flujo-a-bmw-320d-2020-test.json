@@ -1,0 +1,270 @@
+{
+  "_meta": {
+    "schema_version": 1,
+    "flujo": "A",
+    "coche_id": "bmw-320d-2020-test",
+    "generado_el": "2026-09-03T15:00:00+02:00",
+    "origen": "chat-ia"
+  },
+  "vehiculo": {
+    "marca": "BMW",
+    "modelo": "320d",
+    "version": "xDrive Auto",
+    "anio": 2020,
+    "km": 78000,
+    "combustible": "Diesel",
+    "cambio": "Automático",
+    "traccion": "Total",
+    "carroceria": "Sedán",
+    "puertas": 4,
+    "plazas": 5,
+    "potencia_cv": 190,
+    "co2_gkm": 119,
+    "co2_confirmado": true,
+    "vin": "WBA8E91030AK12345",
+    "color_exterior": "Negro Sapphire",
+    "color_interior": "Cuero Dakota Cognac",
+    "propietarios": 1,
+    "equipamiento": [
+      "Paquete M Sport",
+      "Cuero Dakota Cognac",
+      "Techo solar eléctrico",
+      "Navegador Professional",
+      "Apple CarPlay",
+      "Cámara de marcha atrás",
+      "Sensores de aparcamiento del+tras",
+      "Faros LED adaptativos",
+      "Climatizador bizona",
+      "Asientos calefactables",
+      "Llantas 19\" M",
+      "Suspensión adaptativa"
+    ],
+    "garantia": "12 meses desde matriculación",
+    "accidentes_declarados": "Libre de accidentes",
+    "fotos": [
+      "https://placehold.co/800x600/png?text=BMW-320d-1",
+      "https://placehold.co/800x600/png?text=BMW-320d-2",
+      "https://placehold.co/800x600/png?text=BMW-320d-3"
+    ]
+  },
+  "anuncio": {
+    "portal": "mobile.de",
+    "url": "https://www.mobile.de/fahrzeuge/details.html?id=test-bmw-320d",
+    "pais_origen": "Alemania",
+    "ciudad": "Múnich",
+    "precio_publicado": 24900,
+    "precio_negociado": 23900,
+    "moneda": "EUR",
+    "dias_publicado": 32,
+    "tuv_vigente_hasta": "08/2027",
+    "vendedor_tipo": "Profesional",
+    "vendedor_nombre": "BMW Autohaus München",
+    "fecha_captura": "2026-09-03",
+    "descripcion_original": "BMW 320d xDrive Auto, 1 propietario, libro sellado en concesionario oficial, paquete M Sport, techo solar, cuero Dakota Cognac, navegación Professional, cámara trasera, faros LED adaptativos, climatizador bizona, sensores del+tras. Vehículo impecable, siempre en garaje.",
+    "descripcion_traducida": "BMW 320d xDrive Auto, 1 dueño, libro sellado en concesionario oficial, paquete M Sport, techo solar, cuero Dakota Cognac, navegador Professional, cámara trasera, faros LED adaptativos, climatizador bizona, sensores delante+detrás. Vehículo impecable, siempre en garaje."
+  },
+  "investigacion": {
+    "problemas_comunes":   {"hallazgo": "Sin problemas generalizados del B47 (motor 2.0d). Cadena distribución robusta.", "fuente": "https://www.bmwblog.com/2026/03/b47-reliability", "valoracion": "favorable", "fecha": "03/09/2026"},
+    "recalls":             {"hallazgo": "Sin recalls activos para este VIN.", "fuente": "https://www.kfz-rueckrufe.de/", "valoracion": "favorable", "fecha": "03/09/2026"},
+    "precio_mercado":      {"hallazgo": "Mediana ES 26.500 € (8 unidades en Coches.net). Suelo 24.900 €. Techo 28.900 €.", "fuente": "https://www.coches.net/bmw-320d", "valoracion": "favorable", "fecha": "03/09/2026"},
+    "fiabilidad":          {"hallazgo": "Modelo con alta tasa de satisfacción. B47 es uno de los diésel más robustos del grupo BMW.", "fuente": "https://www.tuv.es/", "valoracion": "favorable", "fecha": "03/09/2026"},
+    "homologacion":        {"hallazgo": "COC disponible. IEDMT calculado por km77 sobre 119 g/km → tramo <120 g/km.", "fuente": "https://www.km77.com/bmw-320d-2020", "valoracion": "favorable", "fecha": "03/09/2026"},
+    "etiqueta_ambiental":  {"hallazgo": "Etiqueta C — entra en ZBE de Madrid/Barcelona sin restricciones.", "fuente": "https://www.dgt.es/etiquetas", "valoracion": "favorable", "etiqueta": "C", "fecha": "03/09/2026"},
+    "seguro":              {"hallazgo": "Seguro a todo riesgo ~650 €/año para conductor 35-50 años sin siniestralidad.", "fuente": "https://www.aseguradoras.com/bmw-320d", "valoracion": "neutro", "fecha": "03/09/2026"},
+    "piezas":              {"hallazgo": "Piezas disponibles en concesionarios BMW + aftermarket. Repuestos OEM no caros.", "fuente": "https://www.recambios-coches.net/bmw-320d", "valoracion": "favorable", "fecha": "03/09/2026"},
+    "otros":               {"hallazgo": "Compatible con gasóleo B7 (Estándar actual). AdBlue presente.", "fuente": "https://www.bmw.com/diesel-b7", "valoracion": "neutro", "fecha": "03/09/2026"}
+  },
+  "balance": {
+    "a_favor": [
+      {"texto": "1 propietario particular + libro sellado", "peso": "alto"},
+      {"texto": "Paquete M Sport + techo solar + cuero Dakota", "peso": "alto"},
+      {"texto": "TÜV vigente hasta 08/2027", "peso": "medio"},
+      {"texto": "78.000 km = 13.000 km/año (uso bajo)", "peso": "medio"}
+    ],
+    "en_contra": [
+      {"texto": "32 días publicado → posible margen de negociación", "peso": "bajo"},
+      {"texto": "AdBlue → mantenimiento extra cada 2 años", "peso": "bajo"}
+    ]
+  },
+  "veredicto": {
+    "recomendacion": "Comprar",
+    "confianza": "alta",
+    "razonamiento": "BMW 320d xDrive con 1 dueño y libro sellado en concesionario oficial, paquete M Sport completo, TÜV vigente 11 meses. Precio 1.000 € por debajo del suelo del mercado español (24.900 €). IEDMT tramo <120 g/km bajo (sin minoración adicional).",
+    "que_cambiaria": "Si la negociación baja 600 € adicionales del precio publicado, el margen sube a ~15 %.",
+    "precio_objetivo": 23800,
+    "fecha": "03/09/2026"
+  },
+  "costes": {
+    "precio_coche": 23900,
+    "pvp_nuevo": 48500,
+    "transporte": 850,
+    "itv_matriculacion": 95,
+    "tasa_dgt": 20.61,
+    "iedmt_estimado": 410,
+    "iedmt_sin_minoracion": 615,
+    "iedmt_metodologia": "Base = PVP × coef Anexo IV; minoración art.69 (B47 B47d20); IEDMT = base × 14.75 % (tramo 120-160 g/km).",
+    "gestoria": 0,
+    "otros": 110,
+    "coste_total": 25385.61,
+    "honorarios": 1500
+  },
+  "mercado": {
+    "precio_medio": 26500,
+    "precio_min": 24900,
+    "precio_max": 28900,
+    "nuestra_oferta": 25385,
+    "ahorro_eur": 1115,
+    "ahorro_pct": 4.2,
+    "de_vs_es": {
+      "precio_de": 23900,
+      "precio_es": 26500,
+      "uds_de": 12,
+      "uds_es": 8,
+      "hueco_pct": 9.8
+    },
+    "comparables": [
+      {"titulo": "BMW 320d xDrive 2020 78k km", "km": 78000, "precio": 24900, "url": "https://www.coches.net/visitas-seguridad/bmw-320d-1"},
+      {"titulo": "BMW 320d 2020 92k km", "km": 92000, "precio": 25900, "url": "https://www.coches.net/visitas-seguridad/bmw-320d-2"},
+      {"titulo": "BMW 320d 2021 45k km", "km": 45000, "precio": 28900, "url": "https://www.coches.net/visitas-seguridad/bmw-320d-3"}
+    ],
+    "es": {
+      "min": 24900,
+      "q1": 25800,
+      "mediana": 26500,
+      "q3": 27500,
+      "max": 28900,
+      "n": 8
+    }
+  },
+  "avisos": [
+    "Solicitar COC al vendedor antes de pago final.",
+    "Confirmar que el paquete M Sport está completo (llantas + suspensión + asientos).",
+    "Verificar historial de mantenimiento en concesionario BMW Múnich."
+  ],
+  "publicidad": {
+    "titular": "BMW 320d xDrive M Sport — diésel premium, único dueño, etiqueta C",
+    "claim": "190 CV, M Sport, techo solar y 78.000 km de un solo propietario.",
+    "descripcion": "BMW 320d xDrive con paquete M Sport, techo solar, cuero Dakota Cognac, navegador Professional y faros LED adaptativos. Único dueño, libro sellado en concesionario BMW y TÜV vigente hasta agosto de 2027. Una configuración difícil de encontrar en el mercado español: entra en ZBE (etiqueta C) y está 1.100 € por debajo de la mediana del mercado nacional.",
+    "por_que": "El equilibrio justo entre potencia contenida (190 CV), consumo realista (5,5 l/100 km mixto) y equipamiento M Sport completo. La tracción xDrive y el cambio automático de 8 velocidades lo hacen apto para cualquier uso: ciudad, carretera y puerto de montaña. El historial de un solo propietario en concesionario oficial es la pieza clave: documentación trazable y sin sobresaltos.",
+    "valoracion": "320d xDrive con M Sport completo y un único dueño: 190 CV, etiqueta C, libro sellado en concesionario. Precio 1.100 € por debajo de la mediana española (26.500 €) y configuración difícil de encontrar en el mercado nacional.",
+    "argumentos": [
+      "**1 único propietario** particular + libro sellado en concesionario BMW Múnich.",
+      "**Paquete M Sport completo:** llantas 19\", suspensión adaptativa, asientos deportivos y volante M.",
+      "**Etiqueta C de la DGT:** entra en Zonas de Bajas Emisiones de Madrid, Barcelona y resto de grandes ciudades sin restricciones.",
+      "**Tracción xDrive + cambio automático de 8 vel.**: conducción cómoda en cualquier condición."
+    ],
+    "incluye": [
+      "El vehículo",
+      "Transporte Alemania → España (camión cerrado)",
+      "ITV de importación + tasas DGT",
+      "Gestión integral del proceso",
+      "Inspección previa a la compra",
+      "12 meses de soporte post-entrega"
+    ],
+    "redes": {
+      "gancho": "BMW 320d xDrive M Sport — diésel premium, único dueño, etiqueta C",
+      "pie_foto": [
+        "La trasera con difusador M Performance.",
+        "Interior: cuero Dakota Cognac, navegador Professional.",
+        "Detalle del cambio automático de 8 vel."
+      ],
+      "tiktok": {
+        "posts": [
+          "POV: BMW 320d con 78.000 km y un solo dueño 😱 #bmw #diesel",
+          "190 CV por 23.900 € puesto en Huelva. M Sport completo.",
+          "Alemania → Huelva en 6 semanas. Te enseñamos todo el proceso."
+        ],
+        "stories": [
+          "¿Viste el M Performance?",
+          "78.000 km · 1 dueño",
+          "link en bio"
+        ],
+        "hashtags": ["#bmw", "#320d", "#diesel", "#viral", "#jjimport"],
+        "subir_pasos": "1. Sube el reel (15-30s) · 2. Caption + hashtags · 3. Música trending · 4. Compartir en story"
+      },
+      "instagram": {
+        "posts": [
+          "1 dueño · 78.000 km · 190 CV\nTecho solar, M Sport, cuero Dakota Cognac.\nPuesto en Huelva 23.900 €.\n#BMW #320d #ImportaciónAlemania",
+          "Antes y después: el coche de origen vs el coche puesto en Huelva.",
+          "El proceso completo: compra en DE → inspección → transporte → ITV → entrega."
+        ],
+        "stories": [
+          "¿BMW 320d? 🤔",
+          "M Sport completo",
+          "Link en bio"
+        ],
+        "hashtags": ["#bmw", "#320d", "#cochesimportados", "#huelva"],
+        "subir_pasos": "1. Foto + carrusel · 2. Caption storytelling · 3. 15-20 hashtags nichos"
+      },
+      "facebook": {
+        "posts": [
+          "BMW 320d xDrive M Sport, 2020, 78.000 km, único dueño.\nPVP recomendado nuevo: 48.500 €. Precio JJ Import Motors: 23.900 € puesto en Huelva.\nIncluye: transporte, ITV importación, gestoría integral, 12 meses soporte.",
+          "¿Por qué importar un BMW 320d de Alemania?\n- 1.100 € más barato que la mediana del mercado español\n- Etiqueta C: ZBE sin restricciones\n- Historial completo en concesionario BMW",
+          "Ficha técnica detallada:\n- Motor: B47 2.0d 190 CV xDrive\n- Cambio: Automático 8 vel.\n- Etiqueta ambiental: C\n- Mantenimiento: libro sellado"
+        ],
+        "stories": [
+          "BMW 320d M Sport",
+          "23.900 € puesto en Huelva",
+          "jjimportmotors@gmail.com"
+        ],
+        "hashtags": ["#coches", "#oferta", "#huelva"],
+        "subir_pasos": "1. Facebook Marketplace · 2. Grupo Huelva Coches · 3. Marketplace Vehículos"
+      }
+    },
+    "portales": {
+      "subir_pasos": "1. Milanuncios: 'Poner anuncio' → pega TITULO + DESCRIPCION · 2. Coches.net: 'Publicar anuncio' → fotos + pega · 3. Wallapop: 'Vender' → fotos + pega · 4. Facebook Marketplace: 'Crear nuevo anuncio' → fotos + pega"
+    }
+  },
+  "dossier": {
+    "dossier_num": "JJM-2026-09-03-0001",
+    "carta_presentacion": "Estimado cliente, en JJ Import Motors llevamos años facilitando la búsqueda e importación de vehículos seleccionados desde Alemania. Este dossier documenta por qué este BMW 320d xDrive M Sport merece su atención: datos de mercado reales, inspección técnica exhaustiva y un coste total sin sorpresas. Si decide avanzar, le acompañamos en cada paso hasta la entrega de las llaves en Huelva.",
+    "resumen_30s": {
+      "oportunidades": ["Configuración M Sport completa", "1 único dueño + libro sellado", "TÜV vigente 11 meses"],
+      "atencion": ["Solicitar COC antes del pago final", "Confirmar M Sport completo (llantas + suspensión)"],
+      "proximo_paso": "Reserva 1.000 € para iniciar compra"
+    },
+    "equipamiento_destacado": ["Paquete M Sport", "Techo solar eléctrico", "Cuero Dakota Cognac", "Navegador Professional", "Apple CarPlay", "Cámara trasera", "Faros LED adaptativos", "Climatizador bizona"],
+    "estado_verificado": ["1 propietario particular", "78.000 km en 4 años (13.000 km/año)", "Libro sellado BMW Múnich", "TÜV vigente 08/2027", "Sin accidentes declarados", "Sin recalls activos"],
+    "estado_pendiente": ["Solicitar COC completo", "Confirmar contenido M Sport"],
+    "mercado_es": {"min": 24900, "q1": 25800, "mediana": 26500, "q3": 27500, "max": 28900, "n": 8},
+    "nuestra_oferta": 25385,
+    "ahorro_eur": 1115,
+    "ahorro_pct": 4.2,
+    "de_vs_es": {"precio_de": 23900, "precio_es": 26500, "uds_de": 12, "uds_es": 8, "hueco_pct": 9.8},
+    "eval_tecnica": {
+      "motor": "B47 2.0d 190 CV xDrive",
+      "fiabilidad": "Alta",
+      "problemas_conocidos": ["Cadena distribución robusta", "AdBlue cada 2 años (~200 €)"],
+      "recalls_activos": false
+    },
+    "coste_transparente": [
+      {"concepto": "Compra del vehículo (DE)", "importe": 21400, "nota": ""},
+      {"concepto": "Transporte DE → ES", "importe": 850, "nota": ""},
+      {"concepto": "ITV importación + tasas DGT", "importe": 115, "nota": ""},
+      {"concepto": "Impuesto matriculación (IEDMT)", "importe": 410, "nota": "estimado"},
+      {"concepto": "Matrícula + gestoría", "importe": 110, "nota": ""},
+      {"concepto": "Honorarios JJ Import Motors", "importe": 2500, "nota": "fijos declarados"}
+    ],
+    "coste_total": 25385,
+    "timeline": [
+      {"semana": "0", "fase": "Reserva y encargo"},
+      {"semana": "1", "fase": "Compra y verificación"},
+      {"semana": "2-3", "fase": "Transporte y trámites DE"},
+      {"semana": "3-4", "fase": "Llegada y trámites ES"},
+      {"semana": "5-6", "fase": "Entrega"}
+    ],
+    "garantia_incluido": ["Gestión integral", "Verificación documental", "Inspección previa", "Soporte 12 meses"],
+    "garantia_no_incluido": ["Garantía mecánica post-entrega", "Mantenimiento ordinario", "Neumáticos"],
+    "faq": [
+      {"q": "¿Puedo ver el coche antes de pagar?", "a": "Vídeo-inspección de 60 fotos + 5 min desde origen antes del pago final."},
+      {"q": "¿Y si hay problemas al llegar?", "a": "12 meses de soporte JJ Import Motors para incidencias documentales o de gestión."}
+    ],
+    "pasos": [
+      "Reserva 1.000 € → bloqueo vehículo",
+      "Vídeo-inspección (48-72h)",
+      "Validación: confirmación o reembolso",
+      "Firma contrato + pago 40%",
+      "Inicio del proceso de importación"
+    ]
+  }
+}

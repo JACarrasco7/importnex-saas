@@ -30,6 +30,7 @@ class IaList
         // lista de un solo elemento.
         if (is_string($raw)) {
             $txt = trim($raw);
+
             return $txt === '' ? [] : [$txt];
         }
 
@@ -49,6 +50,7 @@ class IaList
                 if ($txt !== '') {
                     $out[] = $txt;
                 }
+
                 continue;
             }
 
@@ -66,6 +68,7 @@ class IaList
                         $out[] = $txt;
                     }
                 }
+
                 continue;
             }
 

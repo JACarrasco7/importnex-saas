@@ -94,7 +94,17 @@ class CarController extends Controller
 
     public function show(Car $car): Response
     {
-        $car->load(['photos', 'documents', 'expenses', 'checklists', 'client', 'contractAcceptances']);
+        $car->load([
+            'photos',
+            'documents',
+            'expenses',
+            'checklists',
+            'client',
+            'contractAcceptances',
+            // Solo columnas necesarias para el badge N/6 del módulo marketing
+            // (ver resources/js/Pages/Cars/Show.vue → marketingContents count).
+            'marketingContents:car_id,channel,status,source',
+        ]);
 
         // Pre-compute derived data for the enriched valuation UI
         $car->researchGaps;       // touch accessor

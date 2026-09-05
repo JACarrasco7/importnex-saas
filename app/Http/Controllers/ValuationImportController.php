@@ -157,7 +157,7 @@ class ValuationImportController extends Controller
     }
 
     /**
-     * @param  array{car:Car, was_new:bool, photos:int, documents:int, contents?:int, warnings:array<int,string>}  $result
+     * @param  array{car:Car, was_new:bool, photos:int, documents:int, contents?:int, marketing?:int, warnings:array<int,string>}  $result
      */
     private function packageSummary(array $result): string
     {
@@ -165,6 +165,9 @@ class ValuationImportController extends Controller
 
         if (($result['contents'] ?? 0) > 0) {
             $parts[] = $result['contents'].' documento(s) de contenido maquetable(s)';
+        }
+        if (($result['marketing'] ?? 0) > 0) {
+            $parts[] = $result['marketing'].' anuncio(s) de marketing importado(s)';
         }
         if ($result['documents'] > 0) {
             $parts[] = $result['documents'].' documento(s) adjuntado(s)';

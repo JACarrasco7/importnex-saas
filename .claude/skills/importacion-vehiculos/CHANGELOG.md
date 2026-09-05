@@ -5,6 +5,87 @@ Todos los cambios notables en el skill `importacion-vehiculos` se documentarán 
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [3.6.1] - 2026-09-05 — Auditoría v2: 3 bugs críticos en generate/publish/UI resueltos
+
+> **Motivo:** auditoría integral del flujo v2 detectó que los endpoints `generate` y `publish` seguían usando el unique viejo `(car_id, channel)` — con hasta 6 filas por canal actualizaban una fila indeterminada o creaban filas espurias. Además el template de `Marketing.vue` no tenía las tabs de Posts/Stories (solo el script las soportaba).
+
+### 🐛 Bugs críticos resueltos
+- **`CarMarketingController::generate()`**: ahora fija `kind`+`slot` según tipo de canal (social → `post`/`1`; portal → `ad`/`1`) en el `updateOrCreate`. Antes podía crear filas `ad` espurias en instagram/tiktok.
+- **`CarMarketingController::publish()`**: acepta `kind`+`slot` opcionales. Si llegan → publica SOLO esa pieza; si no → publica TODAS las piezas del canal (el botón del panel es "canal publicado"). Antes publicaba solo la primera fila (indeterminada).
+- **`Marketing.vue` template**: añadidas las tabs v2 — selector de tipo (Publicaciones / Stories / Marketplace para facebook) + selector de slot (1-3) + panel "Pasos para subir" editable + History con etiquetas Post N / Story N / Ficha y origen ZIP/IA.
+
+### 🎨 Frontend
+- **`Marketing.vue`**: `socialKinds` computado — facebook es híbrido (posts + stories + ficha Marketplace); tiktok/instagram solo posts+stories. `publish()` a nivel canal (backend publica todas las piezas).
+- **`Marketing/Index.vue`**: `channelsOf()` agrupa las 22 filas por canal (1 chip por canal con "×N" piezas y estado agregado). `channelSummary()` muestra Publicado/Borrador/Parcial (n/N). Antes un coche con ZIP completo mostraba 22 chips repetidos.
+
+### 🧹 Limpieza
+- Eliminado `socialChannelUpper()` (código muerto — la closure ya inlineaba `strtoupper`).
+- Docblock de `attachMarketing()` actualizado al mapeo v2.
+- Migración: quitado `orderBy('id')` redundante en `chunkById` (ya ordena internamente).
+
+### 🧪 Tests PHPUnit
+- `26 passed (161 assertions)` — 3 nuevos: publish todas las piezas, publish pieza única (kind+slot), generate social → (post, 1) exacto.
+
+---
+
+## [3.6.0] - 2026-09-05 — Marketing v2: 3 posts + 3 stories por red + ficha base portales
+
+> **Motivo:** el usuario pidió que las redes sociales (TikTok, Instagram, Facebook)
+> tengan **3 publicaciones + 3 stories cada una** con tono distinto, y que los
+> portales web (Wallapop, Coches.net, Milanuncios, Facebook Marketplace) compartan
+> **una sola ficha base**. Esto requirió ampliar el esquema a `kind + slot`.
+
+### 🆕 Esquema v2: `kind` + `slot`
+- **Migración nueva** `add_slot_and_subir_pasos_to_car_marketing_contents`:
+  añade `kind` ('post'|'story'|'ad'), `slot` (1..3), `subir_pasos` (texto).
+  Backfill de filas existentes: `kind='ad' slot=1` (portales) o `kind='post' slot=1`
+  (instagram/tiktok legacy). **Unique viejo** (`car_id`, `channel`) **eliminado**;
+  **unique nuevo** (`car_id`, `channel`, `kind`, `slot`) creado.
+
+### 📱 Redes sociales: 3 redes × (3 posts + 3 stories)
+- **TikTok** — viral 15-30s, hook en el primer segundo, hashtag trending + nicho.
+- **Instagram** — visual, storytelling, hashtags nichos (15-20), estética cuidada.
+- **Facebook** — informativo masivo, datos y precio visibles, hashtags mínimos (3-5).
+- Cada red: `[RED]_POST_1..3` (3 captions), `[RED]_STORY_1..3` (3 textos cortos),
+  `[RED]_HASHTAGS` (múltiples), `[RED]_SUBIR_PASOS` (instrucciones para esa red).
+- Total filas por coche: **18** (3 redes × 6 piezas).
+
+### 🌐 Portales web: 1 ficha base reutilizada
+- **Misma ficha** (TITULO + DESCRIPCION + FICHA_RAPIDA + QUE_INCLUYE + AVISO_LEGAL
+  + SUBIR_PASOS) para milanuncios, coches_net, wallapop, facebook marketplace.
+- `kind='ad'`, `slot=1`, mismo contenido en los 4 portales.
+- Total filas por coche: **4**.
+
+### 📊 Total por coche con ZIP completo
+- 18 redes + 4 portales = **22 filas en `car_marketing_contents`**.
+
+### 🔧 Cambios técnicos
+- `CarMarketingContent`: añadido `$fillable` (`kind`, `slot`, `subir_pasos`),
+  `$casts` (`slot` → integer), `KINDS` (`post|story|ad`),
+  `SOCIAL_CHANNELS = [instagram, tiktok, facebook]`, `SLOTS_PER_SOCIAL = 3`,
+  scopes `social()` y `portals()`.
+- `ValuationPackageIngestor::attachMarketing()`: closure helper para 3+3
+  filas por red. Posts vacíos → warning explícito. Stories vacíos → silencioso.
+- `ValuationPackageIngestor::upsertMarketing()`: unique compuesto
+  `(car_id, channel, kind, slot)`.
+- `CarMarketingController::save()`: valida `kind` + `slot`. Portales fuerzan
+  `kind=ad, slot=1`.
+- `empaquetar.py`: `generar_redes_sociales()` genera los 3 posts + 3 stories
+  por red con tono y `[RED]_SUBIR_PASOS`. `generar_anuncio_portales()` añade
+  `SUBIR_PASOS` con instrucciones para los 4 portales.
+- `Marketing.vue`: `activeSlot` (1..3) + `activeKind` ('post'|'story') + tabs
+  en redes sociales. Pasa `kind` + `slot` al endpoint save. Muestra `subir_pasos`.
+
+### 🧪 Tests PHPUnit
+- `23 passed (150 assertions)`: 12 marketing ZIP + 11 CarMarketing.
+- Migración nueva testeable cuando MySQL esté disponible (sandbox).
+
+### ✅ Validación T5
+- `python scripts/empaquetar.py` con JSON completo genera ZIP con 7 archivos.
+- `redes-sociales.txt` incluye las 3 redes con 3 posts + 3 stories cada una.
+
+---
+
 ## [3.4.1] - 2026-08-24 — Auditoría búsqueda/filtrado/tratamiento: 15 gaps resueltos
 
 > **Motivo:** auditoría enfocada en los 3 pilares del skill (búsqueda, filtrado, tratamiento de datos) detectó 15 gaps. Patrón dominante: **fragmentación por fecha** (3 generaciones de URLs mobile.de conviviendo en 3 archivos) + **persistencia incompleta** (query no guardada, sin dedup cross-portal, sin esquema de ficha).

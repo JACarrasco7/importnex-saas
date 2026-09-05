@@ -571,6 +571,42 @@ class Esqueleto
 
 > **Nota ingestor:** `ValuationPackageIngestor` guarda **cualquier `.txt` dentro de `contenido/`** del ZIP en `cars/{id}/contenido/`. Por tanto `dossier-cliente.txt` se persiste automáticamente sin tocar el ingestor. Rutas disponibles: `cars.ficha`, `cars.dossier` (autenticado), `cars.informe-interno` (solo owner/operator).
 
+> **📣 Marketing importado desde el ZIP (v2, 05-sep-2026):** los dos `.txt` de marketing se persisten como archivos Y además el ingestor los parsea con `App\Support\Esqueleto` para poblar la tabla `car_marketing_contents` (modelo `App\Models\CarMarketingContent`) con `status=draft`. Cada fila tiene `(car_id, channel, kind, slot)` únicos.
+>
+> **Esquema v2 — redes sociales (3 redes × 6 piezas = 18 filas):**
+>
+> | Red | Tono | Piezas | Bloques en `redes-sociales.txt` |
+> |---|---|---|---|
+> | **TikTok** (viral 15-30s) | hook en el primer segundo, hashtag trending + nicho | 3 posts + 3 stories + hashtags + pasos | `[TIKTOK_POST_1..3]` + `[TIKTOK_STORY_1..3]` + `[TIKTOK_HASHTAGS]` (N) + `[TIKTOK_SUBIR_PASOS]` |
+> | **Instagram** (visual storytelling) | estética cuidada, hashtags nichos (15-20) | 3 posts + 3 stories + hashtags + pasos | `[INSTAGRAM_POST_1..3]` + `[INSTAGRAM_STORY_1..3]` + `[INSTAGRAM_HASHTAGS]` (N) + `[INSTAGRAM_SUBIR_PASOS]` |
+> | **Facebook** (informativo masivo) | datos y precio visibles, hashtags mínimos (3-5) | 3 posts + 3 stories + hashtags + pasos | `[FACEBOOK_POST_1..3]` + `[FACEBOOK_STORY_1..3]` + `[FACEBOOK_HASHTAGS]` (N) + `[FACEBOOK_SUBIR_PASOS]` |
+>
+> **Esquema v2 — portales web (1 ficha base reutilizada en 4 portales = 4 filas):**
+>
+> | Portal | kind | slot | Bloques en `anuncio-portales.txt` |
+> |---|---|---|---|
+> | `milanuncios` | `ad` | `1` | `[TITULO]` + `[DESCRIPCION]` + `[FICHA_RAPIDA]` (N) + `[QUE_INCLUYE]` (N) + `[AVISO_LEGAL]` + `[SUBIR_PASOS]` |
+> | `coches_net` | `ad` | `1` | (mismo contenido que el bloque de arriba, el ingestor crea 4 filas idénticas) |
+> | `wallapop` | `ad` | `1` | (idem) |
+> | `facebook` (marketplace) | `ad` | `1` | (idem) |
+>
+> **Bloques comunes:** `[GANCHO]` (común a las 3 redes), `[HASHTAGS]` (fallback global si la red no trae los suyos), `[PIE_FOTO]` (N, slot 1 los lleva).
+>
+> **Total por coche con ZIP completo:** 18 redes + 4 portales = **22 filas en `car_marketing_contents`**.
+>
+> **Robustez (guardas anti-fila-fantasma):** el ingestor solo crea una fila si el bloque clave tiene contenido real:
+> - Cada `[RED]_POST_N` debe traer copy no vacío (si falta → warning).
+> - `[RED]_STORY_N` vacío → se omite en silencio (no es crítico).
+> - `[TIKTOK_STORY_1..3]` ausentes → no se crean stories de TikTok (solo posts).
+> - 4 portales: requieren `[TITULO]` Y `[DESCRIPCION]` no vacíos.
+> - `[GANCHO]` vacío en `redes-sociales.txt` → no se crea ninguna fila de red social.
+>
+> **Idempotente:** `updateOrCreate(['car_id','channel','kind','slot'])` — reimportar el mismo ZIP NO duplica filas. Si una fila estaba en `status=published`, el reimport la devuelve a `draft`. El campo `subir_pasos` se guarda solo en el slot 1 del primer post de cada red (en slots 2/3 queda vacío para no duplicar instrucciones).
+>
+> **Coexistencia ZIP ↔ IA:** el marketing generado con IA desde el panel (`CarMarketingService`) **coexiste** con el marketing importado desde el ZIP: ambos quedan en la misma tabla con `source = 'ai' | 'zip'`. El endpoint `cars.marketing.generate` actualiza la fila `(car_id, channel, kind='post', slot=1)` del canal; los demás slots los trae el ZIP.
+>
+> **Rutas:** `cars.marketing.show`, `cars.marketing.generate`, `cars.marketing.save` (con `kind`+`slot`), `cars.marketing.publish`. Frontend en `resources/js/Pages/Cars/Marketing.vue` con pestañas `Post 1..3` / `Story 1..3` por red.
+
 ### 🗺️ Mapa de PDFs — tipos y dónde se crean (15-ago-2026)
 
 | # | PDF | Tipo | Quién lo genera | De qué sale | Dónde se crea |

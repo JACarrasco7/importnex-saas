@@ -6,7 +6,7 @@
     <title>{{ $car->brand }} {{ $car->model }} · JJ Import Motors</title>
     <meta name="robots" content="noindex, nofollow">
     <meta property="og:title" content="{{ $car->brand }} {{ $car->model }} · JJ Import Motors">
-    <meta property="og:description" content="{{ ($car->purchase_price ?? 0) > 0 ? number_format($car->purchase_price, 0, ',', '.').' € · ' : '' }}{{ $car->mileage ? number_format($car->mileage, 0, ',', '.').' km · ' : '' }}Dossier JJ Import Motors">
+    <meta property="og:description" content="{{ number_format(($car->sale_price ?? $car->purchase_price ?? 0), 0, ',', '.') }} € · Llave en mano · IVA incluido">
     @if(count($fotos) > 0)
         <meta property="og:image" content="{{ $fotos[0] }}">
     @endif
@@ -71,8 +71,6 @@
             box-shadow: 0 4px 14px rgba(232, 89, 12, 0.4);
             flex-shrink: 0;
         }
-        .nav-cta .ic { width: 16px; height: 16px; }
-        .plazo-chip .ic { width: 13px; height: 13px; }
         .nav-cta:hover { background: #d44a08; transform: translateY(-1px); }
 
         /* ── HERO ──────────────────────────────────────── */
@@ -101,20 +99,19 @@
             gap: 60px; align-items: center;
         }
         .hero-eyebrow {
-            display: inline-flex; align-items: center; gap: 9px;
-            background: rgba(232, 89, 12, 0.12);
-            border: 1px solid rgba(232, 89, 12, 0.35);
-            color: #fdba74;
-            padding: 7px 16px; border-radius: 100px;
-            font-size: 11px; font-weight: 700; letter-spacing: 1.4px;
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(232, 89, 12, 0.15);
+            border: 1px solid rgba(232, 89, 12, 0.4);
+            color: #fed7aa;
+            padding: 7px 14px; border-radius: 100px;
+            font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
             text-transform: uppercase;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
+            animation: pulse 2.4s ease-in-out infinite;
         }
-        .hero-eyebrow::before {
-            content: ''; width: 7px; height: 7px; border-radius: 50%;
-            background: var(--orange);
-            box-shadow: 0 0 0 3px rgba(232, 89, 12, 0.22);
-            flex-shrink: 0;
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(232, 89, 12, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(232, 89, 12, 0); }
         }
         .h1 {
             font-size: clamp(40px, 6vw, 76px); font-weight: 800; line-height: 1.02;
@@ -155,67 +152,7 @@
             -webkit-text-fill-color: transparent;
             line-height: 1; letter-spacing: -1px;
         }
-        .price-value.price-on-request { font-size: 30px; letter-spacing: 0; }
         .price-caption { font-size: 12px; color: #cbd5e1; margin-top: 8px; }
-        .price-note { font-size: 10px; color: #94a3b8; margin-top: 6px; line-height: 1.4; max-width: 280px; }
-        .plazo-chip {
-            display: inline-flex; align-items: center; gap: 6px;
-            margin-top: 12px; padding: 6px 12px; border-radius: 100px;
-            background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.35);
-            color: #4ade80; font-size: 12px; font-weight: 700;
-        }
-        .hero-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
-        .chip {
-            padding: 6px 14px; border-radius: 100px;
-            background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15);
-            font-size: 12.5px; font-weight: 600; color: #e5e7eb;
-            backdrop-filter: blur(6px);
-        }
-        .dgt-badge {
-            display: inline-flex; align-items: center; gap: 8px;
-            padding: 8px 16px; border-radius: 10px; margin-bottom: 18px;
-            font-weight: 900; font-size: 16px; letter-spacing: 1px;
-            border: 2px solid;
-        }
-        .dgt-badge .dgt-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; }
-        .dgt-0 { background: rgba(59, 130, 246, 0.15); border-color: #3b82f6; color: #93c5fd; }
-        .dgt-eco { background: rgba(16, 185, 129, 0.15); border-color: #10b981; color: #6ee7b7; }
-        .dgt-b { background: rgba(34, 197, 94, 0.15); border-color: #22c55e; color: #86efac; }
-        .dgt-c { background: rgba(250, 204, 21, 0.15); border-color: #facc15; color: #fde047; }
-        .verdict-badge {
-            display: inline-flex; align-items: center;
-            padding: 7px 16px; border-radius: 100px;
-            font-size: 12px; font-weight: 800; letter-spacing: 1px;
-            text-transform: uppercase; margin-bottom: 14px;
-        }
-        .v-green { background: rgba(16, 185, 129, 0.2); color: #4ade80; border: 1px solid rgba(16, 185, 129, 0.4); }
-        .v-orange { background: rgba(232, 89, 12, 0.2); color: #fdba74; border: 1px solid rgba(232, 89, 12, 0.4); }
-        .v-red { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
-        .argumentos-grid {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
-            margin-bottom: 80px;
-        }
-        .argumento-item {
-            display: flex; gap: 14px; align-items: flex-start;
-            background: rgba(143, 163, 217, 0.06);
-            border: 1px solid rgba(143, 163, 217, 0.2);
-            border-radius: 14px; padding: 20px 22px;
-            font-size: 14.5px; color: #e5e7eb; line-height: 1.55;
-        }
-        .argumento-check {
-            color: var(--gold); font-size: 18px; flex-shrink: 0;
-            background: rgba(244, 197, 66, 0.12);
-            width: 34px; height: 34px; border-radius: 50%;
-            display: inline-flex; align-items: center; justify-content: center;
-        }
-        .w-badge {
-            display: inline-block; margin-left: 8px; padding: 2px 8px;
-            border-radius: 100px; font-size: 10px; font-weight: 800;
-            text-transform: uppercase; letter-spacing: 0.5px; vertical-align: middle;
-        }
-        .w-high { background: rgba(16, 185, 129, 0.2); color: #4ade80; }
-        .w-med { background: rgba(250, 204, 21, 0.15); color: #fde047; }
-        .legal { font-size: 10.5px; color: #64748b; margin-top: 12px; line-height: 1.5; max-width: 720px; margin-left: auto; margin-right: auto; }
 
         .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
         .btn {
@@ -226,17 +163,16 @@
             border: 1px solid transparent;
             transition: all 0.18s ease;
         }
+        .btn.primary {
+            background: var(--orange); color: #fff;
+            box-shadow: 0 6px 20px rgba(232, 89, 12, 0.4);
+        }
+        .btn.primary:hover { background: #d44a08; transform: translateY(-2px); box-shadow: 0 10px 24px rgba(232, 89, 12, 0.5); }
         .btn.ghost {
             background: rgba(255, 255, 255, 0.08);
             color: #fff; border-color: rgba(255, 255, 255, 0.18);
         }
         .btn.ghost:hover { background: rgba(255, 255, 255, 0.16); }
-        .btn .ic { width: 18px; height: 18px; flex-shrink: 0; }
-        .btn.wa {
-            background: #25D366; color: #06240f;
-            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.35);
-        }
-        .btn.wa:hover { background: #1fb959; transform: translateY(-2px); box-shadow: 0 10px 24px rgba(37, 211, 102, 0.45); }
 
         .hero-photo {
             position: relative;
@@ -247,14 +183,27 @@
             background: #14265a;
             transform: rotate(-1.2deg);
         }
-        .hero-photo-empty {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            gap: 16px; color: var(--platinum);
-            background: linear-gradient(135deg, rgba(143, 163, 217, 0.08) 0%, rgba(143, 163, 217, 0.02) 100%);
-            border: 1px dashed rgba(143, 163, 217, 0.25);
-        }
-        .hero-photo-empty span { font-size: 13px; font-weight: 600; opacity: 0.7; }
         .hero-photo img { width: 100%; height: 100%; object-fit: cover; }
+        .hero-photo-badge {
+            position: absolute; top: 16px; left: 16px;
+            background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px);
+            color: #fff;
+            padding: 8px 14px; border-radius: 100px;
+            font-size: 11px; font-weight: 700; letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .hero-photo-badge.live {
+            background: rgba(16, 185, 129, 0.9);
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        .hero-photo-badge.live::before {
+            content: ''; width: 6px; height: 6px; border-radius: 50%;
+            background: #fff; animation: pulse-dot 1.6s ease-in-out infinite;
+        }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
 
         /* ── TRUST BAR ─────────────────────────────────── */
         .trust {
@@ -384,14 +333,11 @@
             gap: 18px;
         }
         .incluye-item {
-            display: flex; gap: 12px; align-items: flex-start;
+            display: flex; gap: 12px;
             font-size: 14px; color: #e5e7eb;
         }
         .incluye-item strong {
             display: block; color: #fff; font-size: 14px; margin-bottom: 2px;
-        }
-        .incluye-desc {
-            display: block; font-size: 12.5px; color: #9fb3d1; line-height: 1.45;
         }
         .incluye-check {
             width: 22px; height: 22px; border-radius: 50%;
@@ -399,7 +345,6 @@
             color: var(--green); flex-shrink: 0;
             display: flex; align-items: center; justify-content: center;
             font-size: 12px; font-weight: 700;
-            margin-top: 1px;
         }
 
         /* ── GALERÍA ───────────────────────────────────── */
@@ -428,7 +373,6 @@
             display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
             margin-bottom: 80px;
         }
-        .proscons.single { grid-template-columns: 1fr; }
         .pc-col {
             border-radius: 18px; padding: 30px 32px;
             border: 1px solid rgba(143, 163, 217, 0.25);
@@ -519,6 +463,50 @@
             margin-top: 2px;
         }
 
+        /* ── FINANCIACIÓN ─────────────────────────────── */
+        .financ {
+            background: linear-gradient(135deg, var(--estoril) 0%, var(--estoril-2) 100%);
+            border-radius: 24px;
+            padding: 44px 44px;
+            margin-bottom: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+        .financ::before {
+            content: ''; position: absolute;
+            top: -50%; right: -10%;
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.06) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .financ-inner {
+            display: grid; grid-template-columns: 1.4fr 1fr; gap: 40px;
+            align-items: center;
+            position: relative;
+        }
+        .financ h2 {
+            font-size: clamp(24px, 3vw, 32px); font-weight: 800; color: #fff;
+            margin-bottom: 14px;
+        }
+        .financ p { color: #c7d4f5; font-size: 15px; line-height: 1.6; margin-bottom: 24px; }
+        .financ-price {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 16px;
+            padding: 28px 32px;
+            text-align: center;
+        }
+        .financ-from {
+            font-size: 11px; text-transform: uppercase; letter-spacing: 2px;
+            color: #c7d4f5; font-weight: 700; margin-bottom: 8px;
+        }
+        .financ-amount {
+            font-size: 42px; font-weight: 900; color: #fff;
+            line-height: 1; margin-bottom: 6px;
+        }
+        .financ-amount small { font-size: 18px; opacity: 0.7; font-weight: 700; }
+        .financ-detail { font-size: 12px; color: #c7d4f5; margin-top: 12px; }
+
         /* ── TIPS ─────────────────────────────────────── */
         .tips {
             background: rgba(26, 48, 109, 0.4);
@@ -531,7 +519,7 @@
             font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 20px;
             display: flex; align-items: center; gap: 10px;
         }
-        .tips h3 svg { width: 22px; height: 22px; color: var(--gold); flex-shrink: 0; }
+        .tips h3::before { content: '💡'; font-size: 24px; }
         .tips ul { list-style: none; }
         .tips li {
             font-size: 14px; color: #e5e7eb; line-height: 1.6;
@@ -655,10 +643,12 @@
             .equip { grid-template-columns: 1fr; }
             .verdict { padding: 28px 22px; }
             .incluye { padding: 26px 22px; }
-            .argumentos-grid { grid-template-columns: 1fr; margin-bottom: 50px; }
+            .financ { padding: 30px 22px; }
+            .financ-inner { grid-template-columns: 1fr; gap: 24px; }
             .tips { padding: 24px 22px; }
             .cta-final { padding: 40px 22px; }
             .price-value { font-size: 36px; }
+            .financ-amount { font-size: 36px; }
             .h1 { font-size: 38px; }
         }
         @media (max-width: 480px) {
@@ -682,98 +672,55 @@
                 <a href="#galeria" class="nav-link">Galería</a>
                 <a href="#veredicto" class="nav-link">Veredicto</a>
                 <a href="#detalles" class="nav-link">Detalles</a>
+                <a href="#financiacion" class="nav-link">Financiación</a>
             </div>
             <a href="tel:+34675701439" class="nav-cta">
-                <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
-                <span class="long">675 70 14 39</span>
+                📞 <span class="long">675 70 14 39</span>
             </a>
         </div>
     </nav>
 
     {{-- ── HERO ────────────────────────────────────────── --}}
     @php
-        $esEspaña = ! $car->isImport();
-        $origenTxt = $car->pais_origen ?: null;
-        $precio = $car->purchase_price ?? 0;
-        $potencia = $esqueleto?->uno('POTENCIA') ?? ($car->cv ? $car->cv.' CV' : null);
-        $cambioTxt = $car->transmission ?: $esqueleto?->uno('CAMBIO');
-        $kmTxt = $car->mileage ? number_format($car->mileage, 0, ',', '.').' km' : null;
+        $precio = $car->sale_price ?? $car->purchase_price ?? 0;
+        $cuota = $precio > 0 ? round($precio / 60) : null;
+        $potencia = $esqueleto?->uno('POTENCIA');
+        $cambioTxt = $esqueleto?->uno('CAMBIO') ?? $car->transmission;
+        $kmTxt = $car->km ? number_format($car->km, 0, ',', '.').' km' : null;
         $anioTxt = $car->year ?: null;
-        if ($anioTxt && preg_match('/\d{4}/', $anioTxt, $mYear)) { $anioTxt = $mYear[0]; }
-        $fuelMap = [
-            'gasoline' => 'Gasolina', 'petrol' => 'Gasolina',
-            'diesel' => 'Diésel', 'gasoil' => 'Diésel', 'gasóleo' => 'Diésel',
-            'hybrid' => 'Híbrido', 'hibrido' => 'Híbrido', 'híbrido' => 'Híbrido',
-            'electric' => 'Eléctrico', 'electrico' => 'Eléctrico', 'eléctrico' => 'Eléctrico',
-            'lpg' => 'GLP', 'glp' => 'GLP', 'cng' => 'GNC', 'gnc' => 'GNC',
-        ];
-        $fuelKey = mb_strtolower(trim((string) $car->fuel));
-        $fuelTxt = $fuelMap[$fuelKey] ?? ($car->fuel ?: null);
-        $dgt = $esqueleto?->uno('ETIQUETA_DGT');
-        $tituloFicha = $esqueleto?->uno('TITULO');
-        $claimFicha = $esqueleto?->uno('CLAIM');
-        $precioNota = $esqueleto?->uno('PRECIO_NOTA');
-        $plazo = $esqueleto?->uno('PLAZO');
-        $claimParts = array_filter([$potencia, $fuelTxt, $kmTxt]);
+        $claimParts = array_filter([
+            $potencia,
+            $cambioTxt ? 'cambio '.strtolower($cambioTxt) : null,
+            $kmTxt,
+        ]);
     @endphp
     <header class="hero">
         <div class="hero-inner">
             <div class="hero-left">
-                <div class="hero-eyebrow">Dossier exclusivo · {{ $esEspaña ? 'Búsqueda en España' : ($origenTxt ? 'Importación desde '.$origenTxt : 'Importación') }}</div>
-                @if($dgt)
-                    <div class="dgt-badge dgt-{{ strtolower($dgt) }}">
-                        <span class="dgt-label">Etiqueta</span> {{ strtoupper($dgt) }}
-                    </div>
-                @endif
+                <div class="hero-eyebrow">⚡ Dossier exclusivo · Stock limitado</div>
                 <h1 class="h1">
                     {{ $car->brand }}<br>
                     <span class="accent">{{ $car->model }}</span>
                 </h1>
-                @if($claimFicha)
-                    <p class="claim">{{ $claimFicha }}</p>
-                @elseif(count($claimParts) > 0)
-                    <p class="claim">{{ implode(' · ', $claimParts) }} · {{ $esEspaña ? 'Disponible en España' : 'Listo para importar' }}</p>
-                @else
-                    <p class="claim">{{ $esEspaña ? 'Disponible en España' : 'Listo para importar' }}</p>
-                @endif
-
                 @if(count($claimParts) > 0)
-                    <div class="hero-chips">
-                        @foreach($claimParts as $chip)
-                            <span class="chip">{{ $chip }}</span>
-                        @endforeach
-                        @if($cambioTxt)<span class="chip">{{ ucfirst($cambioTxt) }}</span>@endif
-                    </div>
+                    <p class="claim">{{ implode(' · ', $claimParts) }} · Revisado y listo para entrega inmediata</p>
+                @else
+                    <p class="claim">Revisado por nuestro equipo y listo para entrega inmediata</p>
                 @endif
 
                 <div class="price-card">
-                    <div class="price-label">Precio del vehículo</div>
-                    @if($precio > 0)
-                        <div class="price-value">{{ number_format($precio, 0, ',', '.') }} €</div>
-                    @else
-                        <div class="price-value price-on-request">A consultar</div>
-                    @endif
-                    <div class="price-caption">+ gastos de gestión y servicio aparte</div>
-                    @if($precioNota && ! $esEspaña)
-                        <div class="price-note">{{ $precioNota }}</div>
-                    @endif
-                    @if($plazo)
-                        <div class="plazo-chip">
-                            <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                            {{ $plazo }}
-                        </div>
-                    @endif
+                    <div class="price-label">Precio final · IVA incluido</div>
+                    <div class="price-value">{{ number_format($precio, 0, ',', '.') }} €</div>
+                    <div class="price-caption">Llave en mano · Sin sorpresas · Garantía 12 meses</div>
                 </div>
 
                 <div class="hero-actions">
-                    <a href="https://wa.me/34675701439?text={{ urlencode('Hola, me interesa el '.$car->brand.' '.$car->model.'. ¿Podéis darme más información del servicio?') }}"
-                       target="_blank" rel="noopener" class="btn wa">
-                        <svg class="ic" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.87 9.87 0 004.74 1.21h.01c5.46 0 9.9-4.45 9.9-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0012.04 2zm0 18.15c-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.26 8.26 0 01-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24 2.2 0 4.27.86 5.82 2.42a8.18 8.18 0 012.41 5.83c-.01 4.54-3.7 8.23-8.22 8.23zm4.52-6.16c-.25-.13-1.47-.72-1.69-.8-.23-.08-.39-.13-.56.12-.16.25-.64.81-.78.97-.15.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.01-.38.11-.51.11-.11.25-.29.37-.43.13-.15.17-.25.25-.42.08-.17.04-.31-.02-.43-.06-.13-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.42h-.48c-.17 0-.43.06-.66.31-.22.25-.86.85-.86 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.22-.16-.47-.28z"/></svg>
-                        Consultar por WhatsApp
+                    <a href="https://wa.me/34675701439?text={{ urlencode('Hola, me interesa el '.$car->brand.' '.$car->model.' que habéis compartido conmigo.') }}"
+                       target="_blank" rel="noopener" class="btn primary">
+                        💬 Reservar por WhatsApp
                     </a>
                     <a href="tel:+34675701439" class="btn ghost">
-                        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
-                        Llamar ahora
+                        📞 Llamar ahora
                     </a>
                 </div>
             </div>
@@ -781,14 +728,7 @@
             @if(count($fotos) > 0)
                 <div class="hero-photo">
                     <img src="{{ $fotos[0] }}" alt="{{ $car->brand }} {{ $car->model }}">
-                </div>
-            @else
-                <div class="hero-photo hero-photo-empty">
-                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.4">
-                        <path d="M5 17h14M5 17l2-8h10l2 8M5 17a2 2 0 002 2 2 2 0 002-2M15 17a2 2 0 002 2 2 2 0 002-2"/>
-                        <circle cx="8" cy="9" r="1.5"/><circle cx="16" cy="9" r="1.5"/>
-                    </svg>
-                    <span>Foto del vehículo disponible bajo petición</span>
+                    <div class="hero-photo-badge live">EN STOCK</div>
                 </div>
             @endif
         </div>
@@ -802,7 +742,7 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0112 2a8 8 0 018 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg>
                 </div>
                 <div class="trust-text">
-                    <strong>{{ $esEspaña ? 'Búsqueda en España' : ($origenTxt ? 'Importado desde '.$origenTxt : 'Importación') }}</strong>
+                    <strong>Importado desde Alemania</strong>
                     Historial completo y verificado
                 </div>
             </div>
@@ -811,8 +751,8 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
                 <div class="trust-text">
-                    <strong>Inspección previa</strong>
-                    Revisión antes de {{ $esEspaña ? 'comprar' : 'importar' }}
+                    <strong>Garantía 12 meses</strong>
+                    Cobertura mecánica completa
                 </div>
             </div>
             <div class="trust-item">
@@ -820,8 +760,8 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
                 </div>
                 <div class="trust-text">
-                    <strong>Gestión completa</strong>
-                    Trámites y transporte incluidos
+                    <strong>Entrega en tu puerta</strong>
+                    Transporte incluido a Huelva
                 </div>
             </div>
             <div class="trust-item">
@@ -829,8 +769,8 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
                 </div>
                 <div class="trust-text">
-                    <strong>Transparente</strong>
-                    Sin costes ocultos
+                    <strong>Financiación disponible</strong>
+                    Hasta 60 cuotas sin entrada
                 </div>
             </div>
         </div>
@@ -841,10 +781,9 @@
         $kpis = [
             ['k' => 'Año', 'v' => $anioTxt, 's' => $car->year ? 'Primera matriculación' : null, 'class' => ''],
             ['k' => 'Kilómetros', 'v' => $kmTxt ?? '—', 's' => 'Verificados', 'class' => ''],
-            ['k' => 'Combustible', 'v' => $fuelTxt ?? '—', 's' => null, 'class' => ''],
+            ['k' => 'Combustible', 'v' => ucfirst($car->fuel_type ?? '—'), 's' => null, 'class' => ''],
             ['k' => 'Cambio', 'v' => ucfirst($cambioTxt ?? '—'), 's' => null, 'class' => ''],
-            ['k' => 'Potencia', 'v' => $potencia ?? '—', 's' => null, 'class' => ''],
-            ['k' => 'Procedencia', 'v' => $car->pais_origen ?? '—', 's' => 'Historial limpio', 'class' => 'green'],
+            ['k' => 'Origen', 'v' => strtoupper($car->origin_country ?? '—'), 's' => 'Historial limpio', 'class' => 'green'],
         ];
         $kpis = array_filter($kpis, fn($x) => !empty($x['v']) && $x['v'] !== '—');
     @endphp
@@ -854,7 +793,7 @@
                 @foreach($kpis as $k)
                     <div class="kpi">
                         <div class="kpi-k">{{ $k['k'] }}</div>
-                        <div class="kpi-v @if($k['class']){{ $k['class'] }}@endif">{{ $k['v'] }}</div>
+                        <div class="kpi-v {{ $k['class'] }}">{{ $k['v'] }}</div>
                         @if($k['s'])<div class="kpi-s">{{ $k['s'] }}</div>@endif
                     </div>
                 @endforeach
@@ -866,78 +805,64 @@
     <main class="container">
 
         {{-- VEREDICTO --}}
-        @php
-            $verdictMap = [
-                'Buy' => ['label' => 'Recomendado', 'class' => 'v-green'],
-                'Buy if price drops' => ['label' => 'Comprar si baja de precio', 'class' => 'v-orange'],
-                'Doubtful' => ['label' => 'Dudoso', 'class' => 'v-orange'],
-                'Discard' => ['label' => 'No recomendado', 'class' => 'v-red'],
-            ];
-            $verdictInfo = $verdictMap[$car->verdict] ?? null;
-            $dictamen = $esqueleto?->uno('DICTAMEN');
-        @endphp
-        @if($dictamen || $verdictInfo)
+        @if($esqueleto && ($v = $esqueleto->uno('DICTAMEN')))
             <section id="veredicto" class="verdict">
                 <div class="verdict-eyebrow">Veredicto JJ Import Motors</div>
-                @if($verdictInfo)
-                    <div class="verdict-badge {{ $verdictInfo['class'] }}">{{ $verdictInfo['label'] }}</div>
-                @endif
-                <h2 class="verdict-h">{{ $esqueleto?->uno('RESUMEN') ?? $tituloFicha ?? 'Nuestra recomendación' }}</h2>
-                <p class="verdict-body">{{ $dictamen ?? $car->verdict_reasoning ?? 'Hemos analizado este vehículo en detalle: historial, estado, documentación y precio frente al mercado. El resultado de ese análisis está resumido aquí. Consúltanos cualquier duda.' }}</p>
+                <h2 class="verdict-h">{{ $esqueleto->uno('RESUMEN') ?? 'Nuestra recomendación' }}</h2>
+                <p class="verdict-body">{{ $v }}</p>
                 <div class="verdict-footer">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
-                    Análisis actualizado el {{ ($car->verdict_at ?? now())->format('d/m/Y') }} · Basado en inspección + datos del fabricante
+                    Análisis actualizado el {{ now()->format('d/m/Y') }} · Basado en inspección física + datos del fabricante
                 </div>
             </section>
         @endif
 
-        {{-- POR QUÉ ESTE COCHE (argumentos de la ficha) --}}
-        @php $argumentos = $esqueleto ? $esqueleto->todos('ARGUMENTO') : []; @endphp
-        @if(count($argumentos) > 0)
-            <section id="argumentos">
-                <div class="section-title">Argumentos</div>
-                <h2 class="section-h">¿Por qué este coche?</h2>
-                <div class="argumentos-grid">
-                    @foreach($argumentos as $arg)
-                        <div class="argumento-item">
-                            <span class="argumento-check">★</span>
-                            <div>{!! App\Support\Esqueleto::negrita($arg) !!}</div>
-                        </div>
-                    @endforeach
-                </div>
-            </section>
-        @endif
-
-        {{-- QUÉ INCLUYE EL SERVICIO --}}
-        @php
-            $servicioItems = $esEspaña
-                ? [
-                    ['t' => 'Búsqueda y selección', 'd' => 'Localizamos y negociamos la mejor unidad en España para ti'],
-                    ['t' => 'Inspección y verificación', 'd' => 'Revisamos historial, kilometraje y estado antes de cerrar'],
-                    ['t' => 'Traslado hasta tu domicilio', 'd' => 'Nos encargamos del transporte y la logística'],
-                    ['t' => 'Gestoría y transferencia', 'd' => 'Toda la documentación a tu nombre, sin papeleos'],
-                    ['t' => 'Entrega llave en mano', 'd' => 'Lo recibes revisado y listo para circular'],
-                ]
-                : [
-                    ['t' => 'Búsqueda y selección', 'd' => 'Localizamos y negociamos la mejor unidad en Alemania'],
-                    ['t' => 'Inspección previa en origen', 'd' => 'Verificamos historial, estado y documentación antes de comprar'],
-                    ['t' => 'Importación y transporte', 'd' => 'Trámites de importación y traslado hasta Huelva'],
-                    ['t' => 'Matriculación en España', 'd' => 'Impuestos, ITV y matriculación a tu nombre'],
-                    ['t' => 'Entrega llave en mano', 'd' => 'Lo recibes matriculado y listo para circular'],
-                ];
-        @endphp
+        {{-- INCLUYE (lo que va incluido en el precio) --}}
         <section class="incluye">
-            <h3>Qué incluye nuestro servicio</h3>
+            <h3>Qué incluye este precio</h3>
             <div class="incluye-grid">
-                @foreach($servicioItems as $item)
-                    <div class="incluye-item">
-                        <span class="incluye-check">✓</span>
-                        <div>
-                            <strong>{{ $item['t'] }}</strong>
-                            <span class="incluye-desc">{{ $item['d'] }}</span>
-                        </div>
+                <div class="incluye-item">
+                    <span class="incluye-check">✓</span>
+                    <div>
+                        <strong>Transferencia a tu nombre</strong>
+                        Gestionamos todo el papeleo
                     </div>
-                @endforeach
+                </div>
+                <div class="incluye-item">
+                    <span class="incluye-check">✓</span>
+                    <div>
+                        <strong>IVA desgravable</strong>
+                        Si eres empresa o autónomo
+                    </div>
+                </div>
+                <div class="incluye-item">
+                    <span class="incluye-check">✓</span>
+                    <div>
+                        <strong>Garantía mecánica 12 meses</strong>
+                        Cobertura en motor y caja
+                    </div>
+                </div>
+                <div class="incluye-item">
+                    <span class="incluye-check">✓</span>
+                    <div>
+                        <strong>Revisión pre-entrega</strong>
+                        150 puntos de inspección
+                    </div>
+                </div>
+                <div class="incluye-item">
+                    <span class="incluye-check">✓</span>
+                    <div>
+                        <strong>Historial verificado</strong>
+                        Origen y kilometraje confirmados
+                    </div>
+                </div>
+                <div class="incluye-item">
+                    <span class="incluye-check">✓</span>
+                    <div>
+                        <strong>Entrega a domicilio</strong>
+                        Huelva y provincia sin coste
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -956,50 +881,55 @@
             </section>
         @endif
 
-        {{-- PUNTOS FUERTES (solo lo bueno; el análisis de riesgos queda interno) --}}
-        @php $prosDb = $car->pros ?? []; @endphp
-        @if(count($prosDb) > 0)
-            <section>
-                <div class="section-title">Nuestro análisis</div>
-                <h2 class="section-h">Puntos fuertes de este coche</h2>
-                <div class="proscons single">
-                    <div class="pc-col pros">
-                        <ul>
-                            @foreach($prosDb as $p)
-                                <li>
-                                    {{ $p['text'] ?? $p }}
-                                    @if(($p['weight'] ?? '') === 'high')<span class="w-badge w-high">clave</span>@endif
-                                </li>
-                            @endforeach
-                        </ul>
+        {{-- PROS / CONS --}}
+        @if($esqueleto)
+            @php
+                $aFavor = $esqueleto->lista('A_FAVOR');
+                $enContra = $esqueleto->lista('EN_CONTRA');
+            @endphp
+            @if(count($aFavor) > 0 || count($enContra) > 0)
+                <section>
+                    <div class="section-title">Puntos clave</div>
+                    <h2 class="section-h">Lo bueno y lo que debes saber</h2>
+                    <div class="proscons">
+                        @if(count($aFavor) > 0)
+                            <div class="pc-col pros">
+                                <h3>Puntos a favor</h3>
+                                <ul>
+                                    @foreach($aFavor as $item)
+                                        <li>{{ $item }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+                        @if(count($enContra) > 0)
+                            <div class="pc-col cons">
+                                <h3>Aspectos a considerar</h3>
+                                <ul>
+                                    @foreach($enContra as $item)
+                                        <li>{{ $item }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
                     </div>
-                </div>
-            </section>
+                </section>
+            @endif
         @endif
 
-        {{-- ESPECIFICACIONES (SPEC de la ficha + datos de BD) --}}
+        {{-- ESPECIFICACIONES --}}
         @php
             $specRows = [];
-            if ($esqueleto) {
-                foreach ($esqueleto->filas('SPEC') as $fila) {
-                    if (count($fila) >= 2) {
-                        $specRows[] = ['k' => $fila[0], 'v' => $fila[1]];
-                    }
-                }
-            }
-            $extras = [
-                'Color' => $car->color,
-                'Puertas' => $car->doors,
-                'Plazas' => $car->seats,
-                'Combustible' => $fuelTxt,
-                'Kilómetros' => $kmTxt,
-                'Procedencia' => $car->pais_origen,
-                'Versión' => $car->version,
+            $specMap = [
+                'MARCA' => 'Marca', 'MODELO' => 'Modelo', 'VERSION' => 'Versión',
+                'ANIO' => 'Año', 'KM' => 'Kilómetros', 'POTENCIA' => 'Potencia',
+                'CAMBIO' => 'Cambio', 'COMBUSTIBLE' => 'Combustible',
+                'TRACCION' => 'Tracción', 'COLOR' => 'Color', 'PUERTAS' => 'Puertas',
+                'PLAZAS' => 'Plazas', 'ORIGEN' => 'Origen',
             ];
-            foreach ($extras as $k => $v) {
-                if ($v && ! collect($specRows)->contains(fn($r) => mb_strtolower($r['k']) === mb_strtolower($k))) {
-                    $specRows[] = ['k' => $k, 'v' => $v];
-                }
+            foreach ($specMap as $key => $label) {
+                $val = $esqueleto?->uno($key);
+                if ($val) $specRows[] = ['k' => $label, 'v' => $val];
             }
         @endphp
         @if(count($specRows) > 0)
@@ -1017,51 +947,69 @@
             </section>
         @endif
 
-        {{-- EQUIPAMIENTO (ficha o BD) --}}
-        @php
-            $equipamiento = $esqueleto ? $esqueleto->lista('EQUIPAMIENTO') : [];
-            if (count($equipamiento) === 0 && $car->equipment) {
-                $equipamiento = $car->equipment;
-            }
-        @endphp
-        @if(count($equipamiento) > 0)
-            <section>
-                <div class="section-title">Equipamiento</div>
-                <h2 class="section-h">Extras y opciones destacadas</h2>
-                <div class="equip">
-                    @foreach($equipamiento as $item)
-                        <div class="equip-item">{{ is_string($item) ? $item : ($item['text'] ?? '') }}</div>
-                    @endforeach
-                </div>
-            </section>
+        {{-- EQUIPAMIENTO --}}
+        @if($esqueleto)
+            @php $equipamiento = $esqueleto->lista('EQUIPAMIENTO'); @endphp
+            @if(count($equipamiento) > 0)
+                <section>
+                    <div class="section-title">Equipamiento</div>
+                    <h2 class="section-h">Extras y opciones destacadas</h2>
+                    <div class="equip">
+                        @foreach($equipamiento as $item)
+                            <div class="equip-item">{{ $item }}</div>
+                        @endforeach
+                    </div>
+                </section>
+            @endif
+
+            {{-- TIPS --}}
+            @php $tips = $esqueleto->lista('TIPS'); @endphp
+            @if(count($tips) > 0)
+                <section class="tips">
+                    <h3>Cosas que debes saber antes de comprar</h3>
+                    <ul>
+                        @foreach($tips as $t)
+                            <li>{{ $t }}</li>
+                        @endforeach
+                    </ul>
+                </section>
+            @endif
         @endif
 
-        {{-- TIPS (BD) --}}
-        @if($car->tips && count($car->tips) > 0)
-            <section class="tips">
-                <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 22h4M12 2a7 7 0 00-4 12.7c.6.5 1 1.4 1 2.3h6c0-.9.4-1.8 1-2.3A7 7 0 0012 2z"/></svg> Cosas que debes saber antes de comprar</h3>
-                <ul>
-                    @foreach($car->tips as $t)
-                        <li>{{ is_string($t) ? $t : ($t['text'] ?? '') }}</li>
-                    @endforeach
-                </ul>
+        {{-- FINANCIACIÓN --}}
+        @if($cuota)
+            <section id="financiacion" class="financ">
+                <div class="financ-inner">
+                    <div>
+                        <div class="section-title" style="color: #fed7aa;">Financiación</div>
+                        <h2>Desde {{ number_format($cuota, 0, ',', '.') }} €/mes</h2>
+                        <p>Te lo financiamos sin entrada y con cuotas flexibles. Aprobación en 24-48h, sin papeleos y con respuesta rápida. Cuotas orientativas a 60 meses · TAE variable según perfil.</p>
+                        <a href="https://wa.me/34675701439?text={{ urlencode('Hola, quiero financiación para el '.$car->brand.' '.$car->model.'. ¿Me ayudáis con una simulación?') }}"
+                           target="_blank" rel="noopener" class="btn ghost big">
+                            💬 Solicitar simulación
+                        </a>
+                    </div>
+                    <div class="financ-price">
+                        <div class="financ-from">Cuota mensual estimada</div>
+                        <div class="financ-amount"><small>desde</small> {{ number_format($cuota, 0, ',', '.') }} €</div>
+                        <div class="financ-detail">60 cuotas · Sin entrada · Aprobación rápida</div>
+                    </div>
+                </div>
             </section>
         @endif
 
         {{-- CTA FINAL --}}
         <section class="cta-final">
-            <div class="cta-eyebrow">¿Te interesa este coche?</div>
-            <h2>Consúltanos el servicio completo</h2>
-            <p>Este precio es el del vehículo. Nosotros gestionamos {{ $esEspaña ? 'la compra' : 'la importación' }} y todos los trámites para que lo recibas listo en tu domicilio{{ $plazo ? ' en '.$plazo : '' }}.</p>
+            <div class="cta-eyebrow">¿Listo para verlo?</div>
+            <h2>Reserva tu prueba sin compromiso</h2>
+            <p>Llámanos o escríbenos por WhatsApp. Te confirmamos disponibilidad, organizamos la prueba y te lo entregamos en tu domicilio.</p>
             <div class="cta-buttons">
-                <a href="https://wa.me/34675701439?text={{ urlencode('Hola, me interesa el '.$car->brand.' '.$car->model.'. ¿Podéis darme más información del servicio?') }}"
-                   target="_blank" rel="noopener" class="btn wa big">
-                    <svg class="ic" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.87 9.87 0 004.74 1.21h.01c5.46 0 9.9-4.45 9.9-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0012.04 2zm0 18.15c-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.26 8.26 0 01-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24 2.2 0 4.27.86 5.82 2.42a8.18 8.18 0 012.41 5.83c-.01 4.54-3.7 8.23-8.22 8.23zm4.52-6.16c-.25-.13-1.47-.72-1.69-.8-.23-.08-.39-.13-.56.12-.16.25-.64.81-.78.97-.15.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.01-.38.11-.51.11-.11.25-.29.37-.43.13-.15.17-.25.25-.42.08-.17.04-.31-.02-.43-.06-.13-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.42h-.48c-.17 0-.43.06-.66.31-.22.25-.86.85-.86 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.22-.16-.47-.28z"/></svg>
-                    Consultar por WhatsApp
+                <a href="https://wa.me/34675701439?text={{ urlencode('Hola, me interesa el '.$car->brand.' '.$car->model.'. ¿Podemos quedar para verlo?') }}"
+                   target="_blank" rel="noopener" class="btn primary big">
+                    💬 Hablar por WhatsApp
                 </a>
                 <a href="tel:+34675701439" class="btn ghost big">
-                    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
-                    675 70 14 39
+                    📞 675 70 14 39
                 </a>
             </div>
         </section>
@@ -1076,7 +1024,7 @@
             @endif
             <span class="brand-text">JJ Import Motors</span>
         </div>
-        <div class="slogan">Especialistas en importación de vehículos desde Alemania y España</div>
+        <div class="slogan">Especialistas en importación de vehículos desde Alemania</div>
         <div class="links">
             <a href="mailto:jjimportmotors@gmail.com">jjimportmotors@gmail.com</a>
             <span style="opacity: 0.4;">·</span>
@@ -1087,22 +1035,18 @@
             <span>Huelva, España</span>
         </div>
         <div class="copy">
-            © {{ date('Y') }} JJ Import Motors · Dossier generado el {{ now()->format('d/m/Y H:i') }}
-            @php $legal = $esqueleto?->uno('LEGAL'); @endphp
-            @if($legal)
-                <div class="legal">{{ $legal }}</div>
-            @endif
+            © {{ date('Y') }} JJ Import Motors · Todos los precios incluyen IVA · Dossier generado el {{ now()->format('d/m/Y H:i') }}
         </div>
     </footer>
 
     {{-- ── LIGHTBOX ────────────────────────────────────── --}}
     @if(count($fotos) > 1)
-    <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Galería de fotos">
-        <button class="lightbox-close" onclick="closeLightbox()" aria-label="Cerrar galería">×</button>
-        <button class="lightbox-prev" onclick="prevPhoto()" aria-label="Foto anterior">‹</button>
-        <button class="lightbox-next" onclick="nextPhoto()" aria-label="Foto siguiente">›</button>
-        <img id="lightbox-img" src="" alt="{{ $car->brand }} {{ $car->model }}">
-        <div class="lightbox-counter" id="lightbox-counter" aria-live="polite"></div>
+    <div class="lightbox" id="lightbox">
+        <button class="lightbox-close" onclick="closeLightbox()" aria-label="Cerrar">×</button>
+        <button class="lightbox-prev" onclick="prevPhoto()" aria-label="Anterior">‹</button>
+        <button class="lightbox-next" onclick="nextPhoto()" aria-label="Siguiente">›</button>
+        <img id="lightbox-img" src="" alt="">
+        <div class="lightbox-counter" id="lightbox-counter"></div>
     </div>
     <script>
         (function() {
