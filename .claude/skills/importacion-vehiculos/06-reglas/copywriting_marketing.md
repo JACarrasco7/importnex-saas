@@ -15,12 +15,22 @@ La base de datos de producción (Forge/MySQL) usa charset `utf8mb3`, que **NO ad
 
 ---
 
+## 📞 Pie de anuncio: NO repetir el contacto en cada pieza
+
+Laravel añade automáticamente un **pie de anuncio común** (nombre de empresa + teléfonos + web) al botón "Copiar todo" del panel de marketing (`CarMarketingController::show`, config `config/company.php`). Por eso:
+
+- **NO incluyas** teléfono, email ni web en `POST`, `STORY`, `GANCHO`, `TITULO` ni `DESCRIPCION`. Laravel ya lo añade al final al copiar.
+- Los únicos cierres de CTA que SÍ debes escribir son de acción ("Escríbenos", "Consulta disponibilidad", "Link en bio"), nunca datos de contacto literales.
+- Si un portal concreto exige el teléfono visible en el propio anuncio, eso lo gestiona el operador manualmente en el formulario del portal — no forma parte del copy generado.
+
+---
+
 ## 📏 Límites recomendados por canal (guía visual en Laravel, no bloqueantes)
 
 | Canal | Título/Gancho | Cuerpo | Hashtags | Nota |
 |---|---|---|---|---|
 | **TikTok** | ≤150 car. | ≤2200 car. | 3-5 | Guion pensado para vídeo hablado/subtítulos, no solo texto leído |
-| **Instagram** | ≤125 car. (se corta a "ver más") | ≤2200 car. | 15-20 | Las primeras 125 car. son las que MÁS se leen |
+| **Instagram** | ≤125 car. (se corta a "ver más") | ≤2200 car. | 5-10 | Mejor pocos hashtags muy relevantes que muchos genéricos — el algoritmo actual (2025+) penaliza el hashtag-spam |
 | **Facebook** | ≤100 car. | ≤2200 car. | 3-5 | Público más generalista; menos hashtags, más datos duros |
 | **Milanuncios** | ≤60 car. | ≤4000 car. | — | Título = lo que más se lee en el listado |
 | **Coches.net** | ≤60 car. | ≤4000 car. | — | Prioriza estructura técnica clara |
@@ -75,9 +85,31 @@ El `[GANCHO]` es el titular que se reutiliza como `title` en TikTok/Instagram/Fa
   2. **Estado general** (kilometraje, dueños, historial, ITV).
   3. **Equipamiento destacado** (3-5 puntos, los que de verdad diferencian el coche).
   4. **Mecánica** (motor, cambio, tracción, consumo si es dato de venta).
-  5. **Precio y forma de contacto** (cierre claro, sin ambigüedad).
+  5. **Cierre con llamada a la acción** ("Escríbenos para más info", "Consulta disponibilidad") — sin repetir teléfono/web, Laravel los añade automáticamente al copiar.
 - **FICHA_RAPIDA:** datos objetivos separados por `|` (año, km, combustible, cambio, potencia) — NO frases, solo datos.
 - **QUE_INCLUYE:** lista de lo que cubre el servicio (transporte, ITV, matriculación, garantía) — argumento de venta del servicio de importación, no del coche.
+
+---
+
+## ✍️ Ejemplo antes/después (caso real detectado 06-sep-2026)
+
+**❌ Antes (plano, "soso" — todo en el mismo tono, sin gancho, cierre genérico):**
+
+> Mercedes-AMG A 35 4MATIC 2019
+> 306 CV, cambio automático y tracción integral. Acabado en gris metalizado.
+> Equipamiento deportivo completo: techo panorámico corredizo, Night-Paket AMG, sistema MBUX con realidad aumentada, cuadro de instrumentos digital y navegación Premium con información de tráfico en directo.
+> Gestionamos la importación completa desde Alemania hasta la entrega en Huelva. Consúltanos sin compromiso.
+
+**Qué falla:** el título es solo el nombre del coche (sin gancho), la descripción lee como una ficha técnica sin ritmo, y el cierre "Consúltanos sin compromiso" es genérico y no da ninguna razón para actuar YA.
+
+**✅ Después (gancho real + ritmo + cierre con motivo de acción):**
+
+> 306 CV de potencia pura y tracción total: el Mercedes-AMG A35 que no vas a encontrar dos veces
+> 4MATIC 2019, cambio automático, gris metalizado. Equipamiento deportivo real, no de catálogo: techo panorámico corredizo, Night-Paket AMG, MBUX con realidad aumentada, cuadro digital y navegación Premium con tráfico en directo.
+> Lo traemos desde Alemania hasta tu puerta en Huelva — transporte, ITV y matriculación incluidos en el precio.
+> Escríbenos hoy: quedan pocas unidades con este equipamiento en el mercado alemán.
+
+**Qué cambió:** el gancho lidera con el dato más fuerte (306 CV + tracción total) en vez del nombre del coche; el equipamiento se presenta con una frase de transición ("real, no de catálogo") en vez de listarse sin más; el cierre da un MOTIVO concreto para escribir ya (escasez de unidades) en vez de "sin compromiso" — y no repite teléfono/web (los añade Laravel).
 
 ---
 
@@ -87,7 +119,8 @@ El `[GANCHO]` es el titular que se reutiliza como `title` en TikTok/Instagram/Fa
 - **A-COPY2 — Gancho vacío o genérico.** `[GANCHO]` vacío hace que Laravel NO cree ninguna fila de redes sociales (contrato.md). Siempre debe tener un dato concreto.
 - **A-COPY3 — Repetir el mismo texto en los 3 posts de una red.** Cada post/story debe tener un ángulo distinto (dato, pregunta, comparación) — repetir el mismo texto en los 3 slots reduce el valor del contenido a 1/3.
 - **A-COPY4 — Datos inventados en el copy.** Todo dato (km, CV, año, precio) debe coincidir EXACTAMENTE con lo verificado en el informe técnico — nunca redondear "para que suene mejor".
-- **A-COPY5 — CTA ausente en portales.** `DESCRIPCION` de portales siempre debe cerrar con una llamada a la acción clara (contacto, precio, "consúltanos").
+- **A-COPY5 — CTA ausente o genérico.** `DESCRIPCION`/`POST` siempre debe cerrar con una llamada a la acción — y con un motivo concreto (escasez, novedad, ventaja de precio), no un "Consúltanos sin compromiso" a secas sin razón para actuar YA.
+- **A-COPY6 — Repetir teléfono/web/email en el copy.** Laravel añade el pie de contacto común automáticamente al copiar (ver §Pie de anuncio). Repetirlo en el `GANCHO`/`POST`/`DESCRIPCION` lo duplica en el texto final.
 
 ---
 

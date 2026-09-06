@@ -28,6 +28,23 @@ class CarMarketingTest extends TestCase
         $response->assertInertia(fn ($page) => $page->component('Cars/Marketing')->where('car.id', $car->id));
     }
 
+    public function test_marketing_show_exposes_common_ad_footer(): void
+    {
+        $org = Organization::factory()->create();
+        $user = User::factory()->create(['organization_id' => $org->id, 'role' => 'owner']);
+        $car = Car::factory()->create(['organization_id' => $org->id]);
+
+        $this->actingAs($user);
+
+        $response = $this->get(route('cars.marketing', $car));
+        $response->assertInertia(fn ($page) => $page
+            ->where('adFooter', fn ($footer) => str_contains($footer, config('company.telefono_1'))
+                && str_contains($footer, config('company.web'))
+                && str_contains($footer, config('company.nombre'))
+            )
+        );
+    }
+
     public function test_generate_creates_draft_content(): void
     {
         Http::fake([

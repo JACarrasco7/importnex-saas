@@ -19,6 +19,16 @@ class CarMarketingController extends Controller
         return Inertia::render('Cars/Marketing', [
             'car' => $car,
             'contents' => $car->marketingContents,
+            // Pie de anuncio común a toda la empresa: se añade al "Copiar todo"
+            // para que el operador no tenga que escribir el contacto a mano en
+            // cada publicación ni Claude tenga que repetirlo en cada pieza.
+            'adFooter' => sprintf(
+                '%s · %s / %s · %s',
+                config('company.nombre'),
+                config('company.telefono_1'),
+                config('company.telefono_2'),
+                config('company.web'),
+            ),
         ]);
     }
 

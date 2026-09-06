@@ -28,6 +28,7 @@ import { useTranslations } from '@/Composables/useTranslations';
 const props = defineProps({
     car: Object,
     contents: Array,
+    adFooter: { type: String, default: '' },
 });
 
 const { currency: formatCurrency } = useFormat();
@@ -50,7 +51,7 @@ const PLATFORM_GUIDE = {
     coches_net: { titleMax: 60, descMax: 4000, hashtagsMax: 0, tip: 'Coches.net prioriza fichas con datos técnicos claros. Estructura: estado general → equipamiento destacado → mecánica → precio. Evita mayúsculas sostenidas.' },
     wallapop: { titleMax: 80, descMax: 3000, hashtagsMax: 0, tip: 'En Wallapop el título compite con muchos anuncios similares: sé específico (versión, acabado) en vez de genérico. La primera línea de la descripción es la que se ve en el listado.' },
     tiktok: { titleMax: 150, descMax: 2200, hashtagsMax: 5, tip: 'Los primeros 2-3 segundos deciden si siguen viendo el vídeo: empieza con el gancho más fuerte (precio, dato sorprendente), no con la marca. Máx. 3-5 hashtags: 1-2 de nicho + 1-2 de tendencia.' },
-    instagram: { titleMax: 125, descMax: 2200, hashtagsMax: 20, tip: 'Instagram corta la descripción a ~125 caracteres antes de "ver más": pon el gancho y el dato clave al principio. 15-20 hashtags de nicho (no genéricos) mejoran el alcance.' },
+    instagram: { titleMax: 125, descMax: 2200, hashtagsMax: 10, tip: 'Instagram corta la descripción a ~125 caracteres antes de "ver más": pon el gancho y el dato clave al principio. Mejor 5-10 hashtags muy relevantes que 20 genéricos — el algoritmo actual penaliza el hashtag-spam.' },
     facebook: { titleMax: 100, descMax: 2200, hashtagsMax: 5, tip: 'El público de Facebook responde mejor a datos concretos y visibles: precio, kilometraje, año, garantía. Pocos hashtags (3-5) — aquí no aportan alcance como en Instagram/TikTok.' },
 };
 
@@ -256,15 +257,18 @@ function copyToClipboard(text) {
     successMsg.value = 'Copiado al portapapeles.';
 }
 
+// Texto listo para pegar tal cual en la plataforma: sin etiquetas ("Título:",
+// "Hashtags:"...), solo el contenido real en el orden en que se publica +
+// el pie de contacto común de la empresa al final.
 function copyAll() {
-    const content = [];
-    if (form.value.title) content.push(`Título: ${form.value.title}`);
-    if (form.value.description) content.push(`Descripción: ${form.value.description}`);
-    if (form.value.hashtags.length) content.push(`Hashtags: ${form.value.hashtags.map(t => `#${t}`).join(' ')}`);
-    if (form.value.photo_tips.length) content.push(`Tips de fotos: ${form.value.photo_tips.join(', ')}`);
-    const text = content.join('\n\n');
+    const parts = [];
+    if (form.value.title) parts.push(form.value.title);
+    if (form.value.description) parts.push(form.value.description);
+    if (form.value.hashtags.length) parts.push(form.value.hashtags.map(t => `#${t}`).join(' '));
+    if (props.adFooter) parts.push(props.adFooter);
+    const text = parts.join('\n\n');
     navigator.clipboard.writeText(text);
-    successMsg.value = 'Todo copiado al portapapeles.';
+    successMsg.value = 'Todo copiado al portapapeles, listo para pegar.';
 }
 
 function channelLabel(channel) {
@@ -579,6 +583,9 @@ function renderPreview() {
                             {{ saving ? t('cars.saving') : t('marketing.save_draft') }}
                         </button>
                     </div>
+                    <p v-if="adFooter" class="text-right text-xs text-gray-400">
+                        "Copiar todo" añade automáticamente: <span class="font-medium text-gray-500">{{ adFooter }}</span>
+                    </p>
                 </div>
 
                 <!-- Preview Section -->
