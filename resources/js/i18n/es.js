@@ -229,7 +229,7 @@ export default {
     },
     public_link: {
       title: 'Dossier público del coche',
-      help: 'Genera un enlace público para compartir la ficha + folleto del coche con tu cliente. Él verá una página web bonita, sin necesidad de login.',
+      help: 'Genera un enlace público para compartir el informe completo del coche con tu cliente. Él verá una página web bonita, sin necesidad de login.',
       share: 'Generar enlace público',
       copy: 'Copiar enlace',
       copied: '¡Copiado!',

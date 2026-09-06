@@ -463,49 +463,41 @@
             margin-top: 2px;
         }
 
-        /* ── FINANCIACIÓN ─────────────────────────────── */
-        .financ {
-            background: linear-gradient(135deg, var(--estoril) 0%, var(--estoril-2) 100%);
-            border-radius: 24px;
-            padding: 44px 44px;
+        /* ── VEREDICTO: punto de color según semáforo ─── */
+        .verdict-dot {
+            display: inline-block; width: 13px; height: 13px; border-radius: 50%;
+            margin-right: 10px; vertical-align: middle;
+            box-shadow: 0 0 12px currentColor;
+        }
+
+        /* ── ¿POR QUÉ ESTE COCHE? ──────────────────────── */
+        .why {
+            background: rgba(143, 163, 217, 0.05);
+            border-left: 3px solid var(--orange);
+            border-radius: 0 18px 18px 0;
+            padding: 32px 36px;
             margin-bottom: 60px;
-            position: relative;
-            overflow: hidden;
         }
-        .financ::before {
-            content: ''; position: absolute;
-            top: -50%; right: -10%;
-            width: 400px; height: 400px;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.06) 0%, transparent 70%);
-            pointer-events: none;
+        .why-body { color: #e5e7eb; font-size: 16px; line-height: 1.65; }
+
+        /* ── COMPARATIVA DE MERCADO ────────────────────── */
+        .market { margin-bottom: 80px; }
+        .market-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 14px;
         }
-        .financ-inner {
-            display: grid; grid-template-columns: 1.4fr 1fr; gap: 40px;
-            align-items: center;
-            position: relative;
+        .market-box {
+            background: rgba(143, 163, 217, 0.05);
+            border: 1px solid rgba(143, 163, 217, 0.2);
+            border-radius: 14px; padding: 22px; text-align: center;
         }
-        .financ h2 {
-            font-size: clamp(24px, 3vw, 32px); font-weight: 800; color: #fff;
-            margin-bottom: 14px;
+        .market-box .k {
+            font-size: 10px; text-transform: uppercase; letter-spacing: 1px;
+            color: var(--platinum); font-weight: 700; margin-bottom: 8px;
         }
-        .financ p { color: #c7d4f5; font-size: 15px; line-height: 1.6; margin-bottom: 24px; }
-        .financ-price {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            border-radius: 16px;
-            padding: 28px 32px;
-            text-align: center;
-        }
-        .financ-from {
-            font-size: 11px; text-transform: uppercase; letter-spacing: 2px;
-            color: #c7d4f5; font-weight: 700; margin-bottom: 8px;
-        }
-        .financ-amount {
-            font-size: 42px; font-weight: 900; color: #fff;
-            line-height: 1; margin-bottom: 6px;
-        }
-        .financ-amount small { font-size: 18px; opacity: 0.7; font-weight: 700; }
-        .financ-detail { font-size: 12px; color: #c7d4f5; margin-top: 12px; }
+        .market-box .v { font-size: 22px; font-weight: 800; color: #fff; }
+        .market-box.highlight { background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.35); }
+        .market-box.highlight .v { color: #4ade80; }
 
         /* ── TIPS ─────────────────────────────────────── */
         .tips {
@@ -643,12 +635,11 @@
             .equip { grid-template-columns: 1fr; }
             .verdict { padding: 28px 22px; }
             .incluye { padding: 26px 22px; }
-            .financ { padding: 30px 22px; }
-            .financ-inner { grid-template-columns: 1fr; gap: 24px; }
+            .why { padding: 22px 20px; }
+            .market-grid { grid-template-columns: repeat(2, 1fr); }
             .tips { padding: 24px 22px; }
             .cta-final { padding: 40px 22px; }
             .price-value { font-size: 36px; }
-            .financ-amount { font-size: 36px; }
             .h1 { font-size: 38px; }
         }
         @media (max-width: 480px) {
@@ -672,7 +663,6 @@
                 <a href="#galeria" class="nav-link">Galería</a>
                 <a href="#veredicto" class="nav-link">Veredicto</a>
                 <a href="#detalles" class="nav-link">Detalles</a>
-                <a href="#financiacion" class="nav-link">Financiación</a>
             </div>
             <a href="tel:+34675701439" class="nav-cta">
                 📞 <span class="long">675 70 14 39</span>
@@ -683,7 +673,6 @@
     {{-- ── HERO ────────────────────────────────────────── --}}
     @php
         $precio = $car->sale_price ?? $car->purchase_price ?? 0;
-        $cuota = $precio > 0 ? round($precio / 60) : null;
         $potencia = $esqueleto?->uno('POTENCIA');
         $cambioTxt = $esqueleto?->uno('CAMBIO') ?? $car->transmission;
         $kmTxt = $car->mileage ? number_format($car->mileage, 0, ',', '.').' km' : null;
@@ -693,11 +682,57 @@
             $cambioTxt ? 'cambio '.strtolower($cambioTxt) : null,
             $kmTxt,
         ]);
+
+        // ── Origen: España o Alemania. NO solo «importación»: también gestionamos compras en España ──
+        $paisOrigen = strtolower((string) ($car->origin_country ?? ''));
+        $esAlemania = str_contains($paisOrigen, 'alem') || $paisOrigen === 'de';
+        $esEspana = str_contains($paisOrigen, 'espa') || $paisOrigen === 'es';
+        $origenLabel = $esAlemania ? 'Importado desde Alemania' : ($esEspana ? 'Localizado en España' : 'Origen verificado');
+        $origenSub = $esAlemania ? 'Historial completo y verificado' : 'Historial verificado';
+
+        // ── Estado de gestión. NUNCA «EN STOCK»: no vendemos coches, gestionamos la compra ──
+        $estadoLabels = [
+            'Located' => 'Localizado', 'Valuing' => 'En valoración', 'Offered' => 'Oferta enviada',
+            'Reserved' => 'Reservado para ti', 'Purchased' => 'Comprado', 'In_transit' => 'En tránsito',
+            'Processing' => 'En trámites', 'Delivered' => 'Entregado',
+        ];
+        $estadoLabel = $estadoLabels[$car->status] ?? 'Disponible para gestión';
+
+        // ── Contenido enriquecido: esqueleto (ficha-publicitaria.txt) con fallback a los datos de la IA del coche ──
+        $porqueTexto = trim((string) ($esqueleto?->uno('POR_QUE') ?: ($car->recommendation ?? '')));
+        $valoracionTexto = trim((string) ($esqueleto?->uno('VALORACION') ?: ($car->valuation ?? '')));
+        $ahorroTexto = $esqueleto?->uno('AHORRO') ?: ($car->estimated_saving ? number_format($car->estimated_saving, 0, ',', '.').' €' : null);
+
+        // ── Veredicto del experto (semáforo) ──
+        $tl = strtolower((string) ($car->traffic_light ?? ''));
+        $veredictoLabel = ['green' => 'Excelente compra', 'amber' => 'Buena opción', 'red' => 'Con cautela'][$tl] ?? null;
+        $veredictoColor = ['green' => '#10b981', 'amber' => '#f59e0b', 'red' => '#ef4444'][$tl] ?? null;
+
+        // ── Pros / Cons / Tips: esqueleto primero, datos de IA del coche como respaldo ──
+        $prosLista = $esqueleto ? $esqueleto->lista('A_FAVOR') : [];
+        if (empty($prosLista)) {
+            $prosLista = \App\Support\IaList::normalizar($car->pros ?? null);
+        }
+        $consLista = $esqueleto ? $esqueleto->lista('EN_CONTRA') : [];
+        if (empty($consLista)) {
+            $consLista = \App\Support\IaList::normalizar($car->cons ?? null);
+        }
+        $tipsLista = $esqueleto ? $esqueleto->lista('TIPS') : [];
+        if (empty($tipsLista)) {
+            $tipsLista = \App\Support\IaList::normalizar($car->tips ?? null);
+        }
+
+        // ── Comparativa de mercado ──
+        $fmtEur = fn ($n) => $n !== null ? number_format((float) $n, 0, ',', '.').' €' : null;
+        $marketMin = $fmtEur($car->market_min ?? null);
+        $marketAvg = $fmtEur($car->market_avg ?? null);
+        $marketMax = $fmtEur($car->market_max ?? null);
+        $hayMercado = $marketMin || $marketAvg || $marketMax;
     @endphp
     <header class="hero">
         <div class="hero-inner">
             <div class="hero-left">
-                <div class="hero-eyebrow">⚡ Dossier exclusivo · Stock limitado</div>
+                <div class="hero-eyebrow">📋 Informe de oportunidad exclusivo</div>
                 <h1 class="h1">
                     {{ $car->brand }}<br>
                     <span class="accent">{{ $car->model }}</span>
@@ -717,23 +752,18 @@
                 <div class="hero-actions">
                     <a href="https://wa.me/34675701439?text={{ urlencode('Hola, me interesa el '.$car->brand.' '.$car->model.' que habéis compartido conmigo.') }}"
                        target="_blank" rel="noopener" class="btn primary">
-                        💬 Reservar por WhatsApp
+                        💬 Quiero gestionar la compra
                     </a>
                     <a href="tel:+34675701439" class="btn ghost">
                         📞 Llamar ahora
                     </a>
-                    @if(!empty($folletoUrl))
-                        <a href="{{ $folletoUrl }}" target="_blank" rel="noopener" class="btn ghost">
-                            📄 Folleto PDF
-                        </a>
-                    @endif
                 </div>
             </div>
 
             @if(count($fotos) > 0)
                 <div class="hero-photo">
                     <img src="{{ $fotos[0] }}" alt="{{ $car->brand }} {{ $car->model }}">
-                    <div class="hero-photo-badge live">EN STOCK</div>
+                    <div class="hero-photo-badge live">{{ $estadoLabel }}</div>
                 </div>
             @endif
         </div>
@@ -747,8 +777,8 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0112 2a8 8 0 018 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg>
                 </div>
                 <div class="trust-text">
-                    <strong>Importado desde Alemania</strong>
-                    Historial completo y verificado
+                    <strong>{{ $origenLabel }}</strong>
+                    {{ $origenSub }}
                 </div>
             </div>
             <div class="trust-item">
@@ -774,8 +804,8 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
                 </div>
                 <div class="trust-text">
-                    <strong>Financiación disponible</strong>
-                    Hasta 60 cuotas sin entrada
+                    <strong>Gestión integral</strong>
+                    Compra, transporte y trámites incluidos
                 </div>
             </div>
         </div>
@@ -810,14 +840,49 @@
     <main class="container">
 
         {{-- VEREDICTO --}}
-        @if($esqueleto && ($v = $esqueleto->uno('DICTAMEN')))
+        @if($veredictoLabel || $valoracionTexto)
             <section id="veredicto" class="verdict">
                 <div class="verdict-eyebrow">Veredicto JJ Import Motors</div>
-                <h2 class="verdict-h">{{ $esqueleto->uno('RESUMEN') ?? 'Nuestra recomendación' }}</h2>
-                <p class="verdict-body">{{ $v }}</p>
+                <h2 class="verdict-h">
+                    @if($veredictoColor)<span class="verdict-dot" style="background: {{ $veredictoColor }}; color: {{ $veredictoColor }};"></span>@endif
+                    {{ $veredictoLabel ?? 'Nuestra recomendación' }}
+                </h2>
+                @if($valoracionTexto)
+                    <p class="verdict-body">{!! \App\Support\Esqueleto::negrita($valoracionTexto) !!}</p>
+                @endif
                 <div class="verdict-footer">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
-                    Análisis actualizado el {{ now()->format('d/m/Y') }} · Basado en inspección física + datos del fabricante
+                    Análisis actualizado el {{ now()->format('d/m/Y') }} · Verificación del vehículo y comparativa de mercado
+                </div>
+            </section>
+        @endif
+
+        {{-- ¿POR QUÉ ESTE COCHE? --}}
+        @if($porqueTexto)
+            <section class="why">
+                <div class="section-title">¿Por qué este coche?</div>
+                <p class="why-body">{!! \App\Support\Esqueleto::negrita($porqueTexto) !!}</p>
+            </section>
+        @endif
+
+        {{-- COMPARATIVA DE MERCADO --}}
+        @if($hayMercado)
+            <section class="market">
+                <div class="section-title">Comparativa de mercado</div>
+                <h2 class="section-h">Así se compara este precio</h2>
+                <div class="market-grid">
+                    @if($marketMin)
+                        <div class="market-box"><div class="k">Mínimo mercado</div><div class="v">{{ $marketMin }}</div></div>
+                    @endif
+                    @if($marketAvg)
+                        <div class="market-box"><div class="k">Precio medio</div><div class="v">{{ $marketAvg }}</div></div>
+                    @endif
+                    @if($marketMax)
+                        <div class="market-box"><div class="k">Máximo mercado</div><div class="v">{{ $marketMax }}</div></div>
+                    @endif
+                    @if($ahorroTexto)
+                        <div class="market-box highlight"><div class="k">Ahorro estimado</div><div class="v">{{ $ahorroTexto }}</div></div>
+                    @endif
                 </div>
             </section>
         @endif
@@ -889,40 +954,34 @@
             </section>
         @endif
 
-        {{-- PROS / CONS --}}
-        @if($esqueleto)
-            @php
-                $aFavor = $esqueleto->lista('A_FAVOR');
-                $enContra = $esqueleto->lista('EN_CONTRA');
-            @endphp
-            @if(count($aFavor) > 0 || count($enContra) > 0)
-                <section>
-                    <div class="section-title">Puntos clave</div>
-                    <h2 class="section-h">Lo bueno y lo que debes saber</h2>
-                    <div class="proscons">
-                        @if(count($aFavor) > 0)
-                            <div class="pc-col pros">
-                                <h3>Puntos a favor</h3>
-                                <ul>
-                                    @foreach($aFavor as $item)
-                                        <li>{{ $item }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
-                        @if(count($enContra) > 0)
-                            <div class="pc-col cons">
-                                <h3>Aspectos a considerar</h3>
-                                <ul>
-                                    @foreach($enContra as $item)
-                                        <li>{{ $item }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
-                    </div>
-                </section>
-            @endif
+        {{-- PUNTOS CLAVE --}}
+        @if(count($prosLista) > 0 || count($consLista) > 0)
+            <section>
+                <div class="section-title">Puntos clave</div>
+                <h2 class="section-h">Lo bueno y lo que debes saber</h2>
+                <div class="proscons">
+                    @if(count($prosLista) > 0)
+                        <div class="pc-col pros">
+                            <h3>Puntos a favor</h3>
+                            <ul>
+                                @foreach($prosLista as $item)
+                                    <li>{{ $item }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                    @if(count($consLista) > 0)
+                        <div class="pc-col cons">
+                            <h3>Aspectos a considerar</h3>
+                            <ul>
+                                @foreach($consLista as $item)
+                                    <li>{{ $item }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                </div>
+            </section>
         @endif
 
         {{-- ESPECIFICACIONES --}}
@@ -969,50 +1028,27 @@
                     </div>
                 </section>
             @endif
-
-            {{-- TIPS --}}
-            @php $tips = $esqueleto->lista('TIPS'); @endphp
-            @if(count($tips) > 0)
-                <section class="tips">
-                    <h3>Cosas que debes saber antes de comprar</h3>
-                    <ul>
-                        @foreach($tips as $t)
-                            <li>{{ $t }}</li>
-                        @endforeach
-                    </ul>
-                </section>
-            @endif
         @endif
 
-        {{-- FINANCIACIÓN --}}
-        @if($cuota)
-            <section id="financiacion" class="financ">
-                <div class="financ-inner">
-                    <div>
-                        <div class="section-title" style="color: #fed7aa;">Financiación</div>
-                        <h2>Desde {{ number_format($cuota, 0, ',', '.') }} €/mes</h2>
-                        <p>Te lo financiamos sin entrada y con cuotas flexibles. Aprobación en 24-48h, sin papeleos y con respuesta rápida. Cuotas orientativas a 60 meses · TAE variable según perfil.</p>
-                        <a href="https://wa.me/34675701439?text={{ urlencode('Hola, quiero financiación para el '.$car->brand.' '.$car->model.'. ¿Me ayudáis con una simulación?') }}"
-                           target="_blank" rel="noopener" class="btn ghost big">
-                            💬 Solicitar simulación
-                        </a>
-                    </div>
-                    <div class="financ-price">
-                        <div class="financ-from">Cuota mensual estimada</div>
-                        <div class="financ-amount"><small>desde</small> {{ number_format($cuota, 0, ',', '.') }} €</div>
-                        <div class="financ-detail">60 cuotas · Sin entrada · Aprobación rápida</div>
-                    </div>
-                </div>
+        {{-- CONSEJOS DEL EXPERTO --}}
+        @if(count($tipsLista) > 0)
+            <section class="tips">
+                <h3>Cosas que debes saber antes de comprar</h3>
+                <ul>
+                    @foreach($tipsLista as $t)
+                        <li>{{ $t }}</li>
+                    @endforeach
+                </ul>
             </section>
         @endif
 
         {{-- CTA FINAL --}}
         <section class="cta-final">
-            <div class="cta-eyebrow">¿Listo para verlo?</div>
-            <h2>Reserva tu prueba sin compromiso</h2>
-            <p>Llámanos o escríbenos por WhatsApp. Te confirmamos disponibilidad, organizamos la prueba y te lo entregamos en tu domicilio.</p>
+            <div class="cta-eyebrow">¿Seguimos adelante?</div>
+            <h2>Gestionamos la compra de este coche por ti</h2>
+            <p>Escríbenos por WhatsApp o llama. Te explicamos el proceso completo: verificación, compra, transporte, trámites y entrega en tu domicilio — sin sorpresas.</p>
             <div class="cta-buttons">
-                <a href="https://wa.me/34675701439?text={{ urlencode('Hola, me interesa el '.$car->brand.' '.$car->model.'. ¿Podemos quedar para verlo?') }}"
+                <a href="https://wa.me/34675701439?text={{ urlencode('Hola, me interesa el '.$car->brand.' '.$car->model.'. ¿Podemos hablar sobre el proceso de compra?') }}"
                    target="_blank" rel="noopener" class="btn primary big">
                     💬 Hablar por WhatsApp
                 </a>
@@ -1032,7 +1068,7 @@
             @endif
             <span class="brand-text">JJ Import Motors</span>
         </div>
-        <div class="slogan">Especialistas en importación de vehículos desde Alemania</div>
+        <div class="slogan">Gestión de compra e importación de vehículos · España y Alemania</div>
         <div class="links">
             <a href="mailto:jjimportmotors@gmail.com">jjimportmotors@gmail.com</a>
             <span style="opacity: 0.4;">·</span>

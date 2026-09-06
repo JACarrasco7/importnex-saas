@@ -255,13 +255,10 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     // Paquete de valoración (esqueletos .txt → PDF con Blade + Browsershot)
     // Ficha del cliente: vista HTML con iframe embebido (SIEMPRE inline).
     Route::get('/cars/{car}/ficha', [PaqueteValoracionController::class, 'ficha'])->name('cars.ficha');
-    // Folleto del coche: versión visual/compacta para venta.
-    Route::get('/cars/{car}/folleto', [PaqueteValoracionController::class, 'folleto'])->name('cars.folleto');
     // Informe interno: SOLO equipo, nunca expuesto al cliente.
     Route::get('/cars/{car}/informe-interno', [PaqueteValoracionController::class, 'interno'])->name('cars.informe-interno');
     // PDF binario (lo que carga el iframe).
     Route::get('/cars/{car}/ficha/raw', [PaqueteValoracionController::class, 'fichaRaw'])->name('cars.ficha.raw');
-    Route::get('/cars/{car}/folleto/raw', [PaqueteValoracionController::class, 'folletoRaw'])->name('cars.folleto.raw');
     Route::get('/cars/{car}/informe-interno/raw', [PaqueteValoracionController::class, 'internoRaw'])->name('cars.informe-interno.raw');
 
     // Compartir/revocar el seguimiento público con el cliente.
@@ -403,15 +400,10 @@ Route::prefix('contrato/{token}')->where(['token' => '[A-Za-z0-9_-]{20,80}'])->n
 Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
 Route::delete('/newsletter/unsubscribe', [NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
 
-// Dossier público del coche (sin auth, con token): ficha + folleto en HTML
+// Dossier público del coche (sin auth, con token): informe completo en HTML
 // para compartir con el cliente por WhatsApp.
 Route::get('/c/{token}', [PublicCarController::class, 'show'])
     ->where('token', '[A-Za-z0-9_-]{20,80}')
     ->name('public.car.show');
-
-// Folleto PDF del coche vía el mismo token del dossier público.
-Route::get('/c/{token}/folleto', [PublicCarController::class, 'folleto'])
-    ->where('token', '[A-Za-z0-9_-]{20,80}')
-    ->name('public.car.folleto');
 
 require __DIR__.'/auth.php';

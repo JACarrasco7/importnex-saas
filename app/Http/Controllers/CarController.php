@@ -109,7 +109,7 @@ class CarController extends Controller
         // Pre-compute derived data for the enriched valuation UI
         $car->researchGaps;       // touch accessor
         $car->comparablesStats;    // touch accessor
-        $car->calculateTotalCost(); // touch method
+        // totalCost + iedmt se calculan una sola vez más abajo en `derived`.
 
         $checklistMilestones = $car->checklists->where('kind', 'milestone')->values();
         $checklistInspections = $car->checklists->where('kind', 'inspection')->values();
@@ -143,10 +143,14 @@ class CarController extends Controller
             'total' => $checklistInspections->count(),
         ];
 
+        // Auditoria 2026-09-06 (Q5): calculateTotalCost() se llamaba 2 veces
+        // (touch + array 'derived'). Calcular una vez y reusar.
+        $totalCost = $car->calculateTotalCost();
+
         return Inertia::render('Cars/Show', [
             'car' => $car,
             'derived' => [
-                'total_cost' => $car->calculateTotalCost(),
+                'total_cost' => $totalCost,
                 'iedmt' => $car->calculateIEDMT(),
                 'research_gaps' => $car->researchGaps,
                 'comparables_stats' => $car->comparablesStats,
@@ -177,7 +181,7 @@ class CarController extends Controller
      * .txt del ZIP (o con fallback desde los datos del coche). Se listan en la
      * pestaña Documentos para diferenciarlos de los PDFs que genera Claude.
      *
-     * Los 3 están SIEMPRE disponibles: las rutas sirven el esqueleto del ZIP
+     * Los 2 están SIEMPRE disponibles: las rutas sirven el esqueleto del ZIP
      * si existe y, si no, generan el documento desde los datos del coche
      * (PaqueteValoracionController tiene fallbacks propios).
      *
@@ -188,14 +192,8 @@ class CarController extends Controller
         return [
             [
                 'key' => 'ficha',
-                'label' => 'Ficha cliente',
+                'label' => 'Informe cliente',
                 'route' => route('cars.ficha', $car->id),
-                'available' => true,
-            ],
-            [
-                'key' => 'folleto',
-                'label' => 'Folleto',
-                'route' => route('cars.folleto', $car->id),
                 'available' => true,
             ],
             [

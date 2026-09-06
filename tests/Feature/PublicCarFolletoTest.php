@@ -10,16 +10,19 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * Folleto PDF vía link público (mismo token que el dossier /c/{token}).
+ * Folleto PDF retirado (06-sep-2026): JJ Import Motors no vende coches, solo
+ * gestiona la compra (España + importación). El dossier público (/c/{token})
+ * es ahora el ÚNICO documento para el cliente: informe completo (ficha +
+ * veredicto + por qué + comparativa de mercado), sin folleto separado.
  *
- * GET /c/{token}/folleto → 200 (PDF si hay Chrome, HTML como fallback).
- * Token inválido o revocado → vista car-unavailable.
+ * Esta clase verifica que la retirada quedó completa: la ruta ya no existe
+ * y el dossier no ofrece ningún enlace al folleto.
  */
 class PublicCarFolletoTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_folleto_accessible_with_valid_token(): void
+    public function test_folleto_route_no_longer_exists(): void
     {
         $org = Organization::factory()->create();
         User::factory()->create(['organization_id' => $org->id]);
@@ -30,17 +33,10 @@ class PublicCarFolletoTest extends TestCase
         ]);
         $link = CarPublicLink::generateFor($car);
 
-        $response = $this->get("/c/{$link->token}/folleto");
-
-        $response->assertOk();
-        $ct = $response->headers->get('Content-Type') ?? '';
-        $this->assertTrue(
-            str_starts_with($ct, 'application/pdf') || str_starts_with($ct, 'text/html'),
-            "Content-Type esperado pdf|html, recibido: {$ct}"
-        );
+        $this->get("/c/{$link->token}/folleto")->assertNotFound();
     }
 
-    public function test_folleto_dossier_page_links_to_pdf(): void
+    public function test_dossier_page_does_not_link_to_folleto(): void
     {
         $org = Organization::factory()->create();
         User::factory()->create(['organization_id' => $org->id]);
@@ -54,18 +50,30 @@ class PublicCarFolletoTest extends TestCase
         $response = $this->get("/c/{$link->token}");
 
         $response->assertOk();
-        $response->assertSee("/c/{$link->token}/folleto");
+        $response->assertDontSee("/c/{$link->token}/folleto");
+        $response->assertDontSee('Folleto PDF');
     }
 
-    public function test_folleto_unavailable_with_revoked_token(): void
+    public function test_dossier_does_not_show_financing_or_test_drive_language(): void
     {
         $org = Organization::factory()->create();
         User::factory()->create(['organization_id' => $org->id]);
-        $car = Car::factory()->create(['organization_id' => $org->id]);
+        $car = Car::factory()->create([
+            'organization_id' => $org->id,
+            'brand' => 'BMW',
+            'model' => '320d',
+            'purchase_price' => 30000,
+        ]);
         $link = CarPublicLink::generateFor($car);
-        $link->update(['revoked_at' => now()]);
 
-        $this->get("/c/{$link->token}/folleto")->assertOk(); // vista car-unavailable (200)
-        $this->get('/c/invalidtoken0000000000000000/folleto')->assertOk();
+        $response = $this->get("/c/{$link->token}");
+
+        $response->assertOk();
+        // Regla de oro: NO vendemos coches, gestionamos la compra. Nada de
+        // financiación (no la ofrecemos) ni de "reserva tu prueba" (no es
+        // stock propio para probar).
+        $response->assertDontSee('Financiación');
+        $response->assertDontSee('Reserva tu prueba');
+        $response->assertDontSee('EN STOCK');
     }
 }

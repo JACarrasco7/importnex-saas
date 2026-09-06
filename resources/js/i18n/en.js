@@ -232,7 +232,7 @@ export default {
     },
     public_link: {
       title: 'Public car dossier',
-      help: 'Generate a public link to share the spec sheet + brochure of this car with your client. They will see a nice web page, no login required.',
+      help: 'Generate a public link to share the full car report with your client. They will see a nice web page, no login required.',
       share: 'Generate public link',
       copy: 'Copy link',
       copied: 'Copied!',

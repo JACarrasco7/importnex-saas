@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Cierre;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as SupportCollection;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Calculadora de KPIs de cierres — fuente única de verdad.
@@ -70,31 +71,41 @@ class KpiCalculator
     public static function historico(int $organizationId, int $months, ?callable $scopeQuery = null): array
     {
         $months = max(1, min(24, $months));
-        $historico = [];
 
-        for ($i = $months - 1; $i >= 0; $i--) {
-            $p = now()->startOfMonth()->subMonths($i);
+        // Auditoria 2026-09-06 (Q1): historico ejecutaba hasta 24 queries
+        // idénticas en estructura (1 por mes). Cache 1h por org+months+scope.
+        // La clave incluye la firma del scope (si lo hay) para que dos scopes
+        // distintos (p.ej. con/sin filtro de marca) no colisionen en cache.
+        $scopeHash = $scopeQuery ? 'with-scope' : 'no-scope';
+        $cacheKey = "kpis.historico.{$organizationId}.{$months}.{$scopeHash}";
 
-            $query = Cierre::where('organization_id', $organizationId)
-                ->whereYear('fecha_investigacion', $p->year)
-                ->whereMonth('fecha_investigacion', $p->month);
+        return Cache::remember($cacheKey, 3600, function () use ($organizationId, $months, $scopeQuery) {
+            $historico = [];
 
-            if ($scopeQuery) {
-                $scopeQuery($query);
+            for ($i = $months - 1; $i >= 0; $i--) {
+                $p = now()->startOfMonth()->subMonths($i);
+
+                $query = Cierre::where('organization_id', $organizationId)
+                    ->whereYear('fecha_investigacion', $p->year)
+                    ->whereMonth('fecha_investigacion', $p->month);
+
+                if ($scopeQuery) {
+                    $scopeQuery($query);
+                }
+
+                $cierresMes = $query->get();
+                $kpi = self::calcular($cierresMes);
+
+                $historico[] = [
+                    'periodo' => $p->format('Y-m'),
+                    'precision_veredictos' => $kpi['precision_veredictos'],
+                    'tiempo_hasta_venta' => $kpi['tiempo_hasta_venta'],
+                    'tasa_falsos_positivos' => $kpi['tasa_falsos_positivos'],
+                    'volumen' => $cierresMes->count(),
+                ];
             }
 
-            $cierresMes = $query->get();
-            $kpi = self::calcular($cierresMes);
-
-            $historico[] = [
-                'periodo' => $p->format('Y-m'),
-                'precision_veredictos' => $kpi['precision_veredictos'],
-                'tiempo_hasta_venta' => $kpi['tiempo_hasta_venta'],
-                'tasa_falsos_positivos' => $kpi['tasa_falsos_positivos'],
-                'volumen' => $cierresMes->count(),
-            ];
-        }
-
-        return $historico;
+            return $historico;
+        });
     }
 }

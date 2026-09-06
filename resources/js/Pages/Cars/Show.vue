@@ -140,7 +140,7 @@ const copyContractUrl = async () => {
     }
 };
 
-// ── Public link (dossier ficha + folleto para el cliente) ────────────
+// ── Public link (dossier / informe completo para el cliente) ────────────
 const publicLinkForm = useForm({});
 const creatingPublicLink = ref(false);
 const publicLinkCopied = ref(false);
@@ -884,7 +884,7 @@ const onDocKeyChange = () => {
                             </ul>
                         </div>
 
-                        <!-- Compartir con cliente: dossier público ficha + folleto -->
+                        <!-- Compartir con cliente: dossier público (informe completo) -->
                         <div class="rounded-xl border border-estoril-200 bg-estoril-50/50">
                             <div class="border-b border-estoril-200 bg-white px-4 py-3 flex items-start justify-between gap-3">
                                 <div>
