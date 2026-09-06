@@ -41,8 +41,14 @@ class CarObserver
             default => 'red',
         };
 
-        // Flush sitemap cache if marketplace visibility changed.
-        if ($car->isDirty('is_marketplace')) {
+        // Auditoria 2026-09-06 (B9): antes solo invalidaba marketplace si
+        // cambiaba is_marketplace; pero el filtro tambien depende de status y
+        // verdict (un coche que pasa a Delivered/Discarded debe desaparecer
+        // del catalogo publico). Tambien se invalida el sitemap por la misma
+        // razon.
+        $marketplaceRelevant = collect(['is_marketplace', 'status', 'verdict', 'purchase_price', 'sale_price'])
+            ->contains(fn ($f) => $car->isDirty($f));
+        if ($marketplaceRelevant) {
             SitemapController::flush();
             Cache::forget('marketplace.filter_options');
         }

@@ -333,7 +333,9 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
 
     // AI generic chat
     Route::get('/ai/chat', [AiChatController::class, 'index'])->name('ai.chat');
-    Route::post('/ai/chat', [AiChatController::class, 'send'])->name('ai.chat.send');
+    Route::post('/ai/chat', [AiChatController::class, 'send'])
+        ->middleware('throttle:api-heavy')
+        ->name('ai.chat.send');
 
     // Alerts — específicas primero para no ser interceptadas por {alert}
     Route::get('/alerts', [AlertController::class, 'index'])->name('alerts.index');

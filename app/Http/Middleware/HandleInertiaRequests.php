@@ -44,28 +44,47 @@ class HandleInertiaRequests extends Middleware
         $onboardingShare = null;
 
         if ($user = $request->user()) {
-            $pendingAlertsCount = Alert::where('organization_id', $user->organization_id)
-                ->where('resolved', false)
-                ->count();
+            // Auditoria 2026-09-06 (B7): 3 queries por cada request autenticado
+            // (2 count + first). Cache 30s por user_id, invalidado en
+            // AlertObserver::created, CarRequestObserver (cuando exista) y al
+            // cambiar UserOnboardingProgress.
+            $shareKey = 'inertia.share.user.'.$user->id;
+            $cached = Cache::get($shareKey);
 
-            $pendingCarRequestsCount = CarRequest::where('organization_id', $user->organization_id)
-                ->where('status', 'pending')
-                ->count();
+            if ($cached) {
+                $pendingAlertsCount = $cached['pending_alerts_count'];
+                $pendingCarRequestsCount = $cached['pending_car_requests_count'];
+                $onboardingShare = $cached['onboarding_share'];
+            } else {
+                $pendingAlertsCount = Alert::where('organization_id', $user->organization_id)
+                    ->where('resolved', false)
+                    ->count();
 
-            // Onboarding progress (Sprint 2.1) — null when missing or completed.
-            $onboardingProgress = UserOnboardingProgress::where('user_id', $user->id)->first();
-            $onboardingShare = $onboardingProgress && ! $onboardingProgress->is_completed
-                ? [
-                    'step_organization_created' => (bool) $onboardingProgress->step_organization_created,
-                    'step_first_vehicle_added' => (bool) $onboardingProgress->step_first_vehicle_added,
-                    'step_team_invited' => (bool) $onboardingProgress->step_team_invited,
-                    'step_plan_selected' => (bool) $onboardingProgress->step_plan_selected,
-                    'current_step' => (int) $onboardingProgress->current_step,
-                    'progress' => $onboardingProgress->progress ?? 0,
-                    'is_completed' => false,
-                    'skipped_at' => $onboardingProgress->skipped_at?->toIso8601String(),
-                ]
-                : null;
+                $pendingCarRequestsCount = CarRequest::where('organization_id', $user->organization_id)
+                    ->where('status', 'pending')
+                    ->count();
+
+                // Onboarding progress (Sprint 2.1) — null when missing or completed.
+                $onboardingProgress = UserOnboardingProgress::where('user_id', $user->id)->first();
+                $onboardingShare = $onboardingProgress && ! $onboardingProgress->is_completed
+                    ? [
+                        'step_organization_created' => (bool) $onboardingProgress->step_organization_created,
+                        'step_first_vehicle_added' => (bool) $onboardingProgress->step_first_vehicle_added,
+                        'step_team_invited' => (bool) $onboardingProgress->step_team_invited,
+                        'step_plan_selected' => (bool) $onboardingProgress->step_plan_selected,
+                        'current_step' => (int) $onboardingProgress->current_step,
+                        'progress' => $onboardingProgress->progress ?? 0,
+                        'is_completed' => false,
+                        'skipped_at' => $onboardingProgress->skipped_at?->toIso8601String(),
+                    ]
+                    : null;
+
+                Cache::put($shareKey, [
+                    'pending_alerts_count' => $pendingAlertsCount,
+                    'pending_car_requests_count' => $pendingCarRequestsCount,
+                    'onboarding_share' => $onboardingShare,
+                ], 30);
+            }
 
             $organization = $user->organization;
             if ($organization) {

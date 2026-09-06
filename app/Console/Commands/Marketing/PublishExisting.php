@@ -35,6 +35,7 @@ class PublishExisting extends Command
 
         if ($total === 0) {
             $this->info('Nada que publicar: 0 filas source=zip en draft.');
+
             return self::SUCCESS;
         }
 
@@ -48,6 +49,7 @@ class PublishExisting extends Command
                     ->get(['car_id', 'channel', 'kind', 'slot', 'status'])
                     ->map(fn ($r) => (array) $r)->toArray()
             );
+
             return self::SUCCESS;
         }
 
@@ -58,6 +60,7 @@ class PublishExisting extends Command
         ]);
 
         $this->info("OK {$updated} filas pasadas a published.");
+
         return self::SUCCESS;
     }
 }

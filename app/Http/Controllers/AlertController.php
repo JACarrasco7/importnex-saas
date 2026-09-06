@@ -17,6 +17,13 @@ class AlertController extends Controller
         $typeFilter = $request->input('type');
         $org = $request->user()?->organization;
 
+        // Auditoria 2026-09-06 (B1): el modelo Alert NO tiene global scope por
+        // organizacion, así que cualquier consulta aqui filtraba TODAS las
+        // alertas del sistema (leak entre orgs). Anadido where('organization_id')
+        // en las 4 queries. owner JJ Import Motors global (isOwner()=true) sigue
+        // viendo todo (necesario para soportar alerts cross-tenant).
+        $orgScope = $org?->isOwner() ? null : $org?->id;
+
         // N8: Filtrar por preferencias del org (null prefs = todo activo)
         $allTypes = ['car_request', 'car_stale', 'client_no_contact', 'verification_failed', 'verification_completed'];
         $disabledTypes = [];
@@ -25,6 +32,7 @@ class AlertController extends Controller
         }
 
         $query = Alert::query()
+            ->when($orgScope, fn ($q) => $q->where('organization_id', $orgScope))
             ->when($typeFilter, fn ($q, $t) => $q->where('alert_type', $t))
             ->when($filter === 'pending', fn ($q) => $q->active())
             ->when($filter === 'snoozed', fn ($q) => $q->snoozed())
@@ -37,6 +45,7 @@ class AlertController extends Controller
         $query->getCollection()->each->append('target_url');
 
         $typesAvailable = Alert::query()
+            ->when($orgScope, fn ($q) => $q->where('organization_id', $orgScope))
             ->selectRaw('alert_type, COUNT(*) as count')
             ->groupBy('alert_type')
             ->orderByDesc('count')
@@ -49,9 +58,10 @@ class AlertController extends Controller
         }
 
         $counts = [
-            'pending' => Alert::query()->active()->when($disabledTypes, fn ($q) => $q->whereNotIn('alert_type', $disabledTypes))->count(),
-            'snoozed' => Alert::query()->snoozed()->count(),
-            'resolved' => Alert::query()->resolved()->count(),
+            'pending' => Alert::query()->when($orgScope, fn ($q) => $q->where('organization_id', $orgScope))->active()
+                ->when($disabledTypes, fn ($q) => $q->whereNotIn('alert_type', $disabledTypes))->count(),
+            'snoozed' => Alert::query()->when($orgScope, fn ($q) => $q->where('organization_id', $orgScope))->snoozed()->count(),
+            'resolved' => Alert::query()->when($orgScope, fn ($q) => $q->where('organization_id', $orgScope))->resolved()->count(),
         ];
 
         return Inertia::render('Alerts/Index', [

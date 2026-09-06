@@ -686,7 +686,7 @@
         $cuota = $precio > 0 ? round($precio / 60) : null;
         $potencia = $esqueleto?->uno('POTENCIA');
         $cambioTxt = $esqueleto?->uno('CAMBIO') ?? $car->transmission;
-        $kmTxt = $car->km ? number_format($car->km, 0, ',', '.').' km' : null;
+        $kmTxt = $car->mileage ? number_format($car->mileage, 0, ',', '.').' km' : null;
         $anioTxt = $car->year ?: null;
         $claimParts = array_filter([
             $potencia,

@@ -333,4 +333,40 @@ class AlertControllerTest extends TestCase
 
         $response->assertSessionHasErrors('notification_webhook_url');
     }
+
+    /**
+     * Regresion 06-sep-2026 (B1): el index de alertas no tenia filtro
+     * por organization_id, lo que provocaba que usuarios de org A vieran
+     * alertas de org B. Verificado: solo se devuelven las del propio org.
+     */
+    public function test_alerts_index_does_not_leak_other_orgs(): void
+    {
+        $orgA = Organization::factory()->create(['name' => 'Org A']);
+        $orgB = Organization::factory()->create(['name' => 'Org B']);
+        $userA = User::factory()->create(['organization_id' => $orgA->id, 'role' => 'owner']);
+
+        $ownAlert = Alert::factory()->create([
+            'organization_id' => $orgA->id,
+            'message' => 'OWN alert',
+            'alert_type' => 'car_stale',
+            'resolved' => false,
+        ]);
+        $otherAlert = Alert::factory()->create([
+            'organization_id' => $orgB->id,
+            'message' => 'OTHER org alert',
+            'alert_type' => 'car_stale',
+            'resolved' => false,
+        ]);
+
+        $this->actingAs($userA);
+
+        $response = $this->get(route('alerts.index'));
+        $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => $page
+            ->where('alerts.data', fn ($alerts) => collect($alerts)->every(
+                fn ($a) => $a['message'] !== 'OTHER org alert'
+            ))
+            ->etc()
+        );
+    }
 }
