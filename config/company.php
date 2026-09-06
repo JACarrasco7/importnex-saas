@@ -20,4 +20,7 @@ return [
     'email' => 'jjimportmotors@gmail.com',
     'web' => 'jjimportmotors.com',
 
+    // Honorarios fijos del servicio de importacion (visible en el folleto).
+    'precio_honorarios' => '1.500 €',
+
 ];

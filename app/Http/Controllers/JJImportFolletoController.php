@@ -49,10 +49,10 @@ class JJImportFolletoController extends Controller
                 'logo_base64' => $logoBase64,
                 'qr_svg' => $qrSvg,
                 'qr_url' => $qrUrl,
-                'precio_honorarios' => '1.500 €',
-                'telefono_1' => '675 70 14 39',
-                'telefono_2' => '691 48 59 27',
-                'email' => 'jjimportmotors@gmail.com',
+                'precio_honorarios' => config('company.precio_honorarios', '1.500 €'),
+                'telefono_1' => config('company.telefono_1'),
+                'telefono_2' => config('company.telefono_2'),
+                'email' => config('company.email'),
             ])->render();
 
             Browsershot::html($html)

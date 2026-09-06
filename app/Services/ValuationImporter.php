@@ -493,12 +493,20 @@ class ValuationImporter
 
         $vehicleDir = storage_path('app/importnex/import/'.$orgDirName.'/vehicles/'.$car->id);
         if (! file_exists($vehicleDir)) {
-            @mkdir($vehicleDir, 0755, true);
+            if (! @mkdir($vehicleDir, 0755, true) && ! is_dir($vehicleDir)) {
+                Log::warning('ValuationImporter: no se pudo crear vehicleDir', ['dir' => $vehicleDir]);
+            }
         }
 
         // Guardar el informe JSON
         $reportFile = $vehicleDir.'/informe_'.now()->format('Ymd-His').'.json';
-        @file_put_contents($reportFile, json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        $written = @file_put_contents($reportFile, json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        if ($written === false) {
+            Log::warning('ValuationImporter: no se pudo escribir el informe JSON', [
+                'path' => $reportFile,
+                'car_id' => $car->id,
+            ]);
+        }
 
         // Procesar fotos si existen (salvo que el paquete ya las traiga en local)
         // §contrato — retrocompatibilidad: el contrato documentaba fotos en anuncio.fotos;

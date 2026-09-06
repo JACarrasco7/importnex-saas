@@ -25,3 +25,10 @@ Schedule::call(function () {
     $file = storage_path('app/importnex/market/backup-'.now()->toDateString().'.json');
     Artisan::call('market:export', ['--file' => $file]);
 })->dailyAt('06:30');
+
+// Billing: degradar a `starter` las orgs con payment_failed_at vencido.
+// Hook invoice.payment_failed solo marca el timestamp (ver
+// StripeWebhookController::handleInvoicePaymentFailed). Este job lo cierra.
+Schedule::command('subscription:downgrade-expired-grace')
+    ->hourly()
+    ->withoutOverlapping();

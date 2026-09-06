@@ -81,13 +81,22 @@ class ValuationImportController extends Controller
                     ->with('success', 'Coche importado correctamente.');
             }
 
-            // Mode 'server': JSON file from importnex/import directory
+            // Mode 'server': JSON file from importnex/import directory.
+            // El path lo introduce el operador desde un file picker local que
+            // pre-filtra a storage/app/importnex/import, pero igualmente
+            // validamos aquí para impedir path traversal (../../etc/passwd).
             if ($mode === 'server') {
                 $path = $request->input('path');
                 if (! $path || ! is_file($path)) {
                     return back()->withErrors(['path' => 'Archivo no encontrado.']);
                 }
-                $content = file_get_contents($path);
+                $allowedBase = realpath(storage_path('app/importnex/import'));
+                $resolved = realpath($path);
+                if ($allowedBase === false || $resolved === false
+                    || ! str_starts_with($resolved, $allowedBase)) {
+                    return back()->withErrors(['path' => 'Ruta fuera del directorio permitido.']);
+                }
+                $content = file_get_contents($resolved);
                 $payload = json_decode($content, true);
                 if (! is_array($payload)) {
                     return back()->withErrors(['path' => 'JSON inválido.']);
@@ -95,13 +104,19 @@ class ValuationImportController extends Controller
 
                 $car = $this->applyPayload($importer, $payload, $org);
 
-                // Move file to processed/ with timestamp
+                // Mover el archivo al directorio processed/ (no user-controlled).
                 $processedDir = storage_path('app/importnex/processed');
                 if (! is_dir($processedDir)) {
-                    mkdir($processedDir, 0755, true);
+                    if (! @mkdir($processedDir, 0755, true) && ! is_dir($processedDir)) {
+                        Log::warning('No se pudo crear processed dir', ['dir' => $processedDir]);
+                    }
                 }
-                $basename = basename($path);
-                @rename($path, $processedDir.'/'.$basename.'.'.now()->format('Ymd-His'));
+                $basename = basename($resolved);
+                if (! @rename($resolved, $processedDir.'/'.$basename.'.'.now()->format('Ymd-His'))) {
+                    Log::warning('No se pudo mover el archivo procesado', [
+                        'from' => $resolved, 'to_dir' => $processedDir,
+                    ]);
+                }
 
                 return redirect()
                     ->route('cars.show', $car->id)
