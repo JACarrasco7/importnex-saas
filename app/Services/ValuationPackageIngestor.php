@@ -317,9 +317,11 @@ class ValuationPackageIngestor
      * warning y no se crea ninguno de los 4.
      *
      * Idempotente: updateOrCreate sobre (car_id, channel, kind, slot).
-     * Reimportar el mismo paquete sustituye, NO duplica. Status siempre `draft`;
-     * una fila en `published` se revierte a draft al reimportar (el operador
-     * debe revisar antes de republicar).
+     * Reimportar el mismo paquete sustituye, NO duplica. Status inicial: `published`
+     * (el ZIP trae copy listo de Claude). Reimportar PRESERVA el status actual
+     * (no revierte un published a draft: respeta el trabajo del operador).
+     *
+     * Limpia emojis problemáticos para MySQL utf8mb3 de Forge (ver sanitizeForMysql).
      *
      * @param  array<int, array{path:string, archivo:string, plantilla:?string, visibilidad:?string}>  $contenidos
      * @param  array<int, string>  $warnings
@@ -497,6 +499,66 @@ class ValuationPackageIngestor
     }
 
     /**
+     * Limpia caracteres que rompen MySQL utf8mb3 (la BD Forge es utf8mb3).
+     *
+     * - Emojis y símbolos >U+FFFF (⭐ U+2728 Sparkles, etc.) que necesitan
+     *   4 bytes UTF-8 → los sustituimos por equivalentes ASCII seguros para
+     *   no perder el énfasis visual en el copy.
+     * - Zero-width chars invisibles y caracteres de control → se eliminan.
+     *
+     * Aplica solo a strings (recursivo en arrays).
+     *
+     * @param  array<mixed,mixed>  $attributes
+     * @return array<mixed,mixed>
+     */
+    private function sanitizeForMysql(array $attributes): array
+    {
+        $emojiMap = [
+            "\u{2728}" => '*',  // Sparkles ⭐
+            "\u{2726}" => '*',  // Black Four Pointed Star ✦
+            "\u{2727}" => '*',  // White Four Pointed Star ✧
+            "\u{2B50}" => '*',  // White Medium Star ⭐
+            "\u{1F31F}" => '*', // Glowing Star 🌟
+            "\u{1F4AF}" => '!', // Hundred Points 💯
+            "\u{1F525}" => '!', // Fire 🔥
+            "\u{1F680}" => '->', // Rocket 🚀
+            "\u{1F44D}" => '+', // Thumbs Up 👍
+            "\u{1F4B0}" => '$', // Money Bag 💰
+            "\u{1F697}" => '[auto]', // Car 🚗
+            "\u{2705}" => '[ok]', // White Heavy Check Mark ✅
+            "\u{274C}" => '[X]', // Cross Mark ❌
+            "\u{26A0}" => '[!]', // Warning Sign ⚠
+        ];
+
+        $sanitize = function (string $value) use ($emojiMap): string {
+            // Quitar zero-width invisibles (U+200B-U+200D, U+FEFF).
+            $value = preg_replace('/[\x{200B}-\x{200D}\x{FEFF}]/u', '', $value) ?? $value;
+            // Quitar caracteres de control ASCII (excepto \n \r \t).
+            $value = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', '', $value) ?? $value;
+            // Sustituir emojis >U+FFFF problemáticos.
+            $value = strtr($value, $emojiMap);
+            // Cualquier otro caracter >U+FFFF (4-byte UTF-8) que MySQL utf8mb3
+            // no soporta → lo reducimos a '?' para no perder el INSERT.
+            $value = preg_replace('/[\x{10000}-\x{10FFFF}]/u', '?', $value) ?? $value;
+
+            return $value;
+        };
+
+        $walker = function ($value) use (&$walker, $sanitize) {
+            if (is_string($value)) {
+                return $sanitize($value);
+            }
+            if (is_array($value)) {
+                return array_map($walker, $value);
+            }
+
+            return $value;
+        };
+
+        return array_map($walker, $attributes);
+    }
+
+    /**
      * updateOrCreate sobre (car_id, channel, kind, slot). Si el registro
      * existía con status=published, el ZIP lo devuelve a draft (es lo correcto:
      * el operador debe revisar antes de republicar tras una reimportación).
@@ -506,6 +568,12 @@ class ValuationPackageIngestor
      */
     private function upsertMarketing(Car $car, string $channel, array $attributes): CarMarketingContent
     {
+        // Limpia caracteres que rompen MySQL utf8mb3 (forge DB es utf8mb3):
+        // - Emojis >U+FFFF (⭐ U+2728 Sparkles etc.) que necesitan 4 bytes UTF-8.
+        //   Los mapeamos a equivalentes ASCII seguros para no perder el énfasis.
+        // - Caracteres de control y zero-width invisibles.
+        $attributes = $this->sanitizeForMysql($attributes);
+
         $kind = $attributes['kind'] ?? CarMarketingContent::KIND_AD;
         $slot = $attributes['slot'] ?? 1;
 

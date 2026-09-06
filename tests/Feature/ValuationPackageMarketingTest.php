@@ -224,7 +224,9 @@ TXT;
             ->orderBy('slot')
             ->get();
         $this->assertCount(3, $igStories);
-        $this->assertSame('¿BMW 320d? 🤔', $igStories[0]->description);
+        // El emoji 🤔 (U+1F914) es 4-byte UTF-8 y rompería MySQL utf8mb3 de Forge,
+        // así que sanitizeForMysql lo reduce a '?'.
+        $this->assertSame('¿BMW 320d? ?', $igStories[0]->description);
 
         // TikTok: 3 posts + 3 stories
         $ttPosts = CarMarketingContent::where('car_id', $car->id)
@@ -729,5 +731,62 @@ TXT,
             $result['car']->photos()->where('sort_order', 1)->count(),
             'Solo 01.jpg debe existir en la galería'
         );
+    }
+
+    /**
+     * ZIPs de Claude pueden traer emojis problemáticos (⭐ U+2728 Sparkles etc.)
+     * que rompen MySQL utf8mb3 de Forge. El ingestor los sustituye por ASCII.
+     */
+    public function test_ingest_strips_utf8mb4_emoji_from_marketing_copy(): void
+    {
+        $org = Organization::factory()->create();
+        User::factory()->create(['organization_id' => $org->id]);
+
+        $portales = <<<'TXT'
+[QUE_INCLUYE] Vehículo | Transporte
+[TITULO] Test
+[DESCRIPCION] Ficha limpia
+TXT;
+
+        // Copy con ⭐ (Sparkles U+2728, 4-byte UTF-8) y emoji rocket 🚀 (U+1F680)
+        $redes = <<<'TXT'
+[GANCHO] ⭐ Oferta brutal
+[TIKTOK_POST_1] Mira este BMW 🚀 320d
+[TIKTOK_POST_2] Post 2 sin emojis
+[TIKTOK_POST_3] Post 3
+[INSTAGRAM_POST_1] P1
+[INSTAGRAM_POST_2] P2
+[INSTAGRAM_POST_3] P3
+[FACEBOOK_POST_1] P1
+[FACEBOOK_POST_2] P2
+[FACEBOOK_POST_3] P3
+[FACEBOOK_STORY_1] S1
+TXT;
+
+        $zipPath = $this->buildZip([
+            'contenido/redes-sociales.txt' => $redes,
+            'contenido/anuncio-portales.txt' => $portales,
+            'contenido/ficha-publicitaria.txt' => "[TITULO] T\n[DESCRIPCION] D\n",
+            'contenido/informe-interno.txt' => "[COCHE_ID] test\n[FLUJO] A\n",
+        ]);
+
+        // No debe lanzar excepción por charset (el ingestor sanitiza).
+        $result = app(ValuationPackageIngestor::class)->ingest($zipPath, $org);
+
+        $this->assertGreaterThanOrEqual(7, $result['marketing'],
+            'Debe crear al menos 7 piezas (tiktok×3 + instagram×3 + facebook×3 + story×1)');
+
+        // Verifica que NO quedaron emojis problemáticos en BD.
+        $tt1 = CarMarketingContent::where('car_id', $result['car']->id)
+            ->where('channel', 'tiktok')
+            ->where('kind', 'post')
+            ->where('slot', 1)
+            ->first();
+        $this->assertNotNull($tt1);
+        $this->assertStringNotContainsString("\u{2728}", $tt1->description,
+            'Sparkles ⭐ debe haber sido sustituido por ASCII');
+        $this->assertStringNotContainsString("\u{1F680}", $tt1->description,
+            'Emoji 🚀 debe haber sido sustituido por ASCII');
+        $this->assertStringContainsString('Mira este BMW', $tt1->description);
     }
 }
