@@ -1,16 +1,36 @@
 ﻿# Skills — punto único de verdad
 
 > **Documento canónico.** Si hay conflicto entre lo que dice la skill, el código, o algún README suelto: **este archivo gana**.
-> _Última regeneración: 20260905_
+> _Última regeneración: 20260906_
 
-## 📦 ZIPs portables (builds)
+## 📦 ZIPs de skill (builds actuales)
 
-Generados desde las fuentes. Para instalar en Claude Desktop -> descomprimir en `%USERPROFILE%\.claude\skills\`.
+Generados por `scripts/build-skill-zips.ps1`. Para instalar en Claude Desktop -> descomprimir en `%USERPROFILE%\.claude\skills\`.
 
 | Skill | ZIP | Version | Tamano | SHA256 |
 |---|---|---|---|---|
-| `importacion-vehiculos` | `.claude/skills/_dist/skills-importacion-vehiculos-v3.6.1-20260905.zip` | 3.6.1 | 407 KB | `e3bb037e03a4c95585487c0c5cdb2c79a9c3e646182966334841ea66180ce1cf` |
-| `estudio-mercado` | `.claude/skills/_dist/skills-estudio-mercado-v0.3.12-20260905.zip` | 0.3.12 | 53 KB | `84368e4888be3c4f8f9804755b171ae2b09d66f36c4059f3a24cb7c07d2dffa7` |
+| `importacion-vehiculos` | `.claude/skills/_dist/skills-importacion-vehiculos-v3.6.1-20260906.zip` | 3.6.1 | 407 KB | `4b65cab2d3314a6c2ac5e569e7b0d56048e6ab3461e1b5b66c8baf55fe3faecb` |
+| `estudio-mercado` | `.claude/skills/_dist/skills-estudio-mercado-v0.3.12-20260906.zip` | 0.3.12 | 53 KB | `84368e4888be3c4f8f9804755b171ae2b09d66f36c4059f3a24cb7c07d2dffa7` |
+
+## 🚗 ZIPs de coche (informes individuales)
+
+**Salida de cada encargo.** Se generan con `py empaquetar.py <input.json> --out <directorio>`.
+
+| Caso | Dónde ponerlos | Por qué |
+|---|---|---|
+| Encargo real de cliente | `paquetes/<cliente>-<coche>-<fecha>.zip` (crear carpeta `paquetes/` si no existe) | Quedan versionados en el repo, fácil de localizar y resubir |
+| Prueba rápida / borrador | `C:\Users\jacar\Desktop\JJImportMotors\paquetes\` (fuera del repo) | No contamina `git status`, fácil de arrastrar al panel Laravel |
+| Test fixture / ejemplo | `tmp/` o bórralo tras usar | El fixture está en `.claude/skills/.../scripts/fixtures/flujo-a-bmw-320d-2020-test.json` (input), no donde va el ZIP generado |
+
+### Cómo se usa después
+
+Tras generar el ZIP:
+
+1. Subirlo al panel Laravel (`http://localhost/imports`) o por la API (`POST /api/import-valuation`).
+2. Laravel extrae: coche, fotos, dossier, **13 entradas de marketing** (3 redes × 3 posts + 3 stories + 4 portales).
+3. El ZIP ya no es necesario, se puede borrar (queda persistido en BD + `cars/{id}/contenido/*.txt` + `storage/app/public/photos/`).
+
+## 🛠 Regenerar los ZIPs
 
 ## 🛠 Regenerar los ZIPs
 

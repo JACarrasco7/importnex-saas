@@ -109,10 +109,10 @@ if (-not (Test-Path $docsFile)) {
     }
     $newTable = $tableLines -join "`n"
 
-    # Reemplaza la tabla vieja (encabezado "## 📦 ZIPs portables (builds)" → siguiente "## ").
-    $heading     = '## ' + [char]0xD83D + [char]0xDCE6 + ' ZIPs portables (builds)'
-    $intro       = 'Generados desde las fuentes. Para instalar en Claude Desktop -> descomprimir en `%USERPROFILE%\.claude\skills\`.'
-    $pattern     = '(?ms)^## .* ZIPs portables \(builds\).*?(?=^## )'
+    # Reemplaza la tabla vieja (cualquier heading con "ZIPs de skill" → siguiente "## ").
+    $heading     = '## ' + [char]0xD83D + [char]0xDCE6 + ' ZIPs de skill (builds actuales)'
+    $intro       = 'Generados por `scripts/build-skill-zips.ps1`. Para instalar en Claude Desktop -> descomprimir en `%USERPROFILE%\.claude\skills\`.'
+    $pattern     = '(?ms)^## .* ZIPs de skill \(builds actuales\).*?(?=^## )'
     $replacement = $heading + "`n`n" + $intro + "`n`n" + $newTable + "`n`n"
     $content     = [regex]::Replace($content, $pattern, $replacement)
 
