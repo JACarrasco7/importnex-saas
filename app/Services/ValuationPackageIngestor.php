@@ -539,6 +539,17 @@ class ValuationPackageIngestor
         ];
 
         $sanitize = function (string $value) use ($emojiMap): string {
+            // Normalizar encoding: si la cadena viene latin1-mal (bytes sueltos
+            // como "Ô£" en lugar de "✓"), mb_convert_encoding la reinterpreta.
+            // Si ya es UTF-8 válida, no hace nada. Cubre el caso típico de ZIPs
+            // generados en Windows con cmd.exe que mete latin1 en lugar de UTF-8.
+            $detected = mb_detect_encoding($value, ['UTF-8', 'ISO-8859-1', 'Windows-1252', 'ASCII'], true);
+            if ($detected !== false && $detected !== 'UTF-8') {
+                $converted = @mb_convert_encoding($value, 'UTF-8', $detected);
+                if (is_string($converted) && $converted !== '') {
+                    $value = $converted;
+                }
+            }
             // Quitar zero-width invisibles (U+200B-U+200D, U+FEFF).
             $value = preg_replace('/[\x{200B}-\x{200D}\x{FEFF}]/u', '', $value) ?? $value;
             // Quitar caracteres de control ASCII (excepto \n \r \t).
