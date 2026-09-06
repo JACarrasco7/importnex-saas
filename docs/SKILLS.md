@@ -5,12 +5,12 @@
 
 ## 📦 ZIPs de skill (builds actuales)
 
-Generados por `scripts/build-skill-zips.ps1`. Para instalar en Claude Desktop -> descomprimir en `%USERPROFILE%\.claude\skills\`.
+Generados por `scripts/build-skill-zips.ps1`. Para instalar en Claude Desktop -> descomprimir en `%USERPROFILE%\.claude\skills\`. Cada ZIP contiene la carpeta raiz `<skill>/`, lista para cargar.
 
 | Skill | ZIP | Version | Tamano | SHA256 |
 |---|---|---|---|---|
-| `importacion-vehiculos` | `.claude/skills/_dist/skills-importacion-vehiculos-v3.6.1-20260906.zip` | 3.6.1 | 407 KB | `4b65cab2d3314a6c2ac5e569e7b0d56048e6ab3461e1b5b66c8baf55fe3faecb` |
-| `estudio-mercado` | `.claude/skills/_dist/skills-estudio-mercado-v0.3.12-20260906.zip` | 0.3.12 | 53 KB | `84368e4888be3c4f8f9804755b171ae2b09d66f36c4059f3a24cb7c07d2dffa7` |
+| `importacion-vehiculos` | `.claude/skills/_dist/skills-importacion-vehiculos-v3.6.1-20260906.zip` | 3.6.1 | 409 KB | `78601cb7fccf5993dce044c12cd7207b12879836a05cd8d2cacc8aa89e60f3e6` |
+| `estudio-mercado` | `.claude/skills/_dist/skills-estudio-mercado-v0.3.12-20260906.zip` | 0.3.12 | 53 KB | `4aa81edfdd4d18a8f2022a287b15c99bcc889b60bb61912ed32716edfe5a6917` |
 
 ## 🚗 ZIPs de coche (informes individuales)
 
@@ -29,8 +29,6 @@ Tras generar el ZIP:
 1. Subirlo al panel Laravel (`http://localhost/imports`) o por la API (`POST /api/import-valuation`).
 2. Laravel extrae: coche, fotos, dossier, **13 entradas de marketing** (3 redes × 3 posts + 3 stories + 4 portales).
 3. El ZIP ya no es necesario, se puede borrar (queda persistido en BD + `cars/{id}/contenido/*.txt` + `storage/app/public/photos/`).
-
-## 🛠 Regenerar los ZIPs
 
 ## 🛠 Regenerar los ZIPs
 
