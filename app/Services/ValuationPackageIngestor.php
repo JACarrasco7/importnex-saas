@@ -602,6 +602,9 @@ class ValuationPackageIngestor
             // Cualquier caracter >U+FFFF (4-byte UTF-8) → '?' (utf8mb3 no los soporta).
             $value = preg_replace('/[\x{10000}-\x{10FFFF}]/u', '?', $value) ?? $value;
 
+            // Cobertura amplia emojis 4-byte (transport, emoticons, symbols).
+            $value = preg_replace('/[\x{1F300}-\x{1F6FF}\x{1F900}-\x{1F9FF}]/u', '?', $value) ?? $value;
+
             return $value;
         };
 
