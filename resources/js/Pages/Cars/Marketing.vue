@@ -42,6 +42,31 @@ const CHANNELS = [
     { key: 'facebook', label: 'Facebook', icon: '📘', type: 'social' },
 ];
 
+// Límites recomendados por canal (no bloqueantes, solo guía visual).
+// Fuentes: límites técnicos de cada plataforma + buenas prácticas de
+// copywriting para anuncios de coches (hook corto, cuerpo escaneable).
+const PLATFORM_GUIDE = {
+    milanuncios: { titleMax: 60, descMax: 4000, hashtagsMax: 0, tip: 'El título es lo que más se lee en el listado: incluye marca, modelo, año y un dato fuerte (kilometraje bajo, único dueño). La descripción puede ser larga: usa párrafos cortos y termina con el precio y forma de contacto.' },
+    coches_net: { titleMax: 60, descMax: 4000, hashtagsMax: 0, tip: 'Coches.net prioriza fichas con datos técnicos claros. Estructura: estado general → equipamiento destacado → mecánica → precio. Evita mayúsculas sostenidas.' },
+    wallapop: { titleMax: 80, descMax: 3000, hashtagsMax: 0, tip: 'En Wallapop el título compite con muchos anuncios similares: sé específico (versión, acabado) en vez de genérico. La primera línea de la descripción es la que se ve en el listado.' },
+    tiktok: { titleMax: 150, descMax: 2200, hashtagsMax: 5, tip: 'Los primeros 2-3 segundos deciden si siguen viendo el vídeo: empieza con el gancho más fuerte (precio, dato sorprendente), no con la marca. Máx. 3-5 hashtags: 1-2 de nicho + 1-2 de tendencia.' },
+    instagram: { titleMax: 125, descMax: 2200, hashtagsMax: 20, tip: 'Instagram corta la descripción a ~125 caracteres antes de "ver más": pon el gancho y el dato clave al principio. 15-20 hashtags de nicho (no genéricos) mejoran el alcance.' },
+    facebook: { titleMax: 100, descMax: 2200, hashtagsMax: 5, tip: 'El público de Facebook responde mejor a datos concretos y visibles: precio, kilometraje, año, garantía. Pocos hashtags (3-5) — aquí no aportan alcance como en Instagram/TikTok.' },
+};
+
+function guideFor(channel) {
+    return PLATFORM_GUIDE[channel] || { titleMax: 100, descMax: 2200, hashtagsMax: 10, tip: '' };
+}
+const activeGuide = computed(() => guideFor(activeChannel.value));
+
+function counterClass(len, max) {
+    if (!max) return 'text-gray-400';
+    const ratio = len / max;
+    if (ratio > 1) return 'text-red-600 font-semibold';
+    if (ratio > 0.9) return 'text-amber-600';
+    return 'text-gray-400';
+}
+
 const activeChannel = ref('milanuncios');
 const activeSlot = ref(1);          // para redes sociales: 1..3 (post/story #N)
 const activeKind = ref('post');      // para redes sociales: 'post' | 'story'
@@ -401,6 +426,12 @@ function renderPreview() {
                         </button>
                     </div>
 
+                    <!-- Consejo de la plataforma activa -->
+                    <div v-if="activeGuide.tip" class="flex items-start gap-2 rounded-lg bg-blue-50 p-3 text-xs text-blue-900 ring-1 ring-blue-100">
+                        <LightBulbIcon class="h-4 w-4 shrink-0 text-blue-500" />
+                        <span>{{ activeGuide.tip }}</span>
+                    </div>
+
                     <!-- Title -->
                     <FormSection :title="t('cars.ad_title')">
                         <div class="flex items-center gap-2">
@@ -419,6 +450,9 @@ function renderPreview() {
                                 <DocumentDuplicateIcon class="h-4 w-4" />
                             </button>
                         </div>
+                        <div class="mt-1 text-right text-xs" :class="counterClass(form.title.length, activeGuide.titleMax)">
+                            {{ form.title.length }} / {{ activeGuide.titleMax }}
+                        </div>
                     </FormSection>
 
                     <!-- Description -->
@@ -429,7 +463,10 @@ function renderPreview() {
                             rows="8"
                             class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-estoril-500 focus:ring-estoril-500"
                         ></textarea>
-                        <div class="mt-2 flex justify-end">
+                        <div class="mt-2 flex items-center justify-between">
+                            <span class="text-xs" :class="counterClass(form.description.length, activeGuide.descMax)">
+                                {{ form.description.length }} / {{ activeGuide.descMax }} caracteres
+                            </span>
                             <button
                                 v-if="form.description"
                                 @click="copyToClipboard(form.description)"
@@ -469,6 +506,9 @@ function renderPreview() {
                             >
                                 {{ t('cars.add') }}
                             </button>
+                        </div>
+                        <div v-if="activeGuide.hashtagsMax > 0" class="mt-1 text-right text-xs" :class="counterClass(form.hashtags.length, activeGuide.hashtagsMax)">
+                            {{ form.hashtags.length }} / {{ activeGuide.hashtagsMax }} recomendados
                         </div>
                     </FormSection>
 

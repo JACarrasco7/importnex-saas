@@ -571,7 +571,9 @@ class Esqueleto
 
 > **Nota ingestor:** `ValuationPackageIngestor` guarda **cualquier `.txt` dentro de `contenido/`** del ZIP en `cars/{id}/contenido/`. Por tanto `dossier-cliente.txt` se persiste automáticamente sin tocar el ingestor. Rutas disponibles: `cars.ficha`, `cars.dossier` (autenticado), `cars.informe-interno` (solo owner/operator).
 
-> **📣 Marketing importado desde el ZIP (v2, 05-sep-2026):** los dos `.txt` de marketing se persisten como archivos Y además el ingestor los parsea con `App\Support\Esqueleto` para poblar la tabla `car_marketing_contents` (modelo `App\Models\CarMarketingContent`) con `status=draft`. Cada fila tiene `(car_id, channel, kind, slot)` únicos.
+> **📣 Marketing importado desde el ZIP (v2, 05-sep-2026):** los dos `.txt` de marketing se persisten como archivos Y además el ingestor los parsea con `App\Support\Esqueleto` para poblar la tabla `car_marketing_contents` (modelo `App\Models\CarMarketingContent`) con `status=published` (el copy que trae el ZIP viene listo de Claude, no es un borrador). Cada fila tiene `(car_id, channel, kind, slot)` únicos.
+>
+> **⚠️ Sin emoji de color en el copy:** la BD de Forge usa charset `utf8mb3`, que NO admite emoji >U+FFFF (🚀🔥💯⭐ etc.) — el ingestor los elimina al importar. Ver guía completa de redacción (límites por canal, tono, qué emoji evitar) en **`../06-reglas/copywriting_marketing.md`**.
 >
 > **Esquema v2 — redes sociales (3 redes × 6 piezas = 18 filas):**
 >
@@ -601,7 +603,7 @@ class Esqueleto
 > - 4 portales: requieren `[TITULO]` Y `[DESCRIPCION]` no vacíos.
 > - `[GANCHO]` vacío en `redes-sociales.txt` → no se crea ninguna fila de red social.
 >
-> **Idempotente:** `updateOrCreate(['car_id','channel','kind','slot'])` — reimportar el mismo ZIP NO duplica filas. Si una fila estaba en `status=published`, el reimport la devuelve a `draft`. El campo `subir_pasos` se guarda solo en el slot 1 del primer post de cada red (en slots 2/3 queda vacío para no duplicar instrucciones).
+> **Idempotente:** `updateOrCreate(['car_id','channel','kind','slot'])` — reimportar el mismo ZIP NO duplica filas. Si una fila ya existía (publicada o editada por el operador), el reimport **preserva su status actual** (no la resetea a draft: respeta el trabajo del operador). El campo `subir_pasos` se guarda solo en el slot 1 del primer post de cada red (en slots 2/3 queda vacío para no duplicar instrucciones).
 >
 > **Coexistencia ZIP ↔ IA:** el marketing generado con IA desde el panel (`CarMarketingService`) **coexiste** con el marketing importado desde el ZIP: ambos quedan en la misma tabla con `source = 'ai' | 'zip'`. El endpoint `cars.marketing.generate` actualiza la fila `(car_id, channel, kind='post', slot=1)` del canal; los demás slots los trae el ZIP.
 >

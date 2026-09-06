@@ -1470,7 +1470,11 @@ export default {
     save_draft: 'Save',
     with_ads: 'With ads',
     published: 'Published',
-    registered_vehicles: 'Registered vehicles'
+    registered_vehicles: 'Registered vehicles',
+    from_zip: 'From report',
+    from_zip_help: 'This content comes from the imported valuation report. You can edit it or regenerate it with AI.',
+    from_ai: 'AI generated',
+    from_ai_help: 'This content was generated with AI from the panel. You can edit it or regenerate it.'
   },
   templates: {
     title: 'Templates',

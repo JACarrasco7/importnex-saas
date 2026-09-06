@@ -5,6 +5,18 @@ Todos los cambios notables en el skill `importacion-vehiculos` se documentarán 
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [3.7.0] - 2026-09-06 — Guía de copywriting + fix charset marketing
+
+> **Motivo:** auditoría de calidad de los textos generados (GANCHO/POST/STORY/TITULO/DESCRIPCION) tras detectar copy con placeholders sueltos ("! Mercedes-AMG...", "? Consúltanos") en producción, causado por: (1) emoji de 4 bytes que la BD utf8mb3 no admite y el ingestor sustituía por símbolos ASCII feos, y (2) un bug de parsing en `Esqueleto::desde()` (Laravel) que corrompía cualquier caracter UTF-8 cuyo byte de continuación fuera 0x85.
+
+### ✨ Nuevo
+- **`06-reglas/copywriting_marketing.md`**: guía de redacción con límites por canal (TikTok/Instagram/Facebook/portales), fórmula del GANCHO, tono por red social, estructura de DESCRIPCION de portales y anti-patrones de copy (A-COPY1..5).
+- **Regla de oro nueva:** NO usar emoji de color (🔥🚀💯⭐👍💰) en ningún bloque de marketing — la BD Forge (utf8mb3) los elimina al importar. Usar texto/mayúscula/exclamación para énfasis, `•` o `-` para viñetas.
+
+### 🐛 Corregido (lado Laravel, referencia)
+- `App\Support\Esqueleto::desde()` corrompía caracteres UTF-8 multibyte cuyo byte de continuación era `0x85` (p.ej. ✅ = `E2 9C 85`) por falta del modificador `/u` en `preg_split('/\R/', ...)`.
+- El ingestor ahora crea el marketing importado como `status=published` (no `draft`) y el reimport PRESERVA el status existente en vez de resetear a draft.
+
 ## [3.6.1] - 2026-09-05 — Auditoría v2: 3 bugs críticos en generate/publish/UI resueltos
 
 > **Motivo:** auditoría integral del flujo v2 detectó que los endpoints `generate` y `publish` seguían usando el unique viejo `(car_id, channel)` — con hasta 6 filas por canal actualizaban una fila indeterminada o creaban filas espurias. Además el template de `Marketing.vue` no tenía las tabs de Posts/Stories (solo el script las soportaba).

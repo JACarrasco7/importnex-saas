@@ -1487,7 +1487,11 @@ export default {
     save_draft: 'Guardar',
     with_ads: 'Con anuncios',
     published: 'Publicados',
-    registered_vehicles: 'Vehículos registrados'
+    registered_vehicles: 'Vehículos registrados',
+    from_zip: 'Del informe',
+    from_zip_help: 'Este contenido viene del informe de valoración importado. Puedes editarlo o regenerarlo con IA.',
+    from_ai: 'Generado con IA',
+    from_ai_help: 'Este contenido se generó con IA desde el panel. Puedes editarlo o volver a generarlo.'
   },
   templates: {
     title: 'Plantillas',
