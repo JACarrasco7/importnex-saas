@@ -14,21 +14,54 @@ Generados por `scripts/build-skill-zips.ps1`. Para instalar en Claude Desktop ->
 
 ## 🚗 ZIPs de coche (informes individuales)
 
-**Salida de cada encargo.** Se generan con `py empaquetar.py <input.json> --out <directorio>`.
+**SIEMPRE** usar el flag `--auto-path`. Estructura canónica:
 
-| Caso | Dónde ponerlos | Por qué |
-|---|---|---|
-| Encargo real de cliente | `paquetes/<cliente>-<coche>-<fecha>.zip` (crear carpeta `paquetes/` si no existe) | Quedan versionados en el repo, fácil de localizar y resubir |
-| Prueba rápida / borrador | `C:\Users\jacar\Desktop\JJImportMotors\paquetes\` (fuera del repo) | No contamina `git status`, fácil de arrastrar al panel Laravel |
-| Test fixture / ejemplo | `tmp/` o bórralo tras usar | El fixture está en `.claude/skills/.../scripts/fixtures/flujo-a-bmw-320d-2020-test.json` (input), no donde va el ZIP generado |
+```
+C:\Users\jacar\Desktop\JJImportMotors\investigaciones\
+└── <marca>\
+    └── <modelo>\
+        └── <coche_id>-<YYYY-MM-DD>.zip
+```
+
+Marca y modelo se leen automáticamente del input (`vehiculo.marca` + `vehiculo.modelo`), se normalizan a slug, y el archivo lleva la fecha del día.
+
+### Cómo usarlo
+
+```powershell
+py .claude/skills/importacion-vehiculos/scripts/empaquetar.py \
+    --auto-path \
+    ruta/al/flujo-a-<coche>.json
+```
+
+Resultado (ejemplo real con el fixture BMW):
+
+```
+C:\Users\jacar\Desktop\JJImportMotors\investigaciones\
+└── bmw\
+    └── 320d\
+        └── bmw-320d-2020-test-2026-09-06.zip
+```
+
+### Por qué Desktop y no el repo
+
+- Fuera de git → no contamina `git status`, sin commits accidentales.
+- Compartible con otras herramientas (Outlook, drag&drop al panel Laravel).
+- Carpeta visible siempre, fácil de localizar a ojo.
 
 ### Cómo se usa después
 
-Tras generar el ZIP:
-
-1. Subirlo al panel Laravel (`http://localhost/imports`) o por la API (`POST /api/import-valuation`).
+1. Subir al panel Laravel (`http://localhost/imports`) o por API (`POST /api/import-valuation`).
 2. Laravel extrae: coche, fotos, dossier, **13 entradas de marketing** (3 redes × 3 posts + 3 stories + 4 portales).
-3. El ZIP ya no es necesario, se puede borrar (queda persistido en BD + `cars/{id}/contenido/*.txt` + `storage/app/public/photos/`).
+3. Tras importar, el ZIP ya no es necesario (queda persistido en BD + `cars/{id}/contenido/*.txt` + `storage/app/public/photos/`).
+
+### Otros flags (casos raros)
+
+| Flag | Cuándo | Dónde va |
+|---|---|---|
+| `--auto-path` (recomendado) | Encargo normal, prueba, todo | `Desktop\...\investigaciones\<marca>\<modelo>\` |
+| `--out <ruta>` | Si necesitas forzar otra carpeta específica | Lo que pongas |
+
+NO recomendado: dejar que use el default `./paquetes/` (queda en el repo).
 
 ## 🛠 Regenerar los ZIPs
 

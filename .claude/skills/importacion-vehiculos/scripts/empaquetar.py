@@ -39,6 +39,7 @@ Sin dependencias externas: solo stdlib (urllib, json, zipfile, hashlib, argparse
 from __future__ import annotations
 
 import argparse
+import datetime
 import hashlib
 import json
 import os
@@ -168,8 +169,33 @@ def derive_coche_id(payload: dict) -> str:
     return payload.get("_meta", {}).get("coche_id") or "coche-sin-id"
 
 
-def output_zip_path(payload: dict, out_dir: Path) -> Path:
+def derive_auto_path(payload: dict, base: Path | None = None) -> Path:
+    """Ruta canonica Desktop/JJImportMotors/investigaciones/<marca>/<modelo>/.
+
+    Marca y modelo vienen de vehiculo.marca + vehiculo.modelo (normalizados a slug).
+    Si base es None, usa ~/Desktop/JJImportMotors/investigaciones.
+    """
+    veh = payload.get("vehiculo") or {}
+    marca = (veh.get("marca") or "").strip().lower().replace(" ", "-")
+    modelo = (veh.get("modelo") or "").strip().lower().replace(" ", "-")
+    if not marca:
+        marca = "sin-marca"
+    if not modelo:
+        modelo = "sin-modelo"
+
+    if base is None:
+        if os.name == "nt":
+            base = Path(os.environ["USERPROFILE"]) / "Desktop" / "JJImportMotors" / "investigaciones"
+        else:
+            base = Path.home() / "Desktop" / "JJImportMotors" / "investigaciones"
+    return base / marca / modelo
+
+
+def output_zip_path(payload: dict, out_dir: Path, with_date: bool = False) -> Path:
     coche_id = derive_coche_id(payload)
+    if with_date:
+        fecha = datetime.datetime.now().strftime("%Y-%m-%d")
+        return out_dir / f"{coche_id}-{fecha}.zip"
     return out_dir / f"{coche_id}.zip"
 
 
@@ -1068,6 +1094,9 @@ def main() -> int:
     parser.add_argument("json", type=Path, help="Ruta al export/flujo-a-<coche_id>.json")
     parser.add_argument("--out", type=Path, default=None,
                         help=f"Carpeta de salida (defecto: ./{PAQUETES_DIRNAME}/)")
+    parser.add_argument("--auto-path", action="store_true",
+                        help="Ruta canonica: ~/Desktop/JJImportMotors/investigaciones/<marca>/<modelo>/. "
+                             "Crea la estructura si no existe. Incluye fecha en el nombre del ZIP.")
     parser.add_argument("--strict", action="store_true",
                         help="Modo validación dura: aborta si faltan fotos o marketing.")
     parser.add_argument("--no-photos", action="store_true",
@@ -1076,12 +1105,21 @@ def main() -> int:
                         help="Mantener carpeta temporal tras empaquetar (debug).")
     args = parser.parse_args()
 
-    out_dir = args.out or (Path.cwd() / PAQUETES_DIRNAME)
-    out_dir.mkdir(parents=True, exist_ok=True)
-
     payload = load_payload(args.json)
     coche_id = derive_coche_id(payload)
-    zip_path = output_zip_path(payload, out_dir)
+
+    if args.auto_path:
+        out_dir = derive_auto_path(payload)
+        out_dir.mkdir(parents=True, exist_ok=True)
+        zip_path = output_zip_path(payload, out_dir, with_date=True)
+    elif args.out:
+        out_dir = args.out
+        out_dir.mkdir(parents=True, exist_ok=True)
+        zip_path = output_zip_path(payload, out_dir)
+    else:
+        out_dir = Path.cwd() / PAQUETES_DIRNAME
+        out_dir.mkdir(parents=True, exist_ok=True)
+        zip_path = output_zip_path(payload, out_dir)
 
     info(f"Coche: {coche_id}")
     info(f"ZIP destino: {zip_path}")
