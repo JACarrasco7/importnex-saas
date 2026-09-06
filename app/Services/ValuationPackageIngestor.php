@@ -433,7 +433,6 @@ class ValuationPackageIngestor
                         'hashtags' => $hashtags,
                         'photo_tips' => $slot === 1 ? $pieFoto : [],
                         'subir_pasos' => $slot === 1 ? ($subirPasos ?? '') : '',
-                        'status' => CarMarketingContent::STATUS_DRAFT,
                         'generated_at' => $now,
                     ]);
                     $saved++;
@@ -452,7 +451,6 @@ class ValuationPackageIngestor
                         'hashtags' => $hashtags,
                         'photo_tips' => [],
                         'subir_pasos' => '',
-                        'status' => CarMarketingContent::STATUS_DRAFT,
                         'generated_at' => $now,
                     ]);
                     $saved++;
@@ -488,7 +486,6 @@ class ValuationPackageIngestor
                         'hashtags' => [],
                         'photo_tips' => [],
                         'subir_pasos' => $subirPasos ?? '',
-                        'status' => CarMarketingContent::STATUS_DRAFT,
                         'generated_at' => $now,
                     ]);
                     $saved++;
@@ -511,6 +508,23 @@ class ValuationPackageIngestor
     {
         $kind = $attributes['kind'] ?? CarMarketingContent::KIND_AD;
         $slot = $attributes['slot'] ?? 1;
+
+        $existing = CarMarketingContent::where([
+            'car_id' => $car->id,
+            'channel' => $channel,
+            'kind' => $kind,
+            'slot' => $slot,
+        ])->first();
+
+        // El contenido del ZIP ya llega listo de Claude (no es un borrador):
+        // se publica al importar. En reimportaciones se respeta el status
+        // actual para no deshacer publicaciones o ediciones del operador.
+        if (! $existing) {
+            $attributes['status'] = CarMarketingContent::STATUS_PUBLISHED;
+            $attributes['published_at'] = now();
+        } else {
+            unset($attributes['status'], $attributes['published_at']);
+        }
 
         return CarMarketingContent::updateOrCreate(
             [

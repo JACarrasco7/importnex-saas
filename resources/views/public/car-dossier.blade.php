@@ -722,6 +722,11 @@
                     <a href="tel:+34675701439" class="btn ghost">
                         📞 Llamar ahora
                     </a>
+                    @if(!empty($folletoUrl))
+                        <a href="{{ $folletoUrl }}" target="_blank" rel="noopener" class="btn ghost">
+                            📄 Folleto PDF
+                        </a>
+                    @endif
                 </div>
             </div>
 
@@ -868,10 +873,13 @@
 
         {{-- GALERÍA --}}
         @if(count($fotos) > 1)
+            @php
+                $galleryCols = min(4, max(1, count($fotos)));
+            @endphp
             <section id="galeria" class="gallery-wrap">
                 <div class="section-title">Galería</div>
                 <h2 class="section-h">Fotos reales del vehículo</h2>
-                <div class="gallery" id="gallery">
+                <div class="gallery {{ $galleryCols === 4 ? 'four' : ($galleryCols === 3 ? 'three' : ($galleryCols === 2 ? 'two' : 'one')) }}" id="gallery">
                     @foreach($fotos as $i => $foto)
                         <div class="shot" data-index="{{ $i }}" onclick="openLightbox({{ $i }})">
                             <img src="{{ $foto }}" alt="Foto {{ $i+1 }}">

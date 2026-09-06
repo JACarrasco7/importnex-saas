@@ -1467,7 +1467,7 @@ export default {
     generate_ai: 'Generate with AI',
     show_preview: 'Show preview',
     hide_preview: 'Hide preview',
-    save_draft: 'Save draft',
+    save_draft: 'Save',
     with_ads: 'With ads',
     published: 'Published',
     registered_vehicles: 'Registered vehicles'

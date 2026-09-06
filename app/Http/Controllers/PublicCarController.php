@@ -47,7 +47,29 @@ class PublicCarController extends Controller
             'logoBase64' => $this->logo(),
             'fotos' => $this->fotos($car),
             'clienteNombre' => $car->client?->name,
+            'folletoUrl' => route('public.car.folleto', $token),
         ]);
+    }
+
+    /**
+     * Folleto PDF del coche vía link público (mismo token que el dossier).
+     *
+     * GET /c/{token}/folleto
+     *
+     * Reutiliza la generación del folleto de PaqueteValoracionController
+     * (esqueleto del ZIP con fallback desde datos del coche → Blade + PDF).
+     */
+    public function folleto(string $token)
+    {
+        $link = CarPublicLink::where('token', $token)->first();
+
+        if (! $link || ! $link->isActive()) {
+            return response()->view('public.car-unavailable');
+        }
+
+        $car = $link->car()->firstOrFail();
+
+        return app(PaqueteValoracionController::class)->folletoRaw($car);
     }
 
     private function leerContenido($car, string $filename): ?string

@@ -368,7 +368,7 @@
             $grid_count = count($grid_fotos);
         @endphp
         @if($grid_count > 0)
-        <div class="gallery">
+        <div class="gallery {{ $grid_count === 4 ? 'four' : ($grid_count === 3 ? 'three' : ($grid_count === 2 ? 'two' : 'one')) }}">
             @foreach($grid_fotos as $foto)
                 <div class="shot"><img src="{{ $foto }}" alt="{{ $titulo }}"></div>
             @endforeach

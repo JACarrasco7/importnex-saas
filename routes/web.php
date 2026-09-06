@@ -407,4 +407,9 @@ Route::get('/c/{token}', [PublicCarController::class, 'show'])
     ->where('token', '[A-Za-z0-9_-]{20,80}')
     ->name('public.car.show');
 
+// Folleto PDF del coche vía el mismo token del dossier público.
+Route::get('/c/{token}/folleto', [PublicCarController::class, 'folleto'])
+    ->where('token', '[A-Za-z0-9_-]{20,80}')
+    ->name('public.car.folleto');
+
 require __DIR__.'/auth.php';

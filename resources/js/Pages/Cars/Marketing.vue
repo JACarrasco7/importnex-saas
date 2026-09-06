@@ -11,12 +11,10 @@ import {
     PhotoIcon,
     HashtagIcon,
     LightBulbIcon,
-    DocumentIcon,
     EyeIcon,
 } from '@heroicons/vue/24/outline';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
-import Badge from '@/Components/Badge.vue';
 import FormSection from '@/Components/FormSection.vue';
 import { useFormat } from '@/Composables/useFormat';
 import PreviewMilanuncios from '@/Components/PreviewMilanuncios.vue';
@@ -184,7 +182,7 @@ function save() {
             onFinish: () => { saving.value = false; },
             onError: (e) => { errorMsg.value = e?.message || 'Error guardando.'; },
             onSuccess: () => {
-                successMsg.value = 'Borrador guardado.';
+                successMsg.value = 'Guardado.';
                 router.reload({ only: ['contents'] });
             },
         },
@@ -248,12 +246,24 @@ function channelLabel(channel) {
     return CHANNELS.find(c => c.key === channel)?.label || channel;
 }
 
+// Piezas del canal activo: total y publicadas (para el contador del tab).
+function channelStats(channel) {
+    const rows = props.contents.filter(c => c.channel === channel);
+    return {
+        total: rows.length,
+        published: rows.filter(c => c.status === 'published').length,
+    };
+}
+
 function hasContent(channel) {
-    return props.contents.some(c => c.channel === channel);
+    return channelStats(channel).total > 0;
 }
 
 function contentStatus(channel) {
-    return props.contents.find(c => c.channel === channel)?.status;
+    const rows = props.contents.filter(c => c.channel === channel);
+    if (rows.length && rows.every(c => c.status === 'published')) return 'published';
+    if (rows.some(c => c.status === 'published')) return 'partial';
+    return rows.length ? 'draft' : null;
 }
 
 function renderPreview() {
@@ -285,10 +295,6 @@ function renderPreview() {
                             <ArrowLeftIcon class="h-4 w-4" />
                             {{ t('common.back') }}
                         </Link>
-                        <a :href="route('cars.ficha', car.id)" target="_blank" class="inline-flex items-center gap-2 rounded-lg bg-estoril-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-600">
-                            <DocumentIcon class="h-4 w-4" />
-                            {{ t('cars.dossier_pdf') }}
-                        </a>
                     </template>
                 </PageHeader>
 
@@ -317,10 +323,10 @@ function renderPreview() {
                         {{ ch.label }}
                         <span
                             v-if="hasContent(ch.key)"
-                            class="h-1.5 w-1.5 rounded-full"
-                            :class="contentStatus(ch.key) === 'published' ? 'bg-emerald-400' : 'bg-amber-300'"
-                            :title="contentStatus(ch.key) === 'published' ? 'Publicado' : 'Borrador'"
-                        ></span>
+                            class="ml-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold leading-none"
+                            :class="contentStatus(ch.key) === 'published' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'"
+                            :title="contentStatus(ch.key) === 'published' ? 'Listo' : (contentStatus(ch.key) === 'partial' ? 'Parcial' : 'Borrador')"
+                        >{{ channelStats(ch.key).total }}</span>
                     </button>
                 </div>
 
@@ -356,7 +362,7 @@ function renderPreview() {
                     </div>
                     <span v-if="currentContent" class="text-xs text-gray-400">
                         {{ activeKind === 'ad' ? 'Ficha Marketplace' : `${activeKind === 'post' ? 'Publicación' : 'Story'} ${activeSlot}/3` }}
-                        · {{ channelStats(activeChannel).total }} piezas en {{ channelLabel(activeChannel) }}
+                        · {{ channelStats(activeChannel).published }}/{{ channelStats(activeChannel).total }} listas en {{ channelLabel(activeChannel) }}
                     </span>
                     <span v-else class="text-xs text-gray-400">Sin contenido para esta pieza — genéralo con IA o impórtalo del ZIP</span>
                 </div>
@@ -565,41 +571,6 @@ function renderPreview() {
                         placeholder="Instrucciones para subir esta pieza al canal…"
                         class="mt-2 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-estoril-500 focus:ring-estoril-500"
                     ></textarea>
-                </FormSection>
-
-                <!-- History -->
-                <FormSection :title="t('cars.ads_history')">
-                    <div v-if="contents.length" class="space-y-3">
-                        <div
-                            v-for="content in contents"
-                            :key="content.id"
-                            class="flex items-center justify-between rounded-lg border border-gray-200 p-3"
-                        >
-                            <div class="flex items-center gap-3">
-                                <span class="text-lg">{{ CHANNELS.find(c => c.key === content.channel)?.icon || '📄' }}</span>
-                                <div>
-                                    <div class="font-medium text-gray-900">
-                                        {{ CHANNELS.find(c => c.key === content.channel)?.label || content.channel }}
-                                        <span v-if="content.kind === 'post'" class="ml-1 rounded bg-estoril-100 px-1.5 py-0.5 text-[10px] font-semibold text-estoril-800">Post {{ content.slot }}</span>
-                                        <span v-else-if="content.kind === 'story'" class="ml-1 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800">Story {{ content.slot }}</span>
-                                        <span v-else class="ml-1 rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-semibold text-gray-700">Ficha</span>
-                                    </div>
-                                    <div class="text-xs text-gray-500">
-                                        {{ content.status === 'published' ? t('cars.published') : t('cars.draft_label') }}
-                                        · {{ new Date(content.updated_at).toLocaleDateString('es-ES') }}
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span v-if="content.source === 'zip'" class="rounded-full bg-estoril-100 px-2 py-0.5 text-[10px] font-semibold uppercase text-estoril-800">ZIP</span>
-                                <span v-else-if="content.source === 'ai'" class="rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-semibold uppercase text-violet-800">IA</span>
-                                <Badge :variant="content.status === 'published' ? 'success' : 'warning'">
-                                    {{ content.status === 'published' ? t('cars.published') : t('cars.draft_label') }}
-                                </Badge>
-                            </div>
-                        </div>
-                    </div>
-                    <p v-else class="text-sm text-gray-400">{{ t('cars.ads_no_announcements') }}</p>
                 </FormSection>
             </div>
         </div>

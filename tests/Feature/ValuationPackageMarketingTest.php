@@ -252,7 +252,7 @@ TXT;
                 ->where('kind', CarMarketingContent::KIND_AD)
                 ->first();
             $this->assertNotNull($row, "Falta portal {$channel}");
-            $this->assertSame('draft', $row->status);
+            $this->assertSame(CarMarketingContent::STATUS_PUBLISHED, $row->status);
             $this->assertSame('BMW 320d 2020 Automatic 80.000 km — impecable', $row->title);
             $this->assertStringContainsString('Huelva', $row->description);
             $this->assertNotEmpty($row->subir_pasos, 'subir_pasos del portal debe estar poblado');
@@ -543,10 +543,11 @@ TXT,
             ->where('source', CarMarketingContent::SOURCE_ZIP)->count());
     }
 
-    public function test_reimport_resets_published_marketing_back_to_draft(): void
+    public function test_reimport_preserves_published_status(): void
     {
-        // Regla de negocio: si una fila estaba en status=published, reimportar
-        // el ZIP la devuelve a draft (el operador debe revisar antes de republicar).
+        // Regla de negocio (06-sep-2026): el contenido del ZIP ya llega listo
+        // de Claude — entra publicado y el reimport NO debe deshacer
+        // publicaciones ni ediciones del operador.
         $org = Organization::factory()->create();
         User::factory()->create(['organization_id' => $org->id]);
 
@@ -593,12 +594,36 @@ TXT,
         // Reimportar
         $ingestor->ingest($zipPath, $org);
 
-        $this->assertSame(0, CarMarketingContent::where('car_id', $first['car']->id)
-            ->where('status', CarMarketingContent::STATUS_PUBLISHED)->count(),
-            'Tras reimport: 0 en published (vuelven a draft)');
         $this->assertSame(22, CarMarketingContent::where('car_id', $first['car']->id)
-            ->where('status', CarMarketingContent::STATUS_DRAFT)->count(),
-            'Tras reimport: 22 en draft');
+            ->where('status', CarMarketingContent::STATUS_PUBLISHED)->count(),
+            'Tras reimport: siguen 22 en published (el status se conserva)');
+    }
+
+    public function test_zip_import_creates_marketing_as_published(): void
+    {
+        // Regla (06-sep-2026): lo que trae Claude en el ZIP ya está listo
+        // para usar → primera importación crea las filas como published.
+        $org = Organization::factory()->create();
+        User::factory()->create(['organization_id' => $org->id]);
+
+        $zipPath = $this->buildZip([
+            'contenido/redes-sociales.txt' => "[GANCHO] Test\n[INSTAGRAM_POST_1] P1\n",
+            'contenido/anuncio-portales.txt' => "[TITULO] T\n[DESCRIPCION] D\n",
+        ]);
+
+        $result = app(ValuationPackageIngestor::class)->ingest($zipPath, $org);
+
+        $rows = CarMarketingContent::where('car_id', $result['car']->id)->get();
+        $this->assertTrue($rows->count() > 0);
+        $this->assertSame(
+            $rows->count(),
+            $rows->where('status', CarMarketingContent::STATUS_PUBLISHED)->count(),
+            'Todas las filas del ZIP deben importarse como published',
+        );
+        $this->assertTrue(
+            $rows->every(fn ($r) => $r->published_at !== null),
+            'published_at debe fijarse en la importación del ZIP',
+        );
     }
 
     public function test_marketing_import_sets_generated_at_timestamp(): void
