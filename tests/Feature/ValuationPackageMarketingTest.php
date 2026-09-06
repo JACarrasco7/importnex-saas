@@ -225,8 +225,8 @@ TXT;
             ->get();
         $this->assertCount(3, $igStories);
         // El emoji 🤔 (U+1F914) es 4-byte UTF-8 y rompería MySQL utf8mb3 de Forge,
-        // así que sanitizeForMysql lo reduce a '?'.
-        $this->assertSame('¿BMW 320d? ?', $igStories[0]->description);
+        // así que sanitizeForMysql lo elimina (sin dejar placeholder suelto).
+        $this->assertSame('¿BMW 320d?', $igStories[0]->description);
 
         // TikTok: 3 posts + 3 stories
         $ttPosts = CarMarketingContent::where('car_id', $car->id)
@@ -735,7 +735,8 @@ TXT,
 
     /**
      * ZIPs de Claude pueden traer emojis problemáticos (⭐ U+2728 Sparkles etc.)
-     * que rompen MySQL utf8mb3 de Forge. El ingestor los sustituye por ASCII.
+     * que rompen MySQL utf8mb3 de Forge. El ingestor los elimina (sin dejar
+     * placeholders sueltos) y colapsa el espacio doble resultante.
      */
     public function test_ingest_strips_utf8mb4_emoji_from_marketing_copy(): void
     {
@@ -757,7 +758,8 @@ TXT;
 [INSTAGRAM_POST_1] P1
 [INSTAGRAM_POST_2] P2
 [INSTAGRAM_POST_3] P3
-[FACEBOOK_POST_1] P1
+[FACEBOOK_POST_1] ✅ 306 CV
+✅ Cambio automático
 [FACEBOOK_POST_2] P2
 [FACEBOOK_POST_3] P3
 [FACEBOOK_STORY_1] S1
@@ -776,7 +778,8 @@ TXT;
         $this->assertGreaterThanOrEqual(7, $result['marketing'],
             'Debe crear al menos 7 piezas (tiktok×3 + instagram×3 + facebook×3 + story×1)');
 
-        // Verifica que NO quedaron emojis problemáticos en BD.
+        // Verifica que NO quedaron emojis problemáticos en BD y que no dejó
+        // placeholders sueltos tipo "! " o "? " al limpiar.
         $tt1 = CarMarketingContent::where('car_id', $result['car']->id)
             ->where('channel', 'tiktok')
             ->where('kind', 'post')
@@ -784,9 +787,24 @@ TXT;
             ->first();
         $this->assertNotNull($tt1);
         $this->assertStringNotContainsString("\u{2728}", $tt1->description,
-            'Sparkles ⭐ debe haber sido sustituido por ASCII');
+            'Sparkles ⭐ debe haber sido eliminado');
         $this->assertStringNotContainsString("\u{1F680}", $tt1->description,
-            'Emoji 🚀 debe haber sido sustituido por ASCII');
-        $this->assertStringContainsString('Mira este BMW', $tt1->description);
+            'Emoji 🚀 debe haber sido eliminado');
+        $this->assertSame('Mira este BMW 320d', $tt1->description,
+            'El espacio doble que deja el emoji eliminado se colapsa a uno solo');
+
+        // El gancho "⭐ Oferta brutal" no debe quedar con espacio suelto al inicio.
+        $this->assertSame('Oferta brutal', $tt1->title);
+
+        // Los checkmarks ✅ se convierten en viñeta "•" (no se eliminan: mantienen
+        // la estructura de lista de las publicaciones tipo "✅ 306 CV").
+        $fb1 = CarMarketingContent::where('car_id', $result['car']->id)
+            ->where('channel', 'facebook')
+            ->where('kind', 'post')
+            ->where('slot', 1)
+            ->first();
+        $this->assertNotNull($fb1);
+        $this->assertStringContainsString('• 306 CV', $fb1->description);
+        $this->assertStringContainsString('• Cambio automático', $fb1->description);
     }
 }

@@ -5,25 +5,32 @@ namespace App\Support;
 class Esqueleto
 {
     public array $nombrados = [];   // ['TITULO' => ['Opel Astra...'], 'SPEC' => [...], ...]
+
     public array $orden = [];       // [['nombre' => 'TITULO', 'texto' => '...'], ...]
 
     public static function desde(string $contenido): self
     {
-        $e = new self();
+        $e = new self;
 
-        foreach (preg_split('/\R/', $contenido) as $linea) {
+        // \R sin /u trata la cadena como bytes: el byte 0x85 (NEL) coincide
+        // como salto de línea SUELTO, aunque sea el 3er byte de un caracter
+        // UTF-8 multibyte (p.ej. ✅ = E2 9C 85), partiendo el caracter y
+        // corrompiendo el texto. /u fuerza a PCRE a tratar la cadena como
+        // UTF-8 y solo partir en saltos de línea Unicode reales.
+        foreach (preg_split('/\R/u', $contenido) as $linea) {
             if (str_starts_with(ltrim($linea), '#')) {
                 continue;                                   // comentario
             }
 
             if (preg_match('/^\[([A-Z0-9_]+)\]\s?(.*)$/', $linea, $m)) {
                 $e->orden[] = ['nombre' => $m[1], 'texto' => trim($m[2])];
+
                 continue;
             }
 
             if ($e->orden && trim($linea) !== '') {          // continuación multilínea
                 $i = count($e->orden) - 1;
-                $e->orden[$i]['texto'] = trim($e->orden[$i]['texto'] . "\n" . rtrim($linea));
+                $e->orden[$i]['texto'] = trim($e->orden[$i]['texto']."\n".rtrim($linea));
             }
         }
 
@@ -53,7 +60,7 @@ class Esqueleto
         $items = [];
 
         foreach ($bloques as $bloque) {
-            $lineas = preg_split('/\R+/', trim($bloque));
+            $lineas = preg_split('/\R+/u', trim($bloque));
             foreach ($lineas as $linea) {
                 $limpio = trim($linea);
                 if ($limpio !== '') {

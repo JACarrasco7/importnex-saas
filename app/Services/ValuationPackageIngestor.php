@@ -501,10 +501,12 @@ class ValuationPackageIngestor
     /**
      * Limpia caracteres que rompen MySQL utf8mb3 (la BD Forge es utf8mb3).
      *
-     * - Emojis y símbolos >U+FFFF (⭐ U+2728 Sparkles, etc.) que necesitan
-     *   4 bytes UTF-8 → los sustituimos por equivalentes ASCII seguros para
-     *   no perder el énfasis visual en el copy.
-     * - Zero-width chars invisibles y caracteres de control → se eliminan.
+     * Estrategia: los emojis se ELIMINAN (no se sustituyen por placeholders
+     * de texto tipo "[ok]" o "!"), porque un símbolo suelto al inicio de un
+     * titular o una viñeta queda peor que quitar el emoji directamente. Los
+     * checkmarks (✓ ✅ ✔ ✍) sí se sustituyen por "•" para conservar el efecto
+     * de lista con viñetas. Tras la limpieza se colapsan espacios dobles y
+     * se quita el espacio que queda antes de puntuación.
      *
      * Aplica solo a strings (recursivo en arrays).
      *
@@ -513,108 +515,49 @@ class ValuationPackageIngestor
      */
     private function sanitizeForMysql(array $attributes): array
     {
-        // Mapa de los emojis/símbolos problemáticos más comunes. Los que NO estén
-        // aquí caen en los rangos "fallback" más abajo y se sustituyen por ASCII.
-        $emojiMap = [
-            "\u{2705}" => '[ok]',  // White Heavy Check Mark ✅
-            "\u{2713}" => '[ok]',  // Check Mark ✓
-            "\u{2714}" => '[ok]',  // Heavy Check Mark ✔
-            "\u{2728}" => '*',     // Sparkles ⭐
-            "\u{2726}" => '*',     // Black Four Pointed Star ✦
-            "\u{2727}" => '*',     // White Four Pointed Star ✧
-            "\u{2B50}" => '*',     // White Medium Star ⭐
-            "\u{274C}" => '[X]',   // Cross Mark ❌
-            "\u{26A0}" => '[!]',   // Warning Sign ⚠
-            "\u{1F31F}" => '*',    // Glowing Star 🌟
-            "\u{1F4AF}" => '!',    // Hundred Points 💯
-            "\u{1F525}" => '!',    // Fire 🔥
-            "\u{1F680}" => '->',   // Rocket 🚀
-            "\u{1F44D}" => '+',    // Thumbs Up 👍
-            "\u{1F4B0}" => '$',    // Money Bag 💰
-            "\u{1F697}" => '[auto]', // Car 🚗
-            "\u{1F914}" => '?',    // Thinking 🤔
-            "\u{1F60A}" => ':)',   // Smiling 😊
-            "\u{1F642}" => ':)',   // Slight smile 🙂
-            "\u{1F44F}" => '+',    // Clapping Hands 👏
+        // Checkmarks/ticks → viñeta "•" (BMP, seguro en utf8mb3) para no perder
+        // el efecto de lista en copys tipo "✅ 306 CV · cambio automático".
+        $bulletMap = [
+            "\u{2705}" => '•', // ✅ White Heavy Check Mark
+            "\u{2713}" => '•', // ✓ Check Mark
+            "\u{2714}" => '•', // ✔ Heavy Check Mark
+            "\u{270D}" => '•', // ✍ Writing Hand (usado como bullet en algunos ZIPs)
         ];
 
-        $sanitize = function (string $value) use ($emojiMap): string {
-            // Normalizar encoding: si la cadena viene latin1-mal (bytes sueltos
-            // como "Ô£" en lugar de "✓"), mb_convert_encoding la reinterpreta.
-            // Si ya es UTF-8 válida, no hace nada. Cubre el caso típico de ZIPs
-            // generados en Windows con cmd.exe que mete latin1 en lugar de UTF-8.
-            $detected = mb_detect_encoding($value, ['UTF-8', 'ISO-8859-1', 'Windows-1252', 'ASCII'], true);
-            if ($detected !== false && $detected !== 'UTF-8') {
-                $converted = @mb_convert_encoding($value, 'UTF-8', $detected);
-                if (is_string($converted) && $converted !== '') {
+        $sanitize = function (string $value) use ($bulletMap): string {
+            // Reparar encoding SOLO si la cadena no es UTF-8 válido (mb_check_encoding
+            // es una comprobación estricta, no una heurística como mb_detect_encoding,
+            // que puede "adivinar mal" y corromper UTF-8 ya correcto — pasó en pruebas
+            // reales: convirtió ✅ válido en basura de doble codificación).
+            if (! mb_check_encoding($value, 'UTF-8')) {
+                $converted = @mb_convert_encoding($value, 'UTF-8', 'Windows-1252');
+                if (is_string($converted) && $converted !== '' && mb_check_encoding($converted, 'UTF-8')) {
                     $value = $converted;
                 }
             }
+
             // Quitar zero-width invisibles (U+200B-U+200D, U+FEFF).
             $value = preg_replace('/[\x{200B}-\x{200D}\x{FEFF}]/u', '', $value) ?? $value;
             // Quitar caracteres de control ASCII (excepto \n \r \t).
             $value = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', '', $value) ?? $value;
-            // Sustituir emojis/símbolos problemáticos del mapa.
-            $value = strtr($value, $emojiMap);
 
-            // Bloque "Dingbats" U+2700-U+27BF completo: cualquier símbolo de este
-            // rango que no esté en el mapa (✓ ✅ ✗ ⭐ etc.) lo sustituimos por
-            // su versión ASCII equivalente para evitar SQLSTATE 1366 en MySQL
-            // utf8mb3. Aquí caen los U+2713 (✓) que rompen el insert en Forge.
-            $value = preg_replace_callback('/[\x{2700}-\x{27BF}]/u', function ($m) {
-                $ch = $m[0];
-                // Tabla mínima de los símbolos más frecuentes (no exhaustiva):
-                $fallback = [
-                    "\u{2700}" => ' ',   // ✀ Black Safety Scissors
-                    "\u{2702}" => '[scissors]', "\u{2703}" => '[ok]', "\u{2704}" => '[ok]',
-                    "\u{2706}" => '[tel]', "\u{2707}" => '[tape]', "\u{2708}" => '[plane]',
-                    "\u{2709}" => '[mail]', "\u{270C}" => '[hand]', "\u{270E}" => '[pencil]',
-                    "\u{270F}" => '[pencil]', "\u{2710}" => '[pencil]', "\u{2711}" => '[X]',
-                    "\u{2712}" => '[pencil]', "\u{2715}" => '[X]', "\u{2716}" => '[X]',
-                    "\u{2718}" => '[X]', "\u{2719}" => '[X]', "\u{271A}" => '[X]',
-                    "\u{271B}" => '[X]', "\u{271C}" => '[X]', "\u{271D}" => '[X]',
-                    "\u{271E}" => '[X]', "\u{271F}" => '[X]', "\u{2720}" => '[X]',
-                    "\u{2721}" => '[X]', "\u{2722}" => '[X]', "\u{2723}" => '[X]',
-                    "\u{2724}" => '[X]', "\u{2725}" => '*', "\u{2729}" => '*',
-                    "\u{272A}" => '*', "\u{272B}" => '*', "\u{272C}" => '*',
-                    "\u{272D}" => '*', "\u{272E}" => '*', "\u{272F}" => '*',
-                    "\u{2730}" => '*', "\u{2731}" => '*', "\u{2732}" => '*',
-                    "\u{2733}" => '*', "\u{2734}" => '*', "\u{2735}" => '*',
-                    "\u{2736}" => '*', "\u{2737}" => '*', "\u{2738}" => '*',
-                    "\u{2739}" => '*', "\u{273A}" => '*', "\u{273B}" => '*',
-                    "\u{273C}" => '*', "\u{273D}" => '*', "\u{273E}" => '*',
-                    "\u{273F}" => '*', "\u{2740}" => '*', "\u{2741}" => '*',
-                    "\u{2742}" => '*', "\u{2743}" => '*', "\u{2744}" => '*',
-                    "\u{2745}" => '*', "\u{2746}" => '*', "\u{2747}" => '*',
-                    "\u{2748}" => '*', "\u{2749}" => '*', "\u{274A}" => '*',
-                    "\u{274B}" => '*', "\u{274D}" => '*', "\u{274E}" => '[X]',
-                    "\u{274F}" => '*', "\u{2750}" => '*', "\u{2751}" => '*',
-                    "\u{2752}" => '*', "\u{2753}" => '?', "\u{2754}" => '?',
-                    "\u{2755}" => '?', "\u{2756}" => '*', "\u{2757}" => '!',
-                    "\u{2758}" => '|', "\u{2759}" => '|', "\u{275A}" => '|',
-                    "\u{275B}" => '"', "\u{275C}" => '"', "\u{275D}" => '"',
-                    "\u{275E}" => '"', "\u{275F}" => '|', "\u{2760}" => '*',
-                    "\u{2761}" => '*', "\u{2762}" => '!', "\u{2763}" => '*',
-                    "\u{2764}" => '<3',  "\u{2765}" => '<3', "\u{2766}" => '*',
-                    "\u{2767}" => '*', "\u{2768}" => '[', "\u{2769}" => ']',
-                    "\u{276A}" => '<', "\u{276B}" => '>', "\u{276C}" => '<',
-                    "\u{276D}" => '>', "\u{276E}" => '<', "\u{276F}" => '>',
-                    "\u{2770}" => '<', "\u{2771}" => '>', "\u{2772}" => '<',
-                    "\u{2773}" => '>', "\u{2774}" => '{', "\u{2775}" => '}',
-                    "\u{2776}" => '1', "\u{2777}" => '2', "\u{2778}" => '3',
-                    "\u{2779}" => '4', "\u{277A}" => '5', "\u{277B}" => '6',
-                    "\u{277C}" => '7', "\u{277D}" => '8', "\u{277E}" => '9',
-                    "\u{277F}" => '10',
-                ];
+            // Checkmarks → viñeta "•".
+            $value = strtr($value, $bulletMap);
 
-                return $fallback[$ch] ?? '?';
-            }, $value) ?? $value;
+            // Resto del bloque Dingbats (U+2700-27BF) + Miscellaneous Symbols and
+            // Arrows (U+2B00-2BFF, cubre ⭐ U+2B50) + emojis 4-byte (Symbols/
+            // Pictographs/Emoticons/Transport U+1F300-1F9FF) y cualquier otro
+            // caracter >U+FFFF → se ELIMINAN (no placeholder).
+            $value = preg_replace('/[\x{2700}-\x{27BF}\x{2B00}-\x{2BFF}\x{1F300}-\x{1F6FF}\x{1F900}-\x{1F9FF}\x{10000}-\x{10FFFF}]/u', '', $value) ?? $value;
 
-            // Cualquier caracter >U+FFFF (4-byte UTF-8) → '?' (utf8mb3 no los soporta).
-            $value = preg_replace('/[\x{10000}-\x{10FFFF}]/u', '?', $value) ?? $value;
-
-            // Cobertura amplia emojis 4-byte (transport, emoticons, symbols).
-            $value = preg_replace('/[\x{1F300}-\x{1F6FF}\x{1F900}-\x{1F9FF}]/u', '?', $value) ?? $value;
+            // Limpieza tras quitar emojis: colapsar espacios dobles (por línea,
+            // sin tocar saltos de línea) y quitar el espacio que queda antes
+            // de puntuación (p.ej. "texto ." → "texto.").
+            $value = preg_replace('/[ \t]{2,}/', ' ', $value) ?? $value;
+            $value = preg_replace('/ +([.,;:!?])/', '$1', $value) ?? $value;
+            // Trim por línea (un emoji al principio/final de línea deja
+            // espacio suelto) sin perder la estructura multilínea.
+            $value = implode("\n", array_map('trim', explode("\n", $value)));
 
             return $value;
         };
