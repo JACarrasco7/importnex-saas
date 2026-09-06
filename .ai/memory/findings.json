@@ -1,275 +1,354 @@
-[
+﻿[
     {
-        "date": "2026-08-06",
-        "sprint": "A-F",
-        "issue": "Skills duplicadas (.github/skills/ + .claude/skills/) consumían doble contexto",
-        "symptom": "Contexto inflado, IA recibía skills duplicadas",
-        "cause": "Boost skills instaladas por defecto en .claude/skills/ + mi copia manual en .github/skills/",
-        "fix": "Eliminar .github/skills/ (consolidar en .claude/skills/)",
-        "prevention_rule": "Solo UN directorio de skills (.claude/skills/). .github/skills/ es solo para skills custom que NO son Boost.",
-        "affected_files": [".github/skills/"],
-        "severity": "medium"
+        "date":  "2026-08-06",
+        "sprint":  "A-F",
+        "issue":  "Skills duplicadas (.github/skills/ + .claude/skills/) consumÃ­an doble contexto",
+        "symptom":  "Contexto inflado, IA recibÃ­a skills duplicadas",
+        "cause":  "Boost skills instaladas por defecto en .claude/skills/ + mi copia manual en .github/skills/",
+        "fix":  "Eliminar .github/skills/ (consolidar en .claude/skills/)",
+        "prevention_rule":  "Solo UN directorio de skills (.claude/skills/). .github/skills/ es solo para skills custom que NO son Boost.",
+        "affected_files":  [
+                               ".github/skills/"
+                           ],
+        "severity":  "medium"
     },
     {
-        "date": "2026-08-06",
-        "sprint": "A",
-        "issue": "laravel/boost en require rompía composer install --no-dev",
-        "symptom": "Producción sin Boost instalado al usar --no-dev",
-        "cause": "Boost no es dependencia de runtime, es solo dev tool",
-        "fix": "Mover laravel/boost a require-dev",
-        "prevention_rule": "Solo deps de runtime en require, tools de dev en require-dev",
-        "affected_files": ["composer.json"],
-        "severity": "low"
+        "date":  "2026-08-06",
+        "sprint":  "A",
+        "issue":  "laravel/boost en require rompÃ­a composer install --no-dev",
+        "symptom":  "ProducciÃ³n sin Boost instalado al usar --no-dev",
+        "cause":  "Boost no es dependencia de runtime, es solo dev tool",
+        "fix":  "Mover laravel/boost a require-dev",
+        "prevention_rule":  "Solo deps de runtime en require, tools de dev en require-dev",
+        "affected_files":  [
+                               "composer.json"
+                           ],
+        "severity":  "low"
     },
     {
-        "date": "2026-08-06",
-        "sprint": "B-G",
-        "issue": "PricingPublic.vue en Pages/ en lugar de Pages/Public/",
-        "symptom": "HTTP 500 en /pricing: Unable to locate file in Vite manifest",
-        "cause": "Archivo creado en directorio heredado, no en Public/",
-        "fix": "Mover archivo a Pages/Public/ + nueva ruta",
-        "prevention_rule": "Tras añadir página nueva a Public/, siempre grep manifest.json",
-        "affected_files": ["resources/js/Pages/PricingPublic.vue", "routes/web.php"],
-        "severity": "high"
+        "date":  "2026-08-06",
+        "sprint":  "B-G",
+        "issue":  "PricingPublic.vue en Pages/ en lugar de Pages/Public/",
+        "symptom":  "HTTP 500 en /pricing: Unable to locate file in Vite manifest",
+        "cause":  "Archivo creado en directorio heredado, no en Public/",
+        "fix":  "Mover archivo a Pages/Public/ + nueva ruta",
+        "prevention_rule":  "Tras aÃ±adir pÃ¡gina nueva a Public/, siempre grep manifest.json",
+        "affected_files":  [
+                               "resources/js/Pages/PricingPublic.vue",
+                               "routes/web.php"
+                           ],
+        "severity":  "high"
     },
     {
-        "date": "2026-08-06",
-        "sprint": "G",
-        "issue": "SitemapController usaba campos published/published_at inexistentes",
-        "symptom": "HTTP 500 SQLSTATE Column not found en /sitemap.xml",
-        "cause": "Query asumía schema de cars que no coincide con realidad",
-        "fix": "Usar is_marketplace y updated_at (campos reales)",
-        "prevention_rule": "Verificar schema con php artisan tinker antes de escribir query",
-        "affected_files": ["app/Http/Controllers/SitemapController.php"],
-        "severity": "high"
+        "date":  "2026-08-06",
+        "sprint":  "G",
+        "issue":  "SitemapController usaba campos published/published_at inexistentes",
+        "symptom":  "HTTP 500 SQLSTATE Column not found en /sitemap.xml",
+        "cause":  "Query asumÃ­a schema de cars que no coincide con realidad",
+        "fix":  "Usar is_marketplace y updated_at (campos reales)",
+        "prevention_rule":  "Verificar schema con php artisan tinker antes de escribir query",
+        "affected_files":  [
+                               "app/Http/Controllers/SitemapController.php"
+                           ],
+        "severity":  "high"
     },
     {
-        "date": "2026-08-06",
-        "sprint": "G",
-        "issue": "schema-org.blade.php con @type en JSON-LD",
-        "symptom": "HTTP 500 en TODAS las páginas Inertia: syntax error expecting endif",
-        "cause": "Blade interpreta @context, @type como directivas",
-        "fix": "Escapar como @@context, @@type (7 ocurrencias)",
-        "prevention_rule": "grep '@\\(type\\|context\\)' en .blade.php antes de crear",
-        "affected_files": ["resources/views/partials/schema-org.blade.php"],
-        "severity": "critical"
+        "date":  "2026-08-06",
+        "sprint":  "G",
+        "issue":  "schema-org.blade.php con @type en JSON-LD",
+        "symptom":  "HTTP 500 en TODAS las pÃ¡ginas Inertia: syntax error expecting endif",
+        "cause":  "Blade interpreta @context, @type como directivas",
+        "fix":  "Escapar como @@context, @@type (7 ocurrencias)",
+        "prevention_rule":  "grep \u0027@\\(type\\|context\\)\u0027 en .blade.php antes de crear",
+        "affected_files":  [
+                               "resources/views/partials/schema-org.blade.php"
+                           ],
+        "severity":  "critical"
     },
     {
-        "date": "2026-08-06",
-        "sprint": "H",
-        "issue": "9 vulnerabilidades en phpoffice/phpspreadsheet 1.30.0 (transitiva de maatwebsite/excel)",
-        "symptom": "composer audit reporta 2 CRITICAL (SSRF/RCE), 5 HIGH, 2 MEDIUM",
-        "cause": "maatwebsite/excel 3.1.68 fija phpoffice/phpspreadsheet ^1.30.0 (limitación upstream)",
-        "fix": "No actualizable hasta que maatwebsite adopte phpspreadsheet 5.x",
-        "prevention_rule": "Vetar uploads de Excel no autenticados en producción hasta update upstream. Monitorear changelog maatwebsite.",
-        "affected_files": ["composer.lock"],
-        "severity": "critical"
+        "date":  "2026-08-06",
+        "sprint":  "H",
+        "issue":  "9 vulnerabilidades en phpoffice/phpspreadsheet 1.30.0 (transitiva de maatwebsite/excel)",
+        "symptom":  "composer audit reporta 2 CRITICAL (SSRF/RCE), 5 HIGH, 2 MEDIUM",
+        "cause":  "maatwebsite/excel 3.1.68 fija phpoffice/phpspreadsheet ^1.30.0 (limitaciÃ³n upstream)",
+        "fix":  "No actualizable hasta que maatwebsite adopte phpspreadsheet 5.x",
+        "prevention_rule":  "Vetar uploads de Excel no autenticados en producciÃ³n hasta update upstream. Monitorear changelog maatwebsite.",
+        "affected_files":  [
+                               "composer.lock"
+                           ],
+        "severity":  "critical"
     },
     {
-        "date": "2026-08-06",
-        "sprint": "H",
-        "issue": "i18n desincronizado: 1250 claves en en.js sin contraparte en es.js",
-        "symptom": "Posibles keynotfounderror en producción",
-        "cause": "Cambios en en.js sin traducción correspondiente a es.js",
-        "fix": "Pendiente — necesidad crear script sync bidireccional",
-        "prevention_rule": "check-translations.cjs en hook pre-commit (ya implementado Sprint G.3)",
-        "affected_files": ["resources/js/i18n/en.js", "resources/js/i18n/es.js"],
-        "severity": "medium"
+        "date":  "2026-08-06",
+        "sprint":  "H",
+        "issue":  "i18n desincronizado: 1250 claves en en.js sin contraparte en es.js",
+        "symptom":  "Posibles keynotfounderror en producciÃ³n",
+        "cause":  "Cambios en en.js sin traducciÃ³n correspondiente a es.js",
+        "fix":  "Pendiente â€” necesidad crear script sync bidireccional",
+        "prevention_rule":  "check-translations.cjs en hook pre-commit (ya implementado Sprint G.3)",
+        "affected_files":  [
+                               "resources/js/i18n/en.js",
+                               "resources/js/i18n/es.js"
+                           ],
+        "severity":  "medium"
     },
     {
-        "date": "2026-08-06",
-        "sprint": "G",
-        "issue": "autoprefixer redundante con Tailwind v4",
-        "symptom": "9 paquetes npm innecesarios (autoprefixer + transitivos)",
-        "cause": "PostCSS config mantenido de Tailwind v3",
-        "fix": "Remover autoprefixer de postcss.config.js + npm uninstall",
-        "prevention_rule": "Tailwind v4 integra autoprefixer, no declararlo de nuevo",
-        "affected_files": ["postcss.config.js", "package.json"],
-        "severity": "low"
+        "date":  "2026-08-06",
+        "sprint":  "G",
+        "issue":  "autoprefixer redundante con Tailwind v4",
+        "symptom":  "9 paquetes npm innecesarios (autoprefixer + transitivos)",
+        "cause":  "PostCSS config mantenido de Tailwind v3",
+        "fix":  "Remover autoprefixer de postcss.config.js + npm uninstall",
+        "prevention_rule":  "Tailwind v4 integra autoprefixer, no declararlo de nuevo",
+        "affected_files":  [
+                               "postcss.config.js",
+                               "package.json"
+                           ],
+        "severity":  "low"
     },
     {
-        "date": "2026-08-06",
-        "sprint": "H",
-        "issue": "No ejecutaba npm run build antes de commit",
-        "symptom": "Vite manifest desactualizado en producción",
-        "cause": "IA no lanza build (regla de proyecto), USER olvida",
-        "fix": "Pre-commit hook valida manifest.json existe",
-        "prevention_rule": "Commit sin manifest = alerta, no bloqueo (USER maneja flujo)",
-        "affected_files": [".githooks/pre-commit"],
-        "severity": "medium"    },
-    {
-        "date": "2026-08-07",
-        "sprint": "Notificaciones",
-        "issue": "AlertObserver::created no respeta User::isChannelEnabled / isAlertTypeEnabled",
-        "symptom": "N8 incompleto: usuarios silenciados seguían recibiendo emails",
-        "cause": "Dispatcher solo filtraba por Organization, no por User",
-        "fix": "AlertEmailDispatcher ahora filtra con ->filter(fn($u) => $u->isChannelEnabled('email') && $u->isAlertTypeEnabled($type))",
-        "prevention_rule": "Al añadir preferencias por usuario, validar que TODOS los dispatchers las respeten, no solo los nuevos",
-        "affected_files": ["app/Services/AlertEmailDispatcher.php", "app/Models/User.php"],
-        "severity": "high"
+        "date":  "2026-08-06",
+        "sprint":  "H",
+        "issue":  "No ejecutaba npm run build antes de commit",
+        "symptom":  "Vite manifest desactualizado en producciÃ³n",
+        "cause":  "IA no lanza build (regla de proyecto), USER olvida",
+        "fix":  "Pre-commit hook valida manifest.json existe",
+        "prevention_rule":  "Commit sin manifest = alerta, no bloqueo (USER maneja flujo)",
+        "affected_files":  [
+                               ".githooks/pre-commit"
+                           ],
+        "severity":  "medium"
     },
     {
-        "date": "2026-08-07",
-        "sprint": "Auditoría",
-        "issue": "Alert::booted() con global scope basado en auth()->user()",
-        "symptom": "En queue workers / commands / jobs, queries devolvían datos de TODAS las orgs",
-        "cause": "Global scope con auth()->check() es null en jobs, scope se aplicaba con null y devolvía todo",
-        "fix": "Eliminar global scope. AlertController ahora valida con authorizeAlertAccess() helper privado en cada método (show, markResolved, destroy, snooze, unsnooze)",
-        "prevention_rule": "NUNCA añadir global scope basado en auth()->user(). Filtrar manualmente con where('organization_id', $orgId) o helper privado.",
-        "affected_files": ["app/Models/Alert.php", "app/Http/Controllers/AlertController.php"],
-        "severity": "critical"
+        "date":  "2026-08-07",
+        "sprint":  "Notificaciones",
+        "issue":  "AlertObserver::created no respeta User::isChannelEnabled / isAlertTypeEnabled",
+        "symptom":  "N8 incompleto: usuarios silenciados seguÃ­an recibiendo emails",
+        "cause":  "Dispatcher solo filtraba por Organization, no por User",
+        "fix":  "AlertEmailDispatcher ahora filtra con -\u003efilter(fn($u) =\u003e $u-\u003eisChannelEnabled(\u0027email\u0027) \u0026\u0026 $u-\u003eisAlertTypeEnabled($type))",
+        "prevention_rule":  "Al aÃ±adir preferencias por usuario, validar que TODOS los dispatchers las respeten, no solo los nuevos",
+        "affected_files":  [
+                               "app/Services/AlertEmailDispatcher.php",
+                               "app/Models/User.php"
+                           ],
+        "severity":  "high"
     },
     {
-        "date": "2026-08-07",
-        "sprint": "Auditoría",
-        "issue": "useTranslations.js con import duplicado 'es'",
-        "symptom": "Variable shadowing interna vs global, build CI rompe con ESLint/Pint",
-        "cause": "Copy-paste durante refactor de useTranslations.js",
-        "fix": "Eliminar import duplicado",
-        "prevention_rule": "Tras cualquier edit a composables críticos, grep imports duplicados",
-        "affected_files": ["resources/js/Composables/useTranslations.js"],
-        "severity": "high"
+        "date":  "2026-08-07",
+        "sprint":  "AuditorÃ­a",
+        "issue":  "Alert::booted() con global scope basado en auth()-\u003euser()",
+        "symptom":  "En queue workers / commands / jobs, queries devolvÃ­an datos de TODAS las orgs",
+        "cause":  "Global scope con auth()-\u003echeck() es null en jobs, scope se aplicaba con null y devolvÃ­a todo",
+        "fix":  "Eliminar global scope. AlertController ahora valida con authorizeAlertAccess() helper privado en cada mÃ©todo (show, markResolved, destroy, snooze, unsnooze)",
+        "prevention_rule":  "NUNCA aÃ±adir global scope basado en auth()-\u003euser(). Filtrar manualmente con where(\u0027organization_id\u0027, $orgId) o helper privado.",
+        "affected_files":  [
+                               "app/Models/Alert.php",
+                               "app/Http/Controllers/AlertController.php"
+                           ],
+        "severity":  "critical"
     },
     {
-        "date": "2026-08-07",
-        "sprint": "Auditoría",
-        "issue": "Welcome.vue usa iconos no importados (MapPinIcon, ClipboardDocumentCheckIcon, CurrencyEuroIcon)",
-        "symptom": "Sección 'Cómo funciona' se renderiza vacía",
-        "cause": "Añadidos en template sin actualizar import",
-        "fix": "Añadir a import existente: import { TruckIcon, ..., MapPinIcon, ClipboardDocumentCheckIcon, CurrencyEuroIcon } from '@heroicons/vue/24/outline';",
-        "prevention_rule": "Antes de usar un icono en <template>, verificar que está en el import del <script setup>",
-        "affected_files": ["resources/js/Pages/Welcome.vue"],
-        "severity": "high"
+        "date":  "2026-08-07",
+        "sprint":  "AuditorÃ­a",
+        "issue":  "useTranslations.js con import duplicado \u0027es\u0027",
+        "symptom":  "Variable shadowing interna vs global, build CI rompe con ESLint/Pint",
+        "cause":  "Copy-paste durante refactor de useTranslations.js",
+        "fix":  "Eliminar import duplicado",
+        "prevention_rule":  "Tras cualquier edit a composables crÃ­ticos, grep imports duplicados",
+        "affected_files":  [
+                               "resources/js/Composables/useTranslations.js"
+                           ],
+        "severity":  "high"
     },
     {
-        "date": "2026-08-07",
-        "sprint": "Auditoría",
-        "issue": "MarketplaceIndex.vue usa verdictVariant() que no existe en useFormat",
-        "symptom": "Crash al renderizar lista de coches",
-        "cause": "Helper olvidado al añadir badge de veredicto",
-        "fix": "Añadir verdictVariant() a useFormat.js con map positive/neutral/negative → green/amber/red",
-        "prevention_rule": "Al usar helper en template, verificar export en composable antes de commit",
-        "affected_files": ["resources/js/Composables/useFormat.js"],
-        "severity": "high"
+        "date":  "2026-08-07",
+        "sprint":  "AuditorÃ­a",
+        "issue":  "Welcome.vue usa iconos no importados (MapPinIcon, ClipboardDocumentCheckIcon, CurrencyEuroIcon)",
+        "symptom":  "SecciÃ³n \u0027CÃ³mo funciona\u0027 se renderiza vacÃ­a",
+        "cause":  "AÃ±adidos en template sin actualizar import",
+        "fix":  "AÃ±adir a import existente: import { TruckIcon, ..., MapPinIcon, ClipboardDocumentCheckIcon, CurrencyEuroIcon } from \u0027@heroicons/vue/24/outline\u0027;",
+        "prevention_rule":  "Antes de usar un icono en \u003ctemplate\u003e, verificar que estÃ¡ en el import del \u003cscript setup\u003e",
+        "affected_files":  [
+                               "resources/js/Pages/Welcome.vue"
+                           ],
+        "severity":  "high"
     },
     {
-        "date": "2026-08-07",
-        "sprint": "Auditoría",
-        "issue": "Subscriptions/Index.vue toggle anual era decorativo — backend ignoraba billing_cycle",
-        "symptom": "Cliente pensaba pagar anual pero se cobraba mensual",
-        "cause": "Frontend enviaba billing_cycle pero SubscriptionController usaba $plan hardcoded",
-        "fix": "Controller ahora lee billing_cycle y usa stripe_price_annual_id si 'annual'. Añadido campo stripe_price_annual_id a config/subscription.php",
-        "prevention_rule": "Al añadir control en frontend, verificar que backend lo respete. Tests Feature cubriendo el flujo end-to-end.",
-        "affected_files": ["app/Http/Controllers/SubscriptionController.php", "config/subscription.php"],
-        "severity": "high"
+        "date":  "2026-08-07",
+        "sprint":  "AuditorÃ­a",
+        "issue":  "MarketplaceIndex.vue usa verdictVariant() que no existe en useFormat",
+        "symptom":  "Crash al renderizar lista de coches",
+        "cause":  "Helper olvidado al aÃ±adir badge de veredicto",
+        "fix":  "AÃ±adir verdictVariant() a useFormat.js con map positive/neutral/negative â†’ green/amber/red",
+        "prevention_rule":  "Al usar helper en template, verificar export en composable antes de commit",
+        "affected_files":  [
+                               "resources/js/Composables/useFormat.js"
+                           ],
+        "severity":  "high"
     },
     {
-        "date": "2026-08-07",
-        "sprint": "Auditoría",
-        "issue": "PublicMarketplaceController no soportaba filtros brand, deal, mileage",
-        "symptom": "Filtros eran client-side sobre página paginada (12 coches), 0 resultados en otras páginas",
-        "cause": "Frontend enviaba params pero backend no los aceptaba",
-        "fix": "Añadir 'brand', 'deal', 'mileage' a FILTER_RULES + query builder + filterOptions.brands",
-        "prevention_rule": "Cuando frontend agrega filtros, audit backend para confirmar whitelist + query builder",
-        "affected_files": ["app/Http/Controllers/PublicMarketplaceController.php"],
-        "severity": "high"
+        "date":  "2026-08-07",
+        "sprint":  "AuditorÃ­a",
+        "issue":  "Subscriptions/Index.vue toggle anual era decorativo â€” backend ignoraba billing_cycle",
+        "symptom":  "Cliente pensaba pagar anual pero se cobraba mensual",
+        "cause":  "Frontend enviaba billing_cycle pero SubscriptionController usaba $plan hardcoded",
+        "fix":  "Controller ahora lee billing_cycle y usa stripe_price_annual_id si \u0027annual\u0027. AÃ±adido campo stripe_price_annual_id a config/subscription.php",
+        "prevention_rule":  "Al aÃ±adir control en frontend, verificar que backend lo respete. Tests Feature cubriendo el flujo end-to-end.",
+        "affected_files":  [
+                               "app/Http/Controllers/SubscriptionController.php",
+                               "config/subscription.php"
+                           ],
+        "severity":  "high"
     },
     {
-        "date": "2026-08-07",
-        "sprint": "Auditoría",
-        "issue": "NewsletterPopup submit no enviaba email al backend",
-        "symptom": "M.12 implementado visualmente pero sin funcional real",
-        "cause": "@submit.prevent='close' cerraba sin enviar nada",
-        "fix": "Capturar email con v-model, POST a /newsletter/subscribe con rate limit, estados submitting/submitted/error",
-        "prevention_rule": "Componentes con formularios deben tener handler real, no solo UI",
-        "affected_files": ["resources/js/Components/NewsletterPopup.vue"],
-        "severity": "high"
+        "date":  "2026-08-07",
+        "sprint":  "AuditorÃ­a",
+        "issue":  "PublicMarketplaceController no soportaba filtros brand, deal, mileage",
+        "symptom":  "Filtros eran client-side sobre pÃ¡gina paginada (12 coches), 0 resultados en otras pÃ¡ginas",
+        "cause":  "Frontend enviaba params pero backend no los aceptaba",
+        "fix":  "AÃ±adir \u0027brand\u0027, \u0027deal\u0027, \u0027mileage\u0027 a FILTER_RULES + query builder + filterOptions.brands",
+        "prevention_rule":  "Cuando frontend agrega filtros, audit backend para confirmar whitelist + query builder",
+        "affected_files":  [
+                               "app/Http/Controllers/PublicMarketplaceController.php"
+                           ],
+        "severity":  "high"
     },
     {
-        "date": "2026-08-07",
-        "sprint": "Auditoría",
-        "issue": "CompareBar navega a /marketplace/compare que NO existía → 404",
-        "symptom": "Click en 'Comparar' daba error",
-        "cause": "Backend route no creada al añadir componente",
-        "fix": "Añadir Route::get('/marketplace/compare', ...) + PublicMarketplaceController@compare + Public/MarketplaceCompare.vue con tabla side-by-side",
-        "prevention_rule": "Cualquier router.visit/route() debe tener su contraparte en routes/web.php antes de commit",
-        "affected_files": ["routes/web.php", "app/Http/Controllers/PublicMarketplaceController.php", "resources/js/Pages/Public/MarketplaceCompare.vue"],
-        "severity": "high"
+        "date":  "2026-08-07",
+        "sprint":  "AuditorÃ­a",
+        "issue":  "NewsletterPopup submit no enviaba email al backend",
+        "symptom":  "M.12 implementado visualmente pero sin funcional real",
+        "cause":  "@submit.prevent=\u0027close\u0027 cerraba sin enviar nada",
+        "fix":  "Capturar email con v-model, POST a /newsletter/subscribe con rate limit, estados submitting/submitted/error",
+        "prevention_rule":  "Componentes con formularios deben tener handler real, no solo UI",
+        "affected_files":  [
+                               "resources/js/Components/NewsletterPopup.vue"
+                           ],
+        "severity":  "high"
     },
     {
-        "date": "2026-08-07",
-        "sprint": "Auditoría",
-        "issue": "3 componentes marketplace creados pero no integrados en pages: WishlistButton, FinancingCalculator, CompareBar",
-        "symptom": "Componentes huérfanos, código muerto en disco",
-        "cause": "Creación sin integración posterior",
-        "fix": "Integrar WishlistButton en MarketplaceIndex cards + MarketplaceShow header. FinancingCalculator en MarketplaceShow después de Costs. CompareBar global al final de MarketplaceIndex.",
-        "prevention_rule": "Cada componente nuevo debe tener al menos 1 import + 1 uso en producción, o no commitearlo",
-        "affected_files": ["resources/js/Pages/Public/MarketplaceIndex.vue", "resources/js/Pages/Public/MarketplaceShow.vue"],
-        "severity": "high"
+        "date":  "2026-08-07",
+        "sprint":  "AuditorÃ­a",
+        "issue":  "CompareBar navega a /marketplace/compare que NO existÃ­a â†’ 404",
+        "symptom":  "Click en \u0027Comparar\u0027 daba error",
+        "cause":  "Backend route no creada al aÃ±adir componente",
+        "fix":  "AÃ±adir Route::get(\u0027/marketplace/compare\u0027, ...) + PublicMarketplaceController@compare + Public/MarketplaceCompare.vue con tabla side-by-side",
+        "prevention_rule":  "Cualquier router.visit/route() debe tener su contraparte en routes/web.php antes de commit",
+        "affected_files":  [
+                               "routes/web.php",
+                               "app/Http/Controllers/PublicMarketplaceController.php",
+                               "resources/js/Pages/Public/MarketplaceCompare.vue"
+                           ],
+        "severity":  "high"
     },
     {
-        "date": "2026-08-07",
-        "sprint": "Auditoría",
-        "issue": "106 instancias de clases Tailwind v3 deprecadas (bg-gradient-to-*, flex-shrink-0, aspect-[X/Y])",
-        "symptom": "Build warnings, clases no funcionan en v4",
-        "cause": "Migración v3 → v4 incompleta en archivos existentes",
-        "fix": "Script PHP automático con regex: bg-gradient-to-* → bg-linear-to-*, flex-shrink-0 → shrink-0, aspect-[X/Y] → aspect-X/Y. Aplicado a 40 archivos.",
-        "prevention_rule": "Usar SIEMPRE sintaxis v4 desde el inicio. Ver [frontend.md] reglas Tailwind.",
-        "affected_files": ["resources/js/**/*.vue"],
-        "severity": "medium"
+        "date":  "2026-08-07",
+        "sprint":  "AuditorÃ­a",
+        "issue":  "3 componentes marketplace creados pero no integrados en pages: WishlistButton, FinancingCalculator, CompareBar",
+        "symptom":  "Componentes huÃ©rfanos, cÃ³digo muerto en disco",
+        "cause":  "CreaciÃ³n sin integraciÃ³n posterior",
+        "fix":  "Integrar WishlistButton en MarketplaceIndex cards + MarketplaceShow header. FinancingCalculator en MarketplaceShow despuÃ©s de Costs. CompareBar global al final de MarketplaceIndex.",
+        "prevention_rule":  "Cada componente nuevo debe tener al menos 1 import + 1 uso en producciÃ³n, o no commitearlo",
+        "affected_files":  [
+                               "resources/js/Pages/Public/MarketplaceIndex.vue",
+                               "resources/js/Pages/Public/MarketplaceShow.vue"
+                           ],
+        "severity":  "high"
     },
     {
-        "date": "2026-08-07",
-        "sprint": "Auditoría",
-        "issue": "useTranslations.t() no implementaba pluralización {_one, _other} ni pipes Laravel",
-        "symptom": "Render literal '[object Object]' o '{_one:..., _other:...}'",
-        "cause": "es.js declaraba object form pero t() solo navegaba dot-notation",
-        "fix": "t() ahora detecta: (1) string con '|' → Laravel pipes; (2) objeto con _one/_other → count select; (3) fallback Object.values()[0]",
-        "prevention_rule": "Al implementar i18n en custom format, verificar que t() lo soporte",
-        "affected_files": ["resources/js/Composables/useTranslations.js", "resources/js/i18n/es.js"],
-        "severity": "medium"
+        "date":  "2026-08-07",
+        "sprint":  "AuditorÃ­a",
+        "issue":  "106 instancias de clases Tailwind v3 deprecadas (bg-gradient-to-*, flex-shrink-0, aspect-[X/Y])",
+        "symptom":  "Build warnings, clases no funcionan en v4",
+        "cause":  "MigraciÃ³n v3 â†’ v4 incompleta en archivos existentes",
+        "fix":  "Script PHP automÃ¡tico con regex: bg-gradient-to-* â†’ bg-linear-to-*, flex-shrink-0 â†’ shrink-0, aspect-[X/Y] â†’ aspect-X/Y. Aplicado a 40 archivos.",
+        "prevention_rule":  "Usar SIEMPRE sintaxis v4 desde el inicio. Ver [frontend.md] reglas Tailwind.",
+        "affected_files":  [
+                               "resources/js/**/*.vue"
+                           ],
+        "severity":  "medium"
     },
     {
-        "date": "2026-08-07",
-        "sprint": "Auditoría",
-        "issue": "14 strings hardcoded en Cars/Show, Cars/Verify, Clients/ContactLogs, Marketing/Index",
-        "symptom": "Traducciones no funcionaban en EN, claves i18n faltantes",
-        "cause": "Strings añadidos sin usar t()",
-        "fix": "Sustituir por t() y añadir claves nuevas a es.js + en.js",
-        "prevention_rule": "Antes de commit Vue, grep '[A-Z][a-zA-Z]+ [a-z]' en template para detectar hardcoded strings",
-        "affected_files": ["resources/js/Pages/Cars/Show.vue", "resources/js/Pages/Cars/Verify.vue", "resources/js/Pages/Clients/ContactLogs.vue", "resources/js/Pages/Marketing/Index.vue"],
-        "severity": "medium"
+        "date":  "2026-08-07",
+        "sprint":  "AuditorÃ­a",
+        "issue":  "useTranslations.t() no implementaba pluralizaciÃ³n {_one, _other} ni pipes Laravel",
+        "symptom":  "Render literal \u0027[object Object]\u0027 o \u0027{_one:..., _other:...}\u0027",
+        "cause":  "es.js declaraba object form pero t() solo navegaba dot-notation",
+        "fix":  "t() ahora detecta: (1) string con \u0027|\u0027 â†’ Laravel pipes; (2) objeto con _one/_other â†’ count select; (3) fallback Object.values()[0]",
+        "prevention_rule":  "Al implementar i18n en custom format, verificar que t() lo soporte",
+        "affected_files":  [
+                               "resources/js/Composables/useTranslations.js",
+                               "resources/js/i18n/es.js"
+                           ],
+        "severity":  "medium"
     },
     {
-        "date": "2026-08-07",
-        "sprint": "Auditoría",
-        "issue": "NewsletterPopup.vue no importaba onMounted",
-        "symptom": "ReferenceError en runtime",
-        "cause": "Falta import al refactorizar",
-        "fix": "import { ref, onMounted } from 'vue'",
-        "prevention_rule": "Tras refactor Vue, verificar imports",
-        "affected_files": ["resources/js/Components/NewsletterPopup.vue"],
-        "severity": "low"
+        "date":  "2026-08-07",
+        "sprint":  "AuditorÃ­a",
+        "issue":  "14 strings hardcoded en Cars/Show, Cars/Verify, Clients/ContactLogs, Marketing/Index",
+        "symptom":  "Traducciones no funcionaban en EN, claves i18n faltantes",
+        "cause":  "Strings aÃ±adidos sin usar t()",
+        "fix":  "Sustituir por t() y aÃ±adir claves nuevas a es.js + en.js",
+        "prevention_rule":  "Antes de commit Vue, grep \u0027[A-Z][a-zA-Z]+ [a-z]\u0027 en template para detectar hardcoded strings",
+        "affected_files":  [
+                               "resources/js/Pages/Cars/Show.vue",
+                               "resources/js/Pages/Cars/Verify.vue",
+                               "resources/js/Pages/Clients/ContactLogs.vue",
+                               "resources/js/Pages/Marketing/Index.vue"
+                           ],
+        "severity":  "medium"
     },
     {
-        "date": "2026-08-07",
-        "sprint": "Auditoría",
-        "issue": "useWishlist.js rompe en SSR por acceso a localStorage sin guard",
-        "symptom": "ReferenceError en SSR",
-        "cause": "Composables con browser API sin typeof window === 'undefined' guard",
-        "fix": "Añadir guard en load() y save(): if (typeof window === 'undefined') return;",
-        "prevention_rule": "Cualquier composable que use localStorage/window debe tener guard SSR",
-        "affected_files": ["resources/js/Composables/useWishlist.js"],
-        "severity": "low"
+        "date":  "2026-08-07",
+        "sprint":  "AuditorÃ­a",
+        "issue":  "NewsletterPopup.vue no importaba onMounted",
+        "symptom":  "ReferenceError en runtime",
+        "cause":  "Falta import al refactorizar",
+        "fix":  "import { ref, onMounted } from \u0027vue\u0027",
+        "prevention_rule":  "Tras refactor Vue, verificar imports",
+        "affected_files":  [
+                               "resources/js/Components/NewsletterPopup.vue"
+                           ],
+        "severity":  "low"
     },
     {
-        "date": "2026-08-07",
-        "sprint": "Auditoría",
-        "issue": "Colores email (alerts, trial-ending, etc.) usaban #1e3a5f en lugar de #1A306D (estoril-700)",
-        "symptom": "Inconsistencia visual entre web y emails",
-        "cause": "Hardcoded hex en lugar de token semántico",
-        "fix": "Migrar todos los blade emails a #1A306D (estoril-700) y #0F172A (asphalt-900)",
-        "prevention_rule": "En emails, SIEMPRE usar tokens de la paleta del brand (estoril/asphalt/platinum)",
-        "affected_files": ["resources/views/emails/alert.blade.php", "resources/views/emails/trial-ending.blade.php", "resources/views/emails/payment-failed.blade.php", "resources/views/emails/subscription-reactivated.blade.php"],
-        "severity": "low"    }
+        "date":  "2026-08-07",
+        "sprint":  "AuditorÃ­a",
+        "issue":  "useWishlist.js rompe en SSR por acceso a localStorage sin guard",
+        "symptom":  "ReferenceError en SSR",
+        "cause":  "Composables con browser API sin typeof window === \u0027undefined\u0027 guard",
+        "fix":  "AÃ±adir guard en load() y save(): if (typeof window === \u0027undefined\u0027) return;",
+        "prevention_rule":  "Cualquier composable que use localStorage/window debe tener guard SSR",
+        "affected_files":  [
+                               "resources/js/Composables/useWishlist.js"
+                           ],
+        "severity":  "low"
+    },
+    {
+        "date":  "2026-08-07",
+        "sprint":  "AuditorÃ­a",
+        "issue":  "Colores email (alerts, trial-ending, etc.) usaban #1e3a5f en lugar de #1A306D (estoril-700)",
+        "symptom":  "Inconsistencia visual entre web y emails",
+        "cause":  "Hardcoded hex en lugar de token semÃ¡ntico",
+        "fix":  "Migrar todos los blade emails a #1A306D (estoril-700) y #0F172A (asphalt-900)",
+        "prevention_rule":  "En emails, SIEMPRE usar tokens de la paleta del brand (estoril/asphalt/platinum)",
+        "affected_files":  [
+                               "resources/views/emails/alert.blade.php",
+                               "resources/views/emails/trial-ending.blade.php",
+                               "resources/views/emails/payment-failed.blade.php",
+                               "resources/views/emails/subscription-reactivated.blade.php"
+                           ],
+        "severity":  "low"
+    },
+    {
+        "date":  "2026-09-06",
+        "lessons":  [
+                        "503 != 500. El error era \"Import bridge not configured\" en middleware ImportToken.",
+                        ".env de prod NO esta en git. Configuracion manual por operador de Forge.",
+                        "Si el endpoint da 503 persistente, revisar config/services.php + .env antes de culpar al codigo."
+                    ],
+        "sprint":  "v3.6.1",
+        "fix":  "Backup .env -\u003e sed para poner token (el mismo de subir-informe.ps1: 22a600ba2f...1fc32) -\u003e php artisan config:clear. Validado con BMW fixture: HTTP 201 Created, car_id=9.",
+        "issue":  "IMPORTNEX_CHAT_IMPORT_TOKEN vacio en .env de prod causaba 503 al subir ZIP por API. Bridge de import deshabilitado por error de configuracion, no de codigo."
+    }
 ]
