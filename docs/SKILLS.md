@@ -5,11 +5,11 @@
 
 ## 📦 ZIPs de skill (builds actuales)
 
-Generados por `scripts/build-skill-zips.ps1`. Para instalar en Claude Desktop -> descomprimir en `%USERPROFILE%\.claude\skills\`. Cada ZIP contiene la carpeta raiz `<skill>/`, lista para cargar.
+Generados por `scripts/build-skill-zips.ps1`. Para instalar en Claude Desktop -> descomprimir en `%USERPROFILE%\.claude\skills\`.
 
 | Skill | ZIP | Version | Tamano | SHA256 |
 |---|---|---|---|---|
-| `importacion-vehiculos` | `.claude/skills/_dist/skills-importacion-vehiculos-v3.6.1-20260906.zip` | 3.6.1 | 409 KB | `78601cb7fccf5993dce044c12cd7207b12879836a05cd8d2cacc8aa89e60f3e6` |
+| `importacion-vehiculos` | `.claude/skills/_dist/skills-importacion-vehiculos-v3.6.1-20260906.zip` | 3.6.1 | 410 KB | `057202e985a33b4886a97ffcb1e192df377daae402287a56b373eb2f67b5c003` |
 | `estudio-mercado` | `.claude/skills/_dist/skills-estudio-mercado-v0.3.12-20260906.zip` | 0.3.12 | 53 KB | `4aa81edfdd4d18a8f2022a287b15c99bcc889b60bb61912ed32716edfe5a6917` |
 
 ## 🚗 ZIPs de coche (informes individuales)
