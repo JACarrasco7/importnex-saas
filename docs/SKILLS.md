@@ -1,7 +1,14 @@
 ﻿# Skills — punto único de verdad
 
 > **Documento canónico.** Si hay conflicto entre lo que dice la skill, el código, o algún README suelto: **este archivo gana**.
-> _Última regeneración: 20260906 — v3.7.1 (Flujo M marketing multicanal)_
+> _Última regeneración: 20260906 — v3.7.1 (Flujo M marketing multicanal) — 07-sep-2026 sync Desktop completo_
+
+## 🗒 Navegación rápida
+
+- **Índice general de docs/**: [`docs/DOCS-INDEX.md`](DOCS-INDEX.md)
+- **Contexto de negocio JJ Import Motors**: [`docs/contexto-jj-import-motors/`](contexto-jj-import-motors/)
+- **Mockups ficha cliente v2/v3**: [`docs/marketing/`](marketing/)
+- **Informes finales ya entregados**: [`docs/informes/`](informes/)
 
 ## 📦 ZIPs de skill (builds actuales)
 

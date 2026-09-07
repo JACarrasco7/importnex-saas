@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ficha del cliente v2 — JJ Import Motors (mockup)</title>
+
+<!-- ▼ Open Graph: es lo que WhatsApp enseña al mandar el enlace. og:image = 1200x630, <600 KB, JPG/PNG/WebP, URL absoluta HTTPS, UNA sola -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="JJ Import Motors">
+<meta property="og:title" content="Mercedes-Benz A 35 AMG 4MATIC · 2021 · 128.000 km">
+<meta property="og:description" content="Compacto AMG con techo panorámico, Burmester y MBUX. Precio final con transporte, ITV de importación y trámites incluidos.">
+<meta property="og:image" content="https://jjimportmotors.on-forge.com/og/clase-a-35-amg-2021.jpg">
+<meta property="og:url" content="https://jjimportmotors.on-forge.com/c/TOKEN">
+<style>
+  :root{
+    --navy:#1A306D; --navy-deep:#0a142e; --accent:#E8590C; --accent-soft:#f07c3a;
+    --ink:#111827; --muted:#5b6478; --line:#e3e7ef; --bg:#f6f7fb; --card:#fff;
+    --ok:#0f9d58; --warn:#b45309; --radius:14px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font-family:'Inter',-apple-system,'Segoe UI',Roboto,Arial,sans-serif;line-height:1.55}
+  .wrap{max-width:940px;margin:0 auto;padding:0 18px 64px}
+  .mockbar{background:#111827;color:#e5e7eb;font-size:12.5px;padding:8px 18px;text-align:center}
+  .mockbar b{color:#fbbf24}
+
+  header.hero{background:linear-gradient(160deg,var(--navy) 0%,var(--navy-deep) 100%);color:#fff;padding:28px 0 34px;margin-bottom:-28px}
+  .hero .wrap{padding-bottom:0}
+  .brandline{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;
+             letter-spacing:.08em;text-transform:uppercase;color:#9fb4e8;margin-bottom:18px}
+  .pill{display:inline-block;background:rgba(16,185,129,.16);color:#6ee7b7;border:1px solid rgba(16,185,129,.4);
+        border-radius:999px;padding:3px 12px;font-size:12px;letter-spacing:.04em;text-transform:none}
+  h1{font-size:30px;margin:0 0 4px;font-weight:800;letter-spacing:-.02em}
+  .sub{color:#c7d3f2;font-size:15px;margin:0 0 20px}
+  .pricebox{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-end}
+  .price{font-size:38px;font-weight:800;color:#fff;line-height:1}
+  .pricenote{color:#c7d3f2;font-size:13px;max-width:420px}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;margin:18px 0;
+        box-shadow:0 1px 2px rgba(16,24,40,.04)}
+  h2{font-size:17px;margin:0 0 14px;font-weight:700;letter-spacing:-.01em;
+     display:flex;align-items:center;gap:9px}
+  h2::before{content:"";width:4px;height:17px;background:var(--accent);border-radius:2px;display:inline-block}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px 26px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media(max-width:700px){.grid2,.grid3{grid-template-columns:1fr}}
+
+  .resume{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .resume div{border:1px solid var(--line);border-radius:11px;padding:14px;font-size:14px;background:#fbfcfe}
+  .resume .lab{font-size:11.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:5px;font-weight:600}
+  @media(max-width:700px){.resume{grid-template-columns:1fr}}
+
+  .spec{display:flex;justify-content:space-between;gap:14px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:14.5px}
+  .spec span:first-child{color:var(--muted)}
+  .spec span:last-child{font-weight:600;text-align:right}
+  .porconf{color:var(--warn);font-weight:500}
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{background:#eef2fb;border:1px solid #dbe3f5;color:#25376e;border-radius:999px;padding:5px 12px;font-size:13px}
+  .chip.pend{background:#fff7ed;border-color:#fed7aa;color:#9a3412}
+
+  ul.clean{list-style:none;margin:0;padding:0}
+  ul.clean li{padding:6px 0 6px 26px;position:relative;font-size:14.5px}
+  ul.clean li::before{position:absolute;left:0;top:5px}
+  ul.ok li::before{content:"✅";font-size:13px}
+  ul.pend li::before{content:"☐";color:var(--warn);font-weight:700}
+  ul.no li::before{content:"✕";color:#b91c1c;font-weight:700}
+  ul.yes li::before{content:"✓";color:var(--ok);font-weight:700}
+
+  .range{margin-top:6px}
+  .bar{height:9px;border-radius:999px;background:linear-gradient(90deg,#c7d2fe,#93a7e6,#6b83cf);position:relative;margin:26px 0 8px}
+  .tick{position:absolute;top:-24px;transform:translateX(-50%);font-size:12.5px;color:var(--muted);white-space:nowrap}
+  .tick b{display:block;color:var(--ink);font-size:13.5px}
+  .dot{position:absolute;top:-4px;width:17px;height:17px;border-radius:50%;background:var(--accent);
+       border:3px solid #fff;box-shadow:0 0 0 1px var(--accent);transform:translateX(-50%)}
+  .rangenote{font-size:12.5px;color:var(--muted);margin-top:14px}
+
+  .timeline{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:6px}
+  .step{border-top:3px solid var(--accent);padding-top:10px;font-size:13.5px}
+  .step b{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--accent);margin-bottom:4px}
+  @media(max-width:760px){.timeline{grid-template-columns:1fr;gap:12px}}
+
+  .legal{border:1px solid #fcd9b6;background:#fff8f1;border-radius:var(--radius);padding:20px;margin:18px 0}
+  .legal h2::before{background:#b45309}
+  .legal .big{font-weight:700;color:#7c2d12;font-size:15px;margin-bottom:10px}
+
+  details{border-bottom:1px solid var(--line);padding:11px 0}
+  details:last-child{border-bottom:none}
+  summary{cursor:pointer;font-weight:600;font-size:14.5px;list-style:none}
+  summary::marker{display:none}
+  summary::before{content:"+";color:var(--accent);font-weight:800;margin-right:9px}
+  details[open] summary::before{content:"–"}
+  details p{margin:9px 0 2px 22px;color:var(--muted);font-size:14px}
+
+  .cta{background:var(--navy);color:#fff;border-radius:var(--radius);padding:24px;text-align:center;margin:20px 0}
+  .cta a{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;font-weight:700;
+         padding:13px 30px;border-radius:10px;margin-top:6px}
+  .cta .contact{color:#c7d3f2;font-size:13.5px;margin-top:12px}
+
+  .fotos{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .foto{aspect-ratio:4/3;background:#e8ecf5;border:1px dashed #c3cde3;border-radius:10px;display:flex;
+        align-items:center;justify-content:center;color:#8595b8;font-size:12.5px}
+  @media(max-width:700px){.fotos{grid-template-columns:1fr 1fr}}
+
+  footer{color:var(--muted);font-size:12.5px;text-align:center;padding-top:8px}
+
+  /* ---------- Revelado al hacer scroll (3 capas) ---------- */
+  /* Capa 1 · estado base: SIEMPRE visible. Si falla el CSS o el JS, la ficha se lee igual. */
+  .reveal{opacity:1;transform:none}
+
+  /* Capa 2 · CSS nativo dirigido por scroll, solo si el navegador lo soporta */
+  @supports (animation-timeline: view()){
+    @media (prefers-reduced-motion: no-preference){
+      .reveal{animation:reveal-in both;animation-timeline:view();animation-range:entry 8% cover 26%}
+    }
+  }
+  @keyframes reveal-in{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+
+  /* Capa 3 · fallback con IntersectionObserver */
+  .js-oculto{opacity:0;transform:translateY(18px)}
+  .js-visible{opacity:1;transform:none;transition:opacity .5s ease,transform .5s cubic-bezier(.2,.7,.3,1)}
+
+  /* Apagado total: accesibilidad y PDF (Browsershot) */
+  @media (prefers-reduced-motion: reduce){
+    .reveal,.js-oculto,.js-visible{animation:none!important;transition:none!important;opacity:1!important;transform:none!important}
+  }
+  .modo-pdf .reveal,.modo-pdf .js-oculto{animation:none!important;opacity:1!important;transform:none!important}
+  .modo-pdf .progreso,.modo-pdf .ctabar{display:none!important}
+  @media print{
+    .reveal,.js-oculto{animation:none!important;opacity:1!important;transform:none!important}
+    .progreso,.ctabar,.mockbar{display:none!important}
+    .card{break-inside:avoid;box-shadow:none}
+  }
+
+  /* Barra de progreso de lectura */
+  .progreso{position:fixed;top:0;left:0;height:3px;width:0;background:var(--accent);z-index:60;transition:width .1s linear}
+
+  /* Barra de acción fija en móvil */
+  .ctabar{position:fixed;left:0;right:0;bottom:0;background:rgba(10,20,46,.96);backdrop-filter:blur(6px);
+          display:none;gap:10px;padding:10px 14px;z-index:50;align-items:center;justify-content:space-between}
+  .ctabar b{color:#fff;font-size:15px}
+  .ctabar span{color:#9fb4e8;font-size:11.5px;display:block}
+  .ctabar a{background:var(--accent);color:#fff;text-decoration:none;font-weight:700;padding:11px 18px;border-radius:9px;font-size:14px;white-space:nowrap}
+  @media(max-width:760px){.ctabar{display:flex}body{padding-bottom:74px}}
+
+  .card{transition:box-shadow .25s ease}
+  .card:hover{box-shadow:0 6px 22px rgba(16,24,40,.07)}
+  .foto{transition:transform .25s ease,border-color .25s ease;cursor:zoom-in}
+  .foto:hover{transform:translateY(-2px);border-color:var(--accent-soft)}
+  .num{font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+
+<div class="progreso" id="progreso"></div>
+<div class="mockbar"><b>MOCKUP v3</b> — misma unidad que tu enlace real (Clase A 35 AMG), con la estructura y el orden propuestos · lo que no estaba publicado aparece como <b>«por confirmar»</b>, no inventado</div>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="brandline"><span>JJ Import Motors · Huelva</span><span class="pill">Disponible</span></div>
+    <h1>Mercedes-Benz A 35 AMG 4MATIC</h1>
+    <p class="sub">01/2021 · 128.000 km · gasolina · cambio automático · tracción integral</p>
+    <div class="pricebox">
+      <div class="price num" data-contar="24990" data-sufijo=" €">24.990 €</div>
+      <div class="pricenote">Precio final, impuestos incluidos: vehículo, transporte hasta España, ITV de importación, trámites de matriculación y honorarios de gestión. <em style="color:#fbbf24">(En la ficha actual pone «+ gastos gestión de compra»: eso es lo que hay que cerrar aquí.)</em></div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="card reveal">
+    <div class="resume">
+      <div><div class="lab">✅ Lo bueno</div>Acabado AMG con techo panorámico, sonido Burmester y MBUX: un equipamiento muy por encima de lo habitual en su rango.</div>
+      <div><div class="lab">⚠️ A tener en cuenta</div>128.000 km es un kilometraje alto para el año: se revisa el historial de mantenimiento completo antes de cerrar.</div>
+      <div><div class="lab">📍 Siguiente paso</div>Si encaja, se bloquea la unidad con el vendedor y arrancamos la gestión.</div>
+    </div>
+  </div>
+
+  <div class="card reveal">
+    <h2>Ficha técnica</h2>
+    <div class="grid2">
+      <div class="spec"><span>Marca y modelo</span><span>Mercedes-Benz Clase A (W177)</span></div>
+      <div class="spec"><span>Versión</span><span>A 35 AMG 4MATIC</span></div>
+      <div class="spec"><span>Año</span><span>2021</span></div>
+      <div class="spec"><span>Primera matriculación</span><span>01/2021</span></div>
+      <div class="spec"><span>Kilómetros</span><span>128.000 km</span></div>
+      <div class="spec"><span>Combustible</span><span>Gasolina</span></div>
+      <div class="spec"><span>Cambio</span><span>Automático</span></div>
+      <div class="spec"><span>Tracción</span><span>Integral 4MATIC</span></div>
+      <div class="spec"><span>Potencia</span><span class="porconf">Por confirmar con la ficha técnica</span></div>
+      <div class="spec"><span>Carrocería</span><span>Compacto 5 puertas</span></div>
+      <div class="spec"><span>Puertas y plazas</span><span class="porconf">Por confirmar</span></div>
+      <div class="spec"><span>Color</span><span>Gris</span></div>
+      <div class="spec"><span>Etiqueta DGT</span><span class="porconf">Por confirmar al matricular</span></div>
+      <div class="spec"><span>Propietarios</span><span class="porconf">Por confirmar</span></div>
+      <div class="spec"><span>Consumo homologado</span><span class="porconf">Por confirmar</span></div>
+      <div class="spec"><span>Emisiones CO₂</span><span class="porconf">Por confirmar con el COC</span></div>
+    </div>
+  </div>
+
+  <div class="card reveal">
+    <h2>Equipamiento</h2>
+    <div class="chips">
+      <span class="chip">Techo panorámico corredizo</span><span class="chip">Sonido envolvente Burmester</span>
+      <span class="chip">MBUX con realidad aumentada</span><span class="chip">Cuadro de instrumentos digital</span>
+      <span class="chip">Asistente de aparcamiento con cámara</span><span class="chip">Asiento eléctrico con memoria</span>
+      <span class="chip">Tapicería de cuero</span><span class="chip">Llantas AMG de 19"</span>
+      <span class="chip">Cargador de smartphone por inducción</span><span class="chip">Climatizador automático bizona</span>
+    </div>
+  </div>
+
+  <div class="card reveal">
+    <h2>Estado y antecedentes</h2>
+    <div class="grid2">
+      <ul class="clean ok">
+        <li>Origen y kilometraje confirmados</li>
+        <li>Historial verificado</li>
+        <li>Sin llamadas a revisión pendientes para esta unidad</li>
+      </ul>
+      <ul class="clean pend">
+        <li>Estado de frenos y neumáticos: se revisa en la inspección previa a la compra</li>
+        <li>Documento COC y ficha técnica completa: se solicitan al vendedor antes de cerrar</li>
+        <li>Número de propietarios: pendiente de confirmar en la documentación</li>
+      </ul>
+    </div>
+  </div>
+
+
+  <div class="card reveal">
+    <h2>Por qué esta unidad</h2>
+    <ul class="clean yes">
+      <li><b>Acabado y equipamiento poco frecuentes:</b> techo panorámico, Burmester y MBUX con realidad aumentada no son lo habitual en un compacto de este rango.</li>
+      <li><b>Tracción integral 4MATIC:</b> lo hace utilizable todo el año, no solo un coche de buen tiempo.</li>
+      <li><b>Compacto de cinco puertas:</b> prestaciones AMG sin renunciar a usarlo a diario.</li>
+      <li><b>Verificado antes de moverlo:</b> origen, kilometraje e historial comprobados por nosotros.</li>
+    </ul>
+    <p style="margin:14px 0 0;font-size:12.5px;color:var(--muted);border-top:1px dashed var(--line);padding-top:12px">
+      <b>Lo que desaparece de aquí:</b> «hueco de 8.969 € antes de costes», «solo 11 unidades en toda España»,
+      «vendedor profesional 4.5★» y «vendibilidad alta (84/100)». Eso es análisis interno y el enlace es público.
+    </p>
+  </div>
+
+  <div class="card reveal">
+    <h2>Qué dice el mercado español</h2>
+    <div class="range">
+      <div class="bar">
+        <span class="tick" style="left:0"><b class="num" data-contar="33959" data-sufijo=" €">33.959 €</b>mínimo</span>
+        <span class="tick" style="left:50%"><b class="num" data-contar="34283" data-sufijo=" €">34.283 €</b>media</span>
+        <span class="tick" style="left:100%"><b class="num" data-contar="34890" data-sufijo=" €">34.890 €</b>máximo</span>
+        <span class="dot" style="left:0"></span>
+      </div>
+      <div class="rangenote">11 unidades similares publicadas en España el 07/09/2026. Es una referencia de mercado, no una promesa de ahorro: <b>no se publica ninguna cifra de «ahorro estimado»</b> — el cliente compara solo con el precio final de arriba.</div>
+    </div>
+  </div>
+
+  <div class="card reveal">
+    <h2>Qué incluye el precio</h2>
+    <div class="grid2">
+      <ul class="clean yes">
+        <li>El vehículo</li>
+        <li>Búsqueda, inspección y verificación documental</li>
+        <li>Gestión de la compra con el vendedor</li>
+        <li>Transporte hasta España</li>
+        <li>ITV de importación, DGT y gestoría</li>
+        <li>Honorarios de gestión de JJ Import Motors</li>
+        <li>Entrega en Huelva y provincia</li>
+      </ul>
+      <ul class="clean no">
+        <li>Seguro del vehículo</li><li>Impuesto municipal de circulación</li>
+        <li>Mantenimiento, reparaciones y desgaste</li><li>Garantía mecánica (ver abajo)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card reveal" id="galeria">
+    <h2>Fotos reales del vehículo</h2>
+    <div class="fotos">
+      <div class="foto">01 · frontal 3/4</div><div class="foto">02 · lateral</div><div class="foto">03 · trasera</div>
+      <div class="foto">04 · interior</div><div class="foto">05 · cuadro digital</div><div class="foto">06 · techo panorámico</div>
+      <div class="foto">07 · llantas AMG</div><div class="foto">08 · plazas traseras</div>
+    </div>
+    <p style="margin:14px 0 0;text-align:center">
+      <a href="#" style="display:inline-block;border:1px solid var(--line);border-radius:9px;padding:9px 18px;
+         color:var(--navy);text-decoration:none;font-weight:600;font-size:14px">Ver las 32 fotos</a>
+    </p>
+    <p class="rangenote" style="text-align:center">En la ficha actual se cargan las 32 de golpe y entierran todo lo que viene después. Aquí se ven 8 y el resto se abre al pulsar.</p>
+  </div>
+
+  <div class="card reveal">
+    <h2>Cómo funciona</h2>
+    <div class="timeline">
+      <div class="step"><b>Semana 0</b>Reserva y bloqueo de la unidad con el vendedor</div>
+      <div class="step"><b>Semana 1</b>Compra, documentación y preparación de la exportación</div>
+      <div class="step"><b>Semanas 2-3</b>Transporte hasta España</div>
+      <div class="step"><b>Semanas 3-4</b>ITV de importación, impuestos y matriculación</div>
+      <div class="step"><b>Semana 4</b>Entrega, con el coche ya a tu nombre</div>
+    </div>
+    <div class="rangenote">Plazos estimados: dependen del transporte y de las citas de ITV.</div>
+  </div>
+
+  <div class="legal reveal">
+    <h2>Qué hacemos y qué no hacemos</h2>
+    <div class="grid2">
+      <ul class="clean yes">
+        <li>Localizamos la unidad y comprobamos su historial y su documentación</li>
+        <li>Negociamos y coordinamos la compra con el vendedor</li>
+        <li>Organizamos el transporte hasta España</li>
+        <li>Tramitamos ITV de importación, impuestos y matriculación</li>
+        <li>Te acompañamos hasta que tienes las llaves y el coche a tu nombre</li>
+      </ul>
+      <ul class="clean no">
+        <li><b>No vendemos coches:</b> JJ Import Motors no es el vendedor ni el propietario del vehículo. La compraventa es entre el vendedor y tú, y el coche se matricula directamente a tu nombre.</li>
+        <li>No respondemos de averías, desgastes o defectos que no sean visibles en la documentación y en la inspección previa.</li>
+        <li>No hacemos mantenimiento ni reparaciones.</li>
+      </ul>
+    </div>
+    <p class="big" style="margin-top:16px">JJ Import Motors no ofrece garantía de ningún tipo sobre el vehículo.</p>
+    <p style="margin:0;font-size:14px;color:#7c2d12">Cualquier garantía o responsabilidad que exista corresponde al vendedor, según la ley que le sea aplicable. Nuestro servicio es la gestión de la búsqueda, la verificación y la importación, con honorarios fijos acordados de antemano. Si quieres cobertura mecánica, puede contratarse aparte con una compañía especializada.</p>
+  </div>
+
+  <div class="card reveal">
+    <h2>Preguntas frecuentes</h2>
+    <details open><summary>¿El coche es vuestro?</summary><p>No. Nosotros gestionamos la compra: el vehículo se compra al vendedor y se matricula directamente a tu nombre.</p></details>
+    <details><summary>¿Lleva garantía?</summary><p>JJ Import Motors no da garantía. La que pueda existir es la del vendedor, según la ley que le aplique. Si quieres cobertura mecánica, se puede contratar aparte con una compañía especializada.</p></details>
+    <details><summary>¿Qué pasa si al llegar no es como se dijo?</summary><p>Antes de comprar se hace una inspección previa con fotos y vídeo. Si aparece algo que no encaja con lo publicado, se te informa y decides tú si se sigue adelante.</p></details>
+    <details><summary>¿Cuánto tarda?</summary><p>Entre tres y cinco semanas desde la reserva. Es una estimación: depende del transporte y de las citas de ITV.</p></details>
+    <details><summary>¿Qué pasa si lo vende otro antes?</summary><p>Puede ocurrir mientras no hay reserva. Si pasa, te buscamos una unidad equivalente sin coste adicional de gestión.</p></details>
+    <details><summary>¿Puedo verlo antes de comprarlo?</summary><p>Puedes viajar a verlo o pedir la inspección previa con fotos y vídeo detallados, que es lo que hace la mayoría.</p></details>
+    <details><summary>¿Qué pasa con la ITV y la matrícula?</summary><p>Lo tramitamos nosotros: ITV de importación, impuestos y matriculación española a tu nombre.</p></details>
+    <details><summary>¿Cómo se paga?</summary><p>Con una reserva inicial para bloquear la unidad y el resto según el calendario acordado antes de empezar.</p></details>
+    <details><summary>Tiene 128.000 km, ¿es mucho?</summary><p>Para un 2021 es un kilometraje alto, y por eso el precio está donde está. Lo que importa es el historial: revisiones al día, uso mayoritario de carretera y sin incidencias documentadas. Todo eso se comprueba antes de que pagues nada.</p></details>
+  </div>
+
+  <div class="cta reveal">
+    <div style="font-size:15px;color:#c7d3f2">¿Te encaja esta unidad?</div>
+    <a href="#">Quiero gestionar la compra</a>
+    <div class="contact">675 70 14 39 · jjimportmotors@gmail.com · Huelva</div>
+  </div>
+
+  <footer>
+    JJ Import Motors (Huelva) presta un servicio de gestión de búsqueda e importación de vehículos. No es vendedora ni propietaria del vehículo y no ofrece garantía sobre él.
+    Precio final indicado con impuestos incluidos; no incluye seguro, impuesto de circulación ni mantenimiento. Disponibilidad y precio sujetos a confirmación en el momento de la reserva.
+    <br><br>Datos del vehículo capturados el 07/09/2026.
+  </footer>
+
+</div>
+<div class="ctabar">
+  <div><b>24.990 €</b><span>Precio final · transporte, ITV y trámites incluidos</span></div>
+  <a href="#">Quiero gestionar la compra</a>
+</div>
+
+<script>
+(function(){
+  var quietud = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var pdf = document.body.classList.contains('modo-pdf') || location.search.indexOf('pdf=1') > -1;
+  if (pdf) document.body.classList.add('modo-pdf');
+
+  /* Revelado: solo si el navegador NO trae scroll-driven nativo */
+  var nativo = window.CSS && CSS.supports && CSS.supports('animation-timeline: view()');
+  if (!nativo && !quietud && !pdf && 'IntersectionObserver' in window) {
+    var els = document.querySelectorAll('.reveal');
+    els.forEach(function(el){ el.classList.add('js-oculto'); });
+    var io = new IntersectionObserver(function(entradas){
+      entradas.forEach(function(e){
+        if (e.isIntersecting){ e.target.classList.remove('js-oculto'); e.target.classList.add('js-visible'); io.unobserve(e.target); }
+      });
+    }, { rootMargin: '0px 0px -10% 0px', threshold: 0.08 });
+    els.forEach(function(el){ io.observe(el); });
+  }
+
+  /* Contadores: el valor final ya está en el HTML, esto solo lo anima una vez */
+  if (!quietud && !pdf && 'IntersectionObserver' in window) {
+    var nums = document.querySelectorAll('[data-contar]');
+    var ioN = new IntersectionObserver(function(entradas){
+      entradas.forEach(function(e){
+        if (!e.isIntersecting) return;
+        var el = e.target, fin = parseInt(el.dataset.contar, 10), suf = el.dataset.sufijo || '', t0 = null;
+        function paso(t){
+          if (!t0) t0 = t;
+          var p = Math.min((t - t0) / 650, 1), val = Math.round(fin * (1 - Math.pow(1 - p, 3)));
+          el.textContent = val.toLocaleString('es-ES') + suf;
+          if (p < 1) requestAnimationFrame(paso);
+        }
+        requestAnimationFrame(paso); ioN.unobserve(el);
+      });
+    }, { threshold: 0.6 });
+    nums.forEach(function(el){ ioN.observe(el); });
+  }
+
+  /* Barra de progreso de lectura */
+  var barra = document.getElementById('progreso');
+  if (barra && !pdf) {
+    var pintar = function(){
+      var h = document.documentElement.scrollHeight - innerHeight;
+      barra.style.width = (h > 0 ? (scrollY / h) * 100 : 0) + '%';
+    };
+    addEventListener('scroll', pintar, { passive: true }); pintar();
+  }
+})();
+</script>
+</body>
+</html>
