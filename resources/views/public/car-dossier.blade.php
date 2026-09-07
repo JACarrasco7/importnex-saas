@@ -6,7 +6,7 @@
     <title>{{ $car->brand }} {{ $car->model }} · JJ Import Motors</title>
     <meta name="robots" content="noindex, nofollow">
     <meta property="og:title" content="{{ $car->brand }} {{ $car->model }} · JJ Import Motors">
-    <meta property="og:description" content="{{ number_format(($car->sale_price ?? $car->purchase_price ?? 0), 0, ',', '.') }} € · Llave en mano · IVA incluido">
+    <meta property="og:description" content="{{ number_format(($car->sale_price ?? $car->purchase_price ?? 0), 0, ',', '.') }} € · Gestión integral JJ Import Motors">
     @if(count($fotos) > 0)
         <meta property="og:image" content="{{ $fotos[0] }}">
     @endif
@@ -674,12 +674,16 @@
     @php
         $precio = $car->sale_price ?? $car->purchase_price ?? 0;
         $potencia = $esqueleto?->uno('POTENCIA');
-        $cambioTxt = $esqueleto?->uno('CAMBIO') ?? $car->transmission;
+        // ── Cambio: limpio, sin coletillas técnicas (NO mostramos "doble embrague", "DSG", "6 vel"...) ──
+        $cambioRaw = $esqueleto?->uno('CAMBIO') ?? $car->transmission;
+        $cambioTxt = $cambioRaw
+            ? (str_contains(strtolower($cambioRaw), 'auto') || stripos($cambioRaw, 'DSG') !== false || stripos($cambioRaw, 'Tiptronic') !== false
+                ? 'Automático' : 'Manual')
+            : null;
         $kmTxt = $car->mileage ? number_format($car->mileage, 0, ',', '.').' km' : null;
         $anioTxt = $car->year ?: null;
         $claimParts = array_filter([
             $potencia,
-            $cambioTxt ? 'cambio '.strtolower($cambioTxt) : null,
             $kmTxt,
         ]);
 
@@ -708,18 +712,12 @@
         $veredictoLabel = ['green' => 'Excelente compra', 'amber' => 'Buena opción', 'red' => 'Con cautela'][$tl] ?? null;
         $veredictoColor = ['green' => '#10b981', 'amber' => '#f59e0b', 'red' => '#ef4444'][$tl] ?? null;
 
-        // ── Pros / Cons / Tips: esqueleto primero, datos de IA del coche como respaldo ──
+        // ── Pros: solo lo bueno para el cliente. consLista y tipsLista se mantienen
+        //    aquí por compat con consumidores externos del blade, pero el render
+        //    ya no los muestra (ver regla de negocio en .ai/rules/business-model.md).
         $prosLista = $esqueleto ? $esqueleto->lista('A_FAVOR') : [];
         if (empty($prosLista)) {
             $prosLista = \App\Support\IaList::normalizar($car->pros ?? null);
-        }
-        $consLista = $esqueleto ? $esqueleto->lista('EN_CONTRA') : [];
-        if (empty($consLista)) {
-            $consLista = \App\Support\IaList::normalizar($car->cons ?? null);
-        }
-        $tipsLista = $esqueleto ? $esqueleto->lista('TIPS') : [];
-        if (empty($tipsLista)) {
-            $tipsLista = \App\Support\IaList::normalizar($car->tips ?? null);
         }
 
         // ── Comparativa de mercado ──
@@ -738,15 +736,15 @@
                     <span class="accent">{{ $car->model }}</span>
                 </h1>
                 @if(count($claimParts) > 0)
-                    <p class="claim">{{ implode(' · ', $claimParts) }} · Revisado y listo para entrega inmediata</p>
+                    <p class="claim">{{ implode(' · ', $claimParts) }} · Verificado por nuestro equipo</p>
                 @else
-                    <p class="claim">Revisado por nuestro equipo y listo para entrega inmediata</p>
+                    <p class="claim">Verificado por nuestro equipo</p>
                 @endif
 
                 <div class="price-card">
-                    <div class="price-label">Precio final · IVA incluido</div>
+                    <div class="price-label">Precio total cliente</div>
                     <div class="price-value">{{ number_format($precio, 0, ',', '.') }} €</div>
-                    <div class="price-caption">Llave en mano · Sin sorpresas · Garantía 12 meses</div>
+                    <div class="price-caption">Compra + transporte + trámites + honorarios JJ Import Motors</div>
                 </div>
 
                 <div class="hero-actions">
@@ -786,8 +784,8 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
                 <div class="trust-text">
-                    <strong>Garantía 12 meses</strong>
-                    Cobertura mecánica completa
+                    <strong>Historial verificado</strong>
+                    Origen y kilometraje confirmados
                 </div>
             </div>
             <div class="trust-item">
@@ -795,8 +793,8 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
                 </div>
                 <div class="trust-text">
-                    <strong>Entrega en tu puerta</strong>
-                    Transporte incluido a Huelva
+                    <strong>Tramitación completa</strong>
+                    ITV, COC, DGT y gestoría
                 </div>
             </div>
             <div class="trust-item">
@@ -894,29 +892,29 @@
                 <div class="incluye-item">
                     <span class="incluye-check">✓</span>
                     <div>
-                        <strong>Transferencia a tu nombre</strong>
-                        Gestionamos todo el papeleo
+                        <strong>Búsqueda y verificación</strong>
+                        Inspección física, documental y de mercado
                     </div>
                 </div>
                 <div class="incluye-item">
                     <span class="incluye-check">✓</span>
                     <div>
-                        <strong>IVA desgravable</strong>
-                        Si eres empresa o autónomo
+                        <strong>Gestión de la compra</strong>
+                        Negociación con el vendedor y pago seguro
                     </div>
                 </div>
                 <div class="incluye-item">
                     <span class="incluye-check">✓</span>
                     <div>
-                        <strong>Garantía mecánica 12 meses</strong>
-                        Cobertura en motor y caja
+                        <strong>Transporte a España</strong>
+                        Logística y seguimiento del envío
                     </div>
                 </div>
                 <div class="incluye-item">
                     <span class="incluye-check">✓</span>
                     <div>
-                        <strong>Revisión pre-entrega</strong>
-                        150 puntos de inspección
+                        <strong>Trámites de matriculación</strong>
+                        ITV, COC, DGT y gestoría completa
                     </div>
                 </div>
                 <div class="incluye-item">
@@ -929,8 +927,8 @@
                 <div class="incluye-item">
                     <span class="incluye-check">✓</span>
                     <div>
-                        <strong>Entrega a domicilio</strong>
-                        Huelva y provincia sin coste
+                        <strong>Entrega en tu domicilio</strong>
+                        Huelva y provincia
                     </div>
                 </div>
             </div>
@@ -954,32 +952,20 @@
             </section>
         @endif
 
-        {{-- PUNTOS CLAVE --}}
-        @if(count($prosLista) > 0 || count($consLista) > 0)
+        {{-- PUNTOS A FAVOR (al cliente solo lo bueno) --}}
+        @if(count($prosLista) > 0)
             <section>
-                <div class="section-title">Puntos clave</div>
-                <h2 class="section-h">Lo bueno y lo que debes saber</h2>
+                <div class="section-title">Puntos a favor</div>
+                <h2 class="section-h">Por qué destaca este coche</h2>
                 <div class="proscons">
-                    @if(count($prosLista) > 0)
-                        <div class="pc-col pros">
-                            <h3>Puntos a favor</h3>
-                            <ul>
-                                @foreach($prosLista as $item)
-                                    <li>{{ $item }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
-                    @if(count($consLista) > 0)
-                        <div class="pc-col cons">
-                            <h3>Aspectos a considerar</h3>
-                            <ul>
-                                @foreach($consLista as $item)
-                                    <li>{{ $item }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
+                    <div class="pc-col pros" style="grid-column: 1 / -1;">
+                        <h3>Lo que hace fuerte a esta unidad</h3>
+                        <ul>
+                            @foreach($prosLista as $item)
+                                <li>{{ $item }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
                 </div>
             </section>
         @endif
@@ -1030,23 +1016,11 @@
             @endif
         @endif
 
-        {{-- CONSEJOS DEL EXPERTO --}}
-        @if(count($tipsLista) > 0)
-            <section class="tips">
-                <h3>Cosas que debes saber antes de comprar</h3>
-                <ul>
-                    @foreach($tipsLista as $t)
-                        <li>{{ $t }}</li>
-                    @endforeach
-                </ul>
-            </section>
-        @endif
-
         {{-- CTA FINAL --}}
         <section class="cta-final">
             <div class="cta-eyebrow">¿Seguimos adelante?</div>
             <h2>Gestionamos la compra de este coche por ti</h2>
-            <p>Escríbenos por WhatsApp o llama. Te explicamos el proceso completo: verificación, compra, transporte, trámites y entrega en tu domicilio — sin sorpresas.</p>
+            <p>Escríbenos por WhatsApp o llama. Te explicamos el proceso completo: búsqueda, verificación, compra, transporte y trámites.</p>
             <div class="cta-buttons">
                 <a href="https://wa.me/34675701439?text={{ urlencode('Hola, me interesa el '.$car->brand.' '.$car->model.'. ¿Podemos hablar sobre el proceso de compra?') }}"
                    target="_blank" rel="noopener" class="btn primary big">
@@ -1079,7 +1053,7 @@
             <span>Huelva, España</span>
         </div>
         <div class="copy">
-            © {{ date('Y') }} JJ Import Motors · Todos los precios incluyen IVA · Dossier generado el {{ now()->format('d/m/Y H:i') }}
+            © {{ date('Y') }} JJ Import Motors · Dossier generado el {{ now()->format('d/m/Y H:i') }}
         </div>
     </footer>
 

@@ -76,4 +76,27 @@ class PublicCarFolletoTest extends TestCase
         $response->assertDontSee('Reserva tu prueba');
         $response->assertDontSee('EN STOCK');
     }
+
+    public function test_dossier_does_not_promise_warranty_or_inventory_language(): void
+    {
+        $org = Organization::factory()->create();
+        User::factory()->create(['organization_id' => $org->id]);
+        $car = Car::factory()->create([
+            'organization_id' => $org->id,
+            'brand' => 'BMW',
+            'model' => '320d',
+        ]);
+        $link = CarPublicLink::generateFor($car);
+
+        $response = $this->get("/c/{$link->token}");
+        $body = $response->getContent();
+
+        // NO somos vendedor: ni garantía, ni "IVA incluido", ni "llave en mano",
+        // ni precio "final" (no hay precio final; hay precio total cliente).
+        $this->assertStringNotContainsString('Garantía', $body, 'JJ Import Motors NO da garantía');
+        $this->assertStringNotContainsString('IVA incluido', $body, 'No vendemos, no cobramos IVA');
+        $this->assertStringNotContainsString('Llave en mano', $body, 'No entregamos llaves propias');
+        $this->assertStringNotContainsString('Aspectos a considerar', $body, 'Solo lo bueno al cliente');
+        $this->assertStringNotContainsString('Cosas que debes saber antes de comprar', $body, 'No somos comprador en concesionario');
+    }
 }

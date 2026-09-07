@@ -4,6 +4,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 
 | Applies to | Rule file |
 | --- | --- |
+| ** (regla transversal: TODO) | .ai/rules/business-model.md |
 | resources/js/Pages/** | .ai/rules/pages.md |
 | public/sw.js | .ai/rules/public.md |
 | routes/web.php | .ai/rules/routes.md |
