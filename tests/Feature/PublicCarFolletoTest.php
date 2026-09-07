@@ -99,4 +99,29 @@ class PublicCarFolletoTest extends TestCase
         $this->assertStringNotContainsString('Aspectos a considerar', $body, 'Solo lo bueno al cliente');
         $this->assertStringNotContainsString('Cosas que debes saber antes de comprar', $body, 'No somos comprador en concesionario');
     }
+
+    public function test_price_caption_only_mentions_gestion_de_compra(): void
+    {
+        $org = Organization::factory()->create();
+        User::factory()->create(['organization_id' => $org->id]);
+        $car = Car::factory()->create([
+            'organization_id' => $org->id,
+            'brand' => 'BMW',
+            'model' => '320d',
+            'purchase_price' => 24990,
+        ]);
+        $link = CarPublicLink::generateFor($car);
+
+        $response = $this->get("/c/{$link->token}");
+        $body = $response->getContent();
+
+        // El caption del precio debe ser SIEMPRE "+ gastos gestión de compra"
+        // (regla de oro: caption conciso, sin desglose, sin IVA, sin garantía).
+        $this->assertStringContainsString('+ gastos gestión de compra', $body, 'Caption del precio correcto');
+        // Y NO debe contener los antiguos captions prolijo/incorrectos:
+        $this->assertStringNotContainsString('Compra + transporte + trámites', $body, 'Caption antiguo prohibido');
+        $this->assertStringNotContainsString('IVA incluido', $body);
+        $this->assertStringNotContainsString('Llave en mano', $body);
+        $this->assertStringNotContainsString('Garantía', $body);
+    }
 }

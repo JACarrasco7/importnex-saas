@@ -744,7 +744,7 @@
                 <div class="price-card">
                     <div class="price-label">Precio total cliente</div>
                     <div class="price-value">{{ number_format($precio, 0, ',', '.') }} €</div>
-                    <div class="price-caption">Compra + transporte + trámites + honorarios JJ Import Motors</div>
+                    <div class="price-caption">+ gastos gestión de compra</div>
                 </div>
 
                 <div class="hero-actions">
