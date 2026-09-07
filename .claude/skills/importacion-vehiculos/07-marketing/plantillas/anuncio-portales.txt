@@ -1,0 +1,50 @@
+# anuncio-portales.txt — Plantilla v2
+# Texto base común + variantes de título. Reemplaza <PLACEHOLDERS>.
+# Coches.net, Milanuncios, Wallapop comparten este texto. La diferencia entre
+# portales son los campos [PT_*] que el validador usa para verificar cupo.
+#
+# REGLA DURA A26: en portales NO se admiten iconos (texto plano).
+# Si la unidad tiene valores que quieres representar con icono, hazlo en la
+# ficha de redes ([IG_FICHA] / [FB_FICHA]), nunca aquí.
+
+[PT_RESUMEN]
+<2-3 frases sin icono, sin emoji, sin enlace.>
+
+[PT_FICHA]
+- Primera matriculación: <MM/AAAA>
+- Kilometraje: <km> km verificados
+- Potencia: <CV> CV · <combustible>
+- Cambio: <cambio> de <N> velocidades
+- Etiqueta ambiental: <DGT>
+- Propietarios: <N>
+
+[PT_ESTADO]
+- <Lo que se ha revisado>
+- Pega honesta: <hecho> — <solución>
+- <Mantenimiento reciente, opcional>
+
+[PT_EQUIPAMIENTO]
+<3-5 líneas sin icono, equipamiento clave>
+
+[PT_QUE_INCLUYE]
+- Gestión integral de la compra
+- Transporte a España
+- Tramitación completa (matriculación, ITV, DGT)
+
+[PT_COMO_FUNCIONA]
+<3-4 líneas: cómo es el proceso de gestión>
+
+[PT_AVISO]
+JJ Import Motors — gestoría de compra e importación de vehículos.
+Identidad del empresario: <nombre empresa, NIF/CIF, dirección, email, teléfono>.
+El vehículo NO es propiedad del establecimiento.
+Precio total cliente: <X> € (impuestos incluidos).
+No incluye: transporte fuera de <provincia>, matriculación en país distinto a España, ni seguros opcionales.
+Garantía: el vehículo se entrega con la garantía legal que aplique según la antigüedad y el tipo de vendedor original. No la concede JJ Import Motors.
+Fecha de primera matriculación: <MM/AAAA>.
+
+[PT_TITULO_A]
+<MARCA> <MODELO> <VERSIÓN> · <AÑO> · <KM> km · <N> dueño(s)
+
+[PT_TITULO_B]
+<Variante A/B para test>

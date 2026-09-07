@@ -1,6 +1,6 @@
 ---
 name: importacion-vehiculos
-version: 3.7.0
+version: 3.7.1
 description: >
   Negocio JJ Import Motors (Huelva): servicio de búsqueda e importación de coches
   (desde Alemania y dentro de España). NO compra stock, solo oferta el servicio
@@ -52,7 +52,7 @@ Localizar coches (desde Alemania y dentro de España) y **ofertar el servicio de
 >
 > Detalle de bloques en `03-informes/contrato.md` §Bloques por archivo y `03-informes/informe_tecnico.md` §Formato-txt.
 
-> 📁 **Compañeros:** `02-flujos/navegacion_real.md` (MÉTODO PREFERIDO — navegar como humano) · `02-flujos/paginas_reales.md` (estructura REAL capturada de los 7 portales) · `02-flujos/playbook_filtrado.md` (técnicas de filtrado/búsqueda para Claude Desktop) · `02-flujos/extractores.md` (URLs, trampas, diccionario) · `03-informes/contrato.md` (JSON + esqueleto) · `05-operaciones/operaciones.md` (carpetas, scripts) · **`06-reglas/anti_patrones.md`** (reglas duras 21) · **`06-reglas/copywriting_marketing.md`** (cómo redactar GANCHO/POST/STORY/TITULO/DESCRIPCION — límites por canal, tono, anti-patrones de copy) · **`../estudio-mercado/SKILL.md`** (skill hermana: genera el mapa de mercado `datos_mercado.json` que da el criterio de selección)
+> 📁 **Compañeros:** `02-flujos/navegacion_real.md` (MÉTODO PREFERIDO — navegar como humano) · `02-flujos/paginas_reales.md` (estructura REAL capturada de los 7 portales) · `02-flujos/playbook_filtrado.md` (técnicas de filtrado/búsqueda para Claude Desktop) · `02-flujos/extractores.md` (URLs, trampas, diccionario) · `03-informes/contrato.md` (JSON + esqueleto) · `05-operaciones/operaciones.md` (carpetas, scripts) · **`06-reglas/anti_patrones.md`** (reglas duras 30) · **`06-reglas/copywriting_marketing.md`** (cómo redactar GANCHO/POST/STORY/TITULO/DESCRIPCION — límites por canal, tono, anti-patrones de copy) · **`07-marketing/copy_engine.md`** (Flujo M — motor de copy multicanal) · **`07-marketing/redes_sociales.md`** (spec IG/FB/Reel/TikTok/FBMP) · **`07-marketing/portales_anuncio.md`** (spec Coches.net/Milanuncios/Wallapop + aviso legal) · **`07-marketing/biblioteca_ganchos.md`** (8 ángulos de venta) · **`07-marketing/fuentes_y_evidencia.md`** (reglas de citación) · `scripts/check_marketing.py` (validador 30 checks) · **`../estudio-mercado/SKILL.md`** (skill hermana: genera el mapa de mercado `datos_mercado.json` que da el criterio de selección)
 > 
 > 📚 **Módulos especializados:** `03-informes/comparables.md` (ajuste 9 claves) · `04-negocio/costes.md` (IEDMT + desglose) · `04-negocio/riesgos.md` (motores problemáticos) · `05-operaciones/operaciones_cierre.md` (cierre + KPIs + sync)
 >
@@ -75,7 +75,7 @@ Método: navegación real estilo humano SIEMPRE primero → ver `02-flujos/naveg
 Equipamiento: comparar a MÁXIMO equipamiento por defecto (la unidad DE suele venir full: cuadro digital, techo, LED). Un ES "más barato" sin ese equipamiento NO es comparable → ajustar con primas de `03-informes/comparables.md`
 Playbook de filtrado: `02-flujos/playbook_filtrado.md` · estructura real: `02-flujos/paginas_reales.md`
 Trampas top 3: countryCode SIEMPRE | navegación real primero (screenshot+clic), degradado si no se ve | mobile.de directo NUNCA saltar
-Anti-patrones bloqueados: 21 (A1-A21, ver §Anti-patrones)
+Anti-patrones bloqueados: 30 (A1-A30, ver §Anti-patrones y `06-reglas/anti_patrones.md`)
 ENLACES: TODO lo que se entregue lleva enlace al anuncio (ficha) y fuentes con URL (A21)
 📥 ACK ENTENDER: 1 línea de comprensión antes de todo encargo (qué → para qué → entregable) — `01-arranque/guia_prompts.md` §ACK
 Camino fijo: waypoint 📍 en cada mensaje · desviaciones = misión lateral con retorno ↩⃾ (A14)
@@ -93,7 +93,7 @@ Mando: PROTOCOLO DE MANDO — usuario aprueba cada fase, IA ejecuta la fase comp
 
 ---
 
-## 🎯 LOS 5 FLUJOS — leer PRIMERO
+## 🎯 LOS 6 FLUJOS — leer PRIMERO
 
 | Flujo | Disparador | Profundidad | Output | ZIP Laravel |
 |---|---|---|---|---|
@@ -102,6 +102,9 @@ Mando: PROTOCOLO DE MANDO — usuario aprueba cada fase, IA ejecuta la fase comp
 | **C: MERCADO** | "qué merece la pena", "top modelos" | Solo Fase 1, N modelos | Informe BUSQUEDA | ❌ No |
 | **D: DESCUBRIMIENTO** | Cliente SIN modelo concreto (presupuesto + requisitos: año/km/cv/combustible) | Sondeo barato ES+DE — SOLO modelos y motorizaciones, sin anuncios | Informe de MODELOS por país × año | ❌ No |
 | **E: STOCK** | "stock recurrente", "catálogo bajo pedido", "busca coches por categorías/segmentos" | Listados → informe de búsqueda (NO anuncios) | Informe de STOCK (Markdown+PDF+JSON) | ❌ No (catálogo, no valoración) |
+| **M: MARKETING MULTICANAL** *(06-sep-2026)* | Activación automática tras Flujo A con veredicto 🟢/🔵 | Solo marketing (NO navega, NO scraping) | `redes-sociales.txt` + `anuncio-portales.txt` + bloque `marketing` en JSON | ✅ Sí (añadido al ZIP A) |
+
+> **Flujo M · MARKETING (06-sep-2026):** ver `07-marketing/copy_engine.md`. **NO es un flujo independiente**: se activa solo tras un Flujo A con veredicto 🟢 (OPORTUNIDAD) o 🔵 (SOLO ESTE COLOR). Es el que genera el bloque multicanal (3 portales + 3 redes sociales + FB Marketplace) que `empaquetar.py` mete en el ZIP. Reglas: A23-A30 (anti-patrones de copy), validador `scripts/check_marketing.py` (30 checks, 🔴 bloquea publicación), 8 ángulos de venta (`biblioteca_ganchos.md`), léxico de iconos cerrado (16 pictogramas), cupo de hashtags por canal.
 
 > **Flujo E · STOCK (17-ago-2026):** ver `02-flujos/stock-marketing.md`. **Es BÚSQUEDA de coches, NO marketing**: entregable = informe de búsqueda con datos de mercado (nº anuncios, mediana, hueco), NUNCA anuncios/copy IG/FB. El marketing es un flujo posterior separado. Reglas: listado-first (A17) + sellos de precio + ejemplos ilustrativos no lista cerrada (A19) + checkpoint cada X.
 
@@ -126,6 +129,8 @@ Mando: PROTOCOLO DE MANDO — usuario aprueba cada fase, IA ejecuta la fase comp
 ├── NO ↓
 → FLUJO C (MERCADO) — preguntar preferencias al usuario
 ```
+
+> Tras un Flujo A con veredicto 🟢 (OPORTUNIDAD) o 🔵 (SOLO ESTE COLOR), `empaquetar.py` añade automáticamente el **Flujo M (MARKETING)** al ZIP. No es un flujo que el usuario dispara: lo dispara el veredicto. Ver `07-marketing/copy_engine.md`.
 
 **🔴 REGLA DURA UNIVERSAL (17-ago-2026):** todo encargo se asigna a **UN flujo** (A/B/C/D/E) y sigue SU camino con Protocolo de Mando (plan de fase → OK → ejecutar → waypoint 📍 → auditoría de cierre). **Si el encargo NO encaja en ninguno de los 5 flujos, PREGUNTAR al usuario qué flujo aplicar — NUNCA improvisar.** Fallo real 17-ago: "stock recurrente" no encajaba (no existía Flujo E) y Claude improvisó un .docx fuera del camino. Tras añadir Flujo E, si vuelve a aparecer un caso no previsto, la regla es preguntar antes de ejecutar.
 

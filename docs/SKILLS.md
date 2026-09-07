@@ -1,7 +1,7 @@
 ﻿# Skills — punto único de verdad
 
 > **Documento canónico.** Si hay conflicto entre lo que dice la skill, el código, o algún README suelto: **este archivo gana**.
-> _Última regeneración: 20260906_
+> _Última regeneración: 20260906 — v3.7.1 (Flujo M marketing multicanal)_
 
 ## 📦 ZIPs de skill (builds actuales)
 
@@ -9,7 +9,7 @@ Generados por `scripts/build-skill-zips.ps1` (wrapper de `.claude/skills/_dist/b
 
 | Skill | ZIP | Version | Tamano | SHA256 |
 |---|---|---|---|---|
-| `importacion-vehiculos` | `.claude/skills/_dist/skills-importacion-vehiculos-v3.6.1-20260906.zip` | 3.7.0 | 409 KB | `0ac18f87620b27f29ef2549abca06cba45adca83cce7c4524fc074d0287f0110` |
+| `importacion-vehiculos` | `.claude/skills/_dist/skills-importacion-vehiculos-v3.7.1-20260906.zip` | 3.7.1 | 442 KB | `132d6032ea3190a71f8ae5043743d6a342ea52d172ec750dfcd8b19e4293f38b` |
 | `estudio-mercado` | `.claude/skills/_dist/skills-estudio-mercado-v0.3.12-20260906.zip` | 0.3.12 | 53 KB | `894e70f8581011c8659fa683e783c86deb88d419ed3fbb75c476939a90ba2ff9` |
 
 ## 🚗 ZIPs de coche (informes individuales)
@@ -101,4 +101,5 @@ El script:
 - **Repo Laravel**: <https://github.com/JACarrasco7/importnex-saas>
 - **Producción**: <https://jjimportmotors.on-forge.com>
 - **Plan original**: `docs/PLAN_MARKETING_ZIP_2026-09-03.md`
+- **Plan marketing multicanal** (06-sep-2026, Flujo M): `docs/PLAN_MARKETING_MULTICANAL_2026-09-06.md` — documenta el módulo `07-marketing/` de la skill (3 portales + 3 redes + FB Marketplace) y el validador `scripts/check_marketing.py`.
 - **Contexto Claude Desktop**: `c:\Users\jacar\Desktop\JJImportMotors\.claude\`

@@ -5,6 +5,46 @@ Todos los cambios notables en el skill `importacion-vehiculos` se documentarán 
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [3.7.1] - 2026-09-06 — Flujo M: marketing multicanal (implementación Fase 1)
+
+> **Motivo:** el plan multicanal `docs/PLAN_MARKETING_MULTICANAL_2026-09-06.md` proponía una Fase 1 implementada pero la skill no la tenía commiteada. Esta versión la reconstruye dentro del repo y la protege con un validador de 30 checks.
+
+### ✨ Nuevo
+- **Módulo `07-marketing/`** (5 archivos): motor central + spec por canal + plantillas v2 + biblioteca de ganchos + fuentes y evidencia.
+  - `copy_engine.md` — voz de marca, léxico cerrado (iconos + hashtags), matriz de canales, 11 reglas duras (A23-A30).
+  - `redes_sociales.md` — spec IG feed/stories/Reel/TikTok/Shorts, FB página, FB Marketplace.
+  - `portales_anuncio.md` — spec Coches.net/Milanuncios/Wallapop (texto base + 3 deltas) + aviso legal completo.
+  - `biblioteca_ganchos.md` — 8 ángulos de venta con proof point + aperturas prohibidas + fórmula de la pega honesta.
+  - `fuentes_y_evidencia.md` — reglas de citación + catálogo de fuentes + plantilla de cita + auditoría mensual.
+  - `plantillas/redes-sociales.txt` + `plantillas/anuncio-portales.txt` — v2 con placeholders.
+  - `plantillas/ejemplo/*` — ejemplo relleno que valida verde (0 rojos, 0 naranjas, 0 amarillos).
+- **`scripts/check_marketing.py`** — validador Python 3.13 (sin dependencias externas, stdlib pura) que ejecuta los 30 checks con severidad 🔴/🟠/🟡 y exit codes `1` (🔴), `2` (🟠), `0` (verde). CLI: `python scripts/check_marketing.py <archivo.txt> [archivo2.txt ...]` o `python scripts/check_marketing.py -r contenido/`. Soporta UTF-8 en consola Windows.
+- **Anti-patrones A24-A30** en `06-reglas/anti_patrones.md`: superlativos/ganchos vacíos, emoji decorativo, aviso legal incompleto, fecha de matriculación, pega honesta, icono ⚠️ sin pega, "garantía" sin detalle.
+- **Flujo M** añadido a SKILL.md (tabla de 6 flujos + árbol de detección automática). Se activa solo tras Flujo A con veredicto 🟢/🔵.
+- **`docs/PLAN_MARKETING_MULTICANAL_2026-09-06.md`** — copia canónica del plan en `docs/` (referencia, no fuente única).
+
+### 🧪 Cómo verificar
+
+```powershell
+# Verde con el ejemplo
+py .claude/skills/importacion-vehiculos/scripts/check_marketing.py `
+   .claude/skills/importacion-vehiculos/07-marketing/plantillas/ejemplo/redes-sociales-ejemplo.txt `
+   .claude/skills/importacion-vehiculos/07-marketing/plantillas/ejemplo/anuncio-portales-ejemplo.txt
+# Salida: 🔴 0  🟠 0  🟡 0  EXIT 0
+
+# Validar todo un directorio de contenido
+py .claude/skills/importacion-vehiculos/scripts/check_marketing.py -r contenido/
+
+# Salida JSON (para CI)
+py .claude/skills/importacion-vehiculos/scripts/check_marketing.py --json <archivo>
+```
+
+### ⚠️ Decisiones de diseño (no obvias)
+
+- **A26 (sin iconos en portales) admite excepción en `[PT_ESTADO]`**: ⚠️ y ✅ son parte de la fórmula de la pega honesta (A28) y de "verificado", no decoración. El validador los permite solo ahí.
+- **"Vendedor original" del aviso legal NO dispara C09**: refiere al vendedor del coche en origen (alemán), no a JJ Import Motors. Es legítimo y necesario para que la garantía legal quede explicada.
+- **Plantillas con placeholders `<...>` fallan C19 por diseño**: son plantillas vacías, no copy final. El validador comprueba copy final; el ejemplo relleno `plantillas/ejemplo/` pasa verde.
+
 ## [3.7.0] - 2026-09-06 — Guía de copywriting + fix charset marketing
 
 > **Motivo:** auditoría de calidad de los textos generados (GANCHO/POST/STORY/TITULO/DESCRIPCION) tras detectar copy con placeholders sueltos ("! Mercedes-AMG...", "? Consúltanos") en producción, causado por: (1) emoji de 4 bytes que la BD utf8mb3 no admite y el ingestor sustituía por símbolos ASCII feos, y (2) un bug de parsing en `Esqueleto::desde()` (Laravel) que corrompía cualquier caracter UTF-8 cuyo byte de continuación fuera 0x85.

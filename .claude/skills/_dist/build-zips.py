@@ -97,7 +97,7 @@ if __name__ == '__main__':
 
     skills = [
         (r'.claude/skills/importacion-vehiculos',
-         r'.claude/skills/_dist/skills-importacion-vehiculos-v3.6.1-20260906.zip'),
+         r'.claude/skills/_dist/skills-importacion-vehiculos-v3.7.1-20260906.zip'),
         (r'.claude/skills/estudio-mercado',
          r'.claude/skills/_dist/skills-estudio-mercado-v0.3.12-20260906.zip'),
     ]

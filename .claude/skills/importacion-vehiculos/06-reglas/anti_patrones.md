@@ -5,7 +5,7 @@
 
 ---
 
-## 🛡️ Los 23 anti-patrones
+## 🛡️ Los 30 anti-patrones
 
 | # | Anti-patrón | Regla dura |
 |---|---|---|
@@ -32,6 +32,15 @@
 | **A21** | Entregar sin enlaces (anuncio + fuentes) | "TODO lo que se entregue lleva el enlace directo al anuncio (ficha del vehículo) y las fuentes con su URL. Candidatos, comparables, comparativas, informes, dossier, JSON y ZIP. Un dato sin su enlace NO se entrega como concluido. Es la regla que el usuario más repite: sin enlaces la entrega NO vale." |
 | **A22** | Filtrar datos internos al folleto/cliente | "El folleto del coche (y cualquier documento del cliente: ficha, dossier) SOLO lleva texto de venta presentable. PROHIBIDO margen, honorarios, negociación con el vendedor, estrategia de venta, `verdict_reasoning`, `recommendation` — son internos (informe interno) y nunca van al folleto. Claude decide el contenido del esqueleto (`[VALORACION]`, `[ARGUMENTO]`, `[EQUIPAMIENTO]`) pensando en el cliente; Laravel solo maqueta lo que Claude escribe." |
 | **A23** | ZIP sin fotos reales validadas o sin marketing (entrega inválida) | "El ZIP de Laravel (Flujo A) SIN fotos reales del anuncio o SIN los esqueletos `contenido/redes-sociales.txt` + `contenido/anuncio-portales.txt` es una **entrega INVÁLIDA** y NO se sube. La única vía válida es `scripts/empaquetar.py` (NUNCA armar ZIP a mano). Validación de fotos: HTTP 200 + `Content-Type: image/*` + >1 KB + dedup por hash. Una foto que falla genera warning y se continúa; NUNCA se sustituye por captura de pantalla. Marketing obligatorio: con `empaquetar.py` se generan SIEMPRE ambos `.txt` y se crean hasta 6 filas en `car_marketing_contents` (2 redes + 4 portales; el ingestor aplica guardas anti-fila-fantasma si un bloque viene vacío)." |
+| **A24** | Superlativos y ganchos vacíos en copy | "En `redes-sociales.txt` / `anuncio-portales.txt` PROHIBIDO empezar el gancho con: ¡Brutal!, ¡Increíble!, ¡Espectacular!, ¡No te lo pierdas!, Chollo, Oportunidad única, Última oportunidad, Una vez en la vida, Date prisa, Última unidad, joya, maquina, bomba, pepinazo. Bajan la calidad percibida y filtran al público equivocado. El gancho de JJ Import Motors **informa**, no emociona artificialmente. La biblioteca de ángulos `07-marketing/biblioteca_ganchos.md` ofrece 8 alternativas (rareza, ahorro vs mercado, edición especial, mecánica robusta, baja importación, recién revisado, etiqueta ambiental favorable, km verificado)." |
+| **A25** | Emoji decorativo en copy | "PROHIBIDO en copy público: 🔥💥🚀😍🤩✨💯🙌👏 excepto 🔥 (1 vez por pieza, solo en gancho de showstopper). La regla A26 ya prohíbe iconos en portales y FB Marketplace; aquí se aplica a todos los canales. Pictogramas informativos (`🗓️`, `🛣️`, `⚙️`, `⛽`, `🐎`, `🏷️`, `👤`, `🔧`, `📄`, `📍`, `📦`, `💶`, `✅`, `⚠️`, `🇩🇪`, `🇪🇸`) son los únicos admitidos y solo al inicio de línea." |
+| **A26** | Aviso legal incompleto en portales | "Toda pieza de portal (`[PT_*]`) lleva bloque `[PT_AVISO]` con: identidad del empresario (nombre, NIF, dirección, email, teléfono), 'el vehículo NO es propiedad del establecimiento', 'Precio total cliente: <X> € (impuestos incluidos)', 'No incluye: <lista>', 'Fecha de primera matriculación: MM/AAAA', y referencia a la garantía legal aplicable. Coches.net rechaza el anuncio si faltan estos elementos. Adicionalmente: sin enlaces externos, sin teléfono, sin email en bloques distintos del `[PT_AVISO]`, y sin iconos en `[PT_*]` (excepto ⚠️ y ✅ en `[PT_ESTADO]`)." |
+| **A27** | Sin fecha de primera matriculación en portales | "Era un requisito del RDL 1/2007 (art. 20) y de la Ley 11/2022. Sin fecha de 1ª matriculación el anuncio es inválido en Coches.net / Milanuncios / Wallapop. Formato `MM/AAAA` o `AAAA-MM`. La fecha debe ir en `[PT_FICHA]` y en `[PT_AVISO]` (vigente desde la modificación de la LGDCU por Ley 11/2022)." |
+| **A28** | Pega honesta ausente | "Toda pieza larga (IG feed, FB, FBMP, PT) lleva **obligatoriamente** un punto flojo real con su solución: `⚠️ <hecho>: <solución>`. Si la unidad no tiene pega real, se sustituye por 'se ha revisado qué para poder afirmarlo' (ej: `✅ ITV pasada, 0 defectos en inspección de 150 puntos`). Sin pega = pieza inválida. Sin excepción." |
+| **A29** | Icono ⚠️ sin pega | "El pictograma ⚠️ SOLO aparece acompañando una pega real. Si va suelto, el validador `scripts/check_marketing.py` lo detecta como `C15-icono-alerta-sin-pega` (severidad 🟠). Regla simétrica a A28." |
+| **A30** | "Garantía" sin detalle | "La palabra 'garantía' SOLO se usa si se dice cuál, quién la da y cuánto dura. La garantía legal de un VO (RDL 1/2007 modificado por Ley 11/2022) es de 3 años reducible por pacto a 1 año mínimo. JJ Import Motors NO concede garantía propia: la del vehículo la cubre el vendedor original. La pieza debe decir: 'Garantía: <cuál>. <Quién la concede>. <Cuánto dura>.' o no decir nada." |
+
+---
 
 ---
 

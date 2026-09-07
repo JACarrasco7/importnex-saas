@@ -1,0 +1,50 @@
+# anuncio-portales-ejemplo.txt — Ejemplo relleno de la plantilla v2
+# Misma unidad que redes-sociales-ejemplo.txt: BMW 320d Touring 2018.
+# Coches.net / Milanuncios comparten este texto base. Wallapop recorta al 600-900 chars.
+# Los portales NO admiten iconos (regla A26 estricta): la ficha es texto plano.
+
+[PT_RESUMEN]
+BMW 320d Touring 2018 con motor B47, cambio manual de 6 velocidades y 84.000 km verificados. Un solo propietario, mantenimiento sellado por BMW. Localizado en Alemania, gestionamos la compra y lo matriculamos en España.
+
+[PT_FICHA]
+- Primera matriculación: 03/2018
+- Kilometraje: 84.000 km verificados
+- Potencia: 190 CV · Diésel
+- Cambio: Manual de 6 velocidades
+- Etiqueta ambiental: C
+- Propietarios: 1
+
+[PT_ESTADO]
+✅ ITV pasada y mantenimiento sellado por BMW
+⚠️ Neumáticos al 50 %: se sustituyen antes de la entrega
+🔧 Última revisión a los 80.000 km en taller oficial BMW
+
+[PT_EQUIPAMIENTO]
+- Navegador profesional con pantalla de 10"
+- Sensores de aparcamiento traseros
+- Llantas de aleación 17"
+- Faros LED
+- Climatizador bi-zona
+
+[PT_QUE_INCLUYE]
+- Gestión integral de la compra
+- Transporte a España
+- Tramitación completa (matriculación, ITV, DGT)
+
+[PT_COMO_FUNCIONA]
+Localizamos la unidad en Alemania, la verificamos en persona, gestionamos la compra y el pago, y la transportamos a España. Nosotros nos encargamos de la matriculación y de todos los trámites.
+
+[PT_AVISO]
+JJ Import Motors — gestoría de compra e importación de vehículos.
+Identidad del empresario: JJ Import Motors SL, B00000000, Calle Falsa 123, Huelva, info@jjimportmotors.es, +34 600000000.
+El vehículo NO es propiedad del establecimiento.
+Precio total cliente: 19.900 € (impuestos incluidos).
+No incluye: transporte fuera de Huelva, matriculación en país distinto a España, ni seguros opcionales.
+Garantía: el vehículo se entrega con la garantía legal que aplique según la antigüedad y el tipo de vendedor original. No la concede JJ Import Motors.
+Fecha de primera matriculación: 03/2018.
+
+[PT_TITULO_A]
+BMW 320d Touring · 2018 · 84.000 km · 1 dueño
+
+[PT_TITULO_B]
+BMW 320d Touring 2018 manual 190 CV etiqueta C

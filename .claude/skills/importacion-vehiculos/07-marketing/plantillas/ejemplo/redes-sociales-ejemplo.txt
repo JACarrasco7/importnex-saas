@@ -1,0 +1,112 @@
+# redes-sociales-ejemplo.txt — Ejemplo relleno de la plantilla v2
+# Unidad: BMW 320d Touring 2018, 84.000 km, localizado en Alemania.
+# Este archivo es de referencia: valida verde con `check_marketing.py`.
+
+[IG_GANCHO]
+Un 320d Touring con el manual de 6, un solo dueño y 84.000 km verificados.
+
+[IG_FICHA]
+🗓️ 2018-03  1ª matriculación
+🛣️ 84.000 km verificados
+🐎 190 CV · Diésel
+⚙️ Manual de 6 velocidades
+🏷️ Etiqueta C
+👤 1 propietario
+📍 Localizado en DE
+
+[IG_PEGA]
+⚠️ Neumáticos al 50 %: se sustituyen antes de la entrega.
+
+[IG_ARGUMENTO]
+Motor B47 de 2018, uno de los diésel más robustos del mercado alemán. ITV pasada y mantenimiento sellado por BMW.
+
+[IG_CTA]
+Te paso la ficha completa por DM.
+
+[IG_HASHTAGS]
+#BMW320d #dieselmanual #importacion #Huelva #JJImportMotors
+
+[IG_SEND_ASK]
+Mándaselo a quien esté buscando un 320d con cambio manual.
+
+[IG_FOTOS]
+1. Frontal 3/4
+2. Cuadro con km
+3. Libro sellado
+4. Defecto a declarar
+5. Etiqueta DGT
+
+
+[IG_STORIES_1]
+320d Touring manual con un solo dueño.
+
+[IG_STORIES_2]
+84.000 km, libro sellado.
+
+[IG_STORIES_3]
+¿Quieres que te pase la ficha completa?
+
+
+[VT_GANCHO_A]
+Un BMW 320d con manual de 6, un solo dueño.
+
+[VT_GANCHO_B]
+BMW 320d Touring 2018 con 84.000 km verificados.
+
+[VT_GUIÓN_ESCENA_1]
+Frontal y marca
+
+[VT_GUIÓN_ESCENA_2]
+Cuadro 84 mil
+
+[VT_GUIÓN_ESCENA_3]
+Libro sellado BMW
+
+[VT_GUIÓN_ESCENA_4]
+Etiquetado DGT C
+
+[VT_GUIÓN_ESCENA_5]
+Comenta BMW 320d
+
+[VT_HASHTAGS]
+#BMW320d #importacion #Huelva #JJImportMotors
+
+[VT_CTA]
+Comenta BMW 320d y te paso la ficha.
+
+
+[FB_GANCHO]
+BMW 320d Touring 2018, manual, 84.000 km, un solo dueño.
+
+[FB_FICHA]
+🗓️ 2018-03
+🛣️ 84.000 km
+🐎 190 CV · Diésel
+⚙️ Manual de 6
+🏷️ Etiqueta C
+👤 1 propietario
+
+[FB_PEGA]
+⚠️ Neumáticos al 50 %: se sustituyen antes de la entrega.
+
+[FB_ARGUMENTO]
+Motor B47, ITV pasada, mantenimiento sellado por BMW. Localizado en Alemania y se gestiona la compra completa.
+
+[FB_CTA]
+Escríbenos por WhatsApp al +34 600000000.
+
+
+[FBMP_TITULO]
+BMW 320d Touring 2018 · 84.000 km · 1 dueño
+
+[FBMP_DESCRIPCION]
+BMW 320d Touring de 2018 con 190 CV, cambio manual de 6 velocidades, 84.000 km verificados, un solo propietario. Motor Diésel con etiqueta ambiental C, localizado en Alemania. Gestión integral de la compra, transporte a España y tramitación completa.
+
+[FBMP_PEGA]
+⚠️ Neumáticos al 50 %: se sustituyen antes de la entrega.
+
+[FBMP_PRECIO]
+Precio total cliente: 19.900 €
+
+[FBMP_CONTACTO]
+Por mensaje en Marketplace.
