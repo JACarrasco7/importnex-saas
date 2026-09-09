@@ -43,7 +43,7 @@ class PublicCarController extends Controller
 
         $esqueleto = $contenido ? Esqueleto::desde($contenido) : null;
 
-        $fotos = $this->fotos($car);
+        $fotos = $this->fotos($car, $token);
 
         return view('public.car-dossier', [
             'car' => $car,
@@ -143,6 +143,37 @@ class PublicCarController extends Controller
     }
 
     /**
+     * Sirve una foto del coche por su posición (1..N).
+     *
+     * Va por ruta y no por /storage/... a propósito: si el symlink public/storage
+     * no existe en el servidor, el enlace del cliente se quedaría sin fotos y sin
+     * previsualización en WhatsApp.
+     */
+    public function foto(string $token, int $indice)
+    {
+        $link = CarPublicLink::where('token', $token)->first();
+        if (! $link || ! $link->isActive()) {
+            abort(404);
+        }
+
+        $foto = $link->car?->photos()->orderBy('sort_order')->skip(max(0, $indice - 1))->first();
+        if (! $foto) {
+            abort(404);
+        }
+
+        $ruta = ltrim((string) $foto->url, '/');
+        $ruta = str_starts_with($ruta, 'storage/') ? substr($ruta, 8) : $ruta;
+
+        if (! Storage::disk('public')->exists($ruta)) {
+            abort(404);
+        }
+
+        return response()->file(Storage::disk('public')->path($ruta), [
+            'Cache-Control' => 'public, max-age=86400',
+        ]);
+    }
+
+    /**
      * URLs absolutas de las fotos.
      *
      * Antes se incrustaban en base64: con 30 fotos la página pesaba decenas de
@@ -151,10 +182,12 @@ class PublicCarController extends Controller
      *
      * @return array<int, string>
      */
-    private function fotos($car): array
+    private function fotos($car, string $token): array
     {
         $out = [];
+        $posicion = 0;
         foreach ($car->photos()->orderBy('sort_order')->get() as $foto) {
+            $posicion++;
             $ruta = (string) $foto->url;
             if ($ruta === '') {
                 continue;
@@ -162,7 +195,7 @@ class PublicCarController extends Controller
 
             $out[] = str_starts_with($ruta, 'http')
                 ? $ruta
-                : url(str_starts_with($ruta, '/storage/') ? $ruta : '/storage/'.ltrim($ruta, '/'));
+                : route('public.car.photo', ['token' => $token, 'indice' => $posicion]);
         }
 
         return $out;

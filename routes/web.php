@@ -406,4 +406,12 @@ Route::get('/c/{token}', [PublicCarController::class, 'show'])
     ->where('token', '[A-Za-z0-9_-]{20,80}')
     ->name('public.car.show');
 
+// Fotos del dossier público. Se sirven por ruta (no por /storage/...) para no
+// depender del symlink public/storage: si falta, el enlace del cliente se queda
+// sin fotos y sin previsualización en WhatsApp.
+Route::get('/c/{token}/foto/{indice}', [PublicCarController::class, 'foto'])
+    ->where('token', '[A-Za-z0-9_-]{20,80}')
+    ->where('indice', '[0-9]{1,3}')
+    ->name('public.car.photo');
+
 require __DIR__.'/auth.php';

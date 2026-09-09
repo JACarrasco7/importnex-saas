@@ -1022,17 +1022,39 @@
 
         {{-- ESPECIFICACIONES --}}
         @php
+            // 1) Lo mejor: la ficha del cliente v2 (contenido/json/ficha-cliente.json),
+            //    que trae los 16 campos ya tipados como {etiqueta, valor}.
             $specRows = [];
-            $specMap = [
-                'MARCA' => 'Marca', 'MODELO' => 'Modelo', 'VERSION' => 'Versión',
-                'ANIO' => 'Año', 'KM' => 'Kilómetros', 'POTENCIA' => 'Potencia',
-                'CAMBIO' => 'Cambio', 'COMBUSTIBLE' => 'Combustible',
-                'TRACCION' => 'Tracción', 'COLOR' => 'Color', 'PUERTAS' => 'Puertas',
-                'PLAZAS' => 'Plazas', 'ORIGEN' => 'Origen',
-            ];
-            foreach ($specMap as $key => $label) {
-                $val = $esqueleto?->uno($key);
-                if ($val) $specRows[] = ['k' => $label, 'v' => $val];
+            foreach (($ficha['spec'] ?? []) as $fila) {
+                if (is_array($fila) && ($fila['etiqueta'] ?? '') !== '') {
+                    $specRows[] = ['k' => $fila['etiqueta'], 'v' => $fila['valor'] ?? ''];
+                }
+            }
+
+            // 2) Si el coche es anterior a la ficha v2: los pares [SPEC] Etiqueta | Valor
+            //    de ficha-publicitaria.txt, que es lo que genera empaquetar.py.
+            //    (Antes se buscaban bloques [MARCA]/[MODELO]… que nunca han existido:
+            //     por eso la ficha técnica no salía en el enlace.)
+            if (empty($specRows) && $esqueleto) {
+                foreach ($esqueleto->todos('SPEC') as $par) {
+                    $trozos = array_map('trim', explode('|', (string) $par, 2));
+                    if (count($trozos) === 2 && $trozos[0] !== '' && $trozos[1] !== '') {
+                        $specRows[] = ['k' => $trozos[0], 'v' => $trozos[1]];
+                    }
+                }
+            }
+
+            // 3) Último recurso: lo que haya en el propio coche.
+            if (empty($specRows)) {
+                $fallback = [
+                    'Marca' => $car->brand, 'Modelo' => $car->model,
+                    'Año' => $car->year, 'Kilómetros' => $car->mileage ? number_format($car->mileage, 0, ',', '.').' km' : null,
+                    'Combustible' => $car->fuel ?? null, 'Cambio' => $car->transmission ?? null,
+                    'Versión' => $car->version ?? null, 'Tracción' => $car->drivetrain ?? null,
+                ];
+                foreach ($fallback as $k => $v) {
+                    if ($v) $specRows[] = ['k' => $k, 'v' => $v];
+                }
             }
         @endphp
         @if(count($specRows) > 0)
