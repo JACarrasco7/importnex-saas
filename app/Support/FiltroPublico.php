@@ -29,8 +29,21 @@ class FiltroPublico
         '/\bmargen\b/iu',
         '/precio\s+de\s+origen/iu',
         '/coste\s+puesto/iu',
-        '/mercado\s+muy\s+estrecho/iu',
-        '/unidades\s+(disponibles|en\s+toda)/iu',
+        // Banda/cuartil/cifras de precio alemán: son análisis interno de la IA
+        // (dónde está el coche en la banda del mercado de origen). El cliente
+        // no necesita saberlo: ve el rango español y su estimación final.
+        '/banda\s+(alemana?|alemán|de\s+origen|de\s+compra)/iu',
+        '/cuartil\s+(bajo|alto|superior|inferior)/iu',
+        '/\b\d{1,3}([.,]\d{3})*\s*(€|eur)/iu',
+        // Cualquier referencia al mercado de origen con adjetivos internos.
+        '/mercado\s+(alemana?|alemán|de\s+origen|de\s+compra)/iu',
+        // "mercado X muy estrecho" tolerante a palabras intermedias
+        // (español, europeo, de segunda mano, etc.).
+        '/mercado\s+\w[\w\s]{0,40}\s+(muy\s+)?estrecho/iu',
+        '/mercado\s+\w[\w\s]{0,40}\s+(muy\s+)?escaso/iu',
+        '/escasez(\s+de|\s+en|\s+alta)/iu',
+        '/alta\s+escasez/iu',
+        '/\bunidades\s+(disponibles|en\s+(venta|toda|el\s+mercado))/iu',
         '/en\s+toda\s+Espa(ñ|n)a/iu',
         '/vendedor\s+(profesional|alem)/iu',
         '/\d[,.]\d\s*★|★/u',

@@ -763,16 +763,13 @@
         // El veredicto del semáforo es INTERNO (A22): al cliente solo le llega
         // nuestra valoración escrita, sin etiqueta ni nota.
 
-        // ── Pros: solo lo bueno para el cliente. consLista y tipsLista se mantienen
-        //    aquí por compat con consumidores externos del blade, pero el render
-        //    ya no los muestra (ver regla de negocio en .ai/rules/business-model.md).
-        $prosLista = $esqueleto ? $esqueleto->lista('A_FAVOR') : [];
-        if (empty($prosLista)) {
-            $prosLista = \App\Support\IaList::normalizar($car->pros ?? null);
-        }
-        // Los "puntos a favor" de la IA traen análisis interno (hueco, vendibilidad,
-        // competencia, vendedor de origen): fuera antes de renderizar.
-        $prosLista = \App\Support\FiltroPublico::lista($prosLista);
+        // ── Pros: solo lo bueno para el cliente. A1+A2 auditoría 09-sep-2026:
+        //    el controller YA calcula $argumentosPublicos a partir de
+        //    ficha-cliente.json (escrito para el cliente). NUNCA del bloque
+        //    interno A_FAVOR del esqueleto técnico, porque ahí viajan
+        //    "hueco de importación", "vendibilidad", "vendedor de origen",
+        //    cifras en euros del mercado alemán, etc.
+        $prosLista = $argumentosPublicos ?? [];
 
         // ── Ficha del cliente v2 (JSON del ZIP), con listas ya filtradas ──
         $fichaPendiente = $ficha['pendiente_comprobar'] ?? [];
@@ -930,6 +927,42 @@
             <section class="why">
                 <div class="section-title">¿Por qué este coche?</div>
                 <p class="why-body">{!! \App\Support\Esqueleto::negrita($porqueTexto) !!}</p>
+            </section>
+        @endif
+
+        {{-- C3 auditoría 09-sep-2026: precio origen + gastos de compra.
+             El cliente ve "qué cuesta el coche + qué cuesta traerlo" SIN
+             desglose de margen, con aviso de que el total es estimación
+             y se confirma por escrito antes de la reserva. --}}
+        @if(!empty($precioCliente['origen']))
+            @php
+                $pc = $precioCliente;
+                $fmtEurPc = fn ($n) => $n !== null ? number_format((float) $n, 0, ',', '.').' €' : null;
+                $hayDesglose = !empty($pc['desglose']) && count($pc['desglose']) > 1;
+            @endphp
+            <section class="precio-cliente">
+                <div class="section-title">Inversión estimada</div>
+                <h2 class="section-h">Qué pagarías por este coche</h2>
+                <div class="precio-grid">
+                    <div class="precio-box"><div class="k">Precio del anuncio</div><div class="v">{{ $fmtEurPc($pc['origen']) }}</div></div>
+                    @if($pc['gastos'] !== null)
+                        <div class="precio-box"><div class="k">Gastos de compra</div><div class="v">{{ $fmtEurPc($pc['gastos']) }}</div></div>
+                        <div class="precio-box precio-total"><div class="k">Total estimado</div><div class="v">{{ $fmtEurPc($pc['total_estimado']) }}</div></div>
+                    @endif
+                </div>
+                @if($hayDesglose)
+                    <details class="precio-desglose">
+                        <summary>Ver desglose de gastos</summary>
+                        <ul>
+                            @foreach($pc['desglose'] as $concepto => $valor)
+                                @if($concepto !== 'Precio del anuncio')
+                                    <li><span>{{ $concepto }}</span><span>{{ $fmtEurPc($valor) }}</span></li>
+                                @endif
+                            @endforeach
+                        </ul>
+                    </details>
+                @endif
+                <p class="nota-fina">{{ $pc['aviso_precio_final'] }}</p>
             </section>
         @endif
 

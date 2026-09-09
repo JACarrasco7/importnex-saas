@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CarPublicLink;
 use App\Support\Esqueleto;
 use App\Support\FiltroPublico;
+use App\Support\PrecioClienteCalculator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -16,6 +17,16 @@ use Illuminate\Support\Facades\Storage;
  * este coche, comparativa de mercado) en una sola página web (no PDF)
  * pensada para que el equipo la comparta por WhatsApp con el cliente. El
  * link puede revocarse en cualquier momento desde Cars/Show.
+ *
+ * Reglas duras de la ficha pública (auditoría 09-sep-2026):
+ *  - A1+A2: los argumentos visibles vienen SIEMPRE de `ficha-cliente.json`
+ *    (escrito para el cliente). Nunca del bloque interno A_FAVOR del
+ *    esqueleto técnico.
+ *  - A3: si el veredicto interno desaconseja la unidad (no empieza por
+ *    "comprar") y no hay ficha-cliente.json, devolvemos car-unavailable.
+ *  - C3: el cliente ve "precio del anuncio + gastos de compra" SIN
+ *    desglose de margen, con aviso explícito de que el precio final se
+ *    confirma antes de cerrar.
  */
 class PublicCarController extends Controller
 {
@@ -40,20 +51,95 @@ class PublicCarController extends Controller
         }
 
         $contenido = $this->leerContenido($car, 'ficha-publicitaria.txt');
-
         $esqueleto = $contenido ? Esqueleto::desde($contenido) : null;
+        $ficha = $this->fichaCliente($car);
+
+        // A3: si la recomendación interna desaconseja la unidad y no hay
+        // ficha-cliente.json que la justifique ante el cliente, devolvemos
+        // car-unavailable. La ficha armada con datos internos está prohibida.
+        if (! $this->esRecomendableParaCliente($car, $esqueleto, $ficha)) {
+            return response()->view('public.car-unavailable');
+        }
 
         $fotos = $this->fotos($car, $token);
+
+        // C3: precio origen (del anuncio) + gastos de compra estimados.
+        $precioCliente = PrecioClienteCalculator::desde($car, $esqueleto, $ficha);
 
         return view('public.car-dossier', [
             'car' => $car,
             'esqueleto' => $esqueleto,
-            'ficha' => $this->fichaCliente($car),
+            'ficha' => $ficha,
+            'argumentosPublicos' => $this->argumentosPublicos($ficha, $esqueleto),
+            'precioCliente' => $precioCliente,
             'logoBase64' => $this->logo(),
             'fotos' => $fotos,
             'fotoPortada' => $fotos[0] ?? null,
             'clienteNombre' => $car->client?->name,
         ]);
+    }
+
+    /**
+     * ¿La unidad tiene una ficha comercial presentable al cliente?
+     *
+     * - Si la recomendación interna empieza por "comprar" → sí.
+     * - Si existe ficha-cliente.json (v2) → sí (la skill ya decidió).
+     * - En otro caso → no. Mostramos car-unavailable, no una ficha
+     *   comercial armada con datos internos (A3 auditoría 09-sep-2026).
+     */
+    private function esRecomendableParaCliente($car, ?Esqueleto $esqueleto, ?array $ficha): bool
+    {
+        if ($ficha !== null) {
+            return true;
+        }
+
+        $reco = strtolower(trim((string) ($car->recommendation ?? '')));
+        if (str_starts_with($reco, 'comprar')) {
+            return true;
+        }
+
+        $veredicto = strtolower(trim((string) ($esqueleto?->uno('VEREDICTO') ?? '')));
+        if (str_starts_with($veredicto, 'comprar')) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Argumentos de venta que verá el cliente (A1 + A2 auditoría 09-sep-2026).
+     *
+     * Orden de precedencia:
+     *   1) ficha-cliente.json → argumentos  (escrito para el cliente)
+     *   2) publicidad.argumentos (legacy de la skill, escrito para el cliente)
+     *   3) nada — NUNCA cae al bloque A_FAVOR del esqueleto técnico, porque
+     *      ese bloque trae análisis interno (hueco, vendibilidad, vendedor
+     *      de origen) que no debe filtrarse.
+     *
+     * @return array<int, string>
+     */
+    private function argumentosPublicos(?array $ficha, ?Esqueleto $esqueleto): array
+    {
+        $candidatos = [];
+
+        if (is_array($ficha)) {
+            $argFicha = $ficha['argumentos'] ?? [];
+            if (is_array($argFicha)) {
+                $candidatos = array_merge($candidatos, $argFicha);
+            }
+        }
+
+        if (empty($candidatos) && $esqueleto) {
+            foreach ($esqueleto->todos('PUBLICIDAD_ARGUMENTO') as $arg) {
+                $candidatos[] = $arg;
+            }
+        }
+
+        // Red de seguridad final: A22b.
+        return FiltroPublico::lista(array_values(array_filter(
+            $candidatos,
+            fn ($v) => is_string($v) && trim($v) !== ''
+        )));
     }
 
     /**
