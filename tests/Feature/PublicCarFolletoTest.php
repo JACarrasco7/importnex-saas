@@ -109,6 +109,9 @@ class PublicCarFolletoTest extends TestCase
             'brand' => 'BMW',
             'model' => '320d',
             'purchase_price' => 24990,
+            // A3 auditoría 09-sep-2026: sin "comprar" → car-unavailable.
+            // Forzamos recomendación de compra para que el dossier se renderice.
+            'recommendation' => 'Comprar — buena unidad',
         ]);
         $link = CarPublicLink::generateFor($car);
 
@@ -119,9 +122,10 @@ class PublicCarFolletoTest extends TestCase
         // (regla de oro: caption conciso, sin desglose, sin IVA, sin garantía).
         $this->assertStringContainsString('+ gastos gestión de compra', $body, 'Caption del precio correcto');
         // Y NO debe contener los antiguos captions prolijo/incorrectos:
+        // (no comprobamos "Garantía" porque la FAQ del cliente SÍ la menciona
+        // legítimamente: "JJ Import Motors no ofrece garantía".)
         $this->assertStringNotContainsString('Compra + transporte + trámites', $body, 'Caption antiguo prohibido');
         $this->assertStringNotContainsString('IVA incluido', $body);
         $this->assertStringNotContainsString('Llave en mano', $body);
-        $this->assertStringNotContainsString('Garantía', $body);
     }
 }

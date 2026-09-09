@@ -692,10 +692,16 @@ def check_16_uso_garantia(
 def check_17_longitud_por_canal(
     bloques: dict[str, str], canal: str
 ) -> list[Hallazgo]:
-    """Longitud recomendada por canal (banda blanda)."""
+    """Longitud recomendada por canal, POR PIEZA.
+
+    B5 auditoría 09-sep-2026: antes medía el agregado del canal (concatenando
+    todos los bloques) y eso pasaba textos de 78 chars al sumar 3 posts. Ahora
+    medimos cada bloque individualmente. Severidad:
+      - muy por debajo del mínimo (chars < lo/2) → CRIT (antes BAJO).
+      - por debajo del mínimo (lo/2 ≤ chars < lo) → BAJO.
+      - por encima del máximo (chars > hi) → MEDIO.
+    """
     hallazgos: list[Hallazgo] = []
-    text = "\n".join(b for k, b in bloques.items() if prefijo_a_canal(k) == canal)
-    chars = len(text)
     bandas = {
         "instagram": (600, 2200),
         "video_corto": (200, 800),
@@ -704,24 +710,46 @@ def check_17_longitud_por_canal(
         "portal": (800, 3000),
     }
     lo, hi = bandas[canal]
-    if chars < lo:
-        hallazgos.append(
-            Hallazgo(
-                check="C17-longitud-min",
-                severidad="BAJO",
-                canal=canal,
-                mensaje=f"Texto corto ({chars} chars, mínimo recomendado {lo})",
+    critico_lo = lo // 2
+
+    for nombre_bloque, texto in bloques.items():
+        if prefijo_a_canal(nombre_bloque) != canal:
+            continue
+        chars = len(texto.strip())
+        if chars == 0:
+            continue
+        # Muy por debajo del mínimo → CRIT.
+        if chars < critico_lo:
+            hallazgos.append(
+                Hallazgo(
+                    check="C17-longitud-min",
+                    severidad="CRIT",
+                    canal=canal,
+                    bloque=nombre_bloque,
+                    mensaje=f"[{nombre_bloque}] Muy corto ({chars} chars, mínimo útil {critico_lo}; mínimo recomendado {lo})",
+                )
             )
-        )
-    elif chars > hi:
-        hallazgos.append(
-            Hallazgo(
-                check="C17-longitud-max",
-                severidad="MEDIO",
-                canal=canal,
-                mensaje=f"Texto largo ({chars} chars, máximo recomendado {hi})",
+        # Por debajo del mínimo → BAJO.
+        elif chars < lo:
+            hallazgos.append(
+                Hallazgo(
+                    check="C17-longitud-min",
+                    severidad="BAJO",
+                    canal=canal,
+                    bloque=nombre_bloque,
+                    mensaje=f"[{nombre_bloque}] Corto ({chars} chars, mínimo recomendado {lo})",
+                )
             )
-        )
+        elif chars > hi:
+            hallazgos.append(
+                Hallazgo(
+                    check="C17-longitud-max",
+                    severidad="MEDIO",
+                    canal=canal,
+                    bloque=nombre_bloque,
+                    mensaje=f"[{nombre_bloque}] Largo ({chars} chars, máximo recomendado {hi})",
+                )
+            )
     return hallazgos
 
 

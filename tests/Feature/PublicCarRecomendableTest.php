@@ -116,15 +116,19 @@ class PublicCarRecomendableTest extends TestCase
 
         $response->assertOk();
         $body = $response->getContent();
-        // NO debe aparecer ningún dato interno del A_FAVOR.
-        $this->assertStringNotContainsString('31.929', $body);
+        // NO debe aparecer ningún dato interno del A_FAVOR (análisis de IA):
+        // "cuartil", "banda alemana", "vendibilidad", "84/100", "escasez".
+        // El precio del anuncio SÍ puede aparecer en el bloque C3
+        // (auditoría 09-sep-2026): es el dato público, no interno.
         $this->assertStringNotContainsString('cuartil bajo', $body);
         $this->assertStringNotContainsString('banda alemana', $body);
         $this->assertStringNotContainsString('Vendibilidad', $body);
         $this->assertStringNotContainsString('84/100', $body);
         $this->assertStringNotContainsString('muy estrecho', $body);
         $this->assertStringNotContainsString('alta escasez', $body);
-        // SÍ debe aparecer el argumento del cliente.
+        $this->assertStringNotContainsString('hueco', $body);
+        $this->assertStringNotContainsString('vendibilidad', $body);
+        // SÍ debe aparecer el argumento del cliente (de ficha-cliente.json).
         $this->assertStringContainsString('4Motion', $body);
     }
 

@@ -552,6 +552,48 @@
         .market-box.highlight { background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.35); }
         .market-box.highlight .v { color: #4ade80; }
 
+        /* ── INVERSIÓN ESTIMADA (C3 auditoría 09-sep-2026) ── */
+        .precio-cliente { margin-bottom: 80px; }
+        .precio-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px; margin-bottom: 18px;
+        }
+        .precio-box {
+            background: rgba(143, 163, 217, 0.05);
+            border: 1px solid rgba(143, 163, 217, 0.22);
+            border-radius: 16px; padding: 22px 24px; text-align: center;
+        }
+        .precio-box .k {
+            font-size: 10px; text-transform: uppercase; letter-spacing: 1.4px;
+            color: var(--platinum); font-weight: 700; margin-bottom: 8px;
+        }
+        .precio-box .v { font-size: 24px; font-weight: 800; color: #fff; }
+        .precio-box.precio-total {
+            background: linear-gradient(135deg, rgba(16,185,129,0.14) 0%, rgba(16,185,129,0.04) 100%);
+            border-color: rgba(16,185,129,0.4);
+        }
+        .precio-box.precio-total .v { color: #4ade80; }
+        .precio-caption {
+            font-size: 14px; color: var(--platinum-2);
+            margin-top: 6px; font-weight: 500;
+        }
+        .precio-desglose { margin-top: 16px; }
+        .precio-desglose summary {
+            cursor: pointer; font-size: 13px; color: var(--platinum-2);
+            font-weight: 600; padding: 10px 0; list-style: none;
+        }
+        .precio-desglose summary::-webkit-details-marker { display: none; }
+        .precio-desglose ul {
+            list-style: none; margin-top: 10px; padding: 14px 18px;
+            background: rgba(143,163,217,0.05); border-radius: 12px;
+        }
+        .precio-desglose li {
+            display: flex; justify-content: space-between;
+            padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+            font-size: 13px; color: #cbd5e1;
+        }
+        .precio-desglose li:last-child { border-bottom: none; }
+
         /* ── TIPS ─────────────────────────────────────── */
         .tips {
             background: rgba(26, 48, 109, 0.4);
@@ -962,6 +1004,7 @@
                         </ul>
                     </details>
                 @endif
+                <p class="precio-caption">+ gastos gestión de compra (transporte + IVA + IEDMT + gestoría)</p>
                 <p class="nota-fina">{{ $pc['aviso_precio_final'] }}</p>
             </section>
         @endif

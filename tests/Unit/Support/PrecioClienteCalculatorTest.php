@@ -19,7 +19,7 @@ class PrecioClienteCalculatorTest extends TestCase
 {
     public function test_origen_desde_ficha_cliente_json_tiene_prioridad(): void
     {
-        $car = (object) ['purchase_price_eur' => 99999.0];
+        $car = (object) ['purchase_price' => 99999.0];
         $esqueleto = $this->esqueletoConBloques(['PRECIO' => '50.000 €']);
         $ficha = ['precio' => ['origen' => 31929.0, 'gastos' => 8500.0]];
 
@@ -33,7 +33,7 @@ class PrecioClienteCalculatorTest extends TestCase
 
     public function test_origen_desde_esqueleto_si_no_hay_ficha(): void
     {
-        $car = (object) ['purchase_price_eur' => null];
+        $car = (object) ['purchase_price' => null];
         $esqueleto = $this->esqueletoConBloques(['PRECIO' => '31.929 €']);
         $ficha = null;
 
@@ -46,15 +46,16 @@ class PrecioClienteCalculatorTest extends TestCase
 
     public function test_origen_desde_atributo_del_coche_como_ultimo_recurso(): void
     {
-        $car = (object) ['purchase_price_eur' => 12345.67];
+        $car = (object) ['purchase_price' => 12345.67];
         $r = PrecioClienteCalculator::desde($car, null, null);
 
         $this->assertSame(12345.67, $r['origen']);
+        $this->assertSame('coche.purchase_price', $r['fuente']);
     }
 
     public function test_devuelve_null_si_no_hay_origen(): void
     {
-        $car = (object) ['purchase_price_eur' => null];
+        $car = (object) ['purchase_price' => null];
         $r = PrecioClienteCalculator::desde($car, null, null);
 
         $this->assertNull($r['origen']);
@@ -65,7 +66,7 @@ class PrecioClienteCalculatorTest extends TestCase
 
     public function test_desglose_contiene_los_conceptos_esperados(): void
     {
-        $car = (object) ['purchase_price_eur' => 30000.0];
+        $car = (object) ['purchase_price' => 30000.0];
         $r = PrecioClienteCalculator::desde($car, null, null);
 
         $this->assertArrayHasKey('Precio del anuncio', $r['desglose']);
@@ -78,7 +79,7 @@ class PrecioClienteCalculatorTest extends TestCase
 
     public function test_aviso_precio_final_siempre_presente(): void
     {
-        $car = (object) ['purchase_price_eur' => 30000.0];
+        $car = (object) ['purchase_price' => 30000.0];
         $r = PrecioClienteCalculator::desde($car, null, null);
 
         $this->assertStringContainsString('confirma por escrito', $r['aviso_precio_final']);
@@ -87,7 +88,7 @@ class PrecioClienteCalculatorTest extends TestCase
 
     public function test_no_incluye_margen_en_el_desglose(): void
     {
-        $car = (object) ['purchase_price_eur' => 30000.0];
+        $car = (object) ['purchase_price' => 30000.0];
         $r = PrecioClienteCalculator::desde($car, null, null);
 
         // C3: el margen NO aparece en ningún concepto del desglose.
@@ -98,14 +99,27 @@ class PrecioClienteCalculatorTest extends TestCase
 
     public function test_parsea_formatos_europeos_de_euros(): void
     {
-        $car = (object) ['purchase_price_eur' => null];
+        $car = (object) ['purchase_price' => null];
+
+        // Con separador de miles + decimal
         $esqueleto = $this->esqueletoConBloques(['PRECIO' => '31.929,00 EUR']);
         $r = PrecioClienteCalculator::desde($car, $esqueleto, null);
         $this->assertSame(31929.0, $r['origen']);
 
+        // Con espacio como separador de miles
         $esqueleto = $this->esqueletoConBloques(['PRECIO' => '31 929 €']);
         $r = PrecioClienteCalculator::desde($car, $esqueleto, null);
         $this->assertSame(31929.0, $r['origen']);
+
+        // Millones con separadores
+        $esqueleto = $this->esqueletoConBloques(['PRECIO' => '1.234.567 €']);
+        $r = PrecioClienteCalculator::desde($car, $esqueleto, null);
+        $this->assertSame(1234567.0, $r['origen'], 'millones con separadores de miles');
+
+        // Número plano 5 dígitos sin separador (caso límite bug latente)
+        $esqueleto = $this->esqueletoConBloques(['PRECIO' => '31929 EUR']);
+        $r = PrecioClienteCalculator::desde($car, $esqueleto, null);
+        $this->assertSame(31929.0, $r['origen'], 'número plano de 5 dígitos');
     }
 
     /**

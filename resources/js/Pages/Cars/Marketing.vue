@@ -29,6 +29,7 @@ const props = defineProps({
     car: Object,
     contents: Array,
     adFooter: { type: String, default: '' },
+    limits: { type: Object, default: () => ({}) },
 });
 
 const { currency: formatCurrency } = useFormat();
@@ -43,20 +44,24 @@ const CHANNELS = [
     { key: 'facebook', label: 'Facebook', icon: '📘', type: 'social' },
 ];
 
-// Límites recomendados por canal (no bloqueantes, solo guía visual).
-// Fuentes: límites técnicos de cada plataforma + buenas prácticas de
-// copywriting para anuncios de coches (hook corto, cuerpo escaneable).
-const PLATFORM_GUIDE = {
-    milanuncios: { titleMax: 60, descMax: 4000, hashtagsMax: 0, tip: 'El título es lo que más se lee en el listado: incluye marca, modelo, año y un dato fuerte (kilometraje bajo, único dueño). La descripción puede ser larga: usa párrafos cortos y termina con el precio y forma de contacto.' },
-    coches_net: { titleMax: 60, descMax: 4000, hashtagsMax: 0, tip: 'Coches.net prioriza fichas con datos técnicos claros. Estructura: estado general → equipamiento destacado → mecánica → precio. Evita mayúsculas sostenidas.' },
-    wallapop: { titleMax: 80, descMax: 3000, hashtagsMax: 0, tip: 'En Wallapop el título compite con muchos anuncios similares: sé específico (versión, acabado) en vez de genérico. La primera línea de la descripción es la que se ve en el listado.' },
-    tiktok: { titleMax: 150, descMax: 2200, hashtagsMax: 5, tip: 'Los primeros 2-3 segundos deciden si siguen viendo el vídeo: empieza con el gancho más fuerte (precio, dato sorprendente), no con la marca. Máx. 3-5 hashtags: 1-2 de nicho + 1-2 de tendencia.' },
-    instagram: { titleMax: 125, descMax: 2200, hashtagsMax: 10, tip: 'Instagram corta la descripción a ~125 caracteres antes de "ver más": pon el gancho y el dato clave al principio. Mejor 5-10 hashtags muy relevantes que 20 genéricos — el algoritmo actual penaliza el hashtag-spam.' },
-    facebook: { titleMax: 100, descMax: 2200, hashtagsMax: 5, tip: 'El público de Facebook responde mejor a datos concretos y visibles: precio, kilometraje, año, garantía. Pocos hashtags (3-5) — aquí no aportan alcance como en Instagram/TikTok.' },
+// B1 auditoría 09-sep-2026: los límites por canal viven en
+// config/marketing_limits.php y llegan al front vía props.limits.
+// El fallback local es defensivo (no debería usarse si el backend envía props).
+const FALLBACK_GUIDE = {
+    titleMax: 100, descMax: 2200, hashtagsMax: 5, tip: '',
 };
 
 function guideFor(channel) {
-    return PLATFORM_GUIDE[channel] || { titleMax: 100, descMax: 2200, hashtagsMax: 10, tip: '' };
+    const data = props.limits && props.limits[channel];
+    if (data) {
+        return {
+            titleMax: data.title_max ?? FALLBACK_GUIDE.titleMax,
+            descMax: data.desc_max ?? FALLBACK_GUIDE.descMax,
+            hashtagsMax: data.max_hashtags ?? FALLBACK_GUIDE.hashtagsMax,
+            tip: data.help ?? '',
+        };
+    }
+    return FALLBACK_GUIDE;
 }
 const activeGuide = computed(() => guideFor(activeChannel.value));
 

@@ -759,14 +759,17 @@ class ValuationPackageIngestor
     }
 
     /**
-     * Limpia caracteres que rompen MySQL utf8mb3 (la BD Forge es utf8mb3).
+     * Limpia caracteres problemáticos para MySQL antes de escribir.
      *
-     * Estrategia: los emojis se ELIMINAN (no se sustituyen por placeholders
-     * de texto tipo "[ok]" o "!"), porque un símbolo suelto al inicio de un
-     * titular o una viñeta queda peor que quitar el emoji directamente. Los
-     * checkmarks (✓ ✅ ✔ ✍) sí se sustituyen por "•" para conservar el efecto
-     * de lista con viñetas. Tras la limpieza se colapsan espacios dobles y
-     * se quita el espacio que queda antes de puntuación.
+     * B4 auditoría 09-sep-2026: la BD Forge YA es utf8mb4 (verificado en
+     * config/database.php). Ya no eliminamos emojis >U+FFFF (🗓️🛣️🐎🏷️
+     * forman parte del vocabulario canónico de la skill y se usan en
+     * `contenido/json/redes-sociales.json → canales.instagram_feed.ficha`).
+     * Solo mantenemos:
+     *   - Reparación de encoding si la cadena NO es UTF-8 válido (defensiva).
+     *   - Invisibles/control que ensucian el copy.
+     *   - Checkmarks ✓ ✅ ✔ ✍ → viñeta "•" (BMP, sin pérdida semántica).
+     *   - Limpieza de espacios/puntuación tras normalizar.
      *
      * Aplica solo a strings (recursivo en arrays).
      *
@@ -804,11 +807,12 @@ class ValuationPackageIngestor
             // Checkmarks → viñeta "•".
             $value = strtr($value, $bulletMap);
 
-            // Resto del bloque Dingbats (U+2700-27BF) + Miscellaneous Symbols and
-            // Arrows (U+2B00-2BFF, cubre ⭐ U+2B50) + emojis 4-byte (Symbols/
-            // Pictographs/Emoticons/Transport U+1F300-1F9FF) y cualquier otro
-            // caracter >U+FFFF → se ELIMINAN (no placeholder).
-            $value = preg_replace('/[\x{2700}-\x{27BF}\x{2B00}-\x{2BFF}\x{1F300}-\x{1F6FF}\x{1F900}-\x{1F9FF}\x{10000}-\x{10FFFF}]/u', '', $value) ?? $value;
+            // Resto del bloque Dingbats (U+2700-27BF) y Miscellaneous Symbols
+            // and Arrows (U+2B00-2BFF) → ELIMINADOS. Antes (B4 auditoría)
+            // también se eliminaban los emojis 4-byte (U+1F300-1F9FF) y todo
+            // >U+FFFF; con utf8mb4 ya no hace falta: 🗓️🛣️🐎🏷️ del
+            // vocabulario de la skill sobreviven intactos.
+            $value = preg_replace('/[\x{2700}-\x{27BF}\x{2B00}-\x{2BFF}]/u', '', $value) ?? $value;
 
             // Limpieza tras quitar emojis: colapsar espacios dobles (por línea,
             // sin tocar saltos de línea) y quitar el espacio que queda antes

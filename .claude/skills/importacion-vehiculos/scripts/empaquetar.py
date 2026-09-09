@@ -108,19 +108,52 @@ def run_validator(script: Path, args: list[str], cwd: Path) -> list[str]:
     """Ejecuta un validador (check_marketing.py o check_ficha_cliente.py) y
     devuelve los hallazgos CRÍTICOS como strings legibles.
 
-    El validador debe escribir sus hallazgos en stdout. Consideramos 🔴 cualquier
-    línea que empiece por '🔴' (los checks los emiten así). Esto acopla el
-    parser al formato de los checks: si los checks cambian de prefijo, ajustar.
+    Si el primer argumento de `args` apunta a un .zip, lo extrae a un
+    directorio temporal y pasa a los checks los .txt que necesiten
+    (los checks NO leen .zip directamente). Si apuntan a un .txt, lo pasa
+    tal cual.
+
+    Consideramos CRÍTICO cualquier línea con 🔴. Si el validador retorna
+    código != 0 y la línea tiene ❌, también.
     """
     try:
         import subprocess  # noqa: PLC0415
+        import tempfile  # noqa: PLC0415
+        import zipfile  # noqa: PLC0415
     except ImportError:
-        warn("subprocess no disponible — saltando validación")
+        warn("subprocess/tempfile/zipfile no disponible — saltando validación")
         return []
+
+    # Si el validador recibe un ZIP, extraer los .txt que espera.
+    final_args = list(args)
+    if final_args and final_args[0].lower().endswith(".zip"):
+        zip_path = Path(final_args[0])
+        if zip_path.exists():
+            tmp_dir = Path(tempfile.mkdtemp(prefix="val-"))
+            try:
+                with zipfile.ZipFile(zip_path) as zf:
+                    for member in zf.namelist():
+                        if member.endswith((".txt", ".json")) and not member.endswith("/"):
+                            zf.extract(member, tmp_dir)
+                # check_marketing.py espera leer un .txt; le pasamos el más
+                # relevante (redes-sociales.txt o ficha-cliente.txt).
+                candidatos = ["redes-sociales.txt", "ficha-cliente.txt", "ficha-publicitaria.txt"]
+                target = None
+                for nombre in candidatos:
+                    posible = tmp_dir / "contenido" / nombre
+                    if posible.exists():
+                        target = str(posible)
+                        break
+                # Si no encontramos un .txt específico, le pasamos el ZIP
+                # original — algunos checks (check_ficha_cliente.py) leen el ZIP.
+                if target is not None:
+                    final_args = [target, *final_args[1:]]
+            except (OSError, zipfile.BadZipFile) as exc:
+                warn(f"No se pudo extraer ZIP para validar: {exc}")
 
     try:
         proc = subprocess.run(
-            [sys.executable, str(script), *args],
+            [sys.executable, str(script), *final_args],
             cwd=str(cwd),
             capture_output=True,
             text=True,
@@ -140,8 +173,6 @@ def run_validator(script: Path, args: list[str], cwd: Path) -> list[str]:
         stripped = linea.strip()
         if not stripped:
             continue
-        # El check_marketing.py y check_ficha_cliente.py usan 🔴 para CRÍTICO
-        # y 🟠 para MEDIO. Si en el futuro cambian el emoji, ajustar aquí.
         if "🔴" in stripped:
             criticos.append(stripped)
         elif proc.returncode != 0 and "❌" in stripped:
@@ -1786,7 +1817,16 @@ def main() -> int:
         print()
         warn(f"{len(criticos_totales)} hallazgo(s) CRÍTICO(S) en la validación del ZIP:")
         for c in criticos_totales:
-            print(f"     🔴 {c}")
+            # Forzar UTF-8 stdout en Windows (cp1252 no soporta 🔴).
+            try:
+                sys.stdout.reconfigure(encoding="utf-8")
+            except (AttributeError, ValueError):
+                pass
+            try:
+                print(f"     \U0001f534 {c}")
+            except UnicodeEncodeError:
+                # Fallback: reemplazar el emoji por ASCII para Windows cp1252.
+                print(f"     [CRIT] {c.encode('ascii', 'replace').decode('ascii')}")
         if args.strict:
             fail(f"Modo --strict: abortando por {len(criticos_totales)} hallazgo(s) crítico(s).")
             return 5

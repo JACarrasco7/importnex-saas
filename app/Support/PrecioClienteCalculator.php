@@ -52,7 +52,7 @@ class PrecioClienteCalculator
             'total_estimado' => $total,
             'desglose' => self::desglose($origen, $gastos, $car),
             'moneda' => 'EUR',
-            'fuente' => self::fuente($esqueleto, $ficha),
+            'fuente' => self::fuente($car, $esqueleto, $ficha),
             'aviso_precio_final' => 'El precio final se confirma por escrito antes de la reserva. '
                 .'Este cálculo es una estimación basada en el precio del anuncio y los '
                 .'costes habituales de importación desde Alemania; puede variar según '
@@ -76,15 +76,13 @@ class PrecioClienteCalculator
             if ($bloque !== null && ($n = self::parseEur($bloque)) !== null) {
                 return $n;
             }
-            $bloqueOrigen = $esqueleto->uno('PRECIO_ORIGEN');
-            if ($bloqueOrigen !== null && ($n = self::parseEur($bloqueOrigen)) !== null) {
-                return $n;
-            }
         }
 
-        // 3) Atributos del coche (puede venir del anuncio en la BD)
-        if (! empty($car->purchase_price_eur) && (float) $car->purchase_price_eur > 0) {
-            return (float) $car->purchase_price_eur;
+        // 3) purchase_price del coche (decimal 10,2 en BD). Es la fuente más
+        // débil: a veces está en EUR, a veces en otra moneda según el flujo.
+        // Solo la usamos si es claramente positiva.
+        if (! empty($car->purchase_price) && (float) $car->purchase_price > 0) {
+            return (float) $car->purchase_price;
         }
 
         return null;
@@ -153,7 +151,7 @@ class PrecioClienteCalculator
         ];
     }
 
-    private static function fuente(?Esqueleto $esqueleto, ?array $ficha): string
+    private static function fuente($car, ?Esqueleto $esqueleto, ?array $ficha): string
     {
         if (is_array($ficha) && isset($ficha['precio']['origen'])) {
             return 'ficha-cliente.json';
@@ -161,21 +159,43 @@ class PrecioClienteCalculator
         if ($esqueleto && $esqueleto->uno('PRECIO')) {
             return 'ficha-publicitaria.txt';
         }
-        if (! empty($car->purchase_price_eur ?? null)) {
-            return 'coche.purchase_price_eur';
+        if (! empty($car->purchase_price ?? null)) {
+            return 'coche.purchase_price';
         }
 
         return 'n/a';
     }
 
-    /** Parsea "31.929 €" / "31.929€" / "31929" / "31.929,00 EUR" → float. */
+    /**
+     * Parsea "31.929 €" / "31.929€" / "31929" / "31.929,00 EUR" / "1.234.567 €" → float.
+     *
+     * Estrategia: la rama que matchea un número SIN separadores va PRIMERO
+     * (\d+(?:[.,]\d+)?). Si después va la rama con separadores (\d{1,3} con
+     * grupos de 3), evitamos el bug de "31929" → "319" por prioridad de regex.
+     */
     private static function parseEur(string $texto): ?float
     {
-        if (preg_match('/(\d{1,3}(?:[.\s]\d{3})*(?:,\d+)?|\d+(?:[.,]\d+)?)/', $texto, $m) === 1) {
+        // 1) Número SIN separadores de miles (5+ dígitos): "31929", "12345.67"
+        if (preg_match('/\b(\d{4,}(?:[.,]\d+)?)\b/', $texto, $m) === 1) {
+            $num = str_replace(',', '.', $m[1]);
+            $f = (float) $num;
+            if ($f > 0) {
+                return $f;
+            }
+        }
+        // 2) Número CON separadores de miles: "31.929", "31.929,00", "31 929"
+        if (preg_match('/(\d{1,3}(?:[.\s]\d{3})+(?:,\d+)?)/', $texto, $m) === 1) {
             $num = $m[1];
             $num = str_replace(['.', ' '], ['', ''], $num);
             $num = str_replace(',', '.', $num);
             $f = (float) $num;
+            if ($f > 0) {
+                return $f;
+            }
+        }
+        // 3) Número pequeño sin separadores (1-3 dígitos): "1.000 €" (mil suelto)
+        if (preg_match('/\b(\d{1,3})\s*(?:€|EUR)\b/', $texto, $m) === 1) {
+            $f = (float) $m[1];
 
             return $f > 0 ? $f : null;
         }

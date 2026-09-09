@@ -19,6 +19,10 @@ class CarMarketingController extends Controller
         return Inertia::render('Cars/Marketing', [
             'car' => $car,
             'contents' => $car->marketingContents,
+            // B1 auditoría 09-sep-2026: límites de marketing por canal desde
+            // config/marketing_limits.php (fuente única). El front los usa
+            // para validar título/descripción/hashtags al guardar.
+            'limits' => config('marketing_limits'),
             // Pie de anuncio común a toda la empresa: se añade al "Copiar todo"
             // para que el operador no tenga que escribir el contacto a mano en
             // cada publicación ni Claude tenga que repetirlo en cada pieza.
@@ -42,6 +46,25 @@ class CarMarketingController extends Controller
 
         if (! $result['success']) {
             return back()->with('error', 'Error generando contenido: '.($result['error'] ?? 'unknown'));
+        }
+
+        // B2 auditoría 09-sep-2026: validación longitud título al guardar.
+        // Si el título del primer slot excede el límite del canal, lo avisamos
+        // pero NO bloqueamos (algunos portales truncan silenciosamente).
+        $limits = config('marketing_limits.'.$channel);
+        if (is_array($limits) && isset($limits['title_max'])) {
+            $generado = $result['content'] ?? null;
+            if (is_array($generado) && isset($generado['title']) && mb_strlen($generado['title']) > $limits['title_max']) {
+                session()->flash(
+                    'warning',
+                    sprintf(
+                        'El título generado (%d chars) excede el límite de %s (%d). El portal lo truncará.',
+                        mb_strlen($generado['title']),
+                        $channel,
+                        $limits['title_max']
+                    )
+                );
+            }
         }
 
         // v2: fijar kind/slot según tipo de canal. El unique es
