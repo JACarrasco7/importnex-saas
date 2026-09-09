@@ -299,6 +299,67 @@ class Car extends Model
     }
 
     /**
+     * Stats de mercado separadas por país (España vs Alemania).
+     * Devuelve `{es: {avg,min,max,count,items}, de: {...,items}, mixto: ...}` para que la UI
+     * pueda enseñar qué promedio es de qué mercado. Sin `country` en el comparable,
+     * se asigna a "desconocido".
+     *
+     * Formatos aceptados del campo país: "España"/"ES"/"Alemania"/"DE"/"🇩🇪"/"🇪🇸".
+     */
+    public function getComparablesStatsByCountryAttribute(): array
+    {
+        $comparables = $this->comparables_list ?? [];
+        $byCountry = ['es' => [], 'de' => [], 'mixto' => [], 'unknown' => []];
+
+        foreach ($comparables as $c) {
+            if (! is_array($c)) {
+                continue;
+            }
+            $raw = $c['price'] ?? $c['p'] ?? null;
+            if ($raw === null) {
+                continue;
+            }
+            if (is_numeric($raw)) {
+                $price = (float) $raw;
+            } elseif (preg_match('/(\d[\d\.]*)/', (string) $raw, $m)) {
+                $price = (float) str_replace('.', '', $m[1]);
+            } else {
+                continue;
+            }
+            $country = strtolower(trim((string) ($c['country'] ?? $c['pais'] ?? '')));
+            $bucket = match (true) {
+                in_array($country, ['es', 'españa', 'espana', '🇪🇸'], true), str_contains($country, 'esp') => 'es',
+                in_array($country, ['de', 'alemania', 'allemagne', 'deutschland', '🇩🇪'], true), str_contains($country, 'alem') => 'de',
+                $country === '' => 'unknown',
+                default => 'mixto',
+            };
+            $byCountry[$bucket][] = ['price' => $price, 'item' => $c];
+        }
+
+        $stats = function (array $arr): array {
+            if (empty($arr)) {
+                return ['avg' => null, 'min' => null, 'max' => null, 'count' => 0, 'items' => []];
+            }
+            $prices = array_column($arr, 'price');
+
+            return [
+                'avg' => array_sum($prices) / count($prices),
+                'min' => min($prices),
+                'max' => max($prices),
+                'count' => count($prices),
+                'items' => array_column($arr, 'item'),
+            ];
+        };
+
+        return [
+            'es' => $stats($byCountry['es']),
+            'de' => $stats($byCountry['de']),
+            'mixto' => $stats($byCountry['mixto']),
+            'unknown' => $stats($byCountry['unknown']),
+        ];
+    }
+
+    /**
      * Crea una fila vacía de research para un aspecto si no existe.
      */
     public function setResearchAspect(string $aspect, array $data): void

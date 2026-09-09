@@ -487,6 +487,7 @@ export default {
     leads: 'Leads',
     line_items: 'Líneas',
     market_comparables: 'Comparables de mercado',
+    market_breakdown_by_country: 'Desglose por país de mercado',
     next_invoice: 'Próxima factura',
     on: 'el',
     processing_dots: 'Procesando...',

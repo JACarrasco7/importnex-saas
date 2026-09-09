@@ -478,6 +478,7 @@ export default {
     leads: 'Leads',
     line_items: 'Line items',
     market_comparables: 'Market comparables',
+    market_breakdown_by_country: 'Breakdown by market country',
     metodo_de_pago: 'Payment method',
     next_invoice: 'Next invoice',
     no_active_subscription: 'No active subscription.',

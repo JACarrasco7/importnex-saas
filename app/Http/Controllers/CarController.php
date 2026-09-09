@@ -107,8 +107,9 @@ class CarController extends Controller
         ]);
 
         // Pre-compute derived data for the enriched valuation UI
-        $car->researchGaps;       // touch accessor
-        $car->comparablesStats;    // touch accessor
+        $car->researchGaps;             // touch accessor
+        $car->comparablesStats;          // touch accessor
+        $car->comparablesStatsByCountry; // touch accessor (09-sep-2026)
         // totalCost + iedmt se calculan una sola vez más abajo en `derived`.
 
         $checklistMilestones = $car->checklists->where('kind', 'milestone')->values();
@@ -154,6 +155,7 @@ class CarController extends Controller
                 'iedmt' => $car->calculateIEDMT(),
                 'research_gaps' => $car->researchGaps,
                 'comparables_stats' => $car->comparablesStats,
+                'comparables_stats_by_country' => $car->comparablesStatsByCountry,
                 'milestones_progress' => $milestonesProgress,
                 'inspections_progress' => $inspectionsProgress,
                 'inspections_by_section' => $inspectionsBySection,
