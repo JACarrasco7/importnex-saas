@@ -104,6 +104,51 @@ def fail(msg: str) -> None:
     log("❌", msg)
 
 
+def run_validator(script: Path, args: list[str], cwd: Path) -> list[str]:
+    """Ejecuta un validador (check_marketing.py o check_ficha_cliente.py) y
+    devuelve los hallazgos CRÍTICOS como strings legibles.
+
+    El validador debe escribir sus hallazgos en stdout. Consideramos 🔴 cualquier
+    línea que empiece por '🔴' (los checks los emiten así). Esto acopla el
+    parser al formato de los checks: si los checks cambian de prefijo, ajustar.
+    """
+    try:
+        import subprocess  # noqa: PLC0415
+    except ImportError:
+        warn("subprocess no disponible — saltando validación")
+        return []
+
+    try:
+        proc = subprocess.run(
+            [sys.executable, str(script), *args],
+            cwd=str(cwd),
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            timeout=60,
+        )
+    except subprocess.TimeoutExpired:
+        warn(f"{script.name} excedió 60s — saltando")
+        return []
+    except (OSError, ValueError) as exc:
+        warn(f"No se pudo ejecutar {script.name}: {exc}")
+        return []
+
+    output = (proc.stdout or "") + "\n" + (proc.stderr or "")
+    criticos: list[str] = []
+    for linea in output.splitlines():
+        stripped = linea.strip()
+        if not stripped:
+            continue
+        # El check_marketing.py y check_ficha_cliente.py usan 🔴 para CRÍTICO
+        # y 🟠 para MEDIO. Si en el futuro cambian el emoji, ajustar aquí.
+        if "🔴" in stripped:
+            criticos.append(stripped)
+        elif proc.returncode != 0 and "❌" in stripped:
+            criticos.append(stripped)
+    return criticos
+
+
 def safe_filename(name: str) -> str:
     """Igual que ValuationPackageIngestor::safeFilename de Laravel."""
     cleaned = re.sub(r"[^A-Za-z0-9._-]+", "-", name)
@@ -1719,7 +1764,34 @@ def main() -> int:
     n_fotos = build_zip(zip_path, payload, manifest, contents, fotos_dir, json_docs)
     ok(f"ZIP generado: {zip_path} ({n_fotos} fotos)")
 
-    # 5) Cleanup
+    # 5) Validación de calidad — A5 auditoría 09-sep-2026.
+    #    El ZIP se genera aunque el copy no cumpla los checks; eso hace que
+    #    la ficha llegue al panel sin control. Ahora los dos validadores se
+    #    ejecutan ANTES del cleanup. Con --strict, un hallazgo 🔴 aborta.
+    check_args = [
+        ("check_marketing.py", [str(zip_path)]),
+        ("check_ficha_cliente.py", [str(zip_path)]),
+    ]
+    criticos_totales: list[str] = []
+    for script, script_args in check_args:
+        ruta_check = Path(__file__).parent / script
+        if not ruta_check.exists():
+            warn(f"{script} no encontrado en {ruta_check.parent} — saltando validación")
+            continue
+        info(f"Ejecutando {script}…")
+        criticos = run_validator(ruta_check, script_args, work_dir)
+        criticos_totales.extend(criticos)
+
+    if criticos_totales:
+        print()
+        warn(f"{len(criticos_totales)} hallazgo(s) CRÍTICO(S) en la validación del ZIP:")
+        for c in criticos_totales:
+            print(f"     🔴 {c}")
+        if args.strict:
+            fail(f"Modo --strict: abortando por {len(criticos_totales)} hallazgo(s) crítico(s).")
+            return 5
+
+    # 6) Cleanup
     if not args.keep_tmp:
         try:
             for p in work_dir.glob("**/*"):

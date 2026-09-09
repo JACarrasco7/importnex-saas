@@ -339,30 +339,51 @@ class ValuationPackageIngestor
 
         $redesPath = null;
         $portalesPath = null;
+        $redesJsonPath = null;
         foreach ($contenidos as $c) {
             if ($c['archivo'] === 'redes-sociales.txt') {
                 $redesPath = $c['path'];
+            } elseif ($c['archivo'] === 'redes-sociales.json') {
+                $redesJsonPath = $c['path'];
             } elseif ($c['archivo'] === 'anuncio-portales.txt') {
                 $portalesPath = $c['path'];
             }
         }
 
-        if (! $redesPath && ! $portalesPath) {
+        if (! $redesPath && ! $redesJsonPath && ! $portalesPath) {
             return 0;
         }
 
-        $redes = $redesPath ? Esqueleto::desde(File::get($redesPath)) : null;
+        // A4 auditoría 09-sep-2026: si el ZIP trae redes-sociales.json (vocabulario
+        // v2 con bloques canónico: canales.instagram_feed.{gancho,ficha,…}), lo
+        // preferimos sobre el TXT. El TXT era lo que generaba v1.5 de la skill
+        // y tenía el vocabulario que el panel ya importaba correctamente.
+        $redesV2 = null;
+        if ($redesJsonPath) {
+            $decoded = json_decode(File::get($redesJsonPath), true);
+            if (is_array($decoded) && isset($decoded['canales']) && is_array($decoded['canales'])) {
+                $redesV2 = $decoded['canales'];
+            } else {
+                $warnings[] = 'contenido/json/redes-sociales.json no tiene estructura {canales:*}: fallback a TXT.';
+            }
+        }
+        $redes = $redesV2 === null && $redesPath ? Esqueleto::desde(File::get($redesPath)) : null;
         $portales = $portalesPath ? Esqueleto::desde(File::get($portalesPath)) : null;
 
         $saved = 0;
         $now = now();
 
         // ───────────────────────────────────────────────────────────────────
-        // redes-sociales.txt → 3 redes × (3 posts + 3 stories) = 18 filas
-        // Esquema por canal (3 redes): TikTok (viral, 15-30s), Instagram (visual),
-        // Facebook (informativo masivo). Cada red con su tono propio en cada slot.
+        // redes-sociales.json (v2) tiene prioridad sobre el TXT (v1).
+        // El v2 trae la estructura canónica de la skill (canales.* con bloques
+        // gancho/ficha/contexto/argumento/pega/cta/hashtags). A4 auditoría
+        // 09-sep-2026: el panel mostraba 78 chars porque solo leía el TXT.
         // ───────────────────────────────────────────────────────────────────
-        if ($redes) {
+        if ($redesV2 !== null) {
+            $saved += $this->ingestarRedesV2($car, $redesV2, $warnings, $now);
+            // B7 auditoría 09-sep-2026: el v2 también emite stories en su
+            // propio canal (canales.stories), que se ingiere abajo.
+        } elseif ($redes) {
             // Hashtags globales: aplicables a las 3 redes.
             // Esqueleto::lista() ya hace trim + filtra vacíos internamente.
             $hashtagsGlobales = array_values($redes->lista('HASHTAGS'));
@@ -470,6 +491,15 @@ class ValuationPackageIngestor
         }
 
         // ───────────────────────────────────────────────────────────────────
+        // B7 auditoría 09-sep-2026: cuando el ZIP trae redes-sociales.json
+        // (v2), emitimos también las stories del canal "canales.stories" —
+        // el generador legacy solo las creaba en la rama v1 (TXT).
+        // ───────────────────────────────────────────────────────────────────
+        if ($redesV2 !== null && isset($redesV2['stories']) && is_array($redesV2['stories'])) {
+            $saved += $this->ingestarStoriesV2($car, $redesV2['stories'], $warnings, $now);
+        }
+
+        // ───────────────────────────────────────────────────────────────────
         // anuncio-portales.txt → 1 ficha base reutilizada en los 4 portales web.
         // Misma TITULO + DESCRIPCION + FICHA_RAPIDA + QUE_INCLUYE + AVISO_LEGAL
         // para milanuncios, coches_net, wallapop, facebook marketplace.
@@ -501,6 +531,231 @@ class ValuationPackageIngestor
         }
 
         return $saved;
+    }
+
+    /**
+     * A4 auditoría 09-sep-2026: ingestar el vocabulario v2 de la skill
+     * (contenido/json/redes-sociales.json → canales.*). El panel ya muestra
+     * este copy estructurado cuando está en BD, pero antes solo leíamos el
+     * TXT y mostraba los 78 caracteres del vocabulario legacy.
+     *
+     * Estructura esperada por canal (instagram_feed, video, facebook_pagina,
+     * marketplace):
+     *   { gancho, gancho_b, ficha:[], contexto, argumento:[], pega, cta,
+     *     send_ask, hashtags:[] }
+     *
+     * Genera hasta 3 posts por canal (slot 1..3):
+     *  - slot 1: gancho + ficha + contexto + argumento (3 viñetas) + pega + cta
+     *  - slot 2: gancho_b + contexto + argumento (si existen)
+     *  - slot 3: send_ask + contexto (CTA de preguntas)
+     *
+     * @param  array<string, array<string, mixed>>  $canales
+     * @param  array<int, string>  $warnings
+     */
+    private function ingestarRedesV2(Car $car, array $canales, array &$warnings, $now): int
+    {
+        $saved = 0;
+
+        // Mapa canal_v2 → canal_BD. La skill usa 'instagram_feed' / 'video'
+        // (TikTok) / 'facebook_pagina' / 'marketplace'; la BD usa nombres
+        // cortos: instagram / tiktok / facebook / wallapop, etc.
+        $mapaCanales = [
+            'instagram_feed' => 'instagram',
+            'video' => 'tiktok',
+            'facebook_pagina' => 'facebook',
+            'marketplace' => 'wallapop',
+        ];
+
+        foreach ($mapaCanales as $canalSkill => $canalBd) {
+            if (! isset($canales[$canalSkill]) || ! is_array($canales[$canalSkill])) {
+                continue;
+            }
+            $c = $canales[$canalSkill];
+            $gancho = trim((string) ($c['gancho'] ?? ''));
+            if ($gancho === '') {
+                continue;
+            }
+
+            $ficha = $this->normalizarLista($c['ficha'] ?? []);
+            $argumento = $this->normalizarLista($c['argumento'] ?? []);
+            $hashtags = $this->normalizarLista($c['hashtags'] ?? []);
+
+            // slot 1: post principal con todo el cuerpo.
+            $cuerpo1 = $this->componerCuerpoPostV2(
+                $gancho,
+                $ficha,
+                (string) ($c['contexto'] ?? ''),
+                $argumento,
+                (string) ($c['pega'] ?? ''),
+                (string) ($c['cta'] ?? '')
+            );
+            $this->upsertMarketing($car, $canalBd, [
+                'kind' => CarMarketingContent::KIND_POST,
+                'slot' => 1,
+                'title' => $gancho,
+                'description' => $cuerpo1,
+                'hashtags' => $hashtags,
+                'photo_tips' => $ficha,
+                'subir_pasos' => '',
+                'generated_at' => $now,
+            ]);
+            $saved++;
+
+            // slot 2: variante A/B con gancho_b si existe.
+            $ganchoB = trim((string) ($c['gancho_b'] ?? ''));
+            if ($ganchoB !== '') {
+                $cuerpo2 = $this->componerCuerpoPostV2(
+                    $ganchoB,
+                    [],
+                    (string) ($c['contexto'] ?? ''),
+                    $argumento,
+                    '',
+                    (string) ($c['cta'] ?? '')
+                );
+                $this->upsertMarketing($car, $canalBd, [
+                    'kind' => CarMarketingContent::KIND_POST,
+                    'slot' => 2,
+                    'title' => $ganchoB,
+                    'description' => $cuerpo2,
+                    'hashtags' => $hashtags,
+                    'photo_tips' => [],
+                    'subir_pasos' => '',
+                    'generated_at' => $now,
+                ]);
+                $saved++;
+            }
+
+            // slot 3: send_ask (CTA de preguntas, formato típico de Instagram).
+            $sendAsk = trim((string) ($c['send_ask'] ?? ''));
+            if ($sendAsk !== '') {
+                $this->upsertMarketing($car, $canalBd, [
+                    'kind' => CarMarketingContent::KIND_POST,
+                    'slot' => 3,
+                    'title' => $sendAsk,
+                    'description' => $sendAsk,
+                    'hashtags' => $hashtags,
+                    'photo_tips' => [],
+                    'subir_pasos' => '',
+                    'generated_at' => $now,
+                ]);
+                $saved++;
+            }
+        }
+
+        return $saved;
+    }
+
+    /**
+     * B7 auditoría 09-sep-2026: ingestar `canales.stories[]` del v2. Cada
+     * item es { canal, copy } o un string. Genera hasta 3 stories por red.
+     *
+     * @param  array<int, mixed>  $stories
+     * @param  array<int, string>  $warnings
+     */
+    private function ingestarStoriesV2(Car $car, array $stories, array &$warnings, $now): int
+    {
+        $saved = 0;
+        $porCanal = []; // 'instagram' => [story1, story2, ...]
+
+        foreach ($stories as $item) {
+            if (is_string($item)) {
+                // Formato legacy: el item es el copy directo (sin canal). Lo
+                // asumimos para Instagram, que es lo que generaba la skill.
+                $porCanal['instagram'][] = ['canal' => 'instagram', 'copy' => $item];
+            } elseif (is_array($item) && isset($item['copy'])) {
+                $canal = strtolower(trim((string) ($item['canal'] ?? 'instagram')));
+                $porCanal[$canal][] = ['canal' => $canal, 'copy' => (string) $item['copy']];
+            }
+        }
+
+        foreach ($porCanal as $canal => $items) {
+            $slot = 0;
+            foreach ($items as $item) {
+                $slot++;
+                if ($slot > 3) {
+                    break;
+                }
+                $copy = trim($item['copy']);
+                if ($copy === '') {
+                    continue;
+                }
+                $this->upsertMarketing($car, $canal, [
+                    'kind' => CarMarketingContent::KIND_STORY,
+                    'slot' => $slot,
+                    'title' => '',
+                    'description' => $copy,
+                    'hashtags' => [],
+                    'photo_tips' => [],
+                    'subir_pasos' => '',
+                    'generated_at' => $now,
+                ]);
+                $saved++;
+            }
+        }
+
+        return $saved;
+    }
+
+    /**
+     * Compone el cuerpo de un post v2 a partir de sus bloques. El bloque
+     * `argumento` puede ser lista o string; lo formateamos como viñetas
+     * con "•". Si la ficha contiene emojis de check (✓ ✅), se mantienen
+     * — el sanitizador de MySQL los convierte a "•".
+     */
+    private function componerCuerpoPostV2(string $gancho, array $ficha, string $contexto, array $argumento, string $pega, string $cta): string
+    {
+        $partes = [];
+
+        if ($contexto !== '') {
+            $partes[] = $contexto;
+        }
+
+        if ($argumento !== []) {
+            $viñetas = array_map(
+                fn ($a) => '• '.ltrim((string) $a),
+                $argumento
+            );
+            $partes[] = implode("\n", $viñetas);
+        }
+
+        if ($pega !== '') {
+            $partes[] = $pega;
+        }
+
+        if ($cta !== '') {
+            $partes[] = $cta;
+        }
+
+        return implode("\n\n", $partes);
+    }
+
+    /**
+     * Normaliza un campo `lista` del JSON v2: acepta array, string con
+     * saltos de línea, o string con bullets. Devuelve array de strings
+     * limpios (sin bullets ni espacios redundantes).
+     *
+     * @return array<int, string>
+     */
+    private function normalizarLista(mixed $valor): array
+    {
+        if (is_string($valor)) {
+            $valor = preg_split('/\R+/u', $valor);
+        }
+        if (! is_array($valor)) {
+            return [];
+        }
+        $out = [];
+        foreach ($valor as $item) {
+            if (! is_string($item)) {
+                continue;
+            }
+            $limpio = trim(preg_replace('/^[•·\-*]+\s*/u', '', $item) ?? '');
+            if ($limpio !== '') {
+                $out[] = $limpio;
+            }
+        }
+
+        return $out;
     }
 
     /**
