@@ -70,6 +70,23 @@ Todos los cambios notables en el skill `importacion-vehiculos` se documentarán 
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [3.7.2] - 2026-09-09 — `--laravel-storage` en `empaquetar.py` (A31)
+
+> **Motivo:** el ZIP del coche estaba bajando a `C:\Users\jacar\Downloads\` cuando se descargaba por el navegador (caso real: `vw-arteon-r-sb-2023-447819922.zip`). Eso lo deja muerto y obliga a copiarlo a mano. La ruta correcta desde el repo es `<root>/storage/app/private/investigaciones/<marca>/<modelo>/<coche>-<fecha>.zip`.
+
+### ✨ Nuevo
+- **`empaquetar.py --laravel-storage`**: nueva opción que guarda el ZIP en `<raíz-del-proyecto>/storage/app/private/investigaciones/<marca>/<modelo>/<coche>-<fecha>.zip`. La raíz se detecta automáticamente buscando `artisan` + `composer.json` desde cwd (sube hasta 10 niveles).
+- Ayudante `find_project_root()` en `empaquetar.py`.
+- Ayudante `derive_laravel_storage_path()` que normaliza marca/modelo a slug.
+
+### 🛡️ Reglas actualizadas
+- **A31** (nueva): "ZIP del coche guardado en `C:\Users\jacar\Downloads\`". NUNCA debe quedar ahí. Caso real documentado.
+- **A32** (renumerada desde A31): "Presentarnos como vendedor o insinuar garantía" (sin cambios de fondo, solo número).
+
+### 📚 Documentación
+- `05-operaciones/operaciones.md` § Comandos por flujo: tabla de las 4 rutas válidas (`--laravel-storage`, `--auto-path`, `--out`, default).
+- `SKILL.md` § RUTAS DE GUARDADO: añadido el punto 5 con la regla.
+
 ## [3.7.1] - 2026-09-06 — Flujo M: marketing multicanal (implementación Fase 1)
 
 > **Motivo:** el plan multicanal `docs/PLAN_MARKETING_MULTICANAL_2026-09-06.md` proponía una Fase 1 implementada pero la skill no la tenía commiteada. Esta versión la reconstruye dentro del repo y la protege con un validador de 30 checks.

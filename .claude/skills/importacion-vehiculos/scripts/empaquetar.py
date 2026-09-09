@@ -192,6 +192,43 @@ def derive_auto_path(payload: dict, base: Path | None = None) -> Path:
     return base / marca / modelo
 
 
+def find_project_root(start: Path | None = None) -> Path:
+    """Encuentra la raíz del proyecto Laravel (donde está artisan).
+
+    Busca hacia arriba desde `start` (default: cwd) hasta encontrar un
+    directorio que contenga `artisan` + `composer.json`. Si no encuentra,
+    devuelve el cwd.
+    """
+    cur = Path(start or Path.cwd()).resolve()
+    for _ in range(10):
+        if (cur / "artisan").is_file() and (cur / "composer.json").is_file():
+            return cur
+        if cur.parent == cur:
+            break
+        cur = cur.parent
+    return Path.cwd().resolve()
+
+
+def derive_laravel_storage_path(payload: dict, base: Path | None = None) -> Path:
+    """Ruta canonica del proyecto Laravel: <root>/storage/app/private/investigaciones/<marca>/<modelo>/.
+
+    Esta es la ruta preferida cuando se ejecuta desde el repo del proyecto
+    (no contaminar `C:\\Users\\jacar\\Downloads`).
+    """
+    veh = payload.get("vehiculo") or {}
+    marca = (veh.get("marca") or "").strip().lower().replace(" ", "-")
+    modelo = (veh.get("modelo") or "").strip().lower().replace(" ", "-")
+    if not marca:
+        marca = "sin-marca"
+    if not modelo:
+        modelo = "sin-modelo"
+
+    if base is None:
+        root = find_project_root()
+        base = root / "storage" / "app" / "private" / "investigaciones"
+    return base / marca / modelo
+
+
 def output_zip_path(payload: dict, out_dir: Path, with_date: bool = False) -> Path:
     coche_id = derive_coche_id(payload)
     if with_date:
@@ -1592,6 +1629,10 @@ def main() -> int:
     parser.add_argument("--auto-path", action="store_true",
                         help="Ruta canonica: ~/Desktop/JJImportMotors/investigaciones/<marca>/<modelo>/. "
                              "Crea la estructura si no existe. Incluye fecha en el nombre del ZIP.")
+    parser.add_argument("--laravel-storage", action="store_true",
+                        help="Ruta del proyecto Laravel: <root>/storage/app/private/investigaciones/<marca>/<modelo>/. "
+                             "Es la preferida desde el repo (no contamina Downloads). "
+                             "Busca la raíz del proyecto hacia arriba desde cwd.")
     parser.add_argument("--strict", action="store_true",
                         help="Modo validación dura: aborta si faltan fotos o marketing.")
     parser.add_argument("--no-photos", action="store_true",
@@ -1605,6 +1646,10 @@ def main() -> int:
 
     if args.auto_path:
         out_dir = derive_auto_path(payload)
+        out_dir.mkdir(parents=True, exist_ok=True)
+        zip_path = output_zip_path(payload, out_dir, with_date=True)
+    elif args.laravel_storage:
+        out_dir = derive_laravel_storage_path(payload)
         out_dir.mkdir(parents=True, exist_ok=True)
         zip_path = output_zip_path(payload, out_dir, with_date=True)
     elif args.out:

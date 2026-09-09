@@ -900,6 +900,7 @@ ENCARGO (Flujo B: MODELO)
 > 2. `.md` del usuario → `informes\<marca>\<modelo>\` · JSON/ZIP → `laravel\` (NUNCA AppData\Roaming\Claude).
 > 3. `informe.json` solo existe DENTRO del ZIP (lo genera `empaquetar.py`).
 > 4. Normalizar nombres: minúsculas, sin tildes, guiones (`vw\tiguan`), fecha `YYYY-MM-DD`.
+> 5. **`empaquetar.py --laravel-storage`** es la ruta preferida desde el repo: guarda en `<root>/storage/app/private/investigaciones/<marca>/<modelo>/<coche>-<fecha>.zip`. **NUNCA** dejar que el ZIP baje a `C:\Users\jacar\Downloads\` (A31).
 
 ### 📸 FOTOS REALES · ENLACES DE ANUNCIO · FUENTES CON URL (15-ago-2026 · v2.9.4)
 

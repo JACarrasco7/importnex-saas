@@ -434,15 +434,35 @@ python franja.py --mediana 16400 --anio 12/2017 --co2 145 --pvp-nuevo 32250 --zo
 # 2. Desglose completo de un candidato concreto
 python franja.py ... --precio-aleman 13000 --km 102000 --nombre "Opel Astra OPC 2014"
 
-# 3. Confirmar OK y empaquetar
-python empaquetar.py export/flujo-a-opel-astra-opc-2014-a1b2c3.json
-# Genera: paquetes/opel-astra-opc-2014-a1b2c3.zip
+# 3. Confirmar OK y empaquetar — 4 rutas posibles (orden de preferencia):
+python scripts/empaquetar.py --laravel-storage export/flujo-a-<coche>.json
+# → Genera: <repo>/storage/app/private/investigaciones/<marca>/<modelo>/<coche>-<fecha>.zip
+#   (PREFERIDA desde el repo: no contamina Downloads; queda dentro del proyecto)
+
+python scripts/empaquetar.py --auto-path export/flujo-a-<coche>.json
+# → Genera: ~/Desktop/JJImportMotors/investigaciones/<marca>/<modelo>/<coche>-<fecha>.zip
+#   (Cuando se ejecuta desde Claude Desktop, fuera del repo)
+
+python scripts/empaquetar.py --out C:/ruta/custom export/flujo-a-<coche>.json
+# → Genera: <ruta-custom>/<coche>.zip (sin fecha en el nombre)
+#   (Solo si necesitas forzar una ruta específica)
+
+python scripts/empaquetar.py export/flujo-a-<coche>.json
+# → Genera: ./paquetes/<coche>.zip (default — desaconsejado: queda en el repo sin clasificar)
 
 # 4. Subir ZIP a Laravel
 # POST https://dev.aktive.cloud/importnexcore/api/import-valuation
 # Header: X-Import-Token: <token>
 # Body: ZIP (multipart) o JSON del informe.json (extraer del ZIP)
 ```
+
+> **Por qué `--laravel-storage` es la preferida**: la skill ejecuta desde
+> el repo del proyecto (`c:\laragon\www\importnexcore`) y guardar en
+> `storage/app/private/` mantiene el ZIP **dentro** del proyecto, versionable
+> y descargable por URL pública si se quiere. `--auto-path` queda para
+> Claude Desktop cuando el ZIP va al share de negocio. **Nunca** dejar que
+> el navegador baje el ZIP a `C:\Users\jacar\Downloads\` (de ahí el
+> problema que arreglamos el 09-sep-2026).
 
 #### Flujo B (MODELO)
 
