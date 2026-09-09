@@ -65,6 +65,25 @@
 
 ## ⚠️ Trampas potenciales (1-2 apariciones)
 
+### ⚠️ kleinanzeigen.de: el buscador de texto libre no filtra de forma fiable (23-ago-2026)
+**Portal:** kleinanzeigen.de
+**Síntoma real:** Escribí "VW Tiguan Benzin Automatik" en el buscador principal (`Was suchst du?`, ref del `searchbox`), pulsé Enter, y el listado devolvió resultados genéricos sin relación (VW Polo GTI, BMW 216 Gran Tourer, Kia cee'd, Ford Puma, Toyota Avensis...) — 0 de 27 tarjetas mencionaban "Tiguan". Probado también por URL con slug de marca+modelo (`/s-autos/vw-tiguan-benzin-automatik/preis:1500:20000/k0c216`): "Es wurden keine Gebrauchtwagen... gefunden".
+**Causa raíz:** Ni el slug de URL ni el campo de búsqueda de texto libre aplican un filtro real de marca/modelo en este portal; el buscador parece degradar a "todo autos" cuando no reconoce el término exacto.
+**Detección:** Contar cuántas tarjetas del resultado mencionan el modelo buscado; si es 0 o casi 0, el filtro no aplicó.
+**Mitigación:** Declarar cobertura `Degradado` para kleinanzeigen.de cuando esto ocurra (no inventar candidatos de esa muestra). Pendiente de encontrar un método de filtro fiable (¿campo de categoría + filtros laterales por clic, como mobile.de?).
+
+### ⚠️ Milanuncios: `?s=<query>` no filtra por modelo de forma fiable (23-ago-2026)
+**Portal:** Milanuncios
+**Síntoma real:** `/anuncios/?s=volkswagen+tiguan+automatico+gasolina` devolvió "2.413 anuncios" (contador de categoría completa, no del modelo) con el primer resultado un Tiguan a 29.990 € sin relación con el rango de precio buscado.
+**Causa raíz:** El parámetro `s=` no parece anclar el filtro de marca/modelo con fiabilidad; se comporta como una búsqueda laxa que cae hacia la categoría general.
+**Mitigación:** Declarar cobertura `Degradado` en vez de tomar los primeros resultados como candidatos válidos. Si se necesita precisión, probar el flujo de filtros por clic (marca → modelo → precio) en vez del parámetro `s=` directo.
+
+### ⚠️ AutoUncle: los filtros combinados por querystring se ignoran aunque el slug sea correcto (23-ago-2026)
+**Portal:** AutoUncle
+**Síntoma real:** `https://www.autouncle.de/de/gebrauchtwagen/?make=volkswagen&model=tiguan&fuel_type=petrol&transmission=automatic&year_from=2017&price_to=20000&mileage_to=175000` redirigió a `https://www.autouncle.de/de/gebrauchtwagen` (sin ningún parámetro), mostrando el listado genérico de "1.973.973 ofertas verificadas".
+**Causa raíz:** A diferencia de otros portales, AutoUncle no acepta esta combinación de filtros por querystring de una vez — distinto del caso ya conocido de "modelo mal escrito" (esto ocurre incluso con marca/modelo bien escritos).
+**Mitigación:** Confirma la regla ya existente de la skill: si el hueco de mercado ya está claro por Coches.net + mobile.de, declarar AutoUncle `Omitido` en vez de perder peticiones intentando construir la URL. Si se necesita AutoUncle sí o sí, aplicar los filtros por clic (navegación real), no por URL.
+
 ### ⚠️ Mobile.de: filtro "Beschädigte Fahrzeuge" oculto
 **Portal:** mobile.de
 **Síntoma:** Por defecto NO muestra coches con daños. Hay que activarlo explícitamente.
