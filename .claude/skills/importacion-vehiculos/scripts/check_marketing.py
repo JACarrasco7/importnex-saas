@@ -51,9 +51,15 @@ SUPERLATIVOS_PROHIBIDOS = (
 
 # A23 — datos internos prohibidos en copy público. La frase "vendedor original"
 # del aviso legal es legítima (refiere al vendedor del coche en origen, no a JJ).
+# Las URLs de portales (mobile.de/inserat, autoscout24.de/angebote, etc.) son
+# PROHIBIDAS en el copy EXCEPT en los bloques [XX_FUENTES], que llevan el link
+# original del anuncio (regla M-12 / A21).
 DATOS_INTERNOS_PROHIBIDOS = (
     "margen", "honorarios jj", "estrategia de venta",
     "precio de compra", "precio de negociación", "precio de coste",
+)
+# URLs internas prohibidas (se eximen en bloques [XX_FUENTES])
+URLS_INTERNAS_PROHIBIDAS = (
     "mobile.de/inserat", "autoscout24.de/angebote", "kleinanzeigen.de/s-anzeige",
 )
 
@@ -395,7 +401,9 @@ def check_06_cero_hashtags_en_portales(
 def check_07_cero_enlaces_en_portales(
     bloques: dict[str, str], canal: str
 ) -> list[Hallazgo]:
-    """A26: Coches.net rechaza el anuncio si hay URL externa."""
+    """A26: Coches.net rechaza el anuncio si hay URL externa. EXCEPCIÓN: el
+    bloque [PT_FUENTES] lleva el link original del anuncio (regla M-12 / A21)
+    y es obligatorio — no se valida como 'enlace prohibido'."""
     hallazgos: list[Hallazgo] = []
     if canal != "portal":
         return hallazgos
@@ -403,6 +411,8 @@ def check_07_cero_enlaces_en_portales(
         if prefijo_a_canal(nombre) != canal:
             continue
         if nombre == "PT_AVISO":  # El aviso legal puede llevar email/teléfono
+            continue
+        if nombre == "PT_FUENTES":  # Link original del anuncio: obligatorio (M-12)
             continue
         m = URL_REGEX.search(contenido)
         if m:
@@ -460,10 +470,14 @@ def check_08_cero_datos_contacto_en_portales(
 def check_09_datos_internos_prohibidos(
     bloques: dict[str, str], canal: str
 ) -> list[Hallazgo]:
-    """A23: margen, honorarios, vendedor, URL interna."""
+    """A23: margen, honorarios, vendedor, URL interna. EXCEPCIÓN: los bloques
+    [XX_FUENTES] llevan el link original del anuncio (regla M-12 / A21), que
+    es obligatorio y no se considera 'dato interno'."""
     hallazgos: list[Hallazgo] = []
     for nombre, contenido in bloques.items():
         if prefijo_a_canal(nombre) != canal:
+            continue
+        if nombre.endswith("_FUENTES"):  # Link original del anuncio: OK
             continue
         lower = contenido.lower()
         for mal in DATOS_INTERNOS_PROHIBIDOS:
@@ -474,6 +488,17 @@ def check_09_datos_internos_prohibidos(
                         severidad="ALTO",
                         canal=canal,
                         mensaje=f"Término interno '{mal}' no debe aparecer en copy público",
+                        bloque=nombre,
+                    )
+                )
+        for mal in URLS_INTERNAS_PROHIBIDAS:
+            if mal in lower:
+                hallazgos.append(
+                    Hallazgo(
+                        check="C09-url-interna",
+                        severidad="ALTO",
+                        canal=canal,
+                        mensaje=f"URL interna '{mal}' no debe aparecer en copy público (usa [XX_FUENTES])",
                         bloque=nombre,
                     )
                 )
@@ -770,6 +795,47 @@ def check_20_trazabilidad(
     return hallazgos
 
 
+def check_21_link_original_anuncio(
+    bloques: dict[str, str], canal: str
+) -> list[Hallazgo]:
+    """M-12: el link original del anuncio SIEMPRE acompaña al copy.
+    Bloques [IG_FUENTES] / [PT_FUENTES] deben contener una URL válida."""
+    hallazgos: list[Hallazgo] = []
+    nombre_fuentes = {
+        "instagram": "IG_FUENTES",
+        "facebook": "FB_FUENTES",
+        "fb_marketplace": "FBMP_FUENTES",
+        "portal": "PT_FUENTES",
+    }
+    bloque = nombre_fuentes.get(canal)
+    if bloque is None:
+        return hallazgos
+    contenido = bloques.get(bloque, "")
+    if not contenido.strip():
+        hallazgos.append(
+            Hallazgo(
+                check="C21-link-original",
+                severidad="ALTO",
+                canal=canal,
+                mensaje=f"Falta bloque [{bloque}] con el link original del anuncio",
+                bloque=bloque,
+            )
+        )
+        return hallazgos
+    m = URL_REGEX.search(contenido)
+    if not m:
+        hallazgos.append(
+            Hallazgo(
+                check="C21-link-original",
+                severidad="ALTO",
+                canal=canal,
+                mensaje=f"[{bloque}] no contiene una URL válida del anuncio original",
+                bloque=bloque,
+            )
+        )
+    return hallazgos
+
+
 # --------------------------------------------------------------------------- #
 # Orquestador
 # --------------------------------------------------------------------------- #
@@ -832,6 +898,7 @@ def validar_archivo(ruta: Path) -> ResultadoArchivo:
         rc.hallazgos.extend(check_17_longitud_por_canal(bloques_canal, canal))
         rc.hallazgos.extend(check_19_campos_sin_rellenar(bloques_canal, canal))
         rc.hallazgos.extend(check_20_trazabilidad(bloques_canal, canal))
+        rc.hallazgos.extend(check_21_link_original_anuncio(bloques_canal, canal))
         resultado.canales[canal] = rc
 
     # Check 18 — cruza canales

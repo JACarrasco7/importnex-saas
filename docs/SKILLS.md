@@ -16,7 +16,7 @@ Generados por `scripts/build-skill-zips.ps1` (wrapper de `.claude/skills/_dist/b
 
 | Skill | ZIP | Version | Tamano | SHA256 |
 |---|---|---|---|---|
-| `importacion-vehiculos` | `.claude/skills/_dist/skills-importacion-vehiculos-v3.7.1-20260906.zip` | 3.7.1 | 442 KB | `132d6032ea3190a71f8ae5043743d6a342ea52d172ec750dfcd8b19e4293f38b` |
+| `importacion-vehiculos` | `.claude/skills/_dist/skills-importacion-vehiculos-v3.7.1-20260906.zip` | 3.7.1 | 488 KB | `664c8a9bbae2a85d7f5541cce5e32075cdbe3b221d8a3128dac607ea1877b31e` |
 | `estudio-mercado` | `.claude/skills/_dist/skills-estudio-mercado-v0.3.12-20260906.zip` | 0.3.12 | 53 KB | `894e70f8581011c8659fa683e783c86deb88d419ed3fbb75c476939a90ba2ff9` |
 
 ## 🚗 ZIPs de coche (informes individuales)

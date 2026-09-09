@@ -36,6 +36,10 @@ Mándaselo a quien esté buscando un 320d con cambio manual.
 4. Defecto a declarar
 5. Etiqueta DGT
 
+[IG_FUENTES]
+Anuncio original: https://www.mobile.de/inserat/bmw-320d-touring-2018-84-000-km-1234567890.html
+Disponibilidad: sujeta a confirmación.
+
 
 [IG_STORIES_1]
 320d Touring manual con un solo dueño.
@@ -95,6 +99,10 @@ Motor B47, ITV pasada, mantenimiento sellado por BMW. Localizado en Alemania y s
 [FB_CTA]
 Escríbenos por WhatsApp al +34 600000000.
 
+[FB_FUENTES]
+Anuncio original: https://www.mobile.de/inserat/bmw-320d-touring-2018-84-000-km-1234567890.html
+Disponibilidad: sujeta a confirmación.
+
 
 [FBMP_TITULO]
 BMW 320d Touring 2018 · 84.000 km · 1 dueño
@@ -110,3 +118,7 @@ Precio total cliente: 19.900 €
 
 [FBMP_CONTACTO]
 Por mensaje en Marketplace.
+
+[FBMP_FUENTES]
+Anuncio original: https://www.mobile.de/inserat/bmw-320d-touring-2018-84-000-km-1234567890.html
+Disponibilidad: sujeta a confirmación.

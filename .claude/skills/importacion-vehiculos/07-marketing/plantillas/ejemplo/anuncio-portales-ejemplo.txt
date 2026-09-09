@@ -48,3 +48,7 @@ BMW 320d Touring · 2018 · 84.000 km · 1 dueño
 
 [PT_TITULO_B]
 BMW 320d Touring 2018 manual 190 CV etiqueta C
+
+[PT_FUENTES]
+Anuncio original: https://www.mobile.de/inserat/bmw-320d-touring-2018-84-000-km-1234567890.html
+Disponibilidad: sujeta a confirmación en el momento de la gestión.

@@ -112,6 +112,33 @@ class MarketingValidatorTest extends TestCase
         $this->assertMatchesRegularExpression('/<[A-Z][A-Z0-9 _\/\\-]+>/', $portales);
     }
 
+    public function test_plantillas_tienen_bloque_de_fuentes_con_link_original(): void
+    {
+        // M-12: el link original del anuncio SIEMPRE acompaña al copy.
+        $redes = file_get_contents(base_path("{$this->skillRoot}/07-marketing/plantillas/redes-sociales.txt"));
+        $portales = file_get_contents(base_path("{$this->skillRoot}/07-marketing/plantillas/anuncio-portales.txt"));
+
+        foreach (['IG_FUENTES', 'FB_FUENTES', 'FBMP_FUENTES'] as $bloque) {
+            $this->assertStringContainsString(
+                "[{$bloque}]",
+                $redes,
+                "Plantilla redes-sociales.txt debe contener bloque [{$bloque}]",
+            );
+        }
+        $this->assertStringContainsString('[PT_FUENTES]', $portales);
+        $this->assertStringContainsString('URL_ANUNCIO_ORIGEN', $redes);
+        $this->assertStringContainsString('URL_ANUNCIO_ORIGEN', $portales);
+    }
+
+    public function test_ejemplo_relleno_incluye_link_original_valido(): void
+    {
+        $redes = file_get_contents(base_path("{$this->skillRoot}/07-marketing/plantillas/ejemplo/redes-sociales-ejemplo.txt"));
+        $portales = file_get_contents(base_path("{$this->skillRoot}/07-marketing/plantillas/ejemplo/anuncio-portales-ejemplo.txt"));
+
+        $this->assertStringContainsString('https://www.mobile.de/inserat/', $redes);
+        $this->assertStringContainsString('https://www.mobile.de/inserat/', $portales);
+    }
+
     public function test_ejemplo_relleno_existe(): void
     {
         $this->assertFileExists(base_path("{$this->skillRoot}/07-marketing/plantillas/ejemplo/redes-sociales-ejemplo.txt"));

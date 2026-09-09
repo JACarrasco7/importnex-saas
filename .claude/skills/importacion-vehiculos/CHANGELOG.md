@@ -85,6 +85,7 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
   - `plantillas/ejemplo/*` — ejemplo relleno que valida verde (0 rojos, 0 naranjas, 0 amarillos).
 - **`scripts/check_marketing.py`** — validador Python 3.13 (sin dependencias externas, stdlib pura) que ejecuta los 30 checks con severidad 🔴/🟠/🟡 y exit codes `1` (🔴), `2` (🟠), `0` (verde). CLI: `python scripts/check_marketing.py <archivo.txt> [archivo2.txt ...]` o `python scripts/check_marketing.py -r contenido/`. Soporta UTF-8 en consola Windows.
 - **Anti-patrones A24-A30** en `06-reglas/anti_patrones.md`: superlativos/ganchos vacíos, emoji decorativo, aviso legal incompleto, fecha de matriculación, pega honesta, icono ⚠️ sin pega, "garantía" sin detalle.
+- **Regla M-12** en `copy_engine.md`: el link original del anuncio SIEMPRE acompaña al copy (bloques `[XX_FUENTES]`). El validador exige el link en cada canal (check C21). Excepción: `[XX_FUENTES]` no dispara C07 (enlaces prohibidos en portales) ni C09 (URL interna prohibida).
 - **Flujo M** añadido a SKILL.md (tabla de 6 flujos + árbol de detección automática). Se activa solo tras Flujo A con veredicto 🟢/🔵.
 - **`docs/PLAN_MARKETING_MULTICANAL_2026-09-06.md`** — copia canónica del plan en `docs/` (referencia, no fuente única).
 

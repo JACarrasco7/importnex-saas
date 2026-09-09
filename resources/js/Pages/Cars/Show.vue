@@ -421,6 +421,15 @@ const onDocKeyChange = () => {
                     <Badge :variant="trafficLightVariant(car.traffic_light)" dot>{{ car.traffic_light }}</Badge>
                     <Badge :variant="statusVariant(car.status)">{{ statusLabel(t, car.status) }}</Badge>
                     <span v-if="car.year" class="text-sm text-gray-500">{{ car.year }}</span>
+                    <!-- Link original del anuncio (para comprobar disponibilidad) -->
+                    <a v-if="car.url_link"
+                       :href="car.url_link"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="inline-flex items-center gap-1.5 rounded-lg bg-estoril-50 px-3 py-1.5 text-xs font-medium text-estoril-700 ring-1 ring-estoril-200 hover:bg-estoril-100">
+                        <LinkIcon class="h-3.5 w-3.5" />
+                        {{ t('cars.original_listing') }}
+                    </a>
                 </div>
 
                 <!-- Banner de cliente/solicitud vinculado (feedback inmediato) -->

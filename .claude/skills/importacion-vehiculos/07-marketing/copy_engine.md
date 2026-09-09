@@ -153,6 +153,13 @@ cosas: título, longitud y cierre. Wallapop es un **recorte** del base
 11. **A30: la palabra "garantía"** solo se usa si se dice cuál, quién la da
     y cuánto dura. La garantía legal de un VO es de 3 años reducible por
     pacto a 1 año mínimo.
+12. **M-12: el link original del anuncio SIEMPRE acompaña al copy.** Cada
+    pieza de marketing (redes + portales) lleva el link directo al anuncio
+    origen (`url_link` del `informe.json`) en el bloque `[PT_FUENTES]` o
+    `[IG_FUENTES]`. El cliente/potencial comprador debe poder abrir el
+    anuncio original para comprobar disponibilidad. **Prohibido** citar el
+    link como "fuente interna" (A23) — el link del anuncio es público y
+    necesario, no es un dato interno.
 
 ---
 

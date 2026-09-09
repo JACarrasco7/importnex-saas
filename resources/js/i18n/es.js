@@ -167,6 +167,7 @@ export default {
     section_pricing: 'Precio y costes',
     section_status_location: 'Estado y ubicación',
     section_resumen: 'Resumen',
+    original_listing: 'Anuncio original',
     section_investigacion: 'Investigación',
     section_mercado: 'Mercado',
     section_checklist: 'Checklist',

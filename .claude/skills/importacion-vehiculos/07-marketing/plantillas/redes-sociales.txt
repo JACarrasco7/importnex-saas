@@ -43,6 +43,10 @@ Mándaselo a quien lleve <X meses/años> buscando un <modelo>.
 4. <descripción foto>
 5. <descripción foto (opcional)>
 
+[IG_FUENTES]
+Anuncio original: <URL_ANUNCIO_ORIGEN>
+Disponibilidad: sujeta a confirmación.
+
 
 [IG_STORIES_1]
 <dato + icono grande>
@@ -102,6 +106,10 @@ Comenta <MARCA + MODELO> y te paso la ficha.
 [FB_CTA]
 Escríbenos por WhatsApp al +34 <NÚMERO>.
 
+[FB_FUENTES]
+Anuncio original: <URL_ANUNCIO_ORIGEN>
+Disponibilidad: sujeta a confirmación.
+
 
 [FBMP_TITULO]
 <Título sin icono, sin emoji, ≤80 chars>
@@ -117,3 +125,7 @@ Precio total cliente: <X> €
 
 [FBMP_CONTACTO]
 Por mensaje en Marketplace.
+
+[FBMP_FUENTES]
+Anuncio original: <URL_ANUNCIO_ORIGEN>
+Disponibilidad: sujeta a confirmación.

@@ -48,3 +48,7 @@ Fecha de primera matriculación: <MM/AAAA>.
 
 [PT_TITULO_B]
 <Variante A/B para test>
+
+[PT_FUENTES]
+Anuncio original: <URL_ANUNCIO_ORIGEN>
+Disponibilidad: sujeta a confirmación en el momento de la gestión.
