@@ -7,6 +7,7 @@ use App\Support\Esqueleto;
 use App\Support\FiltroPublico;
 use App\Support\PrecioClienteCalculator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -52,7 +53,14 @@ class PublicCarController extends Controller
 
         $contenido = $this->leerContenido($car, 'ficha-publicitaria.txt');
         $esqueleto = $contenido ? Esqueleto::desde($contenido) : null;
-        $ficha = $this->fichaCliente($car);
+        // Caché trivial por car_id: fichaCliente() hace 2 exists() + 1 get()
+        // sobre Storage::local; lo cacheamos 5 min para evitar syscalls repetidos
+        // en visitas consecutivas al mismo /c/{token} (auditoría 09-sep-2026 H8).
+        $ficha = Cache::remember(
+            "public.ficha-cliente.{$car->id}",
+            now()->addMinutes(5),
+            fn () => $this->fichaCliente($car)
+        );
 
         // A3: si la recomendación interna desaconseja la unidad y no hay
         // ficha-cliente.json que la justifique ante el cliente, devolvemos

@@ -811,8 +811,10 @@ class ValuationPackageIngestor
             // and Arrows (U+2B00-2BFF) → ELIMINADOS. Antes (B4 auditoría)
             // también se eliminaban los emojis 4-byte (U+1F300-1F9FF) y todo
             // >U+FFFF; con utf8mb4 ya no hace falta: 🗓️🛣️🐎🏷️ del
-            // vocabulario de la skill sobreviven intactos.
-            $value = preg_replace('/[\x{2700}-\x{27BF}\x{2B00}-\x{2BFF}]/u', '', $value) ?? $value;
+            // vocabulario de la skill sobreviven intactos. Tampoco se eliminan
+            // los BMP (U+2728 ⭐, U+2600 ☀, etc.) — el cliente los usa como
+            // decoración visual del copy.
+            $value = preg_replace('/[\x{2B00}-\x{2BFF}]/u', '', $value) ?? $value;
 
             // Limpieza tras quitar emojis: colapsar espacios dobles (por línea,
             // sin tocar saltos de línea) y quitar el espacio que queda antes
@@ -850,10 +852,12 @@ class ValuationPackageIngestor
      */
     private function upsertMarketing(Car $car, string $channel, array $attributes): CarMarketingContent
     {
-        // Limpia caracteres que rompen MySQL utf8mb3 (forge DB es utf8mb3):
-        // - Emojis >U+FFFF (⭐ U+2728 Sparkles etc.) que necesitan 4 bytes UTF-8.
-        //   Los mapeamos a equivalentes ASCII seguros para no perder el énfasis.
-        // - Caracteres de control y zero-width invisibles.
+        // Limpia caracteres problemáticos para MySQL antes de escribir:
+        // - Invisibles (zero-width) y controles ASCII.
+        // - Checkmarks ✅ ✓ ✔ ✍ → viñeta "•" (BMP, sin pérdida semántica).
+        // Los emojis 4-byte (🗓️🛣️🐎🏷️ del vocabulario v2) y la mayoría de
+        // BMP se CONSERVAN: la BD Forge es utf8mb4 desde B4 auditoría
+        // 09-sep-2026.
         $attributes = $this->sanitizeForMysql($attributes);
 
         $kind = $attributes['kind'] ?? CarMarketingContent::KIND_AD;

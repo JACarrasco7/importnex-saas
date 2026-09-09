@@ -457,12 +457,18 @@ def collect_photos(
         })
         ok(f"foto {idx:02d}/{len(urls)}: {final.name} ({motivo})")
 
+    # B6 auditoría 09-sep-2026: 0 fotos NO es inválido para entrega si
+    # vehiculo.fotos[] tiene URLs — Laravel las descarga él mismo desde
+    # ValuationImporter::savePhotos(). Con --strict, abortamos SOLO si
+    # tampoco hay URLs en el payload para que Laravel descargue.
+    vehiculo_fotos = ((payload.get("vehiculo") or {}).get("fotos") or [])
+    vehiculo_fotos = [u for u in vehiculo_fotos if isinstance(u, str) and u.strip()]
+
     if not saved:
-        msg = "0 fotos válidas — entrega SIN fotos (inválida para cliente)"
-        if strict:
-            fail(msg + " — modo --strict aborta")
+        if strict and not vehiculo_fotos:
+            fail("0 fotos válidas y vehiculo.fotos[] vacío — modo --strict aborta")
             sys.exit(3)
-        warn(msg)
+        warn("0 fotos válidas en el ZIP; Laravel descargará desde vehiculo.fotos[] si hay URLs.")
     elif len(saved) < MIN_PHOTOS_NORMAL:
         warn(f"Solo {len(saved)} fotos válidas (< {MIN_PHOTOS_NORMAL} mínimas)")
     elif len(saved) < MIN_PHOTOS_STRICT and strict:
@@ -1359,7 +1365,7 @@ def _bloques_v2_portales(payload: dict) -> list[str]:
     return L
 
 
-def generar_redes_sociales(payload: dict) -> list[str]:
+def generar_redes_sociales(payload: dict, coche_id: str = "") -> list[str]:
     """redes-sociales.txt — Laravel importa a CarMarketingContent.
 
     Esquema v2 (05-sep-2026): 3 redes (TikTok, Instagram, Facebook) ×
@@ -1368,6 +1374,10 @@ def generar_redes_sociales(payload: dict) -> list[str]:
     Facebook informativo masivo) pero comparten GANCHO y hashtags globales.
 
     Bloques emitidos:
+      [COCHE_ID]                            -> C1 auditoría 09-sep-2026: el ID
+                                              del coche se propaga al TXT y al
+                                              JSON v2 para que el panel pueda
+                                              relacionarlos sin parsear el nombre.
       [GANCHO]                              -> común a las 3 redes
       [HASHTAGS]                            -> globales (fallback si no hay por red)
       [PIE_FOTO]N                           -> pies de foto (1 por foto destacada)
@@ -1384,6 +1394,9 @@ def generar_redes_sociales(payload: dict) -> list[str]:
 
     lines: list[str] = [
         "# Marketing — Redes sociales (3 redes × 3 posts + 3 stories)".rstrip(),
+        # C1 auditoría 09-sep-2026: propagamos coche_id al TXT para que el
+        # panel pueda correlacionarlo sin parsear el nombre del archivo.
+        bloque("COCHE_ID", coche_id),
         bloque("GANCHO", redes.get("gancho") or pub.get("titular") or ""),
     ]
 
@@ -1449,7 +1462,7 @@ def generar_redes_sociales(payload: dict) -> list[str]:
     return _clean_lines(lines)
 
 
-def generar_anuncio_portales(payload: dict) -> list[str]:
+def generar_anuncio_portales(payload: dict, coche_id: str = "") -> list[str]:
     """anuncio-portales.txt — Laravel importa a CarMarketingContent.
 
     Esquema v2 (05-sep-2026): MISMA ficha base reutilizada para los 4 portales
@@ -1503,6 +1516,8 @@ def generar_anuncio_portales(payload: dict) -> list[str]:
 
     lines: list[str] = [
         "# Anuncio portales (misma ficha para Milanuncios · Coches.net · Wallapop · Facebook Marketplace)".rstrip(),
+        # C1 auditoría 09-sep-2026: propagamos coche_id al TXT.
+        bloque("COCHE_ID", coche_id),
         bloque("TITULO", titulo),
         bloque("DESCRIPCION", descripcion),
     ]
@@ -1756,8 +1771,8 @@ def main() -> int:
     interno_lines = generar_informe_interno(payload)
     dossier_lines = generar_dossier_cliente(payload)
     ficha_cliente_lines = generar_ficha_cliente(payload, fotos_ok)
-    redes_lines = generar_redes_sociales(payload)
-    portales_lines = generar_anuncio_portales(payload)
+    redes_lines = generar_redes_sociales(payload, coche_id)
+    portales_lines = generar_anuncio_portales(payload, coche_id)
 
     contents: dict[str, list[str] | None] = {
         "ficha-publicitaria.txt": ficha_lines,
