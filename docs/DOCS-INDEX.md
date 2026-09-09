@@ -32,6 +32,7 @@
 | Carpeta | Qué | Cuándo se mira |
 |---|---|---|
 | [`informes/`](informes/) | Informes de mercado y unidad ya entregados al cliente (AstraJ OPC, Tiguan, etc.) | Cuando se necesita ver un ejemplo real de entregable completo |
+| [`informes/busqueda-bmw-320d-alemania-2026-09-09.md`](informes/busqueda-bmw-320d-alemania-2026-09-09.md) | **Listado crudo** de 11 candidatos mobile.de BMW 320d (3 variantes: F30/G20/G21) con filtros aplicados e hipótesis | Insumo para un Flujo A/B posterior o referencia de mercado |
 
 ---
 

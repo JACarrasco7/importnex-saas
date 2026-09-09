@@ -194,6 +194,28 @@
   - IEDMT por unidad + modalidad M1/M2/M3 pendientes si hay cliente.
   - En cola: `pendiente_busqueda` · `siguiente_busqueda=vw-golf-75-r`.
 
+### BMW 320d (3 variantes) · 2026-09-09 — barrido crudo mobile.de
+- **Tipo:** LISTADO CRUDO (no Flujo A/B completo)
+- **N anuncios DE:** 11 únicos (12 entradas en bruto — 1 duplicado)
+- **N anuncios ES:** no barrido
+- **Filtros aplicados:**
+  - F30 Berlina: `ms=25200;14` · `fr=2017:2020` · `pw=224:232` kW · `ml=:180000` · `p=:22500` · `dam=false` (2 ads)
+  - G20 Berlina: `ms=25200;14` · `fr=2022:2026` · `pw=231:239` kW · `p=:30000` · `dam=false` (3 ads)
+  - G21 Touring: `ms=25200;64` · `fr=2020:2026` · `pw=231:239` kW · `p=:30000` · `dam=false` (6 ads, 1 con `ecol=BLUE`)
+- **Hueco %:** no calculado (listado crudo, sin informe)
+- **Veredicto:** no emitido
+- **Mejor candidato:** ninguno sin verificar ficha
+- **Fuentes cubiertas:** 1/7 (mobile.de crudo, sin AS24/Wallapop/Milanuncios/Coches.net/AutoUncle/kleinanzeigen)
+- **Peticiones usadas:** 0 (pegado a mano por el usuario)
+- **Refrescar antes de:** 2026-09-16 (7 días — barrido de mercado)
+- **Notas:**
+  - **⚠️ Filtro de potencia atípico** (224-239 kW): el 320d estándar son 140 kW. Los 224-239 kW sugieren M340d (240 kW reales) o tuning no declarado.
+  - **Duplicado detectado**: id=`43641335703360` aparece 2× en el listado original. Verificar si fue error de copiar-pegar.
+  - **Una unidad con `ecol=BLUE`** (id=447819922, G21 Touring ≤35k €) — revisar disponibilidad de este color en M340d.
+  - **No se ha pasado el validador `check_marketing.py`** — esto NO es copy, es un listado de insumos.
+  - Próximo paso si se quiere Flujo A: **abrir las 11 fichas y verificar** (versión real, kW reales, siniestros no declarados).
+  - Documentación completa del barrido: `docs/informes/busqueda-bmw-320d-alemania-2026-09-09.md`.
+
 ---
 
 ## 🚗 VW Golf GTI (pendiente)
