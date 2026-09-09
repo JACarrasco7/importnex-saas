@@ -13,6 +13,10 @@
 | `portales_anuncio.md` | Spec de portales: Coches.net, Milanuncios, Wallapop (texto base + 3 deltas) + aviso legal completo |
 | `biblioteca_ganchos.md` | 8 ángulos de venta con proof point, aperturas prohibidas, cierres, fórmula de la pega honesta |
 | `fuentes_y_evidencia.md` | Reglas de citación, fuentes permitidas (DE/ES), plantilla de cita, auditoría mensual |
+| `evidencia_externa.md` | **(07-sep-2026)** De dónde sale cada regla importada de fuera: normas de Coches.net y Milanuncios, art. 20 TRLGDCU y VO expuesto, hashtags y sends per reach de Instagram, vídeo corto, Open Graph de WhatsApp |
+| `ficha_cliente.md` | **(07-sep-2026)** La página que se manda al cliente por enlace: 14 secciones, qué sale y qué entra, orden, bloque fijo de "gestor sin garantía" (A31) y diagnóstico de la ficha en producción |
+| `handoff_laravel.md` | **(07-sep-2026)** Entrega técnica al panel: JSON canónico en vez de parsear texto, mapa bloque → componente Blade con fallback, Open Graph para WhatsApp, animaciones en 3 capas y modo PDF, checklist de aceptación |
+| `plantillas/ficha-cliente.txt` | Esqueleto de la ficha del cliente (+ `plantillas/ejemplo/` relleno como patrón de calidad y fixture) |
 
 ## Activación
 
@@ -35,6 +39,7 @@ No se activa con:
 | Reel / TikTok / Shorts | `redes-sociales.txt` (bloque `[VT_*]`) |
 | Facebook página | `redes-sociales.txt` (bloque `[FB_*]`) |
 | FB Marketplace | `redes-sociales.txt` (bloque `[FBMP_*]`) |
+| Ficha del cliente (enlace `/c/<token>`) | `ficha-cliente.txt` (bloques `[FC_*]`) → `contenido/json/ficha-cliente.json` |
 
 ## Validación
 

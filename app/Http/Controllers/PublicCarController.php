@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CarPublicLink;
 use App\Support\Esqueleto;
+use App\Support\FiltroPublico;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -42,13 +43,83 @@ class PublicCarController extends Controller
 
         $esqueleto = $contenido ? Esqueleto::desde($contenido) : null;
 
+        $fotos = $this->fotos($car);
+
         return view('public.car-dossier', [
             'car' => $car,
             'esqueleto' => $esqueleto,
+            'ficha' => $this->fichaCliente($car),
             'logoBase64' => $this->logo(),
-            'fotos' => $this->fotos($car),
+            'fotos' => $fotos,
+            'fotoPortada' => $fotos[0] ?? null,
             'clienteNombre' => $car->client?->name,
         ]);
+    }
+
+    /**
+     * Ficha del cliente v2 en JSON (`contenido/json/ficha-cliente.json`).
+     *
+     * Es lo que genera la skill con `esqueleto_a_json.py`; si el coche todavía
+     * no lo trae, la vista sigue funcionando con el esqueleto antiguo.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function fichaCliente($car): ?array
+    {
+        // El ingestor aplana los nombres al guardar, así que puede estar en
+        // contenido/json/ (tal cual viene del ZIP) o suelto en contenido/.
+        $candidatos = [
+            "cars/{$car->id}/contenido/json/ficha-cliente.json",
+            "cars/{$car->id}/contenido/ficha-cliente.json",
+        ];
+
+        $path = null;
+        foreach ($candidatos as $candidato) {
+            if (Storage::disk('local')->exists($candidato)) {
+                $path = $candidato;
+                break;
+            }
+        }
+
+        if (! $path) {
+            return null;
+        }
+
+        $datos = json_decode((string) Storage::disk('local')->get($path), true);
+        if (! is_array($datos) || ! isset($datos['ficha']) || ! is_array($datos['ficha'])) {
+            return null;
+        }
+
+        return $this->limpiarFicha($datos['ficha']);
+    }
+
+    /**
+     * Aplica el filtro público a todo lo que venga del ZIP (A22b).
+     *
+     * @param  array<string, mixed>  $ficha
+     * @return array<string, mixed>
+     */
+    private function limpiarFicha(array $ficha): array
+    {
+        foreach ($ficha as $clave => $valor) {
+            if (is_string($valor)) {
+                $ficha[$clave] = FiltroPublico::texto($valor);
+            } elseif (is_array($valor)) {
+                $ficha[$clave] = array_values(array_filter($valor, function ($item) {
+                    if (is_string($item)) {
+                        return FiltroPublico::permitida($item);
+                    }
+
+                    if (is_array($item)) {
+                        return FiltroPublico::permitida(implode(' ', array_filter($item, 'is_string')));
+                    }
+
+                    return true;
+                }));
+            }
+        }
+
+        return array_filter($ficha, fn ($v) => $v !== null && $v !== []);
     }
 
     private function leerContenido($car, string $filename): ?string
@@ -71,19 +142,27 @@ class PublicCarController extends Controller
         return 'data:image/png;base64,'.base64_encode(file_get_contents($path));
     }
 
-    /** @return array<int, string> */
+    /**
+     * URLs absolutas de las fotos.
+     *
+     * Antes se incrustaban en base64: con 30 fotos la página pesaba decenas de
+     * megas y `og:image` quedaba en un `data:` URI que WhatsApp no puede leer
+     * para la previsualización del enlace.
+     *
+     * @return array<int, string>
+     */
     private function fotos($car): array
     {
         $out = [];
         foreach ($car->photos()->orderBy('sort_order')->get() as $foto) {
-            $abs = str_starts_with($foto->url, '/storage/')
-                ? public_path($foto->url)
-                : storage_path('app/public/'.ltrim($foto->url, '/'));
-
-            if (file_exists($abs)) {
-                $mime = mime_content_type($abs) ?: 'image/jpeg';
-                $out[] = 'data:'.$mime.';base64,'.base64_encode(file_get_contents($abs));
+            $ruta = (string) $foto->url;
+            if ($ruta === '') {
+                continue;
             }
+
+            $out[] = str_starts_with($ruta, 'http')
+                ? $ruta
+                : url(str_starts_with($ruta, '/storage/') ? $ruta : '/storage/'.ltrim($ruta, '/'));
         }
 
         return $out;

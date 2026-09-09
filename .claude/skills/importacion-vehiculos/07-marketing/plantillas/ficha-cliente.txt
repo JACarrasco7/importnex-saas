@@ -1,0 +1,134 @@
+# ============================================================================
+# ficha-cliente.txt — la página que se envía al cliente (v2, 07-sep-2026)
+# Spec: 07-marketing/ficha_cliente.md · Reglas comunes: 07-marketing/copy_engine.md
+# La renderiza Laravel (ficha-coche.blade.php). Las líneas con # no se publican.
+# PROHIBIDO aquí: vendibilidad, score, margen, honorarios desglosados, nº de
+# competidores, precio de origen, URLs de comparables, veredicto interno.
+# ============================================================================
+
+[COCHE_ID] 
+[FC_FECHA_DATOS] 
+# Fecha de captura de los datos (dd/mm/aaaa). Siempre visible.
+
+# --- 1 · CABECERA -----------------------------------------------------------
+[FC_TITULO] 
+# Marca Modelo Versión
+[FC_SUBTITULO] 
+# Año · km · combustible · cambio
+[FC_PRECIO] 
+# Precio del VEHÍCULO. El caption es siempre «+ gastos gestión de compra».
+# PROHIBIDO: «IVA incluido», «precio final», «llave en mano», «sin sorpresas» — no vendemos el coche.
+[FC_PRECIO_NOTA] + gastos gestión de compra
+[FC_ESTADO_PROCESO] Disponible
+# Disponible | Reservado | En tránsito | Entregado
+
+# --- 2 · EN 30 SEGUNDOS -----------------------------------------------------
+[FC_RESUMEN_BUENO] 
+[FC_RESUMEN_OJO] 
+# La pega, en positivo y con la solución al lado. Obligatorio (A28).
+[FC_RESUMEN_PASO] 
+
+# --- 3 · FICHA TÉCNICA ------------------------------------------------------
+[FC_SPEC] Marca y modelo | 
+[FC_SPEC] Versión | 
+[FC_SPEC] Año | 
+[FC_SPEC] Primera matriculación | 
+[FC_SPEC] Kilómetros | 
+[FC_SPEC] Combustible | 
+[FC_SPEC] Cambio | 
+[FC_SPEC] Potencia | 
+[FC_SPEC] Tracción | 
+[FC_SPEC] Carrocería | 
+[FC_SPEC] Puertas y plazas | 
+[FC_SPEC] Color | 
+[FC_SPEC] Etiqueta DGT | 
+[FC_SPEC] Consumo homologado | 
+[FC_SPEC] Emisiones CO₂ | 
+[FC_SPEC] Propietarios | 
+# Lo que no se sepa: "por confirmar". NUNCA se inventa ni se omite (A18).
+
+# --- 4 · EQUIPAMIENTO -------------------------------------------------------
+[FC_EQUIP] 
+[FC_EQUIP] 
+[FC_EQUIP] 
+[FC_EQUIP_PENDIENTE] 
+# Lo que aparece en el anuncio pero no está confirmado en la ficha del vehículo.
+
+# --- 5 · ESTADO Y ANTECEDENTES ---------------------------------------------
+[FC_VERIFICADO] 
+[FC_VERIFICADO] 
+[FC_VERIFICADO] 
+[FC_PENDIENTE_COMPROBAR] 
+[FC_PENDIENTE_COMPROBAR] 
+
+# --- 6 · FOTOS --------------------------------------------------------------
+[FC_FOTOS] 
+# Fotos REALES del vehículo, mínimo 5. Nunca capturas ni fotos de catálogo.
+
+# --- 7 · POR QUÉ ESTA UNIDAD ------------------------------------------------
+[FC_ARGUMENTO] 
+[FC_ARGUMENTO] 
+[FC_ARGUMENTO] 
+# Cada uno con su dato. Énfasis con **negrita**.
+
+# --- 8 · QUÉ DICE EL MERCADO ESPAÑOL ---------------------------------------
+[FC_MERCADO_MIN] 
+[FC_MERCADO_MEDIANA] 
+[FC_MERCADO_MAX] 
+[FC_MERCADO_N] 
+[FC_MERCADO_FECHA] 
+[FC_MERCADO_NOTA] Rango de precios de unidades similares publicadas en España en la fecha indicada. Es una referencia de mercado, no una promesa de ahorro.
+# NUNCA: "te ahorras X €", nº de competidores, enlaces a los comparables.
+
+# --- 9 · QUÉ INCLUYE Y QUÉ NO ----------------------------------------------
+[FC_INCLUYE] El vehículo
+[FC_INCLUYE] Transporte hasta España
+[FC_INCLUYE] ITV de importación y trámites de matriculación
+[FC_INCLUYE] Honorarios de gestión de JJ Import Motors
+[FC_NO_INCLUYE] Seguro del vehículo
+[FC_NO_INCLUYE] Impuesto municipal de circulación
+[FC_NO_INCLUYE] Mantenimiento, reparaciones y desgaste
+[FC_NO_INCLUYE] Garantía mecánica (ver más abajo)
+
+# --- 10 · CÓMO FUNCIONA -----------------------------------------------------
+[FC_PASO] Semana 0 | Reserva y bloqueo de la unidad con el vendedor
+[FC_PASO] Semana 1 | Compra, documentación y preparación de la exportación
+[FC_PASO] Semanas 2-3 | Transporte hasta España
+[FC_PASO] Semanas 3-4 | ITV de importación, impuestos y matriculación
+[FC_PASO] Semana 4 | Entrega con el coche ya a tu nombre
+# Plazos ESTIMADOS, siempre en semanas. Nunca fechas cerradas.
+
+# --- 11 · QUÉ HACEMOS Y QUÉ NO (bloque fijo, no se reescribe) --------------
+[FC_HACEMOS] Localizamos la unidad y comprobamos su historial y su documentación
+[FC_HACEMOS] Negociamos y coordinamos la compra con el vendedor
+[FC_HACEMOS] Organizamos el transporte hasta España
+[FC_HACEMOS] Tramitamos la ITV de importación, los impuestos y la matriculación
+[FC_HACEMOS] Te acompañamos hasta que tienes las llaves y el coche a tu nombre
+
+[FC_NO_HACEMOS] No vendemos coches: JJ Import Motors no es el vendedor ni el propietario del vehículo. La compraventa es entre el vendedor y tú, y el coche se matricula directamente a tu nombre.
+[FC_NO_HACEMOS] No respondemos de averías, desgastes o defectos que no sean visibles en la documentación y en la inspección previa.
+[FC_NO_HACEMOS] No hacemos mantenimiento ni reparaciones.
+
+[FC_NO_GARANTIA] JJ Import Motors no ofrece garantía de ningún tipo sobre el vehículo. Cualquier garantía o responsabilidad que exista corresponde al vendedor, según la ley que le sea aplicable. Nuestro servicio es la gestión de la búsqueda, la verificación y la importación, con honorarios fijos acordados de antemano.
+# Bloque OBLIGATORIO. No se reescribe ni se suaviza.
+
+# --- 12 · PREGUNTAS FRECUENTES ---------------------------------------------
+[FC_FAQ] ¿El coche es vuestro? | No. Nosotros gestionamos la compra: el vehículo se compra al vendedor y se matricula directamente a tu nombre.
+[FC_FAQ] ¿Lleva garantía? | JJ Import Motors no da garantía. La que pueda existir es la del vendedor, según la ley que le aplique. Si quieres cobertura mecánica, se puede contratar aparte con una compañía especializada.
+[FC_FAQ] ¿Qué pasa si al llegar no es como se dijo? | 
+[FC_FAQ] ¿Cuánto tarda? | 
+[FC_FAQ] ¿Qué pasa si lo vende otro antes? | 
+[FC_FAQ] ¿Puedo verlo antes de comprarlo? | 
+[FC_FAQ] ¿Qué pasa con la ITV y la matrícula? | 
+[FC_FAQ] ¿Cómo se paga? | 
+
+# --- 13 · SIGUIENTE PASO ----------------------------------------------------
+[FC_CTA] Quiero gestionar la compra
+[FC_CONTACTO] 
+# Un solo CTA. Teléfono y WhatsApp como canal, nada más compitiendo.
+
+# --- 14 · PIE LEGAL ---------------------------------------------------------
+[FC_AVISO_LEGAL] JJ Import Motors (Huelva) presta un servicio de gestión de búsqueda, compra e importación de vehículos. No es vendedora ni propietaria del vehículo y no ofrece garantía sobre él. El precio indicado es el del vehículo; a él se suman los gastos de gestión de compra, detallados arriba. No incluye seguro, impuesto de circulación ni mantenimiento. Disponibilidad y precio sujetos a confirmación en el momento de la reserva.
+
+[PENDIENTE] 
+# Si queda algo pendiente, la ficha NO se envía al cliente.

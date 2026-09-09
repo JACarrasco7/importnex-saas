@@ -1,0 +1,78 @@
+# EJEMPLO RELLENO — Opel Astra OPC (ejemplo canónico). No son datos de una unidad real.
+
+[COCHE_ID] EJEMPLO-astra-opc-2015
+[FECHA] 06/09/2026
+
+[PT_TITULO] Opel Astra OPC 280CV manual · 2015 · 62.400 km · 1 dueño
+
+[PT_TITULO_B] Opel Astra OPC 280CV · 2015 · 62.400 km · libro sellado
+
+[PT_RESUMEN]
+Astra OPC de 280 CV con un único propietario y 62.400 km reales, localizado en Alemania y verificado por nosotros antes de traerlo. Compacto deportivo con cambio manual de 6 velocidades y etiqueta C.
+
+[PT_FICHA] Año | 2015
+[PT_FICHA] Primera matriculación | 03/2015
+[PT_FICHA] Kilómetros | 62.400
+[PT_FICHA] Combustible | Gasolina
+[PT_FICHA] Cambio | Manual, 6 velocidades
+[PT_FICHA] Potencia | 280 CV
+[PT_FICHA] Etiqueta DGT | C
+[PT_FICHA] Propietarios | 1
+
+[PT_ESTADO] Libro de mantenimiento sellado y revisiones al día.
+[PT_ESTADO] Sin llamadas a revisión pendientes para esta unidad.
+[PT_ESTADO] Neumáticos al 50 % de vida: se sustituyen antes de la entrega.
+
+[PT_EQUIPAMIENTO]
+Asientos deportivos Recaro, navegador, climatizador bizona, sensores de aparcamiento delanteros y traseros, llantas de 20 pulgadas y faros bixenón. (Equipamiento verificado en la ficha del vehículo.)
+
+[PT_INCLUYE] El vehículo
+[PT_INCLUYE] Transporte hasta España
+[PT_INCLUYE] ITV de importación y trámites de matriculación
+[PT_NO_INCLUYE] Seguro ni impuesto de circulación
+
+[PT_COMO_FUNCIONA]
+Somos gestores de búsqueda e importación: localizamos el coche, comprobamos su historial y su precio real de mercado, y lo traemos legalizado a España. Plazo aproximado de entrega: 3-4 semanas desde la reserva.
+
+[PT_AVISO] JJ Import Motors (Huelva) actúa como gestor de búsqueda e importación: el vehículo no es propiedad del establecimiento. Precio final al contado, impuestos incluidos; no incluye seguro ni impuesto de circulación. Disponibilidad y precio sujetos a confirmación.
+
+[PT_PRECIO] 18.900 EUR al contado
+
+[PT_CTA_COCHESNET] Llámanos o escríbenos desde el propio anuncio y te pasamos la ficha completa con fotos.
+[PT_CTA_MILANUNCIOS] Escríbenos desde el anuncio y te pasamos la ficha completa con fotos y verificaciones.
+
+[WP_TITULO] Opel Astra OPC 280CV · 2015 · 62.400 km
+
+[WP_DESCRIPCION]
+Astra OPC de 280 CV, un único dueño y 62.400 km reales. Traído de Alemania y verificado antes de moverlo.
+Año 2015 · 62.400 km · gasolina · manual 6v · 280 CV · Etiqueta C · 1 dueño.
+Libro de mantenimiento sellado y sin llamadas a revisión pendientes. Neumáticos al 50 %: se sustituyen antes de entregar.
+Equipamiento verificado: Recaro, navegador, climatizador bizona, sensores de aparcamiento, llantas de 20 pulgadas, bixenón.
+El precio incluye transporte hasta España, ITV de importación y trámites de matriculación.
+JJ Import Motors actúa como gestor de importación, no como vendedor del vehículo. Precio al contado, disponibilidad a confirmar.
+
+[WP_CTA] Escríbeme por el chat y te paso la ficha completa.
+
+[CAMPO] Marca | Opel
+[CAMPO] Modelo | Astra
+[CAMPO] Versión | OPC 2.0 Turbo
+[CAMPO] Año | 2015
+[CAMPO] Kilómetros | 62.400
+[CAMPO] Combustible | Gasolina
+[CAMPO] Cambio | Manual
+[CAMPO] Potencia CV | 280
+[CAMPO] Carrocería | Compacto 3 puertas
+[CAMPO] Puertas | 3
+[CAMPO] Plazas | 5
+[CAMPO] Color | Blanco
+[CAMPO] Etiqueta DGT | C
+[CAMPO] Precio contado | 18.900 EUR
+
+[FUENTE_DATO] 62.400 km | vehiculo.km
+[FUENTE_DATO] 280 CV | vehiculo.potencia_cv
+[FUENTE_DATO] 1 dueño | anuncio.propietarios
+[FUENTE_DATO] Etiqueta C | vehiculo.etiqueta_dgt
+[FUENTE_DATO] 18.900 EUR | costes.precio_cliente
+[FUENTE_DATO] equipamiento | vehiculo.equipamiento
+
+[FOTOS] 01_frontal_34.jpg | 02_lateral.jpg | 03_trasera.jpg | 04_interior.jpg | 05_cuadro.jpg

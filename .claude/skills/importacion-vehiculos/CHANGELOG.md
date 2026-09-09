@@ -1,3 +1,68 @@
+## [09-sep-2026] — Cadena cerrada: empaquetar → ZIP → panel
+
+La skill y el panel ya hablaban el mismo idioma en la documentación, pero no en el código.
+Al probar el pipeline con el fixture saltaron tres roturas que nadie habría visto hasta un
+import real:
+
+1. **`empaquetar.py` no generaba la ficha del cliente ni el JSON.** Ahora emite
+   `contenido/ficha-cliente.txt` (31 bloques `[FC_*]`, solo con veredicto Comprar*),
+   genera `contenido/json/*.json` con `esqueleto_a_json.py` y los declara en el manifest.
+2. **Los bloques de marketing no coincidían.** `empaquetar.py` escribía el vocabulario v1.5
+   (`TIKTOK_POST_n`…) y el módulo esperaba el v2 (`IG_`, `VT_`, `FB_`, `FBMP_`, `PT_`): el
+   validador respondía "archivo sin bloques reconocibles" a TODO lo generado. Ahora se
+   emiten los dos, como puente, hasta que el panel migre.
+3. **Los parsers no seguían el contrato.** `check_marketing.py` solo aceptaba el marcador en
+   línea propia y `esqueleto_a_json.py` descartaba la continuación multilínea. Los dos
+   interpretan ya el formato igual que `App\Support\Esqueleto`.
+
+**Además:** `[IG_GANCHO_B]` en la plantilla de redes (el A/B que prometía copy_engine §9.3),
+superlativos comprobados por palabra completa ("corre" ya no salta dentro de "corresponde") y
+el patrón de "concesionario" solo marca cuando se refiere a nosotros, no cuando es el taller
+donde se selló el libro.
+
+**En el panel:** el ingestor acepta `.json` en `contenido/`, el controlador busca la ficha en
+las dos rutas posibles y `FiltroPublico` aplica el mismo criterio de "concesionario".
+
+**Prueba de humo:** ZIP del fixture → `check_marketing.py` 🔴 0 · `check_ficha_cliente.py` sin
+hallazgos salvo las fotos (que `--no-photos` no descarga).
+
+## [07-sep-2026] — Ficha del cliente v2, A22b/A31 y entrega en JSON al panel
+
+Fusión de la línea de trabajo del Desktop sobre esta base (v3.7.1). Se conserva todo
+lo que ya había en `07-marketing/` y se añade lo que faltaba:
+
+**Nuevo**
+- `07-marketing/ficha_cliente.md` — la página que se manda al cliente por enlace
+  (`/c/<token>`): 14 secciones, orden, qué sale y qué entra, y el diagnóstico de la
+  ficha real en producción.
+- `07-marketing/handoff_laravel.md` — entrega técnica: **Laravel lee JSON, no `.txt`**,
+  mapa bloque → componente Blade con fallback, Open Graph para la previsualización de
+  WhatsApp, animaciones en tres capas y modo PDF, checklist de aceptación.
+- `07-marketing/evidencia_externa.md` — de dónde sale cada regla importada de fuera
+  (normas de Coches.net y Milanuncios, art. 20 TRLGDCU y VO expuesto, hashtags y
+  *sends per reach* de Instagram, vídeo corto, Open Graph). No confundir con
+  `fuentes_y_evidencia.md`, que son las reglas de citación de la investigación.
+- `07-marketing/plantillas/ficha-cliente.txt` + `plantillas/ejemplo/` (patrón y fixture).
+- `scripts/esqueleto_a_json.py` — conversor de esqueletos a JSON tipado para el panel.
+- `scripts/check_ficha_cliente.py` — validador propio de la ficha (severidad 🔴🟠🟡);
+  no toca los 30 checks de `check_marketing.py`.
+- `memoria/marketing-resultados.md` — qué gancho funcionó, por coche y canal.
+
+**Reglas**
+- **A22b** — el enlace del cliente es PÚBLICO. Fugas reales cortadas: «hueco de 8.969 €
+  antes de costes», «solo 11 unidades en toda España», «vendedor profesional 4.5★»,
+  «vendibilidad (84/100)», «ahorro estimado» y el veredicto interno.
+- **A31** — gestor, no vendedor: **no vendemos coches y no damos garantía** (supera a A30).
+  Prohibido «IVA incluido», «precio final» y «llave en mano»; el caption del precio sigue
+  siendo `+ gastos gestión de compra` (`.ai/rules/business-model.md`).
+- §12 del dossier reescrita como "Qué hacemos y qué NO hacemos".
+- `copy_engine.md` §9: addendum con send-ask, tono por situación, A/B de ganchos,
+  números de vídeo y métricas.
+
+**En el panel (mismo commit)**: `App\Support\FiltroPublico` corta las fugas aunque vengan
+de datos antiguos, el dossier público gana las secciones que faltaban y las fotos dejan de
+ir en base64 (og:image ya es una URL, que es lo que WhatsApp necesita).
+
 # Changelog
 
 Todos los cambios notables en el skill `importacion-vehiculos` se documentarán en este archivo.

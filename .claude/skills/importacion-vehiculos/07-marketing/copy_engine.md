@@ -211,3 +211,53 @@ Comprobaciones:
    `informe.json` para trazabilidad.
 7. **Entrega + plan de publicación** — salida al chat + tabla D0/D1/D3/D7
    (ver §8 del plan multicanal).
+
+---
+
+## 9 · Addendum 07-sep-2026 — lo que aporta la investigación externa
+
+> Cada punto con su fuente y su fecha en `evidencia_externa.md`. Revisar en 6 meses.
+
+### 9.1 · El *send-ask* (Instagram prioriza los envíos por DM)
+
+Mosseri (jul-2026): *"Hashtags work, but they've never been a good way to actually increase your reach"* — categorizan, no alcanzan. Lo que sí pesa hoy es **sends per reach** (envíos por DM ÷ alcance; 3-5 % es una buena referencia).
+
+- Toda pieza de feed lleva, **además del CTA**, una línea de envío con destinatario concreto: *"Mándaselo a quien lleve medio año buscando un compacto así"*. Nunca "comparte con 5 amigos".
+- No cuenta como segundo CTA: el CTA apunta hacia nosotros, el send-ask hacia un tercero.
+- **Regla de la primera línea:** marca + modelo + versión en las dos primeras líneas, escritos como se buscan. El buscador de Instagram lee el caption, no las etiquetas.
+
+### 9.2 · Tono por situación
+
+| Situación | Dial | Qué hacer | Qué no |
+|---|---|---|---|
+| Pega grave que hay que declarar | Honesto y tranquilo | Decirla pronto, con la solución al lado | Esconderla al final |
+| La unidad se ha vendido | Breve y útil | Cerrar el post y ofrecer buscar una igual | Presumir de rapidez |
+| Sube el coste (transporte, impuestos) | Transparente | Explicar la causa y qué implica | Dar cifras internas |
+| Comparación con otro importador | Seguro, sin nombres | Explicar qué hacemos nosotros | Nombrar o insinuar |
+| Cliente que preguntó y no contestó | Cercano | Un dato nuevo como excusa | Urgencias falsas |
+
+### 9.3 · Dos ganchos por coche (A/B por defecto)
+
+Cada unidad sale con **gancho A y gancho B, de ángulos distintos** (`[IG_GANCHO_B]`, `[PT_TITULO_B]`). Uno va a Instagram y el otro al título del portal o al segundo vídeo. Después se anota en `../memoria/marketing-resultados.md` cuál trajo contacto. En 8-10 unidades se sabe qué ángulo funciona **con datos propios**.
+
+### 9.4 · Vídeo corto: números de partida
+
+Ventana crítica **0-3 s** · duración con mejor finalización **9-15 s** · rótulo de gancho 6-10 palabras, beneficio 5-8, CTA 2-3 · **zona segura**: nada de texto en los ~120 px superiores ni inferiores · caption de TikTok ≤100 caracteres · mínimo **2 variantes de gancho**.
+
+### 9.5 · Qué se mide
+
+| Publicación | Métrica principal | Referencia |
+|---|---|---|
+| Unidad en redes | Mensajes recibidos · sends per reach | 3-5 % es bueno |
+| Unidad en portales | Contactos · días hasta el primer contacto | Comparar los 3 portales |
+| Reel / TikTok | Tasa de finalización | ~75 % en piezas de 15 s |
+| Ángulo/gancho | Contactos por ángulo y categoría | Alimenta `biblioteca_ganchos.md` |
+
+### 9.6 · Precio: cómo se escribe (A31)
+
+Se publica el **precio del vehículo** con el caption `+ gastos gestión de compra` y, debajo, qué incluye y **qué no** el servicio. **Prohibido** «IVA incluido», «precio final», «llave en mano» o «sin sorpresas»: no vendemos el coche (ver `.ai/rules/business-model.md` del panel y A31).
+
+### 9.7 · El enlace del cliente es público (A22b)
+
+La ficha `/c/<token>` se reenvía por WhatsApp: aplica la misma lista de prohibiciones que un anuncio de portal. Spec completa en `ficha_cliente.md`; entrega técnica en `handoff_laravel.md`.
+

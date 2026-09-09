@@ -551,6 +551,13 @@ class Esqueleto
 }
 ```
 
+> 🔴 **Laravel consume el JSON, no el `.txt` (07-sep-2026).** Antes de cerrar el ZIP se ejecuta
+> `python scripts/esqueleto_a_json.py contenido/ --out contenido/json/`, que genera
+> `contenido/json/ficha-cliente.json` (y los de redes y portales) con los bloques ya tipados
+> (`spec[]`, `faq[]`, `pasos[]`, listas, números de mercado) más `_meta.bloques_ausentes`.
+> Si esa lista no está vacía, la ficha **no se publica**. Contrato de render y mapa a componentes
+> Blade: `../07-marketing/handoff_laravel.md`.
+
 ### Bloques por archivo (Flujo A)
 
 | Archivo | Bloques esperados |
@@ -558,6 +565,7 @@ class Esqueleto
 | `ficha-publicitaria.txt` | TITULO, CLAIM, ETIQUETA_DGT, SPEC (Etiqueta \| Valor), PRECIO, PRECIO_CAPTION, PLAZO, PRECIO_NOTA, AHORRO, **H2 + INCLUYE/ARGUMENTO/EQUIPAMIENTO** (secciones), **DESCRIPCION**, **POR_QUE**, **VALORACION**, CTA, CONTACTO, QR, QR_TEXTO, LEGAL, FOTOS |
 | `informe-interno.txt` | Ver `informe_tecnico.md` §formato-txt (15 secciones, ~60 bloques). **Los bloques `MARGEN`, `VENTA`, `IEDMT_SENSIBILIDAD`, `SCORE_DIM`, `RIESGO`, `BANDERA_ROJA/AMARILLA`, `COBERTURA`, `CAND_*`, `NEG_*`, `COMP_AJUSTE`, `VENDIBILIDAD_FACTOR`, `ACCION` se renderizan como filas/tablas en `informe-interno.blade.php`.** |
 | `dossier-cliente.txt` | Ver `dossier_cliente.md` §formato-txt (15 secciones, ~50 bloques). **Los bloques `FICHA_TECNICA`, `EQUIPAMIENTO`, `MERCADO_*`, `COSTE_LINEA`, `TIMELINE_SEMANA`, `FAQ_Q/A`, `PASOS`, `GARANTIA_*`, `ESTADO_*`, `DE_VS_ES`, `EVAL_*` se renderizan en el documento del cliente de Laravel (`ficha-coche.blade.php`); `dossier.blade.php` NO existe.** |
+| `ficha-cliente.txt` | **v2 (07-sep-2026)** — la PÁGINA que se manda al cliente por enlace, 14 secciones: FC_TITULO, FC_SUBTITULO, FC_PRECIO, FC_PRECIO_NOTA, FC_ESTADO_PROCESO · FC_RESUMEN_BUENO/OJO/PASO · FC_SPEC (lista `Etiqueta \| Valor`, 16 campos) · FC_EQUIP, FC_EQUIP_PENDIENTE · FC_VERIFICADO, FC_PENDIENTE_COMPROBAR · FC_FOTOS · FC_ARGUMENTO · FC_MERCADO_MIN/MEDIANA/MAX/N/FECHA/NOTA · FC_INCLUYE, FC_NO_INCLUYE · FC_PASO (lista `Semana \| Qué pasa`) · **FC_HACEMOS, FC_NO_HACEMOS, FC_NO_GARANTIA (fijos, A31)** · FC_FAQ (mín. 6) · FC_CTA, FC_CONTACTO · FC_AVISO_LEGAL, FC_FECHA_DATOS. Spec: `../07-marketing/ficha_cliente.md` |
 | `redes-sociales.txt` | GANCHO, POST_LARGO, POST_CORTO, STORIES, HASHTAGS, PIE_FOTO |
 | `anuncio-portales.txt` | TITULO, DESCRIPCION, FICHA_RAPIDA, QUE_INCLUYE, AVISO_LEGAL |
 

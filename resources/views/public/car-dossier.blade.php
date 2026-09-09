@@ -5,10 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $car->brand }} {{ $car->model }} · JJ Import Motors</title>
     <meta name="robots" content="noindex, nofollow">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="JJ Import Motors">
+    <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:title" content="{{ $car->brand }} {{ $car->model }} · JJ Import Motors">
-    <meta property="og:description" content="{{ number_format(($car->sale_price ?? $car->purchase_price ?? 0), 0, ',', '.') }} € · Gestión integral JJ Import Motors">
-    @if(count($fotos) > 0)
-        <meta property="og:image" content="{{ $fotos[0] }}">
+    <meta property="og:description" content="{{ number_format(($car->sale_price ?? $car->purchase_price ?? 0), 0, ',', '.') }} € + gastos de gestión · Gestionamos la compra por ti">
+    {{-- og:image debe ser URL absoluta (1200x630, <600 KB). WhatsApp NO lee data: URIs. --}}
+    @if($fotoPortada)
+        <meta property="og:image" content="{{ $fotoPortada }}">
+        <meta name="twitter:card" content="summary_large_image">
     @endif
     <style>
         :root {
@@ -23,6 +28,54 @@
             --gold: #f4c542;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        /* ── Revelado al hacer scroll: el contenido SIEMPRE está visible de base ── */
+        .reveal { opacity: 1; transform: none; }
+        @supports (animation-timeline: view()) {
+            @media (prefers-reduced-motion: no-preference) {
+                .reveal { animation: reveal-in both; animation-timeline: view(); animation-range: entry 8% cover 26%; }
+            }
+        }
+        @keyframes reveal-in { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+        .js-oculto { opacity: 0; transform: translateY(18px); }
+        .js-visible { opacity: 1; transform: none; transition: opacity .5s ease, transform .5s cubic-bezier(.2,.7,.3,1); }
+        @media (prefers-reduced-motion: reduce) {
+            .reveal, .js-oculto, .js-visible { animation: none !important; transition: none !important; opacity: 1 !important; transform: none !important; }
+        }
+        @media print {
+            .reveal, .js-oculto { animation: none !important; opacity: 1 !important; transform: none !important; }
+        }
+
+        /* ── Secciones nuevas de la ficha v2 ── */
+        .dos-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 34px; }
+        @media (max-width: 760px) { .dos-col { grid-template-columns: 1fr; } }
+        .lista-limpia { list-style: none; margin: 0; padding: 0; }
+        .lista-limpia li { position: relative; padding: 7px 0 7px 26px; font-size: 15px; color: #d1d5db; }
+        .lista-limpia li::before { position: absolute; left: 0; top: 7px; }
+        .lista-ok li::before { content: "✓"; color: var(--green); font-weight: 700; }
+        .lista-pend li::before { content: "☐"; color: var(--gold); font-weight: 700; }
+        .lista-no li::before { content: "✕"; color: #f87171; font-weight: 700; }
+        .aviso-legal {
+            border: 1px solid rgba(244, 197, 66, 0.35); background: rgba(244, 197, 66, 0.06);
+            border-radius: 16px; padding: 26px; margin: 26px 0;
+        }
+        .aviso-legal .titular { font-weight: 700; color: var(--gold); font-size: 17px; margin-bottom: 8px; }
+        .aviso-legal p { color: #cbd5e1; font-size: 14.5px; }
+        .pasos { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+        .paso { border-top: 3px solid var(--orange); padding-top: 11px; font-size: 14px; color: #d1d5db; }
+        .paso b { display: block; font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--orange); margin-bottom: 4px; }
+        @media (max-width: 820px) { .pasos { grid-template-columns: 1fr; } }
+        .faq details { border-bottom: 1px solid rgba(143,163,217,.18); padding: 12px 0; }
+        .faq summary { cursor: pointer; font-weight: 600; color: #e5e7eb; list-style: none; font-size: 15px; }
+        .faq summary::-webkit-details-marker { display: none; }
+        .faq summary::before { content: "+"; color: var(--orange); font-weight: 800; margin-right: 9px; }
+        .faq details[open] summary::before { content: "–"; }
+        .faq p { margin: 9px 0 2px 22px; color: #9fb0cf; font-size: 14.5px; }
+        .nota-fina { color: #7f8cab; font-size: 12.5px; margin-top: 12px; }
+        .ver-todas {
+            display: inline-block; margin-top: 16px; border: 1px solid rgba(143,163,217,.35);
+            border-radius: 10px; padding: 10px 20px; color: var(--platinum-2); font-weight: 600; font-size: 14px;
+        }
         html { scroll-behavior: smooth; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
@@ -703,14 +756,12 @@
         $estadoLabel = $estadoLabels[$car->status] ?? 'Disponible para gestión';
 
         // ── Contenido enriquecido: esqueleto (ficha-publicitaria.txt) con fallback a los datos de la IA del coche ──
-        $porqueTexto = trim((string) ($esqueleto?->uno('POR_QUE') ?: ($car->recommendation ?? '')));
-        $valoracionTexto = trim((string) ($esqueleto?->uno('VALORACION') ?: ($car->valuation ?? '')));
-        $ahorroTexto = $esqueleto?->uno('AHORRO') ?: ($car->estimated_saving ? number_format($car->estimated_saving, 0, ',', '.').' €' : null);
+        // A22b: el enlace es público. Todo lo que venga del ZIP o de la BD pasa por el filtro.
+        $porqueTexto = \App\Support\FiltroPublico::texto($esqueleto?->uno('POR_QUE') ?: ($car->recommendation ?? ''));
+        $valoracionTexto = \App\Support\FiltroPublico::texto($esqueleto?->uno('VALORACION') ?: ($car->valuation ?? ''));
 
-        // ── Veredicto del experto (semáforo) ──
-        $tl = strtolower((string) ($car->traffic_light ?? ''));
-        $veredictoLabel = ['green' => 'Excelente compra', 'amber' => 'Buena opción', 'red' => 'Con cautela'][$tl] ?? null;
-        $veredictoColor = ['green' => '#10b981', 'amber' => '#f59e0b', 'red' => '#ef4444'][$tl] ?? null;
+        // El veredicto del semáforo es INTERNO (A22): al cliente solo le llega
+        // nuestra valoración escrita, sin etiqueta ni nota.
 
         // ── Pros: solo lo bueno para el cliente. consLista y tipsLista se mantienen
         //    aquí por compat con consumidores externos del blade, pero el render
@@ -719,6 +770,30 @@
         if (empty($prosLista)) {
             $prosLista = \App\Support\IaList::normalizar($car->pros ?? null);
         }
+        // Los "puntos a favor" de la IA traen análisis interno (hueco, vendibilidad,
+        // competencia, vendedor de origen): fuera antes de renderizar.
+        $prosLista = \App\Support\FiltroPublico::lista($prosLista);
+
+        // ── Ficha del cliente v2 (JSON del ZIP), con listas ya filtradas ──
+        $fichaPendiente = $ficha['pendiente_comprobar'] ?? [];
+        $fichaVerificado = $ficha['verificado'] ?? [];
+        $fichaNoIncluye = $ficha['no_incluye'] ?? ['Seguro del vehículo', 'Impuesto municipal de circulación', 'Mantenimiento, reparaciones y desgaste', 'Garantía mecánica'];
+        $fichaPasos = $ficha['pasos'] ?? [
+            ['cuando' => 'Semana 0', 'que' => 'Reserva y bloqueo de la unidad con el vendedor'],
+            ['cuando' => 'Semana 1', 'que' => 'Compra, documentación y preparación de la exportación'],
+            ['cuando' => 'Semanas 2-3', 'que' => 'Transporte hasta España'],
+            ['cuando' => 'Semanas 3-4', 'que' => 'ITV de importación, impuestos y matriculación'],
+            ['cuando' => 'Semana 4', 'que' => 'Entrega, con el coche ya a tu nombre'],
+        ];
+        $fichaFaq = $ficha['faq'] ?? [
+            ['pregunta' => '¿El coche es vuestro?', 'respuesta' => 'No. Nosotros gestionamos la compra: el vehículo se compra al vendedor y se matricula directamente a tu nombre.'],
+            ['pregunta' => '¿Lleva garantía?', 'respuesta' => 'JJ Import Motors no ofrece garantía. La que pueda existir es la del vendedor, según la ley que le sea aplicable. Si quieres cobertura mecánica, se puede contratar aparte con una compañía especializada.'],
+            ['pregunta' => '¿Qué pasa si al llegar no es como se dijo?', 'respuesta' => 'Antes de comprar se hace una inspección previa con fotos y vídeo. Si aparece algo que no encaja con lo publicado, te informamos y decides tú si se sigue adelante.'],
+            ['pregunta' => '¿Cuánto tarda?', 'respuesta' => 'Entre tres y cinco semanas desde la reserva. Es una estimación: depende del transporte y de las citas de ITV.'],
+            ['pregunta' => '¿Puedo verlo antes de comprarlo?', 'respuesta' => 'No somos concesionario y el coche no está en nuestras instalaciones. Puedes ir a verlo al vendedor o pedir la inspección previa con fotos y vídeo detallados.'],
+            ['pregunta' => '¿Cómo se paga?', 'respuesta' => 'Con una reserva inicial para bloquear la unidad y el resto según el calendario acordado antes de empezar.'],
+        ];
+        $fechaDatos = $ficha['fecha_datos'] ?? now()->format('d/m/Y');
 
         // ── Comparativa de mercado ──
         $fmtEur = fn ($n) => $n !== null ? number_format((float) $n, 0, ',', '.').' €' : null;
@@ -837,20 +912,15 @@
     {{-- ── CONTENIDO PRINCIPAL ─────────────────────────── --}}
     <main class="container">
 
-        {{-- VEREDICTO --}}
-        @if($veredictoLabel || $valoracionTexto)
-            <section id="veredicto" class="verdict">
-                <div class="verdict-eyebrow">Veredicto JJ Import Motors</div>
-                <h2 class="verdict-h">
-                    @if($veredictoColor)<span class="verdict-dot" style="background: {{ $veredictoColor }}; color: {{ $veredictoColor }};"></span>@endif
-                    {{ $veredictoLabel ?? 'Nuestra recomendación' }}
-                </h2>
-                @if($valoracionTexto)
-                    <p class="verdict-body">{!! \App\Support\Esqueleto::negrita($valoracionTexto) !!}</p>
-                @endif
+        {{-- NUESTRA VALORACIÓN (sin veredicto interno ni nota: A22) --}}
+        @if($valoracionTexto)
+            <section id="veredicto" class="verdict reveal">
+                <div class="verdict-eyebrow">Nuestra valoración</div>
+                <h2 class="verdict-h">Qué nos parece esta unidad</h2>
+                <p class="verdict-body">{!! \App\Support\Esqueleto::negrita($valoracionTexto) !!}</p>
                 <div class="verdict-footer">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
-                    Análisis actualizado el {{ now()->format('d/m/Y') }} · Verificación del vehículo y comparativa de mercado
+                    Datos del vehículo comprobados el {{ $fechaDatos }}
                 </div>
             </section>
         @endif
@@ -878,10 +948,8 @@
                     @if($marketMax)
                         <div class="market-box"><div class="k">Máximo mercado</div><div class="v">{{ $marketMax }}</div></div>
                     @endif
-                    @if($ahorroTexto)
-                        <div class="market-box highlight"><div class="k">Ahorro estimado</div><div class="v">{{ $ahorroTexto }}</div></div>
-                    @endif
                 </div>
+                <p class="nota-fina">Rango de precios de unidades similares publicadas en España a fecha de {{ $fechaDatos }}. Es una referencia de mercado, no una promesa de ahorro.</p>
             </section>
         @endif
 
@@ -934,25 +1002,7 @@
             </div>
         </section>
 
-        {{-- GALERÍA --}}
-        @if(count($fotos) > 1)
-            @php
-                $galleryCols = min(4, max(1, count($fotos)));
-            @endphp
-            <section id="galeria" class="gallery-wrap">
-                <div class="section-title">Galería</div>
-                <h2 class="section-h">Fotos reales del vehículo</h2>
-                <div class="gallery {{ $galleryCols === 4 ? 'four' : ($galleryCols === 3 ? 'three' : ($galleryCols === 2 ? 'two' : 'one')) }}" id="gallery">
-                    @foreach($fotos as $i => $foto)
-                        <div class="shot" data-index="{{ $i }}" onclick="openLightbox({{ $i }})">
-                            <img src="{{ $foto }}" alt="Foto {{ $i+1 }}">
-                        </div>
-                    @endforeach
-                </div>
-            </section>
-        @endif
-
-        {{-- PUNTOS A FAVOR (al cliente solo lo bueno) --}}
+                {{-- PUNTOS A FAVOR (al cliente solo lo bueno) --}}
         @if(count($prosLista) > 0)
             <section>
                 <div class="section-title">Puntos a favor</div>
@@ -1016,6 +1066,122 @@
             @endif
         @endif
 
+        {{-- ESTADO: VERIFICADO Y PENDIENTE (la honestidad sostiene la ficha) --}}
+        @if(count($fichaVerificado) > 0 || count($fichaPendiente) > 0)
+            <section class="reveal">
+                <div class="section-title">Estado</div>
+                <h2 class="section-h">Qué está comprobado y qué queda por comprobar</h2>
+                <div class="dos-col">
+                    @if(count($fichaVerificado) > 0)
+                        <ul class="lista-limpia lista-ok">
+                            @foreach($fichaVerificado as $item)
+                                <li>{{ is_string($item) ? $item : '' }}</li>
+                            @endforeach
+                        </ul>
+                    @endif
+                    @if(count($fichaPendiente) > 0)
+                        <ul class="lista-limpia lista-pend">
+                            @foreach($fichaPendiente as $item)
+                                <li>{{ is_string($item) ? $item : '' }}</li>
+                            @endforeach
+                        </ul>
+                    @endif
+                </div>
+            </section>
+        @endif
+
+{{-- GALERÍA --}}
+        @if(count($fotos) > 1)
+            @php
+                $galleryCols = min(4, max(1, count($fotos)));
+            @endphp
+            <section id="galeria" class="gallery-wrap">
+                <div class="section-title">Galería</div>
+                <h2 class="section-h">Fotos reales del vehículo</h2>
+                <div class="gallery {{ $galleryCols === 4 ? 'four' : ($galleryCols === 3 ? 'three' : ($galleryCols === 2 ? 'two' : 'one')) }}" id="gallery">
+                    @foreach(array_slice($fotos, 0, 8) as $i => $foto)
+                        <div class="shot" data-index="{{ $i }}" onclick="openLightbox({{ $i }})">
+                            <img src="{{ $foto }}" alt="{{ $car->brand }} {{ $car->model }} — foto {{ $i+1 }}" loading="{{ $i === 0 ? 'eager' : 'lazy' }}" decoding="async">
+                        </div>
+                    @endforeach
+                </div>
+                @if(count($fotos) > 8)
+                    {{-- El resto no se carga hasta que se abre: 30 fotos de golpe entierran el resto de la ficha --}}
+                    <details id="galeria-resto">
+                        <summary class="ver-todas">Ver las {{ count($fotos) }} fotos</summary>
+                        <div class="gallery {{ $galleryCols === 4 ? 'four' : 'three' }}" style="margin-top:14px">
+                            @foreach(array_slice($fotos, 8, null, true) as $i => $foto)
+                                <div class="shot" data-index="{{ $i }}" onclick="openLightbox({{ $i }})">
+                                    <img src="{{ $foto }}" alt="{{ $car->brand }} {{ $car->model }} — foto {{ $i+1 }}" loading="lazy" decoding="async">
+                                </div>
+                            @endforeach
+                        </div>
+                    </details>
+                @endif
+            </section>
+        @endif
+
+
+        {{-- QUÉ NO INCLUYE --}}
+        <section class="reveal">
+            <div class="section-title">Transparencia</div>
+            <h2 class="section-h">Qué no incluye</h2>
+            <ul class="lista-limpia lista-no">
+                @foreach($fichaNoIncluye as $item)
+                    <li>{{ is_string($item) ? $item : '' }}</li>
+                @endforeach
+            </ul>
+        </section>
+
+        {{-- CÓMO FUNCIONA --}}
+        <section class="reveal">
+            <div class="section-title">El proceso</div>
+            <h2 class="section-h">Cómo funciona</h2>
+            <div class="pasos">
+                @foreach($fichaPasos as $paso)
+                    <div class="paso">
+                        <b>{{ is_array($paso) ? ($paso['cuando'] ?? '') : '' }}</b>
+                        {{ is_array($paso) ? ($paso['que'] ?? '') : (string) $paso }}
+                    </div>
+                @endforeach
+            </div>
+            <p class="nota-fina">Plazos estimados: dependen del transporte y de las citas de ITV.</p>
+        </section>
+
+        {{-- QUÉ HACEMOS Y QUÉ NO — bloque fijo (A31, .ai/rules/business-model.md) --}}
+        <section class="aviso-legal reveal">
+            <div class="section-title">Importante</div>
+            <h2 class="section-h">Qué hacemos y qué no hacemos</h2>
+            <div class="dos-col">
+                <ul class="lista-limpia lista-ok">
+                    <li>Localizamos la unidad y comprobamos su historial y su documentación</li>
+                    <li>Negociamos y coordinamos la compra con el vendedor</li>
+                    <li>Organizamos el transporte hasta España</li>
+                    <li>Tramitamos la ITV de importación, los impuestos y la matriculación</li>
+                    <li>Te acompañamos hasta que el coche está a tu nombre</li>
+                </ul>
+                <ul class="lista-limpia lista-no">
+                    <li><strong>No vendemos coches:</strong> JJ Import Motors no es el vendedor ni el propietario del vehículo. La compraventa es entre el vendedor y tú.</li>
+                    <li>No respondemos de averías, desgastes o defectos que no sean visibles en la documentación y en la inspección previa.</li>
+                    <li>No hacemos mantenimiento ni reparaciones, ni ofrecemos financiación.</li>
+                </ul>
+            </div>
+            <div class="titular" style="margin-top:18px">JJ Import Motors no ofrece garantía de ningún tipo sobre el vehículo.</div>
+            <p>Cualquier garantía o responsabilidad que exista corresponde al vendedor, según la ley que le sea aplicable. Nuestro servicio es la gestión de la búsqueda, la verificación y la importación, con honorarios acordados de antemano. Si quieres cobertura mecánica, puede contratarse aparte con una compañía especializada.</p>
+        </section>
+
+        {{-- PREGUNTAS FRECUENTES --}}
+        <section class="faq reveal">
+            <div class="section-title">Dudas</div>
+            <h2 class="section-h">Preguntas frecuentes</h2>
+            @foreach($fichaFaq as $i => $item)
+                <details @if($i === 0) open @endif>
+                    <summary>{{ is_array($item) ? ($item['pregunta'] ?? '') : '' }}</summary>
+                    <p>{{ is_array($item) ? ($item['respuesta'] ?? '') : '' }}</p>
+                </details>
+            @endforeach
+        </section>
+
         {{-- CTA FINAL --}}
         <section class="cta-final">
             <div class="cta-eyebrow">¿Seguimos adelante?</div>
@@ -1053,9 +1219,33 @@
             <span>Huelva, España</span>
         </div>
         <div class="copy">
-            © {{ date('Y') }} JJ Import Motors · Dossier generado el {{ now()->format('d/m/Y H:i') }}
+            JJ Import Motors (Huelva) presta un servicio de gestión de búsqueda, compra e importación de vehículos.
+            No es vendedora ni propietaria del vehículo y no ofrece garantía sobre él.
+            El precio indicado es el del vehículo; a él se suman los gastos de gestión de compra.
+            Disponibilidad y precio sujetos a confirmación en el momento de la reserva.
+            <br><br>
+            © {{ date('Y') }} JJ Import Motors · Datos del vehículo comprobados el {{ $fechaDatos }}
         </div>
     </footer>
+
+    <script>
+    (function () {
+        var quietud = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var nativo = window.CSS && CSS.supports && CSS.supports('animation-timeline: view()');
+        if (nativo || quietud || !('IntersectionObserver' in window)) return;
+        var els = document.querySelectorAll('.reveal');
+        els.forEach(function (el) { el.classList.add('js-oculto'); });
+        var io = new IntersectionObserver(function (entradas) {
+            entradas.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                e.target.classList.remove('js-oculto');
+                e.target.classList.add('js-visible');
+                io.unobserve(e.target);
+            });
+        }, { rootMargin: '0px 0px -10% 0px', threshold: 0.08 });
+        els.forEach(function (el) { io.observe(el); });
+    })();
+    </script>
 
     {{-- ── LIGHTBOX ────────────────────────────────────── --}}
     @if(count($fotos) > 1)

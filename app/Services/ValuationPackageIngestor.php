@@ -252,8 +252,11 @@ class ValuationPackageIngestor
     }
 
     /**
-     * Archivos de contenido (paquete_version 2): contenido/*.txt que alimentan
-     * las vistas Blade (ficha del cliente + informe interno).
+     * Archivos de contenido (paquete_version 2): contenido/*.txt y contenido/json/*.json
+     * que alimentan las vistas Blade (ficha del cliente + informe interno).
+     *
+     * Los .json los genera `esqueleto_a_json.py` en la skill; el Blade los prefiere
+     * al .txt porque vienen ya tipados (spec[], faq[], pasos[]).
      *
      * @return array<int, array{path:string, archivo:string, plantilla:?string, visibilidad:?string}>
      */
@@ -276,10 +279,12 @@ class ValuationPackageIngestor
             }
         }
 
-        // 2) Cualquier .txt en contenido/ no declarado.
+        // 2) Cualquier .txt o .json en contenido/ no declarado.
+        //    El .json lo genera la skill (contenido/json/*.json) y es lo que consume
+        //    el Blade del dossier público: ver 07-marketing/handoff_laravel.md.
         foreach ($this->allFiles($dir) as $file) {
             $path = $file->getPathname();
-            if (isset($contenidos[$path]) || strtolower($file->getExtension()) !== 'txt') {
+            if (isset($contenidos[$path]) || ! in_array(strtolower($file->getExtension()), ['txt', 'json'], true)) {
                 continue;
             }
             if (! $this->inFolder($dir, $path, self::CONTENT_FOLDER)) {

@@ -182,13 +182,22 @@ def parsear_bloques(texto: str) -> dict[str, str]:
     bloques: dict[str, list[str]] = {}
     actual: str | None = None
     for linea in texto.splitlines():
-        m = re.match(r"^\[([A-Z0-9_]+)\]$", linea.strip())
+        if linea.lstrip().startswith("#"):
+            continue
+        # Formato del contrato (03-informes/contrato.md §formato esqueleto):
+        #   "[BLOQUE] valor"  -> valor en la misma línea (lo que emite empaquetar.py)
+        #   "[BLOQUE]"        -> valor en las líneas siguientes
+        # Un mismo nombre repetido es una lista: se acumulan los valores.
+        m = re.match(r"^\[([A-Z0-9_]+)\](.*)$", linea.strip())
         if m:
             actual = m.group(1)
+            resto = m.group(2).strip()
             bloques.setdefault(actual, [])
+            if resto:
+                bloques[actual].append(resto)
             continue
-        if actual is not None:
-            bloques[current_label := actual].append(linea)
+        if actual is not None and linea.strip():
+            bloques[actual].append(linea)
     return {k: "\n".join(v).strip("\n") for k, v in bloques.items()}
 
 
@@ -481,7 +490,8 @@ def check_10_superlativos_prohibidos(
             continue
         lower = contenido.lower()
         for mal in SUPERLATIVOS_PROHIBIDOS:
-            if mal in lower:
+            # Palabra completa: "corre" no puede saltar dentro de "corresponde".
+            if re.search(rf"(?<![\w]){re.escape(mal)}(?![\w])", lower):
                 hallazgos.append(
                     Hallazgo(
                         check="C10-superlativo",

@@ -46,6 +46,7 @@ import os
 import re
 import sys
 import time
+import unicodedata
 import urllib.error
 import urllib.request
 import zipfile
@@ -802,6 +803,449 @@ def generar_dossier_cliente(payload: dict) -> list[str] | None:
     return _clean_lines(lines)
 
 
+# ── Ficha del cliente (v2, 07-sep-2026) ───────────────────────────────────────
+
+FC_HACEMOS = [
+    "Localizamos la unidad y comprobamos su historial y su documentación",
+    "Negociamos y coordinamos la compra con el vendedor",
+    "Organizamos el transporte hasta España",
+    "Tramitamos la ITV de importación, los impuestos y la matriculación",
+    "Te acompañamos hasta que tienes el coche a tu nombre",
+]
+
+FC_NO_HACEMOS = [
+    "No vendemos coches: JJ Import Motors no es el vendedor ni el propietario del vehículo. "
+    "La compraventa es entre el vendedor y tú, y el coche se matricula directamente a tu nombre.",
+    "No respondemos de averías, desgastes o defectos que no sean visibles en la documentación "
+    "y en la inspección previa.",
+    "No hacemos mantenimiento ni reparaciones, ni ofrecemos financiación.",
+]
+
+FC_NO_GARANTIA = (
+    "JJ Import Motors no ofrece garantía de ningún tipo sobre el vehículo. Cualquier garantía o "
+    "responsabilidad que exista corresponde al vendedor, según la ley que le sea aplicable. Nuestro "
+    "servicio es la gestión de la búsqueda, la verificación y la importación, con honorarios "
+    "acordados de antemano."
+)
+
+FC_AVISO_LEGAL = (
+    "JJ Import Motors (Huelva) presta un servicio de gestión de búsqueda, compra e importación de "
+    "vehículos. No es vendedora ni propietaria del vehículo y no ofrece garantía sobre él. El precio "
+    "indicado es el del vehículo puesto en España; a él se suman los gastos de gestión de compra "
+    "detallados arriba. No incluye seguro, impuesto de circulación ni mantenimiento. Disponibilidad "
+    "y precio sujetos a confirmación en el momento de la reserva."
+)
+
+FC_PASOS = [
+    ("Semana 0", "Reserva y bloqueo de la unidad con el vendedor"),
+    ("Semana 1", "Compra, documentación y preparación de la exportación"),
+    ("Semanas 2-3", "Transporte hasta España"),
+    ("Semanas 3-4", "ITV de importación, impuestos y matriculación"),
+    ("Semana 4", "Entrega, con el coche ya a tu nombre"),
+]
+
+FC_FAQ = [
+    ("¿El coche es vuestro?",
+     "No. Nosotros gestionamos la compra: el vehículo se compra al vendedor y se matricula "
+     "directamente a tu nombre."),
+    ("¿Lleva garantía?",
+     "JJ Import Motors no da garantía. La que pueda existir es la del vendedor, según la ley que le "
+     "sea aplicable. Si quieres cobertura mecánica, se puede contratar aparte con una compañía "
+     "especializada."),
+    ("¿Qué pasa si al llegar no es como se dijo?",
+     "Antes de comprar se hace una inspección previa con fotos y vídeo. Si aparece algo que no encaja "
+     "con lo publicado, te informamos y decides tú si se sigue adelante."),
+    ("¿Cuánto tarda?",
+     "Entre tres y cinco semanas desde la reserva. Es una estimación: depende del transporte y de las "
+     "citas de ITV."),
+    ("¿Puedo verlo antes de comprarlo?",
+     "No somos concesionario y el coche no está en nuestras instalaciones. Puedes ir a verlo al "
+     "vendedor o pedir la inspección previa con fotos y vídeo detallados."),
+    ("¿Qué pasa si lo compra otro antes?",
+     "Puede ocurrir mientras no hay reserva. Si pasa, te buscamos una unidad equivalente sin coste "
+     "adicional de gestión."),
+    ("¿Qué pasa con la ITV y la matrícula?",
+     "Lo tramitamos nosotros: ITV de importación, impuestos y matriculación española a tu nombre."),
+    ("¿Cómo se paga?",
+     "Con una reserva inicial para bloquear la unidad y el resto según el calendario acordado antes "
+     "de empezar."),
+]
+
+FC_NO_INCLUYE = [
+    "Seguro del vehículo",
+    "Impuesto municipal de circulación",
+    "Mantenimiento, reparaciones y desgaste",
+    "Garantía mecánica (ver más abajo)",
+]
+
+
+def generar_ficha_cliente(payload: dict, fotos_ok: list[dict] | None = None) -> list[str] | None:
+    """ficha-cliente.txt — la PÁGINA que se manda al cliente por enlace (/c/<token>).
+
+    Reglas: 07-marketing/ficha_cliente.md · A22b (el enlace es público, cero datos
+    internos) · A28 (pega declarada) · A31 (gestor, no vendedor, sin garantía).
+
+    Solo se genera con veredicto Comprar* — igual que el dossier.
+    """
+    ver = payload.get("veredicto") or {}
+    reco = str(ver.get("recomendacion") or "").lower()
+    if not reco.startswith("comprar"):
+        return None
+
+    veh = payload.get("vehiculo") or {}
+    anun = payload.get("anuncio") or {}
+    cost = payload.get("costes") or {}
+    merc = payload.get("mercado") or {}
+    pub = payload.get("publicidad") or {}
+    dos = payload.get("dossier") or {}
+    inv = payload.get("investigacion") or {}
+
+    etq = None
+    if isinstance(inv.get("etiqueta_ambiental"), dict):
+        etq = inv["etiqueta_ambiental"].get("etiqueta")
+
+    por_confirmar = "Por confirmar"
+    km_txt = f"{veh.get('km', 0):,}".replace(",", ".") + " km" if veh.get("km") else por_confirmar
+    fecha_datos = (anun.get("fecha_captura") or payload.get("_meta", {}).get("generado_el") or "")[:10]
+    if len(fecha_datos) == 10 and fecha_datos[4] == "-":
+        fecha_datos = f"{fecha_datos[8:10]}/{fecha_datos[5:7]}/{fecha_datos[0:4]}"
+
+    lines: list[str] = [
+        f"# Ficha del cliente — {veh.get('marca', '')} {veh.get('modelo', '')}".rstrip(),
+        "# Generado por empaquetar.py · reglas en 07-marketing/ficha_cliente.md",
+        "# PROHIBIDO aquí (A22b): vendibilidad, hueco, comparables, vendedor de origen,",
+        "# precio de origen, ahorro estimado, veredicto interno.",
+        "",
+        bloque("COCHE_ID", derive_coche_id(payload)),
+        bloque("FC_FECHA_DATOS", fecha_datos or time.strftime("%d/%m/%Y")),
+        "",
+        bloque("FC_TITULO", f"{veh.get('marca', '')} {veh.get('modelo', '')} {veh.get('version', '')}".strip()),
+        bloque("FC_SUBTITULO", join_inline(
+            str(veh.get("anio") or ""), km_txt, veh.get("combustible") or "", veh.get("cambio") or "",
+            sep=" · ")),
+    ]
+
+    precio_cliente = cost.get("coste_total") or merc.get("nuestra_oferta")
+    if precio_cliente:
+        lines.append(bloque("FC_PRECIO", fmt_eur(precio_cliente)))
+        lines.append(bloque("FC_PRECIO_NOTA",
+                            "Precio del vehículo puesto en España. Incluye transporte, ITV de "
+                            "importación, trámites de matriculación y honorarios de gestión."))
+    lines.append(bloque("FC_ESTADO_PROCESO", "Disponible"))
+    lines.append("")
+
+    # ── En 30 segundos ────────────────────────────────────────────────────────
+    resumen = dos.get("resumen_30s") or {}
+    bueno = (resumen.get("oportunidades") or [None])[0] or pub.get("valoracion") or pub.get("claim")
+    ojo = (resumen.get("atencion") or [None])[0]
+    paso = resumen.get("proximo_paso") or "Si te encaja, bloqueamos la unidad con el vendedor y arrancamos la gestión."
+    lines.append(bloque("FC_RESUMEN_BUENO", bueno or ""))
+    lines.append(bloque("FC_RESUMEN_OJO", ojo or
+                        "Antes de cerrar se revisan frenos, neumáticos y documentación completa en "
+                        "la inspección previa."))
+    lines.append(bloque("FC_RESUMEN_PASO", paso))
+    lines.append("")
+
+    # ── Ficha técnica (16 campos; lo que no se sepa va "Por confirmar") ───────
+    specs = [
+        ("Marca y modelo", f"{veh.get('marca', '')} {veh.get('modelo', '')}".strip()),
+        ("Versión", veh.get("version")),
+        ("Año", veh.get("anio")),
+        ("Primera matriculación", veh.get("primera_matriculacion") or anun.get("primera_matriculacion")),
+        ("Kilómetros", km_txt),
+        ("Combustible", veh.get("combustible")),
+        ("Cambio", veh.get("cambio")),
+        ("Potencia", f"{veh.get('potencia_cv')} CV" if veh.get("potencia_cv") else None),
+        ("Tracción", veh.get("traccion")),
+        ("Carrocería", veh.get("carroceria")),
+        ("Puertas y plazas", f"{veh.get('puertas')} puertas · {veh.get('plazas')} plazas"
+         if veh.get("puertas") and veh.get("plazas") else None),
+        ("Color", veh.get("color")),
+        ("Etiqueta DGT", etq),
+        ("Emisiones CO₂", f"{veh.get('co2_gkm')} g/km" if veh.get("co2_gkm") else None),
+        ("Consumo homologado", veh.get("consumo")),
+        ("Propietarios", veh.get("propietarios") or anun.get("propietarios")),
+    ]
+    for etiqueta, valor in specs:
+        lines.append(bloque("FC_SPEC", f"{etiqueta} | {valor if valor not in (None, '') else por_confirmar}"))
+    lines.append("")
+
+    # ── Equipamiento verificado ───────────────────────────────────────────────
+    equipamiento = dos.get("equipamiento_destacado") or veh.get("equipamiento") or []
+    for item in equipamiento[:14]:
+        lines.append(bloque("FC_EQUIP", item))
+    lines.append("")
+
+    # ── Estado: verificado / pendiente (A28) ─────────────────────────────────
+    for item in (dos.get("estado_verificado") or []):
+        lines.append(bloque("FC_VERIFICADO", item))
+    pendientes = dos.get("estado_pendiente") or []
+    if not pendientes:
+        pendientes = ["Estado de frenos y neumáticos: se revisa en la inspección previa a la compra",
+                      "Documentación completa (COC y ficha técnica): se solicita antes de cerrar"]
+    for item in pendientes:
+        lines.append(bloque("FC_PENDIENTE_COMPROBAR", item))
+    lines.append("")
+
+    # ── Fotos ─────────────────────────────────────────────────────────────────
+    fotos = [f.get("archivo") for f in (fotos_ok or []) if isinstance(f, dict) and f.get("archivo")]
+    if not fotos:
+        fotos = [f.get("archivo") for f in (payload.get("fotos") or [])
+                 if isinstance(f, dict) and f.get("archivo")]
+    if fotos:
+        lines.append(bloque("FC_FOTOS", " | ".join(fotos)))
+        lines.append("")
+
+    # ── Argumentos (nunca de balance.a_favor: eso es interno) ────────────────
+    for arg in (pub.get("argumentos") or []):
+        lines.append(bloque("FC_ARGUMENTO", arg))
+    lines.append("")
+
+    # ── Mercado: rango, nº de unidades y fecha. SIN cifra de ahorro (A22b) ────
+    mercado_es = merc.get("es") if isinstance(merc.get("es"), dict) else {}
+    minimo = mercado_es.get("min") or merc.get("precio_min")
+    mediana = mercado_es.get("mediana") or merc.get("precio_medio")
+    maximo = mercado_es.get("max") or merc.get("precio_max")
+    n_uds = mercado_es.get("n") or len(merc.get("comparables") or []) or None
+    if mediana and n_uds:
+        if minimo:
+            lines.append(bloque("FC_MERCADO_MIN", fmt_eur(minimo)))
+        lines.append(bloque("FC_MERCADO_MEDIANA", fmt_eur(mediana)))
+        if maximo:
+            lines.append(bloque("FC_MERCADO_MAX", fmt_eur(maximo)))
+        lines.append(bloque("FC_MERCADO_N", str(n_uds)))
+        lines.append(bloque("FC_MERCADO_FECHA", fecha_datos or time.strftime("%d/%m/%Y")))
+        lines.append(bloque("FC_MERCADO_NOTA",
+                            "Rango de precios de unidades similares publicadas en España en la fecha "
+                            "indicada. Es una referencia de mercado, no una promesa de ahorro."))
+        lines.append("")
+
+    # ── Qué incluye / qué no ──────────────────────────────────────────────────
+    incluye = pub.get("incluye") or [
+        "El vehículo",
+        "Búsqueda, inspección y verificación documental",
+        "Transporte hasta España",
+        "ITV de importación, impuestos y matriculación",
+        "Honorarios de gestión de JJ Import Motors",
+    ]
+    for item in incluye:
+        lines.append(bloque("FC_INCLUYE", item))
+    for item in FC_NO_INCLUYE:
+        lines.append(bloque("FC_NO_INCLUYE", item))
+    lines.append("")
+
+    # ── Proceso (semanas estimadas, nunca fechas cerradas) ───────────────────
+    for cuando, que in FC_PASOS:
+        lines.append(bloque("FC_PASO", f"{cuando} | {que}"))
+    lines.append("")
+
+    # ── Bloques fijos A31 ────────────────────────────────────────────────────
+    for item in FC_HACEMOS:
+        lines.append(bloque("FC_HACEMOS", item))
+    lines.append("")
+    for item in FC_NO_HACEMOS:
+        lines.append(bloque("FC_NO_HACEMOS", item))
+    lines.append("")
+    lines += bloque_multi("FC_NO_GARANTIA", FC_NO_GARANTIA)
+    lines.append("")
+
+    # ── FAQ ───────────────────────────────────────────────────────────────────
+    for pregunta, respuesta in FC_FAQ:
+        lines.append(bloque("FC_FAQ", f"{pregunta} | {respuesta}"))
+    lines.append("")
+
+    # ── Cierre ────────────────────────────────────────────────────────────────
+    lines.append(bloque("FC_CTA", "Quiero gestionar la compra"))
+    lines.append(bloque("FC_CONTACTO", "Teléfono y WhatsApp: 675 70 14 39 · jjimportmotors@gmail.com · Huelva"))
+    lines.append("")
+    lines += bloque_multi("FC_AVISO_LEGAL", FC_AVISO_LEGAL)
+
+    return _clean_lines(lines)
+
+
+def _slug_hashtag(*partes: str) -> str:
+    """'BMW', '320d' -> '#BMW320d' (sin acentos ni espacios)."""
+    txt = "".join(str(p or "") for p in partes)
+    txt = unicodedata.normalize("NFKD", txt).encode("ascii", "ignore").decode()
+    txt = re.sub(r"[^A-Za-z0-9]", "", txt)
+    return f"#{txt}" if txt else ""
+
+
+def _pega_del_payload(payload: dict) -> str:
+    """La pega honesta (A28): lo pendiente de comprobar, con qué hacemos al respecto."""
+    dos = payload.get("dossier") or {}
+    pendientes = dos.get("estado_pendiente") or []
+    if pendientes:
+        texto = str(pendientes[0]).rstrip(".")
+        return f"⚠️ {texto}: se comprueba en la inspección previa a la compra."
+    return ("⚠️ Frenos, neumáticos y documentación completa: se revisan en la inspección previa "
+            "antes de cerrar la compra.")
+
+
+def _bloques_v2_redes(payload: dict) -> list[str]:
+    """Bloques del módulo 07-marketing (IG_/VT_/FB_/FBMP_) para `check_marketing.py`.
+
+    Se emiten ADEMÁS de los bloques que lee hoy `ValuationPackageIngestor`
+    (TIKTOK_/INSTAGRAM_/FACEBOOK_POST_n), para no romper la importación mientras
+    el panel migra al vocabulario v2. Ver 07-marketing/handoff_laravel.md.
+    """
+    veh = payload.get("vehiculo") or {}
+    pub = payload.get("publicidad") or {}
+    inv = payload.get("investigacion") or {}
+    cost = payload.get("costes") or {}
+    merc = payload.get("mercado") or {}
+
+    etq = inv.get("etiqueta_ambiental", {}).get("etiqueta") if isinstance(inv.get("etiqueta_ambiental"), dict) else None
+    km_txt = f"{veh.get('km', 0):,}".replace(",", ".") if veh.get("km") else None
+    modelo = f"{veh.get('marca', '')} {veh.get('modelo', '')}".strip()
+    argumentos = pub.get("argumentos") or []
+    gancho_a = pub.get("titular") or modelo
+    gancho_b = pub.get("claim") or (argumentos[0] if argumentos else modelo)
+    pega = _pega_del_payload(payload)
+    precio = cost.get("coste_total") or merc.get("nuestra_oferta")
+
+    ficha_iconos = [
+        f"🗓️ {veh.get('anio')}" if veh.get("anio") else None,
+        f"🛣️ {km_txt} km" if km_txt else None,
+        f"🐎 {veh.get('potencia_cv')} CV" if veh.get("potencia_cv") else None,
+        f"⚙️ {veh.get('cambio')}" if veh.get("cambio") else None,
+        f"🏷️ Etiqueta {etq}" if etq else None,
+    ]
+    ficha_iconos = [f for f in ficha_iconos if f]
+
+    hashtags = [h for h in [
+        _slug_hashtag(veh.get("marca"), veh.get("modelo")),
+        _slug_hashtag(veh.get("carroceria") or "Ocasion"),
+        "#ImportacionDeCoches",
+        "#Huelva",
+        "#JJImportMotors",
+    ] if h]
+
+    L: list[str] = ["", "# ── Bloques v2 del módulo 07-marketing (los valida check_marketing.py) ──"]
+
+    # Instagram feed
+    L.append(bloque("IG_GANCHO", gancho_a))
+    L.append(bloque("IG_GANCHO_B", gancho_b))
+    for linea in ficha_iconos:
+        L.append(bloque("IG_FICHA", linea))
+    if pub.get("descripcion") or pub.get("por_que"):
+        L += bloque_multi("IG_CONTEXTO", pub.get("descripcion") or pub.get("por_que"))
+    for arg in argumentos[:3]:
+        L.append(bloque("IG_ARGUMENTO", arg))
+    L.append(bloque("IG_PEGA", pega))
+    L.append(bloque("IG_CTA", "Te paso la ficha completa por DM."))
+    L.append(bloque("IG_SEND_ASK", f"Mándaselo a quien lleve meses buscando un {modelo}."))
+    L.append(bloque("IG_HASHTAGS", " ".join(hashtags[:5])))
+
+    # Vídeo corto (Reel / TikTok / Shorts): dos ganchos obligatorios
+    L.append(bloque("VT_GANCHO_A", gancho_a))
+    L.append(bloque("VT_GANCHO_B", gancho_b))
+    L.append(bloque("VT_CTA", "Comenta y te paso la ficha."))
+    L.append(bloque("VT_HASHTAGS", " ".join(hashtags[:4])))
+
+    # Facebook página
+    L.append(bloque("FB_GANCHO", gancho_a))
+    for linea in ficha_iconos:
+        L.append(bloque("FB_FICHA", linea))
+    for arg in argumentos[:3]:
+        L.append(bloque("FB_ARGUMENTO", arg))
+    L.append(bloque("FB_PEGA", pega))
+    L.append(bloque("FB_CTA", "Escríbenos por WhatsApp y te mandamos la ficha completa con fotos."))
+
+    # Facebook Marketplace: sin iconos, sin hashtags
+    subtitulo = " · ".join([x for x in [str(veh.get("anio") or ""), f"{km_txt} km" if km_txt else "",
+                                        veh.get("combustible") or "", veh.get("cambio") or ""] if x])
+    L.append(bloque("FBMP_TITULO", f"{modelo} {veh.get('version', '')}".strip() + (f" · {subtitulo}" if subtitulo else "")))
+    L += bloque_multi("FBMP_DESCRIPCION",
+                      (pub.get("descripcion") or pub.get("por_que") or
+                       f"{modelo} localizado y verificado por nosotros antes de traerlo."))
+    L.append(bloque("FBMP_PEGA", pega.replace("⚠️ ", "")))
+    if precio:
+        L.append(bloque("FBMP_PRECIO", fmt_eur(precio)))
+    L.append(bloque("FBMP_CONTACTO", "Escríbeme por Messenger y te paso la ficha completa."))
+
+    return L
+
+
+def _bloques_v2_portales(payload: dict) -> list[str]:
+    """Bloques PT_* del módulo 07-marketing para `check_marketing.py`."""
+    veh = payload.get("vehiculo") or {}
+    pub = payload.get("publicidad") or {}
+    inv = payload.get("investigacion") or {}
+    dos = payload.get("dossier") or {}
+
+    etq = inv.get("etiqueta_ambiental", {}).get("etiqueta") if isinstance(inv.get("etiqueta_ambiental"), dict) else None
+    km_txt = f"{veh.get('km', 0):,}".replace(",", ".") if veh.get("km") else None
+    modelo = f"{veh.get('marca', '')} {veh.get('modelo', '')}".strip()
+    rasgo = (dos.get("estado_verificado") or [""])[0]
+
+    titulo_a = " · ".join([x for x in [
+        f"{modelo} {veh.get('version', '')}".strip(),
+        str(veh.get("anio") or ""),
+        f"{km_txt} km" if km_txt else "",
+    ] if x])
+    titulo_b = " · ".join([x for x in [
+        f"{modelo} {veh.get('potencia_cv')}CV".strip() if veh.get("potencia_cv") else modelo,
+        str(veh.get("anio") or ""),
+        f"Etiqueta {etq}" if etq else "",
+    ] if x])
+
+    L: list[str] = ["", "# ── Bloques v2 del módulo 07-marketing (los valida check_marketing.py) ──"]
+    L.append(bloque("PT_TITULO_A", titulo_a[:70]))
+    L.append(bloque("PT_TITULO_B", titulo_b[:70]))
+    L += bloque_multi("PT_RESUMEN", pub.get("descripcion") or pub.get("por_que") or
+                      f"{modelo} localizado y verificado antes de traerlo a España.")
+
+    for etiqueta, valor in [
+        ("Año", veh.get("anio")),
+        ("Kilómetros", f"{km_txt} km" if km_txt else None),
+        ("Combustible", veh.get("combustible")),
+        ("Cambio", veh.get("cambio")),
+        ("Potencia", f"{veh.get('potencia_cv')} CV" if veh.get("potencia_cv") else None),
+        ("Etiqueta DGT", etq),
+    ]:
+        if valor:
+            L.append(bloque("PT_FICHA", f"{etiqueta} | {valor}"))
+
+    for item in (dos.get("estado_verificado") or [])[:3]:
+        L.append(bloque("PT_ESTADO", item))
+    L.append(bloque("PT_ESTADO", _pega_del_payload(payload)))
+
+    equipamiento = dos.get("equipamiento_destacado") or veh.get("equipamiento") or []
+    if equipamiento:
+        L += bloque_multi("PT_EQUIPAMIENTO",
+                          ", ".join(str(e) for e in equipamiento[:10]) +
+                          ". (Equipamiento verificado en la ficha del vehículo.)")
+
+    for item in (pub.get("incluye") or ["El vehículo", "Transporte hasta España",
+                                        "ITV de importación y trámites de matriculación"]):
+        L.append(bloque("PT_QUE_INCLUYE", item))
+
+    L += bloque_multi("PT_COMO_FUNCIONA",
+                      "Gestionamos la búsqueda, la verificación y la importación: localizamos el coche, "
+                      "comprobamos su historial y lo traemos legalizado a España. Plazo aproximado de "
+                      "entrega: 3-5 semanas desde la reserva.")
+    cost = payload.get("costes") or {}
+    merc = payload.get("mercado") or {}
+    precio_cliente = cost.get("coste_total") or merc.get("nuestra_oferta")
+    primera_matriculacion = (veh.get("primera_matriculacion")
+                             or (payload.get("anuncio") or {}).get("primera_matriculacion")
+                             or (f"{veh.get('anio')}" if veh.get("anio") else "por confirmar"))
+
+    L += bloque_multi("PT_AVISO", "\n".join([
+        "JJ Import Motors — gestión de búsqueda, compra e importación de vehículos.",
+        "Identidad del empresario: JJ Import Motors, Huelva · jjimportmotors@gmail.com · 675 70 14 39.",
+        "El vehículo NO es propiedad del establecimiento: la compraventa es entre el vendedor y el cliente.",
+        f"Precio total cliente: {fmt_eur(precio_cliente)} — a este importe se suman los gastos de gestión de compra."
+        if precio_cliente else
+        "Precio total cliente: pendiente de confirmar — a él se suman los gastos de gestión de compra.",
+        "No incluye: seguro, impuesto municipal de circulación, mantenimiento ni garantía mecánica.",
+        "Garantía: JJ Import Motors no ofrece garantía sobre el vehículo (A31). La que exista corresponde al vendedor.",
+        f"Fecha de primera matriculación: {primera_matriculacion}.",
+    ]))
+    return L
+
+
 def generar_redes_sociales(payload: dict) -> list[str]:
     """redes-sociales.txt — Laravel importa a CarMarketingContent.
 
@@ -887,6 +1331,8 @@ def generar_redes_sociales(payload: dict) -> list[str]:
         if rdata.get("subir_pasos"):
             lines += bloque_multi(f"{red.upper()}_SUBIR_PASOS", rdata["subir_pasos"])
 
+    lines += _bloques_v2_redes(payload)
+
     return _clean_lines(lines)
 
 
@@ -958,7 +1404,39 @@ def generar_anuncio_portales(payload: dict) -> list[str]:
     lines.append(bloque("AVISO_LEGAL", port.get("aviso_legal") or AVISO_LEGAL_DEFAULT))
     lines += bloque_multi("SUBIR_PASOS", port.get("subir_pasos") or subir_pasos_default)
 
+    lines += _bloques_v2_portales(payload)
+
     return _clean_lines(lines)
+
+
+# ── JSON para Laravel ─────────────────────────────────────────────────────────
+
+
+def generar_json_para_laravel(contents: dict[str, list[str] | None]) -> dict[str, dict]:
+    """Convierte los esqueletos en JSON tipado (contenido/json/*.json).
+
+    Laravel lee el JSON y no interpreta texto: ver 07-marketing/handoff_laravel.md.
+    Si el conversor no está disponible, se avisa y el ZIP sale igualmente con los .txt.
+    """
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import esqueleto_a_json as e2j  # noqa: PLC0415
+    except Exception as exc:  # pragma: no cover - depende del entorno
+        warn(f"No se pudo cargar esqueleto_a_json.py ({exc}): el ZIP irá sin contenido/json/")
+        return {}
+
+    objetivo = ("ficha-cliente.txt", "redes-sociales.txt", "anuncio-portales.txt")
+    docs: dict[str, dict] = {}
+    for nombre, lineas in contents.items():
+        if nombre not in objetivo or not lineas:
+            continue
+        texto = "\n".join(lineas) + "\n"
+        try:
+            docs[nombre.replace(".txt", ".json")] = e2j.a_json_desde_texto(texto, nombre)
+        except Exception as exc:  # pragma: no cover
+            warn(f"No se pudo convertir {nombre} a JSON: {exc}")
+
+    return docs
 
 
 # ── Manifest ──────────────────────────────────────────────────────────────────
@@ -969,6 +1447,8 @@ def build_manifest(
     payload: dict,
     fotos_ok: list[dict],
     has_dossier: bool,
+    has_ficha_cliente: bool = False,
+    json_files: list[str] | None = None,
     paquete_version: int = PACKAGE_VERSION,
 ) -> dict:
     contents: list[dict] = [
@@ -984,6 +1464,15 @@ def build_manifest(
     if has_dossier:
         contents.insert(2, {"archivo": "contenido/dossier-cliente.txt",
                             "plantilla": "dossier", "visibilidad": "cliente"})
+
+    # La ficha del cliente (la página del enlace /c/<token>) y su JSON tipado:
+    # Laravel lee el JSON, el .txt queda como formato editable por personas.
+    if has_ficha_cliente:
+        contents.insert(1, {"archivo": "contenido/ficha-cliente.txt",
+                            "plantilla": "ficha-cliente", "visibilidad": "cliente"})
+    for nombre in (json_files or []):
+        contents.append({"archivo": f"contenido/json/{nombre}",
+                         "plantilla": "json", "visibilidad": "cliente"})
 
     return {
         "manifest_version": 1,
@@ -1049,6 +1538,7 @@ def build_zip(
     manifest: dict,
     contents: dict[str, list[str]],
     fotos_dir: Path,
+    json_docs: dict[str, dict] | None = None,
 ) -> int:
     zip_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -1076,6 +1566,11 @@ def build_zip(
                 continue
             zf.writestr(f"contenido/{nombre_archivo}",
                         "\n".join(lineas) + "\n")
+
+        # 3b) contenido/json/*.json — lo que consume Laravel
+        for nombre_json, doc in (json_docs or {}).items():
+            zf.writestr(f"contenido/json/{nombre_json}",
+                        json.dumps(doc, ensure_ascii=False, indent=2))
 
         # 4) fotos/*.jpg (etc)
         for foto_path in fotos_paths:
@@ -1139,11 +1634,13 @@ def main() -> int:
     ficha_lines = generar_ficha_publicitaria(payload)
     interno_lines = generar_informe_interno(payload)
     dossier_lines = generar_dossier_cliente(payload)
+    ficha_cliente_lines = generar_ficha_cliente(payload, fotos_ok)
     redes_lines = generar_redes_sociales(payload)
     portales_lines = generar_anuncio_portales(payload)
 
     contents: dict[str, list[str] | None] = {
         "ficha-publicitaria.txt": ficha_lines,
+        "ficha-cliente.txt": ficha_cliente_lines,
         "informe-interno.txt": interno_lines,
         "dossier-cliente.txt": dossier_lines,
         "redes-sociales.txt": redes_lines,
@@ -1151,17 +1648,30 @@ def main() -> int:
     }
 
     n_generados = sum(1 for v in contents.values() if v)
-    ok(f"{n_generados}/5 esqueletos generados")
+    ok(f"{n_generados}/6 esqueletos generados")
+
+    # 2b) JSON canónico para Laravel (Blade lee el JSON, no el .txt).
+    #     Ver 07-marketing/handoff_laravel.md.
+    json_docs = generar_json_para_laravel(contents)
+    if json_docs:
+        ok(f"{len(json_docs)} JSON generados para el panel (contenido/json/)")
+    else:
+        warn("No se generó ningún JSON para el panel: revisa scripts/esqueleto_a_json.py")
     if args.strict and not dossier_lines and (payload.get("veredicto") or {}).get("recomendacion", "").lower().startswith("comprar"):
         fail("Veredicto Comprar* pero sin dossier-cliente.txt — modo --strict aborta")
         return 4
 
     # 3) Manifest
-    manifest = build_manifest(coche_id, payload, fotos_ok, has_dossier=bool(dossier_lines))
+    manifest = build_manifest(
+        coche_id, payload, fotos_ok,
+        has_dossier=bool(dossier_lines),
+        has_ficha_cliente=bool(ficha_cliente_lines),
+        json_files=sorted(json_docs.keys()),
+    )
 
     # 4) ZIP
     info("Empaquetando ZIP…")
-    n_fotos = build_zip(zip_path, payload, manifest, contents, fotos_dir)
+    n_fotos = build_zip(zip_path, payload, manifest, contents, fotos_dir, json_docs)
     ok(f"ZIP generado: {zip_path} ({n_fotos} fotos)")
 
     # 5) Cleanup
@@ -1180,7 +1690,9 @@ def main() -> int:
     print(f"   Coche:       {coche_id}")
     print(f"   ZIP:         {zip_path}")
     print(f"   Fotos:       {n_fotos} (warnings: {len(photo_warnings)})")
-    print(f"   Esqueletos:  {n_generados}/5")
+    print(f"   Esqueletos:  {n_generados}/6")
+    print(f"   Ficha cliente: {'SÍ' if ficha_cliente_lines else 'NO (solo con veredicto Comprar*)'}")
+    print(f"   JSON panel:  {len(json_docs)} en contenido/json/")
     if dossier_lines:
         print(f"   Dossier:     SÍ (veredicto Comprar*)")
     else:

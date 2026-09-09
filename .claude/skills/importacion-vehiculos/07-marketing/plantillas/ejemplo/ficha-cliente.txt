@@ -1,0 +1,102 @@
+# EJEMPLO RELLENO — Opel Astra OPC (ejemplo canónico de la skill). No es una unidad real.
+
+[COCHE_ID] EJEMPLO-astra-opc-2015
+[FC_FECHA_DATOS] 07/09/2026
+
+[FC_TITULO] Opel Astra OPC 2.0 Turbo
+[FC_SUBTITULO] 2015 · 62.400 km · gasolina · manual de 6 velocidades
+[FC_PRECIO] 18.900 €
+[FC_PRECIO_NOTA] + gastos gestión de compra
+[FC_ESTADO_PROCESO] Disponible
+
+[FC_RESUMEN_BUENO] Un único propietario, libro de mantenimiento sellado y 62.400 km reales para nueve años de uso.
+[FC_RESUMEN_OJO] Los neumáticos están al 50 % de vida: se sustituyen antes de la entrega y va incluido en el precio.
+[FC_RESUMEN_PASO] Si te encaja, se bloquea la unidad con el vendedor y arrancamos la gestión.
+
+[FC_SPEC] Marca y modelo | Opel Astra
+[FC_SPEC] Versión | OPC 2.0 Turbo
+[FC_SPEC] Año | 2015
+[FC_SPEC] Primera matriculación | 03/2015
+[FC_SPEC] Kilómetros | 62.400 km
+[FC_SPEC] Combustible | Gasolina
+[FC_SPEC] Cambio | Manual de 6 velocidades
+[FC_SPEC] Potencia | 280 CV
+[FC_SPEC] Tracción | Delantera
+[FC_SPEC] Carrocería | Compacto 3 puertas
+[FC_SPEC] Puertas y plazas | 3 puertas · 5 plazas
+[FC_SPEC] Color | Blanco
+[FC_SPEC] Etiqueta DGT | C
+[FC_SPEC] Consumo homologado | Por confirmar con la ficha técnica
+[FC_SPEC] Emisiones CO₂ | Por confirmar con el COC
+[FC_SPEC] Propietarios | 1
+
+[FC_EQUIP] Asientos deportivos Recaro
+[FC_EQUIP] Navegador
+[FC_EQUIP] Climatizador bizona
+[FC_EQUIP] Sensores de aparcamiento delanteros y traseros
+[FC_EQUIP] Llantas de 20 pulgadas
+[FC_EQUIP] Faros bixenón
+[FC_EQUIP_PENDIENTE] Kit manos libres y cámara trasera: aparecen en el anuncio pero no están confirmados en la ficha del vehículo.
+
+[FC_VERIFICADO] Un único propietario particular
+[FC_VERIFICADO] Libro de mantenimiento sellado, revisiones al día
+[FC_VERIFICADO] Sin llamadas a revisión pendientes para esta unidad
+[FC_VERIFICADO] Inspección técnica alemana en vigor
+[FC_PENDIENTE_COMPROBAR] Estado de frenos: se revisa en la inspección previa a la compra
+[FC_PENDIENTE_COMPROBAR] Documento COC completo: se solicita al vendedor antes de cerrar
+
+[FC_FOTOS] 01_frontal_34.jpg | 02_lateral.jpg | 03_trasera.jpg | 04_interior.jpg | 05_cuadro.jpg | 06_motor.jpg
+
+[FC_ARGUMENTO] **280 CV con un solo dueño:** la combinación más difícil de encontrar en este modelo, que suele llegar al mercado muy rodado.
+[FC_ARGUMENTO] **8.800 km de media al año:** uso bajo y constante, respaldado por el libro de revisiones.
+[FC_ARGUMENTO] **Etiqueta C:** entra sin restricciones en las zonas de bajas emisiones de las ciudades españolas.
+[FC_ARGUMENTO] **Mecánica conocida:** motor y cambio con recambio disponible y talleres que lo trabajan en España.
+
+[FC_MERCADO_MIN] 19.900 €
+[FC_MERCADO_MEDIANA] 22.400 €
+[FC_MERCADO_MAX] 25.500 €
+[FC_MERCADO_N] 8
+[FC_MERCADO_FECHA] 07/09/2026
+[FC_MERCADO_NOTA] Rango de precios de unidades similares publicadas en España en la fecha indicada. Es una referencia de mercado, no una promesa de ahorro.
+
+[FC_INCLUYE] El vehículo
+[FC_INCLUYE] Transporte hasta España
+[FC_INCLUYE] ITV de importación y trámites de matriculación
+[FC_INCLUYE] Honorarios de gestión de JJ Import Motors
+[FC_INCLUYE] Sustitución de los neumáticos antes de la entrega
+[FC_NO_INCLUYE] Seguro del vehículo
+[FC_NO_INCLUYE] Impuesto municipal de circulación
+[FC_NO_INCLUYE] Mantenimiento, reparaciones y desgaste
+[FC_NO_INCLUYE] Garantía mecánica (ver más abajo)
+
+[FC_PASO] Semana 0 | Reserva y bloqueo de la unidad con el vendedor
+[FC_PASO] Semana 1 | Compra, documentación y preparación de la exportación
+[FC_PASO] Semanas 2-3 | Transporte hasta España
+[FC_PASO] Semanas 3-4 | ITV de importación, impuestos y matriculación
+[FC_PASO] Semana 4 | Entrega con el coche ya a tu nombre
+
+[FC_HACEMOS] Localizamos la unidad y comprobamos su historial y su documentación
+[FC_HACEMOS] Negociamos y coordinamos la compra con el vendedor
+[FC_HACEMOS] Organizamos el transporte hasta España
+[FC_HACEMOS] Tramitamos la ITV de importación, los impuestos y la matriculación
+[FC_HACEMOS] Te acompañamos hasta que tienes las llaves y el coche a tu nombre
+
+[FC_NO_HACEMOS] No vendemos coches: JJ Import Motors no es el vendedor ni el propietario del vehículo. La compraventa es entre el vendedor y tú, y el coche se matricula directamente a tu nombre.
+[FC_NO_HACEMOS] No respondemos de averías, desgastes o defectos que no sean visibles en la documentación y en la inspección previa.
+[FC_NO_HACEMOS] No hacemos mantenimiento ni reparaciones.
+
+[FC_NO_GARANTIA] JJ Import Motors no ofrece garantía de ningún tipo sobre el vehículo. Cualquier garantía o responsabilidad que exista corresponde al vendedor, según la ley que le sea aplicable. Nuestro servicio es la gestión de la búsqueda, la verificación y la importación, con honorarios fijos acordados de antemano.
+
+[FC_FAQ] ¿El coche es vuestro? | No. Nosotros gestionamos la compra: el vehículo se compra al vendedor y se matricula directamente a tu nombre.
+[FC_FAQ] ¿Lleva garantía? | JJ Import Motors no da garantía. La que pueda existir es la del vendedor, según la ley que le aplique. Si quieres cobertura mecánica, se puede contratar aparte con una compañía especializada.
+[FC_FAQ] ¿Qué pasa si al llegar no es como se dijo? | Antes de comprar se hace una inspección previa con fotos y vídeo. Si aparece algo que no encaja con lo publicado, se te informa y decides tú si se sigue adelante.
+[FC_FAQ] ¿Cuánto tarda? | Entre tres y cinco semanas desde la reserva. Es una estimación: depende del transporte y de las citas de ITV.
+[FC_FAQ] ¿Qué pasa si lo vende otro antes? | Puede ocurrir mientras no hay reserva. Si pasa, te buscamos una unidad equivalente sin coste adicional de gestión.
+[FC_FAQ] ¿Puedo verlo antes de comprarlo? | Puedes viajar a verlo o pedir la inspección previa con fotos y vídeo detallados, que es lo que hace la mayoría.
+[FC_FAQ] ¿Qué pasa con la ITV y la matrícula? | Lo tramitamos nosotros: ITV de importación, impuestos y matriculación española a tu nombre.
+[FC_FAQ] ¿Cómo se paga? | Con una reserva inicial para bloquear la unidad y el resto según el calendario acordado antes de empezar.
+
+[FC_CTA] Quiero gestionar la compra
+[FC_CONTACTO] Teléfono y WhatsApp: 675 70 14 39 · jjimportmotors@gmail.com · Huelva
+
+[FC_AVISO_LEGAL] JJ Import Motors (Huelva) presta un servicio de gestión de búsqueda, compra e importación de vehículos. No es vendedora ni propietaria del vehículo y no ofrece garantía sobre él. El precio indicado es el del vehículo; a él se suman los gastos de gestión de compra, detallados arriba. No incluye seguro, impuesto de circulación ni mantenimiento. Disponibilidad y precio sujetos a confirmación en el momento de la reserva.

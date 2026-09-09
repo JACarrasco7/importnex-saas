@@ -52,7 +52,7 @@ Localizar coches (desde Alemania y dentro de España) y **ofertar el servicio de
 >
 > Detalle de bloques en `03-informes/contrato.md` §Bloques por archivo y `03-informes/informe_tecnico.md` §Formato-txt.
 
-> 📁 **Compañeros:** `02-flujos/navegacion_real.md` (MÉTODO PREFERIDO — navegar como humano) · `02-flujos/paginas_reales.md` (estructura REAL capturada de los 7 portales) · `02-flujos/playbook_filtrado.md` (técnicas de filtrado/búsqueda para Claude Desktop) · `02-flujos/extractores.md` (URLs, trampas, diccionario) · `03-informes/contrato.md` (JSON + esqueleto) · `05-operaciones/operaciones.md` (carpetas, scripts) · **`06-reglas/anti_patrones.md`** (reglas duras 30) · **`06-reglas/copywriting_marketing.md`** (cómo redactar GANCHO/POST/STORY/TITULO/DESCRIPCION — límites por canal, tono, anti-patrones de copy) · **`07-marketing/copy_engine.md`** (Flujo M — motor de copy multicanal) · **`07-marketing/redes_sociales.md`** (spec IG/FB/Reel/TikTok/FBMP) · **`07-marketing/portales_anuncio.md`** (spec Coches.net/Milanuncios/Wallapop + aviso legal) · **`07-marketing/biblioteca_ganchos.md`** (8 ángulos de venta) · **`07-marketing/fuentes_y_evidencia.md`** (reglas de citación) · `scripts/check_marketing.py` (validador 30 checks) · **`../estudio-mercado/SKILL.md`** (skill hermana: genera el mapa de mercado `datos_mercado.json` que da el criterio de selección)
+> 📁 **Compañeros:** `02-flujos/navegacion_real.md` (MÉTODO PREFERIDO — navegar como humano) · `02-flujos/paginas_reales.md` (estructura REAL capturada de los 7 portales) · `02-flujos/playbook_filtrado.md` (técnicas de filtrado/búsqueda para Claude Desktop) · `02-flujos/extractores.md` (URLs, trampas, diccionario) · `03-informes/contrato.md` (JSON + esqueleto) · `05-operaciones/operaciones.md` (carpetas, scripts) · **`06-reglas/anti_patrones.md`** (reglas duras 32: A1-A31 + A22b) · **`06-reglas/copywriting_marketing.md`** (cómo redactar GANCHO/POST/STORY/TITULO/DESCRIPCION — límites por canal, tono, anti-patrones de copy) · **`07-marketing/copy_engine.md`** (Flujo M — motor de copy multicanal) · **`07-marketing/redes_sociales.md`** (spec IG/FB/Reel/TikTok/FBMP) · **`07-marketing/portales_anuncio.md`** (spec Coches.net/Milanuncios/Wallapop + aviso legal) · **`07-marketing/biblioteca_ganchos.md`** (8 ángulos de venta) · **`07-marketing/fuentes_y_evidencia.md`** (reglas de citación) · **`07-marketing/ficha_cliente.md`** (la página que se manda al cliente por enlace) · **`07-marketing/handoff_laravel.md`** (entrega en JSON al panel + Open Graph + animaciones) · **`07-marketing/evidencia_externa.md`** (de dónde sale cada regla importada) · `scripts/check_marketing.py` (validador 30 checks) · `scripts/check_ficha_cliente.py` (validador de la ficha del cliente) · `scripts/esqueleto_a_json.py` (JSON para el panel) · **`../estudio-mercado/SKILL.md`** (skill hermana: genera el mapa de mercado `datos_mercado.json` que da el criterio de selección)
 > 
 > 📚 **Módulos especializados:** `03-informes/comparables.md` (ajuste 9 claves) · `04-negocio/costes.md` (IEDMT + desglose) · `04-negocio/riesgos.md` (motores problemáticos) · `05-operaciones/operaciones_cierre.md` (cierre + KPIs + sync)
 >
@@ -75,7 +75,7 @@ Método: navegación real estilo humano SIEMPRE primero → ver `02-flujos/naveg
 Equipamiento: comparar a MÁXIMO equipamiento por defecto (la unidad DE suele venir full: cuadro digital, techo, LED). Un ES "más barato" sin ese equipamiento NO es comparable → ajustar con primas de `03-informes/comparables.md`
 Playbook de filtrado: `02-flujos/playbook_filtrado.md` · estructura real: `02-flujos/paginas_reales.md`
 Trampas top 3: countryCode SIEMPRE | navegación real primero (screenshot+clic), degradado si no se ve | mobile.de directo NUNCA saltar
-Anti-patrones bloqueados: 30 (A1-A30, ver §Anti-patrones y `06-reglas/anti_patrones.md`)
+Anti-patrones bloqueados: 32 (A1-A31 + A22b, ver §Anti-patrones y `06-reglas/anti_patrones.md`)
 ENLACES: TODO lo que se entregue lleva enlace al anuncio (ficha) y fuentes con URL (A21)
 📥 ACK ENTENDER: 1 línea de comprensión antes de todo encargo (qué → para qué → entregable) — `01-arranque/guia_prompts.md` §ACK
 Camino fijo: waypoint 📍 en cada mensaje · desviaciones = misión lateral con retorno ↩⃾ (A14)
@@ -105,6 +105,9 @@ Mando: PROTOCOLO DE MANDO — usuario aprueba cada fase, IA ejecuta la fase comp
 | **M: MARKETING MULTICANAL** *(06-sep-2026)* | Activación automática tras Flujo A con veredicto 🟢/🔵 | Solo marketing (NO navega, NO scraping) | `redes-sociales.txt` + `anuncio-portales.txt` + bloque `marketing` en JSON | ✅ Sí (añadido al ZIP A) |
 
 > **Flujo M · MARKETING (06-sep-2026):** ver `07-marketing/copy_engine.md`. **NO es un flujo independiente**: se activa solo tras un Flujo A con veredicto 🟢 (OPORTUNIDAD) o 🔵 (SOLO ESTE COLOR). Es el que genera el bloque multicanal (3 portales + 3 redes sociales + FB Marketplace) que `empaquetar.py` mete en el ZIP. Reglas: A23-A30 (anti-patrones de copy), validador `scripts/check_marketing.py` (30 checks, 🔴 bloquea publicación), 8 ángulos de venta (`biblioteca_ganchos.md`), léxico de iconos cerrado (16 pictogramas), cupo de hashtags por canal.
+
+> 🔴 **A31 · GESTOR, NO VENDEDOR (07-sep-2026):** JJ Import Motors **no vende coches y no da garantía**. Solo gestión de búsqueda, verificación e importación; la compraventa es entre vendedor y cliente. Prohibido «vendemos», «se vende», «nuestro coche», «concesionario», «garantizamos», «IVA incluido», «precio final», «llave en mano». La palabra garantía solo para negarla o atribuirla al vendedor.
+> 🔴 **A22b · EL ENLACE DEL CLIENTE ES PÚBLICO:** la ficha `/c/<token>` se reenvía por WhatsApp. Misma lista de prohibiciones que un anuncio de portal: ni vendibilidad, ni hueco de importación, ni competencia, ni vendedor de origen, ni ahorro estimado, ni veredicto interno. Spec: `07-marketing/ficha_cliente.md` · validador: `scripts/check_ficha_cliente.py`.
 
 > **Flujo E · STOCK (17-ago-2026):** ver `02-flujos/stock-marketing.md`. **Es BÚSQUEDA de coches, NO marketing**: entregable = informe de búsqueda con datos de mercado (nº anuncios, mediana, hueco), NUNCA anuncios/copy IG/FB. El marketing es un flujo posterior separado. Reglas: listado-first (A17) + sellos de precio + ejemplos ilustrativos no lista cerrada (A19) + checkpoint cada X.
 
@@ -1108,8 +1111,11 @@ Las 21 reglas duras (A1-A21) viven en `06-reglas/anti_patrones.md`. Cargarlas cu
 │   ├── ficha-publicitaria.txt      ← Esqueleto [BLOQUE] → ficha-coche + folleto del coche (el bloque [VALORACION] alimenta "Nuestra valoración" del folleto, SOLO texto de venta al cliente, sin datos internos)
 │   ├── dossier-cliente.txt        ← Esqueleto [BLOQUE] → documento del cliente (ficha-coche) en Laravel
 │   ├── informe-interno.txt         ← Esqueleto [BLOQUE] → informe-interno.blade.php (PDF equipo)
-│   ├── redes-sociales.txt          ← [GANCHO] [POST_LARGO] [STORIES] [HASHTAGS]
-│   └── anuncio-portales.txt        ← [TITULO] [DESCRIPCION] [AVISO_LEGAL]
+│   ├── redes-sociales.txt          ← [IG_*] feed · [IG_STORIES_*] · [VT_*] vídeo · [FB_*] página · [FBMP_*] Marketplace
+│   ├── anuncio-portales.txt        ← [TITULO] [DESCRIPCION] [AVISO_LEGAL] (Coches.net · Milanuncios · Wallapop)
+│   ├── ficha-cliente.txt           ← 🔴 la PÁGINA que se manda al cliente por enlace (14 secciones [FC_*]) — ver 07-marketing/ficha_cliente.md
+│   └── json/                       ← 🔴 LO QUE CONSUME LARAVEL: ficha-cliente.json · redes-sociales.json · anuncio-portales.json
+│                                      (generado con scripts/esqueleto_a_json.py — ver 07-marketing/handoff_laravel.md)
 └── fotos/
 ```
 

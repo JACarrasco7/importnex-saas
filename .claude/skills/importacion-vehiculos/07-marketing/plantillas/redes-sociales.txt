@@ -5,6 +5,13 @@
 [IG_GANCHO]
 <1 línea fuerte, sin icono, sin emoji decorativo>
 
+
+[IG_GANCHO_B]
+# Gancho B, de un ÁNGULO DISTINTO al A (copy_engine.md §9.3). Obligatorio: es el A/B.
+# Va al título del portal ([PT_TITULO_B]) o al segundo vídeo. Después se anota
+# en memoria/marketing-resultados.md cuál trajo contacto.
+<1 línea fuerte, sin icono, sin emoji decorativo>
+
 [IG_FICHA]
 🗓️ <YYYY-MM>  1ª matriculación
 🛣️ <km> km verificados
