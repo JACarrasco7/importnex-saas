@@ -51,6 +51,7 @@ import urllib.error
 import urllib.request
 import zipfile
 from pathlib import Path
+from urllib.parse import quote_plus
 
 # ── Constantes ────────────────────────────────────────────────────────────────
 
@@ -1660,6 +1661,246 @@ def _semaforo_de_reco(reco: str) -> str:
 # ── Empaquetado final ─────────────────────────────────────────────────────────
 
 
+# --------------------------------------------------------------------------- #
+# Busquedas realizadas (URLs de las búsquedas que originaron la investigación).
+#
+# Genera las URLs de los principales portales de búsqueda a partir de los
+# datos del coche (marca, modelo, año, potencia, carroceria, país). Las
+# URLs se inyectan en informe.json → mercado.busquedas_realizadas[] para que
+# el panel admin pueda mostrarlas al cliente (C2 auditoría 09-sep-2026).
+#
+# Si el payload YA trae mercado.busquedas_realizadas (entrada manual de
+# Claude), se respeta tal cual — esto permite pasar URLs custom por modelo.
+# --------------------------------------------------------------------------- #
+
+# Mapeos por portal: clave → (pais, builder_callable)
+# Los callable reciben (marca, modelo, anio_min, anio_max, cv_min, cv_max,
+# carroceria, query_params) y devuelven la URL completa.
+#
+# Los IDs y formato de parámetro son los oficiales (a 09-2026):
+#   - mobile.de: ms=MarcaID;ModeloID; (model IDs estables)
+#   - autoscout24.es: Marca modelo en path
+#   - coches.net: MakeIds[] + Versions[] (versión libre)
+#   - wallapop: query libre
+#   - autouncle: no tiene buscador público usable, omitido
+MARCA_MODEL_ID_MOBILE_DE = {
+    "vw": "25200",
+    "volkswagen": "25200",
+    "bmw": "3500",
+    "mercedes": "17200",
+    "mercedes-benz": "17200",
+    "audi": "1900",
+    "opel": "47000",
+    "ford": "9000",
+    "seat": "12200",
+    "skoda": "2400",
+    "renault": "7300",
+    "peugeot": "5900",
+    "citroen": "5000",
+    "fiat": "4000",
+    "honda": "11000",
+    "hyundai": "21000",
+    "kia": "22300",
+    "mazda": "16800",
+    "nissan": "21000",
+    "toyota": "24100",
+    "volvo": "25100",
+    "cupra": "25900",
+    "ds": "19500",
+}
+
+CARROCERIA_ID_MOBILE_DE = {
+    # 'sedan', 'familiar', 'coupe', 'suv', 'compacto', 'monovolumen'
+    "sedan": "Saloon",
+    "familiar": "EstateCar",
+    "coupe": "SportsCar",
+    "suv": "OffRoad",
+    "compacto": "Compact",
+    "monovolumen": "Van",
+}
+
+
+def _url_mobile_de(marca: str, modelo: str, anio_min: int, anio_max: int,
+                   cv_min: int, cv_max: int, carroceria: str) -> str:
+    """Genera URL de búsqueda mobile.de. Si no tenemos el ID de marca/modelo,
+    devuelve una URL con query libre (que SÍ funciona pero no es tan precisa)."""
+    mid = MARCA_MODEL_ID_MOBILE_DE.get(marca.lower())
+    # En mobile.de, `ms=MarcaID;ModeloID;;` (4 segmentos; el segundo es modelo).
+    if mid:
+        ms = f"{mid};;;"
+    else:
+        ms = ""
+    cid = CARROCERIA_ID_MOBILE_DE.get(carroceria.lower(), "")
+
+    params = {
+        "dam": "0",
+        "fr": f"{anio_min}:{anio_max}",
+        "isSearchRequest": "true",
+        "od": "up",
+        "s": "Car",
+        "sb": "p",
+        "vc": "Car",
+    }
+    if cid:
+        params["c"] = cid
+    if cv_min and cv_max:
+        params["pw"] = f"{cv_min}:{cv_max}"
+    if ms:
+        params["ms"] = ms
+
+    qs = "&".join(f"{k}={quote_plus(str(v))}" for k, v in params.items() if v != "")
+    return f"https://suchen.mobile.de/fahrzeuge/search.html?{qs}" if qs else ""
+
+
+def _url_autoscout24_es(marca: str, modelo: str, anio_min: int, anio_max: int,
+                        cv_min: int, cv_max: int, carroceria: str) -> str:
+    """URL de búsqueda en autoscout24.es por marca/modelo."""
+    from urllib.parse import quote_plus as _q
+    slug = f"{marca}-{modelo}".lower().replace(" ", "-").replace("--", "-")
+    return (
+        f"https://www.autoscout24.es/lst/{_q(slug)}?"
+        f"atype=C&cy={anio_min}%2C{anio_max}&"
+        f"powerfrom={cv_min}&powerto={cv_max}&sort=price&desc=0&"
+        f"ustate=N%2CU&"
+        f"fregfrom={anio_min}&fregto={anio_max}"
+    )
+
+
+def _url_coches_net(marca: str, modelo: str, anio_min: int, anio_max: int,
+                    cv_min: int, cv_max: int, carroceria: str) -> str:
+    """URL de búsqueda en coches.net (mercado español). Usa MakeIds y
+    Versions como query param array; el ID exacto de marca hay que mapearlo."""
+    marca_ids = {
+        "vw": 47, "volkswagen": 47, "bmw": 11, "mercedes": 12, "audi": 4,
+        "opel": 7, "ford": 5, "seat": 9, "skoda": 17, "renault": 13,
+        "peugeot": 14, "citroen": 15, "fiat": 16, "honda": 18,
+        "hyundai": 22, "kia": 23, "mazda": 24, "nissan": 25,
+        "toyota": 10, "volvo": 26, "cupra": 27,
+    }
+    body_type = {
+        "sedan": 1, "compacto": 2, "familiar": 4, "suv": 5,
+        "monovolumen": 6, "coupe": 7,
+    }
+    make_id = marca_ids.get(marca.lower(), 0)
+    bt = body_type.get(carroceria.lower(), 0)
+    parts = [f"MakeIds[0]={make_id}"] if make_id else []
+    if modelo:
+        parts.append(f"Versions[0]={quote_plus(modelo)}")
+    if bt:
+        parts.append(f"ArrBodyType={bt}")
+    if cv_min and cv_max:
+        parts.append(f"PowerHpFrom={cv_min}")
+        parts.append(f"PowerHpTo={cv_max}")
+    parts.append("fi=Price")
+    parts.append("or=1")
+    return f"https://www.coches.net/segunda-mano/?{'&'.join(parts)}"
+
+
+def _url_wallapop(marca: str, modelo: str, anio_min: int, anio_max: int,
+                  cv_min: int, cv_max: int, carroceria: str) -> str:
+    """URL de búsqueda en wallapop (España). Query libre + filtro año/potencia."""
+    q = quote_plus(f"{marca} {modelo}".strip())
+    return f"https://es.wallapop.com/search?keywords={q}"
+
+
+def generar_busquedas_realizadas(payload: dict) -> list[dict]:
+    """Construye las URLs de búsqueda que originaron la investigación de
+    mercado, a partir de los datos del vehiculo. Es una estimación: el
+    operador puede editar las URLs en el JSON de entrada si las precisas
+    mejor (ver CLAUDE.md).
+
+    Cada item del resultado es:
+      { pais: 'DE'|'ES', portal: str, url: str, descripcion: str,
+        params: {...}, generado_el: ISO 8601 }
+
+    Si el payload YA trae mercado.busquedas_realizadas (manual), se respeta.
+    """
+    # Si ya viene relleno (manual), respetar tal cual.
+    mercado = payload.get("mercado") or {}
+    if isinstance(mercado.get("busquedas_realizadas"), list) and mercado["busquedas_realizadas"]:
+        return mercado["busquedas_realizadas"]
+
+    veh = payload.get("vehiculo") or {}
+    marca = (veh.get("marca") or "").strip()
+    modelo = (veh.get("modelo") or "").strip()
+    if not marca or not modelo:
+        return []
+
+    # Año: si es un modelo vigente (anio_hasta=None), usamos 2015:año_actual+1.
+    anio_min = int(veh.get("anio_min") or veh.get("anio") or 2015)
+    anio_hasta = veh.get("anio_hasta") or veh.get("anio_max")
+    anio_max = int(anio_hasta or datetime.date.today().year + 1)
+    cv_min = int(veh.get("cv_min") or (veh.get("potencia_cv") or 0))
+    cv_max = int(veh.get("cv_max") or (veh.get("potencia_cv") or 0))
+    if cv_min and cv_max == 0:
+        cv_max = cv_min + 20
+    carroceria = (veh.get("carroceria") or "").strip().lower() or "sedan"
+
+    ahora = datetime.datetime.now().astimezone().isoformat(timespec="seconds")
+    out: list[dict] = []
+
+    # DE: mobile.de + autoscout24 (Alemania)
+    url = _url_mobile_de(marca, modelo, anio_min, anio_max, cv_min, cv_max, carroceria)
+    if url:
+        out.append({
+            "pais": "DE",
+            "portal": "mobile.de",
+            "url": url,
+            "descripcion": f"{marca} {modelo} {anio_min}-{anio_max}, {cv_min}-{cv_max} CV",
+            "params": {
+                "marca": marca, "modelo": modelo,
+                "anio_min": anio_min, "anio_max": anio_max,
+                "cv_min": cv_min, "cv_max": cv_max,
+                "carroceria": carroceria,
+            },
+            "generado_el": ahora,
+        })
+    url = _url_autoscout24_es(marca, modelo, anio_min, anio_max, cv_min, cv_max, carroceria)
+    if url:
+        out.append({
+            "pais": "DE",
+            "portal": "autoscout24.de",
+            "url": url,
+            "descripcion": f"{marca} {modelo} {anio_min}-{anio_max}, {cv_min}-{cv_max} CV",
+            "params": {
+                "marca": marca, "modelo": modelo,
+                "anio_min": anio_min, "anio_max": anio_max,
+            },
+            "generado_el": ahora,
+        })
+
+    # ES: coches.net + wallapop
+    url = _url_coches_net(marca, modelo, anio_min, anio_max, cv_min, cv_max, carroceria)
+    if url:
+        out.append({
+            "pais": "ES",
+            "portal": "coches.net",
+            "url": url,
+            "descripcion": f"{marca} {modelo} {anio_min}-{anio_max}, {cv_min}-{cv_max} CV",
+            "params": {
+                "marca": marca, "modelo": modelo,
+                "anio_min": anio_min, "anio_max": anio_max,
+                "cv_min": cv_min, "cv_max": cv_max,
+                "carroceria": carroceria,
+            },
+            "generado_el": ahora,
+        })
+    url = _url_wallapop(marca, modelo, anio_min, anio_max, cv_min, cv_max, carroceria)
+    if url:
+        out.append({
+            "pais": "ES",
+            "portal": "wallapop",
+            "url": url,
+            "descripcion": f"{marca} {modelo} (España)",
+            "params": {
+                "marca": marca, "modelo": modelo,
+            },
+            "generado_el": ahora,
+        })
+
+    return out
+
+
 def build_zip(
     zip_path: Path,
     informe_payload: dict,
@@ -1734,6 +1975,30 @@ def main() -> int:
 
     payload = load_payload(args.json)
     coche_id = derive_coche_id(payload)
+
+    # C2 auditoría 09-sep-2026 (panel admin): inyectamos las URLs de
+    # búsqueda de mercado (mobile.de / autoscout24 / coches.net / wallapop)
+    # en informe.json → mercado.busquedas_realizadas[] para que el panel
+    # admin pueda mostrarlas en la pestaña Mercado. Si el payload YA las
+    # trae, se respetan (manual, p.ej. URLs custom por modelo).
+    busquedas = generar_busquedas_realizadas(payload)
+    if busquedas:
+        if not isinstance(payload.get("mercado"), dict):
+            payload["mercado"] = {}
+        payload["mercado"]["busquedas_realizadas"] = busquedas
+        info(f"{len(busquedas)} búsqueda(s) de mercado generadas (mobile.de, coches.net…)")
+
+    # C2 auditoría 09-sep-2026: inyectamos las URLs de búsqueda de mercado
+    # (mobile.de / autoscout24 / coches.net / wallapop) en informe.json →
+    # mercado.busquedas_realizadas[] para que el panel admin pueda
+    # mostrarlas. Si el payload YA las trae, se respetan (manual).
+    busquedas = generar_busquedas_realizadas(payload)
+    if busquedas:
+        payload.setdefault("mercado", {})
+        if not isinstance(payload["mercado"], dict):
+            payload["mercado"] = {}
+        payload["mercado"]["busquedas_realizadas"] = busquedas
+        info(f"{len(busquedas)} búsqueda(s) de mercado generadas (mobile.de, coches.net…)")
 
     if args.auto_path:
         out_dir = derive_auto_path(payload)

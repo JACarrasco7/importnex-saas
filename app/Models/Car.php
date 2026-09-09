@@ -32,7 +32,8 @@ class Car extends Model
         'verdict', 'verdict_confidence', 'verdict_reasoning', 'verdict_changes', 'verdict_at',
         'market_avg', 'market_min', 'market_max', 'estimated_saving',
         'research_source', 'schema_version',
-        'comparables_list', 'fotos_json', 'notes', 'organization_id', 'client_id',
+        'comparables_list', 'fotos_json', 'busquedas_realizadas', 'notes',
+        'organization_id', 'client_id',
         'tracking_token', 'tracking_shared_at', 'tracking_shared_with_email',
         'tracking_revoked_at', 'tracking_views', 'expected_delivery_date',
         'ai_analysis_json', 'ai_verified_at',
@@ -43,7 +44,12 @@ class Car extends Model
         'research' => 'array', 'pros' => 'array', 'cons' => 'array',
         'ai_analysis_json' => 'array',
         'ai_verified_at' => 'datetime',
-        'comparables_list' => 'array', 'fotos_json' => 'array', 'boe_confirmed' => 'boolean',
+        'comparables_list' => 'array', 'fotos_json' => 'array',
+        // C2 auditoría 09-sep-2026: URLs de las búsquedas de mercado
+        // (mobile.de / autoscout24 / coches.net / wallapop) que el panel
+        // admin muestra en la pestaña Mercado.
+        'busquedas_realizadas' => 'array',
+        'boe_confirmed' => 'boolean',
         'co2_confirmado' => 'boolean',
         'is_marketplace' => 'boolean',
         'verdict_at' => 'datetime',
@@ -357,6 +363,44 @@ class Car extends Model
             'mixto' => $stats($byCountry['mixto']),
             'unknown' => $stats($byCountry['unknown']),
         ];
+    }
+
+    /**
+     * C2 auditoría 09-sep-2026: agrupa las URLs de búsqueda de mercado
+     * (mobile.de / autoscout24 / coches.net / wallapop) por país. La pestaña
+     * Mercado del panel admin lo usa para mostrar "Búsquedas realizadas"
+     * con bandera por sección.
+     *
+     * @return array{
+     *     DE: list<array{portal:string, url:string, descripcion:string|null}>,
+     *     ES: list<array{portal:string, url:string, descripcion:string|null}>,
+     *     otros: list<array{portal:string, url:string, descripcion:string|null}>
+     * }
+     */
+    public function getBusquedasPorPaisAttribute(): array
+    {
+        $items = $this->busquedas_realizadas ?? [];
+        $out = ['DE' => [], 'ES' => [], 'otros' => []];
+        foreach ($items as $b) {
+            if (! is_array($b) || empty($b['url'])) {
+                continue;
+            }
+            $pais = strtoupper((string) ($b['pais'] ?? ''));
+            $entry = [
+                'portal' => (string) ($b['portal'] ?? ''),
+                'url' => (string) $b['url'],
+                'descripcion' => $b['descripcion'] ?? null,
+            ];
+            if ($pais === 'DE') {
+                $out['DE'][] = $entry;
+            } elseif ($pais === 'ES') {
+                $out['ES'][] = $entry;
+            } else {
+                $out['otros'][] = $entry;
+            }
+        }
+
+        return $out;
     }
 
     /**

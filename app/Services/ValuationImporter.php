@@ -438,6 +438,10 @@ class ValuationImporter
                     ? $this->translateTrafficLight($m['semaforo'] ?? null)
                     : null,
                 'comparables_list' => $this->normalizeComparables($m['comparables'] ?? []),
+                // C2 auditoría 09-sep-2026: URLs de las búsquedas de mercado
+                // (mobile.de / autoscout24 / coches.net / wallapop) generadas
+                // por la skill. Se muestran en la pestaña Mercado del panel.
+                'busquedas_realizadas' => $this->normalizeBusquedasRealizadas($m['busquedas_realizadas'] ?? []),
 
                 // Source
                 'research_source' => 'chat',
@@ -733,6 +737,43 @@ class ValuationImporter
                 'km' => $c['km'] ?? null,
                 'url' => $c['url'] ?? $c['u'] ?? null,
                 'country' => $c['pais'] ?? null,
+            ], fn ($v) => $v !== null && $v !== '');
+        }
+
+        return $out;
+    }
+
+    /**
+     * C2 auditoría 09-sep-2026: normaliza las URLs de búsqueda de mercado.
+     * Esquema esperado por item:
+     *   { pais: 'DE'|'ES', portal: str, url: str, descripcion: str,
+     *     params?: {...}, generado_el?: ISO }
+     * Defensiva: descarta items sin url o sin portal, loggea warning si llegan
+     * items malformados.
+     */
+    private function normalizeBusquedasRealizadas(array $items): array
+    {
+        $out = [];
+        foreach ($items as $b) {
+            if (! is_array($b)) {
+                continue;
+            }
+            $url = $b['url'] ?? null;
+            $portal = $b['portal'] ?? null;
+            if (! is_string($url) || $url === '' || ! is_string($portal) || $portal === '') {
+                Log::warning('ValuationImporter: busqueda_realizada sin url o portal', [
+                    'item' => $b,
+                ]);
+
+                continue;
+            }
+            $out[] = array_filter([
+                'pais' => $b['pais'] ?? null,
+                'portal' => $portal,
+                'url' => $url,
+                'descripcion' => $b['descripcion'] ?? null,
+                'params' => is_array($b['params'] ?? null) ? $b['params'] : null,
+                'generado_el' => $b['generado_el'] ?? null,
             ], fn ($v) => $v !== null && $v !== '');
         }
 

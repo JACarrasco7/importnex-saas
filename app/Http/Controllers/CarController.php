@@ -156,6 +156,11 @@ class CarController extends Controller
                 'research_gaps' => $car->researchGaps,
                 'comparables_stats' => $car->comparablesStats,
                 'comparables_stats_by_country' => $car->comparablesStatsByCountry,
+                // C2 auditoría 09-sep-2026: URLs de las búsquedas de mercado
+                // (mobile.de / autoscout24 / coches.net / wallapop). La pestaña
+                // Mercado del panel admin las muestra como "Búsquedas
+                // realizadas".
+                'busquedas_por_pais' => $car->busquedasPorPais,
                 'milestones_progress' => $milestonesProgress,
                 'inspections_progress' => $inspectionsProgress,
                 'inspections_by_section' => $inspectionsBySection,

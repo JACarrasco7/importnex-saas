@@ -488,6 +488,8 @@ export default {
     line_items: 'Líneas',
     market_comparables: 'Comparables de mercado',
     market_breakdown_by_country: 'Desglose por país de mercado',
+    market_searches_performed: 'Búsquedas realizadas',
+    market_searches_help: 'URLs que se usaron para investigar este coche. Pínchalas para ver los resultados en cada portal.',
     next_invoice: 'Próxima factura',
     on: 'el',
     processing_dots: 'Procesando...',

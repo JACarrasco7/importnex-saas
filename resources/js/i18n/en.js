@@ -479,6 +479,8 @@ export default {
     line_items: 'Line items',
     market_comparables: 'Market comparables',
     market_breakdown_by_country: 'Breakdown by market country',
+    market_searches_performed: 'Searches performed',
+    market_searches_help: 'URLs used to research this car. Click to see the results on each portal.',
     metodo_de_pago: 'Payment method',
     next_invoice: 'Next invoice',
     no_active_subscription: 'No active subscription.',
