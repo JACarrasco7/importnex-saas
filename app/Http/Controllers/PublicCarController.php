@@ -97,20 +97,37 @@ class PublicCarController extends Controller
      */
     private function esRecomendableParaCliente($car, ?Esqueleto $esqueleto, ?array $ficha): bool
     {
+        // 1) ficha-cliente.json presente → SIEMPRE se muestra. La skill ya
+        //    decidió que este coche merece ficha comercial.
         if ($ficha !== null) {
             return true;
         }
 
+        // 2) Recomendación interna en BD: si empieza por "comprar", OK.
         $reco = strtolower(trim((string) ($car->recommendation ?? '')));
         if (str_starts_with($reco, 'comprar')) {
             return true;
         }
 
+        // 3) Veredicto del esqueleto: bloque actual [VEREDICTO].
         $veredicto = strtolower(trim((string) ($esqueleto?->uno('VEREDICTO') ?? '')));
         if (str_starts_with($veredicto, 'comprar')) {
             return true;
         }
 
+        // 4) ZIP legacy (auditoría 09-sep-2026, fix 10-sep): el bloque
+        //    [RECOMENDACION] estaba en informe-interno.txt, no en
+        //    ficha-publicitaria. Si empieza por "comprar", lo aceptamos
+        //    también — son coches antiguos cuyo ZIP no se puede reimportar.
+        $recoLegacy = strtolower(trim((string) ($esqueleto?->uno('RECOMENDACION') ?? '')));
+        if (str_starts_with($recoLegacy, 'comprar')) {
+            return true;
+        }
+
+        // 5) Coche SIN recommendation en BD y SIN bloque en el esqueleto
+        //    (ZIP muy antiguo o dañado) → no mostramos ficha comercial. El
+        //    operador debe reimportar el ZIP o actualizar la recomendación
+        //    manualmente.
         return false;
     }
 
