@@ -62,12 +62,18 @@ class PublicCarController extends Controller
             fn () => $this->fichaCliente($car)
         );
 
-        // A3: si la recomendación interna desaconseja la unidad y no hay
-        // ficha-cliente.json que la justifique ante el cliente, devolvemos
-        // car-unavailable. La ficha armada con datos internos está prohibida.
-        if (! $this->esRecomendableParaCliente($car, $esqueleto, $ficha)) {
-            return response()->view('public.car-unavailable');
-        }
+        // A3 auditoría 09-sep-2026 (fix 10-sep-2026): con el FiltroPublico
+        // endurecido (A1+A2), ya no ocultamos el dossier cuando la
+        // recomendación interna es "No importar". El operador ha generado el
+        // enlace a propósito y la ficha del cliente usa exclusivamente bloques
+        // escritos para él (ficha-cliente.json o PUBLICIDAD_ARGUMENTO). El
+        // operador sigue viendo el semáforo interno en /cars/{id}; el cliente
+        // ve un dossier neutro con lo que la IA escribió para él.
+        //
+        // Si el operador quiere ocultar un dossier concreto, puede revocar el
+        // enlace desde el panel (Cars/Show → Revocar enlace). El método
+        // esRecomendableParaCliente() sigue disponible por si queremos volver
+        // al modo estricto en el futuro.
 
         $fotos = $this->fotos($car, $token);
 

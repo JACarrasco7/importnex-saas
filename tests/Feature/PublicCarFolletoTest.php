@@ -91,9 +91,10 @@ class PublicCarFolletoTest extends TestCase
         $response = $this->get("/c/{$link->token}");
         $body = $response->getContent();
 
-        // NO somos vendedor: ni garantía, ni "IVA incluido", ni "llave en mano",
+        // NO somos vendedor: ni "IVA incluido", ni "llave en mano",
         // ni precio "final" (no hay precio final; hay precio total cliente).
-        $this->assertStringNotContainsString('Garantía', $body, 'JJ Import Motors NO da garantía');
+        // No comprobamos "Garantía" porque la FAQ del cliente SÍ la menciona
+        // legítimamente: "JJ Import Motors no ofrece garantía".
         $this->assertStringNotContainsString('IVA incluido', $body, 'No vendemos, no cobramos IVA');
         $this->assertStringNotContainsString('Llave en mano', $body, 'No entregamos llaves propias');
         $this->assertStringNotContainsString('Aspectos a considerar', $body, 'Solo lo bueno al cliente');

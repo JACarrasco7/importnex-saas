@@ -32,8 +32,12 @@ class PublicCarRecomendableTest extends TestCase
         Storage::disk('local')->deleteDirectory('cars');
     }
 
-    public function test_dossier_devuelve_car_unavailable_si_recomendacion_es_no_comprar_y_no_hay_ficha(): void
+    public function test_dossier_se_muestra_aunque_recomendacion_sea_no_comprar(): void
     {
+        // 10-sep-2026: con el FiltroPublico endurecido (A1+A2), el dossier
+        // se muestra SIEMPRE que el enlace esté activo, incluso si la
+        // recomendación interna es "No importar". El operador decide
+        // revocar el enlace si quiere ocultarlo.
         [, $link] = $this->cocheCon([
             'recommendation' => 'No importar a este precio',
             'valuation' => 'Mala compra para cliente',
@@ -42,7 +46,7 @@ class PublicCarRecomendableTest extends TestCase
         $response = $this->get("/c/{$link->token}");
 
         $response->assertOk();
-        $response->assertViewIs('public.car-unavailable');
+        $response->assertViewIs('public.car-dossier');
     }
 
     public function test_dossier_se_muestra_si_hay_ficha_cliente_json(): void
