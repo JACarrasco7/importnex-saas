@@ -12,7 +12,6 @@ import {
     XCircleIcon,
     MinusCircleIcon,
     LinkIcon,
-    XMarkIcon,
     GlobeEuropeAfricaIcon,
     ShareIcon,
     ClipboardDocumentIcon,
@@ -27,6 +26,11 @@ import OverviewPanel from '@/Pages/Cars/Partials/OverviewPanel.vue';
 import InvestigationPanel from '@/Pages/Cars/Partials/InvestigationPanel.vue';
 import MarketPanel from '@/Pages/Cars/Partials/MarketPanel.vue';
 import ChecklistPanel from '@/Pages/Cars/Partials/ChecklistPanel.vue';
+import AssignRequestPanel from '@/Pages/Cars/Partials/AssignRequestPanel.vue';
+import NotesPanel from '@/Pages/Cars/Partials/NotesPanel.vue';
+import ExpensesPanel from '@/Pages/Cars/Partials/ExpensesPanel.vue';
+import PhotosPanel from '@/Pages/Cars/Partials/PhotosPanel.vue';
+import ShareTrackingModal from '@/Pages/Cars/Modals/ShareTrackingModal.vue';
 import { useFormat } from '@/Composables/useFormat';
 import { useTranslations } from '@/Composables/useTranslations';
 
@@ -43,17 +47,13 @@ const showDeleteDoc = ref(false);
 const photoToDelete = ref(null);
 const docToDelete = ref(null);
 
-// Vincular solicitud compatible (seleccionada por el admin desde un <select>)
-const selectedRequestId = ref('');
-
 // Vincular coche ↔ solicitud compatible (seleccionada por el admin)
 const linkingId = ref(null);
 const linkError = ref(null);
 const linkSuccess = ref(null);
 const linkForm = useForm({});
-const linkSelectedRequest = () => {
-    if (!selectedRequestId.value || linkingId.value !== null) return;
-    const reqId = Number(selectedRequestId.value);
+const linkSelectedRequest = (reqId) => {
+    if (!reqId || linkingId.value !== null) return;
     linkingId.value = reqId;
     linkError.value = null;
     linkSuccess.value = null;
@@ -63,7 +63,6 @@ const linkSelectedRequest = () => {
             linkSuccess.value = t('cars.matching_link_success');
             linkError.value = null;
             linkingId.value = null;
-            selectedRequestId.value = '';
         },
         onError: (errors) => {
             const first = errors && Object.keys(errors)[0];
@@ -180,20 +179,6 @@ const sections = [
     { id: 'gastos', label: t('cars.expenses_vs_estimated') },
 ];
 const activeSection = ref('resumen');
-
-// Lightbox de fotos
-const lightboxIndex = ref(-1);
-const lightboxPhotos = computed(() => props.car.photos || []);
-const openLightbox = (index) => { lightboxIndex.value = index; };
-const closeLightbox = () => { lightboxIndex.value = -1; };
-const nextLightbox = () => {
-    if (lightboxPhotos.value.length === 0) return;
-    lightboxIndex.value = (lightboxIndex.value + 1) % lightboxPhotos.value.length;
-};
-const prevLightbox = () => {
-    if (lightboxPhotos.value.length === 0) return;
-    lightboxIndex.value = (lightboxIndex.value - 1 + lightboxPhotos.value.length) % lightboxPhotos.value.length;
-};
 
 const photoForm = useForm({ photo_type: 'exterior', photos: [] });
 const docForm = useForm({ doc_type: 'invoice', doc_key: '', name: '', documents: [] });
@@ -502,87 +487,12 @@ const onDocKeyChange = () => {
                     </div>
                 </div>
 
-                <!-- Photos -->
-                <div v-show="activeSection === 'fotos'" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
-                    <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-                        <h3 class="text-base font-semibold text-gray-900">Photos</h3>
-                        <span class="text-sm text-gray-500">{{ car.photos?.length || 0 }} files</span>
-                    </div>
-                    <div class="p-6 space-y-4">
-                        <form @submit.prevent="submitPhotos" class="grid grid-cols-1 gap-3 rounded-xl bg-gray-50 p-4 sm:grid-cols-[1fr_2fr_auto]">
-                            <select v-model="photoForm.photo_type" class="block rounded-lg border-gray-300 text-sm focus:border-estoril-500 focus:ring-estoril-500">
-                                <option value="exterior">{{ t('cars.photo_type_exterior') }}</option>
-                                <option value="interior">{{ t('cars.photo_type_interior') }}</option>
-                                <option value="engine">{{ t('cars.photo_type_engine') }}</option>
-                                <option value="defect">{{ t('cars.photo_type_defect') }}</option>
-                                <option value="document">{{ t('cars.photo_type_document') }}</option>
-                            </select>
-                            <input type="file" multiple accept="image/*" @change="handlePhotoFiles" class="block w-full text-sm text-gray-500 file:mr-3 file:rounded-lg file:border-0 file:bg-estoril-50 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-estoril-700 hover:file:bg-estoril-100" />
-                            <button type="submit" :disabled="!photoForm.photos.length || uploadProgress" class="inline-flex items-center justify-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white hover:bg-estoril-500 disabled:opacity-50">
-                                <ArrowDownTrayIcon class="h-4 w-4" />
-                                {{ uploadProgress ? t('cars.uploading') : t('cars.upload') }}
-                            </button>
-                        </form>
+                <!-- Photos + Lightbox -->
+                <PhotosPanel v-show="activeSection === 'fotos'" :car="car" :photo-type="photoForm.photo_type" :photo-files="photoForm.photos" :upload-progress="uploadProgress" @update:photo-type="(v) => photoForm.photo_type = v" @update:photo-files="(v) => photoForm.photos = v" @submit-photos="submitPhotos" @ask-delete-photo="askDeletePhoto" />
 
-                        <div v-if="car.photos?.length" class="grid grid-cols-2 gap-3 md:grid-cols-4">
-                            <div v-for="(photo, idx) in car.photos" :key="photo.id" class="group relative overflow-hidden rounded-lg">
-                                <button type="button" @click="openLightbox(idx)" class="block h-full w-full">
-                                    <img :src="`/storage/${photo.url}`" :alt="photo.photo_type" class="h-32 w-full cursor-zoom-in object-cover" loading="lazy" />
-                                </button>
-                                <!-- Delete en la esquina superior derecha, sin overlay -->
-                                <button type="button" @click.stop="askDeletePhoto(photo)" class="absolute right-1.5 top-1.5 rounded-md bg-rose-600/90 p-1.5 text-white opacity-0 shadow transition hover:bg-rose-600 group-hover:opacity-100" :title="t('common.delete')">
-                                    <TrashIcon class="h-3.5 w-3.5" />
-                                </button>
-                                <span class="absolute bottom-2 left-2 rounded bg-black/70 px-2 py-0.5 text-xs text-white">{{ photo.photo_type }}</span>
-                            </div>
-                        </div>
-                        <p v-else class="py-6 text-center text-sm text-gray-500">{{ t('cars.no_photos_yet') }}</p>
-                    </div>
-                </div>
-
-                <!-- Lightbox de fotos -->
-                <Teleport to="body">
-                    <div v-if="lightboxIndex >= 0" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4" @click="closeLightbox">
-                        <button type="button" class="absolute right-4 top-4 rounded-full bg-white/10 p-2 text-white hover:bg-white/20" @click.stop="closeLightbox">
-                            <XMarkIcon class="h-6 w-6" />
-                        </button>
-                        <button v-if="lightboxPhotos.length > 1" type="button" class="absolute left-4 rounded-full bg-white/10 p-3 text-white hover:bg-white/20" @click.stop="prevLightbox">‹</button>
-                        <img v-if="lightboxPhotos[lightboxIndex]" :src="`/storage/${lightboxPhotos[lightboxIndex].url}`" :alt="lightboxPhotos[lightboxIndex].photo_type" class="max-h-[85vh] max-w-full rounded-lg object-contain shadow-2xl" @click.stop />
-                        <button v-if="lightboxPhotos.length > 1" type="button" class="absolute right-4 rounded-full bg-white/10 p-3 text-white hover:bg-white/20" @click.stop="nextLightbox">›</button>
-                        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-white/10 px-4 py-1.5 text-sm text-white">
-                            {{ lightboxIndex + 1 }} / {{ lightboxPhotos.length }}
-                        </div>
-                    </div>
-                </Teleport>
-
-                <!-- Vincular solicitud compatible (seleccionada por el admin) -->
-                <div v-if="activeSection === 'resumen' && !car.client && derived?.selectable_requests?.length" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
-                    <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-                        <h3 class="text-base font-semibold text-gray-900">{{ t('cars.select_request_title') }}</h3>
-                        <span class="text-xs text-gray-500">{{ derived.selectable_requests.length }}</span>
-                    </div>
-                    <div class="space-y-3 p-4">
-                        <select
-                            v-model="selectedRequestId"
-                            class="w-full rounded-lg border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm focus:border-estoril-500 focus:ring-estoril-500"
-                        >
-                            <option value="">{{ t('cars.select_request_placeholder') }}</option>
-                            <option v-for="req in derived.selectable_requests" :key="req.id" :value="req.id">
-                                {{ req.name || t('cars.matching_no_name') }}{{ req.brand ? ' · ' + req.brand + (req.model ? ' ' + req.model : '') : '' }}{{ req.budget_max ? ' · ' + currency(req.budget_max) : '' }}
-                            </option>
-                        </select>
-                        <div class="flex items-center justify-between gap-3">
-                            <p class="text-xs text-gray-500">{{ t('cars.select_request_help') }}</p>
-                            <button
-                                type="button"
-                                :disabled="!selectedRequestId || linkingId !== null"
-                                class="shrink-0 rounded-lg bg-estoril-600 px-4 py-2 text-xs font-semibold text-white hover:bg-estoril-500 disabled:cursor-not-allowed disabled:opacity-50"
-                                @click="linkSelectedRequest"
-                            >
-                                <span v-if="linkingId !== null">…</span>
-                                <span v-else>{{ t('cars.matching_link') }}</span>
-                            </button>
-                        </div>
+                <!-- Vincular solicitud compatible -->
+                <AssignRequestPanel v-if="activeSection === 'resumen' && !car.client && derived?.selectable_requests?.length" :derived="derived" :linking="linkingId !== null" @link-selected-request="linkSelectedRequest">
+                    <template #messages>
                         <p v-if="linkError" class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800">
                             <strong class="block">{{ t('cars.matching_link_error_title') }}</strong>
                             {{ linkError }}
@@ -590,8 +500,8 @@ const onDocKeyChange = () => {
                         <p v-if="linkSuccess" class="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
                             {{ linkSuccess }}
                         </p>
-                    </div>
-                </div>
+                    </template>
+                </AssignRequestPanel>
 
                 <!-- Assigned Client -->
                 <div v-if="car.client" class="overflow-hidden rounded-2xl bg-linear-to-br from-blue-50 to-estoril-50 shadow-sm ring-1 ring-blue-200">
@@ -840,44 +750,10 @@ const onDocKeyChange = () => {
                 </div>
 
                 <!-- Notes -->
-                <div v-if="car.notes" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
-                    <div class="border-b border-gray-200 px-6 py-4">
-                        <h3 class="text-base font-semibold text-gray-900">{{ t('cars.notes') }}</h3>
-                    </div>
-                    <div class="p-6">
-                        <pre class="whitespace-pre-wrap font-sans text-sm text-gray-700">{{ car.notes }}</pre>
-                    </div>
-                </div>
+                <NotesPanel :notes="car.notes" />
 
                 <!-- Expenses -->
-                <div v-show="activeSection === 'gastos'" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
-                    <div class="border-b border-gray-200 px-6 py-4">
-                        <h3 class="text-base font-semibold text-gray-900">{{ t('cars.expenses_vs_estimated') }}</h3>
-                    </div>
-                    <div v-if="car.expenses?.length" class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.expense_concept') }}</th>
-                                    <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.expense_estimated') }}</th>
-                                    <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.expense_actual') }}</th>
-                                    <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.expense_diff') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200">
-                                <tr v-for="exp in car.expenses" :key="exp.id">
-                                    <td class="px-6 py-3 text-sm text-gray-900">{{ exp.concept }}</td>
-                                    <td class="px-6 py-3 text-right font-mono text-sm text-gray-700">{{ currency(exp.estimated) }}</td>
-                                    <td class="px-6 py-3 text-right font-mono text-sm text-gray-900">{{ currency(exp.actual) }}</td>
-                                    <td class="px-6 py-3 text-right font-mono text-sm" :class="(exp.actual - exp.estimated) > 0 ? 'text-red-600' : 'text-green-600'">
-                                        {{ currency(exp.actual - exp.estimated) }}
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <p v-else class="p-6 text-center text-sm text-gray-500">{{ t('cars.no_expenses_logged') }}</p>
-                </div>
+                <ExpensesPanel v-show="activeSection === 'gastos'" :expenses="car.expenses || []" />
             </div>
         </div>
 
@@ -885,58 +761,6 @@ const onDocKeyChange = () => {
         <ConfirmDialog :show="showDeleteDoc" :title="t('cars.delete_document')" :message="t('cars.delete_document_msg')" :confirm-text="t('common.delete')" :cancel-text="t('common.cancel')" @confirm="confirmDeleteDoc" @close="showDeleteDoc = false" @cancel="showDeleteDoc = false" />
 
         <!-- Modal de compartir seguimiento con el cliente -->
-        <Teleport to="body">
-            <Transition
-                enter-active-class="transition ease-out duration-150"
-                enter-from-class="opacity-0"
-                enter-to-class="opacity-100"
-                leave-active-class="transition ease-in duration-100"
-                leave-from-class="opacity-100"
-                leave-to-class="opacity-0"
-            >
-                <div v-if="showTrackingModal" class="fixed inset-0 z-50 flex items-center justify-center bg-asphalt-900/60 p-4" @click.self="showTrackingModal = false">
-                    <div class="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
-                        <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-                            <h3 class="flex items-center gap-2 text-base font-semibold text-gray-900">
-                                <ShareIcon class="h-5 w-5 text-estoril-600" />
-                                {{ t('cars.tracking.modal_title') }}
-                            </h3>
-                            <button type="button" @click="showTrackingModal = false" class="text-gray-400 hover:text-gray-600">
-                                <XMarkIcon class="h-5 w-5" />
-                            </button>
-                        </div>
-                        <form @submit.prevent="submitTracking" class="space-y-4 p-6">
-                            <p class="text-sm text-gray-600">{{ t('cars.tracking.modal_help') }}</p>
-                            <div>
-                                <label class="mb-1 block text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.tracking.email_label') }}</label>
-                                <input
-                                    v-model="trackingForm.email"
-                                    type="email"
-                                    class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-500 focus:ring-estoril-500"
-                                    :placeholder="t('cars.tracking.email_placeholder')"
-                                />
-                                <p v-if="trackingForm.errors.email" class="mt-1 text-xs text-rose-600">{{ trackingForm.errors.email }}</p>
-                            </div>
-                            <div>
-                                <label class="mb-1 block text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.tracking.eta_label') }}</label>
-                                <input
-                                    v-model="trackingForm.expected_delivery_date"
-                                    type="date"
-                                    class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-500 focus:ring-estoril-500"
-                                />
-                            </div>
-                            <div class="flex items-center justify-end gap-2 border-t border-gray-100 pt-4">
-                                <button type="button" @click="showTrackingModal = false" class="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50">
-                                    {{ t('common.cancel') }}
-                                </button>
-                                <button type="submit" :disabled="trackingForm.processing" class="inline-flex items-center gap-1 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white hover:bg-estoril-500 disabled:opacity-50">
-                                    {{ t('cars.tracking.generate') }}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </Transition>
-        </Teleport>
+        <ShareTrackingModal :show="showTrackingModal" :email="trackingForm.email" :expected-delivery-date="trackingForm.expected_delivery_date" :errors="trackingForm.errors || {}" :processing="trackingForm.processing" @update:show="(v) => showTrackingModal = v" @update:email="(v) => trackingForm.email = v" @update:expected-delivery-date="(v) => trackingForm.expected_delivery_date = v" @submit="submitTracking" />
     </AuthenticatedLayout>
 </template>
