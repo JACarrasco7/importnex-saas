@@ -34,22 +34,35 @@ class FiltroPublico
         // no necesita saberlo: ve el rango español y su estimación final.
         '/banda\s+(alemana?|alemán|de\s+origen|de\s+compra)/iu',
         '/cuartil\s+(bajo|alto|superior|inferior)/iu',
-        '/\b\d{1,3}([.,]\d{3})*\s*(€|eur)/iu',
+        // Cifras en EUR SOLO si están acompañadas de contexto interno
+        // (palabras clave que delaten análisis de la IA: "banda", "cuartil",
+        // "ahorro", "margen", "hueco"). El cliente puede ver precios
+        // legítimos (rango de mercado, su precio anuncio + gastos).
+        '/(?:banda|cuartil|ahorro|margen|hueco|origen)\D{0,40}\d{1,3}([.,]\d{3})*\s*(€|eur)/iu',
         // Cualquier referencia al mercado de origen con adjetivos internos.
         '/mercado\s+(alemana?|alemán|de\s+origen|de\s+compra)/iu',
         // "mercado X muy estrecho" tolerante a palabras intermedias
         // (español, europeo, de segunda mano, etc.).
         '/mercado\s+\w[\w\s]{0,40}\s+(muy\s+)?estrecho/iu',
         '/mercado\s+\w[\w\s]{0,40}\s+(muy\s+)?escaso/iu',
-        '/escasez(\s+de|\s+en|\s+alta)/iu',
+        // "escasez" solo si habla de MERCADO o unidades, no de plazas/plazas de parking.
+        // "alta escasez de esta motorización" → análisis de oferta/demanda.
+        '/escasez\s+(de\s+esta|de\s+oferta|en\s+stock|alta)/iu',
         '/alta\s+escasez/iu',
         '/\bunidades\s+(disponibles|en\s+(venta|toda|el\s+mercado))/iu',
         '/en\s+toda\s+Espa(ñ|n)a/iu',
         '/vendedor\s+(profesional|alem)/iu',
         '/\d[,.]\d\s*★|★/u',
         '/operaciones\s+de\s+exportaci(ó|o)n/iu',
-        '/\bcomparables?\b/iu',
-        '/mobile\.de|autoscout|kleinanzeigen/iu',
+        // "comparables" solo en contexto de análisis ("nuestros comparables",
+        // "comparables de Alemania"). El cliente no debe ver la palabra sola.
+        '/\bcomparables?\s+(de\s+(alemania|espa(ñ|n)a)|de\s+origen)/iu',
+        // URLs de portales de origen SOLO si acompañan a análisis ("vimos en
+        // mobile.de que…", "el anuncio en autoscout24…"). El cliente SÍ
+        // puede ver la URL del anuncio del coche que está mirando (eso es
+        // su propio coche).
+        '/vimos\s+en\s+(mobile\.de|autoscout|kleinanzeigen)/iu',
+        '/anuncio\s+(original|de\s+origen)\s+en\s+(mobile\.de|autoscout|kleinanzeigen)/iu',
         '/honorarios?\D{0,15}\d/iu',
     ];
 

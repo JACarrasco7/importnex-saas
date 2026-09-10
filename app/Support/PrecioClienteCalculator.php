@@ -169,35 +169,41 @@ class PrecioClienteCalculator
     /**
      * Parsea "31.929 €" / "31.929€" / "31929" / "31.929,00 EUR" / "1.234.567 €" → float.
      *
-     * Estrategia: la rama que matchea un número SIN separadores va PRIMERO
-     * (\d+(?:[.,]\d+)?). Si después va la rama con separadores (\d{1,3} con
-     * grupos de 3), evitamos el bug de "31929" → "319" por prioridad de regex.
+     * Estrategia (auditoría 09-sep-2026, fix #1): exigir CONTEXTO de moneda
+     * (€|EUR) o palabra clave (precio|coste|importe) adyacente al número.
+     * Esto evita capturar años (2023, 2024) o fechas (2024-01-15) que aparecen
+     * sueltos en el mismo bloque [PRECIO].
+     *
+     *   [PRECIO]
+     *   31.929 €
+     *   2023             ← antes capturaba 2023 (mal), ahora lo ignora
      */
     private static function parseEur(string $texto): ?float
     {
-        // 1) Número SIN separadores de miles (5+ dígitos): "31929", "12345.67"
-        if (preg_match('/\b(\d{4,}(?:[.,]\d+)?)\b/', $texto, $m) === 1) {
-            $num = str_replace(',', '.', $m[1]);
-            $f = (float) $num;
-            if ($f > 0) {
-                return $f;
-            }
-        }
-        // 2) Número CON separadores de miles: "31.929", "31.929,00", "31 929"
-        if (preg_match('/(\d{1,3}(?:[.\s]\d{3})+(?:,\d+)?)/', $texto, $m) === 1) {
-            $num = $m[1];
-            $num = str_replace(['.', ' '], ['', ''], $num);
+        // 1) EUR explícito adyacente: "31.929 €", "31.929,00 EUR", "31929€".
+        //    Matchea número (con o sin separadores de miles) seguido de €|EUR.
+        //    OJO: NO usamos flag `i` aquí. PCRE 10.x tiene un bug con `\b`
+        //    multibyte + case-insensitive que hace que la regex no matchee
+        //    strings como "31.929 €" (devuelve null). `€` y `EUR` ya son
+        //    case-insensitive al coincidir con el carácter Unicode exacto.
+        if (preg_match('/(\d{1,3}(?:[.\s]\d{3})+(?:,\d+)?|\d{4,}(?:[.,]\d+)?|\d{1,3})\s*(?:€|EUR)/u', $texto, $m) === 1) {
+            $num = preg_replace('/[.\s]/', '', $m[1]) ?? $m[1];
             $num = str_replace(',', '.', $num);
             $f = (float) $num;
             if ($f > 0) {
                 return $f;
             }
         }
-        // 3) Número pequeño sin separadores (1-3 dígitos): "1.000 €" (mil suelto)
-        if (preg_match('/\b(\d{1,3})\s*(?:€|EUR)\b/', $texto, $m) === 1) {
-            $f = (float) $m[1];
-
-            return $f > 0 ? $f : null;
+        // 2) Palabra clave "precio|coste|importe" antes de un número (algunos
+        //    bloques no usan €, e.g. "[PRECIO] 31.929"). Aquí sí podemos
+        //    usar `i` porque no hay `\b` contra multibyte.
+        if (preg_match('/(?:precio|coste|importe)\D{0,12}(\d{1,3}(?:[.\s]\d{3})+(?:,\d+)?|\d{4,}(?:[.,]\d+)?|\d{1,3})/iu', $texto, $m) === 1) {
+            $num = preg_replace('/[.\s]/', '', $m[1]) ?? $m[1];
+            $num = str_replace(',', '.', $num);
+            $f = (float) $num;
+            if ($f > 0) {
+                return $f;
+            }
         }
 
         return null;

@@ -636,7 +636,7 @@
             content: ''; position: absolute; inset: 0;
             background: radial-gradient(circle at 50% 0%, rgba(232, 89, 12, 0.15) 0%, transparent 40%);
         }
-        .cta-final > { position: relative; }
+        .cta-final > * { position: relative; }
         .cta-eyebrow {
             font-size: 11px; text-transform: uppercase; letter-spacing: 2.5px;
             color: var(--orange); font-weight: 800;
@@ -928,7 +928,7 @@
         $kpis = [
             ['k' => 'Año', 'v' => $anioTxt, 's' => $car->year ? 'Primera matriculación' : null, 'class' => ''],
             ['k' => 'Kilómetros', 'v' => $kmTxt ?? '—', 's' => 'Verificados', 'class' => ''],
-            ['k' => 'Combustible', 'v' => ucfirst($car->fuel_type ?? '—'), 's' => null, 'class' => ''],
+            ['k' => 'Combustible', 'v' => ucfirst($car->fuel ?? '—'), 's' => null, 'class' => ''],
             ['k' => 'Cambio', 'v' => ucfirst($cambioTxt ?? '—'), 's' => null, 'class' => ''],
             ['k' => 'Origen', 'v' => strtoupper($car->origin_country ?? '—'), 's' => 'Historial limpio', 'class' => 'green'],
         ];
