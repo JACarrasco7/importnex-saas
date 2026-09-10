@@ -239,7 +239,6 @@ const submitDocuments = () => {
     });
 };
 
-const handlePhotoFiles = (event) => { photoForm.photos = event.target.files; };
 const handleDocFiles = (event) => { docForm.documents = event.target.files; };
 
 const askDeletePhoto = (photo) => { photoToDelete.value = photo; showDeletePhoto.value = true; };
