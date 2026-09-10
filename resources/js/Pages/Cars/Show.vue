@@ -2,36 +2,31 @@
 import { ref, computed } from 'vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import {
-    ArrowLeftIcon,
-    PencilIcon,
-    SparklesIcon,
-    MegaphoneIcon,
     TrashIcon,
     DocumentIcon,
     DocumentTextIcon,
     ArrowDownTrayIcon,
     EyeIcon,
-    UserCircleIcon,
     ExclamationTriangleIcon,
     CheckCircleIcon,
     XCircleIcon,
     MinusCircleIcon,
     LinkIcon,
-    ChevronDownIcon,
-    ChevronRightIcon,
     XMarkIcon,
     GlobeEuropeAfricaIcon,
-    LanguageIcon,
     ShareIcon,
     ClipboardDocumentIcon,
     ArrowPathIcon,
     DocumentCheckIcon,
 } from '@heroicons/vue/24/outline';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import MapaLeaflet from '@/Components/MapaLeaflet.vue';
 import Badge from '@/Components/Badge.vue';
-import PageHeader from '@/Components/PageHeader.vue';
 import ConfirmDialog from '@/Components/ConfirmDialog.vue';
+import HeaderBar from '@/Pages/Cars/Partials/HeaderBar.vue';
+import OverviewPanel from '@/Pages/Cars/Partials/OverviewPanel.vue';
+import InvestigationPanel from '@/Pages/Cars/Partials/InvestigationPanel.vue';
+import MarketPanel from '@/Pages/Cars/Partials/MarketPanel.vue';
+import ChecklistPanel from '@/Pages/Cars/Partials/ChecklistPanel.vue';
 import { useFormat } from '@/Composables/useFormat';
 import { useTranslations } from '@/Composables/useTranslations';
 
@@ -302,132 +297,11 @@ const specItems = [
     { key: 'vin', label: 'VIN' },
 ];
 
-// Enriched valuation helpers
-const verdictVariant = (v) => {
-    switch (v) {
-        case 'Buy': return 'success';
-        case 'Buy if price drops': return 'warning';
-        case 'Discard': return 'danger';
-        default: return 'neutral';
-    }
-};
-const confidenceVariant = (c) => ({
-    high: 'success', medium: 'warning', low: 'danger',
-}[c] || 'neutral');
-const ratingVariant = (r) => ({
-    favorable: 'success', neutral: 'neutral', unfavorable: 'danger',
-}[r] || 'neutral');
-const ratingIcon = (r) => ({
-    favorable: CheckCircleIcon, neutral: MinusCircleIcon, unfavorable: XCircleIcon,
-}[r] || MinusCircleIcon);
-
-const researchAspectLabels = {
-    common_issues: t('marketplace_show.aspect_common_issues'),
-    recalls: t('marketplace_show.aspect_recalls'),
-    market_price: t('marketplace_show.aspect_market_price'),
-    reliability: t('marketplace_show.aspect_reliability'),
-    spain_homologation: t('marketplace_show.aspect_spain_homologation'),
-    dgt_label: t('marketplace_show.aspect_dgt_label'),
-    insurance_estimate: t('marketplace_show.aspect_insurance_estimate'),
-    parts_maintenance: t('marketplace_show.aspect_parts_maintenance'),
-    unit_specific: t('marketplace_show.aspect_unit_specific'),
-};
-
-const aspects = computed(() => {
-    const research = props.car.research || {};
-    const gaps = props.derived?.research_gaps || [];
-    return Object.entries(researchAspectLabels).map(([key, label]) => {
-        const entry = research[key] || {};
-        return { key, label, ...entry, missing: gaps.includes(key) };
-    });
-});
-
-const marketPosition = computed(() => {
-    const stats = props.derived?.comparables_stats || {};
-    const total = props.derived?.total_cost || 0;
-    if (!stats.avg || !total) return null;
-    const ratio = total / stats.avg;
-    if (ratio <= 1.00) return { label: t('marketplace_show.market_below'), variant: 'success', ratio };
-    if (ratio <= 1.05) return { label: t('marketplace_show.market_at'), variant: 'warning', ratio };
-    return { label: t('marketplace_show.market_above'), variant: 'danger', ratio };
-});
-
-// 09-sep-2026: comparables separados por país (ES/DE). El admin ficha ahora
-// muestra explícitamente de qué mercado es cada promedio y filtra la lista
-// por el país activo. Default: 'es' si hay datos; si no, 'de'.
-const marketCountry = ref('all');
-const statsByCountry = computed(() => props.derived?.comparables_stats_by_country || {
-    es: { avg: null, min: null, max: null, count: 0, items: [] },
-    de: { avg: null, min: null, max: null, count: 0, items: [] },
-    mixto: { avg: null, min: null, max: null, count: 0, items: [] },
-    unknown: { avg: null, min: null, max: null, count: 0, items: [] },
-});
-const visibleComparables = computed(() => {
-    const all = props.car.comparables_list || [];
-    if (marketCountry.value === 'all') return all;
-    const bucket = statsByCountry.value[marketCountry.value];
-    if (!bucket || !bucket.items || !bucket.items.length) return all;
-    // Identificar comparables por su URL o título (los items vienen del accessor)
-    const seen = new Set();
-    bucket.items.forEach((it) => {
-        const k = it.url || it.title || '';
-        if (k) seen.add(k);
-    });
-    return all.filter((c) => {
-        const k = c.url || c.title || '';
-        return seen.has(k);
-    });
-});
-const marketAvailableCountries = computed(() => {
-    const c = statsByCountry.value;
-    const out = [];
-    if (c.es?.count) out.push({ key: 'es', label: 'España', count: c.es.count, flag: '🇪🇸' });
-    if (c.de?.count) out.push({ key: 'de', label: 'Alemania', count: c.de.count, flag: '🇩🇪' });
-    if (c.mixto?.count) out.push({ key: 'mixto', label: 'Mixto', count: c.mixto.count, flag: '🌍' });
-    if (c.unknown?.count) out.push({ key: 'unknown', label: 'Sin país', count: c.unknown.count, flag: '❓' });
-    return out;
-});
-
-// C2 auditoría 09-sep-2026: las URLs de búsqueda de mercado se generan en la
-// skill (empaquetar.py::generar_busquedas_realizadas) y se guardan en el
-// campo cars.busquedas_realizadas (JSON). Aquí las planchamos a una lista
-// {portal, url, descripcion, flag} con bandera por país para mostrarlas
-// en la pestaña Mercado.
-const busquedasPorPais = computed(() => {
-    return props.derived?.busquedas_por_pais || { DE: [], ES: [], otros: [] };
-});
-const busquedasPaisFlat = computed(() => {
-    const out = [];
-    for (const [pais, items] of Object.entries(busquedasPorPais.value)) {
-        for (const b of items || []) {
-            out.push({
-                portal: b.portal,
-                url: b.url,
-                descripcion: b.descripcion,
-                flag: pais === 'DE' ? '🇩🇪' : pais === 'ES' ? '🇪🇸' : '🌍',
-            });
-        }
-    }
-    return out;
-});
-
-const expandedSections = ref({});
-const toggleSection = (key) => { expandedSections.value[key] = !expandedSections.value[key]; };
-
-const priorityVariant = (p) => ({
-    critical: 'danger', important: 'warning', minor: 'neutral',
-}[p] || 'neutral');
-
 const docStatusVariant = (s) => ({
     pending: 'neutral', ordered: 'warning', received: 'success', not_applicable: 'neutral',
 }[s] || 'neutral');
 
-const toggleMilestone = (item) => {
-    useForm({ completed: !item.completed }).post(route('cars.checklists.toggle', [props.car.id, item.id]), {
-        preserveScroll: true,
-    });
-};
-const toggleInspection = (item) => {
+const toggleChecklist = (item) => {
     useForm({ completed: !item.completed }).post(route('cars.checklists.toggle', [props.car.id, item.id]), {
         preserveScroll: true,
     });
@@ -454,71 +328,7 @@ const onDocKeyChange = () => {
 
         <div class="py-8">
             <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <PageHeader :title="t('cars.marketplace_brand_model', { brand: car.brand, model: car.model })" :subtitle="`VIN ${car.vin || '—'}`">
-                    <template #actions>
-                        <Link :href="route('cars.index')" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
-                            <ArrowLeftIcon class="h-4 w-4" />
-                            {{ t('common.back') }}
-                        </Link>
-                        <Link :href="route('cars.verify.show', car.id)" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
-                            <SparklesIcon class="h-4 w-4" />
-                            {{ t('cars.verify_with_ai') }}
-                        </Link>
-                        <Link :href="route('cars.marketing', car.id)" class="inline-flex items-center gap-2 rounded-lg bg-estoril-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-600">
-                            <MegaphoneIcon class="h-4 w-4" />
-                            {{ t('cars.marketing') }}
-                        </Link>
-                        <Link :href="route('cars.edit', car.id)" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
-                            <PencilIcon class="h-4 w-4" />
-                            {{ t('cars.edit_action') }}
-                        </Link>
-                    </template>
-                </PageHeader>
-
-                <!-- Status bar -->
-                <div class="flex flex-wrap items-center gap-3">
-                    <Badge :variant="trafficLightVariant(car.traffic_light)" dot>{{ car.traffic_light }}</Badge>
-                    <Badge :variant="statusVariant(car.status)">{{ statusLabel(t, car.status) }}</Badge>
-                    <span v-if="car.year" class="text-sm text-gray-500">{{ car.year }}</span>
-                    <!-- Link original del anuncio (para comprobar disponibilidad) -->
-                    <a v-if="car.url_link"
-                       :href="car.url_link"
-                       target="_blank"
-                       rel="noopener noreferrer"
-                       class="inline-flex items-center gap-1.5 rounded-lg bg-estoril-50 px-3 py-1.5 text-xs font-medium text-estoril-700 ring-1 ring-estoril-200 hover:bg-estoril-100">
-                        <LinkIcon class="h-3.5 w-3.5" />
-                        {{ t('cars.original_listing') }}
-                    </a>
-                </div>
-
-                <!-- Banner de cliente/solicitud vinculado (feedback inmediato) -->
-                <div v-if="car.client" class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-                    <div class="flex items-center gap-3">
-                        <UserCircleIcon class="h-8 w-8 text-emerald-600" />
-                        <div class="min-w-0">
-                            <p class="text-sm font-semibold text-emerald-900">
-                                {{ t('cars.linked_to_client') }} {{ car.client.name }}
-                            </p>
-                            <p class="text-xs text-emerald-700">
-                                <template v-if="derived?.linked_request">
-                                    {{ t('cars.linked_request') }} #{{ derived.linked_request.id }}
-                                    · <Badge :variant="statusVariant(derived.linked_request.status)" size="sm">{{ t('car_requests.status.' + derived.linked_request.status, derived.linked_request.status) }}</Badge>
-                                </template>
-                                <template v-else>
-                                    {{ t('cars.no_request_linked') }}
-                                </template>
-                            </p>
-                        </div>
-                    </div>
-                    <div class="flex shrink-0 gap-2">
-                        <Link :href="route('clients.show', car.client.id)" class="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-500">
-                            {{ t('cars.view_client') }} →
-                        </Link>
-                        <Link v-if="derived?.linked_request" :href="route('car-requests.show', derived.linked_request.id)" class="inline-flex items-center gap-1 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-emerald-700 shadow-sm ring-1 ring-emerald-200 hover:bg-emerald-100">
-                            {{ t('cars.view_request') }} →
-                        </Link>
-                    </div>
-                </div>
+                <HeaderBar :car="car" :derived="derived" />
 
                 <!-- Section tabs -->
                 <div class="overflow-x-auto rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
@@ -540,7 +350,7 @@ const onDocKeyChange = () => {
                     </nav>
                 </div>
 
-                <!-- IEDMT estimation warning (solo si hay importación; en unidades ES no se devenga) -->
+                <!-- IEDMT estimation warning (siempre visible, no depende de activeSection) -->
                 <div v-if="derived?.iedmt > 0" class="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
                     <ExclamationTriangleIcon class="h-5 w-5 shrink-0 text-amber-600" />
                     <div class="text-sm text-amber-900">
@@ -554,433 +364,17 @@ const onDocKeyChange = () => {
                     </div>
                 </div>
 
-                <!-- Location -->
-                <div v-if="activeSection === 'resumen' && car.lat && car.lng" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
-                    <div class="border-b border-gray-200 px-6 py-4">
-                        <h3 class="text-base font-semibold text-gray-900">{{ t('cars.location') }}</h3>
-                    </div>
-                    <div class="p-6">
-                        <MapaLeaflet :lat="car.lat" :lng="car.lng" :marker-text="t('cars.car_full_name', { brand: car.brand, model: car.model, year: car.city || '' })" height="300px" />
-                    </div>
-                </div>
-
-                <!-- Technical specs -->
-                <div v-show="activeSection === 'resumen'" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
-                    <div class="border-b border-gray-200 px-6 py-4">
-                        <h3 class="text-base font-semibold text-gray-900">{{ t('cars.section_tech_sheet') }}</h3>
-                    </div>
-                    <div class="grid grid-cols-2 gap-x-6 gap-y-4 p-6 md:grid-cols-4">
-                        <div v-for="spec in specItems" :key="spec.key">
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ spec.label }}</dt>
-                            <dd class="mt-1 text-sm font-medium text-gray-900" :class="{ 'font-mono text-xs': spec.key === 'vin' }">{{ car[spec.key] ?? '—' }}{{ spec.suffix || '' }}</dd>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Costs -->
-                <div v-show="activeSection === 'resumen'" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
-                    <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-                        <h3 class="text-base font-semibold text-gray-900">{{ t('cars.costs') }}</h3>
-                        <span class="text-sm text-gray-500">{{ t('cars.total_all_included') }} <span class="font-mono font-semibold text-gray-900">{{ currency(derived?.total_cost) }}</span></span>
-                    </div>
-                    <div class="grid grid-cols-2 gap-x-6 gap-y-4 p-6 md:grid-cols-4">
-                        <div v-for="cost in costItems" :key="cost.key">
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ cost.label }}</dt>
-                            <dd class="mt-1 text-sm font-semibold text-gray-900">{{ currency(car[cost.key]) }}</dd>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Descripción del anuncio (original + traducción SIEMPRE si existen) -->
-                <div v-if="activeSection === 'resumen' && (car.description || car.original_description)" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
-                    <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-                        <h3 class="text-base font-semibold text-gray-900">{{ t('cars.description') }}</h3>
-                        <span v-if="car.original_description && car.description" class="rounded-full bg-estoril-50 px-2.5 py-0.5 text-[11px] font-medium text-estoril-600">{{ t('cars.description_bilingual') }}</span>
-                    </div>
-                    <div class="space-y-5 p-6">
-                        <div v-if="car.original_description">
-                            <h4 class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-500">
-                                <GlobeEuropeAfricaIcon class="h-3.5 w-3.5 text-gray-400" />
-                                {{ t('cars.original_text') }}
-                            </h4>
-                            <p class="mt-2 rounded-lg bg-gray-50 p-3 text-sm text-gray-700 whitespace-pre-wrap">{{ car.original_description }}</p>
-                        </div>
-                        <div v-if="car.description">
-                            <h4 class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-500">
-                                <LanguageIcon class="h-3.5 w-3.5 text-gray-400" />
-                                {{ t('cars.translated_text') }}
-                            </h4>
-                            <p class="mt-2 rounded-lg bg-estoril-50/50 p-3 text-sm text-gray-900 whitespace-pre-wrap">{{ car.description }}</p>
-                        </div>
-                        <p v-else-if="!car.original_description" class="text-sm text-gray-500">{{ t('cars.description') }}</p>
-                    </div>
-                </div>
-
-                <!-- Equipamiento del anuncio (lista COMPLETA del JSON) -->
-                <div v-if="activeSection === 'resumen' && car.equipment?.length" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
-                    <div class="border-b border-gray-200 px-6 py-4">
-                        <h3 class="text-base font-semibold text-gray-900">{{ t('cars.equipment') }}</h3>
-                    </div>
-                    <div class="p-6">
-                        <ul class="flex flex-wrap gap-2">
-                            <li v-for="(item, i) in car.equipment" :key="i"
-                                class="rounded-full bg-estoril-50 px-3 py-1 text-sm text-estoril-700 ring-1 ring-estoril-100">
-                                {{ item }}
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+                <!-- Overview (Resumen): Location + Specs + Costs + Description + Equipment -->
+                <OverviewPanel v-show="activeSection === 'resumen'" :car="car" :spec-items="specItems" :cost-items="costItems" :derived="derived" />
 
                 <!-- ╔ INVESTIGATION ══════════════════════════════════════════════════════╗ -->
-                <div v-show="activeSection === 'investigacion'" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
-                    <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-                        <h3 class="text-base font-semibold text-gray-900">{{ t('cars.section_investigacion') }}</h3>
-                        <span v-if="derived?.research_gaps?.length" class="text-xs font-medium text-amber-700">
-                            {{ derived.research_gaps.length }} aspecto{{ derived.research_gaps.length === 1 ? '' : 's' }} pendiente{{ derived.research_gaps.length === 1 ? '' : 's' }}
-                        </span>
-                    </div>
-
-                    <!-- Verdict -->
-                    <div v-if="car.verdict" class="border-b border-gray-200 bg-gray-50 px-6 py-4">
-                        <div class="flex flex-wrap items-center gap-3">
-                            <Badge :variant="verdictVariant(car.verdict)" dot size="lg">{{ car.verdict }}</Badge>
-                            <Badge v-if="car.verdict_confidence" :variant="confidenceVariant(car.verdict_confidence)">
-                                {{ t('marketplace_show.confidence') }}: {{ car.verdict_confidence }}
-                            </Badge>
-                            <span v-if="car.verdict_at" class="text-xs text-gray-500">
-                                {{ date(car.verdict_at) }}
-                            </span>
-                        </div>
-                        <p v-if="car.verdict_reasoning" class="mt-3 text-sm text-gray-700">{{ car.verdict_reasoning }}</p>
-                        <p v-if="car.verdict_changes" class="mt-2 text-xs italic text-gray-600">
-                            <span class="font-semibold not-italic text-gray-700">{{ t('marketplace_show.what_would_change') }}:</span>
-                            {{ car.verdict_changes }}
-                        </p>
-                    </div>
-
-                    <div v-if="!car.verdict && !derived?.research_gaps?.length" class="px-6 py-8 text-center text-sm text-gray-500">
-                        No hay valoración todavía. {{ t('marketplace_show.import_report_hint') }}
-                    </div>
-
-                    <!-- Análisis IA (ai_analysis_json) — el veredicto detallado del verificador -->
-                    <div v-if="car.ai_analysis_json" class="border-b border-gray-200 px-6 py-4">
-                        <div class="flex items-center justify-between mb-3">
-                            <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.ai_analysis_title') }}</h4>
-                            <Link :href="route('cars.verify.show', car.id)" class="inline-flex items-center gap-1 text-xs font-semibold text-estoril-600 hover:text-estoril-500">
-                                <SparklesIcon class="h-3 w-3" />
-                                {{ t('cars.ai_suggestions') }}
-                            </Link>
-                        </div>
-
-                        <div v-if="car.ai_analysis_json.valuation" class="mb-3 rounded-lg border border-gray-200 bg-white p-3">
-                            <h5 class="text-xs font-semibold uppercase tracking-wider text-estoril-700">{{ t('cars.ai_valuation') }}</h5>
-                            <p class="mt-1 text-sm text-gray-700">{{ car.ai_analysis_json.valuation }}</p>
-                        </div>
-
-                        <div v-if="car.ai_analysis_json.recommendation" class="mb-3 rounded-lg border border-gray-200 bg-white p-3">
-                            <h5 class="text-xs font-semibold uppercase tracking-wider text-estoril-700">{{ t('cars.ai_recommendation') }}</h5>
-                            <p class="mt-1 text-sm text-gray-700">{{ car.ai_analysis_json.recommendation }}</p>
-                        </div>
-
-                        <div v-if="car.ai_analysis_json.market_avg || car.ai_analysis_json.market_min || car.ai_analysis_json.market_max" class="mb-3 grid grid-cols-3 gap-2">
-                            <div v-if="car.ai_analysis_json.market_min" class="rounded-lg bg-gray-50 p-3 text-center">
-                                <div class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">{{ t('marketplace_show.minimum') }}</div>
-                                <div class="font-mono text-sm font-semibold text-gray-900">{{ currency(car.ai_analysis_json.market_min) }}</div>
-                            </div>
-                            <div v-if="car.ai_analysis_json.market_avg" class="rounded-lg bg-gray-50 p-3 text-center">
-                                <div class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">{{ t('marketplace_show.avg') }}</div>
-                                <div class="font-mono text-sm font-semibold text-gray-900">{{ currency(car.ai_analysis_json.market_avg) }}</div>
-                            </div>
-                            <div v-if="car.ai_analysis_json.market_max" class="rounded-lg bg-gray-50 p-3 text-center">
-                                <div class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">{{ t('marketplace_show.maximum') }}</div>
-                                <div class="font-mono text-sm font-semibold text-gray-900">{{ currency(car.ai_analysis_json.market_max) }}</div>
-                            </div>
-                        </div>
-
-                        <div v-if="car.ai_analysis_json.red_flags?.length" class="mb-3">
-                            <h5 class="text-xs font-semibold uppercase tracking-wider text-rose-700">{{ t('cars.ai_red_flags') }}</h5>
-                            <ul class="mt-1 space-y-1.5">
-                                <li v-for="(flag, i) in car.ai_analysis_json.red_flags" :key="i" class="flex items-start gap-2 rounded-lg bg-rose-50 p-2 text-sm text-rose-900">
-                                    <XCircleIcon class="mt-0.5 h-4 w-4 shrink-0 text-rose-600" />
-                                    {{ flag }}
-                                </li>
-                            </ul>
-                        </div>
-
-                        <div v-if="car.ai_analysis_json.tips?.length">
-                            <h5 class="text-xs font-semibold uppercase tracking-wider text-estoril-700">{{ t('cars.ai_tips') }}</h5>
-                            <ul class="mt-1 space-y-1.5">
-                                <li v-for="(tip, i) in car.ai_analysis_json.tips" :key="i" class="flex items-start gap-2 rounded-lg bg-estoril-50 p-2 text-sm text-estoril-900">
-                                    <CheckCircleIcon class="mt-0.5 h-4 w-4 shrink-0 text-estoril-600" />
-                                    {{ tip }}
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <!-- Balance pros / cons -->
-                    <div v-if="(car.pros?.length || car.cons?.length)" class="grid grid-cols-1 gap-6 p-6 md:grid-cols-2">
-                        <div>
-                            <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-green-700">{{ t('cars.pros_label', { count: car.pros?.length || 0 }) }}</h4>
-                            <ul v-if="car.pros?.length" class="space-y-2">
-                                <li v-for="(pro, i) in car.pros" :key="i" class="flex items-start gap-2 rounded-lg border border-green-200 bg-green-50 p-3">
-                                    <CheckCircleIcon class="mt-0.5 h-4 w-4 shrink-0 text-green-600" />
-                                    <div class="flex-1">
-                                        <p class="text-sm text-gray-900">{{ pro.text }}</p>
-                                        <span class="mt-1 inline-block text-xs font-medium uppercase text-green-700">{{ pro.weight }}</span>
-                                    </div>
-                                </li>
-                            </ul>
-                            <p v-else class="text-sm italic text-gray-500">{{ t('cars.no_pros') }}</p>
-                        </div>
-                        <div>
-                            <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-red-700">{{ t('cars.cons_label', { count: car.cons?.length || 0 }) }}</h4>
-                            <ul v-if="car.cons?.length" class="space-y-2">
-                                <li v-for="(con, i) in car.cons" :key="i" class="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3">
-                                    <XCircleIcon class="mt-0.5 h-4 w-4 shrink-0 text-red-600" />
-                                    <div class="flex-1">
-                                        <p class="text-sm text-gray-900">{{ con.text }}</p>
-                                        <span class="mt-1 inline-block text-xs font-medium uppercase text-red-700">{{ con.weight }}</span>
-                                    </div>
-                                </li>
-                            </ul>
-                            <p v-else class="text-sm italic text-gray-500">{{ t('cars.no_cons') }}</p>
-                        </div>
-                    </div>
-
-                    <!-- 9 research aspects -->
-                    <div class="border-t border-gray-200 px-6 py-4">
-                        <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.research_aspects') }}</h4>
-                        <ul class="grid grid-cols-1 gap-3 md:grid-cols-2">
-                            <li v-for="aspect in aspects" :key="aspect.key" class="rounded-lg border p-3"
-                                :class="aspect.missing ? 'border-dashed border-gray-300 bg-gray-50' : 'border-gray-200 bg-white'">
-                                <div class="flex items-start justify-between gap-2">
-                                    <p class="text-sm font-medium text-gray-900">{{ aspect.label }}</p>
-                                    <component v-if="!aspect.missing" :is="ratingIcon(aspect.rating)" class="h-4 w-4 shrink-0"
-                                        :class="{
-                                            'text-green-600': aspect.rating === 'favorable',
-                                            'text-red-600': aspect.rating === 'unfavorable',
-                                            'text-gray-500': aspect.rating === 'neutral' || !aspect.rating,
-                                        }" />
-                                </div>
-                                <p v-if="aspect.missing" class="mt-2 text-xs italic text-gray-500">{{ t('cars.not_researched_yet') }}</p>
-                                <template v-else>
-                                    <p v-if="aspect.finding" class="mt-2 text-sm text-gray-700">{{ aspect.finding }}</p>
-                                    <a v-if="aspect.source" :href="aspect.source" target="_blank" rel="noopener" class="mt-2 inline-flex items-center gap-1 text-xs text-estoril-600 hover:text-estoril-500">
-                                        <LinkIcon class="h-3 w-3" />
-                                        {{ t('marketplace_show.source') }}
-                                    </a>
-                                    <span v-if="aspect.date" class="ml-2 text-xs text-gray-400">{{ aspect.date }}</span>
-                                </template>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+                <InvestigationPanel v-show="activeSection === 'investigacion'" :car="car" :derived="derived" />
 
                 <!-- ╔ MARKET ═══════════════════════════════════════════════════════════╗ -->
-                <div v-if="activeSection === 'mercado' && (car.market_avg || derived?.comparables_stats?.count)" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
-                    <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-                        <h3 class="text-base font-semibold text-gray-900">{{ t('cars.market_comparables') }}</h3>
-                        <Badge v-if="marketPosition" :variant="marketPosition.variant">
-                            {{ marketPosition.label }} ({{ (marketPosition.ratio * 100).toFixed(1) }}%)
-                        </Badge>
-                    </div>
-
-                    <!-- Chips de país: aclara explícitamente si los comparables son de España o Alemania. 09-sep-2026. -->
-                    <div v-if="marketAvailableCountries.length > 1" class="flex flex-wrap gap-2 border-b border-gray-200 px-6 py-3 bg-gray-50">
-                        <button type="button"
-                                @click="marketCountry = 'all'"
-                                :class="['inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition',
-                                         marketCountry === 'all' ? 'bg-estoril-600 text-white shadow' : 'bg-white text-gray-700 ring-1 ring-gray-300 hover:bg-gray-100']">
-                            🌐 Todos ({{ derived?.comparables_stats?.count || 0 }})
-                        </button>
-                        <button v-for="c in marketAvailableCountries" :key="c.key"
-                                type="button"
-                                @click="marketCountry = c.key"
-                                :class="['inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition',
-                                         marketCountry === c.key ? 'bg-estoril-600 text-white shadow' : 'bg-white text-gray-700 ring-1 ring-gray-300 hover:bg-gray-100']">
-                            {{ c.flag }} {{ c.label }} ({{ c.count }})
-                        </button>
-                    </div>
-
-                    <div class="grid grid-cols-1 gap-6 p-6 md:grid-cols-4">
-                        <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('marketplace_show.avg') }}</dt>
-                            <dd class="mt-1 font-mono text-lg font-semibold text-gray-900">{{ currency(car.market_avg) }}</dd>
-                        </div>
-                        <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('marketplace_show.minimum') }}</dt>
-                            <dd class="mt-1 font-mono text-lg font-semibold text-gray-900">{{ currency(car.market_min) }}</dd>
-                        </div>
-                        <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('marketplace_show.maximum') }}</dt>
-                            <dd class="mt-1 font-mono text-lg font-semibold text-gray-900">{{ currency(car.market_max) }}</dd>
-                        </div>
-                        <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('marketplace_show.estimated_saving') }}</dt>
-                            <dd class="mt-1 font-mono text-lg font-semibold text-green-700">{{ currency(car.estimated_saving) }}</dd>
-                        </div>
-                    </div>
-
-                    <!-- Sub-stats por país (09-sep-2026): aclaración explícita del país de cada promedio. -->
-                    <div v-if="marketAvailableCountries.length > 1" class="border-t border-gray-200 px-6 py-4">
-                        <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.market_breakdown_by_country') }}</h4>
-                        <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-                            <div v-for="c in marketAvailableCountries" :key="c.key"
-                                 class="rounded-lg border border-gray-200 p-3"
-                                 :class="marketCountry === c.key ? 'bg-estoril-50 ring-1 ring-estoril-200' : 'bg-white'">
-                                <div class="flex items-center justify-between">
-                                    <p class="text-sm font-semibold text-gray-900">{{ c.flag }} {{ c.label }}</p>
-                                    <span class="text-xs text-gray-500">{{ c.count }} {{ c.count === 1 ? 'anuncio' : 'anuncios' }}</span>
-                                </div>
-                                <dl class="mt-2 space-y-1 text-xs text-gray-600">
-                                    <div class="flex justify-between">
-                                        <dt>Promedio</dt>
-                                        <dd class="font-mono font-semibold text-gray-900">{{ currency(statsByCountry[c.key]?.avg) }}</dd>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <dt>Mínimo</dt>
-                                        <dd class="font-mono text-gray-900">{{ currency(statsByCountry[c.key]?.min) }}</dd>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <dt>Máximo</dt>
-                                        <dd class="font-mono text-gray-900">{{ currency(statsByCountry[c.key]?.max) }}</dd>
-                                    </div>
-                                </dl>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div v-if="busquedasPaisFlat.length > 0" class="border-t border-gray-200 px-6 py-4">
-                        <h4 class="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-500">
-                            <LinkIcon class="h-4 w-4" />
-                            {{ t('cars.market_searches_performed') || 'Búsquedas realizadas' }}
-                        </h4>
-                        <p class="mb-3 text-xs text-gray-500">
-                            {{ t('cars.market_searches_help') || 'URLs que se usaron para investigar este coche. Pínchalas para ver los resultados en cada portal.' }}
-                        </p>
-                        <div class="grid grid-cols-1 gap-2 md:grid-cols-2">
-                            <a v-for="(b, idx) in busquedasPaisFlat" :key="idx"
-                               :href="b.url" target="_blank" rel="noopener"
-                               class="group flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2 transition hover:border-estoril-300 hover:bg-estoril-50">
-                                <span class="flex items-center gap-2 min-w-0">
-                                    <span class="text-base" aria-hidden="true">{{ b.flag }}</span>
-                                    <span class="flex flex-col min-w-0">
-                                        <span class="truncate text-sm font-semibold text-gray-900">{{ b.portal }}</span>
-                                        <span class="truncate text-xs text-gray-500">{{ b.descripcion }}</span>
-                                    </span>
-                                </span>
-                                <LinkIcon class="h-4 w-4 flex-shrink-0 text-gray-400 group-hover:text-estoril-600" />
-                            </a>
-                        </div>
-                    </div>
-
-                    <div v-if="visibleComparables?.length" class="border-t border-gray-200 px-6 py-4">
-                        <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
-                            Comparables
-                            <span v-if="marketCountry !== 'all'" class="ml-1 text-gray-400">
-                                ({{ marketAvailableCountries.find(c => c.key === marketCountry)?.label }})
-                            </span>
-                            <span class="ml-1 text-gray-400">({{ visibleComparables.length }})</span>
-                        </h4>
-                        <ul class="divide-y divide-gray-200 rounded-lg border border-gray-200">
-                            <li v-for="(comp, i) in visibleComparables" :key="i" class="flex items-center justify-between px-4 py-3 hover:bg-gray-50">
-                                <div class="min-w-0 flex-1">
-                                    <p class="truncate text-sm font-medium text-gray-900">{{ comp.title || comp.t }}</p>
-                                    <p class="text-xs text-gray-500">
-                                        <span v-if="comp.km">{{ comp.km.toLocaleString() }} km</span>
-                                        <span v-if="comp.country || comp.pais">
-                                            · <span class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 font-mono text-[10px] font-semibold uppercase">
-                                                {{ comp.country || comp.pais }}
-                                            </span>
-                                        </span>
-                                    </p>
-                                </div>
-                                <div class="flex items-center gap-3">
-                                    <span class="font-mono text-sm font-semibold text-gray-900">{{ currency(comp.price ?? comp.p) }}</span>
-                                    <a v-if="comp.url || comp.u" :href="comp.url || comp.u" target="_blank" rel="noopener" class="text-estoril-600 hover:text-estoril-500">
-                                        <LinkIcon class="h-4 w-4" />
-                                    </a>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+                <MarketPanel v-if="activeSection === 'mercado' && (car.market_avg || derived?.comparables_stats?.count)" :car="car" :derived="derived" />
 
                 <!-- ╔ CHECKLIST ════════════════════════════════════════════════════════╗ -->
-                <div v-show="activeSection === 'checklist'" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
-                    <div class="border-b border-gray-200 px-6 py-4">
-                        <h3 class="text-base font-semibold text-gray-900">{{ t('cars.section_checklist') }}</h3>
-                    </div>
-
-                    <!-- Milestones progress -->
-                    <div class="border-b border-gray-200 bg-gray-50 px-6 py-4">
-                        <div class="mb-2 flex items-center justify-between">
-                            <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-700">{{ t('marketplace_show.milestones') }}</h4>
-                            <span class="text-sm font-mono font-semibold text-gray-900">
-                                {{ derived?.milestones_progress?.completed || 0 }} / {{ derived?.milestones_progress?.total || 0 }}
-                            </span>
-                        </div>
-                        <div class="h-2 w-full overflow-hidden rounded-full bg-gray-200">
-                            <div class="h-full bg-estoril-500 transition-all"
-                                :style="{ width: derived?.milestones_progress?.total ? ((derived.milestones_progress.completed / derived.milestones_progress.total) * 100) + '%' : '0%' }" />
-                        </div>
-                        <ul class="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                            <li v-for="m in car.checklists?.filter(c => c.kind === 'milestone') || []" :key="m.id"
-                                class="flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-3">
-                                <button @click="toggleMilestone(m)" type="button" class="shrink-0">
-                                    <CheckCircleIcon v-if="m.completed" class="h-5 w-5 text-green-600" />
-                                    <MinusCircleIcon v-else class="h-5 w-5 text-gray-400" />
-                                </button>
-                                <div class="flex-1">
-                                    <p class="text-sm font-medium" :class="m.completed ? 'text-gray-500 line-through' : 'text-gray-900'">
-                                        {{ m.item_key.replace(/_/g, ' ') }}
-                                    </p>
-                                    <p v-if="m.completed_at" class="text-xs text-gray-500">{{ date(m.completed_at) }}</p>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <!-- Inspections -->
-                    <div class="px-6 py-4">
-                        <div class="mb-3 flex items-center justify-between">
-                            <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-700">
-                                Inspección ({{ derived?.inspections_progress?.completed || 0 }} / {{ derived?.inspections_progress?.total || 0 }})
-                            </h4>
-                            <span class="text-xs text-gray-500">{{ t('cars.apply_what_relevant') }}</span>
-                        </div>
-                        <div class="space-y-2">
-                            <div v-for="section in derived?.inspections_by_section || []" :key="section.section" class="rounded-lg border border-gray-200">
-                                <button @click="toggleSection(section.section)" type="button" class="flex w-full items-center justify-between px-4 py-2 hover:bg-gray-50">
-                                    <span class="flex items-center gap-2">
-                                        <component :is="expandedSections[section.section] ? ChevronDownIcon : ChevronRightIcon" class="h-4 w-4 text-gray-400" />
-                                        <span class="text-sm font-semibold text-gray-900">{{ section.section }}</span>
-                                    </span>
-                                    <span class="text-xs text-gray-500">
-                                        {{ section.items.filter(i => i.completed).length }} / {{ section.items.length }}
-                                    </span>
-                                </button>
-                                <ul v-if="expandedSections[section.section]" class="divide-y divide-gray-100 border-t border-gray-200">
-                                    <li v-for="item in section.items" :key="item.id" class="flex items-start gap-3 px-4 py-2 hover:bg-gray-50">
-                                        <button @click="toggleInspection(item)" type="button" class="mt-0.5 shrink-0">
-                                            <CheckCircleIcon v-if="item.completed" class="h-5 w-5 text-green-600" />
-                                            <MinusCircleIcon v-else class="h-5 w-5 text-gray-400" />
-                                        </button>
-                                        <div class="flex-1">
-                                            <p class="text-sm" :class="item.completed ? 'text-gray-500 line-through' : 'text-gray-900'">
-                                                {{ item.item_key.replace(/_/g, ' ') }}
-                                            </p>
-                                            <Badge v-if="item.priority" :variant="priorityVariant(item.priority)" size="sm">
-                                                {{ item.priority }}
-                                            </Badge>
-                                        </div>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <ChecklistPanel v-show="activeSection === 'checklist'" :car="car" :derived="derived" @toggle-checklist="toggleChecklist" />
 
                 <!-- ╔ DOCUMENTS ════════════════════════════════════════════════════════╗ -->
                 <div v-show="activeSection === 'documentos'" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
