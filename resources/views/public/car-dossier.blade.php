@@ -903,7 +903,7 @@
             /* ── Compresión vertical (12-sep-2026) ──
                La ficha medía 11.658 px en móvil (14,4 pantallas) y el precio no
                aparecía hasta la sexta. El salto entre secciones era de 80 px:
-               en móvil eso solo es scroll. Y hueco abajo para que la barra CTA
+               en móvil eso solo es scroll. Y margen abajo para que la barra CTA
                fija no tape el pie. */
             .container > section + section { margin-top: 48px; }
             body { padding-bottom: 76px; }

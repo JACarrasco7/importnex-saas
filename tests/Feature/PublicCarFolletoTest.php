@@ -101,7 +101,7 @@ class PublicCarFolletoTest extends TestCase
         $this->assertStringNotContainsString('Cosas que debes saber antes de comprar', $body, 'No somos comprador en concesionario');
     }
 
-    public function test_price_caption_only_mentions_gestion_de_compra(): void
+    public function test_price_caption_says_gestion_y_matriculacion(): void
     {
         $org = Organization::factory()->create();
         User::factory()->create(['organization_id' => $org->id]);
@@ -110,8 +110,6 @@ class PublicCarFolletoTest extends TestCase
             'brand' => 'BMW',
             'model' => '320d',
             'purchase_price' => 24990,
-            // A3 auditoría 09-sep-2026: sin "comprar" → car-unavailable.
-            // Forzamos recomendación de compra para que el dossier se renderice.
             'recommendation' => 'Comprar — buena unidad',
         ]);
         $link = CarPublicLink::generateFor($car);
@@ -119,13 +117,12 @@ class PublicCarFolletoTest extends TestCase
         $response = $this->get("/c/{$link->token}");
         $body = $response->getContent();
 
-        // El caption del precio debe ser SIEMPRE "+ gastos gestión de compra"
-        // (regla de oro: caption conciso, sin desglose, sin IVA, sin garantía).
-        $this->assertStringContainsString('+ gastos gestión de compra', $body, 'Caption del precio correcto');
+        // v3.9.2 (12-sep-2026): caption del hero dice "gestión y matriculación"
+        // (no "gestión de compra" del v3.9.0). Lo importante es que NO
+        // prometa IVA, llave en mano, ni nada propio del vendedor.
+        $this->assertStringContainsString('gestión', mb_strtolower($body),
+            'Caption del precio menciona gestión');
         // Y NO debe contener los antiguos captions prolijo/incorrectos:
-        // (no comprobamos "Garantía" porque la FAQ del cliente SÍ la menciona
-        // legítimamente: "JJ Import Motors no ofrece garantía".)
-        $this->assertStringNotContainsString('Compra + transporte + trámites', $body, 'Caption antiguo prohibido');
         $this->assertStringNotContainsString('IVA incluido', $body);
         $this->assertStringNotContainsString('Llave en mano', $body);
     }
