@@ -12,6 +12,13 @@
 | Stack | PHP, MySQL, Nginx (gestionado por Forge) |
 | Entorno | PRODUCCIÓN |
 
+## Documentación de esta carpeta
+
+| Doc | Qué |
+|---|---|
+| [`HEIDISQL_FORGE.md`](HEIDISQL_FORGE.md) | Conexión HeidiSQL vía SSH tunnel (puerto local 3307) |
+| [`DEPLOY_AI_MULTIPROVIDER.md`](DEPLOY_AI_MULTIPROVIDER.md) | Deploy de IA multi-proveedor + chat flotante (31-jul-2026) |
+
 ## Cómo desplegar
 
 Forge despliega automáticamente desde GitHub al hacer push a `main`:
