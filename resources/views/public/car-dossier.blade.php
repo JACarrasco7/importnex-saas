@@ -778,11 +778,24 @@
         ]);
 
         // ── Origen: España o Alemania. NO solo «importación»: también gestionamos compras en España ──
-        $paisOrigen = strtolower((string) ($car->origin_country ?? ''));
+        // (pais_origen es la columna real; origin_country no existe en el schema)
+        $paisOrigen = strtolower((string) ($car->pais_origen ?? ''));
         $esAlemania = str_contains($paisOrigen, 'alem') || $paisOrigen === 'de';
         $esEspana = str_contains($paisOrigen, 'espa') || $paisOrigen === 'es';
         $origenLabel = $esAlemania ? 'Importado desde Alemania' : ($esEspana ? 'Localizado en España' : 'Origen verificado');
         $origenSub = $esAlemania ? 'Historial completo y verificado' : 'Historial verificado';
+        $origenKpi = $esAlemania ? 'Alemania' : ($esEspana ? 'España' : null);
+
+        // ── Combustible: la BD lo trae del scraping en inglés (gasoline/diesel).
+        //    Al cliente siempre en español. ──
+        $fuelMap = [
+            'gasoline' => 'Gasolina', 'petrol' => 'Gasolina', 'gas' => 'Gasolina',
+            'diesel' => 'Diésel',
+            'hybrid' => 'Híbrido', 'plug-in hybrid' => 'Híbrido enchufable', 'phev' => 'Híbrido enchufable',
+            'electric' => 'Eléctrico', 'ev' => 'Eléctrico',
+            'lpg' => 'GLP', 'glp' => 'GLP',
+        ];
+        $fuelTxt = $fuelMap[strtolower(trim((string) $car->fuel))] ?? ($car->fuel ? ucfirst(mb_strtolower($car->fuel)) : null);
 
         // ── Estado de gestión. NUNCA «EN STOCK»: no vendemos coches, gestionamos la compra ──
         $estadoLabels = [
@@ -851,9 +864,9 @@
                 @endif
 
                 <div class="price-card">
-                    <div class="price-label">Precio total cliente</div>
+                    <div class="price-label">Precio del vehículo</div>
                     <div class="price-value">{{ number_format($precio, 0, ',', '.') }} €</div>
-                    <div class="price-caption">+ gastos gestión de compra</div>
+                    <div class="price-caption">+ gastos de gestión de compra e importación</div>
                 </div>
 
                 <div class="hero-actions">
@@ -923,9 +936,9 @@
         $kpis = [
             ['k' => 'Año', 'v' => $anioTxt, 's' => $car->year ? 'Primera matriculación' : null, 'class' => ''],
             ['k' => 'Kilómetros', 'v' => $kmTxt ?? '—', 's' => 'Verificados', 'class' => ''],
-            ['k' => 'Combustible', 'v' => ucfirst($car->fuel ?? '—'), 's' => null, 'class' => ''],
+            ['k' => 'Combustible', 'v' => $fuelTxt ?? '—', 's' => null, 'class' => ''],
             ['k' => 'Cambio', 'v' => ucfirst($cambioTxt ?? '—'), 's' => null, 'class' => ''],
-            ['k' => 'Origen', 'v' => strtoupper($car->origin_country ?? '—'), 's' => 'Historial limpio', 'class' => 'green'],
+            ['k' => 'Origen', 'v' => $origenKpi ?? '—', 's' => 'Historial limpio', 'class' => 'green'],
         ];
         $kpis = array_filter($kpis, fn($x) => !empty($x['v']) && $x['v'] !== '—');
     @endphp
@@ -956,6 +969,38 @@
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
                     Datos del vehículo comprobados el {{ $fechaDatos }}
                 </div>
+            </section>
+        @endif
+
+        {{-- GALERÍA — subida tras la valoración (12-sep-2026): el cliente quiere
+             VER el coche antes de leer cifras; las fotos son el mejor gancho. --}}
+        @if(count($fotos) > 1)
+            @php
+                $galleryCols = min(4, max(1, count($fotos)));
+            @endphp
+            <section id="galeria" class="gallery-wrap">
+                <div class="section-title">Galería</div>
+                <h2 class="section-h">Fotos reales del vehículo</h2>
+                <div class="gallery {{ $galleryCols === 4 ? 'four' : ($galleryCols === 3 ? 'three' : ($galleryCols === 2 ? 'two' : 'one')) }}" id="gallery">
+                    @foreach(array_slice($fotos, 0, 8) as $i => $foto)
+                        <div class="shot" data-index="{{ $i }}" onclick="openLightbox({{ $i }})">
+                            <img src="{{ $foto }}" alt="{{ $car->brand }} {{ $car->model }} — foto {{ $i+1 }}" loading="{{ $i === 0 ? 'eager' : 'lazy' }}" decoding="async">
+                        </div>
+                    @endforeach
+                </div>
+                @if(count($fotos) > 8)
+                    {{-- El resto no se carga hasta que se abre: 30 fotos de golpe entierran el resto de la ficha --}}
+                    <details id="galeria-resto">
+                        <summary class="ver-todas">Ver las {{ count($fotos) }} fotos</summary>
+                        <div class="gallery {{ $galleryCols === 4 ? 'four' : 'three' }}" style="margin-top:14px">
+                            @foreach(array_slice($fotos, 8, null, true) as $i => $foto)
+                                <div class="shot" data-index="{{ $i }}" onclick="openLightbox({{ $i }})">
+                                    <img src="{{ $foto }}" alt="{{ $car->brand }} {{ $car->model }} — foto {{ $i+1 }}" loading="lazy" decoding="async">
+                                </div>
+                            @endforeach
+                        </div>
+                    </details>
+                @endif
             </section>
         @endif
 
@@ -1077,7 +1122,7 @@
         @if(count($prosLista) > 0)
             <section>
                 <div class="section-title">Puntos a favor</div>
-                <h2 class="section-h">Por qué destaca este coche</h2>
+                <h2 class="section-h">Lo mejor de esta unidad</h2>
                 <div class="proscons">
                     <div class="pc-col pros" style="grid-column: 1 / -1;">
                         <h3>Lo que hace fuerte a esta unidad</h3>
@@ -1120,7 +1165,7 @@
                 $fallback = [
                     'Marca' => $car->brand, 'Modelo' => $car->model,
                     'Año' => $car->year, 'Kilómetros' => $car->mileage ? number_format($car->mileage, 0, ',', '.').' km' : null,
-                    'Combustible' => $car->fuel ?? null, 'Cambio' => $car->transmission ?? null,
+                    'Combustible' => $fuelTxt, 'Cambio' => $car->transmission ?? null,
                     'Versión' => $car->version ?? null, 'Tracción' => $car->drivetrain ?? null,
                 ];
                 foreach ($fallback as $k => $v) {
@@ -1180,37 +1225,6 @@
                         </ul>
                     @endif
                 </div>
-            </section>
-        @endif
-
-{{-- GALERÍA --}}
-        @if(count($fotos) > 1)
-            @php
-                $galleryCols = min(4, max(1, count($fotos)));
-            @endphp
-            <section id="galeria" class="gallery-wrap">
-                <div class="section-title">Galería</div>
-                <h2 class="section-h">Fotos reales del vehículo</h2>
-                <div class="gallery {{ $galleryCols === 4 ? 'four' : ($galleryCols === 3 ? 'three' : ($galleryCols === 2 ? 'two' : 'one')) }}" id="gallery">
-                    @foreach(array_slice($fotos, 0, 8) as $i => $foto)
-                        <div class="shot" data-index="{{ $i }}" onclick="openLightbox({{ $i }})">
-                            <img src="{{ $foto }}" alt="{{ $car->brand }} {{ $car->model }} — foto {{ $i+1 }}" loading="{{ $i === 0 ? 'eager' : 'lazy' }}" decoding="async">
-                        </div>
-                    @endforeach
-                </div>
-                @if(count($fotos) > 8)
-                    {{-- El resto no se carga hasta que se abre: 30 fotos de golpe entierran el resto de la ficha --}}
-                    <details id="galeria-resto">
-                        <summary class="ver-todas">Ver las {{ count($fotos) }} fotos</summary>
-                        <div class="gallery {{ $galleryCols === 4 ? 'four' : 'three' }}" style="margin-top:14px">
-                            @foreach(array_slice($fotos, 8, null, true) as $i => $foto)
-                                <div class="shot" data-index="{{ $i }}" onclick="openLightbox({{ $i }})">
-                                    <img src="{{ $foto }}" alt="{{ $car->brand }} {{ $car->model }} — foto {{ $i+1 }}" loading="lazy" decoding="async">
-                                </div>
-                            @endforeach
-                        </div>
-                    </details>
-                @endif
             </section>
         @endif
 
