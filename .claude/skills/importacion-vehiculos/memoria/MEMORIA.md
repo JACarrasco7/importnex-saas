@@ -146,3 +146,49 @@ ENCARGO (Flujo B) → 📋 INFORME MODELO + top 5 con ENLACES → CP1 (¿Fase 2 
   pendiente.
 - **2026-09-09:** v3.8.0 — Cadena empaquetar → ZIP → panel cerrada (ficha-cliente.json real, vocabulario de marketing unificado v1.5/v2, parsers alineados con `App\Support\Esqueleto`). Ficha del cliente pública (A22b/A31) fusionada y en producción (`FiltroPublico`, ruta de fotos, ficha técnica con fallback). Este índice referencia ya los 9 archivos de memoria (se añadió `marketing-resultados.md`, que faltaba).
 - **2026-08-16:** v3.1.0 — Reorganización física completa (carpetas 01-06), `encargos.md` + `filtros-portales.md` creados, `modelos-medidos.md` ampliado a 12 campos, este índice con 8 archivos + PASO 0 cache.
+
+---
+
+## 🆕 Cambios v3.9.3 (12-sep-2026) que afectan a futuras sesiones
+
+La skill v3.9.2 que había en este directorio quedó **desincronizada** con el repo real.
+Esta versión 3.9.3 refleja el estado actual de producción.
+
+### Para Claude al evaluar/coches:
+
+- **Caption del precio:** es "+ gastos gestión de compra" (NO "+ gastos de gestión de compra
+  e importación" como decía el commit v3.9.0 inicial). Es el canónico v3.9.0/v3.9.2.
+
+- **Dossier público reorganizado:** galería en posición 2 (justo tras la valoración), FAQ y
+  CTA Final en partials Blade separados (`resources/views/public/dossier/partials/`).
+
+- **KPI Origen del dossier:** SIEMPRE debe aparecer (el bug del 12-sep que lo dejaba en
+  null ya está corregido). Sale de `car.pais_origen` (NO `origin_country` — esa columna
+  NO EXISTE).
+
+- **fuel:** en BD viene del scraping en inglés (Gasoline, Diesel, Hybrid). El Blade lo
+  traduce al español. Si Claude lo lee directamente, también verá "Gasoline" en la BD.
+
+### Para Claude al generar ZIPs:
+
+- El panel admin `/cars/{id}` está troceado en 11 partials Vue. NO toques nada del panel —
+  solo entrega el ZIP y Laravel lo pinta.
+
+- Los bloques nuevos `[GASTO]` y `[FC_GASTO]` los emite `empaquetar.py::gastos_cliente()` y los
+  lee `PrecioClienteCalculator::desgloseDeSkill()` con prioridad sobre la estimación propia.
+  Si Claude escribe gastos en la ficha-cliente, formato: `[{concepto: ..., importe: ...}]`.
+
+### Tests PHP del proyecto Laravel: 660 passing (12-sep-2026)
+
+### Commits en master relevantes para esta versión:
+
+```
+07596f6  test(precio+dossier): actualizar al contrato v3.9.2
+cb5e01a  feat(marketing+precio): skill v3.9.2 + horquilla + canales + guía
+a1908e5  fix(dossier): origen real, fuel en espanol, galeria arriba y titulos
+ea9b49b  fix(dossier): margin-top en sections para evitar margin-collapse
+4a00f95  fix(dossier): separar FAQ y CTA + spacing entre secciones
+a586d20  chore(cars): eliminar handlePhotoFiles muerto
+a4d946c  refactor(cars): continuar troceando Show.vue (889 a 717 lineas)
+1c1c724  refactor(cars): trocear Show.vue (1548→889 lineas) con Partials/
+```

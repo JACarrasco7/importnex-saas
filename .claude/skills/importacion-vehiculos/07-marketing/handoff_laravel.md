@@ -226,6 +226,51 @@ Referencia visual: `informes\marketing\mockup_ficha_cliente_v2.html` (versión c
 
 ---
 
+## 11 · Panel admin `/cars/{id}` troceado (12-sep-2026)
+
+El panel admin interno (`/cars/{id}`) está dividido en **partials Vue independientes** para que la skill NO
+toque nada del panel: solo entrega el ZIP y Laravel lo pinta con sus propios componentes.
+
+### Estructura
+
+```
+resources/js/Pages/Cars/
+├── Show.vue                          (717 líneas — solo orquesta imports + layout)
+├── Partials/
+│   ├── HeaderBar.vue                 cabecera: estado, badge origen, acciones
+│   ├── OverviewPanel.vue             ficha técnica + spec[]
+│   ├── InvestigationPanel.vue        bloques [MARCADOR] / zip
+│   ├── MarketPanel.vue               mercado_min / mediana / max
+│   ├── ChecklistPanel.vue            verificado[] / pendiente_comprobar[]
+│   ├── AssignRequestPanel.vue        asignación cliente ↔ solicitud
+│   ├── NotesPanel.vue                notas internas
+│   ├── ExpensesPanel.vue             gastos (lee PrecioClienteCalculator)
+│   └── PhotosPanel.vue               galería + orden
+└── Modals/
+    └── ShareTrackingModal.vue        modal único de compartir tracking
+```
+
+### Contrato con la skill
+
+- La skill entrega ZIP → `ValuationPackageIngestor` lo ingesta → `ContenidoCocheViewModel` lo proyecta.
+- **Show.vue solo recibe props de Inertia** y las pasa al partial correspondiente.
+- Cada partial tiene su propio `defineProps({ coche: Object })` y se renderiza con v-if según pestañas.
+
+### Caption canónico del precio (v3.9.2+)
+
+> "Precio del vehículo + gastos gestión de compra" — NUNCA volver a "gastos de gestión de compra e importación".
+
+### Regla operativa para la skill
+
+**No tocar nada del panel admin.** Si la skill necesita exponer un dato nuevo:
+1. Lo añade al JSON de `ficha-cliente.json` (o crea una clave nueva).
+2. Lo declara en el `manifest.json`.
+3. Avisa al equipo Laravel para que monte el partial (o lo extienda).
+
+La skill NO edita `.vue` directamente porque las dos cosas divergirían otra vez.
+
+---
+
 ## 🔗 Referencias
 - Contenido de la ficha: `ficha_cliente.md` · Reglas comunes: `copy_engine.md`
 - Fuentes y fechas: `fuentes_y_evidencia.md`

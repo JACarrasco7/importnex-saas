@@ -9,7 +9,8 @@
 
 | Carpeta | Qué | Cuándo se mira |
 |---|---|---|
-| [`SKILLS.md`](SKILLS.md) | Índice canónico de los ZIPs de skill, build, SHA, deployments | Cuando hay duda sobre qué versión de la skill está en uso |
+| [`SKILLS.md`](SKILLS.md) | Índice canónico de los ZIPs de skill, build, SHA, deployments — incluye el problema de las 3 copias (repo/Desktop/Cowork) | Cuando hay duda sobre qué versión de la skill está en uso |
+| [`../.ai/rules/skills-sync.md`](../.ai/rules/skills-sync.md) | Regla dura de sincronización: qué comando correr tras editar una skill, qué NO hacer | Antes de tocar cualquier fichero de `.claude/skills/**` |
 | [`PLAN_MARKETING_ZIP_2026-09-03.md`](PLAN_MARKETING_ZIP_2026-09-03.md) | Plan original del pipeline ZIP de skill (lo que disparó todo) | Histórico |
 | [`PLAN_MARKETING_MULTICANAL_2026-09-06.md`](PLAN_MARKETING_MULTICANAL_2026-09-06.md) | Plan del Flujo M (marketing multicanal 6 canales) | Cuando se diseña o revisa copy público |
 

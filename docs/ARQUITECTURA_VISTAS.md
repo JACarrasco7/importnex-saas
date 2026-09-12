@@ -294,6 +294,65 @@ Layout `AuthenticatedLayout.vue`:
 
 ---
 
+### 5.5 Panel admin `/cars/{id}` troceado (12-sep-2026)
+
+El detalle del coche es la vista más grande del panel y la que más ha crecido.
+Para mantener el ciclo de iteración corto (1548 → 717 líneas), se troceó en partials Vue
+independientes y un modal. **`Show.vue` solo orquesta imports y pasa props**.
+
+#### Estructura
+
+```
+resources/js/Pages/Cars/
+├── Show.vue                          (717 líneas — orquesta imports + layout)
+├── Partials/
+│   ├── HeaderBar.vue                 cabecera: estado, badge origen, acciones
+│   ├── OverviewPanel.vue             ficha técnica + spec[]
+│   ├── InvestigationPanel.vue        bloques [MARCADOR] / zip subido
+│   ├── MarketPanel.vue               mercado_min / mediana / max
+│   ├── ChecklistPanel.vue            verificado[] / pendiente_comprobar[]
+│   ├── AssignRequestPanel.vue        asignación cliente ↔ solicitud
+│   ├── NotesPanel.vue                notas internas
+│   ├── ExpensesPanel.vue             gastos (lee PrecioClienteCalculator)
+│   └── PhotosPanel.vue               galería + orden
+└── Modals/
+    └── ShareTrackingModal.vue        modal único de compartir tracking
+```
+
+#### Diagrama de montaje
+
+```
+<AuthenticatedLayout>
+  └── <Show :coche="coche" :contenido="contenido">
+        ├── <HeaderBar :coche />                  ← estado + badge origen + acciones
+        ├── <OverviewPanel :coche />              ← ficha técnica, spec[]
+        ├── <InvestigationPanel :coche />         ← ZIP, bloques [MARCADOR], investigación
+        ├── <MarketPanel :contenido />            ← mercado, banda min/mediana/max
+        ├── <ChecklistPanel :contenido />         ← verificado[] vs pendiente[]
+        ├── <AssignRequestPanel :coche />         ← asignar a cliente / solicitud
+        ├── <NotesPanel :coche />                 ← notas internas (libres)
+        ├── <ExpensesPanel :coche :contenido />   ← gastos (PrecioClienteCalculator)
+        ├── <PhotosPanel :coche />                ← fotos + orden + lightbox
+        └── <ShareTrackingModal v-if=showShare />
+```
+
+#### Reglas
+
+1. **Cada partial es Vue 3 `<script setup>` con `defineProps({ coche: Object })`**, sin estado compartido.
+2. **`Show.vue` no tiene lógica de negocio**, solo compone. La lógica vive en el partial.
+3. **Los partials reciben props de Inertia (`page.props.coche`)**. No hacen fetch.
+4. **El modal vive en `Modals/`** (no en `Partials/`) porque se renderiza condicional sobre el resto.
+5. **Si hay que añadir una pestaña nueva:** crear un partial en `Partials/`, importarlo en `Show.vue`, añadir su v-if en la nav de pestañas.
+
+#### Caption canónico del precio
+
+> "Precio del vehículo + gastos gestión de compra"
+
+Nunca usar otras variantes (commit v3.9.0 inicial usó "gastos de gestión de compra e importación",
+corregido en v3.9.2).
+
+---
+
 ## 6. Internacionalización (i18n)
 
 Todas las vistas usan el composable `useTranslations` ([resources/js/Composables/useTranslations.js](../resources/js/Composables/useTranslations.js)) que carga perezosamente los diccionarios:

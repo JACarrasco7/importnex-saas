@@ -19,6 +19,31 @@ Generados por `scripts/build-skill-zips.ps1` (wrapper de `.claude/skills/_dist/b
 | `importacion-vehiculos` | `.claude/skills/_dist/skills-importacion-vehiculos-v3.7.1-20260906.zip` | 3.7.1 | 488 KB | `664c8a9bbae2a85d7f5541cce5e32075cdbe3b221d8a3128dac607ea1877b31e` |
 | `estudio-mercado` | `.claude/skills/_dist/skills-estudio-mercado-v0.3.12-20260906.zip` | 0.3.12 | 53 KB | `894e70f8581011c8659fa683e783c86deb88d419ed3fbb75c476939a90ba2ff9` |
 
+## 🔀 Las 3 copias que NO se sincronizan solas (12-sep-2026)
+
+Cada skill vive en **tres sitios independientes**, y estar al día en uno no
+significa estarlo en los otros dos:
+
+| Copia | Dónde vive | Se actualiza cuando... |
+|---|---|---|
+| **Repo** (fuente real) | `.claude/skills/<skill>/` | editas `SKILL.md`/scripts a mano |
+| **Claude Desktop** | el `.skill.zip` importado en el gestor de skills de la app | subes a mano el ZIP de `_dist/` |
+| **Cowork / cuenta Claude** | copia sincronizada de la cuenta (solo lectura desde una sesión Cowork) | subes a mano el ZIP de `_dist/` al gestor de skills de tu cuenta |
+
+Ninguna de las tres se entera sola de que otra cambió. El 12-sep-2026 se
+descubrió que llevaban **6 días divergiendo sin que nadie lo notara**: el
+repo iba por v3.9.2/v0.4.0, Cowork seguía en v3.6.1/v0.3.12, y encima
+`.claude/skills/_dist/build-zips.py` tenía el nombre del ZIP **hardcodeado**
+(`v3.7.1-20260906`), así que ni regenerando los ZIPs se habría notado el
+desfase con solo mirar el nombre del fichero. Ya está corregido (el nombre
+sale ahora del `version:` real de cada `SKILL.md`), pero la lección se queda:
+después de tocar una skill, la tabla de arriba se regenera con el comando de
+"Regenerar los ZIPs" — y aun así hay que subir el ZIP a Desktop y a Cowork **a
+mano, uno por uno**, no hay atajo.
+
+Regla completa (leer antes de tocar cualquier fichero de `.claude/skills/**`):
+[`.ai/rules/skills-sync.md`](../.ai/rules/skills-sync.md).
+
 ## 🚗 ZIPs de coche (informes individuales)
 
 **SIEMPRE** usar el flag `--auto-path`. Estructura canónica:
@@ -102,6 +127,7 @@ El script:
 | ZIPs en la raíz del repo `c:\laragon\www\importnexcore\*.zip` | Contaminan `git status`. Deben ir en `.claude/skills/_dist/`. |
 | Múltiples `.claude/MEMORIA.md` | El canónico está en `.claude/skills/*/memoria/MEMORIA.md`. El de Desktop es contexto, no skill. |
 | README en la raíz del repo | Va en `.claude/skills/_dist/` o `docs/`. La raíz es código. |
+| `docs/_sync/` | Carpeta ad-hoc creada el 12-sep-2026 para sincronizar ZIPs a mano; duplicaba `.claude/skills/_dist/` + este flujo. Se puede borrar. |
 
 ## 📞 Soporte
 
