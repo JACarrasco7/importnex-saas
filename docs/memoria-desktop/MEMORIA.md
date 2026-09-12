@@ -1,6 +1,4 @@
-> 🔗 **Fuente única (12-sep-2026).** Este fichero — y el resto de `docs/memoria-desktop/` — es ahora el único canónico. La copia en `Desktop\JJImportMotors\.claude\MEMORIA.md` es un espejo que se actualiza a mano; el proyecto de claude.ai ("Claude Desktop") no lo tenía cargado como Contexto pese a que las instrucciones del proyecto lo pedían — se ha añadido hoy. Edita SOLO aquí. Detalle: `docs/DOCS-INDEX.md`.
->
-> ⚠️ **Revisión vencida.** Este fichero se auto-programó para revisión el 2026-09-12 (línea final, "Próxima revisión"). Hoy es esa fecha. Sigue fechado 12-ago-2026 y no menciona nada de lo aprendido desde entonces (Flujo D, marketing multicanal, anti-patrones A11-A14, IVA en importación intracomunitaria, costes reales 1.129€, etc. — ver `.claude/skills/importacion-vehiculos/memoria/` y `.claude/skills/estudio-mercado/CHANGELOG.md` en el repo para el detalle real y actualizado). Pendiente de que alguien lo revise y lo reescriba; no lo he reescrito yo mismo porque son conclusiones de negocio que te corresponden a ti, no una sincronización mecánica.
+> 🔗 **Fuente única (12-sep-2026).** Este fichero — y el resto de `docs/memoria-desktop/` — es el único canónico (vive en el repo Laravel: `C:\laragon\www\importnexcore\docs\memoria-desktop\`). Las copias en `Desktop\JJImportMotors\.claude\` y en el Contexto del proyecto de claude.ai son espejos que se actualizan a mano tras editar aquí. Edita SOLO aquí. Detalle: `docs/DOCS-INDEX.md`.
 
 ---
 
@@ -8,171 +6,88 @@
 
 > **Índice central de memoria persistente.** Claude DEBE leer este archivo al inicio de cada conversación para tener continuidad entre sesiones.
 >
-> ⚠️ **Optimización 12-ago-2026:** la memoria es **compacta (~11KB total)**. Los docs detallados viven en `_contexto/` y solo se leen BAJO DEMANDA. El contexto auto-cargado es solo `CLAUDE.md` (raíz, 3KB) + `.claude/MEMORIA.md` (3KB) ≈ **6KB** → sin "Prompt length error".
+> ⚠️ **Memoria compacta (~11KB total).** Los docs detallados viven en `_contexto/` y solo se leen BAJO DEMANDA. Contexto auto-cargado: `CLAUDE.md` (raíz, 3KB) + `.claude/MEMORIA.md` (3KB) ≈ **6KB**.
 
 ---
 
 ## 📂 Estructura de la memoria
 
-| Archivo | KB | Cuándo consultar |
-|---|---|---|
-| **`MEMORIA.md`** (este) | 3.4 | SIEMPRE al inicio |
-| `memoria/memoria-corto.md` | 1.4 | Sesión actual |
-| `memoria/preferencias.md` | 1.0 | SIEMPRE (tono, formato) |
-| `memoria/decisiones.md` | 0.9 | Duda sobre "por qué" |
-| `memoria/errores-pasados.md` | 0.8 | SIEMPRE antes de actuar |
-| `memoria/memoria-larga.md` | 0.9 | Cuando el patrón aplique |
-| `memoria/proyectos-activos.md` | 2.8 | Al retomar trabajo |
+| Archivo | Cuándo consultar |
+|---|---|
+| **`MEMORIA.md`** (este) | SIEMPRE al inicio |
+| `memoria/preferencias.md` | SIEMPRE (tono, formato) |
+| `memoria/errores-pasados.md` | SIEMPRE antes de actuar |
+| `memoria/decisiones.md` | Duda sobre "por qué" |
+| `memoria/memoria-corto.md` | Sesión actual |
+| `memoria/memoria-larga.md` | Cuando el patrón aplique |
+| `memoria/proyectos-activos.md` | Al retomar trabajo |
 
-**TOTAL:** ~11 KB (≈2.800 tokens) — ligero.
-
----
-
-## 📄 Documentación bajo demanda (NO auto-cargar)
-
-| Archivo | KB | Cuándo leer |
-|---|---|---|
-| `../_contexto/CONTEXTO_ACTIVO.md` | 8.8 | Detalle de marca, fuentes, umbrales |
-| `../_contexto/CONTEXTO_FOTOS.md` | 5.8 | Referencia visual de coches |
-| `../_contexto/Como_Funciona_JJ_Import_Motors.md` | 6.5 | Explicación sin tecnicismos |
-| `../_contexto/Flujo_Operativo_JJ_Import_Motors.md` | 8.5 | Detalle técnico del flujo |
-
-> ⚠️ **NO leer estos a menos que el trabajo lo requiera.** La raíz solo tiene `CLAUDE.md` (3KB) que resume todo.
+**Docs bajo demanda (NO auto-cargar):** `_contexto/CONTEXTO_ACTIVO.md`, `CONTEXTO_FOTOS.md`, `Como_Funciona_JJ_Import_Motors.md`, `Flujo_Operativo_JJ_Import_Motors.md`. Leer solo si el trabajo lo requiere.
 
 ---
 
 ## 🚦 Protocolo de lectura/escritura
 
-### Al INICIO de cada conversación:
-1. Lee este `MEMORIA.md`
-2. Lee `preferencias.md` (tono, formatos, nivel de detalle)
-3. Lee `errores-pasados.md` (NO repetir)
-4. Lee `memoria-corto.md` (si existe → sesión previa no cerrada)
-5. Lee `proyectos-activos.md` (en qué andas)
+**Al INICIO:** 1) este MEMORIA.md · 2) `preferencias.md` · 3) `errores-pasados.md` · 4) `memoria-corto.md` (sesión previa no cerrada) · 5) `proyectos-activos.md`.
 
-### Durante la conversación:
-- Actualiza `memoria-corto.md` con el estado actual
-- Si aprendes algo nuevo → apúntalo en la sección correspondiente
+**Durante:** actualiza `memoria-corto.md`; aprendizajes → archivo correspondiente.
 
-### Al FINALIZAR (o cuando el usuario lo pida):
-- Mueve `memoria-corto.md` → archivos de largo plazo
-- Actualiza `proyectos-activos.md`
-- Documenta nuevos aprendizajes
+**Al FINALIZAR:** mueve corto → largo plazo · actualiza `proyectos-activos.md` · documenta aprendizajes.
 
 ---
 
 ## 🧠 Tres tipos de memoria
 
-### 1. Memoria de CORTO plazo (sesión)
-- **Qué:** Estado temporal de la conversación actual
-- **Dónde:** `memoria/memoria-corto.md`
-- **Caducidad:** Cuando termina la sesión, se mueve a largo plazo o se borra
+1. **Corto plazo (sesión):** estado temporal → `memoria/memoria-corto.md`.
+2. **Medio plazo (2-3 semanas):** datos de mercado/precios → `informes/datos/<marca>/<modelo>/mercado_<fecha>.json` + `datos_mercado.json` (mapa, **ruta dual**: Desktop + `.claude/skills/datos_mercado.json` en el repo — la IA escribe en 1, Copilot espeja; NUNCA divergir).
+3. **Largo plazo:** patrones/decisiones/errores → `memoria/*.md` + memoria del skill.
 
-### 2. Memoria de MEDIO plazo (2-3 semanas)
-- **Qué:** Datos de mercado, precios, comparables que cambian con el tiempo
-- **Dónde:** `informes/datos/<marca>/<modelo>/mercado_<fecha>.json` (ya existe)
-- **Caducidad:** 2-3 semanas, luego se renueva con medición fresca
-
-### 3. Memoria de LARGO plazo (permanente)
-- **Qué:** Patrones, decisiones, errores, preferencias del usuario
-- **Dónde:** Archivos en `memoria/*.md`
-- **Caducidad:** NUNCA se borra automáticamente. Solo manualmente.
+**Memoria del skill** (`importacion-vehiculos/memoria/`, 9 archivos): `modelos-medidos`, `encargos`, `filtros-portales`, `vendedores-confianza`, `trampas-encontradas`, `mejoras-aplicadas`, `retrospectiva`, `marketing-resultados`. Leer al inicio de encargos (PASO 0 cache).
 
 ---
 
-## 🔗 Memoria relacionada (skill)
+## 🌍 Negocio (constantes)
 
-El skill `importacion-vehiculos` tiene su propia memoria en `.claude/skills/importacion-vehiculos/memoria/`:
-- `modelos-medidos.md` — histórico de modelos investigados
-- `vendedores-confianza.md` — dealers que responden bien
-- `trampas-encontradas.md` — nuevas trampas detectadas en portales
-- `mejoras-aplicadas.md` — qué ha mejorado el skill con el uso
+- JJ Import Motors **NO compra stock**: solo servicio de búsqueda/importación/gestión con **honorarios fijos**. El cliente compra el coche.
+- Ámbito: importación desde **Alemania** + búsqueda/gestión **dentro de España**.
+- **Origen por defecto si no se especifica:** buscar en AMBOS mercados y comparar coste total puesto en Huelva. Empate (<300 €) → preferir ES (menos riesgo).
 
----
-
-## 📊 Reglas de oro
-
-1. **Una memoria útil > mil memorias inútiles.** Solo escribe lo que vas a necesitar recordar.
-2. **Citado es mejor que opinado.** Siempre: "el usuario prefiere X porque dijo 'Y'"
-3. **Borra memorias obsoletas.** Si una preferencia cambió, actualiza el archivo.
-4. **No confundir memoria con documentación.** La documentación es para Claude nuevo. La memoria es para "recordar entre sesiones".
+**Costes de importación DE (reales, fijados 2026-08):** **1.129 €** = transporte 900 + ausfuhr 114 + ITV import 115. **IEDMT aparte** (depende del CO₂ real de cada unidad; referencia deportivos ~1.800 € — no imputar sin dato). **IVA:** con NIF-IVA intracomunitario (empresa) se soporta en ES, no en la compra DE (ver `04-negocio/costes.md` del skill). Ejemplo tope de compra con presupuesto ~9.000 €: ES ≈ 8.550-8.850 € · DE ≈ 7.870 € (+1.129 € import).
 
 ---
 
-## �️ Prompt Improver (12-ago-2026)
+## 🔄 Flujos y cascada de informes (v3.9.x)
 
-**Comportamiento obligatorio** cuando el usuario da un prompt vago:
+**5 flujos:** A UNIDAD (URL concreta) · B MODELO · C MERCADO · **D DESCUBRIMIENTO** (nuevo 12-ago: cliente sin modelo → sondear modelos/motorizaciones que caben en presupuesto → embudar a B) · **M MARKETING multicanal** (nuevo 09-sep: 6 canales, ángulo/gancho por coche, resultados en `marketing-resultados.md`).
 
-```
-¿El prompt tiene <50 chars o <3 parámetros del briefing?
-├── SÍ → MEJORAR antes de navegar
-│   1. Detectar qué falta (tabla de parámetros)
-│   2. Preguntar SOLO críticos (1-3, nunca más de 4)
-│   3. SIEMPRE permitir "busca tú" / "lo que puedas"
-│   4. Mostrar prompt mejorado listo + pedir OK
-└── NO → ejecutar directamente
-```
+**Cascada con checkpoints (NO saltarse):** encargo B → INFORME MODELO + top 5 con enlaces → CP1 (elige el usuario) → Flujo A → INFORME UNIDAD (15 sec) → CP3 veredicto → 🟢/🔵 → DOSSIER CLIENTE + ZIP Laravel. Dossier/ficha/folleto PDF los genera **Laravel** tras subir el ZIP, no Claude.
 
-**Plantilla universal (mínimo viable):**
-```
-[MARCA] [MODELO] [VERSIÓN si tope de gama]
-[año mín]-[año máx]
-[km máx]
-[presupuesto] puesto en [provincia]
-[transmisión] (auto/manual/indistinto)
-[finalidad] (personal / reventa / cliente)
-```
+**Rol del repo Laravel (desde 12-ago):** ImportnexCore es el repositorio único y fuente de verdad de los informes (PDFs, dossier, folleto, galería). La investigación se hace en Claude; el paquete (JSON + esqueletos + fotos) se sube a Laravel.
 
-**Triggers exactos del Prompt Improver (skill):**
-- `<50 chars` → probablemente vago
-- `50-200 chars` → revisar si tiene 3+ parámetros
-- `>200 chars` → ya está completo
+## 🚫 Anti-patrones críticos (A11-A14, completos en `06-reglas/anti_patrones.md`)
 
-**Detalle técnico:** `importacion-vehiculos/guia_prompts.md` (dentro del skill).
+- **A11** — Coches.net ordena por relevancia ≠ precio: paginar TODO (`pg=` + `pf=`) o declarar cobertura parcial.
+- **A12** — Página 1 orden-asc ≠ "el listado": sesgo a lo barato/viejo. Cubrir TODO el rango del presupuesto (bandas). En sondeo D no se pagina (2 lecturas suelo/techo bastan).
+- **A13** — Cualquier cambio de filtros del encargo (ampliar O restringir) se declara ANTES de navegar.
+- **A14** — No abandonar el camino en silencio: pregunta lateral = misión lateral con retorno ↩⃾ al waypoint 📍.
 
 ---
 
-## 🎯 Briefing de Encargo (12-ago-2026)
+## 🎯 Prompt Improver + Briefing (12-ago)
 
-**Comportamiento obligatorio** en flujos A/B antes de navegar:
-
-```
-Parámetros clave (ordenar por importancia):
-1. Modelo + versión (CRÍTICO en tope de gama)
-2. Año mín / km máx
-3. Presupuesto (puesto en provincia, no en DE)
-4. Finalidad (personal / reventa / cliente)
-5. Transmisión (auto/manual)
-6. Color / extras / preferencias
-
-Si el usuario da URL sin contexto → preguntar versión (sobre todo OPC, M, AMG, RS, GTI, GTD).
-```
-
-**Trampa típica:** coches de tope de gama mal etiquetados (ej. OPC con texto genérico). Por eso se confirma versión ANTES de filtrar.
-
-**Detalle técnico:** `importacion-vehiculos/briefing_encargo.md` (dentro del skill).
+Prompt vago (<50 chars o <3 parámetros) → mejorar antes de navegar: detectar faltantes, preguntar SOLO 1-3 críticos, permitir "busca tú", mostrar prompt mejorado + OK. Plantilla: [MARCA][MODELO][VERSIÓN] / [años] / [km máx] / [presupuesto puesto en provincia] / [transmisión] / [finalidad]. En tope de gama (OPC, M, AMG, RS, GTI…) confirmar versión ANTES de filtrar (anuncios mal etiquetados).
 
 ---
 
-## 🌍 Negocio y Origen (12-ago-2026)
+## 🔧 Sistema (12-sep-2026)
 
-**Modelo de negocio:**
-- JJ Import Motors **NO compra** coches ni mantiene stock.
-- Solo **oferta el servicio** de búsqueda, importación y gestión, cobrando honorarios fijos.
-- El cliente es quien compra el coche.
-
-**Ámbito:** importación desde **Alemania** + servicios de búsqueda y gestión **dentro de España**.
-
-**Origen DE vs ES:**
-- Si el encargo NO especifica origen → buscar el modelo en **AMBOS mercados** y comparar dónde sale mejor (coste total puesto en Huelva).
-- DE = transporte 900 + ausfuhr 114 + ITV import 115 + IEDMT + honorarios.
-- ES = traslado + gestoría + honorarios (SIN costes de importación).
-- Si empatan (<300 €), preferir ES (menos riesgo).
+- **Skills:** `importacion-vehiculos` **v3.9.3** · `estudio-mercado` **v0.4.0**. Tras editar una skill SIEMPRE: `.\scripts\build-skill-zips.ps1` (repo) + reimportar ZIP en Desktop y Cowork. Regla dura: `.ai/rules/skills-sync.md`.
+- **Docs:** másters de negocio/memoria en `docs/claude-desktop/` y `docs/memoria-desktop/` (repo) → réplicas en Desktop y claude.ai. Regla de qué doc tocar tras cada cambio: `.ai/rules/doc-sync.md`. Índice: `docs/DOCS-INDEX.md`.
 
 ---
 
 ## 🗓️ Última actualización
 
-- **Fecha:** 2026-08-12
-- **Cambios:** Prompt Improver + Briefing de Encargo + Negocio/Origen DE vs ES
-- **Próxima revisión:** 2026-09-12 (1 mes)
+- **Fecha:** 2026-09-12 (revisión vencida del 12-ago ejecutada)
+- **Cambios:** +Flujo D y M · anti-patrones A11-A14 · costes reales importación 1.129 € + IEDMT + IVA intracomunitario · rol del repo Laravel · skills v3.9.3/v0.4.0 · rutas duales y reglas sync
+- **Próxima revisión:** al cerrar el próximo sprint (regla `.ai/rules/doc-sync.md`)

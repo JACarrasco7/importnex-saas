@@ -78,9 +78,9 @@ distinta cada una**:
   ni el resto de `memoria/*.md`, pese a que sus propias instrucciones dicen
   "Lee .claude/MEMORIA.md al inicio". Añadidos el 12-sep-2026.
 - `memoria-desktop/MEMORIA.md` llevaba una nota interna "Próxima revisión:
-  2026-09-12" — vencida: sigue fechado 12-ago-2026 y no menciona nada de lo
-  aprendido desde entonces (Flujo D, marketing multicanal, anti-patrones,
-  IVA intracomunitario…). **Revisión de contenido pendiente — decisión de negocio.**
+  2026-09-12" — vencida y **ejecutada el mismo 12-sep-2026**: el máster ya
+  incorpora Flujo D, Flujo M, anti-patrones A11-A14, costes reales de
+  importación (1.129 € + IEDMT + IVA intracomunitario) y versiones de skills.
 
 **Regla desde hoy:** los másters son [`claude-desktop/`](claude-desktop/) y
 [`memoria-desktop/`](memoria-desktop/) en este repo. `Desktop\JJImportMotors\`
@@ -91,7 +91,7 @@ actualizan a mano después de editar el máster, nunca al revés. Ídem skills:
 | Carpeta | Qué | Estado |
 |---|---|---|
 | [`claude-desktop/`](claude-desktop/) | **Máster (12-sep-2026)** de los 4 ficheros de entrada del proyecto Claude Desktop: `CLAUDE.md`, `README.md`, `GUIA_INICIO_RAPIDO.md`, `INSTRUCCIONES_PROYECTO.md` | Activo |
-| [`memoria-desktop/`](memoria-desktop/) | **Máster (12-sep-2026)** de la memoria transversal (MEMORIA.md + decisiones/errores/corto/larga/preferencias/proyectos). ⚠️ MEMORIA.md con revisión vencida (ver arriba). La memoria operativa de cada skill vive en `.claude/skills/<skill>/memoria/` | Activo |
+| [`memoria-desktop/`](memoria-desktop/) | **Máster (12-sep-2026)** de la memoria transversal (MEMORIA.md + decisiones/errores/corto/larga/preferencias/proyectos), revisada 12-sep-2026. La memoria operativa de cada skill vive en `.claude/skills/<skill>/memoria/` | Activo |
 
 ## 📚 Guías de flujos — [`guias/`](guias/README.md)
 

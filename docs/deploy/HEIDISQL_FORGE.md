@@ -22,12 +22,16 @@ Remoto: 168.144.6.105:3306
 | **Network type** | MySQL (TCP/IP) |
 | **Hostname / IP** | `127.0.0.1` |
 | **User** | `forge` |
-| **Password** | `z5sAhm2QZfCOYvIel0hU` |
+| **Password** | 🔐 **NO está aquí** — ver el gestor de contraseñas / panel de Forge (`Sites → Database`). Nunca commiteada al repo |
 | **Port** | `3307` |
 | **Databases** | (dejar vacío para ver todas) |
 | **Comment** | `Forge Production` |
 
 Click **"Open"**
+
+> ⚠️ **Seguridad (12-sep-2026):** una password anterior estuvo commiteada en este
+> fichero y sigue en el **historial de git**. Si no se ha hecho ya: **rotarla en
+> Forge** (panel → Database → rotate password) y actualizar `.env` del servidor.
 
 ## 📊 Tablas importantes
 
