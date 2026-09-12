@@ -60,6 +60,20 @@ class ImportValuationApiController extends Controller
         try {
             $car = $importer->resolveCar($payload, $org);
             $wasNew = ! $car->exists;
+
+            // dry_run (?dry=1 o header X-Dry-Run: 1) valida pero NO escribe en BD.
+            // Util para que el chat verifique que un JSON entrara sin crear coche basura.
+            $dryRun = $request->boolean('dry') || strtolower((string) $request->header('X-Dry-Run')) === '1';
+            if ($dryRun) {
+                return response()->json([
+                    'status' => 'dry_run_ok',
+                    'would_create' => $wasNew,
+                    'car_id' => $wasNew ? null : $car->id,
+                    'car_url' => $wasNew ? null : url("/cars/{$car->id}"),
+                    'message' => 'JSON valido. dry_run=1: NO se importo a la BD.',
+                ], 200);
+            }
+
             $importer->apply($car, $payload);
         } catch (\RuntimeException $e) {
             // Auditoría 3 (#4) — validaciones de negocio = payload inválido (422), no 500

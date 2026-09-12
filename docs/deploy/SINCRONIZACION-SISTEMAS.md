@@ -74,11 +74,15 @@
 
 ## ✅ Mejoras pendientes (no implementadas)
 
-- **CI en GitHub Actions**: build de ZIPs + `docs/SKILLS.md` en cada push; artefactos descargables. Quita dependencia del local.
-- **`dry_run` en la API** (`?dry=1`): valida JSON antes de crear coche real. (Comprobar si ya existe en `app/Http/Controllers/Api/ImportValuationApiController.php`.)
 - **Webhook Laravel → Claude**: cuando se importa un ZIP, notificar al Desktop (push a una URL local) para que actualice `encargos.md` sin tener que esperar a `subir-informe.ps1`.
+
+## ✅ Implementado en este commit (12-sep-2026)
+
+- **CI en GitHub Actions** (`.github/workflows/build-skills.yml`): en cada push a master valida paths, regenera ZIPs, refresca `docs/SKILLS.md`, commitea el bump si hay cambios, y sube los ZIPs como artefactos descargables. Corre también `ImportValuationDryRunTest`.
+- **`dry_run` en la API** (`POST /api/import-valuation?dry=1` o header `X-Dry-Run: 1`): valida JSON, ejecuta el resolve del coche y devuelve lo que pasaría, **sin escribir en BD**. Útil para que el chat verifique que un JSON entra sin crear coche basura. Test: `tests/Feature/ImportValuationDryRunTest.php` (4 casos: query, header, sin flag crea, JSON inválido devuelve 422).
+- **`subir-informe.ps1 -DryRun`**: wrapper para que el chat/subir-informe.bat llame a la API en modo dry_run sin cambiar lógica.
 
 ## 📜 Historial
 
 - **2026-08-12** — Token en claro en `subir-informe.ps1` (commiteado por error).
-- **2026-09-12** — Plan de sincronización + identificación de canales. Implementación inicial de `sync-desktop.ps1`, `sync.manifest.json`, token por env var, round-trip automático, `.env.gitignore`.
+- **2026-09-12** — Plan de sincronización + identificación de canales. Implementación inicial de `sync-desktop.ps1`, `sync.manifest.json`, token por env var, round-trip automático, `.env.gitignore`. Fix bug crítico en `_dist/build-zips.py` (rutas hardcodeadas). SKILL.md estudio-mercado bumpea a 0.4.0. Implementadas también: `dry_run` API + CI GitHub Actions.

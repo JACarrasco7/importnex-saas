@@ -17,7 +17,8 @@
 param(
     [string]$Archivo,                                                 # un solo archivo
     [string]$Carpeta = "C:\Users\jacar\Desktop\JJImportMotors\laravel\informes",
-    [switch]$NoRoundTrip
+    [switch]$NoRoundTrip,
+    [switch]$DryRun                                                  # valida JSON sin crear coche (?dry=1)
 )
 
 $ErrorActionPreference = "Continue"
@@ -84,6 +85,7 @@ if ($Archivo) {
         $ok = & curl.exe -s -X POST $API `
             -H "X-Import-Token: $TOKEN" `
             -H "Content-Type: application/json" `
+            $(if ($DryRun) { '-H "X-Dry-Run: 1"' }) `
             --data-binary "@$tmp" `
             -w "[HTTP:%{http_code}]" 2>&1
 
@@ -136,7 +138,7 @@ foreach ($f in $archivos) {
     try {
         $texto = [System.IO.File]::ReadAllText($f.FullName, [System.Text.Encoding]::UTF8)
         [System.IO.File]::WriteAllText($tmp, $texto, (New-Object System.Text.UTF8Encoding $false))
-        $r = & curl.exe -s -X POST $API -H "X-Import-Token: $TOKEN" -H "Content-Type: application/json" --data-binary "@$tmp" -w "[HTTP:%{http_code}]" 2>&1
+        $r = & curl.exe -s -X POST $API -H "X-Import-Token: $TOKEN" -H "Content-Type: application/json" $(if ($DryRun) { '-H "X-Dry-Run: 1"' }) --data-binary "@$tmp" -w "[HTTP:%{http_code}]" 2>&1
         $codigo = if ($r -match '\[HTTP:(\d+)\]') { $matches[1] } else { "0" }
         $body   = $r -replace '\[HTTP:\d+\]', ''
         if ($codigo -eq "200" -or $codigo -eq "201") {

@@ -1,0 +1,113 @@
+name: Build skill ZIPs + validar dry_run
+
+# Trabaja en cada push a master y en PRs.
+# Replica lo que hace scripts/build-skill-zips.ps1 en local.
+# Resultado: ZIPs + docs/SKILLS.md siempre actualizados en origin/master.
+# Artefactos descargables para Cowork/Desktop desde la pagina de Actions.
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: write   # para commitear el bump de docs/SKILLS.md si regenera ZIPs
+
+jobs:
+  build-skills:
+    name: Build skill ZIPs + docs/SKILLS.md
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python (zipfile robusto)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Validate paths (no incluye chars prohibidos por Claude Skills JS)
+        run: python .claude/skills/_dist/build-zips.py --validate-only
+
+      - name: Build ZIPs (los nombres ahora reflejan version real del SKILL.md)
+        run: python .claude/skills/_dist/build-zips.py
+
+      - name: Refresh docs/SKILLS.md (version + SHA + tamano reales)
+        run: |
+          if command -v pwsh &> /dev/null; then
+            pwsh -NoProfile -File scripts/build-skill-zips.ps1 -NoCommit
+          else
+            # PowerShell no disponible: regeneramos la tabla a mano con sha256sum
+            echo "| Skill | ZIP | Version | Tamano | SHA256 |" > docs/SKILLS.md.new
+            echo "|---|---|---|---|---|" >> docs/SKILLS.md.new
+            for zip in .claude/skills/_dist/*.zip; do
+              name=$(basename "$zip")
+              size=$(stat -c%s "$zip")
+              sha=$(sha256sum "$zip" | cut -c1-12)
+              echo "  $name: size=$size sha=$sha" >&2
+              # version desde el SKILL.md de la skill correspondiente
+              skill_name=$(echo "$name" | sed -E 's/^skills-(.+)-v[0-9.]+.*/\1/')
+              version=$(grep -E '^version:' ".claude/skills/${skill_name}/SKILL.md" | head -1 | awk '{print $2}')
+              echo "| $skill_name | $name | $version | ${size} bytes | $sha |" >> docs/SKILLS.md.new
+            done
+            mv docs/SKILLS.md.new docs/SKILLS.md
+          fi
+
+      - name: Commit regenerado (solo en push a master, si hay cambios)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add .claude/skills/_dist/ docs/SKILLS.md
+          if git diff --cached --quiet; then
+            echo 'No hay cambios que commitear.'
+          else
+            git commit -m 'ci(skills): regenerar ZIPs + docs/SKILLS.md [skip ci]'
+            git push
+          fi
+
+      - name: Subir ZIPs como artefactos descargables
+        uses: actions/upload-artifact@v4
+        with:
+          name: skill-zips
+          path: .claude/skills/_dist/*.zip
+          if-no-files-found: error
+          retention-days: 30
+
+  test-dry-run:
+    name: Test ImportValuation dry_run
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, dom, fileinfo, mysql, sqlite, gd, curl, xml, zip
+          coverage: none
+
+      - name: Setup Composer
+        uses: composer/composer-action@v2
+
+      - name: Copy .env
+        run: cp .env.example .env
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Generate key + migrate (sqlite en memoria para tests)
+        run: |
+          php artisan key:generate
+          touch database/database.sqlite
+          php artisan migrate --force --env=testing
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+
+      - name: Run dry_run test
+        run: |
+          php artisan test --filter=ImportValuationDryRunTest --compact
