@@ -10,3 +10,4 @@ Before planning or editing, find the row whose globs match the file's path and r
 | routes/web.php | .ai/rules/routes.md |
 | resources/views/** | .ai/rules/views.md |
 | .claude/skills/**, docs/SKILLS.md, docs/DOCS-INDEX.md, scripts/build-skill-zips.ps1 | .ai/rules/skills-sync.md |
+| docs/**, .github/copilot-instructions.md, .ai/rules/index.md, AGENTS.md, CLAUDE.md, app/Http/Controllers/**, app/Models/**, app/Services/**, routes/**, config/** | .ai/rules/doc-sync.md |
