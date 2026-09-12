@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "generated_by": "build-skill-zips.ps1 (manualmente editable: regenerar con -NoCommit y editar)",
+  "skills": {
+    "importacion-vehiculos": {
+      "version": "3.9.3",
+      "zip": "skills-importacion-vehiculos-v3.9.3-YYYYMMDD.zip",
+      "source_dir": ".claude/skills/importacion-vehiculos"
+    },
+    "estudio-mercado": {
+      "version": "0.4.0",
+      "zip": "skills-estudio-mercado-v0.4.0-YYYYMMDD.zip",
+      "source_dir": ".claude/skills/estudio-mercado"
+    }
+  },
+  "masters": {
+    "claude-desktop": {
+      "source_dir": "docs/claude-desktop/",
+      "destinations": [
+        {
+          "name": "Claude Desktop (raiz)",
+          "path": "C:\\Users\\jacar\\Desktop\\JJImportMotors\\",
+          "files": ["CLAUDE.md", "README.md", "GUIA_INICIO_RAPIDO.md", "INSTRUCCIONES_PROYECTO.md"]
+        }
+      ]
+    },
+    "memoria-desktop": {
+      "source_dir": "docs/memoria-desktop/",
+      "destinations": [
+        {
+          "name": "Claude Desktop (.claude/)",
+          "path": "C:\\Users\\jacar\\Desktop\\JJImportMotors\\.claude\\",
+          "files": ["MEMORIA.md"]
+        },
+        {
+          "name": "Claude Desktop (.claude/memoria/)",
+          "path": "C:\\Users\\jacar\\Desktop\\JJImportMotors\\.claude\\memoria\\",
+          "files": ["decisiones.md", "errores-pasados.md", "memoria-corto.md", "memoria-larga.md", "preferencias.md", "proyectos-activos.md"]
+        }
+      ]
+    }
+  },
+  "datos_mercado_json": {
+    "policy": "repo es canonico; Desktop es espejo",
+    "repo_path": ".claude/skills/datos_mercado.json",
+    "desktop_path": "C:\\Users\\jacar\\Desktop\\JJImportMotors\\datos_mercado.json"
+  },
+  "api": {
+    "endpoint": "https://jjimportmotors.on-forge.com/api/import-valuation",
+    "token_env": "IMPORTNEX_TOKEN"
+  },
+  "sync_script": "scripts/sync-desktop.ps1",
+  "rules": [".ai/rules/skills-sync.md", ".ai/rules/doc-sync.md"]
+}

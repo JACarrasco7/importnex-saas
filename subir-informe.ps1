@@ -1,24 +1,72 @@
 # ================================================================
-# subir-informe.ps1 â€” Un solo comando para subir informes a ImportnexCore
+# subir-informe.ps1 -- Un solo comando para subir informes a ImportnexCore
 # ================================================================
 # Uso:
-#   .\subir-informe.ps1                              â†’ sube TODOS los .json de la carpeta por defecto
-#   .\subir-informe.ps1 -Archivo "ruta\informe.json"  â†’ sube UN solo archivo
-#   .\subir-informe.ps1 -Carpeta "otra\carpeta"       â†’ sube todos de otra carpeta
+#   .\subir-informe.ps1                              -> sube TODOS los .json de la carpeta por defecto
+#   .\subir-informe.ps1 -Archivo "ruta\informe.json"  -> sube UN solo archivo
+#   .\subir-informe.ps1 -Carpeta "otra\carpeta"       -> sube todos de otra carpeta
+#   .\subir-informe.ps1 -NoRoundTrip                  -> NO escribir en encargos.md del skill
+#
+# Token de la API: se lee de $env:IMPORTNEX_TOKEN. NO esta hardcodeado.
+# Para configurarlo una sola vez por maquina (PowerShell):
+#   [Environment]::SetEnvironmentVariable("IMPORTNEX_TOKEN","<token>","User")
+# O para una sola sesion:
+#   $env:IMPORTNEX_TOKEN = "<token>"
 # ================================================================
 
 param(
-    [string]$Archivo,  # un solo archivo
-    [string]$Carpeta = "C:\Users\jacar\Desktop\JJImportMotors\laravel\informes"
+    [string]$Archivo,                                                 # un solo archivo
+    [string]$Carpeta = "C:\Users\jacar\Desktop\JJImportMotors\laravel\informes",
+    [switch]$NoRoundTrip
 )
 
 $ErrorActionPreference = "Continue"
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
-$TOKEN  = "22a600ba2f1f52eaa96a450dfd82bb9a36c26a28ee54f879e763583770a1fc32"
-$API    = "https://jjimportmotors.on-forge.com/api/import-valuation"
+# --- Token desde entorno (NO hardcoded) ------------------------------------
+$TOKEN = $env:IMPORTNEX_TOKEN
+if (-not $TOKEN) {
+    Write-Host "ERROR: variable de entorno IMPORTNEX_TOKEN no definida." -ForegroundColor Red
+    Write-Host "  Configurala una vez:" -ForegroundColor Yellow
+    Write-Host '  [Environment]::SetEnvironmentVariable("IMPORTNEX_TOKEN","<token>","User")' -ForegroundColor Yellow
+    exit 2
+}
 
-# â”€â”€ Modo: un solo archivo â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+$API = "https://jjimportmotors.on-forge.com/api/import-valuation"
+
+# --- Round-trip: registro de encargos del skill ----------------------------
+$skillEncargos = Join-Path $env:USERPROFILE 'Desktop\JJImportMotors\.claude\skills\importacion-vehiculos\memoria\encargos.md'
+
+function Write-RoundTrip($jsonPath, $carId, $carUrl) {
+    if ($NoRoundTrip) { return }
+    if (-not (Test-Path $skillEncargos)) {
+        Write-Host "  (Round-trip: no existe $skillEncargos -- saltado)" -ForegroundColor DarkGray
+        return
+    }
+    try {
+        $j = Get-Content $jsonPath -Raw -Encoding UTF8 | ConvertFrom-Json
+        $cliente  = if ($j._meta.client_id) { $j._meta.client_id } else { 'anonimo' }
+        $modelo   = if ($j.vehiculo.marca -and $j.vehiculo.modelo) { "$($j.vehiculo.marca) $($j.vehiculo.modelo)" } else { 'sin modelo' }
+        $fecha    = Get-Date -Format 'yyyy-MM-dd HH:mm'
+        $linea    = "### $cliente - $modelo - $fecha (auto-subido)"
+        $bloque   = @"
+
+$linea
+- **Tipo:** AUTO-SUBIDO via subir-informe.ps1
+- **Estado:** importado a Laravel
+- **Entregables:** ZIP -> coche_id=$carId
+- **Resultado:** $carUrl
+- **Notas:** [round-trip automatico por subir-informe.ps1 - revisar manualmente]
+
+"@
+        Add-Content -Path $skillEncargos -Value $bloque -Encoding UTF8
+        Write-Host "  > round-trip anotado en encargos.md" -ForegroundColor DarkGray
+    } catch {
+        Write-Host "  (Round-trip fallo: $_)" -ForegroundColor Yellow
+    }
+}
+
+# -- Modo: un solo archivo -------------------------------------------------
 if ($Archivo) {
     if (-not (Test-Path $Archivo)) {
         Write-Host "ERROR: $Archivo no existe" -ForegroundColor Red
@@ -46,13 +94,14 @@ if ($Archivo) {
             $data = $body | ConvertFrom-Json
             Write-Host "LISTO  car_id=$($data.car_id)  $($data.status)" -ForegroundColor Green
             Write-Host "       $($data.car_url)" -ForegroundColor DarkGray
+            Write-RoundTrip $Archivo $data.car_id $data.car_url
         }
         elseif ($codigo -eq "422") {
             Write-Host "ERROR  JSON invalido o falta schema_version" -ForegroundColor Red
             Write-Host "       $body" -ForegroundColor DarkGray
         }
         elseif ($codigo -eq "401") {
-            Write-Host "ERROR  Token invalido" -ForegroundColor Red
+            Write-Host "ERROR  Token invalido (revisa IMPORTNEX_TOKEN)" -ForegroundColor Red
         }
         else {
             Write-Host "ERROR  HTTP $codigo" -ForegroundColor Red
@@ -68,61 +117,44 @@ if ($Archivo) {
     exit 0
 }
 
-# â”€â”€ Modo: carpeta completa â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# -- Modo: carpeta completa ------------------------------------------------
 if (-not (Test-Path $Carpeta)) {
     Write-Host "ERROR: $Carpeta no existe" -ForegroundColor Red
     exit 1
 }
 
 $archivos = Get-ChildItem $Carpeta -Filter "*.json" -ErrorAction SilentlyContinue
-if ($archivos.Count -eq 0) {
+if (-not $archivos -or $archivos.Count -eq 0) {
     Write-Host "No hay .json en: $Carpeta" -ForegroundColor Yellow
     exit 0
 }
 
-Clear-Host
-Write-Host "============================================================" -ForegroundColor Magenta
-Write-Host "   ImportnexCore - Subir $($archivos.Count) informe(s)" -ForegroundColor Magenta
-Write-Host "============================================================" -ForegroundColor Magenta
-Write-Host ""
-
-$total = $archivos.Count; $ok = 0; $fail = 0
-
+$okCount = 0; $failCount = 0
 foreach ($f in $archivos) {
-    Write-Host "  $($f.Name) " -NoNewline
-
+    Write-Host "Subiendo: $($f.Name)" -ForegroundColor Cyan
     $tmp = [System.IO.Path]::GetTempFileName() + ".json"
     try {
         $texto = [System.IO.File]::ReadAllText($f.FullName, [System.Text.Encoding]::UTF8)
         [System.IO.File]::WriteAllText($tmp, $texto, (New-Object System.Text.UTF8Encoding $false))
-
-        $out = & curl.exe -s -X POST $API `
-            -H "X-Import-Token: $TOKEN" `
-            -H "Content-Type: application/json" `
-            --data-binary "@$tmp" `
-            -w "[HTTP:%{http_code}]" 2>&1
-
-        $codigo = if ($out -match '\[HTTP:(\d+)\]') { $matches[1] } else { "0" }
-        $body   = $out -replace '\[HTTP:\d+\]', ''
-
+        $r = & curl.exe -s -X POST $API -H "X-Import-Token: $TOKEN" -H "Content-Type: application/json" --data-binary "@$tmp" -w "[HTTP:%{http_code}]" 2>&1
+        $codigo = if ($r -match '\[HTTP:(\d+)\]') { $matches[1] } else { "0" }
+        $body   = $r -replace '\[HTTP:\d+\]', ''
         if ($codigo -eq "200" -or $codigo -eq "201") {
             $data = $body | ConvertFrom-Json
-            Write-Host "car_id=$($data.car_id) $($data.status)" -ForegroundColor Green
-            $ok++
+            Write-Host "  LISTO  car_id=$($data.car_id)" -ForegroundColor Green
+            Write-RoundTrip $f.FullName $data.car_id $data.car_url
+            $okCount++
+        } else {
+            Write-Host "  ERROR  HTTP $codigo  $body" -ForegroundColor Red
+            $failCount++
         }
-        else {
-            Write-Host "FAIL HTTP $codigo" -ForegroundColor Red
-            $fail++
-        }
-    }
-    catch {
-        Write-Host "FAIL $_" -ForegroundColor Red
-        $fail++
-    }
-    finally {
+    } catch {
+        Write-Host "  ERROR  $_" -ForegroundColor Red
+        $failCount++
+    } finally {
         if (Test-Path $tmp) { Remove-Item $tmp -Force }
     }
 }
-
 Write-Host ""
-Write-Host "OK: $ok / FAIL: $fail / TOTAL: $total" -ForegroundColor Magenta
+Write-Host "Resumen: $okCount OK, $failCount fallidos" -ForegroundColor $(if ($failCount -eq 0) {'Green'} else {'Yellow'})
+exit 0

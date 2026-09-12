@@ -86,6 +86,31 @@ def build(skill_dir, out_path):
     print(f'  {skill_name}: {len(planned)} entries, {os.path.getsize(out_path):,} bytes -> {out_path}')
 
 
+def read_skill_version(skill_dir):
+    """Lee la version del SKILL.md de la skill (frontmatter YAML)."""
+    skill_md = os.path.join(skill_dir, 'SKILL.md')
+    if not os.path.exists(skill_md):
+        raise SystemExit(f'{skill_dir}: falta SKILL.md')
+    with open(skill_md, encoding='utf-8') as f:
+        for line in f:
+            line = line.strip()
+            if line.startswith('version:'):
+                return line.split(':', 1)[1].strip()
+    raise SystemExit(f'{skill_dir}: no encuentro "version:" en SKILL.md')
+
+
+def build_dst_path(skill_dir):
+    """Calcula el nombre del ZIP desde la version REAL del SKILL.md + fecha del dia."""
+    from datetime import date
+    skill_name = os.path.basename(os.path.normpath(skill_dir))
+    version = read_skill_version(skill_dir)
+    today = date.today().strftime('%Y%m%d')
+    return os.path.join(
+        '.claude/skills/_dist',
+        f'skills-{skill_name}-v{version}-{today}.zip',
+    )
+
+
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='Build ZIPs portables de las skills.')
@@ -96,11 +121,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     skills = [
-        (r'.claude/skills/importacion-vehiculos',
-         r'.claude/skills/_dist/skills-importacion-vehiculos-v3.7.1-20260906.zip'),
-        (r'.claude/skills/estudio-mercado',
-         r'.claude/skills/_dist/skills-estudio-mercado-v0.3.12-20260906.zip'),
+        (r'.claude/skills/importacion-vehiculos', None),
+        (r'.claude/skills/estudio-mercado', None),
     ]
+    skills = [(s, build_dst_path(s)) for s, _ in skills]
 
     if args.skill_only:
         skills = [s for s in skills if args.skill_only in s[0]]

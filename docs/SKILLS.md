@@ -3,21 +3,14 @@
 > **Documento canónico.** Si hay conflicto entre lo que dice la skill, el código, o algún README suelto: **este archivo gana**.
 > _Última regeneración: 20260906 — v3.7.1 (Flujo M marketing multicanal) — 07-sep-2026 sync Desktop completo_
 
-## 🗒 Navegación rápida
-
-- **Índice general de docs/**: [`docs/DOCS-INDEX.md`](DOCS-INDEX.md)
-- **Contexto de negocio JJ Import Motors**: [`docs/contexto-jj-import-motors/`](contexto-jj-import-motors/)
-- **Mockups ficha cliente v2/v3**: [`docs/marketing/`](marketing/)
-- **Informes finales ya entregados**: [`docs/informes/`](informes/)
-
 ## 📦 ZIPs de skill (builds actuales)
 
 Generados por `scripts/build-skill-zips.ps1` (wrapper de `.claude/skills/_dist/build-zips.py`). Para instalar en Claude Desktop -> descomprimir en `%USERPROFILE%\.claude\skills\`.
 
 | Skill | ZIP | Version | Tamano | SHA256 |
 |---|---|---|---|---|
-| `importacion-vehiculos` | `.claude/skills/_dist/skills-importacion-vehiculos-v3.7.1-20260906.zip` | 3.7.1 | 488 KB | `664c8a9bbae2a85d7f5541cce5e32075cdbe3b221d8a3128dac607ea1877b31e` |
-| `estudio-mercado` | `.claude/skills/_dist/skills-estudio-mercado-v0.3.12-20260906.zip` | 0.3.12 | 53 KB | `894e70f8581011c8659fa683e783c86deb88d419ed3fbb75c476939a90ba2ff9` |
+| `importacion-vehiculos` | `.claude/skills/_dist/skills-importacion-vehiculos-v3.9.3-20260912.zip` | 3.9.3 | 512 KB | `0a1adb27d2ed26641c9e8695599df81ac3a1b6a1cf25f152adcdf3a9e71f2da6` |
+| `estudio-mercado` | `.claude/skills/_dist/skills-estudio-mercado-v0.4.0-20260912.zip` | 0.4.0 | 54 KB | `c8ff5ce73c9d0261180f09a394b8148ce14c2149bb5feb3b4579f021646ff0a3` |
 
 ## 🔀 Las 3 copias que NO se sincronizan solas (12-sep-2026)
 

@@ -5,6 +5,34 @@ Todos los cambios notables en el skill `estudio-mercado` se documentarán en est
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.4.0] - 2026-09-12 — Fix bug nombre ZIP (build-zips.py: version real del SKILL.md)
+
+> **Motivo:** el script `_dist/build-zips.py` tenia las rutas de los ZIPs
+> **hardcodeadas** con `v3.7.1-20260906` y `v0.3.12-20260906` desde el 06-sep,
+> ignorando la version real del `SKILL.md` de cada skill. Resultado: la v3.9.3
+> del repo se empaquetaba con nombre `v3.7.1` en `_dist/`, y `docs/SKILLS.md`
+> (que se regenera del ZIP, no del SKILL.md) reportaba la version vieja. El
+> skill de Cowork/Desktop quedaba con v3.6.1 mientras el repo "parecia"
+> haber subido a v3.9.3 por el nombre real del SKILL.md — el peor escenario
+> para auditar divergencias.
+
+### `._dist/build-zips.py`
+- Aniadidas funciones `read_skill_version()` y `build_dst_path()` que leen el
+  frontmatter `version:` del `SKILL.md` y construyen el nombre del ZIP
+  `skills-<skill>-v<VERSION>-<YYYYMMDD>.zip`.
+- La lista de skills ya no lleva ruta hardcodeada: `(skill_dir, None)` y se
+  resuelve con `build_dst_path()` en tiempo de ejecucion.
+
+### `SKILL.md`
+- Bump version 0.3.12 → **0.4.0** (el frontmatter iba retrasado respecto al CHANGELOG).
+
+### Resultado
+- Tras ejecutar `scripts/build-skill-zips.ps1`, `_dist/` contiene:
+  - `skills-importacion-vehiculos-v3.9.3-YYYYMMDD.zip`
+  - `skills-estudio-mercado-v0.4.0-YYYYMMDD.zip`
+- `scripts/sync-desktop.ps1` (nuevo) detecta automaticamente si Desktop/Cowork
+  tienen una version vieja de la skill.
+
 ## [0.3.12] - 2026-08-24 — Segmentación amplia por variables (24-ago) + informe Golf 7.5 ejemplo
 
 > **Motivo:** la pasada en vivo del 23-24 ago del Golf 7.5 (GTI/TCR/Clubsport/R) demostró que el §3 "DESGLOSE POR VARIABLES" de la plantilla se quedaba corto: solo cubría combinaciones (3p+manual+sin techo: 4/14) con muestras muy pequeñas, mientras que la realidad permite segmentar por **eje único** (cambio, puertas, techo, cuadro digital) con conteos grandes (132 manuales sobre 717 ofertas GTI, 84% DSG Clubsport, etc.) + detección de limitaciones reales (cuadro digital no medible, puertas no en DE, trampa TransmissionTypeId Golf R). Se sube el listón de la plantilla y se guarda el informe generado como referencia.
