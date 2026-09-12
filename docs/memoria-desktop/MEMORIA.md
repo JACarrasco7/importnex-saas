@@ -1,3 +1,9 @@
+> 🔗 **Fuente única (12-sep-2026).** Este fichero — y el resto de `docs/memoria-desktop/` — es ahora el único canónico. La copia en `Desktop\JJImportMotors\.claude\MEMORIA.md` es un espejo que se actualiza a mano; el proyecto de claude.ai ("Claude Desktop") no lo tenía cargado como Contexto pese a que las instrucciones del proyecto lo pedían — se ha añadido hoy. Edita SOLO aquí. Detalle: `docs/DOCS-INDEX.md`.
+>
+> ⚠️ **Revisión vencida.** Este fichero se auto-programó para revisión el 2026-09-12 (línea final, "Próxima revisión"). Hoy es esa fecha. Sigue fechado 12-ago-2026 y no menciona nada de lo aprendido desde entonces (Flujo D, marketing multicanal, anti-patrones A11-A14, IVA en importación intracomunitaria, costes reales 1.129€, etc. — ver `.claude/skills/importacion-vehiculos/memoria/` y `.claude/skills/estudio-mercado/CHANGELOG.md` en el repo para el detalle real y actualizado). Pendiente de que alguien lo revise y lo reescriba; no lo he reescrito yo mismo porque son conclusiones de negocio que te corresponden a ti, no una sincronización mecánica.
+
+---
+
 # Memoria de Claude — JJ Import Motors
 
 > **Índice central de memoria persistente.** Claude DEBE leer este archivo al inicio de cada conversación para tener continuidad entre sesiones.

@@ -61,6 +61,38 @@ Contrato de export (`CONTRATO_EXPORT.md`), formato del esqueleto
 Cómo funciona la empresa, flujo operativo, contexto de fotos. **Toda IA
 nueva debe leer estos docs antes de tocar nada del negocio.**
 
+## 🔗 Fuente única entre sistemas (12-sep-2026)
+
+El mismo contenido de negocio existía en **tres sitios que no se sincronizaban
+solos**: la carpeta `Desktop\JJImportMotors\` (donde trabaja el proyecto
+"Claude Desktop"), el propio **Contexto del proyecto de claude.ai** ("JJ
+Import Motors", lo que ese proyecto realmente lee) y este repo. Al auditarlo
+se encontró que no eran copias sincronizadas sino **divergentes de forma
+distinta cada una**:
+
+- El Contexto del proyecto de claude.ai tenía **duplicados** `Como_Funciona_JJ_Import_Motors.md`
+  y `Flujo_Operativo_JJ_Import_Motors.md` — las instrucciones del propio
+  proyecto pedían quitarlos desde el 12-ago-2026 ("ya consolidado en
+  CLAUDE.md") y nunca se hizo. Eliminados el 12-sep-2026.
+- Ese mismo proyecto de claude.ai **nunca tuvo cargado `.claude/MEMORIA.md`**
+  ni el resto de `memoria/*.md`, pese a que sus propias instrucciones dicen
+  "Lee .claude/MEMORIA.md al inicio". Añadidos el 12-sep-2026.
+- `memoria-desktop/MEMORIA.md` llevaba una nota interna "Próxima revisión:
+  2026-09-12" — vencida: sigue fechado 12-ago-2026 y no menciona nada de lo
+  aprendido desde entonces (Flujo D, marketing multicanal, anti-patrones,
+  IVA intracomunitario…). **Revisión de contenido pendiente — decisión de negocio.**
+
+**Regla desde hoy:** los másters son [`claude-desktop/`](claude-desktop/) y
+[`memoria-desktop/`](memoria-desktop/) en este repo. `Desktop\JJImportMotors\`
+y el Contexto del proyecto de claude.ai son **copias de distribución** — se
+actualizan a mano después de editar el máster, nunca al revés. Ídem skills:
+[`.ai/rules/skills-sync.md`](../.ai/rules/skills-sync.md).
+
+| Carpeta | Qué | Estado |
+|---|---|---|
+| [`claude-desktop/`](claude-desktop/) | **Máster (12-sep-2026)** de los 4 ficheros de entrada del proyecto Claude Desktop: `CLAUDE.md`, `README.md`, `GUIA_INICIO_RAPIDO.md`, `INSTRUCCIONES_PROYECTO.md` | Activo |
+| [`memoria-desktop/`](memoria-desktop/) | **Máster (12-sep-2026)** de la memoria transversal (MEMORIA.md + decisiones/errores/corto/larga/preferencias/proyectos). ⚠️ MEMORIA.md con revisión vencida (ver arriba). La memoria operativa de cada skill vive en `.claude/skills/<skill>/memoria/` | Activo |
+
 ## 📚 Guías de flujos — [`guias/`](guias/README.md)
 
 01-primeros-pasos → 08-solucion-problemas: Flujos A (unidad), B (modelo),
@@ -78,11 +110,6 @@ Mockups de ficha cliente v2 + v3 (HTML).
 ## 🧪 Aprendizaje — [`aprendizaje/`](aprendizaje/00-INDICE.md)
 
 13 lecciones numeradas (SaaS, SEO, PWA, i18n, performance…) con índice propio.
-
-## 🗄️ Memoria Desktop — [`memoria-desktop/`](memoria-desktop/)
-
-Memoria persistente de Claude Desktop (7 docs). Solo referencia; NO
-canónica; NO se sincroniza con la skill.
 
 ## 🔧 Tools — [`tools/`](tools/)
 
@@ -102,3 +129,5 @@ ZIPs de skills actualizados que Claude deja aquí (no puede escribir bajo
 - Los docs traídos de Desktop son **snapshot**; no se regeneran solos.
 - Nada de archivos personales o autogenerados aquí dentro sin decisión consciente.
 - Plan terminado o sustituido → `planes/archivo/`, nunca borrar.
+- Edits de negocio (CLAUDE.md/MEMORIA.md) → siempre al máster del repo
+  (`claude-desktop/`, `memoria-desktop/`), luego se replica a las copias.
