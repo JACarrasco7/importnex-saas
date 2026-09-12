@@ -505,6 +505,38 @@ def bloque_multi(nombre: str, valor: str | None) -> list[str]:
     return lines
 
 
+def gastos_cliente(cost: dict) -> list[tuple[str, float]]:
+    """Agrupa `payload.costes` (esquema en 03-informes/contrato.md § costes) en
+    las líneas que puede ver el cliente — regla dura nº3: nunca "honorarios"
+    como línea propia, siempre fundido en la gestión (ni tampoco "margen").
+
+    Devuelve una lista de (concepto, importe) con solo las líneas que tienen
+    importe > 0. Si `cost` está vacío, devuelve [] (A18: nunca se inventan
+    gastos — que Laravel caiga a su propia estimación es mejor que mostrar
+    ceros o partidas ficticias).
+
+    Fuente preferida sobre la que Laravel calcula el desglose del cliente
+    (`PrecioClienteCalculator::desgloseDeSkill()`), vía los bloques
+    `[GASTO]`/`[FC_GASTO]` que emiten `generar_ficha_publicitaria()` y
+    `generar_ficha_cliente()`.
+    """
+    if not cost:
+        return []
+
+    transporte = float(cost.get("transporte") or 0)
+    exportacion = float(cost.get("itv_matriculacion") or 0) + float(cost.get("tasa_dgt") or 0) + float(cost.get("otros") or 0)
+    iedmt = float(cost.get("iedmt_estimado") or cost.get("iedmt") or 0)
+    gestion = float(cost.get("gestoria") or 0) + float(cost.get("honorarios") or 0)
+
+    lineas = [
+        ("Transporte hasta España", transporte),
+        ("Trámites de exportación e ITV de importación", exportacion),
+        ("Impuesto de matriculación (IEDMT)", iedmt),
+        ("Gestión y matriculación", gestion),
+    ]
+    return [(concepto, importe) for concepto, importe in lineas if importe > 0]
+
+
 # ── Generadores de .txt ───────────────────────────────────────────────────────
 
 
@@ -551,6 +583,8 @@ def generar_ficha_publicitaria(payload: dict) -> list[str]:
     if precio:
         lines.append(bloque("PRECIO", fmt_eur(precio)))
         lines.append(bloque("PRECIO_CAPTION", "puesto en Huelva · honorarios incluidos"))
+        for concepto, importe in gastos_cliente(cost):
+            lines.append(bloque("GASTO", f"{concepto} | {fmt_eur(importe)}"))
 
     # Plazo entrega
     plazo = "4-6 semanas desde la reserva"
@@ -1051,6 +1085,8 @@ def generar_ficha_cliente(payload: dict, fotos_ok: list[dict] | None = None) -> 
         lines.append(bloque("FC_PRECIO_NOTA",
                             "Precio del vehículo puesto en España. Incluye transporte, ITV de "
                             "importación, trámites de matriculación y honorarios de gestión."))
+        for concepto, importe in gastos_cliente(cost):
+            lines.append(bloque("FC_GASTO", f"{concepto} | {fmt_eur(importe)}"))
     lines.append(bloque("FC_ESTADO_PROCESO", "Disponible"))
     lines.append("")
 

@@ -1,3 +1,73 @@
+## [3.9.2] - 2026-09-12
+
+Dos tandas de trabajo que quedaron sin aplicar al repo real (se prepararon en sesión pero
+nunca se copiaron a `.claude/skills/`): el rediseño móvil de la ficha del cliente + precio
+en horquilla, y las correcciones de marketing pedidas después ("revisa e implementa todo").
+Este es el primer commit real de ambas.
+
+**Precio en horquilla (no una cifra cerrada):**
+- `PrecioClienteCalculator.php` (Laravel) calcula ahora un rango `total_min`/`total_max` en
+  vez de una cifra única, con el ancho ligado a la incertidumbre real de cada partida
+  (transporte ±15 %, IEDMT ±10 % con CO₂ confirmado / ±60 % sin confirmar).
+- Se eliminó un 21 % de IVA que `gastosEstimados()` sumaba sobre el precio del coche y que
+  `04-negocio/costes.md` no contempla — un usado de la UE no vuelve a tributar IVA en España.
+  Eran ~6.700 € inventados en el caso que lo destapó (Arteon).
+- `empaquetar.py` gana `gastos_cliente()`: agrupa `payload.costes` en las 4 líneas que puede
+  ver el cliente (transporte / trámites de exportación e ITV / IEDMT / gestión y
+  matriculación — honorarios SIEMPRE fundidos ahí, nunca en línea propia, regla dura nº3) y
+  las emite como `[GASTO]`/`[FC_GASTO] concepto | importe` en `ficha-publicitaria.txt` y
+  `ficha-cliente.txt`. `PrecioClienteCalculator::desgloseDeSkill()` las lee con prioridad
+  sobre su propia estimación.
+- `07-marketing/ficha_cliente.md` §3.5 reescrito: resuelve la contradicción con el mockup
+  `mockup_ficha_cliente_v3.html` (proponía "precio final, impuestos incluidos") a favor de la
+  horquilla — el mockup es referencia de estructura, no de precio.
+- Nuevo §3bis: `VALORACION` (qué ES la unidad) y `POR_QUE` (por qué te encaja) no pueden
+  repetir ninguna cifra entre sí — antes decían lo mismo con otras palabras.
+
+**Rediseño móvil del dossier (`car-dossier.blade.php`):**
+De 11.658 px (14,4 pantallas) a 6.582 px (8,1). Galería en carrusel justo después de las
+insignias de confianza (2.222 → 411 px), "Nuestra valoración" y "¿Por qué este coche?"
+fusionados en un solo bloque, barra KPI eliminada (duplicaba 4 datos de la ficha técnica con
+valores que no coincidían — "01/2023" vs "2023"), equipamiento en chips plegables, insignias
+de confianza alineadas en 2×2, CTA fijo inferior (antes el primer botón de contacto al hacer
+scroll aparecía en la pantalla 13 de 14), sin nombre del cliente en la página. El bloque legal
+A31 sigue completo y visible antes del CTA — no se toca ni una coma de su texto.
+
+**A11 — los 4 canales de portal recibían el mismo texto (bug reportado 12-sep-2026):**
+`ValuationPackageIngestor::attachMarketing()` solo leía el vocabulario v1
+(`anuncio-portales.txt` → `[TITULO]`/`[DESCRIPCION]`) y copiaba literalmente el mismo texto a
+los 4 canales de `CarMarketingContent::PORTAL_CHANNELS` (milanuncios, coches_net, wallapop,
+facebook-ad) — la skill llevaba desde el 05-sep generando contenido v2 diferenciado
+(`PT_TITULO_A/B`, `FBMP_*`) que el panel nunca leía. Nuevo `ingestarPortalesV2()`:
+- Milanuncios / Coches.net: texto base completo, título A.
+- Wallapop: título B + el mismo cuerpo recortado a 600-900 caracteres (copy_engine.md §5:
+  "un recorte del base, nunca una reescritura") — el recorte protege siempre completos la
+  pega honesta (A28) y el aviso legal (A26/A27); si hace falta espacio se acorta antes el
+  resto (ficha, equipamiento).
+- Facebook Marketplace: sus propios bloques `FBMP_*` (que existían en el ZIP pero no tenían
+  canal asignado en `esqueleto_a_json.py` — se añadió `canales.fb_marketplace`).
+- `copy_engine.md` §7 aclara que la banda 600-900 de Wallapop la aplica Laravel al montar el
+  anuncio, no la skill (de ahí que `check_marketing.py` no tenga una banda "Wallapop" propia).
+
+**La guía de límites del editor de Marketing.vue nunca llegaba al panel (hallazgo de la
+revisión de cierre, 12-sep-2026):** `Marketing.vue` tiene un comentario fechado 09-sep-2026 que
+da por hecho que `config/marketing_limits.php` existe y que `CarMarketingController` envía
+`props.limits` — ninguna de las dos cosas era cierta. El editor llevaba usando siempre la guía
+genérica (100 título / 2200 descripción / 5 hashtags) para los 6 canales, así que el recorte de
+Wallapop a 600-900 nunca se veía reflejado en su propio contador de caracteres. Se creó
+`config/marketing_limits.php` (mismos números que `MAX_HASHTAGS`/`bandas` de
+`check_marketing.py` — una sola fuente) y `CarMarketingController::show()` ahora sí pasa
+`limits`, con Wallapop diferenciado (600-900) del resto de portales (800-3000). Mismo patrón de
+fallo que el punto anterior: un comentario "ya verificado" que nadie había verificado de
+verdad.
+
+**Migración a utf8mb4 (revisado, no aplicado):** un comentario en el propio código
+(`ValuationPackageIngestor::sanitizeForMysql()`, fechado 09-sep-2026) afirma que la BD de
+Forge ya se verificó en utf8mb4, lo que contradice que siguiera en la lista de pendientes del
+12-sep. No hay forma de comprobar el estado real de producción desde aquí (sin acceso al
+servidor Forge) — puede que ya esté resuelto. Ver aviso en el paquete de sincronización antes
+de tocar nada en producción.
+
 ## [09-sep-2026] — Cadena cerrada: empaquetar → ZIP → panel
 
 La skill y el panel ya hablaban el mismo idioma en la documentación, pero no en el código.

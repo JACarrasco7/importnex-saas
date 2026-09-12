@@ -71,10 +71,28 @@ Lo que hay que arreglar:
 2. **El "ahorro" no se vende como cifra propia.** Se muestra el **rango del mercado español** (mín-mediana-máx), el número de unidades comparadas y la fecha. El cliente saca su conclusión; nosotros no prometemos un ahorro.
 3. **Una pega visible, sí o sí** (A28). Si de verdad no hay, se dice qué se ha revisado para poder afirmarlo.
 4. **Lo no verificado se marca como pendiente**, nunca se omite ni se rellena (A18).
-5. **Precio del vehículo + caption `+ gastos gestión de compra`** y, debajo, qué incluye y qué NO incluye el servicio. **Prohibido** "IVA incluido", "precio final", "llave en mano" o "sin sorpresas": no vendemos el coche, así que no emitimos un precio final de venta (ver `.ai/rules/business-model.md` del panel).
+5. **El precio es una HORQUILLA aproximada, nunca una cifra cerrada, y se desglosa por partidas.** Corrección 12-sep-2026: este punto contradecía al mockup `mockup_ficha_cliente_v3.html` (07-sep-2026), que proponía una "Precio final, impuestos incluidos" como cifra única — **manda esta regla, el mockup es referencia de ESTRUCTURA, no de precio.** Los gastos de importación NUNCA son una cifra cerrada de antemano, por varias razones que no dependen de nosotros:
+   - El **IEDMT** depende del CO₂ confirmado (COC del vehículo); sin él, se estima con el tramo intermedio y el margen de error es mayor.
+   - El **transporte** varía según disponibilidad de camión y ruta.
+   - El origen (España/Alemania) cambia qué partidas aplican.
+
+   Por eso: se muestra una **horquilla** (mín-máx, nunca un solo número) con el caption `puesto en España · aprox.`, y **debajo** el desglose línea a línea de lo que la compone (transporte, trámites, IEDMT, gestión) para que el cliente entienda de qué depende el aproximado — sin mostrar honorarios como línea propia (regla dura nº3: se funden en "Gestión y matriculación"). Los bloques son `[FC_GASTO] concepto | importe` (uno por partida; los emite `empaquetar.py::gastos_cliente()`). **Prohibido** seguir usando "IVA incluido", "precio final", "llave en mano" o "sin sorpresas": no vendemos el coche, así que no emitimos un precio final de venta (ver `.ai/rules/business-model.md` del panel). El cálculo real y la horquilla los computa `PrecioClienteCalculator.php`; esta ficha solo aporta el desglose base cuando lo tiene.
 6. **Fecha de captura de datos siempre visible.** Un dato sin fecha envejece mal.
 7. **Un solo CTA.** "Quiero gestionar la compra" y el teléfono; nada más compitiendo.
 8. **Plazos en semanas y como estimación**, nunca fechas cerradas.
+
+---
+
+## 3bis · Valoración y "por qué": dos papeles, cero solapamiento
+
+`VALORACION` y `POR_QUE` (o su equivalente en la ficha del cliente) tienden a acabar diciendo lo mismo con otras palabras — el usuario lo señaló al ver "Nuestra valoración" y "¿Por qué este coche?" una debajo de la otra. Regla para que no se pisen:
+
+| Bloque | Papel | Contenido |
+|---|---|---|
+| `VALORACION` | Qué **ES** la unidad | Versión, equipamiento destacado, distintivos objetivos (etiqueta, kilometraje bajo para el año, historial). Hechos sobre el coche. |
+| `POR_QUE` | Por qué **te encaja a ti** | Uso previsto, tamaño de familia, tipo de viajes, por qué esta configuración concreta resuelve lo que el cliente pidió. Razonamiento sobre el encaje, no repetición de specs. |
+
+**Regla dura:** ninguna cifra (km, año, CV, precio) puede repetirse entre los dos bloques — si `VALORACION` ya dijo "320 CV", `POR_QUE` no vuelve a mencionar la potencia, solo lo que esa potencia permite hacer. Si al redactar los dos bloques suenan intercambiables, es señal de que uno de los dos sobra o hay que fusionarlos en la plantilla (ver Laravel: `car-dossier.blade.php` los fusiona en una sola sección `#veredicto` con dos párrafos desde 12-sep-2026).
 
 ---
 

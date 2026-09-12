@@ -340,6 +340,7 @@ class ValuationPackageIngestor
         $redesPath = null;
         $portalesPath = null;
         $redesJsonPath = null;
+        $portalesJsonPath = null;
         foreach ($contenidos as $c) {
             if ($c['archivo'] === 'redes-sociales.txt') {
                 $redesPath = $c['path'];
@@ -347,6 +348,8 @@ class ValuationPackageIngestor
                 $redesJsonPath = $c['path'];
             } elseif ($c['archivo'] === 'anuncio-portales.txt') {
                 $portalesPath = $c['path'];
+            } elseif ($c['archivo'] === 'anuncio-portales.json') {
+                $portalesJsonPath = $c['path'];
             }
         }
 
@@ -369,6 +372,20 @@ class ValuationPackageIngestor
         }
         $redes = $redesV2 === null && $redesPath ? Esqueleto::desde(File::get($redesPath)) : null;
         $portales = $portalesPath ? Esqueleto::desde(File::get($portalesPath)) : null;
+
+        // A11 auditoría 12-sep-2026: anuncio-portales.json (v2, bloques PT_*)
+        // tiene prioridad sobre el TXT (v1, [TITULO]/[DESCRIPCION]). Ver
+        // ingestarPortalesV2() para el porqué: el v1 copiaba el MISMO texto
+        // a los 4 portales, que es justo el bug reportado.
+        $portalesV2 = null;
+        if ($portalesJsonPath) {
+            $decodedPt = json_decode(File::get($portalesJsonPath), true);
+            if (is_array($decodedPt) && isset($decodedPt['portales']['base']) && is_array($decodedPt['portales']['base'])) {
+                $portalesV2 = $decodedPt['portales']['base'];
+            } else {
+                $warnings[] = 'contenido/json/anuncio-portales.json no tiene estructura {portales:{base:*}}: fallback a TXT.';
+            }
+        }
 
         $saved = 0;
         $now = now();
@@ -500,12 +517,22 @@ class ValuationPackageIngestor
         }
 
         // ───────────────────────────────────────────────────────────────────
-        // anuncio-portales.txt → 1 ficha base reutilizada en los 4 portales web.
-        // Misma TITULO + DESCRIPCION + FICHA_RAPIDA + QUE_INCLUYE + AVISO_LEGAL
-        // para milanuncios, coches_net, wallapop, facebook marketplace.
-        // SUBIR_PASOS indica cómo pegarlo en cada portal (1 entrada común).
+        // anuncio-portales.json (v2) tiene prioridad sobre el TXT (v1).
+        // A11 auditoría 12-sep-2026: el v1 (rama `elseif` de abajo) copiaba
+        // el MISMO [TITULO]+[DESCRIPCION] a los 4 canales de
+        // PORTAL_CHANNELS — bug reportado ("los 4 portales reciben el mismo
+        // texto"). El v2 diferencia lo que pide 07-marketing/copy_engine.md
+        // §5: título A/B, Wallapop como recorte del base (nunca una
+        // reescritura) y Facebook Marketplace con sus propios bloques FBMP_.
         // ───────────────────────────────────────────────────────────────────
-        if ($portales) {
+        if ($portalesV2 !== null) {
+            $saved += $this->ingestarPortalesV2($car, $portalesV2, $redesV2, $warnings, $now);
+        } elseif ($portales) {
+            // Vocabulario v1 (ZIPs antiguos sin contenido/json/anuncio-portales.json):
+            // 1 ficha base reutilizada en los 4 portales web. Misma TITULO +
+            // DESCRIPCION + FICHA_RAPIDA + QUE_INCLUYE + AVISO_LEGAL para
+            // milanuncios, coches_net, wallapop, facebook marketplace.
+            // SUBIR_PASOS indica cómo pegarlo en cada portal (1 entrada común).
             $titulo = trim((string) $portales->uno('TITULO'));
             $descripcion = trim((string) $portales->uno('DESCRIPCION'));
             $subirPasos = $portales->uno('SUBIR_PASOS');
@@ -531,6 +558,280 @@ class ValuationPackageIngestor
         }
 
         return $saved;
+    }
+
+    /**
+     * A11 auditoría 12-sep-2026: ingestar el vocabulario v2 de portales
+     * (contenido/json/anuncio-portales.json → portales.base, bloques PT_*).
+     *
+     * Antes de esto, la rama v1 de `attachMarketing()` solo leía
+     * [TITULO]/[DESCRIPCION] de anuncio-portales.txt y copiaba el MISMO
+     * texto a los 4 canales de PORTAL_CHANNELS — bug reportado: "los 4
+     * portales reciben el mismo texto". El v2 ya diferencia tres cosas por
+     * portal, como pide 07-marketing/copy_engine.md §5:
+     *
+     *  - Milanuncios / Coches.net: título A + ficha completa (texto base).
+     *  - Wallapop: título B + el mismo cuerpo RECORTADO a 600-900 caracteres
+     *    (nunca una reescritura — es un recorte del base, cortado en un
+     *    límite de frase; ver recortarParaWallapop()).
+     *  - Facebook Marketplace (channel 'facebook', kind=ad): usa sus
+     *    propios bloques FBMP_* (vienen en redes-sociales.json →
+     *    canales.fb_marketplace, NO en anuncio-portales.json) porque el
+     *    copy engine ya los redacta distintos (sin iconos, con "Escríbeme
+     *    por Messenger…"). Si el ZIP es antiguo y no trae ese bloque, cae
+     *    al texto base — mismo comportamiento que antes, no una regresión.
+     *
+     * @param  array<string, mixed>  $base  anuncio-portales.json → portales.base
+     * @param  array<string, mixed>|null  $canalesRedesV2  redes-sociales.json → canales (para fb_marketplace)
+     * @param  array<int, string>  $warnings
+     */
+    private function ingestarPortalesV2(Car $car, array $base, ?array $canalesRedesV2, array &$warnings, $now): int
+    {
+        $tituloA = trim((string) ($base['titulo_a'] ?? ''));
+        $tituloB = trim((string) ($base['titulo_b'] ?? '')) ?: $tituloA;
+        $cuerpo = $this->componerCuerpoPortalV2($base);
+
+        if ($tituloA === '' || $cuerpo === '') {
+            $warnings[] = 'anuncio-portales.json (v2) sin título o ficha: no se crearon los anuncios de portales.';
+
+            return 0;
+        }
+
+        $saved = 0;
+        $subirPasosRaw = $base['subir_pasos'] ?? '';
+        $subirPasos = is_array($subirPasosRaw) ? implode("\n", $subirPasosRaw) : (string) $subirPasosRaw;
+
+        // Milanuncios y Coches.net: texto base completo, título A.
+        foreach (['milanuncios', 'coches_net'] as $channel) {
+            $this->upsertMarketing($car, $channel, [
+                'kind' => CarMarketingContent::KIND_AD,
+                'slot' => 1,
+                'title' => $tituloA,
+                'description' => $cuerpo,
+                'hashtags' => [],
+                'photo_tips' => [],
+                'subir_pasos' => $subirPasos,
+                'generated_at' => $now,
+            ]);
+            $saved++;
+        }
+
+        // Wallapop: título B (variante) + recorte a 600-900 caracteres
+        // (copy_engine.md §5: "Wallapop es un recorte del base, nunca una
+        // reescritura"). El recorte quita antes lo narrativo (equipamiento,
+        // "cómo funciona"); el aviso legal (A26/A27) y la pega honesta (A28)
+        // no se tocan — son obligatorios en todo anuncio de portal.
+        $this->upsertMarketing($car, 'wallapop', [
+            'kind' => CarMarketingContent::KIND_AD,
+            'slot' => 1,
+            'title' => $tituloB,
+            'description' => $this->componerCuerpoPortalWallapop($base),
+            'hashtags' => [],
+            'photo_tips' => [],
+            'subir_pasos' => $subirPasos,
+            'generated_at' => $now,
+        ]);
+        $saved++;
+
+        // Facebook Marketplace (channel 'facebook', kind=ad): bloques FBMP_
+        // propios, si el ZIP los trae (redes-sociales.json → canales.fb_marketplace).
+        $fbmp = is_array($canalesRedesV2['fb_marketplace'] ?? null) ? $canalesRedesV2['fb_marketplace'] : null;
+        $fbmpTitulo = trim((string) ($fbmp['titulo'] ?? ''));
+        $fbmpDescripcion = trim((string) ($fbmp['descripcion'] ?? ''));
+        if ($fbmpTitulo !== '' && $fbmpDescripcion !== '') {
+            $fbmpCuerpo = $fbmpDescripcion;
+            if (! empty($fbmp['pega'])) {
+                $fbmpCuerpo .= "\n\n".$fbmp['pega'];
+            }
+            if (! empty($fbmp['contacto'])) {
+                $fbmpCuerpo .= "\n\n".$fbmp['contacto'];
+            }
+            $this->upsertMarketing($car, 'facebook', [
+                'kind' => CarMarketingContent::KIND_AD,
+                'slot' => 1,
+                'title' => $fbmpTitulo,
+                'description' => $fbmpCuerpo,
+                'hashtags' => [],
+                'photo_tips' => [],
+                'subir_pasos' => $subirPasos,
+                'generated_at' => $now,
+            ]);
+        } else {
+            // ZIP antiguo sin FBMP_*: mismo comportamiento que antes (no
+            // regresión), pero avisamos para que se note en el log.
+            $warnings[] = 'anuncio-portales.json (v2) sin bloques FBMP_* para Facebook Marketplace: se usó el texto base de portal (regenera el ZIP con la skill actualizada para diferenciarlo).';
+            $this->upsertMarketing($car, 'facebook', [
+                'kind' => CarMarketingContent::KIND_AD,
+                'slot' => 1,
+                'title' => $tituloA,
+                'description' => $cuerpo,
+                'hashtags' => [],
+                'photo_tips' => [],
+                'subir_pasos' => $subirPasos,
+                'generated_at' => $now,
+            ]);
+        }
+        $saved++;
+
+        return $saved;
+    }
+
+    /**
+     * Compone el cuerpo del anuncio de portal a partir de los bloques PT_*
+     * ya estructurados por `esqueleto_a_json.py` (resumen, ficha, estado
+     * verificado + pega honesta [A28], equipamiento, qué incluye, cómo
+     * funciona, aviso legal [A26/A27]). Se omite cualquier parte vacía.
+     *
+     * @param  array<string, mixed>  $base
+     */
+    private function componerCuerpoPortalV2(array $base): string
+    {
+        $partes = [];
+
+        $resumen = $base['resumen'] ?? '';
+        $resumen = is_array($resumen) ? implode("\n", $resumen) : (string) $resumen;
+        if (trim($resumen) !== '') {
+            $partes[] = trim($resumen);
+        }
+
+        $ficha = $base['ficha'] ?? [];
+        if (is_array($ficha) && $ficha !== []) {
+            $lineas = [];
+            foreach ($ficha as $item) {
+                if (is_array($item) && isset($item['etiqueta'], $item['valor'])) {
+                    $lineas[] = trim((string) $item['etiqueta']).': '.trim((string) $item['valor']);
+                }
+            }
+            if ($lineas !== []) {
+                $partes[] = implode("\n", $lineas);
+            }
+        }
+
+        // PT_ESTADO: estado verificado + la pega honesta (A28). Obligatorio
+        // por regla dura — nunca se omite si viene en el JSON.
+        $estado = $this->normalizarLista($base['estado'] ?? []);
+        if ($estado !== []) {
+            $partes[] = implode("\n", $estado);
+        }
+
+        $equipamiento = $base['equipamiento'] ?? '';
+        $equipamiento = is_array($equipamiento) ? implode("\n", $equipamiento) : (string) $equipamiento;
+        if (trim($equipamiento) !== '') {
+            $partes[] = trim($equipamiento);
+        }
+
+        $queIncluye = $this->normalizarLista($base['que_incluye'] ?? []);
+        if ($queIncluye !== []) {
+            $partes[] = "Incluye:\n".implode("\n", array_map(fn ($i) => '• '.$i, $queIncluye));
+        }
+
+        $comoFunciona = $base['como_funciona'] ?? '';
+        $comoFunciona = is_array($comoFunciona) ? implode("\n", $comoFunciona) : (string) $comoFunciona;
+        if (trim($comoFunciona) !== '') {
+            $partes[] = trim($comoFunciona);
+        }
+
+        $aviso = $base['aviso'] ?? '';
+        $aviso = is_array($aviso) ? implode("\n", $aviso) : (string) $aviso;
+        if (trim($aviso) !== '') {
+            $partes[] = trim($aviso);
+        }
+
+        return implode("\n\n", $partes);
+    }
+
+    /**
+     * A11 auditoría 12-sep-2026: cuerpo COMPACTO para Wallapop (600-900
+     * caracteres, copy_engine.md §5). No es una reescritura: es el mismo
+     * cuerpo base con las partes menos esenciales (equipamiento, "cómo
+     * funciona") quitadas primero — igual que se acortaría un anuncio real
+     * a mano. El aviso legal (A26/A27) y la pega honesta (A28) NUNCA se
+     * quitan: son obligatorios en todo anuncio de portal, Wallapop incluido.
+     * Si aun así sobra, se aplica el recorte por caracteres como último
+     * recurso (recortarParaWallapop()).
+     */
+    private function componerCuerpoPortalWallapop(array $base, int $max = 900): string
+    {
+        $aviso = $base['aviso'] ?? '';
+        $aviso = trim(is_array($aviso) ? implode("\n", $aviso) : (string) $aviso);
+
+        // La pega honesta (A28) es el último elemento de PT_ESTADO — así la
+        // genera la skill: verificados primero, ⚠️ pega al final (ver
+        // empaquetar.py::_pega_del_payload). Se protege igual que el aviso
+        // legal: nunca se recorta.
+        $estadoLista = $this->normalizarLista($base['estado'] ?? []);
+        $pega = '';
+        $verificados = $estadoLista;
+        foreach (array_reverse($estadoLista) as $item) {
+            if (str_contains($item, "\u{26A0}")) {
+                $pega = $item;
+                $verificados = array_values(array_diff($estadoLista, [$item]));
+                break;
+            }
+        }
+
+        // Bloque protegido: pega honesta + aviso legal. Nunca se recortan
+        // (A28 y A26/A27 son reglas duras) — lo demás sí es recortable.
+        $protegido = implode("\n\n", array_filter([$pega, $aviso], fn ($s) => $s !== ''));
+
+        $resto = $base;
+        unset($resto['equipamiento'], $resto['como_funciona'], $resto['aviso']);
+        $resto['estado'] = $verificados;
+        $cuerpoResto = $this->componerCuerpoPortalV2($resto);
+
+        if ($protegido === '') {
+            // Sin pega ni aviso en el JSON (no debería pasar: son
+            // obligatorios en el origen), recorte simple sobre todo el cuerpo.
+            return $this->recortarParaWallapop($cuerpoResto, $max);
+        }
+
+        $separador = "\n\n";
+        $espacioParaResto = $max - mb_strlen($protegido) - mb_strlen($separador);
+        if ($espacioParaResto < 100) {
+            // Lo protegido por sí solo ocupa casi todo el hueco: se
+            // prioriza completo y delante solo va el resumen, recortado a
+            // lo que quepa (puede superar levemente el máximo: la banda
+            // 600-900 es un objetivo editorial, nunca a costa de la pega
+            // honesta o el aviso legal).
+            $resumen = trim((string) ($base['resumen'] ?? ''));
+            $cuerpoResto = $resumen !== '' ? mb_substr($resumen, 0, max(0, $espacioParaResto)) : '';
+        } else {
+            $cuerpoResto = $this->recortarParaWallapop($cuerpoResto, $espacioParaResto);
+        }
+
+        return trim($cuerpoResto.$separador.$protegido);
+    }
+
+    /**
+     * A11 auditoría 12-sep-2026: recorta el cuerpo del anuncio a 600-900
+     * caracteres para Wallapop (07-marketing/copy_engine.md §5: "Wallapop
+     * es un recorte del base, nunca una reescritura"). Corta en el último
+     * punto o salto de párrafo antes del máximo para no partir una frase a
+     * la mitad; si no hay ninguno razonablemente cerca, corta en el último
+     * espacio. Si el texto ya cabe en el máximo, se devuelve intacto — la
+     * banda 600-900 es un objetivo editorial, no un mínimo que rellenar.
+     */
+    private function recortarParaWallapop(string $texto, int $max = 900): string
+    {
+        $texto = trim($texto);
+        if (mb_strlen($texto) <= $max) {
+            return $texto;
+        }
+
+        $corte = mb_substr($texto, 0, $max);
+        $ultimoPunto = max(
+            mb_strrpos($corte, '.') ?: 0,
+            mb_strrpos($corte, "\n") ?: 0,
+        );
+        if ($ultimoPunto > $max * 0.5) {
+            return rtrim(mb_substr($corte, 0, $ultimoPunto + 1));
+        }
+        $ultimoEspacio = mb_strrpos($corte, ' ');
+        if ($ultimoEspacio !== false) {
+            $corte = mb_substr($corte, 0, $ultimoEspacio);
+        }
+
+        return rtrim($corte, " \n.,;:").'…';
     }
 
     /**

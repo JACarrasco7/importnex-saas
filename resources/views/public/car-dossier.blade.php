@@ -273,7 +273,10 @@
         }
         .trust-item {
             display: flex; align-items: center; gap: 12px;
-            justify-content: center;
+            /* 12-sep-2026: estaba en `center`, así que cada fila centraba el
+               grupo icono+texto y, al medir distinto cada texto, los iconos
+               quedaban desalineados entre sí. Con flex-start forman columna. */
+            justify-content: flex-start;
         }
         .trust-icon {
             width: 36px; height: 36px; border-radius: 8px;
@@ -402,6 +405,9 @@
 
         /* ── GALERÍA ───────────────────────────────────── */
         .gallery-wrap { }
+        /* La galería sube fuera de <main class="container">, entre la barra de
+           confianza y el contenido: necesita su propio ancho y padding. */
+        .gallery-top { max-width: 1100px; margin: 0 auto; padding: 56px 24px 0; }
         .gallery {
             display: grid; grid-template-columns: repeat(3, 1fr);
             gap: 14px;
@@ -708,6 +714,162 @@
             font-size: 13px; color: #fff;
         }
 
+        /* ══════════════════════════════════════════════════
+           REDISEÑO MÓVIL · 12-sep-2026
+           La ficha medía 11.658 px (14,4 pantallas de móvil) y el precio no
+           aparecía hasta la pantalla 6. Lo que sigue es lo que la comprime
+           a ~6 pantallas sin perder un solo dato.
+           ══════════════════════════════════════════════════ */
+
+        /* — Carrusel de fotos: sustituye a la rejilla de 8 fotos apiladas
+             (2.222 px en móvil, el bloque más grande de la página) — */
+        .carrusel {
+            display: flex; gap: 10px;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            padding-bottom: 4px;
+        }
+        .carrusel::-webkit-scrollbar { display: none; }
+        .carrusel .shot {
+            flex: 0 0 86%; scroll-snap-align: center;
+            aspect-ratio: 4/3; margin: 0;
+        }
+        .carrusel .shot:first-child { grid-column: auto; grid-row: auto; }
+        .carrusel-pie {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-top: 10px; font-size: 12px; color: var(--platinum);
+        }
+        .carrusel-pie .ver-todas { margin: 0; }
+
+        /* — Chips de equipamiento: 15 filas de lista pasan a etiquetas — */
+        .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+        .chip {
+            font-size: 12.5px; color: #e8eeff; line-height: 1;
+            padding: 9px 13px; border-radius: 999px;
+            background: rgba(143, 163, 217, 0.10);
+            border: 1px solid rgba(143, 163, 217, 0.22);
+        }
+
+        /* — Plegables con aspecto de control (antes no parecían pulsables) — */
+        .plegable { border-top: 1px solid rgba(143, 163, 217, 0.16); margin-top: 18px; }
+        .plegable > summary {
+            list-style: none; cursor: pointer;
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 10px; padding: 16px 2px; min-height: 44px;
+            font-size: 14px; font-weight: 700; color: #fff;
+        }
+        .plegable > summary::-webkit-details-marker { display: none; }
+        .plegable > summary::after {
+            content: '⌄'; font-size: 18px; line-height: 1;
+            color: var(--orange); transition: transform .2s ease;
+        }
+        .plegable[open] > summary::after { transform: rotate(180deg); }
+        .plegable-cuerpo { padding: 2px 0 18px; }
+
+        /* — Bloque de precio: una sola horquilla protagonista — */
+        .precio-horquilla {
+            background: rgba(143, 163, 217, 0.06);
+            border: 1px solid rgba(143, 163, 217, 0.22);
+            border-radius: 18px; padding: 26px 22px;
+        }
+        .precio-horquilla .etq {
+            font-size: 10.5px; text-transform: uppercase; letter-spacing: 1.6px;
+            color: var(--platinum); font-weight: 700; margin-bottom: 10px;
+        }
+        .precio-horquilla .cifra {
+            font-size: 34px; font-weight: 900; color: #fff;
+            line-height: 1.05; letter-spacing: -0.8px;
+        }
+        .precio-horquilla .cifra .guion { color: var(--platinum); font-weight: 600; }
+        .precio-horquilla .aprox {
+            font-size: 13px; color: #c7d4f5; margin-top: 8px;
+        }
+        .precio-lineas {
+            margin-top: 20px; padding-top: 16px;
+            border-top: 1px dashed rgba(143, 163, 217, 0.22);
+            display: flex; flex-direction: column; gap: 11px;
+        }
+        .precio-lineas .fila {
+            display: flex; align-items: baseline; justify-content: space-between;
+            gap: 14px; font-size: 13.5px; color: #c7d4f5;
+        }
+        .precio-lineas .fila .c { flex: 1; }
+        .precio-lineas .fila .i { font-weight: 700; color: #fff; white-space: nowrap; }
+        .precio-lineas .fila.coche .i { color: #fff; }
+        .precio-lineas .fila.suma {
+            border-top: 1px solid rgba(143, 163, 217, 0.22);
+            padding-top: 12px; margin-top: 3px;
+            font-size: 14.5px; color: #fff; font-weight: 700;
+        }
+        .precio-lineas .fila.suma .i { color: var(--orange); }
+
+        /* — Mercado como barra de rango (antes: 3 tarjetas apiladas) — */
+        .rango { margin-top: 6px; }
+        .rango-barra {
+            position: relative; height: 8px; border-radius: 999px;
+            background: linear-gradient(90deg, rgba(74,222,128,.55) 0%, rgba(143,163,217,.45) 50%, rgba(253,186,116,.55) 100%);
+            margin: 46px 0 10px;
+        }
+        .rango-marca {
+            position: absolute; top: -7px; width: 3px; height: 22px;
+            border-radius: 2px; background: #fff;
+            box-shadow: 0 0 0 3px rgba(10, 21, 53, .85);
+        }
+        .rango-marca span {
+            position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%);
+            white-space: nowrap; font-size: 11.5px; font-weight: 800; color: #fff;
+            background: var(--orange); padding: 4px 9px; border-radius: 999px;
+        }
+        .rango-topes {
+            display: flex; justify-content: space-between;
+            font-size: 12px; color: var(--platinum);
+        }
+        .rango-topes b { display: block; color: #fff; font-size: 13.5px; font-weight: 800; }
+        .rango-topes .der { text-align: right; }
+        .rango-nota { font-size: 12px; color: var(--platinum); margin-top: 14px; line-height: 1.5; }
+
+        /* — Incluye / No incluye, uno al lado del otro — */
+        .dos-listas { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
+        .dos-listas h3 {
+            font-size: 12px; text-transform: uppercase; letter-spacing: 1.2px;
+            font-weight: 800; margin-bottom: 12px;
+            display: block;
+        }
+        /* `.incluye h3` pone un círculo verde con ✓ delante del título. Aquí
+           hay DOS títulos y uno es "No incluido": el ✓ verde en ese sería
+           justo lo contrario de lo que dice. Se anula. */
+        .dos-listas h3::before { content: none; }
+        .dos-listas .si h3 { color: #4ade80; }
+        .dos-listas .no h3 { color: var(--platinum); }
+        .dos-listas ul { list-style: none; display: flex; flex-direction: column; gap: 9px; }
+        .dos-listas li { font-size: 13.5px; line-height: 1.45; padding-left: 20px; position: relative; }
+        .dos-listas .si li { color: #e8eeff; }
+        .dos-listas .no li { color: #a8b6d8; }
+        .dos-listas .si li::before { content: '✓'; position: absolute; left: 0; color: #4ade80; font-weight: 800; }
+        .dos-listas .no li::before { content: '–'; position: absolute; left: 0; color: var(--platinum); font-weight: 800; }
+
+        /* — Barra CTA fija: antes el primer botón disponible mientras hacías
+             scroll estaba en la pantalla 13 — */
+        .cta-fijo {
+            position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
+            display: none; gap: 10px; padding: 10px 14px;
+            padding-bottom: max(10px, env(safe-area-inset-bottom));
+            background: rgba(10, 21, 53, 0.94);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(143, 163, 217, 0.22);
+        }
+        .cta-fijo.visible { display: flex; }
+        .cta-fijo .btn { flex: 1; justify-content: center; min-height: 48px; font-size: 14.5px; }
+        .cta-fijo .btn.tel { flex: 0 0 56px; min-width: 56px; }
+
+        /* — Línea de disponibilidad honesta — */
+        .disponibilidad {
+            font-size: 13px; color: var(--platinum); line-height: 1.5;
+            margin: 22px 0 0; font-style: italic;
+        }
+
         /* ── RESPONSIVE ───────────────────────────────── */
         @media (max-width: 800px) {
             .nav-links { display: none; }
@@ -715,9 +877,15 @@
             .hero { min-height: auto; padding: 40px 20px 56px; }
             .hero-inner { grid-template-columns: 1fr; gap: 32px; }
             .hero-photo { aspect-ratio: 16/10; transform: rotate(0); }
-            .trust-inner { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+            .trust { padding: 18px 16px; }
+            /* Insignias en 2×2 con el icono arriba: ocupa la mitad de alto y
+               se lee como insignia, no como lista (12-sep-2026). */
+            .trust-inner { grid-template-columns: 1fr 1fr; gap: 18px 14px; }
+            .trust-item { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .trust-text { font-size: 11.5px; }
+            .trust-text strong { font-size: 12.5px; }
             .container { padding: 50px 20px; }
-            .kpi-bar { padding: 32px 20px; }
+            .gallery-top { padding: 36px 20px 0; }
             .gallery { grid-template-columns: repeat(2, 1fr); }
             .gallery .shot:first-child { grid-column: span 2; grid-row: span 1; aspect-ratio: 16/10; }
             .proscons { grid-template-columns: 1fr; }
@@ -729,13 +897,42 @@
             .market-grid { grid-template-columns: repeat(2, 1fr); }
             .tips { padding: 24px 22px; }
             .cta-final { padding: 40px 22px; }
-            .price-value { font-size: 36px; }
-            .h1 { font-size: 38px; }
+            .price-value { font-size: 32px; }
+            .h1 { font-size: 32px; }
+
+            /* ── Compresión vertical (12-sep-2026) ──
+               La ficha medía 11.658 px en móvil (14,4 pantallas) y el precio no
+               aparecía hasta la sexta. El salto entre secciones era de 80 px:
+               en móvil eso solo es scroll. Y hueco abajo para que la barra CTA
+               fija no tape el pie. */
+            .container > section + section { margin-top: 48px; }
+            body { padding-bottom: 76px; }
+
+            /* Etiquetas de 10 px → 11 px: en móvil 10 px no se lee cómodo */
+            .kpi-k, .spec-row .k, .precio-box .k { font-size: 11px; }
+
+            .dos-listas { grid-template-columns: 1fr; gap: 24px; }
+            .precio-horquilla { padding: 22px 18px; }
+            .precio-horquilla .cifra { font-size: 28px; }
+            .carrusel .shot { flex-basis: 88%; }
+
+            /* El bloque de A31 se queda COMPLETO y visible (lo exige el spec
+               del skill), pero más compacto: era 1.126 px, 1,4 pantallas. */
+            .aviso-legal { padding: 24px 20px; }
+            .aviso-legal .lista-limpia li { font-size: 13px; line-height: 1.45; }
+            .aviso-legal .titular { font-size: 15px; }
+            .aviso-legal p { font-size: 13px; line-height: 1.55; }
+            .dos-col { gap: 18px; }
+            .pasos { gap: 10px; }
         }
         @media (max-width: 480px) {
-            .gallery { grid-template-columns: 1fr; }
-            .gallery .shot:first-child { grid-column: span 1; }
-            .trust-inner { grid-template-columns: 1fr; }
+            /* 12-sep-2026: este bloque dejaba las insignias en UNA columna
+               (llegaba después del breakpoint de 800 px y ganaba). Se quedan
+               en 2×2, que es donde más se nota la compresión. La galería
+               tampoco vuelve a una columna: ahora es un carrusel. */
+            .trust-inner { grid-template-columns: 1fr 1fr; }
+            .h1 { font-size: 29px; }
+            .hero-actions .btn { flex: 1; justify-content: center; }
         }
     </style>
 </head>
@@ -762,7 +959,23 @@
 
     {{-- ── HERO ────────────────────────────────────────── --}}
     @php
-        $precio = $car->sale_price ?? $car->purchase_price ?? 0;
+        // FIX 12-sep-2026 (tres precios en la misma página): el hero mostraba
+        // su propio precio ($car->sale_price — columna que no existe — o
+        // purchase_price, el coste del coche SIN gastos) mientras más abajo el
+        // bloque de "inversión estimada" daba otro total. En el Arteon el
+        // cliente veía 31.929 € arriba, 39.232 € en medio y 48.931 € de total.
+        //
+        // Ahora hay UNA sola fuente ($precioCliente) y se expresa como
+        // HORQUILLA, nunca como cifra cerrada (decisión del usuario 12-sep-2026
+        // + `07-marketing/ficha_cliente.md` §3.5: prohibido "precio final" o
+        // "IVA incluido", porque no somos el vendedor).
+        $fmtEur0 = fn ($n) => $n === null ? null : number_format((float) $n, 0, ',', '.').' €';
+        $pcMin = $precioCliente['total_min'] ?? null;
+        $pcMax = $precioCliente['total_max'] ?? null;
+        $hayHorquilla = $pcMin && $pcMax && $pcMax > $pcMin;
+        $precioTitular = $hayHorquilla
+            ? number_format((float) $pcMin, 0, ',', '.').' – '.$fmtEur0($pcMax)
+            : ($fmtEur0($precioCliente['total_estimado'] ?? null) ?? $fmtEur0($car->purchase_price ?? null));
         $potencia = $esqueleto?->uno('POTENCIA');
         // ── Cambio: limpio, sin coletillas técnicas (NO mostramos "doble embrague", "DSG", "6 vel"...) ──
         $cambioRaw = $esqueleto?->uno('CAMBIO') ?? $car->transmission;
@@ -772,10 +985,6 @@
             : null;
         $kmTxt = $car->mileage ? number_format($car->mileage, 0, ',', '.').' km' : null;
         $anioTxt = $car->year ?: null;
-        $claimParts = array_filter([
-            $potencia,
-            $kmTxt,
-        ]);
 
         // ── Origen: España o Alemania. NO solo «importación»: también gestionamos compras en España ──
         // (pais_origen es la columna real; origin_country no existe en el schema)
@@ -784,7 +993,6 @@
         $esEspana = str_contains($paisOrigen, 'espa') || $paisOrigen === 'es';
         $origenLabel = $esAlemania ? 'Importado desde Alemania' : ($esEspana ? 'Localizado en España' : 'Origen verificado');
         $origenSub = $esAlemania ? 'Historial completo y verificado' : 'Historial verificado';
-        $origenKpi = $esAlemania ? 'Alemania' : ($esEspana ? 'España' : null);
 
         // ── Combustible: la BD lo trae del scraping en inglés (gasoline/diesel).
         //    Al cliente siempre en español. ──
@@ -796,6 +1004,15 @@
             'lpg' => 'GLP', 'glp' => 'GLP',
         ];
         $fuelTxt = $fuelMap[strtolower(trim((string) $car->fuel))] ?? ($car->fuel ? ucfirst(mb_strtolower($car->fuel)) : null);
+
+        // Tracción: la BD guarda los códigos internos (FWD/RWD/AWD). Igual que
+        // el combustible, al cliente en español (12-sep-2026).
+        $traccionTxt = match (strtoupper(trim((string) ($car->drivetrain ?? '')))) {
+            'FWD' => 'Delantera',
+            'RWD' => 'Trasera',
+            'AWD', '4WD' => 'Total (4x4)',
+            default => $car->drivetrain ?: null,
+        };
 
         // ── Estado de gestión. NUNCA «EN STOCK»: no vendemos coches, gestionamos la compra ──
         $estadoLabels = [
@@ -825,6 +1042,17 @@
         $fichaPendiente = $ficha['pendiente_comprobar'] ?? [];
         $fichaVerificado = $ficha['verificado'] ?? [];
         $fichaNoIncluye = $ficha['no_incluye'] ?? ['Seguro del vehículo', 'Impuesto municipal de circulación', 'Mantenimiento, reparaciones y desgaste', 'Garantía mecánica'];
+        // 12-sep-2026: antes era una rejilla de 6 tarjetas escritas a mano en la
+        // plantilla. Ahora sale de la ficha del cliente (FC_INCLUYE) si el ZIP
+        // la trae, con el mismo contenido como respaldo.
+        $fichaIncluye = $ficha['incluye'] ?? [
+            'Búsqueda y verificación de la unidad',
+            'Negociación y gestión de la compra',
+            'Transporte hasta España',
+            'ITV de importación, impuestos y matriculación',
+            'Historial y kilometraje comprobados',
+            'Entrega en Huelva y provincia',
+        ];
         $fichaPasos = $ficha['pasos'] ?? [
             ['cuando' => 'Semana 0', 'que' => 'Reserva y bloqueo de la unidad con el vendedor'],
             ['cuando' => 'Semana 1', 'que' => 'Compra, documentación y preparación de la exportación'],
@@ -852,27 +1080,38 @@
     <header class="hero">
         <div class="hero-inner">
             <div class="hero-left">
-                <div class="hero-eyebrow">📋 Informe de oportunidad exclusivo</div>
+                {{-- 12-sep-2026: "Informe de oportunidad exclusivo" sonaba a
+                     teletienda. Sin nombre de cliente (decisión del usuario:
+                     el enlace se reenvía por WhatsApp y debe ser neutro). --}}
+                <div class="hero-eyebrow">Informe de la unidad · {{ $fechaDatos }}</div>
                 <h1 class="h1">
                     {{ $car->brand }}<br>
                     <span class="accent">{{ $car->model }}</span>
                 </h1>
-                @if(count($claimParts) > 0)
-                    <p class="claim">{{ implode(' · ', $claimParts) }} · Verificado por nuestro equipo</p>
+                @php
+                    // Todos los datos clave en UNA línea, como el mockup v3.
+                    // Sin potencia: en 375 px dejaba un "320 CV" huérfano en
+                    // una segunda línea. Va en la ficha técnica.
+                    $heroDatos = array_filter([$anioTxt, $kmTxt, $fuelTxt, $cambioTxt]);
+                @endphp
+                @if(count($heroDatos) > 0)
+                    <p class="claim">{{ implode(' · ', $heroDatos) }}</p>
                 @else
                     <p class="claim">Verificado por nuestro equipo</p>
                 @endif
 
-                <div class="price-card">
-                    <div class="price-label">Precio del vehículo</div>
-                    <div class="price-value">{{ number_format($precio, 0, ',', '.') }} €</div>
-                    <div class="price-caption">+ gastos de gestión de compra e importación</div>
-                </div>
+                @if($precioTitular)
+                    <div class="price-card">
+                        <div class="price-label">Puesto en Huelva · aprox.</div>
+                        <div class="price-value">{{ $precioTitular }}</div>
+                        <div class="price-caption">Coche, transporte, impuestos y gestión — desglose más abajo</div>
+                    </div>
+                @endif
 
                 <div class="hero-actions">
                     <a href="https://wa.me/34675701439?text={{ urlencode('Hola, me interesa el '.$car->brand.' '.$car->model.' que habéis compartido conmigo.') }}"
                        target="_blank" rel="noopener" class="btn primary">
-                        💬 Quiero gestionar la compra
+                        💬 Me interesa, ¿hablamos?
                     </a>
                     <a href="tel:+34675701439" class="btn ghost">
                         📞 Llamar ahora
@@ -931,40 +1170,57 @@
         </div>
     </section>
 
-    {{-- ── KPI BAR ─────────────────────────────────────── --}}
-    @php
-        $kpis = [
-            ['k' => 'Año', 'v' => $anioTxt, 's' => $car->year ? 'Primera matriculación' : null, 'class' => ''],
-            ['k' => 'Kilómetros', 'v' => $kmTxt ?? '—', 's' => 'Verificados', 'class' => ''],
-            ['k' => 'Combustible', 'v' => $fuelTxt ?? '—', 's' => null, 'class' => ''],
-            ['k' => 'Cambio', 'v' => ucfirst($cambioTxt ?? '—'), 's' => null, 'class' => ''],
-            ['k' => 'Origen', 'v' => $origenKpi ?? '—', 's' => 'Historial limpio', 'class' => 'green'],
-        ];
-        $kpis = array_filter($kpis, fn($x) => !empty($x['v']) && $x['v'] !== '—');
-    @endphp
-    @if(count($kpis) > 0)
-        <section class="kpi-bar">
-            <div class="kpi-grid">
-                @foreach($kpis as $k)
-                    <div class="kpi">
-                        <div class="kpi-k">{{ $k['k'] }}</div>
-                        <div class="kpi-v {{ $k['class'] }}">{{ $k['v'] }}</div>
-                        @if($k['s'])<div class="kpi-s">{{ $k['s'] }}</div>@endif
+    {{-- Auditoría 12-sep-2026 (móvil): la galería estaba dentro del contenido,
+         después de la valoración, y era una rejilla de 8 fotos apiladas —
+         2.222 px en móvil, el bloque más grande de toda la página. Ahora sube
+         justo tras la barra de confianza (quien abre el enlace quiere ver el
+         coche) y es un carrusel con scroll-snap: se ven todas deslizando y
+         ocupa el alto de una sola foto. Los width/height evitan que la página
+         salte mientras cargan. --}}
+    @if(count($fotos) > 1)
+        <section id="galeria" class="gallery-wrap gallery-top">
+            <div class="section-title">Galería</div>
+            <h2 class="section-h">Fotos reales del vehículo</h2>
+            <div class="gallery carrusel" id="gallery">
+                @foreach(array_slice($fotos, 0, 10) as $i => $foto)
+                    <div class="shot" data-index="{{ $i }}" onclick="openLightbox({{ $i }})">
+                        <img src="{{ $foto }}" width="800" height="600"
+                             alt="{{ $car->brand }} {{ $car->model }} — foto {{ $i+1 }}"
+                             loading="{{ $i === 0 ? 'eager' : 'lazy' }}" decoding="async">
                     </div>
                 @endforeach
             </div>
+            <div class="carrusel-pie">
+                <span>Desliza para ver más · {{ count($fotos) }} fotos</span>
+                @if(count($fotos) > 10)
+                    <a href="#" class="ver-todas" onclick="event.preventDefault(); openLightbox(0);">Ver todas</a>
+                @endif
+            </div>
         </section>
     @endif
+
+    {{-- ── KPI BAR: ELIMINADA (12-sep-2026) ──────────────
+         Mostraba Año / Kilómetros / Combustible / Cambio / Origen a razón de UN
+         dato por fila en móvil (494 px), y cuatro de esos cinco campos se
+         repetían más abajo en la ficha técnica — además con valores que no
+         coincidían entre sí ("01/2023" arriba vs "2023" abajo; "Automático" vs
+         "Automático (DSG 7v)"). Los datos clave están ahora en una línea bajo el
+         título de la portada; el detalle completo, en la ficha técnica. --}}
 
     {{-- ── CONTENIDO PRINCIPAL ─────────────────────────── --}}
     <main class="container">
 
         {{-- NUESTRA VALORACIÓN (sin veredicto interno ni nota: A22) --}}
-        @if($valoracionTexto)
+        @if($valoracionTexto || $porqueTexto)
             <section id="veredicto" class="verdict reveal">
                 <div class="verdict-eyebrow">Nuestra valoración</div>
                 <h2 class="verdict-h">Qué nos parece esta unidad</h2>
-                <p class="verdict-body">{!! \App\Support\Esqueleto::negrita($valoracionTexto) !!}</p>
+                @if($valoracionTexto)
+                    <p class="verdict-body">{!! \App\Support\Esqueleto::negrita($valoracionTexto) !!}</p>
+                @endif
+                @if($porqueTexto)
+                    <p class="verdict-body" style="margin-top:16px">{!! \App\Support\Esqueleto::negrita($porqueTexto) !!}</p>
+                @endif
                 <div class="verdict-footer">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
                     Datos del vehículo comprobados el {{ $fechaDatos }}
@@ -974,151 +1230,175 @@
 
         {{-- GALERÍA — subida tras la valoración (12-sep-2026): el cliente quiere
              VER el coche antes de leer cifras; las fotos son el mejor gancho. --}}
-        @if(count($fotos) > 1)
-            @php
-                $galleryCols = min(4, max(1, count($fotos)));
-            @endphp
-            <section id="galeria" class="gallery-wrap">
-                <div class="section-title">Galería</div>
-                <h2 class="section-h">Fotos reales del vehículo</h2>
-                <div class="gallery {{ $galleryCols === 4 ? 'four' : ($galleryCols === 3 ? 'three' : ($galleryCols === 2 ? 'two' : 'one')) }}" id="gallery">
-                    @foreach(array_slice($fotos, 0, 8) as $i => $foto)
-                        <div class="shot" data-index="{{ $i }}" onclick="openLightbox({{ $i }})">
-                            <img src="{{ $foto }}" alt="{{ $car->brand }} {{ $car->model }} — foto {{ $i+1 }}" loading="{{ $i === 0 ? 'eager' : 'lazy' }}" decoding="async">
-                        </div>
-                    @endforeach
-                </div>
-                @if(count($fotos) > 8)
-                    {{-- El resto no se carga hasta que se abre: 30 fotos de golpe entierran el resto de la ficha --}}
-                    <details id="galeria-resto">
-                        <summary class="ver-todas">Ver las {{ count($fotos) }} fotos</summary>
-                        <div class="gallery {{ $galleryCols === 4 ? 'four' : 'three' }}" style="margin-top:14px">
-                            @foreach(array_slice($fotos, 8, null, true) as $i => $foto)
-                                <div class="shot" data-index="{{ $i }}" onclick="openLightbox({{ $i }})">
-                                    <img src="{{ $foto }}" alt="{{ $car->brand }} {{ $car->model }} — foto {{ $i+1 }}" loading="lazy" decoding="async">
-                                </div>
-                            @endforeach
-                        </div>
-                    </details>
-                @endif
-            </section>
-        @endif
-
-        {{-- ¿POR QUÉ ESTE COCHE? --}}
-        @if($porqueTexto)
-            <section class="why">
-                <div class="section-title">¿Por qué este coche?</div>
-                <p class="why-body">{!! \App\Support\Esqueleto::negrita($porqueTexto) !!}</p>
-            </section>
-        @endif
 
         {{-- C3 auditoría 09-sep-2026: precio origen + gastos de compra.
              El cliente ve "qué cuesta el coche + qué cuesta traerlo" SIN
              desglose de margen, con aviso de que el total es estimación
              y se confirma por escrito antes de la reserva. --}}
-        @if(!empty($precioCliente['origen']))
+        @if($precioTitular)
             @php
                 $pc = $precioCliente;
                 $fmtEurPc = fn ($n) => $n !== null ? number_format((float) $n, 0, ',', '.').' €' : null;
-                $hayDesglose = !empty($pc['desglose']) && count($pc['desglose']) > 1;
+                // Las líneas del desglose ya vienen agrupadas y sin honorarios
+                // etiquetados (PrecioClienteCalculator las toma de los bloques
+                // [GASTO] del ZIP, que la skill funde con la gestoría).
+                $lineasCoche = [];
+                $lineasGastos = [];
+                foreach (($pc['desglose'] ?? []) as $concepto => $valor) {
+                    if (str_contains(mb_strtolower((string) $concepto), 'precio del coche')) {
+                        $lineasCoche[$concepto] = $valor;
+                    } else {
+                        $lineasGastos[$concepto] = $valor;
+                    }
+                }
             @endphp
             <section class="precio-cliente">
-                <div class="section-title">Inversión estimada</div>
-                <h2 class="section-h">Qué pagarías por este coche</h2>
-                <div class="precio-grid">
-                    <div class="precio-box"><div class="k">Precio del anuncio</div><div class="v">{{ $fmtEurPc($pc['origen']) }}</div></div>
-                    @if($pc['gastos'] !== null)
-                        <div class="precio-box"><div class="k">Gastos de compra</div><div class="v">{{ $fmtEurPc($pc['gastos']) }}</div></div>
-                        <div class="precio-box precio-total"><div class="k">Total estimado</div><div class="v">{{ $fmtEurPc($pc['total_estimado']) }}</div></div>
+                <div class="section-title">El precio</div>
+                <h2 class="section-h">Cuánto te costaría, puesto en Huelva</h2>
+
+                <div class="precio-horquilla">
+                    <div class="etq">{{ $hayHorquilla ? 'Horquilla estimada' : 'Estimación' }}</div>
+                    <div class="cifra">
+                        @if($hayHorquilla)
+                            {{ number_format((float) $pcMin, 0, ',', '.') }}<span class="guion"> – </span>{{ $fmtEur0($pcMax) }}
+                        @else
+                            {{ $precioTitular }}
+                        @endif
+                    </div>
+                    <div class="aprox">Coche, transporte, impuestos y gestión incluidos</div>
+
+                    {{-- Desglose DETALLADO y siempre visible (decisión del
+                         usuario 12-sep-2026: "los gastos siempre aproximados,
+                         y desglosados con detalle para que el cliente lo pueda
+                         saber"). Cada línea va con ~ delante: ninguna es fija. --}}
+                    @if(count($lineasCoche) + count($lineasGastos) > 0)
+                        <div class="precio-lineas">
+                            @foreach($lineasCoche as $concepto => $valor)
+                                <div class="fila coche">
+                                    <span class="c">{{ $concepto }}</span>
+                                    <span class="i">{{ $fmtEurPc($valor) }}</span>
+                                </div>
+                            @endforeach
+                            @foreach($lineasGastos as $concepto => $valor)
+                                <div class="fila">
+                                    <span class="c">{{ $concepto }}</span>
+                                    <span class="i">~ {{ $fmtEurPc($valor) }}</span>
+                                </div>
+                            @endforeach
+                            @if(!empty($pc['total_estimado']))
+                                <div class="fila suma">
+                                    <span class="c">Total aproximado</span>
+                                    <span class="i">~ {{ $fmtEurPc($pc['total_estimado']) }}</span>
+                                </div>
+                            @endif
+                        </div>
                     @endif
                 </div>
-                @if($hayDesglose)
-                    <details class="precio-desglose">
-                        <summary>Ver desglose de gastos</summary>
-                        <ul>
-                            @foreach($pc['desglose'] as $concepto => $valor)
-                                @if($concepto !== 'Precio del anuncio')
-                                    <li><span>{{ $concepto }}</span><span>{{ $fmtEurPc($valor) }}</span></li>
-                                @endif
-                            @endforeach
-                        </ul>
-                    </details>
+
+                @if(!empty($pc['banda_motivo']))
+                    <p class="nota-fina">{{ $pc['banda_motivo'] }}</p>
                 @endif
-                <p class="precio-caption">+ gastos gestión de compra (transporte + IVA + IEDMT + gestoría)</p>
                 <p class="nota-fina">{{ $pc['aviso_precio_final'] }}</p>
             </section>
         @endif
 
-        {{-- COMPARATIVA DE MERCADO --}}
-        @if($hayMercado)
-            <section class="market">
-                <div class="section-title">Comparativa de mercado</div>
-                <h2 class="section-h">Así se compara este precio</h2>
-                <div class="market-grid">
-                    @if($marketMin)
-                        <div class="market-box"><div class="k">Mínimo mercado</div><div class="v">{{ $marketMin }}</div></div>
-                    @endif
-                    @if($marketAvg)
-                        <div class="market-box"><div class="k">Precio medio</div><div class="v">{{ $marketAvg }}</div></div>
-                    @endif
-                    @if($marketMax)
-                        <div class="market-box"><div class="k">Máximo mercado</div><div class="v">{{ $marketMax }}</div></div>
-                    @endif
+        {{-- Auditoría 12-sep-2026 (diseño): "qué incluye"/"qué no incluye" vivían
+             muy lejos del precio (incluye después de la comparativa de mercado y
+             puntos a favor; no-incluye después de la ficha técnica y galería).
+             Se colocan justo debajo del precio para que la transparencia
+             (qué pagas / qué te llevas / qué no) sea un bloque único. --}}
+        {{-- QUÉ INCLUYE / QUÉ NO — 12-sep-2026: estaban en dos secciones
+             separadas y lejanas (incluye tras la comparativa de mercado, no
+             incluye casi al final de la página). Juntas, y pegadas al precio,
+             la transparencia se lee como un bloque: qué pagas, qué te llevas,
+             qué no. --}}
+        <section class="incluye">
+            <div class="dos-listas">
+                <div class="si">
+                    <h3>Incluido en el precio</h3>
+                    <ul>
+                        @foreach($fichaIncluye as $item)
+                            <li>{{ is_string($item) ? $item : '' }}</li>
+                        @endforeach
+                    </ul>
                 </div>
-                <p class="nota-fina">Rango de precios de unidades similares publicadas en España a fecha de {{ $fechaDatos }}. Es una referencia de mercado, no una promesa de ahorro.</p>
+                <div class="no">
+                    <h3>No incluido</h3>
+                    <ul>
+                        @foreach($fichaNoIncluye as $item)
+                            <li>{{ is_string($item) ? $item : '' }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+            <p class="disponibilidad">Esta unidad seguía publicada el {{ $fechaDatos }}. No reservamos nada hasta que tú lo digas.</p>
+        </section>
+
+{{-- COMPARATIVA DE MERCADO --}}
+        @if($hayMercado)
+            @php
+                // 12-sep-2026: eran tres tarjetas apiladas (una por fila en
+                // móvil) que no decían nada por sí solas. Una barra de rango
+                // con la posición de nuestra estimación se entiende de un
+                // vistazo — y es lo que pedía el spec del skill
+                // (`ficha_cliente.md` §5: "barra de rango con mín-mediana-máx").
+                $mMin = $car->market_min ? (float) $car->market_min : null;
+                $mMax = $car->market_max ? (float) $car->market_max : null;
+                $mAvg = $car->market_avg ? (float) $car->market_avg : null;
+                $nuestro = $precioCliente['total_estimado'] ?? null;
+
+                $posPct = null;
+                if ($mMin && $mMax && $mMax > $mMin && $nuestro) {
+                    $posPct = (($nuestro - $mMin) / ($mMax - $mMin)) * 100;
+                    $posPct = max(2, min(98, $posPct));
+                }
+                // A28: si nuestra estimación queda por encima de la media del
+                // mercado, se dice. Un cliente que lo descubre solo se va.
+                $porEncimaDeMedia = $mAvg && $nuestro && $nuestro > $mAvg;
+            @endphp
+            <section class="market">
+                <div class="section-title">El mercado español</div>
+                <h2 class="section-h">Cómo está de precio</h2>
+
+                @if($posPct !== null)
+                    <div class="rango">
+                        <div class="rango-barra">
+                            <div class="rango-marca" style="left: {{ round($posPct, 1) }}%">
+                                <span>Esta unidad</span>
+                            </div>
+                        </div>
+                        <div class="rango-topes">
+                            <div><b>{{ $marketMin }}</b>el más barato</div>
+                            <div class="der"><b>{{ $marketMax }}</b>el más caro</div>
+                        </div>
+                        @if($marketAvg)
+                            <p class="rango-nota">Precio medio de unidades parecidas en España: <strong style="color:#fff">{{ $marketAvg }}</strong>.</p>
+                        @endif
+                    </div>
+                @else
+                    <div class="market-grid">
+                        @if($marketMin)
+                            <div class="market-box"><div class="k">El más barato</div><div class="v">{{ $marketMin }}</div></div>
+                        @endif
+                        @if($marketAvg)
+                            <div class="market-box"><div class="k">Precio medio</div><div class="v">{{ $marketAvg }}</div></div>
+                        @endif
+                        @if($marketMax)
+                            <div class="market-box"><div class="k">El más caro</div><div class="v">{{ $marketMax }}</div></div>
+                        @endif
+                    </div>
+                @endif
+
+                @if($porEncimaDeMedia)
+                    <p class="rango-nota">Esta unidad queda por encima de la media del mercado. Lo justifican
+                    su equipamiento y su kilometraje; si buscas ajustar el precio, podemos seguir
+                    buscando otras opciones.</p>
+                @endif
+                <p class="nota-fina">Comparativa de unidades similares publicadas en España a fecha de {{ $fechaDatos }}. Es una referencia de mercado, no una promesa de ahorro.</p>
             </section>
         @endif
 
-        {{-- INCLUYE (lo que va incluido en el precio) --}}
-        <section class="incluye">
-            <h3>Qué incluye este precio</h3>
-            <div class="incluye-grid">
-                <div class="incluye-item">
-                    <span class="incluye-check">✓</span>
-                    <div>
-                        <strong>Búsqueda y verificación</strong>
-                        Inspección física, documental y de mercado
-                    </div>
-                </div>
-                <div class="incluye-item">
-                    <span class="incluye-check">✓</span>
-                    <div>
-                        <strong>Gestión de la compra</strong>
-                        Negociación con el vendedor y pago seguro
-                    </div>
-                </div>
-                <div class="incluye-item">
-                    <span class="incluye-check">✓</span>
-                    <div>
-                        <strong>Transporte a España</strong>
-                        Logística y seguimiento del envío
-                    </div>
-                </div>
-                <div class="incluye-item">
-                    <span class="incluye-check">✓</span>
-                    <div>
-                        <strong>Trámites de matriculación</strong>
-                        ITV, COC, DGT y gestoría completa
-                    </div>
-                </div>
-                <div class="incluye-item">
-                    <span class="incluye-check">✓</span>
-                    <div>
-                        <strong>Historial verificado</strong>
-                        Origen y kilometraje confirmados
-                    </div>
-                </div>
-                <div class="incluye-item">
-                    <span class="incluye-check">✓</span>
-                    <div>
-                        <strong>Entrega en tu domicilio</strong>
-                        Huelva y provincia
-                    </div>
-                </div>
-            </div>
-        </section>
-
-                {{-- PUNTOS A FAVOR (al cliente solo lo bueno) --}}
+        {{-- PUNTOS A FAVOR (al cliente solo lo bueno) --}}
         @if(count($prosLista) > 0)
             <section>
                 <div class="section-title">Puntos a favor</div>
@@ -1165,8 +1445,8 @@
                 $fallback = [
                     'Marca' => $car->brand, 'Modelo' => $car->model,
                     'Año' => $car->year, 'Kilómetros' => $car->mileage ? number_format($car->mileage, 0, ',', '.').' km' : null,
-                    'Combustible' => $fuelTxt, 'Cambio' => $car->transmission ?? null,
-                    'Versión' => $car->version ?? null, 'Tracción' => $car->drivetrain ?? null,
+                    'Combustible' => $fuelTxt, 'Cambio' => $cambioTxt,
+                    'Versión' => $car->version ?? null, 'Tracción' => $traccionTxt,
                 ];
                 foreach ($fallback as $k => $v) {
                     if ($v) $specRows[] = ['k' => $k, 'v' => $v];
@@ -1188,21 +1468,35 @@
             </section>
         @endif
 
-        {{-- EQUIPAMIENTO --}}
-        @if($esqueleto)
-            @php $equipamiento = $esqueleto->lista('EQUIPAMIENTO'); @endphp
+        {{-- EQUIPAMIENTO — 12-sep-2026: eran 15 filas de lista, una por línea
+             (776 px en móvil). Como chips y dentro de un plegable ocupa una
+             línea hasta que el cliente decide abrirlo, que es exactamente lo
+             que proponía el mockup v3. --}}
+        @if($esqueleto || !empty($ficha['equipamiento']))
+            @php
+                $equipamiento = $ficha['equipamiento'] ?? [];
+                if (empty($equipamiento) && $esqueleto) {
+                    $equipamiento = $esqueleto->lista('EQUIPAMIENTO');
+                }
+                $equipamiento = array_values(array_filter(
+                    (array) $equipamiento,
+                    fn ($v) => is_string($v) && trim($v) !== ''
+                ));
+            @endphp
             @if(count($equipamiento) > 0)
-                <section>
-                    <div class="section-title">Equipamiento</div>
-                    <h2 class="section-h">Extras y opciones destacadas</h2>
-                    <div class="equip">
-                        @foreach($equipamiento as $item)
-                            <div class="equip-item">{{ $item }}</div>
-                        @endforeach
+                <details class="plegable">
+                    <summary>Equipamiento y extras ({{ count($equipamiento) }})</summary>
+                    <div class="plegable-cuerpo">
+                        <div class="chips">
+                            @foreach($equipamiento as $item)
+                                <span class="chip">{{ $item }}</span>
+                            @endforeach
+                        </div>
                     </div>
-                </section>
+                </details>
             @endif
         @endif
+
 
         {{-- ESTADO: VERIFICADO Y PENDIENTE (la honestidad sostiene la ficha) --}}
         @if(count($fichaVerificado) > 0 || count($fichaPendiente) > 0)
@@ -1228,18 +1522,6 @@
             </section>
         @endif
 
-
-        {{-- QUÉ NO INCLUYE --}}
-        <section class="reveal">
-            <div class="section-title">Transparencia</div>
-            <h2 class="section-h">Qué no incluye</h2>
-            <ul class="lista-limpia lista-no">
-                @foreach($fichaNoIncluye as $item)
-                    <li>{{ is_string($item) ? $item : '' }}</li>
-                @endforeach
-            </ul>
-        </section>
-
         {{-- CÓMO FUNCIONA --}}
         <section class="reveal">
             <div class="section-title">El proceso</div>
@@ -1257,8 +1539,8 @@
 
         {{-- QUÉ HACEMOS Y QUÉ NO — bloque fijo (A31, .ai/rules/business-model.md) --}}
         <section class="aviso-legal reveal">
-            <div class="section-title">Importante</div>
-            <h2 class="section-h">Qué hacemos y qué no hacemos</h2>
+            <div class="section-title">Cómo trabajamos</div>
+            <h2 class="section-h">Somos gestores, no vendedores</h2>
             <div class="dos-col">
                 <ul class="lista-limpia lista-ok">
                     <li>Localizamos la unidad y comprobamos su historial y su documentación</li>
@@ -1327,6 +1609,37 @@
             });
         }, { rootMargin: '0px 0px -10% 0px', threshold: 0.08 });
         els.forEach(function (el) { io.observe(el); });
+    })();
+    </script>
+
+    {{-- ── BARRA CTA FIJA ──────────────────────────────────
+         12-sep-2026: el botón de la portada desaparecía en la pantalla 2 y el
+         siguiente estaba en la pantalla 13 de 14. Si el cliente se convencía a
+         mitad de página, no tenía dónde pulsar. Es el MISMO CTA (regla §3.7 del
+         spec: un solo CTA), solo que siempre accesible. --}}
+    <div class="cta-fijo" id="cta-fijo">
+        <a href="https://wa.me/34675701439?text={{ urlencode('Hola, me interesa el '.$car->brand.' '.$car->model.' que habéis compartido conmigo.') }}"
+           target="_blank" rel="noopener" class="btn primary">
+            💬 Hablar por WhatsApp
+        </a>
+        <a href="tel:+34675701439" class="btn ghost tel" aria-label="Llamar a JJ Import Motors">📞</a>
+    </div>
+    <script>
+    (function () {
+        var barra = document.getElementById('cta-fijo');
+        var hero = document.querySelector('.hero');
+        if (!barra || !hero) return;
+
+        // Aparece cuando la portada (con su propio CTA) sale de pantalla.
+        if ('IntersectionObserver' in window) {
+            new IntersectionObserver(function (entradas) {
+                entradas.forEach(function (e) {
+                    barra.classList.toggle('visible', !e.isIntersecting);
+                });
+            }, { threshold: 0 }).observe(hero);
+        } else {
+            barra.classList.add('visible');
+        }
     })();
     </script>
 

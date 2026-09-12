@@ -120,9 +120,16 @@ puntos`).
 | FB Marketplace | no | texto plano | no | sí | 0 | 0 | mensaje |
 | Coches.net / Milanuncios / Wallapop | no | ficha estructurada | no | **obligatoria** | 0 | 0 | contacto del portal |
 
-**Importante:** los 3 portales comparten **texto base** y solo cambian tres
-cosas: título, longitud y cierre. Wallapop es un **recorte** del base
-(600-900 caracteres), nunca una reescritura.
+**Importante:** los 3 portales web (Coches.net / Milanuncios / Wallapop)
+comparten **texto base** y solo cambian tres cosas: título, longitud y
+cierre. Wallapop es un **recorte** del base (600-900 caracteres), nunca
+una reescritura. **Facebook Marketplace es un canal aparte** (bloques
+`FBMP_*`, sin iconos, sin hashtags, "Escríbeme por Messenger…" como
+cierre): no comparte el texto base de los portales web. **Corrección
+12-sep-2026:** hasta la v3.9.1 los 4 (los 3 portales + Marketplace)
+recibían el mismo texto en el panel porque `ValuationPackageIngestor`
+solo leía el vocabulario v1 (`[TITULO]`/`[DESCRIPCION]`); ya lee el v2
+(`PT_*` para los 3 portales, `FBMP_*` para Marketplace) y los diferencia.
 
 ---
 
@@ -192,7 +199,14 @@ Comprobaciones:
 14. Pega honesta presente (A28).
 15. Icono ⚠️ solo con pega (A29).
 16. Uso correcto de "garantía" (A30).
-17. Longitudes por canal (Wallapop 600-900 chars, etc.).
+17. Longitudes por canal. **Aclaración 12-sep-2026:** las bandas que valida
+    este script (`check_marketing.py`) son sobre el **texto base** que
+    genera la skill (`PT_*`, banda única para los 3 portales web). El
+    recorte de Wallapop a 600-900 caracteres (§5) lo aplica **Laravel**
+    al montar el anuncio final (`ValuationPackageIngestor::ingestarPortalesV2()`),
+    no la skill — por eso no hay una banda "Wallapop" separada aquí. El
+    recorte nunca toca la pega honesta (A28) ni el aviso legal (A26/A27):
+    si hace falta, se acorta antes el resto (ficha, equipamiento).
 18. Textos duplicados entre canales.
 19. Campos del formulario sin rellenar.
 20. Trazabilidad: cada cifra del copy debe poderse citar a un campo del

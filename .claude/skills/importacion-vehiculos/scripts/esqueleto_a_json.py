@@ -40,13 +40,15 @@ LISTAS = {
     "FC_SPEC", "FC_EQUIP", "FC_EQUIP_PENDIENTE", "FC_VERIFICADO", "FC_PENDIENTE_COMPROBAR",
     "FC_ARGUMENTO", "FC_INCLUYE", "FC_NO_INCLUYE", "FC_PASO", "FC_HACEMOS", "FC_NO_HACEMOS",
     "FC_FAQ", "IG_FICHA", "FB_FICHA", "FB_INCLUYE", "MP_FICHA", "ST_PANTALLA", "RL_ESCENA",
-    "PT_FICHA", "PT_ESTADO", "PT_INCLUYE", "CAMPO", "FUENTE_DATO", "PROOF", "PENDIENTE",
+    "PT_FICHA", "PT_ESTADO", "PT_QUE_INCLUYE", "CAMPO", "FUENTE_DATO", "PROOF", "PENDIENTE",
 }
 # Bloques "clave | valor"
 KV = {"FC_SPEC": ("etiqueta", "valor"), "PT_FICHA": ("etiqueta", "valor"),
       "MP_FICHA": ("etiqueta", "valor"), "CAMPO": ("campo", "valor"),
       "FC_FAQ": ("pregunta", "respuesta"), "FC_PASO": ("cuando", "que"),
-      "FUENTE_DATO": ("dato", "campo"), "PROOF": ("angulo", "campo")}
+      "FUENTE_DATO": ("dato", "campo"), "PROOF": ("angulo", "campo"),
+      # Desglose de gastos del cliente (12-sep-2026): "concepto | importe"
+      "FC_GASTO": ("concepto", "importe"), "GASTO": ("concepto", "importe")}
 # Bloques con 3 partes
 TRIPLES = {"RL_ESCENA": ("tiempo", "plano", "texto")}
 # Bloques numéricos (se limpian a número cuando se puede)
@@ -57,6 +59,7 @@ MAPA_FICHA = {
     "FC_TITULO": "titulo", "FC_SUBTITULO": "subtitulo", "FC_PRECIO": "precio",
     "FC_PRECIO_NOTA": "precio_nota", "FC_ESTADO_PROCESO": "estado_proceso",
     "FC_RESUMEN_BUENO": "resumen_bueno", "FC_RESUMEN_OJO": "resumen_ojo",
+    "FC_GASTO": "gastos",
     "FC_RESUMEN_PASO": "resumen_paso", "FC_SPEC": "spec", "FC_EQUIP": "equipamiento",
     "FC_EQUIP_PENDIENTE": "equipamiento_pendiente", "FC_VERIFICADO": "verificado",
     "FC_PENDIENTE_COMPROBAR": "pendiente_comprobar", "FC_FOTOS": "fotos",
@@ -159,8 +162,16 @@ def a_json_desde_texto(texto, nombre):
             "instagram_feed": {k[3:].lower(): datos[k] for k in datos if k.startswith("IG_")},
             "stories": datos.get("ST_PANTALLA", []),
             "video": {k: datos[k] for k in datos if k.startswith(("RL_", "TT_", "YS_"))},
-            "facebook_pagina": {k[3:].lower(): datos[k] for k in datos if k.startswith("FB_")},
+            # OJO: "FB_" no debe capturar "FBMP_" (Facebook Marketplace tiene
+            # sus propios bloques, canal aparte) — de ahí el filtro extra.
+            "facebook_pagina": {k[3:].lower(): datos[k] for k in datos
+                                if k.startswith("FB_") and not k.startswith("FBMP_")},
             "marketplace": {k[3:].lower(): datos[k] for k in datos if k.startswith("MP_")},
+            # A11 auditoría 12-sep-2026: Facebook Marketplace tenía bloques
+            # FBMP_* generados (empaquetar.py) pero sin canal en este mapa,
+            # así que ValuationPackageIngestor nunca los veía y el anuncio de
+            # Marketplace caía al mismo texto que los 3 portales web.
+            "fb_marketplace": {k[5:].lower(): datos[k] for k in datos if k.startswith("FBMP_")},
         }
         doc["coche_id"] = datos.get("COCHE_ID", "")
     elif any(k.startswith(("PT_", "WP_")) for k in crudo):

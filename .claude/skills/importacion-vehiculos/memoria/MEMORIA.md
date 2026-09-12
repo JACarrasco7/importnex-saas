@@ -16,6 +16,7 @@
 | `trampas-encontradas.md` | Trampas detectadas en portales | Antes de cada navegación |
 | `mejoras-aplicadas.md` | Cambios y mejoras del skill | Al planificar cambios |
 | `retrospectiva.md` | Retrospectivas de sesión + plantilla de CIERRE | Al cerrar conversación / auditoría de cierre |
+| `marketing-resultados.md` | Qué ángulo/gancho funcionó por coche y canal | Al elegir ángulo (07-marketing) · después de publicar |
 
 ---
 
@@ -35,10 +36,11 @@
 - Si verificas un filtro/URL nuevo en un portal → añádelo a `filtros-portales.md` (fecha + parámetro)
 - Si un vendedor responde bien/mal → anótalo en `vendedores-confianza.md`
 - Si mejoras el skill → documéntalo en `mejoras-aplicadas.md`
+- Si una campaña de marketing ya tiene resultado (contactos, días al 1er contacto) → anótalo en `marketing-resultados.md`
 
 ### Al FINALIZAR:
 - **Auditoría de cierre** (ver `../SKILL.md` §AUDITORÍA DE CIERRE): volcar las 5 dimensiones a `retrospectiva.md` (plantilla CIERRE)
-- Verifica que los 8 archivos de memoria estén actualizados
+- Verifica que los 9 archivos de memoria estén actualizados
 - Si hay aprendizajes grandes → añádelos también a `.claude/memoria/decisiones.md` del proyecto
 
 ---
@@ -63,8 +65,8 @@
 
 | Métrica | Valor |
 |---|---|
-| Versión actual | 3.6.1 |
-| Fecha de release | 2026-09-05 |
+| Versión actual | 3.9.2 |
+| Fecha de release | 2026-09-12 |
 
 ---
 
@@ -118,4 +120,29 @@ ENCARGO (Flujo B) → 📋 INFORME MODELO + top 5 con ENLACES → CP1 (¿Fase 2 
 
 ## 🗓️ Última actualización
 
+- **2026-09-12:** v3.9.2 — Dos tandas de trabajo que se habían preparado en sesión pero nunca
+  llegaron a copiarse al repo real (`.claude/` rechaza escrituras del puente remoto: hace
+  falta el `.bat` de sincronización). Ahora sí están aplicadas: precio del cliente en
+  horquilla (nunca cifra cerrada) con desglose `[GASTO]`/`[FC_GASTO]`, fix del 21% de IVA
+  fantasma, rediseño móvil del dossier, y el fix de `ingestarPortalesV2()` para que los 4
+  canales de portal dejen de recibir el mismo texto. **Aprendizaje operativo:** cuando un
+  cambio queda "preparado" pero no se confirma que el `.bat` se ejecutó, la sesión siguiente
+  no puede asumir que está en producción — hay que releer el fichero real del repo antes de
+  dar nada por hecho, no fiarse del historial de la conversación. **Aprendizaje técnico:**
+  cuando la skill y el panel mantienen dos modelos de costes en paralelo, divergen sin avisar
+  (el 21% de IVA vivía solo en `PrecioClienteCalculator.php`, nunca en `04-negocio/costes.md`)
+  — una sola fuente, siempre. Mismo patrón en marketing: la skill llevaba desde el 05-sep
+  generando `PT_TITULO_A/B`/`FBMP_*` diferenciados que el panel nunca leía (seguía en
+  vocabulario v1) — de ahí que 4 canales de portal recibieran el mismo texto durante más de
+  una semana sin que nadie lo detectara hasta que el usuario lo señaló directamente.
+  **Cuarto hallazgo (revisión de cierre, mismo día):** el mismo patrón exacto una tercera vez —
+  `Marketing.vue` tenía un comentario "B1 auditoría 09-sep-2026" que daba por verificado que
+  `config/marketing_limits.php` existía y que el controlador enviaba `props.limits`; ninguna de
+  las dos cosas era cierta, así que el contador de caracteres del editor llevaba SIEMPRE
+  mostrando la guía genérica para los 6 canales. Se corrigió en la misma tanda. **Regla que hay
+  que empezar a aplicar de forma sistemática:** un comentario en el código que dice "ya
+  verificado" o "ya existe" no es evidencia — hay que abrir el fichero que dice referenciar
+  antes de darlo por bueno, cada vez, no solo cuando el usuario pregunta si queda algo
+  pendiente.
+- **2026-09-09:** v3.8.0 — Cadena empaquetar → ZIP → panel cerrada (ficha-cliente.json real, vocabulario de marketing unificado v1.5/v2, parsers alineados con `App\Support\Esqueleto`). Ficha del cliente pública (A22b/A31) fusionada y en producción (`FiltroPublico`, ruta de fotos, ficha técnica con fallback). Este índice referencia ya los 9 archivos de memoria (se añadió `marketing-resultados.md`, que faltaba).
 - **2026-08-16:** v3.1.0 — Reorganización física completa (carpetas 01-06), `encargos.md` + `filtros-portales.md` creados, `modelos-medidos.md` ampliado a 12 campos, este índice con 8 archivos + PASO 0 cache.
