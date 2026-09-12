@@ -60,10 +60,24 @@ if ($LASTEXITCODE -ne 0) {
     throw "El script Python fallo con exit code $LASTEXITCODE"
 }
 
-# Limpiar ZIPs viejos que ya no son los actuales.
+# Limpiar ZIPs viejos: solo los de las skills regeneradas (M5, 12-sep-2026).
+# Antes borraba CUALQUIER skills-*.zip sin importar la fecha -> si regenerabas
+# solo una skill con -SkillOnly, dejaba la otra intacta pero al siguiente
+# build a "all" se la comia igualmente. Ahora respeta el scope.
+$scope = if ($SkillOnly -ne 'all') { $SkillOnly } else { 'all' }
+$keptNames = @()
+foreach ($skill in @('importacion-vehiculos','estudio-mercado')) {
+    if ($scope -eq 'all' -or $scope -eq $skill) {
+        $kept = Get-ChildItem $distDir -Filter "skills-$skill-*.zip" -File -ErrorAction SilentlyContinue
+        if ($kept) { $keptNames += $kept.Name }
+    }
+}
 Get-ChildItem $distDir -Filter 'skills-*.zip' -File | Where-Object {
-    $_.Name -notlike "*-$today.zip"
-} | Remove-Item -Force
+    $_.Name -notin $keptNames -and $_.Name -notlike "*-$today.zip"
+} | ForEach-Object {
+    Write-Host "  [clean] $($_.Name)" -ForegroundColor DarkGray
+    Remove-Item $_.FullName -Force
+}
 Write-Host "[OK] ZIPs regenerados, antiguos eliminados" -ForegroundColor Cyan
 
 # ---------------------------------------------------------------

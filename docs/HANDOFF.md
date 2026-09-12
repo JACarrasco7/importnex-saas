@@ -24,6 +24,17 @@
 
 ---
 
+## 2026-09-12 22:30 · Copilot-VSCode · auditoria externa + opciones (M1-M7)
+
+- Hice: auditoria con subagente Explore (16 chequeos, 4 criticos P1-P4 + 4 importantes P5-P8 + trampas B1-B10). Fix: NotifyImportWebhook implements ShouldQueue (tries=3, backoff=5) [P1], pre-commit usa $1 en vez de git log -1 [P2], footer SKILLS.md actualizado a v3.9.3/v0.4.0 [P3], MEMORIA.md skill v3.9.3 [P4], BOM CHANGELOG eliminado [P5], build-zips.py autodetecta skills (excluye las de Copilot/Claude Code) [P6], sync-desktop limpia ZIPs solo de la skill regenerada [M5], sync-desktop distingue NO INSTALADA vs DIFF [P10], DRY controller: 5 endpoints usan trait ParsesImportPayload [M1], try/catch en Stop/Close del listener receptor [M3], doc IMPORTNEX_TOKEN en .env.example [M4]. 9/9 tests verdes, Pint OK.
+- Bumps: importacion-vehiculos 3.9.2 → 3.9.3 (frontmatter ya estaba bien, tabla metricas corregida); estudio-mercado 0.3.12 → 0.4.0.
+- ⚠️ PENDIENTE para Claude-Desktop: nada urgente — todo verificado por tests + subagente auditor. Sigue: (1) reimportar ZIPs en Cowork, (2) rotar password BD Forge, (3) `$env:IMPORTNEX_TOKEN`.
+- Commit: a850ae8 (auditoria) + pendientes (M1-M7) en el siguiente.
+
+---
+
+## 2026-09-12 21:10 · Copilot-VSCode · sistema de sincronización completo
+
 ## 2026-09-12 21:10 · Copilot-VSCode · sistema de sincronización completo
 
 - Hice: doc-sync (`scripts/sync-desktop.ps1` + `sync.manifest.json`), token API por env var, round-trip `encargos.md`, dry_run en API, CI build-skills (GHA), webhook Laravel→Desktop (`CarImported` + `NotifyImportWebhook` + receptor PS1). Fix bug crítico `build-zips.py` (versiones hardcodeadas). Arreglé event() muerto tras return en `ImportValuationApiController` (store + storeModelo). 9 tests nuevos en verde, 28 existentes OK, Pint OK.

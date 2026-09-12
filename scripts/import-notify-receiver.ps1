@@ -118,6 +118,8 @@ $linea
     }
 }
 finally {
-    $listener.Stop()
-    $listener.Close()
+    # M3 (12-sep-2026): envolver Stop/Close en su propio try/catch porque
+    # si hay conexiones pendientes Close puede lanzar ObjectDisposed.
+    try { $listener.Stop() } catch { Write-Host "  WARN  Stop: $_" -ForegroundColor Yellow }
+    try { $listener.Close() } catch { Write-Host "  WARN  Close: $_" -ForegroundColor Yellow }
 }

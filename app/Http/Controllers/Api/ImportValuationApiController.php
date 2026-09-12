@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Events\CarImported;
+use App\Http\Controllers\Api\Concerns\ParsesImportPayload;
 use App\Http\Controllers\Controller;
 use App\Models\Car;
 use App\Models\Cierre;
@@ -32,20 +33,15 @@ use Illuminate\Support\Facades\Log;
  */
 class ImportValuationApiController extends Controller
 {
+    use ParsesImportPayload;
+
     public function store(Request $request, ValuationImporter $importer): JsonResponse
     {
         $org = $request->attributes->get('import_org');
 
-        $payload = $request->json()->all();
-        if (empty($payload)) {
-            $payload = json_decode($request->getContent(), true);
-        }
-        if (empty($payload) || ! is_array($payload)) {
-            $rawBody = $request->getContent() ?: file_get_contents('php://input');
-            $payload = json_decode($rawBody, true);
-        }
-        if (empty($payload) || ! is_array($payload)) {
-            return response()->json(['error' => 'Empty or invalid JSON body.'], 422);
+        [$payload, $error] = $this->parseImportPayload($request);
+        if ($error !== null) {
+            return $error;
         }
 
         // §10.7 — validar estructura mínima de Flujo A (schema_version + bloques requeridos)
@@ -117,16 +113,9 @@ class ImportValuationApiController extends Controller
     {
         $org = $request->attributes->get('import_org');
 
-        $payload = $request->json()->all();
-        if (empty($payload)) {
-            $payload = json_decode($request->getContent(), true);
-        }
-        if (empty($payload) || ! is_array($payload)) {
-            $rawBody = $request->getContent() ?: file_get_contents('php://input');
-            $payload = json_decode($rawBody, true);
-        }
-        if (empty($payload) || ! is_array($payload)) {
-            return response()->json(['error' => 'Empty or invalid JSON body.'], 422);
+        [$payload, $error] = $this->parseImportPayload($request);
+        if ($error !== null) {
+            return $error;
         }
 
         // §10.6 — validar schema_version, flujo y bloques mínimos (Flujo B)
@@ -185,16 +174,9 @@ class ImportValuationApiController extends Controller
     {
         $org = $request->attributes->get('import_org');
 
-        $payload = $request->json()->all();
-        if (empty($payload)) {
-            $payload = json_decode($request->getContent(), true);
-        }
-        if (empty($payload) || ! is_array($payload)) {
-            $rawBody = $request->getContent() ?: file_get_contents('php://input');
-            $payload = json_decode($rawBody, true);
-        }
-        if (empty($payload) || ! is_array($payload)) {
-            return response()->json(['error' => 'Empty or invalid JSON body.'], 422);
+        [$payload, $error] = $this->parseImportPayload($request);
+        if ($error !== null) {
+            return $error;
         }
 
         // §10.6 — validar schema_version, flujo y bloques mínimos (Flujo C)
@@ -300,16 +282,9 @@ class ImportValuationApiController extends Controller
     {
         $org = $request->attributes->get('import_org');
 
-        $payload = $request->json()->all();
-        if (empty($payload)) {
-            $payload = json_decode($request->getContent(), true);
-        }
-        if (empty($payload) || ! is_array($payload)) {
-            $rawBody = $request->getContent() ?: file_get_contents('php://input');
-            $payload = json_decode($rawBody, true);
-        }
-        if (empty($payload) || ! is_array($payload)) {
-            return response()->json(['error' => 'Empty or invalid JSON body.'], 422);
+        [$payload, $error] = $this->parseImportPayload($request);
+        if ($error !== null) {
+            return $error;
         }
 
         // Validar campos requeridos
@@ -444,16 +419,9 @@ class ImportValuationApiController extends Controller
     {
         $org = $request->attributes->get('import_org');
 
-        $payload = $request->json()->all();
-        if (empty($payload)) {
-            $payload = json_decode($request->getContent(), true);
-        }
-        if (empty($payload) || ! is_array($payload)) {
-            $rawBody = $request->getContent() ?: file_get_contents('php://input');
-            $payload = json_decode($rawBody, true);
-        }
-        if (empty($payload) || ! is_array($payload)) {
-            return response()->json(['error' => 'Empty or invalid JSON body.'], 422);
+        [$payload, $error] = $this->parseImportPayload($request);
+        if ($error !== null) {
+            return $error;
         }
 
         // Validar campos requeridos
