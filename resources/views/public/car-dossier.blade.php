@@ -313,12 +313,10 @@
         /* ── CONTENEDOR PRINCIPAL ──────────────────────── */
         .container {
             max-width: 1100px; margin: 0 auto;
-            padding: 60px 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 60px;
+            padding: 80px 24px;
+            display: flow-root;
         }
-        .container > section:last-child { margin-bottom: 0; }
+        .container > section + section { margin-top: 80px; }
 
         .section-title {
             font-size: 11px; text-transform: uppercase; letter-spacing: 2.5px;
