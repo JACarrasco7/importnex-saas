@@ -5,6 +5,9 @@
 > Esos archivos tienen TODAS las guidelines oficiales de Laravel 11 / PHP / Inertia / Pint / PHPUnit.
 > Este archivo sólo añade contexto específico de **este proyecto**.
 
+> 📋 **Comunicación cross-agent:** antes de empezar sesión lee [`docs/HANDOFF.md`](docs/HANDOFF.md) (última entrada del otro agente) y [`docs/COMUNICACION-CLAUDE-VSCODE.md`](docs/COMUNICACION-CLAUDE-VSCODE.md) (rutina diaria). Al terminar, añade tu entrada al HANDOFF.md (≤10 líneas, sin editar la del otro).
+> Reglas de este repo en `.ai/rules/index.md` — léelas según el glob del archivo que toques.
+
 ---
 
 ## Stack

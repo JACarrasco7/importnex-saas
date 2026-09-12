@@ -1,6 +1,8 @@
 > 🔗 **Copia de distribución (12-sep-2026).** El máster de este fichero vive en el repo: `docs/claude-desktop/CLAUDE.md` en `C:\laragon\www\importnexcore\`. Edita ahí, no aquí — esta copia (carpeta Desktop / Contexto del proyecto de claude.ai) se actualiza a mano tras cada cambio. Detalle completo del porqué: `docs/DOCS-INDEX.md`.
 >
 > ⚠️ **Contenido pendiente de revisión** — fechado 12-ago-2026, no refleja los flujos/reglas/marketing añadidos en la skill desde entonces (hoy es 12-sep-2026, la fecha en que `MEMORIA.md` se auto-marcó para revisión). Sigue siendo la versión vigente hasta que se actualice.
+>
+> 📋 **Comunicación con Copilot (VS Code):** lee `Desktop\JJImportMotors\HANDOFF.md` al empezar y escribe tu entrada al terminar (≤10 líneas, no edites la de Copilot). Para subir un informe, usa `subir-informe.ps1 -DryRun` primero y luego sin el flag. Si activas el webhook receptor, arranca `scripts\import-notify-receiver.ps1`.
 
 ---
 
