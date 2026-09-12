@@ -313,8 +313,12 @@
         /* ── CONTENEDOR PRINCIPAL ──────────────────────── */
         .container {
             max-width: 1100px; margin: 0 auto;
-            padding: 80px 24px;
+            padding: 60px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 60px;
         }
+        .container > section:last-child { margin-bottom: 0; }
 
         .section-title {
             font-size: 11px; text-transform: uppercase; letter-spacing: 2.5px;
@@ -335,7 +339,6 @@
             padding: 44px 44px;
             position: relative;
             overflow: hidden;
-            margin-bottom: 60px;
         }
         .verdict::before {
             content: '“'; position: absolute;
@@ -369,7 +372,6 @@
             border: 1px solid rgba(16, 185, 129, 0.3);
             border-radius: 20px;
             padding: 36px 36px;
-            margin-bottom: 60px;
         }
         .incluye h3 {
             font-size: 22px; font-weight: 800; color: #fff;
@@ -401,7 +403,7 @@
         }
 
         /* ── GALERÍA ───────────────────────────────────── */
-        .gallery-wrap { margin-bottom: 80px; }
+        .gallery-wrap { }
         .gallery {
             display: grid; grid-template-columns: repeat(3, 1fr);
             gap: 14px;
@@ -424,7 +426,6 @@
         /* ── PROS / CONS ──────────────────────────────── */
         .proscons {
             display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
-            margin-bottom: 80px;
         }
         .pc-col {
             border-radius: 18px; padding: 30px 32px;
@@ -473,7 +474,7 @@
         }
 
         /* ── ESPECIFICACIONES ─────────────────────────── */
-        .specs { margin-bottom: 80px; }
+        .specs { }
         .specs-grid {
             background: rgba(143, 163, 217, 0.05);
             border: 1px solid rgba(143, 163, 217, 0.2);
@@ -499,7 +500,6 @@
         /* ── EQUIPAMIENTO ─────────────────────────────── */
         .equip {
             display: grid; grid-template-columns: 1fr 1fr; gap: 6px 32px;
-            margin-bottom: 80px;
         }
         .equip-item {
             display: flex; align-items: flex-start; gap: 10px;
@@ -529,12 +529,11 @@
             border-left: 3px solid var(--orange);
             border-radius: 0 18px 18px 0;
             padding: 32px 36px;
-            margin-bottom: 60px;
         }
         .why-body { color: #e5e7eb; font-size: 16px; line-height: 1.65; }
 
         /* ── COMPARATIVA DE MERCADO ────────────────────── */
-        .market { margin-bottom: 80px; }
+        .market { }
         .market-grid {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
             gap: 14px;
@@ -553,7 +552,7 @@
         .market-box.highlight .v { color: #4ade80; }
 
         /* ── INVERSIÓN ESTIMADA (C3 auditoría 09-sep-2026) ── */
-        .precio-cliente { margin-bottom: 80px; }
+        .precio-cliente { }
         .precio-grid {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 14px; margin-bottom: 18px;
@@ -600,7 +599,6 @@
             border: 1px solid rgba(143, 163, 217, 0.25);
             border-radius: 18px;
             padding: 32px 36px;
-            margin-bottom: 80px;
         }
         .tips h3 {
             font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 20px;
@@ -630,7 +628,6 @@
             border: 1px solid rgba(255, 255, 255, 0.08);
             position: relative;
             overflow: hidden;
-            margin-bottom: 80px;
         }
         .cta-final::before {
             content: ''; position: absolute; inset: 0;
@@ -1268,33 +1265,9 @@
             <p>Cualquier garantía o responsabilidad que exista corresponde al vendedor, según la ley que le sea aplicable. Nuestro servicio es la gestión de la búsqueda, la verificación y la importación, con honorarios acordados de antemano. Si quieres cobertura mecánica, puede contratarse aparte con una compañía especializada.</p>
         </section>
 
-        {{-- PREGUNTAS FRECUENTES --}}
-        <section class="faq reveal">
-            <div class="section-title">Dudas</div>
-            <h2 class="section-h">Preguntas frecuentes</h2>
-            @foreach($fichaFaq as $i => $item)
-                <details @if($i === 0) open @endif>
-                    <summary>{{ is_array($item) ? ($item['pregunta'] ?? '') : '' }}</summary>
-                    <p>{{ is_array($item) ? ($item['respuesta'] ?? '') : '' }}</p>
-                </details>
-            @endforeach
-        </section>
-
-        {{-- CTA FINAL --}}
-        <section class="cta-final">
-            <div class="cta-eyebrow">¿Seguimos adelante?</div>
-            <h2>Gestionamos la compra de este coche por ti</h2>
-            <p>Escríbenos por WhatsApp o llama. Te explicamos el proceso completo: búsqueda, verificación, compra, transporte y trámites.</p>
-            <div class="cta-buttons">
-                <a href="https://wa.me/34675701439?text={{ urlencode('Hola, me interesa el '.$car->brand.' '.$car->model.'. ¿Podemos hablar sobre el proceso de compra?') }}"
-                   target="_blank" rel="noopener" class="btn primary big">
-                    💬 Hablar por WhatsApp
-                </a>
-                <a href="tel:+34675701439" class="btn ghost big">
-                    📞 675 70 14 39
-                </a>
-            </div>
-        </section>
+        {{-- PREGUNTAS FRECUENTES + CTA FINAL (separados a partials 10-sep-2026) --}}
+        @include('public.dossier.partials.faq')
+        @include('public.dossier.partials.cta-final')
 
     </main>
 
