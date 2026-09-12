@@ -113,18 +113,33 @@ def build_dst_path(skill_dir):
 
 if __name__ == '__main__':
     import argparse
+    import glob as _glob
+
+    # Autodetectar skills (12-sep-2026): cualquier carpeta bajo .claude/skills/
+    # que tenga un SKILL.md con frontmatter `version:`. Mantiene retro-compat:
+    # si una skill NO tiene version: falla con mensaje claro (antes del fix pasaba
+    # silencioso). Tambien excluimos _dist/ (no es una skill) y las skills que NO
+    # son del negocio JJ Import Motors (cashier-stripe, inertia-vue, etc.) -
+    # esas son de Copilot/Claude Code, no se publican como ZIP portable.
+    SKILLS_ROOT = '.claude/skills'
+    EXCLUDED = {'_dist', 'cashier-stripe-development', 'inertia-vue-development',
+                'tailwindcss-development', 'infer-conventions', 'vehicle-listings',
+                'laravel-best-practices'}
+    all_skill_dirs = sorted([
+        os.path.dirname(p) for p in _glob.glob(os.path.join(SKILLS_ROOT, '*', 'SKILL.md'))
+        if os.path.basename(os.path.dirname(p)) not in EXCLUDED
+    ])
+    if not all_skill_dirs:
+        raise SystemExit(f'No se encontraron skills de negocio en {SKILLS_ROOT}')
+
     parser = argparse.ArgumentParser(description='Build ZIPs portables de las skills.')
-    parser.add_argument('--skill-only', choices=['importacion-vehiculos', 'estudio-mercado'],
+    parser.add_argument('--skill-only', choices=[os.path.basename(d) for d in all_skill_dirs],
                         help='Solo regenerar esta skill.')
     parser.add_argument('--validate-only', action='store_true',
                         help='Solo auditar paths, sin regenerar ZIPs.')
     args = parser.parse_args()
 
-    skills = [
-        (r'.claude/skills/importacion-vehiculos', None),
-        (r'.claude/skills/estudio-mercado', None),
-    ]
-    skills = [(s, build_dst_path(s)) for s, _ in skills]
+    skills = [(d, build_dst_path(d)) for d in all_skill_dirs]
 
     if args.skill_only:
         skills = [s for s in skills if args.skill_only in s[0]]

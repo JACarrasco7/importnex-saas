@@ -78,7 +78,7 @@ Write-Host ''
 Write-Host "=== sync-desktop.ps1 :: $mode ===" -ForegroundColor Cyan
 Write-Host ("  Repo    : {0}" -f $RepoRoot)
 Write-Host ("  Desktop : {0}" -f $DesktopRoot)
-Write-Host ("  Token   : {0}" -f $(if ($env:IMPORTNEX_TOKEN) {'OK (env)'} else {'NO cargado (exporta IMPORTNEX_TOKEN)'}))
+Write-Host "  Token API: irrelevante para sync (usalo en subir-informe.ps1)" -ForegroundColor DarkGray
 Write-Host ''
 
 if (-not (Test-Path $DesktopRoot)) {
@@ -177,7 +177,10 @@ if (-not (Test-Path $DistSkills)) {
             Write-Host ("  repo ZIP: {0,-45}  v{1}" -f $zipName, $repoVer) -ForegroundColor DarkGray
             if (Test-Path $DesktopSkillDir) {
                 $installed = Get-ChildItem $DesktopSkillDir -Directory -ErrorAction SilentlyContinue | Where-Object {
-                    $_.Name -match 'importacion-vehiculos|estudio-mercado'
+                    $_.Name -eq $repoName
+                }
+                if (-not $installed) {
+                    Write-Host ("    [NO INSTALADA] Desktop no tiene la skill '{0}'" -f $repoName) -ForegroundColor DarkGray
                 }
                 foreach ($d in $installed) {
                     $skillMd = Join-Path $d.FullName 'SKILL.md'

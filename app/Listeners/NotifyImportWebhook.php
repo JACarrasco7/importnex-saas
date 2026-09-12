@@ -3,6 +3,7 @@
 namespace App\Listeners;
 
 use App\Events\CarImported;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -13,13 +14,20 @@ use Illuminate\Support\Facades\Log;
  * con los datos del coche. Fire-and-forget: timeout duro 2s (configurable),
  * nunca lanza excepcion al import real si el webhook falla.
  *
+ * Se ejecuta en cola (ShouldQueue) para no bloquear el POST /api/import-valuation.
+ * Sin cola, un webhook receptor caido podia sumar 3s de latencia al import.
+ *
  * En local, scripts/import-notify-receiver.ps1 escucha en el puerto 8765
  * y reescribe encargos.md del skill. Asi el siguiente encargo de Claude
  * Desktop ve que ese coche ya esta importado sin que el chat tenga que
  * llamar a subir-informe.ps1.
  */
-class NotifyImportWebhook
+class NotifyImportWebhook implements ShouldQueue
 {
+    public int $tries = 3;
+
+    public int $backoff = 5;
+
     public function handle(CarImported $event): void
     {
         $url = (string) config('services.importnex_chat.webhook_url', '');

@@ -1,7 +1,7 @@
 ﻿# Skills — punto único de verdad
 
 > **Documento canónico.** Si hay conflicto entre lo que dice la skill, el código, o algún README suelto: **este archivo gana**.
-> _Última regeneración: 20260906 — v3.7.1 (Flujo M marketing multicanal) — 07-sep-2026 sync Desktop completo_
+> _Última regeneración: 2026-09-12 — importacion-vehiculos v3.9.3 / estudio-mercado v0.4.0 — sync Desktop completo_
 
 ## 📦 ZIPs de skill (builds actuales)
 

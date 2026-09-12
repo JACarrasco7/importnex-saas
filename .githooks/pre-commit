@@ -59,7 +59,7 @@ if [ -f "scripts/check-translations.cjs" ] && [ -f "node_modules/.package-lock.j
 fi
 
 # 4. Tests (solo si cambió código de Tests/ o controlador crítico)
-TEST_FILES=$(echo "$CHANGED_FILES" | grep -E '^(tests/|app/Http/Controllers/(Billing|StripeWebhookController))' || true)
+TEST_FILES=$(echo "$CHANGED_FILES" | grep -E '^(tests/|app/Http/Controllers/(Billing|StripeWebhookController|Api/ImportValuationApiController))' || true)
 if [ -n "$TEST_FILES" ] && [ -f "vendor/bin/phpunit" ]; then
     echo "🧪 Pre-commit: Tests..."
     if ! php artisan test --compact 2>&1 | tail -10; then
@@ -93,8 +93,14 @@ if echo "$CHANGED" | grep -Eq "$CONTEXT_PATTERN"; then
     echo "      - sync.manifest.json       → si cambia version/ruta/token"
     echo "      - .claude/skills/_dist/*.zip → si se editó una skill"
     echo "      - .\scripts\sync-desktop.ps1 -Apply si toca memoria/CLAUDE"
-    COMMIT_MSG=$(git log -1 --format=%B 2>/dev/null || true)
-    if echo "$COMMIT_MSG" | grep -q '\[skip context-gate\]'; then
+    # $1 = path al mensaje del commit actual (lo pasa Git al hook).
+    # Truco: si no hay $1 (hook de testing), probar tambien el ultimo commit
+    # como fallback informativo, sin permitir el escape.
+    SKIPPED=0
+    if [ -n "$1" ] && [ -f "$1" ] && grep -q '\[skip context-gate\]' "$1"; then
+        SKIPPED=1
+    fi
+    if [ "$SKIPPED" = "1" ]; then
         echo "      (saltado por [skip context-gate] en el mensaje)"
     fi
 fi
