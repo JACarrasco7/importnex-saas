@@ -1,15 +1,60 @@
 {
   "version": 1,
   "generated_by": "build-skill-zips.ps1 (manualmente editable: regenerar con -NoCommit y editar)",
+  "purpose": "Indice unico de cableado: que archivo es contexto de que agente y como se sincroniza. Si tocas algo, mira el canal correspondiente aqui primero.",
+  "agents": {
+    "copilot_vscode": {
+      "context_files_auto_loaded": [
+        ".github/copilot-instructions.md",
+        "AGENTS.md",
+        "CLAUDE.md"
+      ],
+      "context_files_on_demand": [
+        "docs/HANDOFF.md",
+        "docs/COMUNICACION-CLAUDE-VSCODE.md",
+        "docs/deploy/SINCRONIZACION-SISTEMAS.md",
+        ".ai/rules/index.md"
+      ],
+      "gatekeeper": ".githooks/pre-commit (context-gate) bloquea commits que tocan estos archivos sin actualizar el contexto"
+    },
+    "claude_desktop": {
+      "context_files_auto_loaded": [
+        "C:\\Users\\jacar\\Desktop\\JJImportMotors\\CLAUDE.md",
+        "C:\\Users\\jacar\\Desktop\\JJImportMotors\\README.md",
+        "C:\\Users\\jacar\\Desktop\\JJImportMotors\\GUIA_INICIO_RAPIDO.md",
+        "C:\\Users\\jacar\\Desktop\\JJImportMotors\\INSTRUCCIONES_PROYECTO.md"
+      ],
+      "context_files_on_demand": [
+        "C:\\Users\\jacar\\Desktop\\JJImportMotors\\HANDOFF.md",
+        "C:\\Users\\jacar\\Desktop\\JJImportMotors\\.claude\\MEMORIA.md",
+        "C:\\Users\\jacar\\Desktop\\JJImportMotors\\.claude\\memoria\\"
+      ],
+      "replication": {
+        "tool": "scripts/sync-desktop.ps1",
+        "masters_repo": "docs/claude-desktop/ + docs/memoria-desktop/",
+        "policy": "repo es canonico; Desktop es espejo"
+      }
+    },
+    "claude_ai_project": {
+      "context_files_auto_loaded": "Contexto del proyecto 'JJ Import Motors' en claude.ai",
+      "replication": "manual (copiar los mismos 7 ficheros de memoria-desktop al Contexto)",
+      "note": "claude.ai no es actualizable desde el repo; la herramienta .bat del ZIP de Claude es el unico camino"
+    },
+    "cowork_claude": {
+      "context_files_auto_loaded": "Skills de la cuenta",
+      "replication": "import manual del .skill.zip desde .claude/skills/_dist/",
+      "note": "Cowork no se actualiza solo; el repo publica ZIPs via GHA build-skills workflow"
+    }
+  },
   "skills": {
     "importacion-vehiculos": {
       "version": "3.9.3",
-      "zip": "skills-importacion-vehiculos-v3.9.3-YYYYMMDD.zip",
+      "zip": "skills-importacion-vehiculos-v3.9.3-20260912.zip",
       "source_dir": ".claude/skills/importacion-vehiculos"
     },
     "estudio-mercado": {
       "version": "0.4.0",
-      "zip": "skills-estudio-mercado-v0.4.0-YYYYMMDD.zip",
+      "zip": "skills-estudio-mercado-v0.4.0-20260912.zip",
       "source_dir": ".claude/skills/estudio-mercado"
     }
   },
@@ -47,8 +92,13 @@
   },
   "api": {
     "endpoint": "https://jjimportmotors.on-forge.com/api/import-valuation",
-    "token_env": "IMPORTNEX_TOKEN"
+    "token_env": "IMPORTNEX_TOKEN",
+    "dry_run_support": true
   },
   "sync_script": "scripts/sync-desktop.ps1",
-  "rules": [".ai/rules/skills-sync.md", ".ai/rules/doc-sync.md"]
+  "rules": [".ai/rules/skills-sync.md", ".ai/rules/doc-sync.md"],
+  "history": {
+    "2026-09-12": "Creado como single source of truth. Agentes y replication declarados. Tras cada cambio, actualizar este manifest ANTES de commitear."
+  }
 }
+

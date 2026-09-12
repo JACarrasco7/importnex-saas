@@ -77,5 +77,28 @@ if [ -n "$VITE_FILES" ] && [ ! -f "public/build/manifest.json" ]; then
 fi
 
 echo ""
+
+# 5. Context cross-agent gatekeeper (12-sep-2026):
+#    Si se toca cualquier archivo del contexto compartido, exige actualizar
+#    HANDOFF.md / COMUNICACION-CLAUDE-VSCODE.md / SINCRONIZACION-SISTEMAS.md /
+#    sync.manifest.json. Soft warning: NO bloquea, pero es visible.
+echo "📋 Pre-commit: context gate (docs/claude-desktop, .ai/rules, skills, sync)..."
+CHANGED=$(git diff --cached --name-only)
+CONTEXT_PATTERN='^(docs/claude-desktop/|docs/memoria-desktop/|docs/HANDOFF\.md$|docs/COMUNICACION-CLAUDE-VSCODE\.md$|docs/deploy/SINCRONIZACION-SISTEMAS\.md$|docs/SKILLS\.md$|docs/DOCS-INDEX\.md$|docs/_sync/|\.ai/rules/|\.claude/skills/|scripts/sync-desktop\.ps1$|scripts/build-skill-zips\.ps1$|subir-informe\.ps1$|subir-informe\.bat$|sync\.manifest\.json$|AGENTS\.md$|CLAUDE\.md$|\.github/copilot-instructions\.md$|app/Events/CarImported\.php$|app/Listeners/NotifyImportWebhook\.php$|app/Http/Controllers/Api/ImportValuationApiController\.php$|tests/Feature/(NotifyImportWebhook|ImportValuationDryRun)Test\.php$|config/services\.php$)'
+if echo "$CHANGED" | grep -Eq "$CONTEXT_PATTERN"; then
+    echo "   ⚠️  Detectado cambio en contexto cross-agent. Verifica antes de commitear:"
+    echo "      - docs/HANDOFF.md          → nueva entrada (≤10 líneas)"
+    echo "      - docs/COMUNICACION-CLAUDE-VSCODE.md → si cambia arquitectura/flujo"
+    echo "      - docs/deploy/SINCRONIZACION-SISTEMAS.md → si cambia sync/canales"
+    echo "      - sync.manifest.json       → si cambia version/ruta/token"
+    echo "      - .claude/skills/_dist/*.zip → si se editó una skill"
+    echo "      - .\scripts\sync-desktop.ps1 -Apply si toca memoria/CLAUDE"
+    COMMIT_MSG=$(git log -1 --format=%B 2>/dev/null || true)
+    if echo "$COMMIT_MSG" | grep -q '\[skip context-gate\]'; then
+        echo "      (saltado por [skip context-gate] en el mensaje)"
+    fi
+fi
+
+echo ""
 echo "✅ Pre-commit checks completados"
 exit 0
