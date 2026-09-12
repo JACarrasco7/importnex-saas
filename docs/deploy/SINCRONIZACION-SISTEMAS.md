@@ -74,9 +74,11 @@
 
 ## ✅ Mejoras pendientes (no implementadas)
 
-- **Webhook Laravel → Claude**: cuando se importa un ZIP, notificar al Desktop (push a una URL local) para que actualice `encargos.md` sin tener que esperar a `subir-informe.ps1`.
+- ~~**Webhook Laravel → Claude**~~ ✅ implementado (12-sep-2026) — ver "Implementado en este commit".
 
 ## ✅ Implementado en este commit (12-sep-2026)
+
+- **Webhook Laravel → Desktop** (canal 7 round-trip): al importar un coche por API (`store()` o `storeModelo()`) Laravel dispara `App\Events\CarImported`. El listener `NotifyImportWebhook` hace `POST` fire-and-forget a `services.importnex_chat.webhook_url` con timeout 2s, secret HMAC-SHA256 opcional, header `X-Webhook-Signature`. **Si falla NO rompe el import.** En local, `scripts/import-notify-receiver.ps1` escucha en `127.0.0.1:8765`, valida el HMAC y reescribe `encargos.md` del skill. Solo queda operativo si defines `IMPORTNEX_CHAT_WEBHOOK_URL` en `.env`. Tests: `tests/Feature/NotifyImportWebhookTest.php` (5 casos).
 
 - **CI en GitHub Actions** (`.github/workflows/build-skills.yml`): en cada push a master valida paths, regenera ZIPs, refresca `docs/SKILLS.md`, commitea el bump si hay cambios, y sube los ZIPs como artefactos descargables. Corre también `ImportValuationDryRunTest`.
 - **`dry_run` en la API** (`POST /api/import-valuation?dry=1` o header `X-Dry-Run: 1`): valida JSON, ejecuta el resolve del coche y devuelve lo que pasaría, **sin escribir en BD**. Útil para que el chat verifique que un JSON entra sin crear coche basura. Test: `tests/Feature/ImportValuationDryRunTest.php` (4 casos: query, header, sin flag crea, JSON inválido devuelve 422).

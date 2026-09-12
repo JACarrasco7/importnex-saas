@@ -10,6 +10,7 @@ use App\Observers\CarDocumentObserver;
 use App\Observers\CarObserver;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
@@ -31,8 +32,22 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureRateLimiters();
         $this->registerObservers();
+        $this->registerEventListeners();
 
         Vite::prefetch(concurrency: 3);
+    }
+
+    /**
+     * Mapeo explicito de listeners (12-sep-2026):
+     * Laravel 11 auto-descubre, pero declararlo aqui hace el contrato
+     * visible y permite tener varios listeners para el mismo evento.
+     */
+    private function registerEventListeners(): void
+    {
+        Event::listen(
+            \App\Events\CarImported::class,
+            \App\Listeners\NotifyImportWebhook::class,
+        );
     }
 
     /**
