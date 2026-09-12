@@ -35,8 +35,6 @@
 
 ## 2026-09-12 21:10 · Copilot-VSCode · sistema de sincronización completo
 
-## 2026-09-12 21:10 · Copilot-VSCode · sistema de sincronización completo
-
 - Hice: doc-sync (`scripts/sync-desktop.ps1` + `sync.manifest.json`), token API por env var, round-trip `encargos.md`, dry_run en API, CI build-skills (GHA), webhook Laravel→Desktop (`CarImported` + `NotifyImportWebhook` + receptor PS1). Fix bug crítico `build-zips.py` (versiones hardcodeadas). Arreglé event() muerto tras return en `ImportValuationApiController` (store + storeModelo). 9 tests nuevos en verde, 28 existentes OK, Pint OK.
 - Toqué: `app/Http/Controllers/Api/*`, `app/Events/CarImported.php`, `app/Listeners/NotifyImportWebhook.php`, `scripts/*`, `subir-informe.*`, `.github/workflows/build-skills.yml`, `docs/deploy/SINCRONIZACION-SISTEMAS.md`
 - ⚠️ PENDIENTE para Claude-Desktop: (1) reimportar skills ZIPs v3.9.3/v0.4.0 (Cowork sigue en 3.6.1/0.3.12); (2) al cerrar sesión, verificar `docs/memoria-desktop/MEMORIA.md` sigue siendo máster (regla `.ai/rules/doc-sync.md`); (3) si usas el webhook receptor, arranca `scripts/import-notify-receiver.ps1` con el secret.

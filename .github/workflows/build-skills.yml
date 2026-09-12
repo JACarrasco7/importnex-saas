@@ -77,21 +77,21 @@ jobs:
           retention-days: 30
 
   test-dry-run:
-    name: Test ImportValuation dry_run
+    name: Test ImportValuation dry_run + webhook
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup PHP
+      # Fix ronda 3 (12-sep-2026): composer/composer-action@v2 NO existe (404).
+      # shivammathur/setup-php ya incluye composer binario -> no hace falta step.
+      # PHP 8.5 porque composer.json exige "php": "^8.5" (con 8.3 falla platform check).
+      - name: Setup PHP 8.5 (composer incluido)
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
-          extensions: mbstring, dom, fileinfo, mysql, sqlite, gd, curl, xml, zip
+          php-version: '8.5'
+          extensions: mbstring, dom, fileinfo, sqlite, gd, curl, xml, zip
           coverage: none
-
-      - name: Setup Composer
-        uses: composer/composer-action@v2
 
       - name: Copy .env
         run: cp .env.example .env
@@ -99,15 +99,10 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
 
-      - name: Generate key + migrate (sqlite en memoria para tests)
-        run: |
-          php artisan key:generate
-          touch database/database.sqlite
-          php artisan migrate --force --env=testing
-        env:
-          DB_CONNECTION: sqlite
-          DB_DATABASE: ':memory:'
+      # Fix ronda 3: el migrate contra :memory: era inutil (la conexion se cierra
+      # y la BD se descarta; phpunit.xml ya usa sqlite :memory: con RefreshDatabase).
+      - name: Generate app key
+        run: php artisan key:generate
 
-      - name: Run dry_run test
-        run: |
-          php artisan test --filter=ImportValuationDryRunTest --compact
+      - name: Run sync tests (dry_run + webhook)
+        run: php artisan test tests/Feature/ImportValuationDryRunTest.php tests/Feature/NotifyImportWebhookTest.php --compact

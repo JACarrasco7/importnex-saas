@@ -263,8 +263,24 @@ class OpenApiController extends Controller
         return [
             'tags' => ['imports'],
             'summary' => 'Upload chat valuation report (JSON or ZIP)',
-            'description' => 'Endpoint used by the chat to import valuation reports into the system. Requires shared token.',
+            'description' => 'Endpoint used by the chat to import valuation reports into the system. Requires shared token. Supports dry_run to validate without writing to DB.',
             'security' => [['sharedToken' => []]],
+            'parameters' => [
+                [
+                    'name' => 'dry',
+                    'in' => 'query',
+                    'required' => false,
+                    'schema' => ['type' => 'boolean', 'default' => false],
+                    'description' => 'dry=1 validates the JSON and resolves the car WITHOUT writing to the DB. Same effect via header X-Dry-Run: 1.',
+                ],
+                [
+                    'name' => 'X-Dry-Run',
+                    'in' => 'header',
+                    'required' => false,
+                    'schema' => ['type' => 'string', 'enum' => ['1']],
+                    'description' => 'Alternative to ?dry=1.',
+                ],
+            ],
             'requestBody' => [
                 'required' => true,
                 'content' => [
@@ -278,6 +294,15 @@ class OpenApiController extends Controller
                     'content' => ['application/json' => ['schema' => ['type' => 'object', 'properties' => [
                         'car_id' => ['type' => 'integer'],
                         'redirect' => ['type' => 'string'],
+                    ]]]],
+                ],
+                '200' => [
+                    'description' => 'dry_run response (only with ?dry=1 or X-Dry-Run: 1) — nothing written to DB',
+                    'content' => ['application/json' => ['schema' => ['type' => 'object', 'properties' => [
+                        'status' => ['type' => 'string', 'enum' => ['dry_run_ok']],
+                        'would_create' => ['type' => 'boolean'],
+                        'car_id' => ['type' => 'integer', 'nullable' => true],
+                        'car_url' => ['type' => 'string', 'nullable' => true],
                     ]]]],
                 ],
                 '401' => ['description' => 'Invalid or missing token'],

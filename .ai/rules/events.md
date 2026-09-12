@@ -40,6 +40,7 @@ class CarImported
 - **Backoff**: array `[5, 30, 120]` para HTTP (reintentos espaciados). Para mail, `[10, 60]`.
 - **Timeout**: property `public int $timeout = 5;` para acotar jobs que pueden colgar.
 - **Nunca lanzar al handler principal**: `try { ... } catch (\Throwable $e) { Log::warning(...) }`. El listener en cola: el job framework reintentara; el listener sincrono: debe morir silencioso para no romper el request.
+- **⚠️ REQUISITO de deploy (ronda 3, 12-sep-2026):** `ShouldQueue` SOLO funciona si hay un **queue worker** corriendo (`php artisan queue:work` o daemon supervisord). En Forge esto es la pestana "Queues" del dashboard o un Daemon en supervisord. **Sin worker + `ShouldQueue` = los jobs se acumulan en `jobs` para siempre y nunca se ejecutan** = el listener nunca hace su trabajo y crece la tabla. Caso real: `NotifyImportWebhook` v3.9.3 uso `ShouldQueue` y empeoro el sistema porque Forge no tiene worker documentado. Verificar que el deploy tiene worker ANTES de marcar un listener como `ShouldQueue`.
 
 ```php
 class NotifyImportWebhook implements ShouldQueue
@@ -49,6 +50,8 @@ class NotifyImportWebhook implements ShouldQueue
     public function handle(CarImported $event): void { ... }
 }
 ```
+
+**Si NO hay worker en produccion**, deja el listener sincrono con `try/catch` + timeout corto. Es peor en latencia (3s peor caso si el webhook remoto esta caido) pero predecible: o se ejecuta y notifica, o falla silencioso. NO se queda colgado en la tabla `jobs` para siempre.
 
 ### Despacho del evento
 

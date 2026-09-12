@@ -19,7 +19,7 @@ trait ParsesImportPayload
      * Lee el body del request como array. Devuelve [array, null] si OK o
      * [null, JsonResponse(422)] si no se pudo parsear.
      *
-     * @return array{0: array, 1: JsonResponse|null}
+     * @return array{0: array|null, 1: JsonResponse|null}
      */
     protected function parseImportPayload(Request $request): array
     {
