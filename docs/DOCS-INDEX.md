@@ -12,6 +12,8 @@
 
 | Doc | Qué | Estado |
 |---|---|---|
+| [`COMUNICACION-CLAUDE-VSCODE.md`](COMUNICACION-CLAUDE-VSCODE.md) | **Guía operativa** de comunicación Claude Desktop ↔ VS Code: rutina diaria, quién toca qué, divergencia | Activo |
+| [`HANDOFF.md`](HANDOFF.md) | **Cuaderno de turno entre agentes** — leer al empezar sesión, escribir al terminar | Activo |
 | [`ARQUITECTURA_VISTAS.md`](ARQUITECTURA_VISTAS.md) | Arquitectura frontend (Inertia/Vue, páginas, layouts) | Activo |
 | [`BRAND.md`](BRAND.md) | Manual de marca JJ Import Motors (estoril/asphalt/platinum) | Activo |
 | [`SKILLS.md`](SKILLS.md) | Índice canónico de los ZIPs de skill, build, SHA, deployments — incluye el problema de las 3 copias (repo/Desktop/Cowork) | Activo |

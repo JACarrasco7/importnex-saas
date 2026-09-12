@@ -42,6 +42,15 @@ sistemas".
 - **Mensual** (día 1) → auditar `docs/DOCS-INDEX.md`: ¿sigue reflejando la realidad? ¿Algún plan en `archivo/` que ya no se consulte? ¿Algún README de subcarpeta desactualizado?
 - **Tras incidente grave** → `docs/memoria-desktop/errores-pasados.md` con causa raíz + fix + cómo detectarlo la próxima vez.
 
+## Protocolo HANDOFF (12-sep-2026)
+
+Antes de trabajar en el repo, todo agente (Copilot/Claude Desktop) DEBE leer
+la última entrada de [`docs/HANDOFF.md`](../../docs/HANDOFF.md) y escribir la
+suya al terminar (qué hizo, qué dejó pendiente, commit). Es el canal de
+comunicación directa entre agentes. Máx ~10 líneas por entrada, nunca editar
+la entrada de otro. Guía operativa completa:
+[`docs/COMUNICACION-CLAUDE-VSCODE.md`](../../docs/COMUNICACION-CLAUDE-VSCODE.md).
+
 ## Trampas conocidas
 
 - **Editar copias en vez del másters** — Desktop y claude.ai son de distribución. Si tocas ahí, mañana divergen de nuevo.

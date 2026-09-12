@@ -15,15 +15,30 @@ class NotifyImportWebhookTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected string $token;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->token = 'test-token-'.bin2hex(random_bytes(16));
+        config(['services.importnex_chat.token' => $this->token]);
+        Organization::factory()->create(['name' => 'JJ Import Motors']);
+    }
+
     public function test_evento_car_imported_se_despacha_al_importar(): void
     {
         Event::fake([CarImported::class]);
 
-        $response = $this->postImport();
+        $response = $this->postJson(
+            '/api/import-valuation',
+            $this->validPayload(),
+            ['X-Import-Token' => $this->token]
+        );
 
         $response->assertStatus(201);
         Event::assertDispatched(CarImported::class, function ($e) use ($response) {
             $data = $response->json();
+
             return $e->car->id === $data['car_id'] && $e->flujo === 'A';
         });
     }
@@ -97,9 +112,13 @@ class NotifyImportWebhookTest extends TestCase
     {
         Event::fake([CarImported::class]);
 
-        $payload = $this->validPayload();
-        $this->postJson('/api/import-valuation?dry=1', $payload, ['X-Import-Token' => $this->token()])
-            ->assertOk()
+        $response = $this->postJson(
+            '/api/import-valuation?dry=1',
+            $this->validPayload(),
+            ['X-Import-Token' => $this->token]
+        );
+
+        $response->assertOk()
             ->assertJsonPath('status', 'dry_run_ok');
 
         Event::assertNotDispatched(CarImported::class);
@@ -107,30 +126,10 @@ class NotifyImportWebhookTest extends TestCase
 
     // ---- helpers ----
 
-    protected function token(): string
-    {
-        return $this->_token ??= 'test-token-'.bin2hex(random_bytes(16));
-    }
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-        config(['services.importnex_chat.token' => $this->token()]);
-        Organization::factory()->create(['name' => 'JJ Import Motors']);
-    }
-
-    private function postImport()
-    {
-        return $this->postJson(
-            '/api/import-valuation',
-            $this->validPayload(),
-            ['X-Import-Token' => $this->token()]
-        );
-    }
-
     private function makeCar(): Car
     {
         $org = Organization::first();
+
         return Car::factory()->create([
             'organization_id' => $org->id,
             'brand' => 'Opel',
@@ -143,51 +142,55 @@ class NotifyImportWebhookTest extends TestCase
         return [
             '_meta' => [
                 'schema_version' => 1,
+                'flujo' => 'A',
                 'generado_el' => '2026-09-12T12:00:00+02:00',
                 'origen' => 'chat-ia',
                 'coche_id' => 'opel-astra-2019-webhook',
-                'client_id' => null,
             ],
             'vehiculo' => [
                 'marca' => 'Opel', 'modelo' => 'Astra', 'version' => '1.4 Turbo',
-                'anio' => 2019, 'km' => 50000, 'combustible' => 'gasolina',
-                'cambio' => 'manual', 'cv' => 125, 'puertas' => 5,
+                'anio' => 2019, 'km' => 50000, 'combustible' => 'Gasolina',
+                'cambio' => 'Manual', 'potencia_cv' => 125, 'co2_gkm' => 120,
             ],
             'anuncio' => [
                 'portal' => 'mobile.de', 'url' => 'https://example.com/x',
-                'vendedor' => 'Test Dealer', 'precio_publicado' => 12000,
-                'moneda' => 'EUR', 'fotos' => [],
+                'pais_origen' => 'Alemania', 'precio_publicado' => 12000,
+                'moneda' => 'EUR', 'vendedor_tipo' => 'Profesional',
             ],
             'investigacion' => [
-                'mecanica' => ['hallazgo' => 'OK', 'fuente' => 'x', 'valoracion' => 'favorable', 'fecha' => '2026-08-01'],
-                'electrico' => ['hallazgo' => 'OK', 'fuente' => 'x', 'valoracion' => 'favorable', 'fecha' => '2026-08-01'],
-                'carroceria' => ['hallazgo' => 'OK', 'fuente' => 'x', 'valoracion' => 'favorable', 'fecha' => '2026-08-01'],
-                'interior' => ['hallazgo' => 'OK', 'fuente' => 'x', 'valoracion' => 'favorable', 'fecha' => '2026-08-01'],
-                'mantenimiento' => ['hallazgo' => 'OK', 'fuente' => 'x', 'valoracion' => 'favorable', 'fecha' => '2026-08-01'],
-                'fiabilidad' => ['hallazgo' => 'OK', 'fuente' => 'x', 'valoracion' => 'favorable', 'fecha' => '2026-08-01'],
-                'recalls' => ['hallazgo' => 'Ninguno', 'fuente' => 'x', 'valoracion' => 'favorable', 'fecha' => '2026-08-01'],
-                'homologacion' => ['hallazgo' => 'OK', 'fuente' => 'x', 'valoracion' => 'favorable', 'fecha' => '2026-08-01'],
-                'seguro' => ['hallazgo' => 'OK', 'fuente' => 'x', 'valoracion' => 'favorable', 'fecha' => '2026-08-01'],
+                'problemas_comunes' => ['hallazgo' => 'OK', 'fuente' => 'x', 'valoracion' => 'favorable'],
+                'recalls' => ['hallazgo' => 'Ninguno', 'fuente' => 'x', 'valoracion' => 'favorable'],
+                'precio_mercado' => ['hallazgo' => 'OK', 'fuente' => 'x', 'valoracion' => 'favorable'],
+                'fiabilidad' => ['hallazgo' => 'OK', 'fuente' => 'x', 'valoracion' => 'favorable'],
+                'homologacion' => ['hallazgo' => 'OK', 'fuente' => 'x', 'valoracion' => 'favorable'],
+                'etiqueta_ambiental' => ['hallazgo' => 'C', 'fuente' => 'DGT', 'valoracion' => 'neutro'],
+                'seguro' => ['hallazgo' => '600 EUR/an', 'fuente' => 'x', 'valoracion' => 'neutro'],
+                'piezas' => ['hallazgo' => 'Alta', 'fuente' => 'x', 'valoracion' => 'favorable'],
+                'otros' => ['hallazgo' => '', 'fuente' => '', 'valoracion' => ''],
             ],
             'balance' => [
-                'pros' => [['text' => 'Buen estado', 'weight' => 1]],
-                'cons' => [['text' => 'Color raro', 'weight' => 1]],
+                'a_favor' => [['texto' => 'Buen estado', 'peso' => 'alto']],
+                'en_contra' => [['texto' => 'Color raro', 'peso' => 'medio']],
             ],
             'veredicto' => [
-                'decision' => 'buy', 'confianza' => 'high',
-                'razonamiento' => 'OK', 'cambiaria' => 'precio',
+                'recomendacion' => 'Comprar', 'confianza' => 'alta',
+                'razonamiento' => 'Precio ajustado a mercado.', 'precio_objetivo' => 11500,
+                'fecha' => '12/09/2026',
             ],
             'costes' => [
-                'coste_compra' => 12000, 'transporte' => 900,
-                'ausfuhr' => 114, 'itv_import' => 115, 'iedmt' => 0,
-                'gestoria' => 200, 'total_puesto' => 13329,
+                'precio_coche' => 12000, 'pvp_nuevo' => 24000,
+                'transporte' => 900, 'itv_matriculacion' => 115,
+                'tasa_dgt' => 20.61, 'iedmt_estimado' => 0,
+                'gestoria' => 200, 'otros' => 114,
+                'coste_total' => 13349.61, 'honorarios' => 1500,
+                'precio_cliente' => 14849.61,
             ],
             'mercado' => [
-                'comparables' => [], 'posicion' => 'media',
-                'recomendacion_precio' => 12500,
+                'comparables' => [], 'precio_medio' => 12500,
+                'precio_min' => 11500, 'precio_max' => 13500,
+                'ahorro_estimado' => 500, 'semaforo' => 'green',
             ],
+            'avisos' => [],
         ];
     }
-
-    private string $_token = '';
 }

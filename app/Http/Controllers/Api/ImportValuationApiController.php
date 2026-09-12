@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
 use App\Events\CarImported;
+use App\Http\Controllers\Controller;
 use App\Models\Car;
 use App\Models\Cierre;
 use App\Models\InvestigationCache;
@@ -85,20 +85,26 @@ class ImportValuationApiController extends Controller
             return response()->json(['error' => 'Import failed: '.$e->getMessage()], 500);
         }
 
-        return response()->json([
-            'status' => $wasNew ? 'created' : 'updated',
-            'car_id' => $car->id,
-            'car_url' => url("/cars/{$car->id}"),
-        ], $wasNew ? 201 : 200);
-
-        // Canal 7 (sin esto la sync de encargos.md se pierde). Despues de enviar
-        // la respuesta al chat, se notifica al Desktop para que anote el encargo.
-        event(new \App\Events\CarImported(
+        // Canal 7 (sin esto la sync de encargos.md se pierde): al importar un
+        // coche se despacha el evento; el listener NotifyImportWebhook avisa al
+        // Desktop local si IMPORTNEX_CHAT_WEBHOOK_URL esta configurado.
+        event(new CarImported(
             car: $car,
             flujo: 'A',
             carUrl: url("/cars/{$car->id}"),
             schemaVersion: (string) ($payload['_meta']['schema_version'] ?? '1'),
         ));
+
+        return response()->json([
+            'status' => $wasNew ? 'created' : 'updated',
+            'car_id' => $car->id,
+            'car_url' => url("/cars/{$car->id}"),
+        ], $wasNew ? 201 : 200);
+    }
+
+    /**
+     * Importa un informe de modelo (Flujo B) — investigación sin decisión de venta.
+     *
      * Idéntico a store() pero valida que _meta.flujo = "B" y elimina publicidad si viene.
      *
      * Uso desde el chat (curl):
@@ -150,20 +156,20 @@ class ImportValuationApiController extends Controller
             return response()->json(['error' => 'Import failed: '.$e->getMessage()], 500);
         }
 
-        return response()->json([
-            'status' => $wasNew ? 'created' : 'updated',
-            'flujo' => 'B',
-            'car_id' => $car->id,
-            'car_url' => url("/cars/{$car->id}"),
-        ], $wasNew ? 201 : 200);
-
-        // Ver Store() para explicacion del evento.
+        // Canal 7 — ver store() para la explicacion del evento.
         event(new CarImported(
             car: $car,
             flujo: 'B',
             carUrl: url("/cars/{$car->id}"),
             schemaVersion: (string) ($payload['_meta']['schema_version'] ?? '1'),
         ));
+
+        return response()->json([
+            'status' => $wasNew ? 'created' : 'updated',
+            'flujo' => 'B',
+            'car_id' => $car->id,
+            'car_url' => url("/cars/{$car->id}"),
+        ], $wasNew ? 201 : 200);
     }
 
     /**
