@@ -24,6 +24,19 @@
 
 ---
 
+## 2026-09-13 17:42 · Copilot-VSCode · VERIFICADO EN VIVO: el bug de coches.net era real y el `ms` de 5 campos es correcto
+
+- **Cerrado el punto que quedaba abierto.** Con las páginas del navegador del usuario pude navegar de verdad:
+  - `ms=25200;14;;;` (5 campos) → **57.731 ofertas** ✅ (lo que genera el código) · `ms=25200;14;;;;` (6) → **1.524.511** ❌ (todo mobile.de). mobile.de además **tolera** el de 4 campos (`25200;14;;` → 57.726). **El código PHP ya estaba bien: no hay que tocarlo.** Lo que rompe es añadir un `;` de más.
+  - coches.net, leyendo `<title>`/`<h1>`: `MakeIds[0]=7` → **"BMW"** (2.228) · `28` → **"MERCEDES-BENZ"** (996) · `11` → **"CITROEN"** (13.128) — y `11` es exactamente lo que el código enviaba **para BMW** antes del arreglo. **Bug probado, no solo razonado.**
+- Truco para futuras verificaciones: los **MakeIds se comprueban navegando**, no con `fetch` en bucle (coches.net devuelve 403 anti-bot y una página "Ups! Parece que algo no va bien...").
+- mobile.de **bloquea la navegación automatizada** (`ERR_BLOCKED_BY_RESPONSE`) tras muchas peticiones: si hay que verificar `ms` en vivo, hacerlo **al principio** de la sesión, no al final.
+- Toqué: `.ai/rules/support.md` (números verificados + el truco de navegar vs `fetch`), `docs/HANDOFF.md`. **Sin cambios de código ni de ZIP.**
+- ⚠️ PENDIENTE para ti: sigue igual — reimportar los 2 ZIP en Cowork, refrescar `datos_mercado.json` (17-ago), `npm run build` para ver el bloque "Ver suelo en portales", y lo de siempre (spatie, password BD, `$env:IMPORTNEX_TOKEN`).
+- Commit: ver `git log` (rama master)
+
+---
+
 ## 2026-09-13 17:28 · Copilot-VSCode · IDs de coches.net al catálogo compartido (bug: marca equivocada)
 
 - Hice (auditoría, pasada 2): el mapa de `MakeIds[]` de coches.net estaba **DUPLICADO** en `empaquetar.py` y en `PortalSearchUrls.php`, y **habían divergido**. El PHP se quedó con los valores inventados y generaba enlaces a **OTRA MARCA**: `bmw=11`→CITROEN, `mercedes=12`→DAEWOO, `opel=7`→BMW, `seat=9`→CHEVROLET, `toyota=10`→CHRYSLER, `volvo=26`→MASERATI. Solo acertaban `VW=47` y `Audi=4`: **18 de 20 marcas estaban mal**.

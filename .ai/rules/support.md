@@ -61,6 +61,10 @@ https://suchen.mobile.de/fahrzeuge/search.html?dam=0&fr=<a-1>:<a+1>
    anuncios NO es 0 **y que el filtro "Marca, modelo, versión" muestra la marca+modelo**
    (no "Todo") — con un `;` de más el contador siempre da un número grande pero está
    mostrando el catálogo entero sin filtrar.
+   Números **verificados en vivo** el 13-sep-2026 (VW Golf, `makeId`=25200, `modelId`=14):
+   `ms=25200;14;;;` → **57.731 ofertas** ✅ · `ms=25200;14;;;;` → **1.524.511** ❌ (todo
+   mobile.de, sin filtrar). mobile.de además **tolera** el de 4 campos (`25200;14;;` →
+   57.726), pero el canónico son 5 campos. Lo que rompe es añadir un `;` **de más**.
 4. Actualizar el JSON y anotar la fecha en `verificado`.
 
 > ⚠️ Hay que **cargar la página completa** (`page.goto` con recarga real): en navegación
@@ -79,7 +83,18 @@ https://www.coches.net/segunda-mano/?MakeIds[0]=47&Versions[0]=Golf
   `Golf`); la generación/variante rompe el filtro.
 - `ModelIds[0]` es **preferible**: usarlo cuando el modelo esté mapeado, `Versions[0]`
   como fallback. Verificados 13-sep-2026: VW `MakeIds[0]`=47 · Golf `ModelIds[0]`=89.
+  La URL completa que genera Laravel para un Golf de 330 CV
+  (`MakeIds[0]=47&ModelIds[0]=89&PowerHpFrom=325&PowerHpTo=335&fi=Price&or=1`) devuelve
+  **"VOLKSWAGEN Golf" · 56 anuncios desde 39.900 €**: modelo filtrado y ordenado por
+  precio, que es justo el SUELO que la función promete. Si algún día sale "VOLKSWAGEN"
+  a secas con miles de anuncios, el `ModelIds[0]` se ha caído.
 - Los corchetes van **literales** (`MakeIds[0]=`), no `%5B`.
+- **Comprobado en vivo** el 13-sep-2026 (navegando a `/segunda-mano/?MakeIds[0]=<id>` y
+  leyendo `<title>`/`<h1>`): `7` → "BMW" (2.228) · `28` → "MERCEDES-BENZ" (996) ·
+  `11` → **"CITROEN"** (13.128) — que es justo el ID que el código enviaba **para BMW**
+  antes del arreglo. Con esto el bug queda probado, no solo razonado.
+  ⚠️ Verificar MakeIds en vivo requiere **navegar** (un `fetch` en bucle recibe el anti-bot
+  de coches.net y devuelve 403).
 - **Los 134 `MakeIds[0]` están en el catálogo compartido** (`app/Support/data/mobile-de-catalogo.json`,
   clave `cochesnet`, junto a los de mobile.de). **No hardcodear ni inventar mapas**: Laravel y
   `empaquetar.py` lo leen de ahí. Tenerlo duplicado ya causó un bug real — la copia del PHP se
