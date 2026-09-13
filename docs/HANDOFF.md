@@ -24,6 +24,19 @@
 
 ---
 
+## 2026-09-13 19:43 · Copilot-VSCode · sección "Guía" dentro de la app (menú de la organización)
+
+- **Lo que pedía el usuario:** ver las guías **dentro de la web**, no solo en markdown suelto. Ya había un intento a medias: el sidebar traía la sección preparada pero **comentada** ("la ruta `guide.index` aún no existe y Ziggy lanza errores") y existía un `Pages/Guide/Index.vue` con una guía **escrita a mano en HTML**.
+- Hecho: ruta `guide.index` (`/guias`) + `guide.show` (`/guias/{slug}`), sección **Guía** activada en el menú, y `GuideController` que **convierte los markdown del repo** (`docs/guias/*.md` + la guía rápida) a HTML. Ahora el contenido vive en **un solo sitio**: el markdown.
+- **No se perdió nada:** la guía que estaba hardcodeada en el `.vue` se pasó a `docs/guias/00-guia-de-uso.md` (mismo texto, en markdown) antes de sustituir la página.
+- Seguridad: el slug se traduce con **whitelist** (nunca se lee una ruta de la URL) y el markdown se convierte con `html_input=strip`. Cubierto por test (incluye un intento de path traversal).
+- ⚠️ Para añadir una guía nueva: fichero en `docs/guias/` **y** registrarlo en el whitelist de `GuideController`.
+- Verificado: **699 tests** OK, Pint limpio, `npm run build` hecho y manifest con `Guide/Index.vue`.
+- Toqué: `GuideController`, `routes/web.php`, `Pages/Guide/Index.vue`, `AuthenticatedLayout.vue`, `docs/guias/00-guia-de-uso.md`, `GuideControllerTest`.
+- Commit: ver `git log` (rama master)
+
+---
+
 ## 2026-09-13 19:24 · Copilot-VSCode · guías de uso: ahora dicen QUÉ PEDIR (y el caso "revisar un segmento")
 
 - Las guías explicaban cada flujo, pero **no decían cómo pedirlo**. Añadida al índice una tabla **"Cómo pedirlo — ejemplos reales"** con la frase que dispara cada uno de los **6 flujos** (A/B/C/D/E + M automático).

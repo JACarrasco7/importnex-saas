@@ -99,9 +99,14 @@ actualizan a mano después de editar el máster, nunca al revés. Ídem skills:
 
 ## 📚 Guías de flujos — [`guias/`](guias/README.md)
 
-01-primeros-pasos → 08-solucion-problemas: Flujos **A** (unidad), **B** (modelo),
-**C** (mercado / segmento), **D** (descubrimiento) y **E** (stock), + informes,
-cierre de venta y troubleshooting. Con [`guias/ejemplos/`](guias/ejemplos/) reales.
+`00-guia-de-uso` → `08-solucion-problemas`: los 2 flujos de trabajo explicados paso a paso,
+Flujos **A** (unidad), **B** (modelo), **C** (mercado / segmento), **D** (descubrimiento) y
+**E** (stock), + informes, cierre de venta y troubleshooting.
+Con [`guias/ejemplos/`](guias/ejemplos/) reales.
+
+> **Se ven dentro de la app**: sección **Guía** del menú lateral (`/guias`), renderizadas desde
+> estos mismos markdown por `App\Http\Controllers\GuideController`. Para publicar una guía nueva:
+añadir el fichero a `docs/guias/` y registrarlo en el whitelist del controlador.
 
 El [índice de guías](guias/README.md) empieza con una tabla de **"cómo pedirlo"**: la frase que
 dispara cada flujo — p. ej. *"quiero revisar SUVs deportivas: RSQ3, Tiguan R y similares, con un
