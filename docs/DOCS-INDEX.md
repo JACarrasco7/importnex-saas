@@ -99,9 +99,13 @@ actualizan a mano después de editar el máster, nunca al revés. Ídem skills:
 
 ## 📚 Guías de flujos — [`guias/`](guias/README.md)
 
-01-primeros-pasos → 08-solucion-problemas: Flujos A (unidad), B (modelo),
-C (mercado), D (descubrimiento), informes, cierre de venta, troubleshooting.
-Con [`guias/ejemplos/`](guias/ejemplos/) reales.
+01-primeros-pasos → 08-solucion-problemas: Flujos **A** (unidad), **B** (modelo),
+**C** (mercado / segmento), **D** (descubrimiento) y **E** (stock), + informes,
+cierre de venta y troubleshooting. Con [`guias/ejemplos/`](guias/ejemplos/) reales.
+
+El [índice de guías](guias/README.md) empieza con una tabla de **"cómo pedirlo"**: la frase que
+dispara cada flujo — p. ej. *"quiero revisar SUVs deportivas: RSQ3, Tiguan R y similares, con un
+plan de búsqueda por marca"* → **Flujo C**.
 
 ## 🤖 Puente con Claude — [`claude/`](claude/README.md)
 

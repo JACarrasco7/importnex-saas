@@ -24,6 +24,17 @@
 
 ---
 
+## 2026-09-13 19:24 · Copilot-VSCode · guías de uso: ahora dicen QUÉ PEDIR (y el caso "revisar un segmento")
+
+- Las guías explicaban cada flujo, pero **no decían cómo pedirlo**. Añadida al índice una tabla **"Cómo pedirlo — ejemplos reales"** con la frase que dispara cada uno de los **6 flujos** (A/B/C/D/E + M automático).
+- **Caso que faltaba y es el más habitual**: revisar **un segmento partiendo de modelos conocidos** — *"quiero revisar SUVs deportivas: Audi RSQ3, VW Tiguan R y similares, con un plan de búsqueda por marca"*. Es **FLUJO C**, documentado en `docs/guias/04-flujo-c-mercado.md` §1b: qué devuelve (oferta · suelo · mediana · hueco · veredicto por modelo + comparativa) y 3 avisos al leerlo (suelo ≠ mediana; hay que controlar el año o el hueco cambia de signo; oferta escasa = mediana poco fiable).
+- Corregido de paso: el índice decía "skill v2.9.0" (real: **3.9.7**) y el resumen de 30 s mencionaba solo 3 de los 6 flujos.
+- ⚠️ Para el lado Claude: si el encargo es *"revisar una categoría/familia de coches"* → **Flujo C**, NO D (D es cuando **no** hay modelo, solo presupuesto). Y si algo no encaja en ningún flujo, **preguntar**, no improvisar (regla dura del 17-ago).
+- Toqué: `docs/guias/README.md`, `docs/guias/04-flujo-c-mercado.md`, `docs/DOCS-INDEX.md`.
+- Commit: ver `git log` (rama master)
+
+---
+
 ## 2026-09-13 18:33 · Copilot-VSCode · 🔴 INCIDENTE: credencial de la BD de Forge publicada en el repo
 
 - **Qué pasó:** revisando por qué el token no me servía, miré `forge-mysql-tunnel.bat` y tenía la **password de la BD de producción en texto plano**. Ese archivo **está rastreado por git**, está en **2 commits** del historial, y el repo `github.com/JACarrasco7/importnex-saas` es **PÚBLICO**. Es decir: credencial de producción visible para cualquiera. Queda también expuesto el host SSH y el usuario.
