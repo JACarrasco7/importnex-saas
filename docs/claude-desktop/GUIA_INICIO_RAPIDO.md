@@ -72,6 +72,32 @@ qué oportunidades hay ahora mismo para importar a España:
 - gasolina o híbrido enchufable
 ```
 
+#### 💡 La variante más útil: revisar UNA familia de coches
+
+Si no quieres "el mercado entero" sino **un tipo concreto** (SUVs deportivas, familiares,
+compactos...), **nombra 2-3 modelos que la definan** y Claude completa los rivales de cada
+marca:
+
+```
+quiero revisar SUVs deportivas:
+- Audi RSQ3
+- VW Tiguan R
+- y los equivalentes de otras marcas
+
+dame un plan de búsqueda por marca: qué rivales tiene cada una,
+cuánta oferta hay, a qué precio y si merece la pena importarlo
+```
+
+Te devuelve, **por cada modelo**: oferta en 🇩🇪 y 🇪🇸 · el más barato (suelo) · la **mediana** ·
+el hueco ya con los costes de importación · veredicto 🟢🟡🔴. Y lo más útil de todo: la
+**comparativa**, es decir *cuál de toda la familia es el que hay que mirar*.
+
+> ⚠️ **Dos cosas al leer el informe:**
+> 1. Compara siempre **el mismo año**. Sin controlar la matriculación se mezclan generaciones
+>    y el hueco **cambia de signo** (le pasó al Mercedes A 45 AMG: -15% y luego +6,2%).
+> 2. No te fíes del **coche más barato** — casi siempre es el peor de la muestra (siniestro,
+>    kilometraje, importado de terceros). Para decidir se usa la **mediana**.
+
 ### 🟣 Flujo D — Descubrimiento (cliente sin modelo claro)
 
 ```
@@ -86,6 +112,26 @@ Claude hará el embudo D1→D2→D3 (sin saltar fases):
 - **D3** tú eliges 2-3 modelos → cada uno pasa a Flujo B → candidato → Flujo A
 
 > Además, confirmará la **modalidad de honorarios M1/M2/M3** (incluidos / aparte / no se cobran) y la **tarifa ES reducida (~500 €)** si la unidad está en España.
+
+---
+
+### 🔴 Flujo E — Stock para ofertar
+
+Cuando quieres **varios candidatos del mismo modelo** (no un encargo de cliente, sino tener
+con qué ofertar):
+
+```
+consígueme 5 Golf GTI para ofertar
+- 2019+, menos de 90.000 km
+- hasta 32.000 € puestos en Huelva
+```
+
+Es búsqueda con datos de mercado (oferta, mediana, hueco). **No** es marketing: los anuncios y
+el copy para redes salen después.
+
+> **Flujo M (marketing)** no se pide: se activa solo cuando evalúas un coche (Flujo A) y sale
+> **🟢 OPORTUNIDAD**. Genera el texto para los 3 portales y las 3 redes sociales, más el
+> anuncio de Facebook Marketplace.
 
 ---
 
@@ -120,11 +166,14 @@ Claude hará el embudo D1→D2→D3 (sin saltar fases):
 | Evaluar 1 coche | `evalúa este: <URL>` |
 | Buscar modelo con briefing | `encargo personal X, año Y, km Z` |
 | Ver mercado completo | `qué merece la pena, presupuesto X-Yk, <resto>` |
+| **Revisar una familia de coches** | `quiero revisar SUVs deportivas: RSQ3, Tiguan R y similares, con plan por marca` |
 | Refinar una búsqueda | `filtra más por <filtro>` o `amplía a <rango>` |
 | Precio de un modelo | `cuánto cuesta traer un X desde Alemania?` |
 | Solo ES | `en España, donde encontrar X?` |
 | Ver histórico | `qué tengo medido de X?` (lee modelos-medidos.md) |
 | Comparar DE vs ES | `¿dónde sale mejor este modelo, en España o Alemania?` |
+| **Stock para ofertar** | `consígueme 5 <modelo> para ofertar` |
+| **Marketing de un coche** | *(automático)* aparece al evaluar un coche con veredicto 🟢 |
 
 ---
 
