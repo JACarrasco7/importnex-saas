@@ -24,6 +24,18 @@
 
 ---
 
+## 2026-09-13 · Copilot-VSCode · auditoría ronda 4 (2 pasadas) + fixes
+
+- Hice: dos auditorías externas independientes (4A sync/API, 4B app/seguridad) que destaparon 4 críticos + 9 importantes. Aplicados todos: `scripts/LockFile.ps1` (race en encargos.md), guard producción en `build-skill-zips.ps1`, multi-tenant explícito en `alerts:generate`, límite 1000 modelos, clamp `?limit`, rate-limit por token, chunk/lazy en 4 comandos, `queue:prune-failed`, HSTS, purga de backups, throttle Stripe, `inspire` fuera.
+- **Los propios tests cazaron 2 bugs que introduje** (withoutOverlapping sin name → LogicException; throttle numérico → viola convención). Arreglados.
+- **Suite completa: 673 passed · 6 skipped · 0 failed.** Pint limpio.
+- Hallazgo colateral: **`public/hot` ralentiza cada request ~2s** (Vite::prefetch contra el dev server). No afecta a producción. `PerformanceAuditTest` ahora se salta esos tests con mensaje claro si el archivo existe.
+- Toqué: `app/Console/Commands/*`, `app/Http/Middleware/SecurityHeaders.php`, `app/Providers/AppServiceProvider.php`, `app/Http/Controllers/Api/ImportValuationApiController.php`, `routes/console.php`, `routes/web.php`, `scripts/*`, `subir-informe.ps1`, `.ai/rules/{index,events,auth-roles}.md`, `tests/Feature/Round4GuardsTest.php`, `docs/AUDITORIA_ronda4_2026-09-13.md`
+- ⚠️ PENDIENTE para ti (decisiones, no hay código bloqueado): (1) `spatie/laravel-permission` → implementar o desinstalar (`.ai/rules/auth-roles.md`); (2) rotar password BD Forge; (3) `$env:IMPORTNEX_TOKEN`; (4) reimportar ZIPs en Cowork. Opcionales documentados: CORS, backup de BD, `kpis()` a SQL, `savePhotos()` con `Http::pool()`.
+- Commit: ver `git log` (rama master)
+
+---
+
 ## 2026-09-12 22:30 · Copilot-VSCode · auditoria externa + opciones (M1-M7)
 
 - Hice: auditoria con subagente Explore (16 chequeos, 4 criticos P1-P4 + 4 importantes P5-P8 + trampas B1-B10). Fix: NotifyImportWebhook implements ShouldQueue (tries=3, backoff=5) [P1], pre-commit usa $1 en vez de git log -1 [P2], footer SKILLS.md actualizado a v3.9.3/v0.4.0 [P3], MEMORIA.md skill v3.9.3 [P4], BOM CHANGELOG eliminado [P5], build-zips.py autodetecta skills (excluye las de Copilot/Claude Code) [P6], sync-desktop limpia ZIPs solo de la skill regenerada [M5], sync-desktop distingue NO INSTALADA vs DIFF [P10], DRY controller: 5 endpoints usan trait ParsesImportPayload [M1], try/catch en Stop/Close del listener receptor [M3], doc IMPORTNEX_TOKEN en .env.example [M4]. 9/9 tests verdes, Pint OK.

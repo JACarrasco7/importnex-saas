@@ -106,7 +106,11 @@ Route::get('/sw.js', function () {
 })->name('pwa.sw');
 
 // Stripe webhook (must be outside auth/csrf middleware)
-Route::post('stripe/webhook', [StripeWebhookController::class, 'handleWebhook']);
+// (auditoria ronda 4, sep-2026): throttle nombrado evita que un atacante
+// spammee webhooks invalidos forzando verificacion HMAC-SHA256 por peticion.
+// 60/min es suficiente para retries reales de Stripe (max 3 dias x N eventos).
+Route::post('stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])
+    ->middleware('throttle:stripe-webhook');
 
 // Public car request form
 // URL: /request/{slug} — public form for clients to send car preferences

@@ -24,6 +24,9 @@ param(
 $ErrorActionPreference = "Continue"
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
+# --- Lock para encargos.md (auditoria ronda 4) ------------------------------
+. "$PSScriptRoot\scripts\LockFile.ps1"
+
 # --- Token desde entorno (NO hardcoded) ------------------------------------
 $TOKEN = $env:IMPORTNEX_TOKEN
 if (-not $TOKEN) {
@@ -60,7 +63,7 @@ $linea
 - **Notas:** [round-trip automatico por subir-informe.ps1 - revisar manualmente]
 
 "@
-        Add-Content -Path $skillEncargos -Value $bloque -Encoding UTF8
+        Add-ContentLocked -Path $skillEncargos -Value $bloque
         Write-Host "  > round-trip anotado en encargos.md" -ForegroundColor DarkGray
     } catch {
         Write-Host "  (Round-trip fallo: $_)" -ForegroundColor Yellow

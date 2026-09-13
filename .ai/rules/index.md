@@ -12,4 +12,5 @@ Before planning or editing, find the row whose globs match the file's path and r
 | .claude/skills/**, docs/SKILLS.md, docs/DOCS-INDEX.md, scripts/build-skill-zips.ps1 | .ai/rules/skills-sync.md |
 | docs/**, .github/copilot-instructions.md, .ai/rules/index.md, AGENTS.md, CLAUDE.md, app/Http/Controllers/**, app/Models/**, app/Services/**, routes/**, config/** | .ai/rules/doc-sync.md |
 | app/Events/**, app/Listeners/**, app/Observers/** | .ai/rules/events.md |
+| app/Models/User.php, app/Http/Middleware/TelescopeAccess.php, config/permission.php | .ai/rules/auth-roles.md |
 | ** (cambio en contexto cross-agent) | .ai/rules/context-gate.md |

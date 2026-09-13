@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Events\CarImported;
+use App\Listeners\NotifyImportWebhook;
 use App\Models\Alert;
 use App\Models\Car;
 use App\Models\CarDocument;
@@ -45,8 +47,8 @@ class AppServiceProvider extends ServiceProvider
     private function registerEventListeners(): void
     {
         Event::listen(
-            \App\Events\CarImported::class,
-            \App\Listeners\NotifyImportWebhook::class,
+            CarImported::class,
+            NotifyImportWebhook::class,
         );
     }
 
@@ -71,8 +73,16 @@ class AppServiceProvider extends ServiceProvider
         });
 
         // 20 req/min — write/mutation APIs (POST/PUT/PATCH/DELETE)
+        // (auditoria ronda 4, sep-2026): oficinas con NAT/CGNAT comparten IP,
+        // asi que un bucket por IP penaliza a todos. Si llega X-Import-Token,
+        // keyar por hash del token (identificable en logs aunque sea compartido).
         RateLimiter::for('api-write', function (Request $request) {
-            return Limit::perMinute(20)->by($request->user()?->id ?: $request->ip());
+            $token = $request->header('X-Import-Token');
+            $key = $request->user()?->id
+                ?: ($token ? 't:'.substr(hash('sha256', $token), 0, 16) : null)
+                ?: $request->ip();
+
+            return Limit::perMinute(20)->by($key);
         });
 
         // 5 req/10min — heavy operations (AI verification, scraping)
@@ -88,6 +98,14 @@ class AppServiceProvider extends ServiceProvider
         // 10 req/min — public forms (newsletter, car request, contact)
         RateLimiter::for('public-form', function (Request $request) {
             return Limit::perMinute(10)->by($request->ip());
+        });
+
+        // 60 req/min — Stripe webhook (auditoria ronda 4, sep-2026).
+        // Stripe valida HMAC de cada payload, asi que un atacante puede
+        // forzar verificacion criptografica con spam de eventos invalidos.
+        // 60/min cubre de sobra los reintentos reales de Stripe.
+        RateLimiter::for('stripe-webhook', function (Request $request) {
+            return Limit::perMinute(60)->by($request->ip());
         });
     }
 

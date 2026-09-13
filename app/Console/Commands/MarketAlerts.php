@@ -27,26 +27,30 @@ class MarketAlerts extends Command
         $outliers = 0;
         $oportunidades = 0;
 
-        foreach (MarketModel::with('history')->get() as $model) {
-            // Outlier: delta de hueco bruto vs la medición anterior > 15 puntos
-            $delta = null;
-            $prev = $model->history->sortByDesc('medido_el')->first();
-            if ($prev && $prev->hueco_pct !== null && $model->hueco_pct !== null) {
-                $delta = (float) $model->hueco_pct - (float) $prev->hueco_pct;
-                if (abs($delta) > 15) {
-                    $outliers++;
-                    $this->warn("  [OUTLIER] {$model->modelo}: hueco {$prev->hueco_pct}% → {$model->hueco_pct}% (Δ {$delta} pts) — revisar medición o cambio real de mercado");
-                    $this->notify($model, 'market_outlier', "Cambio brusco de hueco en {$model->modelo}: Δ {$delta} pts");
+        // (auditoria ronda 4, sep-2026): ->get() carga todo en memoria.
+        // ->chunk(500) itera por lotes, evita OOM con miles de modelos.
+        MarketModel::with('history')->chunk(500, function ($models) use (&$outliers, &$oportunidades) {
+            foreach ($models as $model) {
+                // Outlier: delta de hueco bruto vs la medición anterior > 15 puntos
+                $delta = null;
+                $prev = $model->history->sortByDesc('medido_el')->first();
+                if ($prev && $prev->hueco_pct !== null && $model->hueco_pct !== null) {
+                    $delta = (float) $model->hueco_pct - (float) $prev->hueco_pct;
+                    if (abs($delta) > 15) {
+                        $outliers++;
+                        $this->warn("  [OUTLIER] {$model->modelo}: hueco {$prev->hueco_pct}% → {$model->hueco_pct}% (Δ {$delta} pts) — revisar medición o cambio real de mercado");
+                        $this->notify($model, 'market_outlier', "Cambio brusco de hueco en {$model->modelo}: Δ {$delta} pts");
+                    }
+                }
+
+                // Oportunidad recién marcada (sin histórico previo de oportunidad)
+                if ($model->oportunidad && $model->veredicto === 'verde') {
+                    $oportunidades++;
+                    $this->info("  [CHOLLO] {$model->modelo}: precio_desde_de ".number_format((float) $model->precio_desde_de).' € vs mediana '.number_format((float) $model->mediana_de).' €');
+                    $this->notify($model, 'market_chollo', "Chollo detectado: {$model->modelo} a ".number_format((float) $model->precio_desde_de).' €');
                 }
             }
-
-            // Oportunidad recién marcada (sin histórico previo de oportunidad)
-            if ($model->oportunidad && $model->veredicto === 'verde') {
-                $oportunidades++;
-                $this->info("  [CHOLLO] {$model->modelo}: precio_desde_de ".number_format((float) $model->precio_desde_de).' € vs mediana '.number_format((float) $model->mediana_de).' €');
-                $this->notify($model, 'market_chollo', "Chollo detectado: {$model->modelo} a ".number_format((float) $model->precio_desde_de).' €');
-            }
-        }
+        });
 
         $this->info("market:alerts — {$outliers} outliers · {$oportunidades} oportunidades");
 

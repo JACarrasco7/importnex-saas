@@ -24,6 +24,12 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+# Lock concurrente para encargos.md (auditoria ronda 4, sep-2026).
+# Si subir-informe.ps1 corre a la vez que este receiver, sin lock P2
+# sobrescribe la entrada de P1 (Add-Content no es atomico).
+$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+. (Join-Path $scriptDir 'LockFile.ps1')
+
 $encargosPath = Join-Path $env:USERPROFILE 'Desktop\JJImportMotors\.claude\skills\importacion-vehiculos\memoria\encargos.md'
 $secret = $env:IMPORTNEX_CHAT_WEBHOOK_SECRET
 
@@ -101,7 +107,7 @@ $linea
 - **Notas:** [webhook; revisar manualmente si falla]
 
 "@
-            Add-Content -Path $encargosPath -Value $bloque -Encoding UTF8
+            Add-ContentLocked -Path $encargosPath -Value $bloque
             Write-Host "  OK  car_id=$carId  flujo=$flujo  anadido a encargos.md" -ForegroundColor Green
 
             $resp.StatusCode = 200

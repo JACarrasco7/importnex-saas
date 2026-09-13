@@ -198,6 +198,14 @@ class ImportValuationApiController extends Controller
             return response()->json(['error' => 'Field "modelos" must be an array.'], 422);
         }
 
+        // Limite defensivo (auditoria ronda 4, sep-2026): si llegan 100k modelos,
+        // el INSERT por modelo dentro de transaccion bloquea la BD minutos.
+        if (count($payload['modelos']) > 1000) {
+            return response()->json([
+                'error' => 'Field "modelos" exceeds max length (1000). Split into multiple scouting imports.',
+            ], 422);
+        }
+
         // Validar campos requeridos en cada modelo
         foreach ($payload['modelos'] as $i => $modeloData) {
             foreach (['modelo', 'hueco_pct', 'n_uds_de'] as $field) {
@@ -627,8 +635,9 @@ class ImportValuationApiController extends Controller
                 $query->veredictoPositivo();
             }
 
+            $limit = max(1, min(500, (int) $request->query('limit', 100)));
             $cierres = $query->orderByDesc('fecha_investigacion')
-                ->limit($request->query('limit', 100))
+                ->limit($limit)
                 ->get();
 
             // Agregar estadísticas resumidas

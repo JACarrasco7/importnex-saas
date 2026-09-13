@@ -17,6 +17,7 @@ use Illuminate\Console\Command;
 class GenerateAutomaticAlerts extends Command
 {
     protected $signature = 'alerts:generate';
+
     protected $description = 'Generate automatic alerts for stale cars and clients without contact';
 
     public function handle(): int
@@ -39,31 +40,36 @@ class GenerateAutomaticAlerts extends Command
     {
         $threshold = now()->subDays(30);
 
-        $cars = Car::whereIn('status', ['Located', 'Offered', 'Reserved'])
-            ->where('updated_at', '<', $threshold)
-            ->get();
-
+        // (auditoria ronda 4, sep-2026): el globalScope de Car NO se aplica en
+        // comandos porque `auth()->check()` es false -> filtraba nada. Forzar
+        // filtro explicito aqui y abajo evita cross-tenant alerts.
         $created = 0;
-        foreach ($cars as $car) {
-            $existing = Alert::where('reference_type', 'car')
-                ->where('reference_id', $car->id)
-                ->where('alert_type', 'car_stale')
-                ->where('resolved', false)
-                ->exists();
+        Car::withoutGlobalScope('organization')
+            ->whereIn('status', ['Located', 'Offered', 'Reserved'])
+            ->where('updated_at', '<', $threshold)
+            ->select(['id', 'organization_id', 'brand', 'model', 'status', 'updated_at'])
+            ->chunk(500, function ($cars) use (&$created) {
+                foreach ($cars as $car) {
+                    $existing = Alert::where('reference_type', 'car')
+                        ->where('reference_id', $car->id)
+                        ->where('alert_type', 'car_stale')
+                        ->where('resolved', false)
+                        ->exists();
 
-            if (! $existing) {
-                $daysSinceUpdate = $car->updated_at->diffInDays(now());
-                Alert::create([
-                    'organization_id' => $car->organization_id,
-                    'alert_type' => 'car_stale',
-                    'reference_type' => 'car',
-                    'reference_id' => $car->id,
-                    'message' => "Car {$car->brand} {$car->model} has been in '{$car->status}' status for {$daysSinceUpdate} days.",
-                    'resolved' => false,
-                ]);
-                $created++;
-            }
-        }
+                    if (! $existing) {
+                        $daysSinceUpdate = $car->updated_at->diffInDays(now());
+                        Alert::create([
+                            'organization_id' => $car->organization_id,
+                            'alert_type' => 'car_stale',
+                            'reference_type' => 'car',
+                            'reference_id' => $car->id,
+                            'message' => "Car {$car->brand} {$car->model} has been in '{$car->status}' status for {$daysSinceUpdate} days.",
+                            'resolved' => false,
+                        ]);
+                        $created++;
+                    }
+                }
+            });
 
         return $created;
     }
@@ -75,38 +81,41 @@ class GenerateAutomaticAlerts extends Command
     {
         $threshold = now()->subDays(14);
 
-        $clients = Client::whereIn('status', ['New', 'Briefing', 'Quote sent', 'Negotiating'])
-            ->get();
-
+        // Idem: forzar sin global scope + chunk (round 4)
         $created = 0;
-        foreach ($clients as $client) {
-            $lastLog = ClientContactLog::where('client_id', $client->id)
-                ->orderBy('contact_date', 'desc')
-                ->first();
+        Client::withoutGlobalScope('organization')
+            ->whereIn('status', ['New', 'Briefing', 'Quote sent', 'Negotiating'])
+            ->select(['id', 'organization_id', 'name', 'created_at'])
+            ->chunk(500, function ($clients) use (&$created, $threshold) {
+                foreach ($clients as $client) {
+                    $lastLog = ClientContactLog::where('client_id', $client->id)
+                        ->orderBy('contact_date', 'desc')
+                        ->first();
 
-            $lastContact = $lastLog?->contact_date ?? $client->created_at;
+                    $lastContact = $lastLog?->contact_date ?? $client->created_at;
 
-            if ($lastContact->lt($threshold)) {
-                $existing = Alert::where('reference_type', 'client')
-                    ->where('reference_id', $client->id)
-                    ->where('alert_type', 'client_no_contact')
-                    ->where('resolved', false)
-                    ->exists();
+                    if ($lastContact->lt($threshold)) {
+                        $existing = Alert::where('reference_type', 'client')
+                            ->where('reference_id', $client->id)
+                            ->where('alert_type', 'client_no_contact')
+                            ->where('resolved', false)
+                            ->exists();
 
-                if (! $existing) {
-                    $daysSinceContact = $lastContact->diffInDays(now());
-                    Alert::create([
-                        'organization_id' => $client->organization_id,
-                        'alert_type' => 'client_no_contact',
-                        'reference_type' => 'client',
-                        'reference_id' => $client->id,
-                        'message' => "Client {$client->name} has not been contacted in {$daysSinceContact} days.",
-                        'resolved' => false,
-                    ]);
-                    $created++;
+                        if (! $existing) {
+                            $daysSinceContact = $lastContact->diffInDays(now());
+                            Alert::create([
+                                'organization_id' => $client->organization_id,
+                                'alert_type' => 'client_no_contact',
+                                'reference_type' => 'client',
+                                'reference_id' => $client->id,
+                                'message' => "Client {$client->name} has not been contacted in {$daysSinceContact} days.",
+                                'resolved' => false,
+                            ]);
+                            $created++;
+                        }
+                    }
                 }
-            }
-        }
+            });
 
         return $created;
     }

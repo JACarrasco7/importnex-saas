@@ -30,6 +30,12 @@ class SecurityHeaders
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
         $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
 
+        // (auditoria ronda 4, sep-2026): HSTS fuerza HTTPS durante 1 anio.
+        // Sin esto un atacante en la misma red puede hacer SSL stripping.
+        // Forge ya redirige HTTP→HTTPS; este header indica a navegadores
+        // que nuncausen HTTP para subdominios tampoco.
+        $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+
         return $response;
     }
 }

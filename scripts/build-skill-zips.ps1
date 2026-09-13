@@ -28,6 +28,16 @@ param(
     [switch]$ValidateOnly
 )
 
+# Guardia (auditoria ronda 4, sep-2026): este script hace `git push origin master`
+# con `--no-verify`. Si por error corre en Forge (que tambien tiene el repo
+# clonado), commitearia y pushearia estado de produccion al repo publico.
+if ($env:APP_ENV -eq 'production') {
+    throw 'build-skill-zips.ps1 NO debe correr en produccion (APP_ENV=production). Solo local.'
+}
+if ($env:FORGE_SERVER_ID -or $env:FORGE_ENV) {
+    throw 'build-skill-zips.ps1 detecta variable Forge ($FORGE_SERVER_ID o $FORGE_ENV). Solo local.'
+}
+
 $ErrorActionPreference = 'Stop'
 
 $root        = (Resolve-Path "$PSScriptRoot\..").Path

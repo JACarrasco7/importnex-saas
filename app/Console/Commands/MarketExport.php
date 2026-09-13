@@ -26,10 +26,13 @@ class MarketExport extends Command
 
     public function handle(): int
     {
+        // (auditoria ronda 4, sep-2026): necesitamos todos los modelos para
+        // agrupar por categoria/marca en el JSON, pero cargar miles con
+        // ->get() OOM-ea. lazy() usa cursor PHP y no materializa.
         $models = MarketModel::query()
             ->with('history')
             ->when($this->option('org'), fn ($q) => $q->whereHas('organization', fn ($o) => $o->where('name', $this->option('org'))))
-            ->get();
+            ->lazy(500);
 
         if ($models->isEmpty()) {
             $this->warn('No hay modelos de mercado para exportar.');

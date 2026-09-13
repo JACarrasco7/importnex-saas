@@ -22,6 +22,7 @@
 | [`PLAN_MARKETING_ZIP_2026-09-03.md`](PLAN_MARKETING_ZIP_2026-09-03.md) | Plan original del pipeline ZIP de skill (lo que disparó todo) | Histórico |
 | [`PLAN_MARKETING_MULTICANAL_2026-09-06.md`](PLAN_MARKETING_MULTICANAL_2026-09-06.md) | Plan del Flujo M (marketing multicanal 6 canales) | Activo |
 | [`AUDITORIA_estudio-mercado_2026-09-12.md`](AUDITORIA_estudio-mercado_2026-09-12.md) | Auditoría de la skill estudio-mercado (v0.4.0) | Activo |
+| [`AUDITORIA_ronda4_2026-09-13.md`](AUDITORIA_ronda4_2026-09-13.md) | Auditoría ronda 4 (2 pasadas externas): race condition encargos.md, multi-tenant en comandos, HSTS, chunk/OOM, `public/hot` | Activo |
 | [`PENDIENTES_v3.9.2_2026-09-12.md`](PENDIENTES_v3.9.2_2026-09-12.md) | Pendientes abiertos de la 3.9.2 | Activo |
 
 Regla dura de sincronización de skills: [`../.ai/rules/skills-sync.md`](../.ai/rules/skills-sync.md)
