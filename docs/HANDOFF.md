@@ -24,6 +24,18 @@
 
 ---
 
+## 2026-09-13 · Copilot-VSCode · enlaces de suelo corregidos al spec canónico
+
+- Hice: el usuario pasó dos URLs de ejemplo (Arteon Shooting Brake R) y al contrastarlas con `playbook_filtrado.md` §"URL de resultados reales" aparecieron **dos bugs míos**: (1) `pw` de mobile.de va en **kW** (`cv × 0,7355 ±4`) y yo mandaba CV — un 290cv pedía 209:217 kW y yo pedía 261:319, que **excluía el propio coche**; (2) el `ms` son **cinco campos** `makeId;modelId;;;` y yo mandaba cuatro. Además mi mapa de makeIds (copiado de `empaquetar.py`) tenía IDs duplicados/inventados (Hyundai y Nissan = `21000`, Volvo = `25100`) → ahora solo los vigentes.
+- Verificado en navegador: `coches.net/segunda-mano/?MakeIds[0]=47&Versions[0]=Golf&PowerHpFrom=285&PowerHpTo=295&fi=Price&or=1` → *"VOLKSWAGEN GOLF de segunda mano y ocasión"*. El enlace que genera Laravel para tu Golf TCR es **idéntico**.
+- **Hallazgo sobre mobile.de:** su URL canónica del 24-ago abre hoy con **0 Angebote en modo formulario** incluso con `ms=25200;12603;;;` (el modelId verificado entonces). Los IDs de modelo **caducan**. Por eso el generador: reutiliza el `modelId` de `busquedas_realizadas` si existe, si no cae a texto libre (`q=`) — y **no inventa IDs**. Si abres el enlace de mobile.de y no ves tarjetas, es esto.
+- Toqué: `app/Support/PortalSearchUrls.php` (reescrito), `tests/Feature/CarEnlacesSueloTest.php` (14 tests), `.ai/rules/support.md`, `docs/guias/02-flujo-a-unidad.md`.
+- ⚠️ **NO usar `record-rule` en `app/Support/**`**: reescribe `.ai/rules/index.md` y borró 7 filas. Lo restauré y amplié a 23 filas; el aviso está dentro de `support.md`.
+- ⚠️ PENDIENTE para ti: **sigue todo lo de las dos entradas anteriores** (spatie, rotar password BD, `$env:IMPORTNEX_TOKEN`, reimportar ZIPs en Cowork). Ojo: la nota anterior decía que el formato de coches.net del skill estaba mal — **era mi lectura, no su error**; el skill usa `MakeIds+Versions` y funciona. No toqué `.claude/`.
+- Commit: ver `git log` (rama master)
+
+---
+
 ## 2026-09-13 · Copilot-VSCode · enlaces "ver suelo" en la ficha del coche
 
 - Hice: nueva sección **"Ver suelo en portales"** en la pestaña Mercado de la ficha del coche. Genera enlaces a `mobile.de` (DE) y `coches.net` (ES) desde los datos del coche, **ordenados por precio ascendente**, para comparar el suelo a mano. Cubre los coches sin `mercado.busquedas_realizadas[]` (importados antes del 09-sep).

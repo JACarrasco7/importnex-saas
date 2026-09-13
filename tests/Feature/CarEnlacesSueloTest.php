@@ -13,9 +13,9 @@ use Tests\TestCase;
  * coches.net (ES) generados desde los datos del coche, ordenados por precio
  * ascendente. Cubren los coches cuyo ZIP no trae `mercado.busquedas_realizadas[]`.
  *
- * Los formatos de URL siguen los verificados por Claude (12/15-ago-2026):
- *  - mobile.de  -> suchen.mobile.de/fahrzeuge/search.html?...&sb=p
- *  - coches.net -> /segunda-mano/coches/<slug>?...&fi=Price&or=1
+ * Formatos según el spec canónico de la skill (`playbook_filtrado.md`, 24-ago):
+ *  - mobile.de  -> suchen.mobile.de/fahrzeuge/search.html?...&sb=p, `pw` en kW
+ *  - coches.net -> /segunda-mano/?MakeIds[0]=..&Versions[0]=..&fi=Price&or=1
  */
 class CarEnlacesSueloTest extends TestCase
 {
@@ -34,51 +34,83 @@ class CarEnlacesSueloTest extends TestCase
         $this->assertFalse($enlaces[1]['en_informe']);
     }
 
-    public function test_mobile_de_ordena_por_precio_y_filtra_marca_anio_y_potencia(): void
+    public function test_mobile_de_usa_kw_en_la_potencia_con_margen_de_4(): void
     {
+        // 335 cv × 0,7355 = 246,39 kW → 246 ± 4 = 242:250 (en CV sería 335).
         $url = $this->cocheCon([])->enlacesSuelo[0]['url'];
 
         $this->assertStringStartsWith('https://suchen.mobile.de/fahrzeuge/search.html?', $url);
-        $this->assertStringContainsString('sb=p', $url);            // orden por precio asc = suelo
-        $this->assertStringContainsString('dam=0', $url);           // sin siniestros
-        $this->assertStringContainsString('ms=25200%3B%3B%3B', $url); // VW
-        $this->assertStringContainsString('fr=2018%3A2020', $url);  // ±1 año
-        $this->assertStringContainsString('pw=301%3A369', $url);    // 335 cv ±10%
+        $this->assertStringContainsString('pw=242%3A250', $url);
+        $this->assertStringContainsString('sb=p', $url);             // precio asc = suelo
+        $this->assertStringContainsString('dam=0', $url);            // sin siniestros
+        $this->assertStringContainsString('isSearchRequest=true', $url);
+        $this->assertStringContainsString('od=up', $url);
+        $this->assertStringContainsString('fr=2018%3A2020', $url);   // ±1 año
         // El dominio /es/ está deprecado: cae en modo formulario sin tarjetas.
         $this->assertStringNotContainsString('www.mobile.de/es', $url);
     }
 
-    public function test_coches_net_usa_el_path_de_marca_modelo_y_ordena_por_precio(): void
+    public function test_mobile_de_usa_ms_con_el_model_id_verificado(): void
     {
+        // VW Golf Mk7.5 = 12603 (mapa de IDs verificados de mobile.de).
+        $url = $this->cocheCon(['brand' => 'VW', 'model' => 'Golf 7.5 TCR'])->enlacesSuelo[0]['url'];
+
+        // `ms` son CINCO campos: makeId;modelId;;;
+        $this->assertStringContainsString('ms=25200%3B12603%3B%3B%3B', $url);
+        $this->assertStringNotContainsString('q=', $url);
+    }
+
+    public function test_mobile_de_cae_a_texto_libre_si_no_hay_model_id(): void
+    {
+        // Sin modelId conocido, `ms` deja la página en modo formulario (0 tarjetas).
+        $url = $this->cocheCon([])->enlacesSuelo[0]['url'];
+
+        $this->assertStringContainsString('q=Volkswagen+Arteon', $url);
+        $this->assertStringNotContainsString('ms=', $url);
+    }
+
+    public function test_mobile_de_reutiliza_el_model_id_de_las_busquedas_del_informe(): void
+    {
+        $url = $this->cocheCon([
+            'busquedas_realizadas' => [
+                ['pais' => 'DE', 'portal' => 'mobile.de', 'url' => 'https://suchen.mobile.de/fahrzeuge/search.html?ms=25200%3B64%3B%3B%3B&sb=p', 'descripcion' => 'Arteon 320 CV'],
+            ],
+        ])->enlacesSuelo[0]['url'];
+
+        $this->assertStringContainsString('ms=25200%3B64%3B%3B%3B', $url);
+        $this->assertStringNotContainsString('q=', $url);
+    }
+
+    public function test_coches_net_usa_make_ids_versions_y_potencia_en_cv(): void
+    {
+        // Verificado en navegador 13-sep-2026: MakeIds[0]=47&Versions[0]=Golf
+        // -> "VOLKSWAGEN GOLF de segunda mano y ocasión | Coches.net".
         $url = $this->cocheCon([])->enlacesSuelo[1]['url'];
 
-        $this->assertStringStartsWith('https://www.coches.net/volkswagen/arteon/segunda-mano/?', $url);
-        $this->assertStringContainsString('fi=Price', $url);        // campo de orden
-        $this->assertStringContainsString('or=1', $url);            // ascendente = suelo
-        $this->assertStringContainsString('MinYear=2018', $url);
-        $this->assertStringContainsString('PowerHpFrom=301', $url);
-        $this->assertStringContainsString('PowerHpTo=369', $url);
-        // Regla dura SKILL.md v3.3.8: nunca filtrar por `Versions[]`.
-        $this->assertStringNotContainsString('Versions', $url);
+        $this->assertSame(
+            'https://www.coches.net/segunda-mano/?MakeIds[0]=47&Versions[0]=Arteon&PowerHpFrom=330&PowerHpTo=340&fi=Price&or=1',
+            $url
+        );
     }
 
-    public function test_coches_net_usa_solo_el_primer_token_del_modelo(): void
+    public function test_coches_net_limpia_la_generacion_del_modelo(): void
     {
-        // Verificado en navegador: `golf-7-5-tcr` degrada a la página de marca,
-        // `golf` sí devuelve "VOLKSWAGEN Golf de segunda mano".
-        $url = $this->cocheCon(['model' => 'Golf 7.5 TCR'])->enlacesSuelo[1]['url'];
+        // `Versions[0]` es texto libre: la generación/variante rompe el filtro.
+        $url = $this->cocheCon(['brand' => 'VW', 'model' => 'Golf 7.5 TCR'])->enlacesSuelo[1]['url'];
 
-        $this->assertStringStartsWith('https://www.coches.net/volkswagen/golf/segunda-mano/?', $url);
+        $this->assertStringContainsString('Versions[0]=Golf', $url);
+        $this->assertStringNotContainsString('7.5', $url);
     }
 
-    public function test_coches_net_con_modelo_numerico_usa_dos_tokens(): void
+    public function test_coches_net_conserva_modelo_numerico(): void
     {
         $url = $this->cocheCon(['brand' => 'BMW', 'model' => '3 Series'])->enlacesSuelo[1]['url'];
 
-        $this->assertStringStartsWith('https://www.coches.net/bmw/3-series/segunda-mano/?', $url);
+        $this->assertStringContainsString('MakeIds[0]=11', $url);
+        $this->assertStringContainsString('Versions[0]=3+Series', $url);
     }
 
-    public function test_sin_potencia_omite_los_filtros_de_cv(): void
+    public function test_sin_potencia_omite_los_filtros_de_potencia(): void
     {
         $enlaces = $this->cocheCon(['cv' => 0])->enlacesSuelo;
 
@@ -86,12 +118,11 @@ class CarEnlacesSueloTest extends TestCase
         $this->assertStringNotContainsString('PowerHp', $enlaces[1]['url']);
     }
 
-    public function test_sin_anio_omite_los_filtros_de_fecha(): void
+    public function test_sin_anio_omite_el_filtro_de_fecha(): void
     {
-        $enlaces = $this->cocheCon(['year' => ''])->enlacesSuelo;
+        $url = $this->cocheCon(['year' => ''])->enlacesSuelo[0]['url'];
 
-        $this->assertStringNotContainsString('fr=', $enlaces[0]['url']);
-        $this->assertStringNotContainsString('MinYear', $enlaces[1]['url']);
+        $this->assertStringNotContainsString('fr=', $url);
     }
 
     public function test_sin_marca_o_modelo_no_genera_enlaces(): void
@@ -113,20 +144,25 @@ class CarEnlacesSueloTest extends TestCase
         $this->assertFalse($enlaces[1]['en_informe']);  // coches.net no
     }
 
-    public function test_acepta_marca_con_alias_corto(): void
+    public function test_marca_desconocida_usa_texto_libre_y_no_filtra_marca(): void
     {
-        $enlaces = $this->cocheCon(['brand' => 'VW'])->enlacesSuelo;
+        $enlaces = $this->cocheCon(['brand' => 'Tesla', 'model' => 'Model 3'])->enlacesSuelo;
 
-        $this->assertStringContainsString('ms=25200%3B%3B%3B', $enlaces[0]['url']);
-        $this->assertStringStartsWith('https://www.coches.net/volkswagen/arteon/segunda-mano/?', $enlaces[1]['url']);
+        $this->assertStringContainsString('q=Tesla+Model+3', $enlaces[0]['url']);
+        $this->assertStringNotContainsString('ms=', $enlaces[0]['url']);
+        $this->assertStringNotContainsString('MakeIds', $enlaces[1]['url']);
+        $this->assertStringContainsString('Versions[0]=Model', $enlaces[1]['url']);
     }
 
-    public function test_marca_desconocida_no_rompe_la_url(): void
+    public function test_alias_corto_de_marca_resuelve_los_ids(): void
     {
-        $url = $this->cocheCon(['brand' => 'Tesla', 'model' => 'Model 3'])->enlacesSuelo[0]['url'];
+        $enlaces = $this->cocheCon(['brand' => 'VW', 'model' => 'Golf 7.5 TCR'])->enlacesSuelo;
 
-        $this->assertStringStartsWith('https://suchen.mobile.de/fahrzeuge/search.html?', $url);
-        $this->assertStringNotContainsString('ms=', $url);
+        $this->assertStringContainsString('ms=25200%3B12603%3B%3B%3B', $enlaces[0]['url']);
+        $this->assertSame(
+            'https://www.coches.net/segunda-mano/?MakeIds[0]=47&Versions[0]=Golf&PowerHpFrom=330&PowerHpTo=340&fi=Price&or=1',
+            $enlaces[1]['url']
+        );
     }
 
     /**
