@@ -1719,31 +1719,97 @@ def _semaforo_de_reco(reco: str) -> str:
 #   - coches.net: MakeIds[] + Versions[] (versión libre)
 #   - wallapop: query libre
 #   - autouncle: no tiene buscador público usable, omitido
-MARCA_MODEL_ID_MOBILE_DE = {
+# ⚠️ REVISADO 13-sep-2026 (v3.9.4). Los valores anteriores eran INVENTADOS y
+# producían URLs que apuntaban a OTRA MARCA: `ford=24500` es en realidad TVR,
+# `opel=47000` no existe (es 19000), `skoda=2400` (es 22900), `seat=12200`
+# (es 22500), `cupra=25900` (es 3), `citroen=5000` (es 5900), y
+# `nissan`/`hyundai` compartían 21000. Se han QUITADO las marcas cuyo ID no se
+# pudo verificar por conteo de anuncios: sin ID la URL cae a búsqueda por texto
+# (`q=`), que es bastante mejor que filtrar por la marca equivocada.
+#
+# Los IDs de mobile.de CADUCAN: el `Golf Mk7.5 = 12603` del playbook devolvía
+# **0 anuncios** el 13-sep-2026; el vigente es `14` (57.717). Catálogo completo
+# en `references/mobile-de-ids.json`.
+MARCA_ID_MOBILE_DE = {
     "vw": "25200",
     "volkswagen": "25200",
+    "audi": "1900",
     "bmw": "3500",
     "mercedes": "17200",
     "mercedes-benz": "17200",
-    "audi": "1900",
-    "opel": "47000",
+    "porsche": "20100",
     "ford": "9000",
-    "seat": "12200",
-    "skoda": "2400",
-    "renault": "7300",
-    "peugeot": "5900",
-    "citroen": "5000",
-    "fiat": "4000",
-    "honda": "11000",
-    "hyundai": "21000",
-    "kia": "22300",
-    "mazda": "16800",
-    "nissan": "21000",
+    "skoda": "22900",
+    "opel": "19000",
     "toyota": "24100",
     "volvo": "25100",
-    "cupra": "25900",
-    "ds": "19500",
+    "cupra": "3",
+    "seat": "22500",
+    "dacia": "6600",
+    "citroen": "5900",
 }
+
+# ModelIds de coches.net verificados (preferibles a `Versions[]`, texto libre).
+# Golf = 89 comprobado el 13-sep-2026.
+MODELO_ID_COCHES_NET = {"47": {"golf": 89}}
+
+_CATALOGO_IDS = None
+
+
+def _catalogo_ids():
+    """Carga references/mobile-de-ids.json (marcas + modelIds de mobile.de)."""
+    global _CATALOGO_IDS
+    if _CATALOGO_IDS is None:
+        import json
+        from pathlib import Path
+        ruta = Path(__file__).resolve().parent.parent / "references" / "mobile-de-ids.json"
+        try:
+            _CATALOGO_IDS = json.loads(ruta.read_text(encoding="utf-8"))
+        except Exception:
+            _CATALOGO_IDS = {}
+    return _CATALOGO_IDS
+
+
+def _clave_id(texto):
+    """Normaliza para buscar en los catalogos ('Golf 7.5 TCR' -> 'golf75tcr')."""
+    import re
+    import unicodedata
+    t = unicodedata.normalize("NFKD", (texto or "").lower())
+    t = "".join(c for c in t if not unicodedata.combining(c))
+    return re.sub(r"[^a-z0-9]", "", t)
+
+
+def _modelo_id_mobile_de(marca, modelo):
+    """modelId de mobile.de para (marca, modelo), o None si no esta en el catalogo.
+
+    Prueba de la clave mas especifica a la mas generica ('golf75tcr', 'golf75',
+    'golf') y, como ultimo recurso, una clave que sea prefijo del modelo
+    ('320' para '320d').
+    """
+    import re
+    make_id = MARCA_ID_MOBILE_DE.get((marca or "").lower())
+    if not make_id:
+        return None
+    modelos = (_catalogo_ids().get("modelos") or {}).get(make_id) or {}
+    if not modelos:
+        return None
+    plano = _clave_id(modelo)
+    partes = [p for p in re.split(r"[^a-z0-9]+", (modelo or "").lower()) if p]
+    candidatos = [plano]
+    if len(partes) > 1:
+        candidatos.append("".join(partes[:2]))
+        candidatos.append(partes[0])
+    if partes:
+        sin_letra = re.sub(r"[^0-9]+$", "", partes[0])
+        if sin_letra and sin_letra != partes[0]:
+            candidatos.append(sin_letra)
+    for clave in candidatos:
+        if clave in modelos:
+            return modelos[clave]
+    for clave, mid in modelos.items():
+        if len(str(clave)) >= 2 and plano.startswith(str(clave)):
+            return mid
+    return None
 
 CARROCERIA_ID_MOBILE_DE = {
     # 'sedan', 'familiar', 'coupe', 'suv', 'compacto', 'monovolumen'
@@ -1758,15 +1824,17 @@ CARROCERIA_ID_MOBILE_DE = {
 
 def _url_mobile_de(marca: str, modelo: str, anio_min: int, anio_max: int,
                    cv_min: int, cv_max: int, carroceria: str) -> str:
-    """Genera URL de búsqueda mobile.de. Si no tenemos el ID de marca/modelo,
-    devuelve una URL con query libre (que SÍ funciona pero no es tan precisa)."""
-    mid = MARCA_MODEL_ID_MOBILE_DE.get(marca.lower())
-    # En mobile.de, `ms=MarcaID;ModeloID;;` (4 segmentos; el segundo es modelo).
-    if mid:
-        ms = f"{mid};;;"
-    else:
-        ms = ""
-    cid = CARROCERIA_ID_MOBILE_DE.get(carroceria.lower(), "")
+    """URL de busqueda mobile.de ordenada por precio (el SUELO).
+
+    - `pw` va en **kW**, NO en cv: kW = cv x 0,7355 (+-4 kW de margen). Mandar cv
+      filtraba por una potencia imposible y dejaba FUERA el propio coche.
+    - `ms` son **cinco campos** (`makeId;modelId;;;`). Sin `modelId` la pagina
+      cae en modo formulario sin tarjetas, asi que ahi se filtra por texto (`q=`).
+    - `dam=0` (sin siniestros), `sb=p` (precio ascendente), `isSearchRequest=true`.
+    """
+    make_id = MARCA_ID_MOBILE_DE.get((marca or "").lower())
+    modelo_id = _modelo_id_mobile_de(marca, modelo)
+    cid = CARROCERIA_ID_MOBILE_DE.get((carroceria or "").lower(), "")
 
     params = {
         "dam": "0",
@@ -1779,10 +1847,17 @@ def _url_mobile_de(marca: str, modelo: str, anio_min: int, anio_max: int,
     }
     if cid:
         params["c"] = cid
+
     if cv_min and cv_max:
-        params["pw"] = f"{cv_min}:{cv_max}"
-    if ms:
-        params["ms"] = ms
+        kw_desde = int(cv_min * 0.7355) - 4
+        kw_hasta = int(cv_max * 0.7355) + 4
+        if kw_desde > 0 and kw_hasta > kw_desde:
+            params["pw"] = f"{kw_desde}:{kw_hasta}"
+
+    if make_id and modelo_id:
+        params["ms"] = f"{make_id};{modelo_id};;;"
+    else:
+        params["q"] = f"{marca} {modelo}".strip()
 
     qs = "&".join(f"{k}={quote_plus(str(v))}" for k, v in params.items() if v != "")
     return f"https://suchen.mobile.de/fahrzeuge/search.html?{qs}" if qs else ""
@@ -1795,7 +1870,7 @@ def _url_autoscout24_es(marca: str, modelo: str, anio_min: int, anio_max: int,
     slug = f"{marca}-{modelo}".lower().replace(" ", "-").replace("--", "-")
     return (
         f"https://www.autoscout24.es/lst/{_q(slug)}?"
-        f"atype=C&cy={anio_min}%2C{anio_max}&"
+        f"atype=C&"
         f"powerfrom={cv_min}&powerto={cv_max}&sort=price&desc=0&"
         f"ustate=N%2CU&"
         f"fregfrom={anio_min}&fregto={anio_max}"
@@ -1806,12 +1881,23 @@ def _url_coches_net(marca: str, modelo: str, anio_min: int, anio_max: int,
                     cv_min: int, cv_max: int, carroceria: str) -> str:
     """URL de búsqueda en coches.net (mercado español). Usa MakeIds y
     Versions como query param array; el ID exacto de marca hay que mapearlo."""
+    # MakeIds de coches.net — extraidos del payload de coches.net (13-sep-2026).
+    # La tabla anterior era INVENTADA: `bmw=11` devolvia CITROEN, `mercedes=12`
+    # DAEWOO, `opel=7` BMW, `toyota=10` CHRYSLER, `volvo=26` MASERATI... Solo
+    # acertaban VW=47 y Audi=4. Los IDs NO van por orden alfabetico simple
+    # (Mercedes es 28 y VW 47; Cupra es 1400 y Seat 39).
     marca_ids = {
-        "vw": 47, "volkswagen": 47, "bmw": 11, "mercedes": 12, "audi": 4,
-        "opel": 7, "ford": 5, "seat": 9, "skoda": 17, "renault": 13,
-        "peugeot": 14, "citroen": 15, "fiat": 16, "honda": 18,
-        "hyundai": 22, "kia": 23, "mazda": 24, "nissan": 25,
-        "toyota": 10, "volvo": 26, "cupra": 27,
+        "vw": 47, "volkswagen": 47, "audi": 4, "bmw": 7,
+        "mercedes": 28, "mercedes-benz": 28, "porsche": 34, "ford": 15,
+        "opel": 32, "seat": 39, "skoda": 40, "cupra": 1400, "dacia": 1011,
+        "citroen": 11, "peugeot": 33, "renault": 35, "fiat": 14, "honda": 69,
+        "hyundai": 18, "kia": 22, "mazda": 27, "nissan": 31, "toyota": 46,
+        "volvo": 48, "ds": 1358, "mini": 222, "mitsubishi": 30, "suzuki": 44,
+        "subaru": 43, "jeep": 21, "jaguar": 20, "land rover": 24,
+        "landrover": 24, "lexus": 25, "mg": 29, "ssangyong": 42, "smart": 41,
+        "rover": 37, "saab": 38, "isuzu": 19, "tesla": 1354,
+        "polestar": 1402, "chevrolet": 9, "chrysler": 10, "lancia": 23,
+        "byd": 1352, "infiniti": 1025,
     }
     body_type = {
         "sedan": 1, "compacto": 2, "familiar": 4, "suv": 5,
@@ -1820,7 +1906,12 @@ def _url_coches_net(marca: str, modelo: str, anio_min: int, anio_max: int,
     make_id = marca_ids.get(marca.lower(), 0)
     bt = body_type.get(carroceria.lower(), 0)
     parts = [f"MakeIds[0]={make_id}"] if make_id else []
-    if modelo:
+    # `ModelIds[0]` es preferible a `Versions[0]`: `Versions[]` es texto libre y
+    # depende del etiquetado del vendedor (regla dura v3.3.8).
+    modelo_id = MODELO_ID_COCHES_NET.get(str(make_id), {}).get(_clave_id(modelo))
+    if modelo_id:
+        parts.append(f"ModelIds[0]={modelo_id}")
+    elif modelo:
         parts.append(f"Versions[0]={quote_plus(modelo)}")
     if bt:
         parts.append(f"ArrBodyType={bt}")

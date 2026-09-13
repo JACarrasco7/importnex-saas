@@ -269,11 +269,16 @@ https://suchen.mobile.de/fahrzeuge/search.html
 - `pw=<kWdesde>%3A<kWhasta>` para filtrar por rango de potencia en kW (clave para la doble pasada).
 - `dam=0` (NO dañados), `isSearchRequest=true` (mantiene resultados aunque cambies filtros), `od=up` (orden: precio ascendente).
 
-**Plantilla Golf R 310cv Mk7.5 2017-2020, ≤180k km:**
+**Plantilla Golf R 310cv 2017-2020, ≤180k km:**
 ```
-https://suchen.mobile.de/fahrzeuge/search.html?dam=0&fr=2017%3A2020&isSearchRequest=true&ml=%3A180000&ms=25200%3B12603%3B%3B%3B&od=up&s=Car&sb=p&vc=Car&pw=224%3A232
+https://suchen.mobile.de/fahrzeuge/search.html?dam=0&fr=2017%3A2020&isSearchRequest=true&ml=%3A180000&ms=25200%3B14%3B%3B%3B&od=up&s=Car&sb=p&vc=Car&pw=224%3A232
 ```
-(`makeId` VW=25200, `modelId` Golf Mk7.5=12603 — verificar IDs actualizados en mobile.de para cada modelo.)
+(`makeId` VW=25200, `modelId` Golf=**14**.)
+
+> ⚠️ **Los `modelId` CADUCAN.** El `12603` que circuló como "Golf Mk7.5" devolvía
+> **0 anuncios** el 13-sep-2026; el vigente es `14` (**57.717**). Sacar el ID del catálogo
+> `references/mobile-de-ids.json` en vez de teclearlo de memoria, y validar por conteo.
+> La plantilla de arriba con `pw=224:232` son **kW** (310 cv × 0,7355 = 228 ±4), NO cv.
 
 ### 🇩🇪 mobile.de — extracción de tarjetas virtualizadas (24-ago-2026)
 
@@ -310,26 +315,68 @@ PASO 3 — Para ver más tarjetas
 | **Número de puertas** (`door-filter` `TWO_OR_THREE` / `FOUR_OR_FIVE` / `SIX_OR_SEVEN`) | ⚠️ **No se ha podido aplicar como filtro verificable** ni por URL directa ni por clic+selección esta sesión | La segmentación por puertas en DE queda como limitación abierta. En ES (Coches.net) sí funciona (`minDoors=`) |
 | **Panel de instrumentos digital** (cuadro digital / Active Info Display) | ⚠️ Vive detrás de un enlace "Más..." en Conjuntos de funciones que no respondió a intentos de expansión | Sin filtro agregado fiable en ningún portal. Verificar ficha a ficha en Flujo B |
 
-### 🆔 Tabla de IDs mobile.de (makeId;modelId) — 24-ago-2026
+### 🆔 Tabla de IDs mobile.de (makeId;modelId) — revisada 13-sep-2026
 
-> Los `makeId` siguen vigentes; los `modelId` NUEVOS (formato `12603`) son distintos de los modelGroup viejos (`29`). Verificados = probados con la URL canónica. El resto: descubrir con el procedimiento de abajo y AÑADIR a esta tabla al verificar.
+> ⚠️ La tabla anterior tenía **valores inventados** que devolvían OTRA MARCA:
+> `Ford=24500` es en realidad **TVR** · `Opel=29000` no existe (es **19000**) ·
+> `Hyundai=35500` sin verificar. Corregido tras verificar cada ID por conteo real.
+>
+> **Catálogo completo y verificado**: `references/mobile-de-ids.json` — marcas +
+> modelIds de 11 marcas (VW, Audi, BMW, Mercedes-Benz, Porsche, Ford, Seat, Cupra,
+> Skoda, Opel, Volvo). Es el **mismo fichero que usa Laravel**, para que las URLs del
+> ZIP y las que genera el panel admin coincidan.
 
-| Marca | makeId | Modelos (modelId) |
+| Marca | makeId | Verificado por conteo (13-sep-2026) |
 |---|---|---|
-| VW | 25200 | Golf Mk7.5 = **12603** ✅ · Golf 8, Arteon, Tiguan = ⬜ por verificar |
-| Audi | 1900 | A3, S3, TT, RS3 = ⬜ por verificar |
-| BMW | 3500 | Serie 1, M135, M240i = ⬜ por verificar |
-| Mercedes | 17200 | Clase A, A45, CLA = ⬜ por verificar |
-| Seat | 22500 | León = ⬜ por verificar |
-| Cupra | 3 | León, Formentor = ⬜ por verificar |
-| Opel | 29000* | Astra J = ⬜ por verificar (*por confirmar) |
-| Ford | 24500* | Focus = ⬜ por verificar (*por confirmar) |
-| Hyundai | 35500* | i30N = ⬜ por verificar (*por confirmar) |
+| VW | **25200** | Golf=**14** (57.717) · Arteon=64 (2.007) · Tiguan=54 (21.259) + catálogo |
+| Audi | **1900** | A3=**8** (17.868) + catálogo completo |
+| BMW | **3500** | 320=**10** (11.351) + catálogo completo |
+| Mercedes-Benz | **17200** | C 200=**18** (5.776) + catálogo (341 modelos) |
+| Porsche | **20100** | catálogo completo |
+| Ford | **9000** | Focus=**20** (17.721) + catálogo completo |
+| Seat | **22500** | Leon=**9** (8.670) + catálogo completo |
+| Cupra | **3** | Formentor=**5** (8.771) + catálogo completo |
+| Skoda | **22900** | Octavia=**10** (14.838) + catálogo completo |
+| Opel | **19000** | Astra=**5** (17.992) + catálogo completo |
+| Volvo | **25100** | XC60=**40** (6.373) + catálogo completo |
+| Toyota / Dacia / Citroën | 24100 / 6600 / 5900 | makeId vigente, **sin catálogo de modelos** → usar `q=` |
 
-**Procedimiento para descubrir makeId/modelId nuevos (3 pasos, ~2 capturas):**
-1. Navegar a `https://www.mobile.de/es/s/auto?s=Car&vc=Car` (la página SIRVE para esto: construir queries, no para ver tarjetas).
-2. Leer los `options value` del select `[data-testid="make-incl-0"]` → makeId de la marca. Elegir marca → el select `[data-testid="model-incl-0"]` se rellena → leer su `value` → modelId.
-3. Construir `ms=<makeId>;<modelId>;;;;` en la URL canónica suchen y **validar contra el `<h1>`** (debe decir el modelo correcto + "X Angebote" > 0). Si el `<h1>` muestra otra cosa → modelId mal.
+**Procedimiento para descubrir/refrescar IDs (verificado 13-sep-2026):**
+
+> El HTML **servido** por mobile.de embebe su catálogo completo. No hace falta navegar la
+> UI ni leer selects: se parsea el payload. (Antes se documentaba leer los selects
+> `[data-testid="make-incl-0"]` de `/es/s/auto`, que es mucho más lento y frágil.)
+
+1. Cargar con **recarga real** (no navegación cliente: si no, el payload no está en el DOM):
+   `https://suchen.mobile.de/fahrzeuge/search.html?dam=0&isSearchRequest=true&s=Car&vc=Car&ms=<makeId>;;;;`
+2. En el HTML, buscar `modelsCache` (anchor fiable) o `isGroup`. Los pares van como
+   `{\"label\":\"Golf\",\"value\":\"14\"}` — **ojo**: a veces `value` va antes que `label`.
+   La lista de **marcas** está en la misma página tras `\"Alle Marken\"`.
+3. **Validar SIEMPRE por conteo**: abrir
+   `...search.html?dam=0&isSearchRequest=true&s=Car&vc=Car&ms=<makeId>;<modelId>;;;;&od=up&s=Car&sb=p&vc=Car`
+   y comprobar que el contador "X Angebote" **no es 0** y que el `<h1>` nombra el modelo
+   correcto. Si sale 0 o el modo formulario → el ID está mal o caducado.
+4. Volcar el resultado en `references/mobile-de-ids.json` y anotar la fecha en `verificado`.
+
+**Orden de resolución que aplica `empaquetar.py`**: `mercado.busquedas_realizadas` manual →
+catálogo `references/mobile-de-ids.json` → búsqueda por texto (`q=`). **Nunca inventar un ID.**
+
+**🇪🇸 coches.net — MakeIds y ModelIds (13-sep-2026):** la lista completa (134 marcas) está
+en el HTML servido, dentro de `window.__INITIAL_PROPS__` → `listFiltersOptions.makeId.options`,
+como pares `{\"id\":47,\"label\":\"VOLKSWAGEN\"}`.
+
+> ⚠️ **Los IDs de coches.net NO son alfabéticos simples.** La tabla anterior era inventada
+> y devolvía OTRA MARCA en 18 de 20 casos: `bmw=11` → CITROEN · `mercedes=12` → DAEWOO ·
+> `opel=7` → BMW · `seat=9` → CHEVROLET · `toyota=10` → CHRYSLER · `volvo=26` → MASERATI.
+> Solo acertaban VW=47 y Audi=4.
+
+Valores reales: `audi=4 · bmw=7 · citroen=11 · fiat=14 · ford=15 · hyundai=18 ·
+mercedes-benz=28 · mazda=27 · nissan=31 · opel=32 · peugeot=33 · porsche=34 · renault=35 ·
+seat=39 · skoda=40 · toyota=46 · volkswagen=47 · volvo=48 · cupra=1400 · dacia=1011 ·
+ds=1358 · tesla=1354 · mini=222 · honda=69`.
+ModelIds verificados: `MakeIds[0]=47` + Golf `ModelIds[0]=89` (→ "VOLKSWAGEN Golf de segunda
+mano"). **`ModelIds[0]` es preferible a `Versions[0]`**, que es texto libre y depende del
+etiquetado del vendedor (regla dura v3.3.8); `Versions[0]` queda como fallback.
 
 ### 📄 Paginación con la URL canónica (24-ago-2026)
 
