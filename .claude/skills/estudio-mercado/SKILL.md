@@ -1,6 +1,6 @@
 ---
 name: estudio-mercado
-version: 0.4.1
+version: 0.4.2
 description: >
   Estudio profundo del mercado de coches de 2ª mano en España y Alemania para
   JJ Import Motors. Genera un mapa de mercado persistente (datos_mercado.json)
@@ -226,6 +226,30 @@ FASE 1 — ES (Coches.net, navegación real):
   └─ Doble pasada por kW para topes de gama (GTI/R/M/AMG/RS/OPC) — ver playbook
 
 **🔴 REGLA DURA DE FILTRADO (23-ago-2026 v0.3.10):** en Coches.net **NUNCA** filtrar por el campo de texto libre `Versions[]`/`Version=` (depende del etiquetado del vendedor, mezcla generaciones). **SIEMPRE** usar filtros individuales estructurados por URL: `PowerHpFrom-To` / `MinYear` / `MaxKms` / `Fueltype2List` / `ArrBodyType` / `minDoors` / `TransmissionTypeId` + `fi=Price&or=1`. En mobile.de: filtros estructurados (`makeModelVariant1Ids`, `kwFrom`, `kmFrom-To`, `yearFrom-To`, `damageVehicle_damageUndecided=ONLY_DAMAGE_FREE`) + doble pasada por kW. **Si la IA usa el campo de versión de texto, el estudio entero es INVÁLIDO y hay que rehacerlo.** Detalle en `../importacion-vehiculos/02-flujos/playbook_filtrado.md`.
+
+**🆔 IDs de portal — NUNCA inventarlos (13-sep-2026 v0.4.2):** las URLs de búsqueda llevan
+IDs numéricos que **no son adivinables**: no van en orden alfabético simple (`BMW=7` pero
+`Mercedes-Benz=28` y `Cupra=1400`) y **caducan**. Usar SIEMPRE el catálogo verificado
+`references/mobile-de-ids.json` (marcas + modelIds de VW, Audi, BMW, Mercedes-Benz, Porsche,
+Ford, Seat, Cupra, Skoda, Opel y Volvo — el **mismo fichero que usa Laravel**, para que las
+URLs del estudio y las del panel admin coincidan). Si un modelo no está en el catálogo →
+filtrar por texto (`q=`) **antes** que inventarse un ID.
+
+| Portal | Filtro | Forma correcta |
+|---|---|---|
+| mobile.de | marca+modelo | `ms=<makeId>;<modelId>;;;` (**5 campos**, no 4) |
+| mobile.de | potencia | `pw=<kWdesde>:<kWhasta>` — en **kW** = cv × 0,7355 ±4 (310 cv → `pw=224:232`) |
+| mobile.de | año / km | `fr=<añoDesde>:<añoHasta>` · `ml=:<kmMax>` |
+| coches.net | marca | `MakeIds[0]=` — VW=**47** · Audi=**4** · BMW=**7** · Mercedes-Benz=**28** · Opel=**32** · Seat=**39** · Skoda=**40** · Toyota=**46** · Volvo=**48** · Cupra=**1400** |
+| coches.net | modelo | `ModelIds[0]=` si se conoce (Golf=**89**) — preferible a `Versions[]` |
+
+> ⚠️ **Los IDs de mobile.de CADUCAN.** El `Golf Mk7.5 = 12603` que circulaba devolvía
+> **0 anuncios** el 13-sep-2026; el vigente es `14` (**57.717**). Validar SIEMPRE por conteo
+> (contador "X Angebote" > 0 + el `<h1>` nombrando el modelo correcto) antes de dar una URL
+> por buena.
+> ⚠️ Una tabla anterior de este ecosistema tenía IDs **inventados** que devolvían OTRA MARCA
+> (`bmw=11` → CITROEN · `mercedes=12` → DAEWOO · `ford=24500` → TVR). No fiarse de IDs de
+> memoria: mirar el catálogo. Procedimiento de refresco en el playbook de la skill hermana.
 
 FASE 3 — CRUCE y veredicto:
   └─ hueco_pct (bruto) = (mediana_es − mediana_de) / mediana_es × 100  ← comparable con historial y umbrales

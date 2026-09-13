@@ -5,6 +5,26 @@ Todos los cambios notables en el skill `estudio-mercado` se documentarán en est
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.4.2] - 2026-09-13 — Catálogo de IDs de portal (deja de inventarlos)
+
+> **Motivo:** la skill construye URLs de búsqueda con IDs numéricos de mobile.de
+> (`ms=`) y coches.net (`MakeIds[]`). Esos IDs **no son adivinables** (no van en orden
+> alfabético simple: `BMW=7` pero `Mercedes-Benz=28` y `Cupra=1400`) y **caducan**. La
+> skill hermana `importacion-vehiculos` tenía una tabla de IDs inventada que devolvía OTRA
+> MARCA (`bmw=11` → CITROEN, `mercedes=12` → DAEWOO, `ford=24500` → TVR).
+>
+> **Añadido:** `references/mobile-de-ids.json` — catálogo verificado por conteo real de
+> anuncios (13-sep-2026) con marcas + modelIds de VW, Audi, BMW, Mercedes-Benz, Porsche,
+> Ford, Seat, Cupra, Skoda, Opel y Volvo. Es el **mismo fichero que usa Laravel**, para que
+> las URLs del estudio y las del panel admin coincidan.
+>
+> **Regla nueva en el SKILL.md:** usar SIEMPRE el catálogo; si un modelo no está, filtrar
+> por texto (`q=`) antes que inventar un ID. Añadida también la tabla de formas correctas
+> (`ms` de 5 campos, `pw` en **kW** = cv × 0,7355 ±4, `MakeIds[0]`/`ModelIds[0]`).
+>
+> ⚠️ **Los IDs caducan:** `Golf Mk7.5 = 12603` devolvía **0 anuncios** el 13-sep-2026; el
+> vigente es `14` (57.717). Validar siempre por conteo.
+
 ## [0.4.1] - 2026-09-13 — `ms=` de mobile.de alineado a los 5 campos canónicos
 
 > **Motivo:** el mapa (`datos_mercado.json`) guardaba las URLs de mobile.de con **4
