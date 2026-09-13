@@ -24,7 +24,7 @@
 
 ---
 
-## 2026-09-13 18:45 · Copilot-VSCode · deudas saldadas: build + refresco real de oferta del mapa de mercado
+## 2026-09-13 18:14 · Copilot-VSCode · deudas saldadas: build + refresco real de oferta del mapa de mercado
 
 - **`npm run build`** lanzado (por petición expresa del usuario, que anula su propia regla de que lo lanza él). El bloque "Ver suelo en portales" **ya está en el bundle** (`MarketPanel-*.js`, manifest 18:02).
 - **`datos_mercado.json` refrescado de verdad**, no de palabra: reejecutada la consulta propia de cada una de las **9 showstoppers** (las caducadas el 31-ago) y actualizados los recuentos de oferta medidos en vivo. Golf GTI ES 494→**507** / DE 3479→**3294**; Golf R 161→162 / 623→623; Audi S3 66→**64** / 828→**791**; A45 AMG 139→**149** / 156→**170**; M135 13→12 / 513→508; i30 N 195→193 / 463→**491**; Focus ST 68→**70** / 567→**577**; Audi TT 86→85 / 460→**453**; Cupra Leon 655→**697** / 5321→**5505**. `refrescar_antes_de_categoria` → 2026-09-27. Espejo del Escritorio sincronizado.
