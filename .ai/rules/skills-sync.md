@@ -45,8 +45,15 @@ equivocado es indistinguible de uno actualizado a simple vista: por eso
      queda con un ZIP nuevo construido sobre fuentes sin commitear (pasó el 13-sep-2026).
      **Revisar siempre `git status` después de correr el script.**
 3. **Después**, y solo entonces, subir el ZIP nuevo de `_dist/` a:
-   - Claude Desktop (gestor de skills de la app).
-   - La cuenta de Claude (donde se gestionan las skills de Cowork).
+   - **Carpeta de skills del perfil** (verificado 13-sep-2026):
+     `%USERPROFILE%\.claude\skills\` → descomprimir el ZIP ahí (crea la carpeta
+     `importacion-vehiculos/`). Para actualizar: renombrar la carpeta vieja a
+     `importacion-vehiculos.old-<fecha>` y descomprimir la nueva encima (no borrar,
+     por si hay que volver atrás).
+   - **Claude Desktop**: la copia de reparto vive en
+     `C:\Users\jacar\Desktop\JJImportMotors\importacion-vehiculos.skill.zip` — es el
+     archivo que se sube al gestor de skills de la app.
+   - **La cuenta de Claude (Cowork)**: subir el mismo ZIP al gestor de skills de la cuenta.
 
 Si un agente de Claude sin acceso a terminal en esta máquina (el puente remoto
 puede estar caído, o no puede escribir bajo `.claude/`) prepara cambios de skill:
