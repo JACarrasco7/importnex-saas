@@ -5,6 +5,26 @@ Todos los cambios notables en el skill `estudio-mercado` se documentarán en est
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.4.1] - 2026-09-13 — `ms=` de mobile.de alineado a los 5 campos canónicos
+
+> **Motivo:** el mapa (`datos_mercado.json`) guardaba las URLs de mobile.de con **4
+> campos** (`ms=25200;14;;`) cuando la forma canónica verificada es de **5**
+> (`ms=25200;14;;;`) — así aparece en el playbook y la memoria de `importacion-vehiculos`
+> y en todos los ejemplos reales. Corregidas las **18 ocurrencias** (9 en claro + 9
+> URL-encoded), respetando si el fichero usaba `;` o `%3B`.
+>
+> Los `modelId` del mapa **sí estaban bien** y coinciden con el catálogo verificado por
+> conteo: Golf=14 · Audi S3=19 · Mercedes-Benz A 45 AMG=229 · Ford Focus=20 · BMW M135=69.
+>
+> ⚠️ **No se pudo verificar en vivo** al aplicar el cambio: mobile.de empezó a limitar
+> las peticiones (la URL de Golf que devolvía 57.717 anuncios quince minutos antes dejó
+> de mostrar contador). Pendiente reconfirmar por conteo cuando el portal desbloquee.
+
+> **Aviso de caducidad (13-sep-2026):** la última consulta a portales es del **17-ago**.
+> `refrescar_antes_de` → `showstoppers` caducó el **31-ago** (13 días) y `alta_rotacion`
+> el **07-sep** (6 días); `gemas_economicas` caduca el **14-sep**. Según la regla dura de
+> cache del SKILL.md, esos modelos hay que **re-medir**. Toca pasada de refresco.
+
 ## [0.4.0] - 2026-09-12 — Fix bug nombre ZIP (build-zips.py: version real del SKILL.md)
 
 > **Motivo:** el script `_dist/build-zips.py` tenia las rutas de los ZIPs
