@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\PortalSearchUrls;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -401,6 +402,25 @@ class Car extends Model
         }
 
         return $out;
+    }
+
+    /**
+     * Enlaces "ver suelo" (mobile.de DE + coches.net ES) generados desde los
+     * datos del coche, ordenados por precio ascendente para comprobar a mano
+     * el precio más bajo del modelo y compararlo con esta unidad.
+     *
+     * Complementa a `busquedasPorPais`: aquel expone las URLs reales que trajo
+     * el informe, este garantiza que la ficha siempre tenga enlaces aunque el
+     * ZIP no incluya `mercado.busquedas_realizadas[]`. El flag `en_informe`
+     * avisa de cuándo ya existe una búsqueda real para ese portal.
+     *
+     * ⚠️ Material interno (`.ai/rules/mercado.md`): panel admin, nunca público.
+     *
+     * @return list<array{portal:string, pais:string, url:string, descripcion:string, en_informe:bool}>
+     */
+    public function getEnlacesSueloAttribute(): array
+    {
+        return PortalSearchUrls::forCar($this);
     }
 
     /**

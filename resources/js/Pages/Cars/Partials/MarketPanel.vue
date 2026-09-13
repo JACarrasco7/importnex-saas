@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
-import { LinkIcon } from '@heroicons/vue/24/outline';
+import { LinkIcon, ArrowTopRightOnSquareIcon } from '@heroicons/vue/24/outline';
 import Badge from '@/Components/Badge.vue';
 import { useFormat } from '@/Composables/useFormat';
 import { useTranslations } from '@/Composables/useTranslations';
@@ -55,6 +55,9 @@ const marketAvailableCountries = computed(() => {
     return out;
 });
 const busquedasPorPais = computed(() => props.derived?.busquedas_por_pais || { DE: [], ES: [], otros: [] });
+// Enlaces "ver suelo" generados en backend (mobile.de DE + coches.net ES),
+// ordenados por precio ascendente para comprobar a mano el suelo del modelo.
+const enlacesSuelo = computed(() => props.derived?.enlaces_suelo || []);
 const busquedasPaisFlat = computed(() => {
     const out = [];
     for (const [pais, items] of Object.entries(busquedasPorPais.value)) {
@@ -166,6 +169,37 @@ const busquedasPaisFlat = computed(() => {
                         </span>
                     </span>
                     <LinkIcon class="h-4 w-4 flex-shrink-0 text-gray-400 group-hover:text-estoril-600" />
+                </a>
+            </div>
+        </div>
+
+        <!-- Ver suelo en portales (enlaces generados desde los datos del coche) -->
+        <div v-if="enlacesSuelo.length > 0" class="border-t border-gray-200 px-6 py-4">
+            <h4 class="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-500">
+                <ArrowTopRightOnSquareIcon class="h-4 w-4" />
+                {{ t('cars.market_price_floor_links') || 'Ver suelo en portales' }}
+            </h4>
+            <p class="mb-3 text-xs text-gray-500">
+                {{ t('cars.market_price_floor_help') || 'Listados reales ordenados por precio (más baratos primero). Ábrelos y compara a mano con el precio de este coche.' }}
+            </p>
+            <div class="grid grid-cols-1 gap-2 md:grid-cols-2">
+                <a v-for="(l, idx) in enlacesSuelo" :key="idx"
+                   :href="l.url" target="_blank" rel="noopener"
+                   class="group flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2 transition hover:border-estoril-300 hover:bg-estoril-50">
+                    <span class="flex items-center gap-2 min-w-0">
+                        <span class="text-base" aria-hidden="true">{{ l.pais === 'DE' ? '🇩🇪' : '🇪🇸' }}</span>
+                        <span class="flex flex-col min-w-0">
+                            <span class="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                                <span class="truncate">{{ l.portal }}</span>
+                                <span v-if="l.en_informe"
+                                      class="flex-shrink-0 rounded-full bg-estoril-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-estoril-700">
+                                    {{ t('cars.market_floor_in_report') || 'informe' }}
+                                </span>
+                            </span>
+                            <span class="truncate text-xs text-gray-500">{{ l.descripcion }}</span>
+                        </span>
+                    </span>
+                    <ArrowTopRightOnSquareIcon class="h-4 w-4 flex-shrink-0 text-gray-400 group-hover:text-estoril-600" />
                 </a>
             </div>
         </div>

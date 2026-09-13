@@ -42,3 +42,21 @@ El skill hará Flujo A: rastreará el anuncio, buscará comparables en 7 fuentes
 ## 6. Presupuesto típico
 
 Flujo A: **hasta 70 peticiones** (avisar al usuario a las 35). Si se agota sin veredicto → pausa, muestra resumen parcial.
+
+## 7. Comprobar el suelo a mano (ficha del coche)
+
+En la ficha del coche, pestaña **Mercado**, hay dos bloques de enlaces:
+
+- **Búsquedas realizadas** — las URLs reales que usó el skill (vienen dentro del ZIP).
+- **Ver suelo en portales** — enlaces **generados por Laravel** desde los datos del coche
+  (marca, modelo, año, CV) y ordenados por **precio ascendente** en cada portal:
+  - 🇩🇪 `mobile.de` — marca del coche, año ±1 y potencia ±10%, más baratos primero.
+  - 🇪🇸 `coches.net` — página de marca/modelo, más baratos primero.
+
+Sirven para abrir el listado real y comparar **a mano** el precio de esta unidad con el
+suelo del mercado, sin depender de que el ZIP traiga los enlaces (los coches importados
+antes del 09-sep-2026 no los traen). La etiqueta `informe` indica que ese portal **ya**
+tenía una búsqueda real en el informe.
+
+> ⚠️ Estos enlaces son **material interno** (`.ai/rules/mercado.md`): solo se ven en el
+> panel admin, nunca en el marketplace público ni en el tracking del cliente.

@@ -161,6 +161,10 @@ class CarController extends Controller
                 // Mercado del panel admin las muestra como "Búsquedas
                 // realizadas".
                 'busquedas_por_pais' => $car->busquedasPorPais,
+                // Enlaces "ver suelo" (mobile.de + coches.net) generados desde
+                // los datos del coche, ordenados por precio. Cubren los coches
+                // que no traen `mercado.busquedas_realizadas[]` en el ZIP.
+                'enlaces_suelo' => $car->enlacesSuelo,
                 'milestones_progress' => $milestonesProgress,
                 'inspections_progress' => $inspectionsProgress,
                 'inspections_by_section' => $inspectionsBySection,

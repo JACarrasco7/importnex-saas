@@ -24,6 +24,18 @@
 
 ---
 
+## 2026-09-13 · Copilot-VSCode · enlaces "ver suelo" en la ficha del coche
+
+- Hice: nueva sección **"Ver suelo en portales"** en la pestaña Mercado de la ficha del coche. Genera enlaces a `mobile.de` (DE) y `coches.net` (ES) desde los datos del coche, **ordenados por precio ascendente**, para comparar el suelo a mano. Cubre los coches sin `mercado.busquedas_realizadas[]` (importados antes del 09-sep).
+- **Formatos de URL verificados en navegador hoy** (lo viejo del skill estaba mal): coches.net es `/<marca>/<modelo>/segunda-mano/?fi=Price&or=1&PowerHpFrom=…&MinYear=…` — **NO** `/segunda-mano/coches/<marca>-<modelo>/`. Con slug de modelo inexistente degrada a la página de marca (nunca 404); solo reconoce el primer token (`Golf 7.5 TCR` → `golf`). mobile.de sigue `suchen.mobile.de/fahrzeuge/search.html?…&sb=p`.
+- Nuevo: `app/Support/PortalSearchUrls.php`, accessor `Car::enlacesSuelo`, prop `enlaces_suelo` en `CarController@show`, bloque en `MarketPanel.vue`, claves i18n `market_price_floor_*`.
+- Tests: `tests/Feature/CarEnlacesSueloTest.php` (12). **Suite completa: 684 passed · 6 skipped · 0 failed.** Pint limpio · paridad i18n 1720/1720.
+- Toqué: `app/Support/PortalSearchUrls.php`, `app/Models/Car.php`, `app/Http/Controllers/CarController.php`, `resources/js/Pages/Cars/Partials/MarketPanel.vue`, `resources/js/i18n/{es,en}.js`, `tests/Feature/CarEnlacesSueloTest.php`, `docs/guias/02-flujo-a-unidad.md`, `docs/ARQUITECTURA_VISTAS.md`.
+- ⚠️ PENDIENTE para ti: ⚠️ **sigue todo lo de la entrada anterior** (spatie, rotar password BD, `$env:IMPORTNEX_TOKEN`, reimportar ZIPs en Cowork). La skill `importacion-vehiculos` tiene el patrón de coches.net **desactualizado** en `02-flujos/paginas_reales.md` — conviene corregirlo al lado Claude (yo no toco `.claude/` sin ZIP).
+- Commit: ver `git log` (rama master)
+
+---
+
 ## 2026-09-13 · Copilot-VSCode · auditoría ronda 4 (2 pasadas) + fixes
 
 - Hice: dos auditorías externas independientes (4A sync/API, 4B app/seguridad) que destaparon 4 críticos + 9 importantes. Aplicados todos: `scripts/LockFile.ps1` (race en encargos.md), guard producción en `build-skill-zips.ps1`, multi-tenant explícito en `alerts:generate`, límite 1000 modelos, clamp `?limit`, rate-limit por token, chunk/lazy en 4 comandos, `queue:prune-failed`, HSTS, purga de backups, throttle Stripe, `inspire` fuera.

@@ -309,7 +309,7 @@ resources/js/Pages/Cars/
 │   ├── HeaderBar.vue                 cabecera: estado, badge origen, acciones
 │   ├── OverviewPanel.vue             ficha técnica + spec[]
 │   ├── InvestigationPanel.vue        bloques [MARCADOR] / zip subido
-│   ├── MarketPanel.vue               mercado_min / mediana / max
+│   ├── MarketPanel.vue               mercado_min / mediana / max + busquedas_realizadas + enlaces suelo
 │   ├── ChecklistPanel.vue            verificado[] / pendiente_comprobar[]
 │   ├── AssignRequestPanel.vue        asignación cliente ↔ solicitud
 │   ├── NotesPanel.vue                notas internas
