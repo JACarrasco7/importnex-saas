@@ -31,8 +31,9 @@
 - Nuevo: `app/Support/PortalSearchUrls.php`, accessor `Car::enlacesSuelo`, prop `enlaces_suelo` en `CarController@show`, bloque en `MarketPanel.vue`, claves i18n `market_price_floor_*`.
 - Tests: `tests/Feature/CarEnlacesSueloTest.php` (12). **Suite completa: 684 passed · 6 skipped · 0 failed.** Pint limpio · paridad i18n 1720/1720.
 - Toqué: `app/Support/PortalSearchUrls.php`, `app/Models/Car.php`, `app/Http/Controllers/CarController.php`, `resources/js/Pages/Cars/Partials/MarketPanel.vue`, `resources/js/i18n/{es,en}.js`, `tests/Feature/CarEnlacesSueloTest.php`, `docs/guias/02-flujo-a-unidad.md`, `docs/ARQUITECTURA_VISTAS.md`.
-- ⚠️ PENDIENTE para ti: ⚠️ **sigue todo lo de la entrada anterior** (spatie, rotar password BD, `$env:IMPORTNEX_TOKEN`, reimportar ZIPs en Cowork). La skill `importacion-vehiculos` tiene el patrón de coches.net **desactualizado** en `02-flujos/paginas_reales.md` — conviene corregirlo al lado Claude (yo no toco `.claude/` sin ZIP).
-- Commit: ver `git log` (rama master)
+- ⚠️ PENDIENTE para ti: ⚠️ **sigue todo lo de la entrada anterior** (spatie, rotar password BD, `$env:IMPORTNEX_TOKEN`, reimportar ZIPs en Cowork). Nota para el lado Claude: verifiqué en navegador que `/<marca>/<modelo>/segunda-mano/` devuelve la página de modelo (`coches.net/volkswagen/golf/segunda-mano/` → "VOLKSWAGEN Golf de segunda mano"); el skill documenta la forma `/segunda-mano/coches/<marca>-<modelo>` en `02-flujos/paginas_reales.md` y `memoria/trampas-encontradas.md` ya avisa de un cambio de URL. **No he tocado el skill** (no quería forzar otro reimport de ZIPs sin contrastarlo antes): conviene comparar las dos formas con una pasada real y unificar.
+- ⚠️ **El equipo no se apaga**: cancelé el `shutdown` que había programado porque llegó este encargo. Dime si quieres que lo vuelva a programar.
+- Commit: `73ee3df` (push a master OK)
 
 ---
 
