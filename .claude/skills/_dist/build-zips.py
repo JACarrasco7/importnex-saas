@@ -111,6 +111,26 @@ def build_dst_path(skill_dir):
     )
 
 
+def borrar_zips_viejos(skill_dir, nuevo_zip):
+    """Deja UN solo ZIP por skill en _dist/ y devuelve los borrados.
+
+    Antes se acumulaban: v3.9.3 y v3.9.4 convivian en _dist/, y eso es peligroso
+    al importar en Claude Desktop (es facil coger el viejo). La regla
+    `.ai/rules/skills-sync.md` daba por hecho que el script los borraba, pero ese
+    codigo no existia (13-sep-2026).
+    """
+    import glob
+    skill_name = os.path.basename(os.path.normpath(skill_dir))
+    nuevo = os.path.basename(nuevo_zip)
+    borrados = []
+    patron = os.path.join('.claude/skills/_dist', f'skills-{skill_name}-v*.zip')
+    for ruta in glob.glob(patron):
+        if os.path.basename(ruta) != nuevo:
+            os.remove(ruta)
+            borrados.append(os.path.basename(ruta))
+    return borrados
+
+
 if __name__ == '__main__':
     import argparse
     import glob as _glob
@@ -169,4 +189,6 @@ if __name__ == '__main__':
     for src, dst in skills:
         print(f'\n=== {src} ===')
         build(src, dst)
+        for viejo in borrar_zips_viejos(src, dst):
+            print(f'  [limpieza] borrado ZIP obsoleto: {viejo}')
     print('\nDone.')
