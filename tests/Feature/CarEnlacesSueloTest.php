@@ -50,22 +50,38 @@ class CarEnlacesSueloTest extends TestCase
         $this->assertStringNotContainsString('www.mobile.de/es', $url);
     }
 
-    public function test_mobile_de_usa_ms_con_el_model_id_verificado(): void
+    public function test_mobile_de_usa_ms_con_el_model_id_del_catalogo(): void
     {
-        // VW Golf Mk7.5 = 12603 (mapa de IDs verificados de mobile.de).
+        // Catalogo verificado por conteo el 13-sep-2026: VW Golf = 14 (57.717
+        // anuncios). El `12603` del skill estaba caducado (0 anuncios).
         $url = $this->cocheCon(['brand' => 'VW', 'model' => 'Golf 7.5 TCR'])->enlacesSuelo[0]['url'];
 
         // `ms` son CINCO campos: makeId;modelId;;;
-        $this->assertStringContainsString('ms=25200%3B12603%3B%3B%3B', $url);
+        $this->assertStringContainsString('ms=25200%3B14%3B%3B%3B', $url);
         $this->assertStringNotContainsString('q=', $url);
+    }
+
+    public function test_mobile_de_resuelve_marca_y_modelo_de_otras_marcas(): void
+    {
+        $url = $this->cocheCon(['brand' => 'Audi', 'model' => 'A3'])->enlacesSuelo[0]['url'];
+
+        $this->assertStringContainsString('ms=1900%3B8%3B%3B%3B', $url);
+    }
+
+    public function test_mobile_de_quita_la_letra_de_motorizacion(): void
+    {
+        // `320d` -> el catalogo de BMW agrupa el modelo como `320`.
+        $url = $this->cocheCon(['brand' => 'BMW', 'model' => '320d'])->enlacesSuelo[0]['url'];
+
+        $this->assertStringContainsString('ms=3500%3B10%3B%3B%3B', $url);
     }
 
     public function test_mobile_de_cae_a_texto_libre_si_no_hay_model_id(): void
     {
         // Sin modelId conocido, `ms` deja la página en modo formulario (0 tarjetas).
-        $url = $this->cocheCon([])->enlacesSuelo[0]['url'];
+        $url = $this->cocheCon(['brand' => 'Volvo', 'model' => 'XC90'])->enlacesSuelo[0]['url'];
 
-        $this->assertStringContainsString('q=Volkswagen+Arteon', $url);
+        $this->assertStringContainsString('q=Volvo+XC90', $url);
         $this->assertStringNotContainsString('ms=', $url);
     }
 
@@ -93,13 +109,17 @@ class CarEnlacesSueloTest extends TestCase
         );
     }
 
-    public function test_coches_net_limpia_la_generacion_del_modelo(): void
+    public function test_coches_net_prefiere_model_ids_y_cae_a_versions(): void
     {
-        // `Versions[0]` es texto libre: la generación/variante rompe el filtro.
-        $url = $this->cocheCon(['brand' => 'VW', 'model' => 'Golf 7.5 TCR'])->enlacesSuelo[1]['url'];
+        // Golf tiene ModelId verificado: se usa (más fiable que el texto libre).
+        $golf = $this->cocheCon(['brand' => 'VW', 'model' => 'Golf 7.5 TCR'])->enlacesSuelo[1]['url'];
+        $this->assertStringContainsString('ModelIds[0]=89', $golf);
+        $this->assertStringNotContainsString('Versions', $golf);
 
-        $this->assertStringContainsString('Versions[0]=Golf', $url);
-        $this->assertStringNotContainsString('7.5', $url);
+        // Arteon no lo tiene: fallback sancionado a `Versions[0]` sin la variante.
+        $arteon = $this->cocheCon(['model' => 'Arteon Shooting Brake'])->enlacesSuelo[1]['url'];
+        $this->assertStringContainsString('Versions[0]=Arteon', $arteon);
+        $this->assertStringNotContainsString('ModelIds', $arteon);
     }
 
     public function test_coches_net_conserva_modelo_numerico(): void
@@ -158,9 +178,9 @@ class CarEnlacesSueloTest extends TestCase
     {
         $enlaces = $this->cocheCon(['brand' => 'VW', 'model' => 'Golf 7.5 TCR'])->enlacesSuelo;
 
-        $this->assertStringContainsString('ms=25200%3B12603%3B%3B%3B', $enlaces[0]['url']);
+        $this->assertStringContainsString('ms=25200%3B14%3B%3B%3B', $enlaces[0]['url']);
         $this->assertSame(
-            'https://www.coches.net/segunda-mano/?MakeIds[0]=47&Versions[0]=Golf&PowerHpFrom=330&PowerHpTo=340&fi=Price&or=1',
+            'https://www.coches.net/segunda-mano/?MakeIds[0]=47&ModelIds[0]=89&PowerHpFrom=330&PowerHpTo=340&fi=Price&or=1',
             $enlaces[1]['url']
         );
     }

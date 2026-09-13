@@ -50,21 +50,22 @@ En la ficha del coche, pestaña **Mercado**, hay dos bloques de enlaces:
 - **Búsquedas realizadas** — las URLs reales que usó el skill (vienen dentro del ZIP).
 - **Ver suelo en portales** — enlaces **generados por Laravel** desde los datos del coche
   y ordenados por **precio ascendente** en cada portal:
-  - 🇩🇪 `mobile.de` — marca + modelo (cuando hay un `modelId` verificado) + año ±1. La
-    potencia va en **kW** (`cv × 0,7355 ±4`), que es lo que entiende el portal.
-  - 🇪🇸 `coches.net` — `MakeIds[0]` + `Versions[0]` (nombre limpio del modelo) + potencia
-    en **CV** (`±5`).
+  - 🇩🇪 `mobile.de` — marca y modelo **clavados por ID** (`ms=25200;14;;;` es VW Golf) y
+    año ±1. La potencia va en **kW** (`cv × 0,7355 ±4`), que es lo que entiende el portal.
+  - 🇪🇸 `coches.net` — `MakeIds[0]` + `ModelIds[0]` (o `Versions[0]` si ese modelo no
+    tiene ID) + potencia en **CV** (`±5`).
 
 Sirven para abrir el listado real y comparar **a mano** el precio de esta unidad con el
 suelo del mercado, sin depender de que el ZIP traiga los enlaces (los coches importados
 antes del 09-sep-2026 no los traen). La etiqueta `informe` indica que ese portal **ya**
 tenía una búsqueda real en el informe.
 
-> ⚠️ **mobile.de y los `modelId`.** El portal identifica cada modelo con un número que
-> **cambia con el tiempo**. Si el coche ya tiene una búsqueda real en el informe se
-> reutiliza su `modelId`; si no, el enlace filtra por texto (`q=`) porque mandar `ms=`
-> sin `modelId` deja la página en modo formulario (0 resultados). Si abres el enlace y no
-> ves tarjetas, afina los filtros a mano en el portal.
+> ⚠️ **mobile.de y los `modelId`.** Cada modelo tiene un número que **cambia con el
+tiempo** (el Golf del skill era `12603` y daba 0 resultados; ahora es `14`). Los IDs
+verificados viven en `app/Support/data/mobile-de-catalogo.json`, y si el informe del coche
+ya trae una búsqueda real se reutiliza su ID. Un modelo sin ID cae a búsqueda por texto
+(`q=`), porque mandar `ms=` sin `modelId` deja la página en modo formulario (0 tarjetas).
+> Si abres un enlace y no ves tarjetas, afina los filtros a mano en el portal.
 
 > ⚠️ Estos enlaces son **material interno** (`.ai/rules/mercado.md`): solo se ven en el
 > panel admin, nunca en el marketplace público ni en el tracking del cliente.

@@ -63,38 +63,16 @@ class PortalSearchUrls
     private const MARGEN_CV = 5;
 
     /**
-     * makeId de mobile.de (tabla §"Tabla de IDs mobile.de", 24-ago-2026).
+     * Catálogo de IDs de mobile.de (marcas + modelos).
      *
-     * ⚠️ Solo los vigentes. La tabla vieja de `empaquetar.py` traía IDs
-     * duplicados o inventados (Hyundai y Nissan compartían `21000`, Volvo
-     * repetía `25100`…) que devolvían la marca equivocada: peor que no filtrar.
-     *
-     * @var array<string, string>
+     * ⚠️ Los IDs de mobile.de **caducan** (Golf Mk7.5 = `12603` daba 0 anuncios
+     * el 13-sep-2026; el bueno es `14` = 57.717 anuncios). Por eso viven en un
+     * fichero de datos fechado en vez de hardcodeados aquí.
      */
-    private const MARCA_ID_MOBILE_DE = [
-        'vw' => '25200', 'volkswagen' => '25200',
-        'audi' => '1900',
-        'bmw' => '3500',
-        'mercedes' => '17200', 'mercedes-benz' => '17200',
-        'seat' => '22500',
-        'cupra' => '3',
-        'opel' => '29000',
-        'ford' => '24500',
-        'hyundai' => '35500',
-    ];
+    private const CATALOGO_MOBILE_DE = __DIR__.'/data/mobile-de-catalogo.json';
 
-    /**
-     * modelId de mobile.de, con clave `<makeId>:<primer token del modelo>`.
-     *
-     * ⚠️ mobile.de cambia estos IDs: añadir aquí SOLO los verificados con la
-     * URL canónica. Los `ms` del informe del coche tienen prioridad sobre este
-     * mapa.
-     *
-     * @var array<string, string>
-     */
-    private const MODELO_ID_MOBILE_DE = [
-        '25200:golf' => '12603', // VW Golf Mk7.5 (verificado 24-ago-2026)
-    ];
+    /** Caché del catálogo (se lee una vez por petición). */
+    private static ?array $catalogo = null;
 
     /**
      * MakeIds de coches.net. VW=47 verificado en navegador (13-sep-2026).
@@ -125,6 +103,20 @@ class PortalSearchUrls
     ];
 
     /**
+     * ModelIds de coches.net, con clave `<MakeIds[0]>` -> `<modelo normalizado>`.
+     *
+     * Es la forma PREFERIBLE; `Versions[0]` solo es el fallback para modelos sin
+     * ModelId conocido. Golf = 89 verificado en navegador (13-sep-2026).
+     *
+     * @var array<string, array<string, int>>
+     */
+    private const MODELO_ID_COCHES_NET = [
+        '47' => [
+            'golf' => 89,
+        ],
+    ];
+
+    /**
      * Enlaces "ver suelo" del coche, uno por portal con precio de referencia.
      *
      * @return list<array{
@@ -147,13 +139,14 @@ class PortalSearchUrls
         $anio = self::anio($car);
         $cv = (int) $car->cv;
         $portalesDelInforme = self::portalesDelInforme($car);
-        $modeloId = self::modeloIdMobileDe($car, $marca);
+        $makeId = self::makeIdMobileDe($marca);
+        $modeloId = self::modeloIdMobileDe($car, $makeId);
 
         $enlaces = [
             [
                 'portal' => 'mobile.de',
                 'pais' => 'DE',
-                'url' => self::mobileDe($marca, $modelo, $anio, $cv, $modeloId),
+                'url' => self::mobileDe($marca, $modelo, $anio, $cv, $makeId, $modeloId),
                 'descripcion' => self::descripcion('Suelo DE', $marca, $modelo, $anio),
                 'en_informe' => in_array('mobile.de', $portalesDelInforme, true),
             ],
@@ -177,10 +170,8 @@ class PortalSearchUrls
      *
      * @param  string|null  $modeloId  modelId verificado (`2º` campo de `ms`)
      */
-    private static function mobileDe(string $marca, string $modelo, int $anio, int $cv, ?string $modeloId): string
+    private static function mobileDe(string $marca, string $modelo, int $anio, int $cv, ?string $makeId, ?string $modeloId): string
     {
-        $makeId = self::MARCA_ID_MOBILE_DE[self::clave($marca)] ?? null;
-
         $params = ['dam' => '0'];
 
         if ($anio > 0) {
@@ -220,12 +211,18 @@ class PortalSearchUrls
             $params['MakeIds[0]'] = $makeId;
         }
 
-        $version = self::versionCochesNet($modelo);
-        if ($version !== '') {
-            $params['Versions[0]'] = $version;
+        $modeloId = $makeId === null ? null : self::modeloIdCochesNet((string) $makeId, $modelo);
+
+        if ($modeloId !== null) {
+            $params['ModelIds[0]'] = $modeloId;
+        } else {
+            $version = self::versionCochesNet($modelo);
+            if ($version !== '') {
+                $params['Versions[0]'] = $version;
+            }
         }
 
-        if ($makeId === null && $version === '') {
+        if ($makeId === null && ! isset($params['Versions[0]'])) {
             return '';
         }
 
@@ -249,21 +246,121 @@ class PortalSearchUrls
     }
 
     /**
+     * Catálogo de IDs de mobile.de, cacheado.
+     *
+     * @return array{marcas?: array<string, string>, modelos?: array<string, array<string, string>>}
+     */
+    private static function catalogo(): array
+    {
+        if (self::$catalogo === null) {
+            $contenido = is_readable(self::CATALOGO_MOBILE_DE)
+                ? (string) file_get_contents(self::CATALOGO_MOBILE_DE)
+                : '';
+            $datos = json_decode($contenido, true);
+            self::$catalogo = is_array($datos) ? $datos : [];
+        }
+
+        return self::$catalogo;
+    }
+
+    private static function makeIdMobileDe(?string $marca): ?string
+    {
+        return self::catalogo()['marcas'][self::claveCatalogo($marca)] ?? null;
+    }
+
+    /**
      * modelId de mobile.de para este coche.
      *
-     * 1º las búsquedas reales del informe (IDs que Claude ya validó), 2º el mapa
-     * de IDs verificados a mano. Si no hay ninguno, `null` → se usa texto libre.
+     * 1º las búsquedas reales del informe (IDs que Claude ya validó), 2º el
+     * catálogo de IDs verificados. Si no hay ninguno, `null` → texto libre.
      */
-    private static function modeloIdMobileDe(Car $car, string $marca): ?string
+    private static function modeloIdMobileDe(Car $car, ?string $makeId): ?string
     {
-        $makeId = self::MARCA_ID_MOBILE_DE[self::clave($marca)] ?? null;
-
         if ($makeId === null) {
             return null;
         }
 
-        return self::modeloIdDesdeInforme($car, $makeId)
-            ?? self::MODELO_ID_MOBILE_DE[$makeId.':'.self::clave(self::primerToken($car->model))] ?? null;
+        $delInforme = self::modeloIdDesdeInforme($car, $makeId);
+
+        if ($delInforme !== null) {
+            return $delInforme;
+        }
+
+        $modelos = self::catalogo()['modelos'][$makeId] ?? [];
+
+        return self::buscarModelo($modelos, $car->model);
+    }
+
+    private static function modeloIdCochesNet(string $makeId, ?string $modelo): ?int
+    {
+        return self::buscarModelo(self::MODELO_ID_COCHES_NET[$makeId] ?? [], $modelo);
+    }
+
+    /**
+     * Busca el ID de un modelo en un catálogo `<clave normalizada> => <id>`.
+     *
+     * @param  array<string, int|string>  $catalogo
+     */
+    private static function buscarModelo(array $catalogo, ?string $modelo): int|string|null
+    {
+        if ($catalogo === [] || $modelo === null) {
+            return null;
+        }
+
+        foreach (self::clavesModelo($modelo) as $clave) {
+            if (isset($catalogo[$clave])) {
+                return $catalogo[$clave];
+            }
+        }
+
+        // Último recurso: clave del catálogo que sea prefijo del modelo
+        // (`320` para `320d`, `911` para `911 Urmodell`). Mínimo 2 caracteres
+        // para no confundir siglas de una letra.
+        $plano = self::claveCatalogo($modelo);
+
+        foreach ($catalogo as $clave => $id) {
+            if (strlen((string) $clave) >= 2 && str_starts_with($plano, (string) $clave)) {
+                return $id;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Claves candidatas del modelo, de la más específica a la más genérica
+     * (`Golf 7.5 TCR` → `golf75tcr`, `golf75`, `golf`).
+     *
+     * @return list<string>
+     */
+    private static function clavesModelo(?string $modelo): array
+    {
+        $plano = self::claveCatalogo($modelo);
+
+        if ($plano === '') {
+            return [];
+        }
+
+        $tokens = preg_split('/[^a-z0-9]+/', (string) strtolower(Str::ascii((string) $modelo))) ?: [];
+        $tokens = array_values(array_filter($tokens, static fn (string $token): bool => $token !== ''));
+
+        $claves = [$plano];
+
+        if (count($tokens) > 2) {
+            $claves[] = implode('', array_slice($tokens, 0, 2));
+        }
+
+        if ($tokens !== []) {
+            $claves[] = $tokens[0];
+
+            // `320d` → `320`: mobile.de agrupa el modelo sin la letra del motor.
+            $sinLetra = (string) preg_replace('/[^0-9]+$/', '', $tokens[0]);
+            if ($sinLetra !== '' && $sinLetra !== $tokens[0]) {
+                $claves[] = $sinLetra;
+            }
+        }
+
+        return array_values(array_unique($claves));
     }
 
     /**
@@ -371,6 +468,12 @@ class PortalSearchUrls
     private static function clave(?string $texto): string
     {
         return strtolower(trim(Str::ascii((string) $texto)));
+    }
+
+    /** Clave sin separadores para los catálogos (`Mercedes-Benz` → `mercedesbenz`). */
+    private static function claveCatalogo(?string $texto): string
+    {
+        return (string) preg_replace('/[^a-z0-9]/', '', self::clave($texto));
     }
 
     /**

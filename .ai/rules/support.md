@@ -22,14 +22,30 @@ https://suchen.mobile.de/fahrzeuge/search.html?dam=0&fr=<a-1>:<a+1>
   inferior hacia abajo). Ej: 320 cv → `pw=231:239`. Mandar CV aquí filtra mal y excluye
   el propio coche.
 - `ms` son **cinco campos** (`makeId;modelId;;;`). Sin `modelId` la página cae en
-  **modo formulario con 0 tarjetas** → en ese caso filtrar por texto (`q=`) en vez de `ms`.
-- Los `modelId` **cambian**: no inventarlos. Preferir los que vengan en
-  `busquedas_realizadas` del informe; el mapa `MODELO_ID_MOBILE_DE` solo admite IDs
-  verificados con la URL canónica.
-- makeIds vigentes: VW=25200 · Audi=1900 · BMW=3500 · Mercedes=17200 · Seat=22500 ·
-  Cupra=3 · Opel=29000 · Ford=24500 · Hyundai=35500. La tabla vieja de
-  `empaquetar.py` traía IDs duplicados o inventados (Hyundai y Nissan compartían
-  `21000`, Volvo repetía `25100`) → devolvían la marca equivocada: peor que no filtrar.
+  **modo formulario con 0 tarjetas** → en ese caso se filtra por texto (`q=`).
+- Los IDs viven en `app/Support/data/mobile-de-catalogo.json` (marcas + modelos),
+  **fechado**. Orden de resolución: `busquedas_realizadas` del informe → catálogo → texto
+  libre. **Nunca inventar IDs.**
+- ⚠️ Los IDs **caducan**: Golf Mk7.5 = `12603` (tabla del skill, 24-ago) devolvía **0**
+  anuncios el 13-sep; el vigente es `14` (**57.717**). Verificados por conteo el
+  13-sep-2026: Golf=14 · Arteon=64 · Tiguan=54 · Audi A3=8 · BMW 320=10 · Ford Focus=20.
+- makeIds vigentes (13-sep-2026): VW=25200 · Audi=1900 · BMW=3500 · Mercedes-Benz=17200 ·
+  Porsche=20100 · Ford=9000 · Skoda=22900 · Opel=19000 · Toyota=24100 · Volvo=25100 ·
+  Cupra=3 · Dacia=6600 · Citroën=5900. La tabla vieja de `empaquetar.py` traía valores
+  inventados (Ford=24500 es en realidad **TVR**; Opel=29000 no existe) → devolvían la
+  marca equivocada, que es peor que no filtrar.
+
+**Cómo refrescar el catálogo** (los IDs cambian; ~5 min con navegador):
+
+1. Abrir `https://suchen.mobile.de/fahrzeuge/search.html?dam=0&isSearchRequest=true&s=Car&vc=Car&ms=<makeId>;;;;`.
+2. El HTML del servidor **embebe el catálogo**: buscar `isGroup` y parsear los pares
+   `{\"label\":\"Golf\",\"value\":\"14\"}`. La lista de marcas está en la misma
+   página tras `"Alle Marken"`.
+3. Confirmar con `ms=<makeId>;<modelId>;;;;` que el contador de anuncios NO es 0.
+4. Actualizar el JSON y anotar la fecha en `verificado`.
+
+> ⚠️ Hay que **cargar la página completa** (`page.goto` con recarga real): en navegación
+> cliente el payload no está en el DOM y la extracción devuelve vacío.
 - NUNCA `www.mobile.de/es/...` (modo formulario sin tarjetas).
 
 **coches.net** (verificado 13-sep-2026 → title "VOLKSWAGEN GOLF de segunda mano y ocasión")
@@ -40,9 +56,10 @@ https://www.coches.net/segunda-mano/?MakeIds[0]=47&Versions[0]=Golf
 ```
 
 - `PowerHp*` va en **CV**, margen ±5 CV.
-- `Versions[0]` es texto libre: solo el nombre limpio del modelo (`Golf 7.5 TCR` →
-  `Golf`); la generación/variante rompe el filtro. `ModelIds[0]` sería preferible, pero
-  no hay mapa de ModelIds de coches.net.
+- `Versions[0]` es texto libre: si se usa, solo el nombre limpio del modelo (`Golf 7.5 TCR` →
+  `Golf`); la generación/variante rompe el filtro.
+- `ModelIds[0]` es **preferible**: usarlo cuando el modelo esté mapeado, `Versions[0]`
+  como fallback. Verificados 13-sep-2026: VW `MakeIds[0]`=47 · Golf `ModelIds[0]`=89.
 - Los corchetes van **literales** (`MakeIds[0]=`), no `%5B`.
 - VW=47 verificado. Ojo: el resto de MakeIds provienen de `empaquetar.py` sin verificar.
 

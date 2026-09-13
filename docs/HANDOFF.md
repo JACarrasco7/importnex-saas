@@ -24,6 +24,18 @@
 
 ---
 
+## 2026-09-13 · Copilot-VSCode · catálogo de IDs de mobile.de extraído y verificado
+
+- Hice: descubrí que **el HTML de mobile.de embebe su catálogo completo de marcas y modelos con IDs** (`{"label":"Golf","value":"14"}`). Extraje y **verifiqué por conteo de anuncios**: VW Golf=**14** (57.717), Arteon=**64** (2.007), Tiguan=54 (21.259), Audi A3=**8** (17.868), BMW 320=**10** (11.351), Ford Focus=20 (17.721). Guardado en `app/Support/data/mobile-de-catalogo.json` (fechado) con marcas + modelos de VW, Audi, BMW, Ford y Porsche completos.
+- ⚠️ **El `12603` del skill estaba caducado**: devuelve **0** anuncios; el bueno es `14`. Y la tabla de makeIds de `empaquetar.py` tenía valores inventados — `Ford=24500` es en realidad **TVR**, `Opel=29000` no existe (es **19000**), `Skoda` es **22900**. Esos IDs devolvían la marca equivocada.
+- coches.net: `ModelIds[0]` es preferible a `Versions[0]`. Verificado `MakeIds[0]=47&ModelIds[0]=89&Versions` → *"VOLKSWAGEN Golf de segunda mano"*. Golf=89 mapeado; el resto cae a `Versions[0]` (fallback sancionado).
+- Generado para tus 3 coches reales: BMW 320d → `ms=3500;10;;;` · Audi A3 → `ms=1900;8;;;` · VW Golf 7.5 TCR → `ms=25200;14;;;` + `pw=209:217`.
+- Toqué: `app/Support/PortalSearchUrls.php`, `app/Support/data/mobile-de-catalogo.json` (nuevo), `tests/Feature/CarEnlacesSueloTest.php` (16 tests), `.ai/rules/support.md` (con el **procedimiento de refresco** del catálogo), `docs/guias/02-flujo-a-unidad.md`.
+- ⚠️ PENDIENTE para ti: falta el catálogo de modelos de **Mercedes/Seat/Cupra/Skoda/Opel/Volvo** (mobile.de respondió flaky en esas descargas). Esos modelos caen a `q=` por ahora. El procedimiento para añadirlos está en `.ai/rules/support.md`. Sigue pendiente también lo de siempre (spatie, password BD, `$env:IMPORTNEX_TOKEN`, reimportar ZIPs).
+- Commit: ver `git log` (rama master)
+
+---
+
 ## 2026-09-13 · Copilot-VSCode · enlaces de suelo corregidos al spec canónico
 
 - Hice: el usuario pasó dos URLs de ejemplo (Arteon Shooting Brake R) y al contrastarlas con `playbook_filtrado.md` §"URL de resultados reales" aparecieron **dos bugs míos**: (1) `pw` de mobile.de va en **kW** (`cv × 0,7355 ±4`) y yo mandaba CV — un 290cv pedía 209:217 kW y yo pedía 261:319, que **excluía el propio coche**; (2) el `ms` son **cinco campos** `makeId;modelId;;;` y yo mandaba cuatro. Además mi mapa de makeIds (copiado de `empaquetar.py`) tenía IDs duplicados/inventados (Hyundai y Nissan = `21000`, Volvo = `25100`) → ahora solo los vigentes.
