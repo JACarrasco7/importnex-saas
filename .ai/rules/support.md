@@ -80,7 +80,11 @@ https://www.coches.net/segunda-mano/?MakeIds[0]=47&Versions[0]=Golf
 - `ModelIds[0]` es **preferible**: usarlo cuando el modelo esté mapeado, `Versions[0]`
   como fallback. Verificados 13-sep-2026: VW `MakeIds[0]`=47 · Golf `ModelIds[0]`=89.
 - Los corchetes van **literales** (`MakeIds[0]=`), no `%5B`.
-- VW=47 verificado. Ojo: el resto de MakeIds provienen de `empaquetar.py` sin verificar.
+- **Los 134 `MakeIds[0]` están en el catálogo compartido** (`app/Support/data/mobile-de-catalogo.json`,
+  clave `cochesnet`, junto a los de mobile.de). **No hardcodear ni inventar mapas**: Laravel y
+  `empaquetar.py` lo leen de ahí. Tenerlo duplicado ya causó un bug real — la copia del PHP se
+  quedó con valores inventados (`bmw=11` → CITROEN, `mercedes=12` → DAEWOO, `opel=7` → BMW,
+  `toyota=10` → CHRYSLER, `volvo=26` → MASERATI) y generaba enlaces a la marca equivocada.
 
 **Común**
 

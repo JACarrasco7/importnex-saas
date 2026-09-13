@@ -24,6 +24,19 @@
 
 ---
 
+## 2026-09-13 17:28 · Copilot-VSCode · IDs de coches.net al catálogo compartido (bug: marca equivocada)
+
+- Hice (auditoría, pasada 2): el mapa de `MakeIds[]` de coches.net estaba **DUPLICADO** en `empaquetar.py` y en `PortalSearchUrls.php`, y **habían divergido**. El PHP se quedó con los valores inventados y generaba enlaces a **OTRA MARCA**: `bmw=11`→CITROEN, `mercedes=12`→DAEWOO, `opel=7`→BMW, `seat=9`→CHEVROLET, `toyota=10`→CHRYSLER, `volvo=26`→MASERATI. Solo acertaban `VW=47` y `Audi=4`: **18 de 20 marcas estaban mal**.
+- Arreglado de raíz (una sola fuente): los IDs viven ahora solo en el catálogo (`app/Support/data/mobile-de-catalogo.json`, clave `cochesnet`, **134 marcas** del payload + `cochesnet.modelos`). Laravel y `empaquetar.py` lo leen de ahí. Tests: `test_coches_net_usa_los_make_ids_verificados_del_catalogo` (22 marcas) + `test_coches_net_no_vuelve_a_los_make_ids_inventados` (regresión).
+- Doc con datos caducados corregida: `.ai/rules/support.md` decía "el resto de MakeIds sin verificar" (ya no), `extractores.md` citaba `12603` como válido (devuelve **0**; el bueno es **14**).
+- Skills regeneradas: **importacion-vehiculos 3.9.6** / **estudio-mercado 0.4.3**, instaladas en `%USERPROFILE%\.claude\skills\` y copiadas al Escritorio. Borrados los backups `.old-*` del perfil (contenían `SKILL.md` y podían cargar versiones viejas).
+- Verificado: suite **692 pasan / 6 skip / 0 fallan**; Pint limpio; las 3 copias del catálogo idénticas (`DDBC318D…`); ZIP sin backslashes ni `__pycache__`.
+- Toqué: `app/Support/PortalSearchUrls.php`, `app/Support/data/mobile-de-catalogo.json`, `tests/Feature/CarEnlacesSueloTest.php`, `.claude/skills/**`, `.ai/rules/support.md`, `docs/SKILLS.md`.
+- ⚠️ PENDIENTE para ti: reconfirmar el `ms` de 5 campos en vivo cuando mobile.de levante el rate-limit; refrescar `datos_mercado.json` (datos del 17-ago, showstoppers caducados el 31-ago); reimportar los 2 ZIP en Cowork. Sigue lo de siempre (spatie, password BD, `$env:IMPORTNEX_TOKEN`).
+- Commit: ver `git log` (rama master)
+
+---
+
 ## 2026-09-13 · Copilot-VSCode · catálogo de IDs de mobile.de extraído y verificado
 
 - Hice: descubrí que **el HTML de mobile.de embebe su catálogo completo de marcas y modelos con IDs** (`{"label":"Golf","value":"14"}`). Extraje y **verifiqué por conteo de anuncios**: VW Golf=**14** (57.717), Arteon=**64** (2.007), Tiguan=54 (21.259), Audi A3=**8** (17.868), BMW 320=**10** (11.351), Ford Focus=20 (17.721). Guardado en `app/Support/data/mobile-de-catalogo.json` (fechado) con marcas + modelos de VW, Audi, BMW, Ford y Porsche completos.

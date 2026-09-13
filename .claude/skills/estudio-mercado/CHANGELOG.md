@@ -5,6 +5,16 @@ Todos los cambios notables en el skill `estudio-mercado` se documentarán en est
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.4.3] - 2026-09-13
+
+**Catálogo compartido actualizado: sección `coches.net`.**
+
+`references/mobile-de-ids.json` gana la sección `cochesnet` (**134 marcas** +
+`ModelIds`), extraída del payload de coches.net. Es el **mismo archivo** que usan
+la skill hermana y Laravel, así que los IDs de coches.net ya no se duplican ni
+divergen. Los IDs no van por orden alfabético (Mercedes=28, VW=47, Cupra=1400):
+no inventar, consultar el catálogo.
+
 ## [0.4.2] - 2026-09-13 — Catálogo de IDs de portal (deja de inventarlos)
 
 > **Motivo:** la skill construye URLs de búsqueda con IDs numéricos de mobile.de

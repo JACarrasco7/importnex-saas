@@ -190,7 +190,7 @@ Avisos: CO₂ falta a menudo → estimar y decirlo · <15 features = anuncio pob
 
 ### `ms` validados
 
-> ⚠️ **DEPRECADO 24-ago-2026 — NO usar esta tabla para construir URLs nuevas.** El formato `make;;modelGroup;desc` dejó de devolver resultados en la versión ES (hallazgo 24-ago). Los **makeIds** (VW=25200, Audi=1900, Cupra=3, Seat=22500, Mercedes=17200, BMW=3500) SIGUEN siendo válidos y están migrados a la tabla nueva del playbook; los modelGroup (29, 19, 36...) NO — los modelId nuevos son distintos (ej. Golf Mk7.5 = 12603). Fuente canónica: `playbook_filtrado.md` §"URL de resultados reales que SÍ funciona" + §"Tabla de IDs mobile.de".
+> ⚠️ **DEPRECADO 24-ago-2026 — NO usar esta tabla para construir URLs nuevas.** El formato `make;;modelGroup;desc` dejó de devolver resultados en la versión ES (hallazgo 24-ago). Los **makeIds** (VW=25200, Audi=1900, Cupra=3, Seat=22500, Mercedes=17200, BMW=3500) SIGUEN siendo válidos y están migrados a la tabla nueva del playbook; los modelGroup (29, 19, 36...) NO — los modelId nuevos son distintos (ej. Golf Mk7.5 = **14**, 57.717 anuncios el 13-sep-2026; el `12603` que citaba el playbook viejo devuelve **0**). Fuente canónica: `playbook_filtrado.md` §"URL de resultados reales que SÍ funciona" + §"Tabla de IDs mobile.de" y el catálogo `references/mobile-de-ids.json`.
 
 | Modelo | `ms` | | Modelo | `ms` |
 |---|---|---|---|---|

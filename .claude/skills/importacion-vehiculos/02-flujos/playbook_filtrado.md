@@ -371,10 +371,13 @@ como pares `{\"id\":47,\"label\":\"VOLKSWAGEN\"}`.
 > `opel=7` → BMW · `seat=9` → CHEVROLET · `toyota=10` → CHRYSLER · `volvo=26` → MASERATI.
 > Solo acertaban VW=47 y Audi=4.
 
-Valores reales: `audi=4 · bmw=7 · citroen=11 · fiat=14 · ford=15 · hyundai=18 ·
-mercedes-benz=28 · mazda=27 · nissan=31 · opel=32 · peugeot=33 · porsche=34 · renault=35 ·
-seat=39 · skoda=40 · toyota=46 · volkswagen=47 · volvo=48 · cupra=1400 · dacia=1011 ·
-ds=1358 · tesla=1354 · mini=222 · honda=69`.
+**Los 134 IDs viven en el catálogo compartido** (`references/mobile-de-ids.json`, clave
+`cochesnet`) — el **mismo archivo** que usa Laravel (`app/Support/PortalSearchUrls.php`):
+`empaquetar.py` los lee con `_make_id_coches_net()` / `_modelo_id_coches_net()`.
+**No copiar la lista a mano ni inventar IDs.** Muestra: `audi=4 · bmw=7 · citroen=11 ·
+fiat=14 · ford=15 · honda=69 · hyundai=18 · kia=22 · mazda=27 · mercedesbenz=28 ·
+nissan=31 · opel=32 · peugeot=33 · porsche=34 · renault=35 · seat=39 · skoda=40 ·
+toyota=46 · volkswagen=47 · volvo=48 · cupra=1400 · dacia=1011 · ds=1358 · tesla=1354`.
 ModelIds verificados: `MakeIds[0]=47` + Golf `ModelIds[0]=89` (→ "VOLKSWAGEN Golf de segunda
 mano"). **`ModelIds[0]` es preferible a `Versions[0]`**, que es texto libre y depende del
 etiquetado del vendedor (regla dura v3.3.8); `Versions[0]` queda como fallback.

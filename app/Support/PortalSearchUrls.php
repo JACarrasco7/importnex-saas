@@ -75,46 +75,35 @@ class PortalSearchUrls
     private static ?array $catalogo = null;
 
     /**
-     * MakeIds de coches.net. VW=47 verificado en navegador (13-sep-2026).
+     * Los IDs de coches.net viven en el catálogo compartido, clave `cochesnet`
+     * de `data/mobile-de-catalogo.json` (134 marcas + ModelIds).
      *
-     * @var array<string, int>
+     * ⚠️ Antes estaban DUPLICADOS aquí y en `empaquetar.py`, y **divergieron**:
+     * esta copia se quedó con valores inventados (`bmw=11` → CITROEN,
+     * `mercedes=12` → DAEWOO, `toyota=10` → CHRYSLER, `volvo=26` → MASERATI)
+     * mientras el script ya usaba los buenos. Una sola fuente, como mobile.de.
      */
-    private const MARCA_ID_COCHES_NET = [
-        'vw' => 47, 'volkswagen' => 47,
-        'bmw' => 11,
-        'mercedes' => 12, 'mercedes-benz' => 12,
-        'audi' => 4,
-        'opel' => 7,
-        'ford' => 5,
-        'seat' => 9,
-        'skoda' => 17,
-        'renault' => 13,
-        'peugeot' => 14,
-        'citroen' => 15,
-        'fiat' => 16,
-        'honda' => 18,
-        'hyundai' => 22,
-        'kia' => 23,
-        'mazda' => 24,
-        'nissan' => 25,
-        'toyota' => 10,
-        'volvo' => 26,
-        'cupra' => 27,
-    ];
+    private static function makeIdCochesNet(?string $marca): ?int
+    {
+        $id = self::catalogo()['cochesnet']['marcas'][self::claveCatalogo($marca)] ?? null;
+
+        return is_numeric($id) ? (int) $id : null;
+    }
 
     /**
-     * ModelIds de coches.net, con clave `<MakeIds[0]>` -> `<modelo normalizado>`.
+     * ModelId de coches.net (`cochesnet.modelos[<MakeIds[0]>]`).
      *
      * Es la forma PREFERIBLE; `Versions[0]` solo es el fallback para modelos sin
-     * ModelId conocido. Golf = 89 verificado en navegador (13-sep-2026).
-     *
-     * @var array<string, array<string, int>>
+     * ModelId conocido.
      */
-    private const MODELO_ID_COCHES_NET = [
-        '47' => [
-            'golf' => 89,
-        ],
-    ];
+    private static function modeloIdCochesNet(int $makeId, ?string $modelo): ?int
+    {
+        $modelos = self::catalogo()['cochesnet']['modelos'][(string) $makeId] ?? [];
+
+        $id = self::buscarModelo($modelos, $modelo);
+
+        return is_numeric($id) ? (int) $id : null;
+    }
 
     /**
      * Enlaces "ver suelo" del coche, uno por portal con precio de referencia.
@@ -206,12 +195,12 @@ class PortalSearchUrls
     {
         $params = [];
 
-        $makeId = self::MARCA_ID_COCHES_NET[self::clave($marca)] ?? null;
+        $makeId = self::makeIdCochesNet($marca);
         if ($makeId !== null) {
             $params['MakeIds[0]'] = $makeId;
         }
 
-        $modeloId = $makeId === null ? null : self::modeloIdCochesNet((string) $makeId, $modelo);
+        $modeloId = $makeId === null ? null : self::modeloIdCochesNet($makeId, $modelo);
 
         if ($modeloId !== null) {
             $params['ModelIds[0]'] = $modeloId;
@@ -289,11 +278,6 @@ class PortalSearchUrls
         $modelos = self::catalogo()['modelos'][$makeId] ?? [];
 
         return self::buscarModelo($modelos, $car->model);
-    }
-
-    private static function modeloIdCochesNet(string $makeId, ?string $modelo): ?int
-    {
-        return self::buscarModelo(self::MODELO_ID_COCHES_NET[$makeId] ?? [], $modelo);
     }
 
     /**

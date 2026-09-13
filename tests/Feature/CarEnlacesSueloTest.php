@@ -153,8 +153,67 @@ class CarEnlacesSueloTest extends TestCase
     {
         $url = $this->cocheCon(['brand' => 'BMW', 'model' => '3 Series'])->enlacesSuelo[1]['url'];
 
-        $this->assertStringContainsString('MakeIds[0]=11', $url);
+        $this->assertStringContainsString('MakeIds[0]=7', $url);
         $this->assertStringContainsString('Versions[0]=3+Series', $url);
+    }
+
+    public function test_coches_net_usa_los_make_ids_verificados_del_catalogo(): void
+    {
+        // IDs extraídos del payload de coches.net (13-sep-2026, 134 marcas).
+        // No van por orden alfabético: BMW=7 pero Mercedes-Benz=28; VW=47 y Cupra=1400.
+        $casos = [
+            'Audi' => 4,
+            'BMW' => 7,
+            'Citroen' => 11,
+            'Dacia' => 1011,
+            'Ford' => 15,
+            'Honda' => 69,
+            'Hyundai' => 18,
+            'Kia' => 22,
+            'Mazda' => 27,
+            'Mercedes-Benz' => 28,
+            'Nissan' => 31,
+            'Opel' => 32,
+            'Peugeot' => 33,
+            'Porsche' => 34,
+            'Renault' => 35,
+            'Seat' => 39,
+            'Skoda' => 40,
+            'Tesla' => 1354,
+            'Toyota' => 46,
+            'Volkswagen' => 47,
+            'Volvo' => 48,
+            'Cupra' => 1400,
+        ];
+
+        foreach ($casos as $marca => $esperado) {
+            $url = $this->cocheCon(['brand' => $marca, 'model' => 'Zzz'])->enlacesSuelo[1]['url'];
+
+            $this->assertStringContainsString(
+                "MakeIds[0]={$esperado}&",
+                $url,
+                "coches.net: {$marca} debería usar MakeIds[0]={$esperado}"
+            );
+        }
+    }
+
+    public function test_coches_net_no_vuelve_a_los_make_ids_inventados(): void
+    {
+        // Regresión: el mapa estaba DUPLICADO (PHP + empaquetar.py) y divergió.
+        // El PHP se quedó con valores inventados que apuntaban a OTRA marca:
+        // bmw=11 → Citroen, mercedes=12 → Daewoo, opel=7 → BMW, toyota=10 →
+        // Chrysler, volvo=26 → Maserati. Ahora ambos leen el catálogo compartido.
+        $inventados = ['BMW' => 11, 'Mercedes-Benz' => 12, 'Opel' => 7, 'Toyota' => 10, 'Volvo' => 26];
+
+        foreach ($inventados as $marca => $malo) {
+            $url = $this->cocheCon(['brand' => $marca, 'model' => 'Zzz'])->enlacesSuelo[1]['url'];
+
+            $this->assertStringNotContainsString(
+                "MakeIds[0]={$malo}&",
+                $url,
+                "coches.net: {$marca} no debe volver al MakeIds inventado {$malo}"
+            );
+        }
     }
 
     public function test_sin_potencia_omite_los_filtros_de_potencia(): void
@@ -193,9 +252,10 @@ class CarEnlacesSueloTest extends TestCase
 
     public function test_marca_desconocida_usa_texto_libre_y_no_filtra_marca(): void
     {
-        $enlaces = $this->cocheCon(['brand' => 'Tesla', 'model' => 'Model 3'])->enlacesSuelo;
+        // `Panhard` no está en el catálogo de coches.net (134 marcas): sin MakeIds.
+        $enlaces = $this->cocheCon(['brand' => 'Panhard', 'model' => 'Model 3'])->enlacesSuelo;
 
-        $this->assertStringContainsString('q=Tesla+Model+3', $enlaces[0]['url']);
+        $this->assertStringContainsString('q=Panhard+Model+3', $enlaces[0]['url']);
         $this->assertStringNotContainsString('ms=', $enlaces[0]['url']);
         $this->assertStringNotContainsString('MakeIds', $enlaces[1]['url']);
         $this->assertStringContainsString('Versions[0]=Model', $enlaces[1]['url']);

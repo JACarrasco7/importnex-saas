@@ -1,3 +1,20 @@
+## [3.9.6] - 2026-09-13
+
+**Los IDs de coches.net pasan al catálogo compartido (una sola fuente).**
+
+`empaquetar.py` y el PHP de Laravel tenían **cada uno su copia** del mapa de
+`MakeIds[]` de coches.net, y divergieron: la copia de Laravel se quedó con los
+valores viejos inventados (`bmw=11` → CITROEN, `mercedes=12` → DAEWOO,
+`opel=7` → BMW, `toyota=10` → CHRYSLER, `volvo=26` → MASERATI) y generaba
+enlaces a **la marca equivocada**. Solo acertaban `VW=47` y `Audi=4`.
+
+- El mapa vive ahora en `references/mobile-de-ids.json`, sección `cochesnet`
+  (**134 marcas**, extraídas del payload de coches.net) + `cochesnet.modelos`.
+- `empaquetar.py` lo lee con `_make_id_coches_net()` / `_modelo_id_coches_net()`.
+- Es el **mismo archivo** que usa Laravel (`app/Support/PortalSearchUrls.php`).
+- Recordatorio: **los IDs no van por orden alfabético** (Mercedes=28, VW=47,
+  Cupra=1400, Seat=39). No inventar: consultar el catálogo.
+
 ## [3.9.5] - 2026-09-13
 
 **Documentación: un `;` de más en `ms=` rompía el filtro por completo.**

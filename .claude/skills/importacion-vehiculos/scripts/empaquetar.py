@@ -1749,10 +1749,6 @@ MARCA_ID_MOBILE_DE = {
     "citroen": "5900",
 }
 
-# ModelIds de coches.net verificados (preferibles a `Versions[]`, texto libre).
-# Golf = 89 comprobado el 13-sep-2026.
-MODELO_ID_COCHES_NET = {"47": {"golf": 89}}
-
 _CATALOGO_IDS = None
 
 
@@ -1768,6 +1764,31 @@ def _catalogo_ids():
         except Exception:
             _CATALOGO_IDS = {}
     return _CATALOGO_IDS
+
+
+def _cochesnet_ids():
+    """Seccion `cochesnet` del catalogo (134 marcas + ModelIds)."""
+    return _catalogo_ids().get("cochesnet") or {}
+
+
+def _make_id_coches_net(marca):
+    """`MakeIds[0]` de coches.net, o 0 si la marca no esta en el catalogo.
+
+    FUENTE UNICA con Laravel (`app/Support/PortalSearchUrls.php`). Antes este
+    mapa estaba DUPLICADO en el script Y en el PHP, y divergio: la copia de
+    Laravel se quedo con valores inventados (`bmw=11` -> CITROEN, `mercedes=12`
+    -> DAEWOO, `opel=7` -> BMW, `toyota=10` -> CHRYSLER, `volvo=26` -> MASERATI)
+    y generaba enlaces a la marca EQUIVOCADA. Los IDs no van por orden
+    alfabetico (Mercedes=28 y VW=47; Cupra=1400 y Seat=39): NO INVENTAR.
+    """
+    marcas = _cochesnet_ids().get("marcas") or {}
+    return int(marcas.get(_clave_id(marca)) or 0)
+
+
+def _modelo_id_coches_net(make_id, modelo):
+    """`ModelIds[0]` de coches.net (preferible a `Versions[]`, texto libre)."""
+    modelos = (_cochesnet_ids().get("modelos") or {}).get(str(make_id)) or {}
+    return modelos.get(_clave_id(modelo))
 
 
 def _clave_id(texto):
@@ -1881,34 +1902,20 @@ def _url_coches_net(marca: str, modelo: str, anio_min: int, anio_max: int,
                     cv_min: int, cv_max: int, carroceria: str) -> str:
     """URL de búsqueda en coches.net (mercado español). Usa MakeIds y
     Versions como query param array; el ID exacto de marca hay que mapearlo."""
-    # MakeIds de coches.net — extraidos del payload de coches.net (13-sep-2026).
-    # La tabla anterior era INVENTADA: `bmw=11` devolvia CITROEN, `mercedes=12`
-    # DAEWOO, `opel=7` BMW, `toyota=10` CHRYSLER, `volvo=26` MASERATI... Solo
-    # acertaban VW=47 y Audi=4. Los IDs NO van por orden alfabetico simple
-    # (Mercedes es 28 y VW 47; Cupra es 1400 y Seat 39).
-    marca_ids = {
-        "vw": 47, "volkswagen": 47, "audi": 4, "bmw": 7,
-        "mercedes": 28, "mercedes-benz": 28, "porsche": 34, "ford": 15,
-        "opel": 32, "seat": 39, "skoda": 40, "cupra": 1400, "dacia": 1011,
-        "citroen": 11, "peugeot": 33, "renault": 35, "fiat": 14, "honda": 69,
-        "hyundai": 18, "kia": 22, "mazda": 27, "nissan": 31, "toyota": 46,
-        "volvo": 48, "ds": 1358, "mini": 222, "mitsubishi": 30, "suzuki": 44,
-        "subaru": 43, "jeep": 21, "jaguar": 20, "land rover": 24,
-        "landrover": 24, "lexus": 25, "mg": 29, "ssangyong": 42, "smart": 41,
-        "rover": 37, "saab": 38, "isuzu": 19, "tesla": 1354,
-        "polestar": 1402, "chevrolet": 9, "chrysler": 10, "lancia": 23,
-        "byd": 1352, "infiniti": 1025,
-    }
+    # MakeIds[0] de coches.net desde el catalogo compartido (fuente unica con
+    # Laravel). La tabla anterior era INVENTADA: `bmw=11` devolvia CITROEN,
+    # `mercedes=12` DAEWOO, `opel=7` BMW, `toyota=10` CHRYSLER, `volvo=26`
+    # MASERATI... Solo acertaban VW=47 y Audi=4.
     body_type = {
         "sedan": 1, "compacto": 2, "familiar": 4, "suv": 5,
         "monovolumen": 6, "coupe": 7,
     }
-    make_id = marca_ids.get(marca.lower(), 0)
+    make_id = _make_id_coches_net(marca)
     bt = body_type.get(carroceria.lower(), 0)
     parts = [f"MakeIds[0]={make_id}"] if make_id else []
     # `ModelIds[0]` es preferible a `Versions[0]`: `Versions[]` es texto libre y
     # depende del etiquetado del vendedor (regla dura v3.3.8).
-    modelo_id = MODELO_ID_COCHES_NET.get(str(make_id), {}).get(_clave_id(modelo))
+    modelo_id = _modelo_id_coches_net(make_id, modelo)
     if modelo_id:
         parts.append(f"ModelIds[0]={modelo_id}")
     elif modelo:
