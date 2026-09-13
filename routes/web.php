@@ -19,6 +19,7 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FinanceController;
+use App\Http\Controllers\GuideController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\JJImportFolletoController;
 use App\Http\Controllers\KpiController;
@@ -154,6 +155,10 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
 
     // Dashboard de KPIs del skill importacion-vehiculos (§3.8)
     Route::get('/kpis', [KpiController::class, '__invoke'])->name('kpis.index');
+
+    // Guías internas — sección "Guía" del menú lateral (ver GuideController)
+    Route::get('/guias', [GuideController::class, 'index'])->name('guide.index');
+    Route::get('/guias/{slug}', [GuideController::class, 'show'])->name('guide.show');
 
     // Mapa de mercado — panel admin (skill estudio-mercado)
     Route::get('/mercado/admin', [MercadoController::class, 'admin'])->name('mercado.admin');

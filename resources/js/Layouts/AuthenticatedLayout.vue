@@ -133,15 +133,13 @@ const navGroups = computed(() => [
             { name: t('nav.cars'), route: 'cars.index', icon: TruckIcon },
         ],
     },
-    // Guía oculta: la ruta 'guide.index' aún no existe en el repo
-    // y Ziggy lanza errores en el sidebar. Reactivar cuando exista el módulo.
-    // {
-    //     title: t('nav.guide'),
-    //     icon: BookOpenIcon,
-    //     items: [
-    //         { name: t('nav.guide'), route: 'guide.index', icon: BookOpenIcon },
-    //     ],
-    // },
+    {
+        title: t('nav.guide'),
+        icon: BookOpenIcon,
+        items: [
+            { name: t('nav.guide'), route: 'guide.index', icon: BookOpenIcon },
+        ],
+    },
     {
         title: t('nav.account'),
         icon: BuildingOfficeIcon,
