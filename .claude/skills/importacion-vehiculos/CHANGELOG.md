@@ -15,6 +15,16 @@ enlaces a **la marca equivocada**. Solo acertaban `VW=47` y `Audi=4`.
 - Recordatorio: **los IDs no van por orden alfabético** (Mercedes=28, VW=47,
   Cupra=1400, Seat=39). No inventar: consultar el catálogo.
 
+**Misma limpieza en mobile.de:** se ha **eliminado** el mapa hardcodeado
+`MARCA_ID_MOBILE_DE` (16 marcas). Ahora `_make_id_mobile_de()` lo lee también del
+catálogo, así que el script conoce las **53 marcas** en vez de 16 (las 38 que
+faltaban caían a `q=` sin necesidad). Comprobado antes de borrarlo: los 15
+valores reales coincidían con el catálogo, no había divergencia.
+
+**Regla que sale de esto:** *ningún ID de portal se escribe a mano en el script.*
+Si falta una marca, se añade al catálogo (con el procedimiento de refresco), no
+al código. El bug de hoy nació exactamente de tener el mismo mapa en dos sitios.
+
 ## [3.9.5] - 2026-09-13
 
 **Documentación: un `;` de más en `ms=` rompía el filtro por completo.**

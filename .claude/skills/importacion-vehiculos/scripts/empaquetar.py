@@ -1730,24 +1730,11 @@ def _semaforo_de_reco(reco: str) -> str:
 # Los IDs de mobile.de CADUCAN: el `Golf Mk7.5 = 12603` del playbook devolvía
 # **0 anuncios** el 13-sep-2026; el vigente es `14` (57.717). Catálogo completo
 # en `references/mobile-de-ids.json`.
-MARCA_ID_MOBILE_DE = {
-    "vw": "25200",
-    "volkswagen": "25200",
-    "audi": "1900",
-    "bmw": "3500",
-    "mercedes": "17200",
-    "mercedes-benz": "17200",
-    "porsche": "20100",
-    "ford": "9000",
-    "skoda": "22900",
-    "opel": "19000",
-    "toyota": "24100",
-    "volvo": "25100",
-    "cupra": "3",
-    "seat": "22500",
-    "dacia": "6600",
-    "citroen": "5900",
-}
+# ⚠️ `MARCA_ID_MOBILE_DE` se ELIMINO (13-sep-2026). Los makeId de mobile.de se
+# leen del catalogo compartido con `_make_id_mobile_de()`. Mantener aqui una
+# copia hardcodeada es justo lo que causo el bug de coches.net: dos copias que
+# divergen y generan URLs a la marca equivocada. Ademas esta copia solo
+# conocia 16 marcas, asi que 38 marcas del catalogo caian a `q=` sin necesidad.
 
 _CATALOGO_IDS = None
 
@@ -1791,6 +1778,15 @@ def _modelo_id_coches_net(make_id, modelo):
     return modelos.get(_clave_id(modelo))
 
 
+def _make_id_mobile_de(marca):
+    """makeId de mobile.de, o None si la marca no esta en el catalogo.
+
+    FUENTE UNICA: `references/mobile-de-ids.json`, el mismo archivo que usa
+    Laravel (`app/Support/PortalSearchUrls.php`).
+    """
+    return (_catalogo_ids().get("marcas") or {}).get(_clave_id(marca))
+
+
 def _clave_id(texto):
     """Normaliza para buscar en los catalogos ('Golf 7.5 TCR' -> 'golf75tcr')."""
     import re
@@ -1808,7 +1804,7 @@ def _modelo_id_mobile_de(marca, modelo):
     ('320' para '320d').
     """
     import re
-    make_id = MARCA_ID_MOBILE_DE.get((marca or "").lower())
+    make_id = _make_id_mobile_de(marca)
     if not make_id:
         return None
     modelos = (_catalogo_ids().get("modelos") or {}).get(make_id) or {}
@@ -1853,7 +1849,7 @@ def _url_mobile_de(marca: str, modelo: str, anio_min: int, anio_max: int,
       cae en modo formulario sin tarjetas, asi que ahi se filtra por texto (`q=`).
     - `dam=0` (sin siniestros), `sb=p` (precio ascendente), `isSearchRequest=true`.
     """
-    make_id = MARCA_ID_MOBILE_DE.get((marca or "").lower())
+    make_id = _make_id_mobile_de(marca)
     modelo_id = _modelo_id_mobile_de(marca, modelo)
     cid = CARROCERIA_ID_MOBILE_DE.get((carroceria or "").lower(), "")
 
