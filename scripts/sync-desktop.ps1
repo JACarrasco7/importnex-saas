@@ -195,7 +195,9 @@ if (-not (Test-Path $DistSkills)) {
                     Write-Host ("    [{0}] Desktop: {1,-35} v{2}   repo v{3}" -f $status, $d.Name, $ver, $repoVer) -ForegroundColor $color
                 }
             } else {
-                Write-Host ("    (no se encontro {0})" -f $DesktopSkillDir) -ForegroundColor Yellow
+                Write-Host "    [N/A] Claude Desktop instala las skills via su gestor (.skill.zip)," -ForegroundColor DarkGray
+                Write-Host "          no como carpetas en disco. Verifica la version abierta en la app." -ForegroundColor DarkGray
+                Write-Host "          Para actualizar: importar el ZIP de arriba desde Actions o _dist/." -ForegroundColor DarkGray
             }
         }
     }
