@@ -24,6 +24,17 @@
 
 ---
 
+## 2026-09-13 18:45 · Copilot-VSCode · deudas saldadas: build + refresco real de oferta del mapa de mercado
+
+- **`npm run build`** lanzado (por petición expresa del usuario, que anula su propia regla de que lo lanza él). El bloque "Ver suelo en portales" **ya está en el bundle** (`MarketPanel-*.js`, manifest 18:02).
+- **`datos_mercado.json` refrescado de verdad**, no de palabra: reejecutada la consulta propia de cada una de las **9 showstoppers** (las caducadas el 31-ago) y actualizados los recuentos de oferta medidos en vivo. Golf GTI ES 494→**507** / DE 3479→**3294**; Golf R 161→162 / 623→623; Audi S3 66→**64** / 828→**791**; A45 AMG 139→**149** / 156→**170**; M135 13→12 / 513→508; i30 N 195→193 / 463→**491**; Focus ST 68→**70** / 567→**577**; Audi TT 86→85 / 460→**453**; Cupra Leon 655→**697** / 5321→**5505**. `refrescar_antes_de_categoria` → 2026-09-27. Espejo del Escritorio sincronizado.
+- ⚠️ **Bug encontrado en el propio mapa:** las `query_reejecutable.de` grabadas estaban **incompletas** — les faltaba `isSearchRequest=true&s=Car&vc=Car`. Usarlas tal cual hace que mobile.de **ignore los filtros** y devuelva el catálogo entero (664.331 / 728.899 anuncios) **sin avisar**, dando a entender que es el modelo. Corregidas a la URL completa.
+- **Lo que NO se ha tocado, a propósito:** las **medianas** siguen del estudio completo (17-ago) → anotado con `oferta_medida` por entrada para no mezclar fechas. Y **las 14 entradas sin `query_reejecutable`** no se han refrescado: sin la consulta original no se mide lo mismo, y reconstruirla a ojo sería inventar (misma regla que con los IDs de portal).
+- ⚠️ **PENDIENTE (decisiones tuyas, no código):** (1) **spatie/laravel-permission** — la regla dice "2-3 días, riesgo alto, esperar decisión"; hay que elegir implementar o desinstalar; (2) **rotar password de BD Forge** — requiere el panel de Forge y es un secreto, no pasa por el asistente; (3) **`$env:IMPORTNEX_TOKEN`** — igual, el token no debe pasar por el asistente: se pega en la terminal y luego se verifica sin verlo.
+- Commit: ver `git log` (rama master)
+
+---
+
 ## 2026-09-13 17:52 · Copilot-VSCode · catálogo a 14 marcas (+Toyota/Citroën/Dacia) y las 53 marcas verificadas
 
 - **Revisión con hallazgo:** las notas del catálogo decían *"añadir al mapa SOLO lo verificado"* pero **37 de sus 53 marcas nunca se habían comprobado** (venían del payload sin más). Como el refactor de 3.9.6 hizo que `empaquetar.py` leyera de ahí, esas 37 entraban en juego sin verificar. **Comprobadas las 53 en vivo** (pidiendo `ms=<makeId>;;;` y leyendo el `<h1>`): **53/53 correctas** — `alpina=1100`→"624 ALPINA", `abarth=140`→"1.905 Abarth", `chevrolet=5600`, `byd=31953`… Un ID del payload es **autoritativo**; lo prohibido es **inventarlo**.
