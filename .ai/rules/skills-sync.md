@@ -34,10 +34,16 @@ equivocado es indistinguible de uno actualizado a simple vista: por eso
    - Regenera los ZIPs en `.claude/skills/_dist/` con el nombre correcto (versión +
      fecha leídas del `SKILL.md` real, corregido 12-sep-2026 — antes estaba
      hardcodeado).
-   - Borra los ZIPs viejos de la misma skill.
+   - Borra los ZIPs viejos de la misma skill. ⚠️ Esta limpieza **no existía** hasta el
+     13-sep-2026: `v3.9.3` y `v3.9.4` convivieron en `_dist/` (riesgo real de importar el
+     viejo a Desktop). Añadida a `build-zips.py` (`borrar_zips_viejos`).
    - Reescribe la tabla de `docs/SKILLS.md` con versión/tamaño/SHA256 reales.
    - Hace `git add` + commit + push de `_dist/`, `docs/SKILLS.md` y el propio
      script.
+   - ⚠️ **NO commitea los ficheros FUENTE de la skill** (`SKILL.md`, `memoria/`, `scripts/`,
+     `02-flujos/`, `references/`…). Hay que commitearlos a mano tras el build, o el repo
+     queda con un ZIP nuevo construido sobre fuentes sin commitear (pasó el 13-sep-2026).
+     **Revisar siempre `git status` después de correr el script.**
 3. **Después**, y solo entonces, subir el ZIP nuevo de `_dist/` a:
    - Claude Desktop (gestor de skills de la app).
    - La cuenta de Claude (donde se gestionan las skills de Cowork).
