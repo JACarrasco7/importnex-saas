@@ -1,3 +1,31 @@
+## [3.9.8] - 2026-09-13
+
+**Ficha de marketing: TikTok vacío y stories vacías en TODAS las redes.**
+
+Dos bugs (tres, en realidad) en `scripts/esqueleto_a_json.py` que hacían que el JSON llegara a
+Laravel con `canales.video` **vacío** y `canales.stories` **vacío**, aunque el
+`redes-sociales.txt` sí traía el contenido. **Verificado contra el Arteon real (coche 11)**: la
+salida del script corregido es **idéntica** al JSON que se había arreglado a mano.
+
+1. **TikTok vacío** — la skill escribe el contenido de vídeo con prefijo `VT_`
+   (`VT_GANCHO_A`, `VT_CTA`, `VT_HASHTAGS`), pero el builder solo miraba `RL_`/`TT_`/`YS_`,
+   así que `canales.video` salía `{}`. Añadido `VT_` al filtro.
+2. **`VT_GANCHO_A` nunca llegaba a `gancho`** — el corte de prefijo lo dejaba en `gancho_a`,
+   una clave que `ValuationPackageIngestor::ingestarRedesV2()` **no lee**: exige `gancho` no
+   vacío o descarta el canal entero, así que arreglar el filtro no bastaba. Nuevo
+   `_clave_canal()` normaliza `gancho_a` → `gancho`.
+3. **Stories vacías en todas las redes** — el builder leía `ST_PANTALLA`, un bloque que la
+   skill **nunca ha emitido**. Los reales son `INSTAGRAM_STORY_*` / `FACEBOOK_STORY_*` /
+   `TIKTOK_STORY_*`. Nuevo `_stories_desde_bloques_legacy()` los mapea a `{canal, copy}`:
+   **9 stories** (3 por red) en vez de 0.
+4. **De propina**: los bloques `*_HASHTAGS` van en UNA línea (`#a #b #c`) y no se separaban
+   → Laravel los recibía como una sola etiqueta y le anteponía su propio `#` (`##a #b...`).
+   Ahora se separan y se les quita el `#` de origen.
+
+> ⚠️ **Pendiente conocido (no tocado)**: el script imprime un ✅ y en una consola Windows con
+> cp1252 eso lanza `UnicodeEncodeError` y **sale con código 1 aunque el JSON ya se haya
+> escrito**. Con `PYTHONIOENCODING=utf-8` (o en Linux) funciona sin ruido.
+
 ## [3.9.7] - 2026-09-13
 
 **Catálogo ampliado a 14 marcas: entran Toyota, Citroën y Dacia. Y metadatos corregidos.**

@@ -99,6 +99,54 @@ def num(valor):
         return valor
 
 
+# FIX 2026-09-13 (bug "stories vacías en Laravel para todas las redes"):
+# el builder de "canales.stories" esperaba un bloque genérico [ST_PANTALLA]
+# que la skill nunca ha llegado a emitir — el generador de redes-sociales.txt
+# sigue escribiendo los bloques v1 por red (INSTAGRAM_STORY_1..3,
+# FACEBOOK_STORY_1..3, TIKTOK_STORY_1..3), que existen y tienen contenido
+# real, pero no encajaban en ningún lado del JSON canónico v2. Resultado:
+# ValuationPackageIngestor::ingestarStoriesV2() recibía siempre [] y no
+# creaba NINGUNA story, en NINGUNA red, aunque el .txt sí las traía.
+# Este mapeo traduce esos bloques legacy al formato {canal, copy} que
+# ingestarStoriesV2() ya sabe leer, sin tocar Laravel ni la skill.
+_STORY_PREFIJOS_LEGACY = {
+    "INSTAGRAM_STORY_": "instagram",
+    "FACEBOOK_STORY_": "facebook",
+    "TIKTOK_STORY_": "tiktok",
+}
+
+
+def _stories_desde_bloques_legacy(datos):
+    stories = []
+    for prefijo, canal in _STORY_PREFIJOS_LEGACY.items():
+        n = 1
+        while f"{prefijo}{n}" in datos:
+            copy = datos[f"{prefijo}{n}"]
+            if isinstance(copy, str) and copy.strip():
+                stories.append({"canal": canal, "copy": copy.strip()})
+            n += 1
+    return stories
+
+
+def _clave_canal(prefijo_len, nombre):
+    """Corta el prefijo de un bloque de canal (IG_/FB_/VT_/...) y lo pasa a
+    minúsculas para usarlo como clave del dict que consume Laravel.
+
+    FIX 2026-09-13 (parte 2 del bug "TikTok vacío"): la skill escribe el gancho
+    principal de vídeo como [VT_GANCHO_A] / [VT_GANCHO_B] (variante A/B), pero
+    el resto de canales (IG_GANCHO, FB_GANCHO) no llevan sufijo para la
+    variante principal. ValuationPackageIngestor::ingestarRedesV2() exige
+    $canal['gancho'] no vacío para crear NINGÚN contenido del canal (si no
+    existe, hace `continue` y descarta el canal entero). Con el corte de
+    prefijo simple, VT_GANCHO_A se convertía en "gancho_a" — una clave que
+    Laravel nunca lee — así que aunque se arregle el filtro de prefijos
+    ("VT_" añadido antes), el canal "video" seguía sin "gancho" y Laravel
+    lo descartaba igual. Este alias normaliza "gancho_a" → "gancho".
+    """
+    clave = nombre[prefijo_len:].lower()
+    return "gancho" if clave == "gancho_a" else clave
+
+
 def valor_de(nombre, crudo):
     partes = [x.strip() for x in crudo.split("|")]
     if nombre in TRIPLES and len(partes) >= 3:
@@ -108,6 +156,17 @@ def valor_de(nombre, crudo):
         return {k: partes[0], v: " | ".join(partes[1:]).strip() if len(partes) > 1 else ""}
     if nombre in ("FC_FOTOS", "FOTOS") and "|" in crudo:
         return [x for x in partes if x]
+    if nombre.endswith("_HASHTAGS") and "|" not in crudo:
+        # FIX 2026-09-13: bloques como [IG_HASHTAGS] se escriben en UNA línea con
+        # varias etiquetas separadas por espacio ("#a #b #c"), a diferencia de los
+        # bloques antiguos (p.ej. INSTAGRAM_HASHTAGS) que repetían el marcador una
+        # vez por etiqueta. Sin este split, Laravel recibía "#a #b #c" como una
+        # única etiqueta (contador "1/5 recomendados") y le anteponía su propio
+        # "#", duplicándolo ("##a #b..."). Se quita el "#" de origen: Laravel ya
+        # antepone el suyo al renderizar cada elemento de la lista.
+        tags = [t.lstrip("#") for t in crudo.split() if t.strip()]
+        if len(tags) > 1:
+            return tags
     if nombre in NUMERICOS:
         return num(crudo)
     return crudo
@@ -160,8 +219,14 @@ def a_json_desde_texto(texto, nombre):
         doc["tipo"] = "redes_sociales"
         doc["canales"] = {
             "instagram_feed": {k[3:].lower(): datos[k] for k in datos if k.startswith("IG_")},
-            "stories": datos.get("ST_PANTALLA", []),
-            "video": {k: datos[k] for k in datos if k.startswith(("RL_", "TT_", "YS_"))},
+            "stories": datos.get("ST_PANTALLA") or _stories_desde_bloques_legacy(datos),
+            # FIX 2026-09-13: la skill escribe el contenido de vídeo/TikTok con el
+            # prefijo "VT_" (VT_GANCHO_A, VT_CTA, VT_HASHTAGS...), pero "VT_" no
+            # estaba en esta lista de prefijos — solo RL_/TT_/YS_. Resultado: la
+            # pestaña TikTok de Laravel llegaba siempre vacía ("video": {}) pese a
+            # que el .txt sí tenía el contenido. Se añade "VT_" al filtro.
+            "video": {_clave_canal(3, k): datos[k] for k in datos
+                      if k.startswith(("RL_", "TT_", "VT_", "YS_"))},
             # OJO: "FB_" no debe capturar "FBMP_" (Facebook Marketplace tiene
             # sus propios bloques, canal aparte) — de ahí el filtro extra.
             "facebook_pagina": {k[3:].lower(): datos[k] for k in datos
