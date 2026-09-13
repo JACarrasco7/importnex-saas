@@ -10,7 +10,7 @@
 
 ### URL verificada
 
-> ⚠️ **ACTUALIZADA 24-ago-2026:** esta URL (`www.mobile.de/...&ms=<make>;<model>;<grp>;<desc>&lang=de`) quedó **deprecada** para la versión ES — el dominio `www.mobile.de/es/...` cae en modo formulario sin tarjetas y la sintaxis `ms=make;;group;desc` devuelve 0 resultados. La **URL canónica actual** es `suchen.mobile.de/fahrzeuge/search.html?...&ms=<makeId>;<modelId>;;;;&sb=p` (ver `playbook_filtrado.md` §"URL de resultados reales que SÍ funciona"). Esta sección describe la estructura de la página, que sigue siendo válida.
+> ⚠️ **ACTUALIZADA 24-ago-2026:** esta URL (`www.mobile.de/...&ms=<make>;<model>;<grp>;<desc>&lang=de`) quedó **deprecada** para la versión ES — el dominio `www.mobile.de/es/...` cae en modo formulario sin tarjetas y la sintaxis `ms=make;;group;desc` devuelve 0 resultados. La **URL canónica actual** es `suchen.mobile.de/fahrzeuge/search.html?...&ms=<makeId>;<modelId>;;;&sb=p` (CUATRO `;`, no cinco — un `;` de más rompe el filtro y cae a todo el catálogo, reconfirmado en vivo 13-sep-2026) (ver `playbook_filtrado.md` §"URL de resultados reales que SÍ funciona"). Esta sección describe la estructura de la página, que sigue siendo válida.
 
 ```
 https://www.mobile.de/fahrzeuge/search.html?dam=false&isSearchRequest=true&ms=<make>;<model>;<grp>;<desc>&s=Car&vc=Car&lang=de

@@ -1,3 +1,33 @@
+## [3.9.5] - 2026-09-13
+
+**Documentación: un `;` de más en `ms=` rompía el filtro por completo.**
+
+Reconfirmado en vivo (navegando de verdad, 13-sep-2026) el punto que quedó abierto en la
+sesión anterior:
+
+| `ms=` | `;` | Campos | Resultado |
+|---|---|---|---|
+| `25200;14;;;` | 4 | 5 | "Volkswagen Golf" · **57.731 ofertas** ✅ |
+| `25200;14;;;;` | 5 | 6 | "Todo" · **1.524.511 ofertas** ❌ (el catálogo entero) |
+
+El formato correcto **siempre fue el de 5 campos** y el código (`empaquetar.py`,
+`PortalSearchUrls.php`) ya lo generaba bien — pero la **documentación** tenía el de 6 en
+**5 sitios de `02-flujos/playbook_filtrado.md`**, 1 en `02-flujos/paginas_reales.md` y 1 en
+`02-flujos/extractores.md`. El error venía del 24-ago y era incoherente consigo mismo:
+decía "5 campos" mientras escribía 5 `;`.
+
+Es un bug traicionero porque **nunca da 0 resultados**: parece que funciona y te devuelve
+medio millón de coches sin filtrar.
+
+Corregidos los 7 sitios + añadido un aviso explícito en `playbook_filtrado.md` §Claves
+("Ojo con un `;` de más... contar los `;` a mano").
+
+> ⚠️ Las entradas de este CHANGELOG fechadas el **24-ago-2026** citan
+> `ms=makeId;modelId;;;;` — **están mal**, se dejan como registro histórico. El formato
+> bueno es `makeId;modelId;;;` (5 campos, 4 `;`).
+
+---
+
 ## [3.9.4] - 2026-09-13
 
 **Corrección de datos: la mayoría de los IDs de portal que usaba la skill estaban

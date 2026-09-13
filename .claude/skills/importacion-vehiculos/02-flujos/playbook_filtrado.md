@@ -26,7 +26,7 @@
 
 | Filtro | mobile.de (DE) | Coches.net (ES) | AutoScout24 (DE) | AutoUncle | kleinanzeigen (DE) | Wallapop (ES) |
 |---|---|---|---|---|---|---|
-| Marca+modelo | `ms=<makeId>;<modelId>;;;;` | `MakeIds[0]=`+`ModelIds[0]=` | ruta `/lst/<marca>/<modelo>/` | combobox | `autos.marke_s:` | radio `brand`→`model` |
+| Marca+modelo | `ms=<makeId>;<modelId>;;;` | `MakeIds[0]=`+`ModelIds[0]=` | ruta `/lst/<marca>/<modelo>/` | combobox | `autos.marke_s:` | radio `brand`→`model` |
 | Año desde | `fr=<y>:` | `MinYear=` | `fregfrom=` | `[name="minYear"]` | `brwse-attr-autos.ez_i-min` | range selector |
 | Año hasta | `fr=:<y>` | `MaxYear=` | `fregto=` | `[name="maxYear"]` | `brwse-attr-autos.ez_i-max` | range selector |
 | Km máx | `ml=:<km>` | `MaxKms=` | `kmto=` | `[name="maxKm"]` | `brwse-attr-autos.km_i-max` | range |
@@ -52,7 +52,7 @@
 
 ```
 1. mobile.de (1 navegación + 2 capturas)
-   - URL = plantilla canónica §"URL de resultados reales" (`suchen.mobile.de/fahrzeuge/search.html?...&ms=<makeId>;<modelId>;;;;&sb=p`) — NUNCA `/es/s/auto` (modo formulario sin tarjetas)
+   - URL = plantilla canónica §"URL de resultados reales" (`suchen.mobile.de/fahrzeuge/search.html?...&ms=<makeId>;<modelId>;;;&sb=p`) — NUNCA `/es/s/auto` (modo formulario sin tarjetas)
    - Aceptar cookies → screenshot
    - Filtro Kilometerstand bis + Erstzulassung von (clic combobox) → screenshot
    - Anotar: <h1> "X Angebote" + 5-8 precios bajos + lista (kW/PS, km, año)
@@ -188,7 +188,7 @@ PASO 1 — Búsqueda por variante de texto (la normal)
   Resultado: 72 anuncios (muchos son "OPC-Line" o mal etiquetados)
 
 PASO 2 — Búsqueda por MODELO BASE + potencia (kW)
-  URL: plantilla canónica suchen con el modelo base (ms=<makeId>;<modelId>;;;;)
+  URL: plantilla canónica suchen con el modelo base (ms=<makeId>;<modelId>;;;)
   + pw=<kWdesde>%3A<kWhasta> derivado del cv EXACTO de la variante (ver tabla abajo)
     · Ej OPC 280 CV = 206 kW → pw=196:211
   + fr=<año mínimo> (Erstzulassung)
@@ -262,8 +262,9 @@ https://suchen.mobile.de/fahrzeuge/search.html
   &tr=MANUAL_GEAR|AUTOMATIC_GEAR
 ```
 
-**Claves (24-ago-2026):**
-- `ms=` va como `makeId;modelId;;;;` (make;model;vacío;vacío;vacío). **NO** como `make;;variante` (esa sintaxis probada al principio **fallaba** y devolvía 0 resultados).
+**Claves (24-ago-2026, reconfirmado por conteo en vivo 13-sep-2026):**
+- `ms=` va como `makeId;modelId;;;` (**CINCO campos**: make;model;vacío;vacío;vacío = CUATRO `;`). **NO** como `make;;variante` (esa sintaxis probada al principio **fallaba** y devolvía 0 resultados).
+- ⚠️ **Ojo con un `;` de más.** `makeId;modelId;;;;` (SEIS campos, cinco `;`) parece inofensivo pero **rompe el filtro por completo**: mobile.de lo interpreta como "Marca, modelo, versión: Todo" y el buscador cae a **todo el catálogo sin filtrar** (verificado en vivo 13-sep-2026: VW Golf con 4 `;` → 57.731 anuncios correctos; el mismo `ms` con 5 `;` → 1.524.511 anuncios, el total de mobile.de). Contar los `;` a mano antes de dar un `ms=` por bueno.
 - `sb=p` (precio asc) **SÍ funciona** combinado con `ms` en esta URL — sin él, la página cae en modo formulario sin resultados.
 - `tr=MANUAL_GEAR` o `tr=AUTOMATIC_GEAR` para filtrar cambio individual (omitir `tr=` para ambos).
 - `pw=<kWdesde>%3A<kWhasta>` para filtrar por rango de potencia en kW (clave para la doble pasada).
@@ -353,7 +354,7 @@ PASO 3 — Para ver más tarjetas
    `{\"label\":\"Golf\",\"value\":\"14\"}` — **ojo**: a veces `value` va antes que `label`.
    La lista de **marcas** está en la misma página tras `\"Alle Marken\"`.
 3. **Validar SIEMPRE por conteo**: abrir
-   `...search.html?dam=0&isSearchRequest=true&s=Car&vc=Car&ms=<makeId>;<modelId>;;;;&od=up&s=Car&sb=p&vc=Car`
+   `...search.html?dam=0&isSearchRequest=true&s=Car&vc=Car&ms=<makeId>;<modelId>;;;&od=up&s=Car&sb=p&vc=Car`
    y comprobar que el contador "X Angebote" **no es 0** y que el `<h1>` nombra el modelo
    correcto. Si sale 0 o el modo formulario → el ID está mal o caducado.
 4. Volcar el resultado en `references/mobile-de-ids.json` y anotar la fecha en `verificado`.

@@ -14,15 +14,20 @@ Fuente canónica: `.claude/skills/importacion-vehiculos/02-flujos/playbook_filtr
 
 ```
 https://suchen.mobile.de/fahrzeuge/search.html?dam=0&fr=<a-1>:<a+1>
-  &isSearchRequest=true&ms=<makeId>;<modelId>;;;;&od=up&s=Car&sb=p&vc=Car
+  &isSearchRequest=true&ms=<makeId>;<modelId>;;;&od=up&s=Car&sb=p&vc=Car
   &pw=<kW-4>:<kW+4>
 ```
 
 - `pw` va en **kW**, NO en CV: `kW = cv × 0,7355`, margen ±4 kW (redondear el límite
   inferior hacia abajo). Ej: 320 cv → `pw=231:239`. Mandar CV aquí filtra mal y excluye
   el propio coche.
-- `ms` son **cinco campos** (`makeId;modelId;;;`). Sin `modelId` la página cae en
+- `ms` son **cinco campos** (`makeId;modelId;;;`, CUATRO `;`). Sin `modelId` la página cae en
   **modo formulario con 0 tarjetas** → en ese caso se filtra por texto (`q=`).
+  ⚠️ **Reconfirmado en vivo 13-sep-2026**: un `;` de más (`makeId;modelId;;;;`, SEIS
+  campos) no da error — silenciosamente ignora marca/modelo y cae a **todo el catálogo**
+  (VW Golf con 4 `;` → 57.731 anuncios correctos; el mismo `ms` con 5 `;` → 1.524.511,
+  el total de mobile.de). Un `ms` con 6 campos "parece" válido porque el contador nunca
+  da 0 — por eso es un bug peligroso de detectar sin comparar el `<h1>`/breadcrumb.
 - Los IDs viven en `app/Support/data/mobile-de-catalogo.json` (marcas + modelos),
   **fechado**. Orden de resolución: `busquedas_realizadas` del informe → catálogo → texto
   libre. **Nunca inventar IDs.**
@@ -52,7 +57,10 @@ https://suchen.mobile.de/fahrzeuge/search.html?dam=0&fr=<a-1>:<a+1>
 2. El HTML del servidor **embebe el catálogo**: buscar `isGroup` y parsear los pares
    `{\"label\":\"Golf\",\"value\":\"14\"}`. La lista de marcas está en la misma
    página tras `"Alle Marken"`.
-3. Confirmar con `ms=<makeId>;<modelId>;;;;` que el contador de anuncios NO es 0.
+3. Confirmar con `ms=<makeId>;<modelId>;;;` (CUATRO `;`, no cinco) que el contador de
+   anuncios NO es 0 **y que el filtro "Marca, modelo, versión" muestra la marca+modelo**
+   (no "Todo") — con un `;` de más el contador siempre da un número grande pero está
+   mostrando el catálogo entero sin filtrar.
 4. Actualizar el JSON y anotar la fecha en `verificado`.
 
 > ⚠️ Hay que **cargar la página completa** (`page.goto` con recarga real): en navegación

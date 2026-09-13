@@ -161,7 +161,7 @@ noticias**. Usa `/segunda-mano/coches/<marca>-<modelo>`.
 
 ### Pasada 1 — listado
 
-> ⚠️ **DEPRECADO 24-ago-2026 — la sintaxis `ms=<make>;<model>;<modelGroup>;<desc>` de esta sección (ej. `25200;;29;GTI`) FALLA en la versión ES y devuelve 0 resultados.** La sintaxis validada el 24-ago es `ms=<makeId>;<modelId>;;;;` con `sb=p` en `suchen.mobile.de/fahrzeuge/search.html`. Ver **`playbook_filtrado.md` §"URL de resultados reales que SÍ funciona"** (fuente canónica única) y su tabla de IDs. Esta sección se mantiene solo como referencia histórica de la versión `lang=de`.
+> ⚠️ **DEPRECADO 24-ago-2026 — la sintaxis `ms=<make>;<model>;<modelGroup>;<desc>` de esta sección (ej. `25200;;29;GTI`) FALLA en la versión ES y devuelve 0 resultados.** La sintaxis validada es `ms=<makeId>;<modelId>;;;` (CUATRO `;`) con `sb=p` en `suchen.mobile.de/fahrzeuge/search.html` — un `;` de más (`;;;;`, cinco) no da error pero rompe el filtro y devuelve todo el catálogo (reconfirmado en vivo 13-sep-2026). Ver **`playbook_filtrado.md` §"URL de resultados reales que SÍ funciona"** (fuente canónica única) y su tabla de IDs. Esta sección se mantiene solo como referencia histórica de la versión `lang=de`.
 
 URL: `/fahrzeuge/search.html?dam=false&isSearchRequest=true&ms=<make>;<model>;<modelGroup>;<desc>&p=<min>:<max>&ml=:<kmMax>&fr=<anio>:&pw=<minKW>:<maxKW>&s=Car&vc=Car&lang=de`
 
