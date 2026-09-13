@@ -28,12 +28,23 @@ https://suchen.mobile.de/fahrzeuge/search.html?dam=0&fr=<a-1>:<a+1>
   libre. **Nunca inventar IDs.**
 - ⚠️ Los IDs **caducan**: Golf Mk7.5 = `12603` (tabla del skill, 24-ago) devolvía **0**
   anuncios el 13-sep; el vigente es `14` (**57.717**). Verificados por conteo el
-  13-sep-2026: Golf=14 · Arteon=64 · Tiguan=54 · Audi A3=8 · BMW 320=10 · Ford Focus=20.
+  13-sep-2026: Golf=14 · Arteon=64 · Tiguan=54 · Audi A3=8 · BMW 320=10 · Ford Focus=20 ·
+  Mercedes C200=18 (5.776) · Seat Leon=9 (8.670) · Cupra Formentor=5 (8.771) ·
+  Skoda Octavia=10 (14.838) · Opel Astra=5 (17.992) · Volvo XC60=40 (6.373).
 - makeIds vigentes (13-sep-2026): VW=25200 · Audi=1900 · BMW=3500 · Mercedes-Benz=17200 ·
   Porsche=20100 · Ford=9000 · Skoda=22900 · Opel=19000 · Toyota=24100 · Volvo=25100 ·
   Cupra=3 · Dacia=6600 · Citroën=5900. La tabla vieja de `empaquetar.py` traía valores
   inventados (Ford=24500 es en realidad **TVR**; Opel=29000 no existe) → devolvían la
   marca equivocada, que es peor que no filtrar.
+- **Catálogo de modelos completo** (`app/Support/data/mobile-de-catalogo.json` →
+  `modelos`) cubre 11 marcas a 13-sep-2026: VW(25200), Audi(1900), BMW(3500), Ford(9000),
+  Porsche(20100), Mercedes-Benz(17200, 341 modelos), Seat(22500, 16), Cupra(3, 9),
+  Skoda(22900, 24), Opel(19000, 51), Volvo(25100, 51). El anchor de extracción cambió:
+  ya NO se busca `isGroup` (solo aparece para algunas marcas) — el marcador fiable es
+  `"modelsCache":{"<makeId>":[...]}` en el HTML servido, con conteo de llaves `{}` para
+  encontrar el cierre exacto del array (el offset fijo que usaba VW/Audi/BMW no vale para
+  todas las marcas). Toyota, Dacia y Citroën tienen makeId vigente pero SIN catálogo de
+  modelos todavía — caen a `q=` (texto libre) hasta que se extraigan.
 
 **Cómo refrescar el catálogo** (los IDs cambian; ~5 min con navegador):
 

@@ -79,10 +79,37 @@ class CarEnlacesSueloTest extends TestCase
     public function test_mobile_de_cae_a_texto_libre_si_no_hay_model_id(): void
     {
         // Sin modelId conocido, `ms` deja la página en modo formulario (0 tarjetas).
-        $url = $this->cocheCon(['brand' => 'Volvo', 'model' => 'XC90'])->enlacesSuelo[0]['url'];
+        // Toyota tiene makeId vigente pero SIN catálogo de modelos todavía
+        // (13-sep-2026, pasada 2: se completó Mercedes/Seat/Cupra/Skoda/Opel/Volvo,
+        // por eso este test ya no puede usar Volvo XC90 como ejemplo sin modelId).
+        $url = $this->cocheCon(['brand' => 'Toyota', 'model' => 'Corolla'])->enlacesSuelo[0]['url'];
 
-        $this->assertStringContainsString('q=Volvo+XC90', $url);
+        $this->assertStringContainsString('q=Toyota+Corolla', $url);
         $this->assertStringNotContainsString('ms=', $url);
+    }
+
+    public function test_mobile_de_resuelve_las_marcas_completadas_13_sep_pasada_2(): void
+    {
+        // Catálogo completado 13-sep-2026 (pasada 2), verificado por conteo real:
+        // Mercedes C200=18 (5.776), Seat Leon=9 (8.670), Cupra Formentor=5 (8.771),
+        // Skoda Octavia=10 (14.838), Opel Astra=5 (17.992), Volvo XC60=40 (6.373).
+        $mercedes = $this->cocheCon(['brand' => 'Mercedes-Benz', 'model' => 'C 200'])->enlacesSuelo[0]['url'];
+        $this->assertStringContainsString('ms=17200%3B18%3B%3B%3B', $mercedes);
+
+        $seat = $this->cocheCon(['brand' => 'Seat', 'model' => 'Leon'])->enlacesSuelo[0]['url'];
+        $this->assertStringContainsString('ms=22500%3B9%3B%3B%3B', $seat);
+
+        $cupra = $this->cocheCon(['brand' => 'Cupra', 'model' => 'Formentor'])->enlacesSuelo[0]['url'];
+        $this->assertStringContainsString('ms=3%3B5%3B%3B%3B', $cupra);
+
+        $skoda = $this->cocheCon(['brand' => 'Skoda', 'model' => 'Octavia'])->enlacesSuelo[0]['url'];
+        $this->assertStringContainsString('ms=22900%3B10%3B%3B%3B', $skoda);
+
+        $opel = $this->cocheCon(['brand' => 'Opel', 'model' => 'Astra'])->enlacesSuelo[0]['url'];
+        $this->assertStringContainsString('ms=19000%3B5%3B%3B%3B', $opel);
+
+        $volvo = $this->cocheCon(['brand' => 'Volvo', 'model' => 'XC60'])->enlacesSuelo[0]['url'];
+        $this->assertStringContainsString('ms=25100%3B40%3B%3B%3B', $volvo);
     }
 
     public function test_mobile_de_reutiliza_el_model_id_de_las_busquedas_del_informe(): void
