@@ -30,8 +30,9 @@ Regla dura de sincronización de skills: [`../.ai/rules/skills-sync.md`](../.ai/
 
 ## 📐 Planes — [`planes/`](planes/README.md)
 
-Índice en [`planes/README.md`](planes/README.md). Activo:
-`STRIPE_LOOKUP_KEYS.md` (mapeo planes ↔ Stripe). Los planes de julio-2026
+Índice en [`planes/README.md`](planes/README.md). Activos:
+`STRIPE_LOOKUP_KEYS.md` (mapeo planes ↔ Stripe) y
+`PLAN_SPATIE_PERMISOS.md` (roles — aparcado el 13-sep-2026). Los planes de julio-2026
 (implementación completa, valoración enriquecida, marketing IA, launch,
 deploy Docker, PROGRESO) están archivados en [`planes/archivo/`](planes/archivo/).
 
