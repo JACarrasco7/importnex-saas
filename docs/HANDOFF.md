@@ -24,6 +24,19 @@
 
 ---
 
+## 2026-09-13 17:52 · Copilot-VSCode · catálogo a 14 marcas (+Toyota/Citroën/Dacia) y las 53 marcas verificadas
+
+- **Revisión con hallazgo:** las notas del catálogo decían *"añadir al mapa SOLO lo verificado"* pero **37 de sus 53 marcas nunca se habían comprobado** (venían del payload sin más). Como el refactor de 3.9.6 hizo que `empaquetar.py` leyera de ahí, esas 37 entraban en juego sin verificar. **Comprobadas las 53 en vivo** (pidiendo `ms=<makeId>;;;` y leyendo el `<h1>`): **53/53 correctas** — `alpina=1100`→"624 ALPINA", `abarth=140`→"1.905 Abarth", `chevrolet=5600`, `byd=31953`… Un ID del payload es **autoritativo**; lo prohibido es **inventarlo**.
+- **Ampliado el catálogo a 14 marcas con modelos.** Faltaban las 3 que tenían makeId pero caían a `q=` (texto libre). Extraídos de `modelsCache` y confirmados con el `<h1>`: **Toyota** (55 modelos, `corolla=9`→2.108, `rav4=28`→1.445, `yaris=36`), **Citroën** (53, `c3=11`→6.399, `c5aircross=44`→3.192) y **Dacia** (11, `duster=2`→4.867, `sandero=24`→4.897). Ahora filtran por modelo de verdad.
+- Truco para la próxima: la extracción va con `fetch` **same-origin** desde suchen.mobile.de (`page.request` **no** funciona en este entorno, y `require`/`fs` tampoco → el JSON hay que sacarlo por el resultado). El `<h1>` está en el HTML crudo, así que se puede verificar sin navegar.
+- Toqué: `app/Support/data/mobile-de-catalogo.json` (metadatos reescritos: procedencia + qué se verificó), `tests/Feature/CarEnlacesSueloTest.php` (20 tests), `.ai/rules/support.md` (política de IDs), `.claude/skills/**`.
+- ⚠️ **Ojo:** el test `test_mobile_de_cae_a_texto_libre` usaba Toyota Corolla como ejemplo "sin modelId" — ya no sirve, ahora usa **Alfa Romeo Giulia** (makeId 900, sin catálogo de modelos).
+- Skills regeneradas: **importacion-vehiculos v3.9.7** / **estudio-mercado v0.4.4**, instaladas en el perfil y copiadas al Escritorio. Verificado: 693 tests, Pint limpio, auditoría 0 fallos.
+- ⚠️ PENDIENTE para ti: **`npm run build`** (el bundle del 12-sep NO tiene el bloque "Ver suelo en portales"), reimportar los 2 ZIP en Cowork, refrescar `datos_mercado.json` (17-ago) y lo de siempre.
+- Commit: ver `git log` (rama master)
+
+---
+
 ## 2026-09-13 17:42 · Copilot-VSCode · VERIFICADO EN VIVO: el bug de coches.net era real y el `ms` de 5 campos es correcto
 
 - **Cerrado el punto que quedaba abierto.** Con las páginas del navegador del usuario pude navegar de verdad:

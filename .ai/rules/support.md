@@ -42,14 +42,21 @@ https://suchen.mobile.de/fahrzeuge/search.html?dam=0&fr=<a-1>:<a+1>
   inventados (Ford=24500 es en realidad **TVR**; Opel=29000 no existe) → devolvían la
   marca equivocada, que es peor que no filtrar.
 - **Catálogo de modelos completo** (`app/Support/data/mobile-de-catalogo.json` →
-  `modelos`) cubre 11 marcas a 13-sep-2026: VW(25200), Audi(1900), BMW(3500), Ford(9000),
+  `modelos`) cubre **14 marcas** a 13-sep-2026: VW(25200), Audi(1900), BMW(3500), Ford(9000),
   Porsche(20100), Mercedes-Benz(17200, 341 modelos), Seat(22500, 16), Cupra(3, 9),
-  Skoda(22900, 24), Opel(19000, 51), Volvo(25100, 51). El anchor de extracción cambió:
-  ya NO se busca `isGroup` (solo aparece para algunas marcas) — el marcador fiable es
-  `"modelsCache":{"<makeId>":[...]}` en el HTML servido, con conteo de llaves `{}` para
-  encontrar el cierre exacto del array (el offset fijo que usaba VW/Audi/BMW no vale para
-  todas las marcas). Toyota, Dacia y Citroën tienen makeId vigente pero SIN catálogo de
-  modelos todavía — caen a `q=` (texto libre) hasta que se extraigan.
+  Skoda(22900, 24), Opel(19000, 51), Volvo(25100, 51), **Toyota(24100, 55 modelos)**,
+  **Citroën(5900, 53)** y **Dacia(6600, 11)** — estas 3 añadidas el 13-sep-2026.
+  El marcador fiable de extracción es `"modelsCache":{"<makeId>":[...]}` en el HTML
+  servido (**cargar la página completa**: en navegación cliente el payload no está en el
+  DOM y la extracción devuelve vacío). Las marcas sin catálogo de modelos (Alfa Romeo,
+  Abarth, Chevrolet…) caen a `q=` (texto libre): funciona, pero no filtra por modelo.
+- **Política de IDs (leer antes de tocar cualquier mapa).** Los IDs se **extraen** del
+  payload oficial de mobile.de — eso los hace autoritativos — y se **confirman** leyendo
+  el `<h1>` de `ms=<makeId>;;;` (o con modelo, `ms=<makeId>;<modeloId>;;;`). Lo que está
+  **PROHIBIDO es inventarlos**: un ID inventado **no da error**, devuelve **otra marca**
+  (pasó de verdad con coches.net: `bmw=11` → CITROEN). Verificado el 13-sep-2026:
+  las **53 marcas** del mapa, **53/53 correctas**. Y **un solo sitio**: el catálogo.
+  Tener el mismo mapa en dos archivos fue la causa del bug de coches.net.
 
 **Cómo refrescar el catálogo** (los IDs cambian; ~5 min con navegador):
 

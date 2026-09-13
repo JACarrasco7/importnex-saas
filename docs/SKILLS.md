@@ -1,7 +1,7 @@
 ﻿# Skills — punto único de verdad
 
 > **Documento canónico.** Si hay conflicto entre lo que dice la skill, el código, o algún README suelto: **este archivo gana**.
-> _Última regeneración: 2026-09-13 — importacion-vehiculos **v3.9.6** (IDs de coches.net al catálogo compartido) / estudio-mercado **v0.4.3** (catálogo con la sección `cochesnet`)_
+> _Última regeneración: 2026-09-13 — importacion-vehiculos **v3.9.7** (catálogo a 14 marcas: +Toyota, +Citroën, +Dacia; 53/53 marcas verificadas en vivo) / estudio-mercado **v0.4.4** (mismo catálogo)_
 
 ## 📦 ZIPs de skill (builds actuales)
 
@@ -9,8 +9,8 @@ Generados por `scripts/build-skill-zips.ps1` (wrapper de `.claude/skills/_dist/b
 
 | Skill | ZIP | Version | Tamano | SHA256 |
 |---|---|---|---|---|
-| `importacion-vehiculos` | `.claude/skills/_dist/skills-importacion-vehiculos-v3.9.6-20260913.zip` | 3.9.6 | 525 KB | `058a1d08f83bd6ed1ba5897dbde52ab6a9183b1a3cd98272ef71dad195c21404` |
-| `estudio-mercado` | `.claude/skills/_dist/skills-estudio-mercado-v0.4.3-20260913.zip` | 0.4.3 | 63 KB | `aa7ff452bd8bb6b3bc2a72f602704e52e3cbcb7ab2951a22486849826d63684a` |
+| `importacion-vehiculos` | `.claude/skills/_dist/skills-importacion-vehiculos-v3.9.7-20260913.zip` | 3.9.7 | 526 KB | `b47141aaaebc289da5a63496b6275a26e1a042ec3203a569131f12ce4748493d` |
+| `estudio-mercado` | `.claude/skills/_dist/skills-estudio-mercado-v0.4.4-20260913.zip` | 0.4.4 | 64 KB | `9ca0cbbea0e810eb54ca3963e393e88fff9a01f944fb859e713ab2dffe1cbf23` |
 
 ## 🔀 Las 3 copias que NO se sincronizan solas (12-sep-2026)
 

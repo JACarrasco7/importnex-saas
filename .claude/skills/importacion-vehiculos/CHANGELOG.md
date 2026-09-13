@@ -1,3 +1,25 @@
+## [3.9.7] - 2026-09-13
+
+**Catálogo ampliado a 14 marcas: entran Toyota, Citroën y Dacia. Y metadatos corregidos.**
+
+Al revisar el catálogo vi que sus notas decían *"añadir al mapa SOLO lo verificado"* pero
+**37 de sus 53 marcas nunca se habían comprobado** (venían del payload, sin más). Como el
+refactor de 3.9.6 hizo que `empaquetar.py` leyera de ahí, esas 37 marcas estaban entrando
+en juego sin verificar. Resuelto:
+
+- **Comprobadas en vivo las 53 marcas** el 13-sep-2026 (pidiendo `ms=<makeId>;;;` y
+  leyendo el `<h1>`): **53/53 correctas**. Un ID del payload oficial es autoritativo;
+  lo prohibido es **inventarlo**.
+- **Modelos nuevos**, extraídos de `modelsCache` y confirmados con conteo:
+  **Toyota** (55 modelos: `corolla=9` → 2.108 anuncios, `rav4=28` → 1.445),
+  **Citroën** (53: `c3=11` → 6.399, `c5aircross=44` → 3.192) y
+  **Dacia** (11: `duster=2` → 4.867, `sandero=24` → 4.897). Las tres caían a `q=`
+  (texto libre) y ahora filtran por modelo de verdad.
+- Metadatos del catálogo reescritos: procedencia, qué se verificó y cómo, y el aviso del
+  `ms` de 6 campos (devuelve 1.524.511 anuncios sin avisar).
+- Truco apuntado: la extracción va con `fetch` **same-origin** desde suchen.mobile.de
+  (`page.request` no está disponible en ese entorno).
+
 ## [3.9.6] - 2026-09-13
 
 **Los IDs de coches.net pasan al catálogo compartido (una sola fuente).**

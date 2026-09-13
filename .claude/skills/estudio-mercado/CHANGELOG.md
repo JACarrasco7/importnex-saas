@@ -5,6 +5,20 @@ Todos los cambios notables en el skill `estudio-mercado` se documentarán en est
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.4.4] - 2026-09-13
+
+**Catálogo compartido ampliado: 14 marcas con modelos y metadatos honestos.**
+
+`references/mobile-de-ids.json` gana los modelos de **Toyota** (55), **Citroën** (53) y
+**Dacia** (11), extraídos de `modelsCache` y confirmados leyendo el `<h1>` en vivo
+(`corolla=9` → 2.108 anuncios, `c3=11` → 6.399, `duster=2` → 4.867). Es el mismo archivo
+que usan la skill hermana y Laravel.
+
+Además se comprobaron **las 53 marcas** del mapa (53/53 correctas) y se reescribieron las
+notas del catálogo: antes decían "verificado por conteo" de todo, cuando 37 marcas venían
+solo del payload sin comprobar. Regla que queda escrita: **un ID del payload oficial es
+autoritativo; lo prohibido es inventarlo** — un ID inventado no falla, devuelve otra marca.
+
 ## [0.4.3] - 2026-09-13
 
 **Catálogo compartido actualizado: sección `coches.net`.**

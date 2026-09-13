@@ -78,14 +78,35 @@ class CarEnlacesSueloTest extends TestCase
 
     public function test_mobile_de_cae_a_texto_libre_si_no_hay_model_id(): void
     {
-        // Sin modelId conocido, `ms` deja la página en modo formulario (0 tarjetas).
-        // Toyota tiene makeId vigente pero SIN catálogo de modelos todavía
-        // (13-sep-2026, pasada 2: se completó Mercedes/Seat/Cupra/Skoda/Opel/Volvo,
-        // por eso este test ya no puede usar Volvo XC90 como ejemplo sin modelId).
-        $url = $this->cocheCon(['brand' => 'Toyota', 'model' => 'Corolla'])->enlacesSuelo[0]['url'];
+        // Sin `modelId` conocido, `ms` deja la página en modo formulario (0 tarjetas)
+        // → se cae a texto libre. Alfa Romeo tiene makeId (900) pero su catálogo de
+        // modelos todavía no se ha extraído. (Toyota ya NO sirve de ejemplo: desde
+        // el 13-sep-2026 tiene los 55 modelos, Corolla=9.)
+        $url = $this->cocheCon(['brand' => 'Alfa Romeo', 'model' => 'Giulia'])->enlacesSuelo[0]['url'];
 
-        $this->assertStringContainsString('q=Toyota+Corolla', $url);
+        $this->assertStringContainsString('q=Alfa+Romeo+Giulia', $url);
         $this->assertStringNotContainsString('ms=', $url);
+    }
+
+    public function test_mobile_de_resuelve_toyota_citroen_y_dacia(): void
+    {
+        // Catálogos extraídos del payload el 13-sep-2026 (Toyota 55 modelos,
+        // Citroën 53, Dacia 11) y confirmados leyendo el `<h1>`:
+        // `ms=24100;9;;;` -> "2.108 Toyota Corolla" · `ms=5900;11;;;` ->
+        // "6.399 Citroën C3" · `ms=6600;2;;;` -> "4.867 Dacia Duster".
+        $corolla = $this->cocheCon(['brand' => 'Toyota', 'model' => 'Corolla'])->enlacesSuelo[0]['url'];
+        $this->assertStringContainsString('ms=24100%3B9%3B%3B%3B', $corolla);
+        $this->assertStringNotContainsString('q=', $corolla);
+
+        $c3 = $this->cocheCon(['brand' => 'Citroën', 'model' => 'C3'])->enlacesSuelo[0]['url'];
+        $this->assertStringContainsString('ms=5900%3B11%3B%3B%3B', $c3);
+
+        $duster = $this->cocheCon(['brand' => 'Dacia', 'model' => 'Duster'])->enlacesSuelo[0]['url'];
+        $this->assertStringContainsString('ms=6600%3B2%3B%3B%3B', $duster);
+
+        // El catálogo normaliza acentos: `Citroën` y `Citroen` son la misma clave.
+        $sinDieresis = $this->cocheCon(['brand' => 'Citroen', 'model' => 'C5 Aircross'])->enlacesSuelo[0]['url'];
+        $this->assertStringContainsString('ms=5900%3B44%3B%3B%3B', $sinDieresis);
     }
 
     public function test_mobile_de_resuelve_las_marcas_completadas_13_sep_pasada_2(): void
