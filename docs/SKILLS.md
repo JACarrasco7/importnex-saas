@@ -1,7 +1,7 @@
 ﻿# Skills — punto único de verdad
 
 > **Documento canónico.** Si hay conflicto entre lo que dice la skill, el código, o algún README suelto: **este archivo gana**.
-> _Última regeneración: 2026-09-13 — importacion-vehiculos **v3.9.4** (IDs de portal corregidos) / estudio-mercado **v0.4.2** (catálogo de IDs verificado)_
+> _Última regeneración: 2026-09-13 — importacion-vehiculos **v3.9.5** (IDs de portal corregidos + doc del `ms=` de 5 campos) / estudio-mercado **v0.4.2** (catálogo de IDs verificado)_
 
 ## 📦 ZIPs de skill (builds actuales)
 
