@@ -24,6 +24,17 @@
 
 ---
 
+## 2026-09-13 18:33 · Copilot-VSCode · 🔴 INCIDENTE: credencial de la BD de Forge publicada en el repo
+
+- **Qué pasó:** revisando por qué el token no me servía, miré `forge-mysql-tunnel.bat` y tenía la **password de la BD de producción en texto plano**. Ese archivo **está rastreado por git**, está en **2 commits** del historial, y el repo `github.com/JACarrasco7/importnex-saas` es **PÚBLICO**. Es decir: credencial de producción visible para cualquiera. Queda también expuesto el host SSH y el usuario.
+- **Escaneo completo:** pasé un buscador de secretos por los **995 archivos rastreados**. Resultado: **1 único secreto real** (ese). El resto eran falsos positivos (nombres de ruta `PASSWORD_RESET`, etiquetas i18n, props de Vue). Comprobado además que la credencial **no está en ningún otro archivo**.
+- **Qué he hecho yo:** quitada del `.bat` (no rompe nada: el túnel SSH autentica con la clave de `~/.ssh`, la password solo se *mostraba* para configurar HeidiSQL). Ahora se lee de `FORGE_DB_PASSWORD` y el archivo avisa de que es público. Documentada la variable en `.env.example`.
+- ⚠️ **LO QUE HAY QUE HACER (solo tú, es una credencial):** **rotar la password de la BD en Forge YA**. Borrarla del `.bat` no basta: sigue en el historial de un repo público. La rotación es lo único que la invalida.
+- ⚠️ Nota para el próximo agente: **no repitas la credencial en comandos** (`git log -S '<valor>'` la mete en el transcript). Usa ficheros o variables.
+- Commit: ver `git log` (rama master)
+
+---
+
 ## 2026-09-13 18:14 · Copilot-VSCode · deudas saldadas: build + refresco real de oferta del mapa de mercado
 
 - **`npm run build`** lanzado (por petición expresa del usuario, que anula su propia regla de que lo lanza él). El bloque "Ver suelo en portales" **ya está en el bundle** (`MarketPanel-*.js`, manifest 18:02).
