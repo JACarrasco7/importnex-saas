@@ -181,6 +181,14 @@ Lo deja marcado como pendiente en vez de inventarlo. Te lo señalará al present
 Cada comparable lleva su URL para que lo puedas comprobar tú mismo. Claude verifica que el anuncio
 siga activo antes de citarlo, pero conviene echarle un vistazo si algo te llama la atención.
 
+**¿De dónde salen los números del mercado (oferta, suelo, mediana)?**
+
+De los buscadores de los portales, y el informe te da **el enlace exacto**. Debajo de cada versión
+aparece el enlace de 🇩🇪 mobile.de y de 🇪🇸 Coches.net **con los filtros que se usaron escritos al
+lado** (marca, modelo, año, km, potencia). Si lo pegas en el navegador verás el mismo listado: así
+compruebas el conteo y el precio con tus propios ojos, sin fiarte de nadie. Si un informe no trae
+esos enlaces, pídelos — ya no se entregan sin ellos.
+
 **¿Qué diferencia hay entre el informe interno y la ficha publicitaria?**
 
 El informe interno lleva precio de compra, honorarios y margen — es solo vuestro. La ficha

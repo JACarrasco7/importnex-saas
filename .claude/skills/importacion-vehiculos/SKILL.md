@@ -1,6 +1,6 @@
 ---
 name: importacion-vehiculos
-version: 3.9.8
+version: 3.9.9
 description: >
   Negocio JJ Import Motors (Huelva): servicio de búsqueda e importación de coches
   (desde Alemania y dentro de España). NO compra stock, solo oferta el servicio
@@ -917,7 +917,7 @@ ENCARGO (Flujo B: MODELO)
 - **PROHIBIDO** usar URLs de búsqueda/filtro del portal (`?sortOption=...&categories=...`), páginas de listado o el dominio raíz. Si la fuente no da URL directa, construirla desde el ID (A6).
 
 **3. Fuentes = SIEMPRE documentadas con su URL en el informe.**
-- Todo informe (búsqueda y unidad) incluye al final la sección **"Fuentes consultadas"**: cada fuente con su estado (OK / 0 resultados / bloqueada+intentos) y su enlace cuando aplique.
+- Todo informe (búsqueda y unidad) incluye al final la sección **"🔗 Fuentes consultadas — re-ejecutable"**: **por cada modelo-versión medida**, la URL exacta de 🇩🇪 mobile.de y de 🇪🇸 Coches.net CON sus parámetros, más el estado de cada fuente (OK / 0 resultados / bloqueada+intentos). No vale un enlace genérico ni "cuando aplique": sin la URL de la medición el dato no es verificable (regla A33).
 - Se registran las fuentes del flujo (no solo las que dieron candidatos); si alguna quedó sin peinar, se declara.
 - En el JSON van en el bloque `fuentes` (o en `avisos` si alguna quedó bloqueada).
 
@@ -925,6 +925,8 @@ ENCARGO (Flujo B: MODELO)
 - Todo lo que genera Claude se guarda en `informes\<marca>\<modelo>\` (y `laravel\export\` para los JSON) — nunca suelto ni en AppData. Normalizar nombres (minúsculas, sin tildes, guiones).
 
 **🔴 5. REGLA A21 — ENLACES EN TODO (17-ago-2026 · la que el usuario más repite):** NO existe entrega sin enlaces. **Todo** candidato, comparable, fila de tabla, comparativa, informe, dossier, JSON y ZIP incluye **el enlace directo al anuncio** (ficha del vehículo, no búsqueda/filtro — A6) **y las fuentes con su URL** (sección "Fuentes consultadas" con cada portal y estado). Un dato, cifra o afirmación sin su enlace/fuente NO se entrega como concluido: se declara cómo se obtuvo o se pregunta. Revisar la entrega final con lupa: si cualquier candidato carece de enlace, el trabajo está incompleto.
+
+**🔴 6. REGLA A33 — FUENTES RE-EJECUTABLES POR MODELO (15-sep-2026):** A21 cubría los enlaces **a los anuncios**; A33 cubre los enlaces **de las mediciones**. Cada modelo-versión del informe (plan de búsqueda, informe MODELO, informe de mercado) lleva debajo de su título el bloque con la URL completa de 🇩🇪 mobile.de y 🇪🇸 Coches.net **y los parámetros escritos al lado** (marca=ID, modelo=ID, carrocería, año, km, potencia en kW y en cv, orden precio ascendente). El usuario tiene que poder **rehacer cada búsqueda él mismo** y comprobar el conteo. Se genera con `py scripts/fuentes.py --seccion --spec "Marca|Modelo|Etiqueta|cv_min|cv_max|anio_desde|anio_hasta|km|carroceria"` (un `--spec` por modelo) — **nunca a mano** (los IDs no se inventan). Si el modelo no está en el catálogo, el script avisa del plan B (`q=` en mobile.de, `Versions[0]` en coches.net) y ese aviso va a la **nota metodológica**. **Sin este bloque el informe NO se entrega.**
 
 
 ### ⚡ EJECUCIÓN EN CASCADA — tras aprobar el plan de fase (16-ago-2026, ver §PROTOCOLO DE MANDO)
@@ -1055,9 +1057,11 @@ LO DEMÁS: sin cambios significativos.
 
 ## 🛡️ ANTI-PATRONES BLOQUEADOS
 
-Las 21 reglas duras (A1-A21) viven en `06-reglas/anti_patrones.md`. Cargarlas cuando se duda de una práctica o antes de cerrar un informe.
+Las reglas duras (A1-A33) viven en `06-reglas/anti_patrones.md`. Cargarlas cuando se duda de una práctica o antes de cerrar un informe.
 
 > 🔴 **A21 — ENLACES SIEMPRE (17-ago-2026 · regla que el usuario más repite):** TODO lo que se entregue —candidatos, comparables, comparativas, informes, dossier, JSON/ZIP— lleva SIEMPRE el **enlace directo al anuncio** (ficha del vehículo) y las **fuentes con su URL**. Un dato sin su enlace no se entrega como concluido: se indica cómo se obtuvo o se pide permiso. Sin enlaces la entrega NO vale.
+
+> 🔴 **A33 — FUENTES RE-EJECUTABLES POR MODELO (15-sep-2026):** cada modelo-versión del informe lleva debajo su bloque con la URL completa de 🇩🇪 mobile.de y 🇪🇸 Coches.net **y los parámetros al lado**, para que el usuario rehaga la búsqueda él mismo. Se genera con `scripts/fuentes.py` (nunca a mano). Sin bloque de fuentes el informe NO se entrega.
 
 **Resumen rápido:**
 - **A1** No descartar por silencio (sello `man`, no exclusión)
@@ -1077,6 +1081,7 @@ Las 21 reglas duras (A1-A21) viven en `06-reglas/anti_patrones.md`. Cargarlas cu
 - **A15** La búsqueda web/snippets NO es método de sondeo — D1 SIEMPRE con navegación real (datos inconsistentes)
 - **A16** El sondeo D1 es por FILTROS, no por modelo: una pasada con los filtros del encargo devuelve TODOS los modelos; prohibido elegir 3-4 a mano ni dejar "otros por explorar" sin sondear. Potencia = mínimo ≥Xcv, no solo la variante tope.
 - **A21** ENLACES SIEMPRE (17-ago-2026): TODO lo que se entregue lleva enlace directo al anuncio (ficha) + fuentes con URL. Candidatos, comparables, comparativas, informes, dossier, JSON y ZIP. Un dato sin su enlace NO se entrega como concluido. Es la regla que el usuario más repite.
+- **A33** FUENTES RE-EJECUTABLES POR MODELO (15-sep-2026): cada modelo-versión lleva debajo su bloque con la URL de búsqueda DE+ES y los parámetros al lado (marca=ID, modelo=ID, año, km, potencia). Se genera con `scripts/fuentes.py`; sin él el informe no se entrega.
 
 ---
 
@@ -1149,6 +1154,7 @@ Las 21 reglas duras (A1-A21) viven en `06-reglas/anti_patrones.md`. Cargarlas cu
 **Antes de gastar**
 - [ ] Detecté el flujo correcto (A/B/C/D/E)
 - [ ] **A21: pensé qué enlaces llevará la entrega (anuncio + fuentes) antes de cerrar**
+- [ ] **A33: tengo ya el bloque de fuentes por modelo-versión (`scripts/fuentes.py`) para pegarlo en el informe**
 - [ ] Tabla cobertura con las fuentes que apliquen al flujo
 - [ ] Consulté `indice.json` y comprobé frescura
 - [ ] Miré el registro de clientes (Flujo B)
@@ -1182,6 +1188,7 @@ Las 21 reglas duras (A1-A21) viven en `06-reglas/anti_patrones.md`. Cargarlas cu
 - [ ] Precio máximo de compra en informe (A5)
 - [ ] Tablas con columna ENLACE (A6)
 - [ ] **A21: todo dato/candidato/comparable lleva enlace al anuncio + fuentes con URL** (sin enlaces la entrega no vale)
+- [ ] **A33: cada modelo-versión del informe lleva sus URLs de búsqueda (DE+ES) con los parámetros al lado**
 
 **Al cerrar**
 - [ ] Actualicé `datos/registro_cierres.json` → Ver `05-operaciones/operaciones_cierre.md`

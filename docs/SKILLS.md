@@ -1,7 +1,7 @@
 ﻿# Skills — punto único de verdad
 
 > **Documento canónico.** Si hay conflicto entre lo que dice la skill, el código, o algún README suelto: **este archivo gana**.
-> _Última regeneración: 2026-09-13 — importacion-vehiculos **v3.9.8** (fix marketing: TikTok y stories vacíos en `canales.video` / `canales.stories`) / estudio-mercado **v0.4.4** (mismo catálogo)_
+> _Última regeneración: 2026-09-15 — importacion-vehiculos **v3.9.9** (regla A33: los enlaces de cada medición van en el informe + `scripts/fuentes.py`) / estudio-mercado **v0.4.5** (§10 FUENTES CONSULTADAS obligatoria)_
 
 ## 📦 ZIPs de skill (builds actuales)
 
@@ -9,8 +9,8 @@ Generados por `scripts/build-skill-zips.ps1` (wrapper de `.claude/skills/_dist/b
 
 | Skill | ZIP | Version | Tamano | SHA256 |
 |---|---|---|---|---|
-| `importacion-vehiculos` | `.claude/skills/_dist/skills-importacion-vehiculos-v3.9.8-20260913.zip` | 3.9.8 | 528 KB | `800dec12482e9bae9b8118e79fb05a15dc3c46b912c861de4f5e9fb8814dd3bb` |
-| `estudio-mercado` | `.claude/skills/_dist/skills-estudio-mercado-v0.4.4-20260913.zip` | 0.4.4 | 64 KB | `9ca0cbbea0e810eb54ca3963e393e88fff9a01f944fb859e713ab2dffe1cbf23` |
+| `importacion-vehiculos` | `.claude/skills/_dist/skills-importacion-vehiculos-v3.9.9-20260915.zip` | 3.9.9 | 536 KB | `88d3d76c2de6f1e721398e1be54b51d3ee030e30bcfa1588d138de464badc2e0` |
+| `estudio-mercado` | `.claude/skills/_dist/skills-estudio-mercado-v0.4.5-20260915.zip` | 0.4.5 | 66 KB | `2f2b380e57dede7eebc81664f83af7545d3b73c94db6ba64ad17e931f868c66c` |
 
 ## 🔀 Las 3 copias que NO se sincronizan solas (12-sep-2026)
 

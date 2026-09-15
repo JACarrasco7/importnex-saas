@@ -55,6 +55,22 @@ Cierra con un checkpoint (**CP-C**): *"Mapa de oportunidades listo. ¿Cuáles qu
 3. **Oferta escasa = poca fiabilidad.** Un modelo con 12 unidades en España no da una mediana
    sólida. El skill lo marca, pero conviene mirarlo.
 
+### 🔗 Y siempre con los enlaces: compruébalo tú mismo
+
+El informe **no se entrega sin los enlaces de cada medición.** Debajo de cada versión verás su
+bloque de fuentes:
+
+```
+Golf R Variant Mk7.5 (310cv, 2017-2020)
+
+- 🇩🇪 mobile.de: `https://suchen.mobile.de/fahrzeuge/search.html?dam=0&fr=2017%3A2020&ml=%3A180000&ms=25200%3B14%3B%3B%3B&pw=224%3A232&c=EstateCar` (marca VW=25200, modelo Golf=14, familiar, 2017-2020, km≤180.000, 224-232 kW = 305-315 cv, precio ascendente)
+- 🇪🇸 Coches.net: `https://www.coches.net/segunda-mano/?MakeIds[0]=47&ModelIds[0]=89&ArrBodyType=4&PowerHpFrom=305&PowerHpTo=315&MaxKms=180000&MinYear=2017&MaxYear=2020&fi=Price&or=1`
+```
+
+Pégalos en el navegador y verás **el mismo listado** con el que se midió: de ahí salen el
+conteo, el suelo y la mediana. Los parámetros van escritos al lado a propósito, para que veas
+**qué se filtró** — si un número no cuadra con lo que ves al abrir el enlace, dímelo.
+
 ---
 
 ## 2. Salida típica

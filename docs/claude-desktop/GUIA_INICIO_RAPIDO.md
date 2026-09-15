@@ -92,6 +92,11 @@ Te devuelve, **por cada modelo**: oferta en 🇩🇪 y 🇪🇸 · el más barat
 el hueco ya con los costes de importación · veredicto 🟢🟡🔴. Y lo más útil de todo: la
 **comparativa**, es decir *cuál de toda la familia es el que hay que mirar*.
 
+> 🔗 **Siempre con los enlaces.** Debajo de cada versión va el bloque de fuentes con la URL
+exacta de 🇩🇪 mobile.de y 🇪🇸 Coches.net **y los parámetros al lado** (marca=ID, modelo=ID, año,
+km, potencia). Pega el enlace en el navegador y verás el mismo listado con el que se midió: es
+la forma de comprobar de dónde sale cada dato. Si el informe no lo trae, pídelo.
+
 > ⚠️ **Dos cosas al leer el informe:**
 > 1. Compara siempre **el mismo año**. Sin controlar la matriculación se mezclan generaciones
 >    y el hueco **cambia de signo** (le pasó al Mercedes A 45 AMG: -15% y luego +6,2%).
@@ -167,6 +172,7 @@ el copy para redes salen después.
 | Buscar modelo con briefing | `encargo personal X, año Y, km Z` |
 | Ver mercado completo | `qué merece la pena, presupuesto X-Yk, <resto>` |
 | **Revisar una familia de coches** | `quiero revisar SUVs deportivas: RSQ3, Tiguan R y similares, con plan por marca` |
+| **Ver de dónde sale un dato** | *(automático)* cada versión lleva sus enlaces DE+ES en el informe |
 | Refinar una búsqueda | `filtra más por <filtro>` o `amplía a <rango>` |
 | Precio de un modelo | `cuánto cuesta traer un X desde Alemania?` |
 | Solo ES | `en España, donde encontrar X?` |

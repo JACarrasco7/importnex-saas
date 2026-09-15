@@ -1,3 +1,38 @@
+## [3.9.9] - 2026-09-15
+
+**Regla A33: los enlaces de cada medición van EN el informe (no solo en el JSON).**
+
+El usuario pidió "un plan de búsqueda por marca" para las SUVs deportivas (RSQ3, Tiguan R y
+rivales) y recibió tablas sin los enlaces con los que se había medido. La regla dura de
+`query_reejecutable` (24-ago) solo obligaba a guardar la query en `datos_mercado.json`, una
+auditoría interna que él no ve. Ahora va también a la vista.
+
+**Nuevo (A33):** cada modelo-versión del informe (plan de búsqueda, informe MODELO, informe de
+mercado) lleva debajo de su título el bloque de fuentes con la URL completa de 🇩🇪 mobile.de y
+🇪🇸 Coches.net **y los parámetros escritos al lado** (marca=ID, modelo=ID, carrocería, año, km,
+potencia en kW y en cv, orden). Así se ve de dónde sale cada dato y la búsqueda se repite a
+mano. **Sin el bloque el informe no se entrega.**
+
+- `scripts/fuentes.py` **nuevo**: genera el bloque. `--spec` por modelo (9 campos separados por
+  `|`, los 3 últimos opcionales), `--seccion` aáde el encabezado, `--ascii` para consolas
+  antiguas. Los IDs salen del catálogo compartido: **nunca se inventan**. Si el modelo no está en
+  el catálogo, avisa del plan B (`q=` en mobile.de, `Versions[0]` en coches.net).
+- **Validado en vivo (15-sep):** Golf R Variant Mk7.5 → mobile.de `<h1>` = "30 Volkswagen Golf"
+  con unidades de **228 kW (310 PS)** de 2017-2018 y ≤180.000 km; coches.net `<h1>` = "3
+  VOLKSWAGEN Golf Familiar". Los IDs coinciden con el ejemplo del usuario (`ms=25200;14;;;`,
+  `MakeIds[0]=47&ModelIds[0]=89`).
+- **Bug corregido en las URLs de `empaquetar.py`:** `_url_coches_net()` recibía `anio_min`/
+  `anio_max` y **los ignoraba** (no emitía `MinYear`/`MaxYear`), y ninguno de los dos builders
+  emitía el tope de km (`ml` / `MaxKms`). Una URL sin esos filtros enseña más oferta que la
+  medida: deja de ser re-ejecutable. Añadidos. También `fr=<año>:` para modelos vigentes
+  (antes salía `2019:0`, que no es un rango válido).
+- Reglas tocadas: A33 en `06-reglas/anti_patrones.md` (tabla + detalle + verificación + origen),
+  `SKILL.md` (regla 6 + resumen rápido + 2 checklists), `02-flujos/como_deben_ser_las_sesiones.md`
+  (output por modelo + regla de entrega 10), `01-arranque/planificador.md` (PASO 4 ya exige los enlaces).
+- **Pendiente de 3.9.8 resuelto:** `esqueleto_a_json.py` ya no sale con **código 1** al imprimir
+  ✅ en consola Windows cp1252 (stdout forzado a utf-8). Verificado: exit 0 sin
+  `PYTHONIOENCODING` y los 5 JSON de las plantillas siguen saliendo válidos.
+
 ## [3.9.8] - 2026-09-13
 
 **Ficha de marketing: TikTok vacío y stories vacías en TODAS las redes.**

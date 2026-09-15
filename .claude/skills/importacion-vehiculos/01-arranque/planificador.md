@@ -83,13 +83,22 @@ PASO 4 — PLAN DE BÚSQUEDA OBLIGATORIO (17-ago-2026) — ANTES de cualquier na
        4. EMBUDO: bandas de precio a recorrer (suelo → techo) · segmentación (segmento/rango/tipo_cliente
           del mapa) · por lotes (1 categoría o segmento cada vez con checkpoint, si el encargo es grande)
        5. PRESUPUESTO: peticiones estimadas por fase (sondeo → barrido → detalle)
-       6. OK del usuario ANTES de ejecutar (Protocolo de Mando)
+       6. ENLACES (regla dura 15-sep-2026): cada modelo-versión lleva sus URLs DE+ES con los
+          parámetros escritos al lado, para que el usuario pueda rehacer la búsqueda él mismo.
+          Se generan con el script `scripts/fuentes.py` — NUNCA a mano.
+       7. OK del usuario ANTES de ejecutar (Protocolo de Mando)
   └─ Plantilla del plan a mostrar:
        "📋 PLAN — [objetivo]
         · Mercados: DE+ES · Filtros: ≥[año] · ≤[km] · [potencia] · ≤[techo]€ (por URL: X, Y / por clic: Z)
         · Embudo: banda [a]-[b] → [b]-[c] € · segmento [X] · por lotes: [categoría] primero
         · Presupuesto: ~N peticiones (sondeo) + ~N (barrido)
+        · Enlaces: uno por modelo-versión (DE + ES) — se pegan debajo del plan
         · ¿Aprobado?"
+  └─ Los enlaces se generan con el script, no a mano:
+       py scripts/fuentes.py --seccion \
+          --spec "Volkswagen|Golf|Golf R Variant Mk7.5 (310cv, 2017-2020)|310|310|2017|2020|180000|familiar"
+       (repetir --spec por cada modelo-versión). Los MISMOS enlaces que se muestran en el plan
+       son los que van al informe final: el usuario comprueba de dónde sale cada dato.
 
 PASO 5 — EJECUTAR la fase en cascada con checkpoints
   └─ Fase 1 → Informe + lista de candidatos + checkpoint

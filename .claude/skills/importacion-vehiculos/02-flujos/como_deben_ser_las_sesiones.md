@@ -279,11 +279,29 @@ FASE E · CIERRE (2 min)
 - Candidatos (2-3): [precio][año][km][equipamiento][vendedor] → URL
 - Veredicto: 🟢/🟡/🔴 · Mejor mercado: DE/ES/paridad · Encaja perfil: SÍ/NO
 - estado_cola: [estudiado | buscado | descartado]
-- query_reejecutable: [URL DE completa] · [URL ES completa]  ← OBLIGATORIO (24-ago)
 - Próximo modelo sugerido: [X] (siguiente_* del mapa)
 ```
 
 > 🔴 **REGLA DURA (24-ago-2026): `query_reejecutable` NUNCA vacío.** Toda medición volcada al mapa guarda la URL final con TODOS los parámetros de cada portal usado + `fecha_medicion` + `contador_resultados`. Lección Golf 7.5: con `query_reejecutable: []` fue imposible explicar la discrepancia 717 GTI vivos vs 13 guardados (¿filtro distinto? ¿mercado movido?). Sin la query, el sondeo NO es re-ejecutable ni auditable → el checklist de cierre lo BLOQUEA. Detalle y reglas de reconciliación de conteos en `playbook_filtrado.md` §TRATAMIENTO DE DATOS.
+
+> 🔴 **REGLA DURA (15-sep-2026): LOS ENLACES VAN EN EL INFORME, NO SOLO EN EL JSON.**
+> Guardar la query en el mapa era solo la mitad. El usuario tiene que poder **re-ejecutar cada
+> medición con un clic** para comprobar de dónde sale cada dato (conteo, suelo, mediana).
+> **Cada modelo-versión** del informe lleva su bloque de fuentes justo debajo del título:
+
+```
+Golf R Variant Mk7.5 (310cv, 2017-2020)
+
+- 🇩🇪 mobile.de: `https://suchen.mobile.de/fahrzeuge/search.html?dam=0&fr=2017%3A2020&isSearchRequest=true&ml=%3A180000&ms=25200%3B14%3B%3B%3B&od=up&s=Car&sb=p&vc=Car&pw=224%3A232&c=EstateCar` (marca VW=25200, modelo Golf=14, carrocería Coche familiar, año 2017-2020, km≤180.000, potencia 224-232kW=305-315cv, orden precio ascendente)
+- 🇪🇸 Coches.net: `https://www.coches.net/segunda-mano/?MakeIds[0]=47&ModelIds[0]=89&ArrBodyType=4&PowerHpFrom=305&PowerHpTo=315&MaxKms=180000&MinYear=2017&MaxYear=2020&fi=Price&or=1`
+```
+
+> Se genera **con el script, nunca a mano** (los IDs no se inventan jamás):
+> `py scripts/fuentes.py --spec "Volkswagen|Golf|Golf R Variant Mk7.5 (310cv, 2017-2020)|310|310|2017|2020|180000|familiar"`
+> Repetir `--spec` por cada modelo-versión (`--seccion` añade el encabezado listo para pegar).
+> Si el modelo no está en el catálogo, el script avisa y explica el plan B (`q=` en mobile.de,
+> `Versions[0]` en coches.net) → **ese aviso se copia en la nota metodológica** del informe.
+> **Bloqueante:** un informe de búsqueda/mercado sin el bloque de fuentes NO se entrega.
 
 ---
 
@@ -303,6 +321,7 @@ FASE E · CIERRE (2 min)
    *"Archivo: `informes/mercado/<archivo>.md`. Cuando quieras volcarlo al mapa, pásale ese MD a Copilot en VS Code y dile 'importa este MD al mapa de mercado'."*
    (NO intentar escribir la ruta de Windows. NO usar jerga de "sincronización" / "merge" / "volcado". Palabras de persona.)
 6. **Desglose por variables OBLIGATORIO.** Puertas (3p/5p), cambio (manual/DSG), techo solar, cuadro digital — siempre que haya muestra suficiente. Es donde se ve el valor real del coche y casi siempre se salta. Si no hay muestra, se dice en 1 línea y se omite la tabla.
-7. **Resumen para copiar al final:** el usuario debe poder copiar 1 párrafo con los datos clave (suelos, hueco, veredicto, advertencia principal) sin re-leer el informe. Sin enlaces (no funcionan pegados en WhatsApp/notas).
+7. **Resumen para copiar al final:** el usuario debe poder copiar 1 párrafo con los datos clave (suelos, hueco, veredicto, advertencia principal) sin re-leer el informe. Ese párrafo va sin enlaces (no funcionan pegados en WhatsApp/notas) — pero OJO: **el informe SÍ lleva los enlaces de fuentes** (regla 10). No confundir el párrafo-resumen con el informe.
 8. **Comparables con modelos ya estudiados.** "El Astra OPC de julio tenía X hueco, este Golf R tiene Y → mejor/peor relación". Evita que el usuario tenga que abrir 3 informes para poner el dato en contexto.
 9. **Puesto en Huelva = precio Alemania + 1.500 € de gastos fijos estimados** (1.000 € transporte + 200 € ITV + 300 € gestoría/ausfuhr). Es la cifra que el usuario ve para decidir. IVA de importación + IEDMT NO se incluyen — se mencionan en la sección "💶 Desglose de los 1.500 €" para que sepa qué falta. El cálculo técnico del `hueco_neto_pct` (con IEDMT exacto) se mantiene en el mapa `datos_mercado.json` para uso interno, pero el informe va con la cifra redonda. Si el usuario da otra cifra ("mis gastos son 2.000 €"), recalcular todas las tablas.
+10. **Enlaces de fuentes SÍ o SÍ (regla dura, 15-sep-2026).** Todo informe de búsqueda o de mercado lleva, por **cada modelo-versión**, el bloque `🔗 FUENTES` con la URL exacta de cada portal usada **y los parámetros escritos al lado** (marca=ID, modelo=ID, año, km, potencia, carrocería). El usuario tiene que poder rehacer cada medición él mismo y comprobar de dónde sale cada dato: sin eso el informe no es auditable. Se genera con `scripts/fuentes.py` (nunca a mano, los IDs no se inventan) y va al final del informe, antes del checklist de cierre. **Sin este bloque el informe NO se entrega** y el checklist lo bloquea.

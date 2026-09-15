@@ -97,6 +97,7 @@ Para no inventar datos, necesito confirmar 4 cosas:
   ✅ §ARCHIVO GENERADO
   ✅ §DESGLOSE 1.500 € GASTOS
   ✅ §COBERTURA Y METODOLOGÍA (al final)
+  ✅ §FUENTES CONSULTADAS con la URL exacta de cada medición (re-ejecutable)
 
 ✅ Check — Datos consistentes:
   ✅ Suelos DE/ES con marca de fiabilidad (✅/👁️/⚠️)
@@ -129,7 +130,8 @@ Para no inventar datos, necesito confirmar 4 cosas:
 | 7 | 💶 DESGLOSE 1.500 € GASTOS | ✅ | — |
 | 8 | 📁 ARCHIVO GENERADO | ✅ | — |
 | 9 | 📋 COBERTURA Y METODOLOGÍA | ✅ | — |
-| 10 | ✅ CHECKLIST (auto-verificación) | ✅ | — |
+| 10 | 🔗 FUENTES CONSULTADAS (URL de cada medición, re-ejecutable) | ✅ | — |
+| 11 | ✅ CHECKLIST (auto-verificación) | ✅ | — |
 
 Guardar como: `informes\mercado\<marca>-<modelo>_<YYYY-MM-DD>.md`
 
@@ -448,6 +450,29 @@ informes/mercado/volKSwagen-golf-75_2026-08-23.md
 
 ---
 
+## 🔗 FUENTES CONSULTADAS — re-ejecutable (sección 10, obligatoria)
+
+> **Para qué sirve:** que puedas **comprobar de dónde sale cada dato** y repetir la búsqueda tú mismo. Un número sin su enlace no es un dato: es una opinión.
+
+Una entrada **por cada versión medida** (las mismas filas de la tabla del estudio):
+
+```
+Golf R Variant Mk7.5 (310cv, 2017-2020)
+
+- 🇩🇪 mobile.de: `https://suchen.mobile.de/fahrzeuge/search.html?dam=0&fr=2017%3A2020&isSearchRequest=true&ml=%3A180000&ms=25200%3B14%3B%3B%3B&od=up&s=Car&sb=p&vc=Car&pw=224%3A232&c=EstateCar` (marca VW=25200, modelo Golf=14, carrocería familiar, año 2017-2020, km≤180.000, potencia 224-232 kW = 305-315 cv, orden precio ascendente) → **30 ofertas** (medido 15-sep-2026)
+- 🇪🇸 Coches.net: `https://www.coches.net/segunda-mano/?MakeIds[0]=47&ModelIds[0]=89&ArrBodyType=4&PowerHpFrom=305&PowerHpTo=315&MaxKms=180000&MinYear=2017&MaxYear=2020&fi=Price&or=1` → **3 ofertas** (medido 15-sep-2026)
+```
+
+**Reglas duras de esta sección:**
+1. **Una URL por portal y por versión**, con TODOS los filtros de la medición. No vale la URL de la marca entera.
+2. Los **parámetros van escritos al lado** (marca=ID, modelo=ID, año, km, potencia en kW y en cv, carrocería, orden) para que se vea qué se filtró.
+3. Se aade el **conteo medido** de cada URL y la fecha. Si al abrirla el conteo no cuadra → incidencia en §3.c.
+4. Se generan con el script, **nunca a mano:** `py .claude/skills/importacion-vehiculos/scripts/fuentes.py --seccion --spec "Marca|Modelo|Etiqueta|cv_min|cv_max|anio_desde|anio_hasta|km|carroceria"` (un `--spec` por versión). Los IDs salen del catálogo compartido (`references/mobile-de-ids.json`, idéntico en las dos skills): **no se inventan nunca**.
+5. Si un modelo no está en el catálogo, el script avisa del plan B (`q=` en mobile.de, `Versions[0]` en coches.net) → ese aviso se copia en §3.c LIMITACIONES, no se esconde.
+6. **Sin esta sección el informe NO se entrega** (el checklist de arriba lo bloquea).
+
+---
+
 ## ✅ CHECKLIST — auto-verificación antes de entregar (obligatorio)
 
 > La nube rellena este bloque al final del informe con ✅ en cada línea. NO entregar si hay algún ❌ sin resolver.
@@ -464,6 +489,7 @@ informes/mercado/volKSwagen-golf-75_2026-08-23.md
   ✅ §ARCHIVO GENERADO
   ✅ §DESGLOSE 1.500 € GASTOS
   ✅ §COBERTURA Y METODOLOGÍA (al final)
+  ✅ §FUENTES CONSULTADAS con la URL exacta de cada medición (re-ejecutable)
 
 ✅ Datos consistentes:
   ✅ Suelos DE/ES con marca de fiabilidad (✅/👁️/⚠️)

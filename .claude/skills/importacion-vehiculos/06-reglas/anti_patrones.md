@@ -42,6 +42,7 @@
 | **A30** | "Garantía" sin detalle | "La palabra 'garantía' SOLO se usa si se dice cuál, quién la da y cuánto dura. La garantía legal de un VO (RDL 1/2007 modificado por Ley 11/2022) es de 3 años reducible por pacto a 1 año mínimo. JJ Import Motors NO concede garantía propia: la del vehículo la cubre el vendedor original. La pieza debe decir: 'Garantía: <cuál>. <Quién la concede>. <Cuánto dura>.' o no decir nada." |
 | **A22b** | Tratar el enlace del cliente como si fuera privado | "El enlace `/c/<token>` **es público**: se reenvía por WhatsApp, no caduca y no pide contraseña. Aplica la MISMA lista de prohibiciones que un anuncio de portal. Fugas reales detectadas en producción (07-sep-2026, ficha de un Clase A): «hueco de 8.969 € (26,4 %) antes de costes», «solo 11 unidades en toda España», «vendedor profesional 4.5★», «vendibilidad alta (84/100)», «ahorro estimado 4.214 €» y el veredicto interno «Excelente compra». Nada de eso vuelve a salir. En el panel lo corta `App\Support\FiltroPublico`; en la skill, `scripts/check_ficha_cliente.py`."
 | **A32** | Presentarnos como vendedor o insinuar garantía | "**JJ Import Motors NO vende coches y NO da garantía** (supera a A30, que solo pedía detallarla). Prestamos el servicio de gestión de búsqueda, verificación e importación con honorarios acordados; la compraventa es entre el vendedor y el cliente, y el coche se matricula a nombre del cliente. PROHIBIDO en cualquier texto público o de cliente: «vendemos», «se vende», «nuestro coche», «nuestro stock», «concesionario», «garantizamos», «con garantía», «te aseguramos», «respondemos del vehículo», «IVA incluido», «precio final», «llave en mano». La palabra garantía solo aparece para **negarla** o atribuirla al vendedor o a un tercero contratable aparte. Toda ficha de cliente lleva el bloque fijo `[FC_NO_GARANTIA]` (ver `../07-marketing/ficha_cliente.md` §4). Base: `.ai/rules/business-model.md` del panel."
+| **A33** | Informe sin las URLs de búsqueda de cada medición | "Cada modelo-versión del informe lleva justo debajo su bloque de fuentes: URL 🇩🇪 mobile.de + URL 🇪🇸 Coches.net, con los parámetros escritos al lado (marca=ID, modelo=ID, año, km, potencia, carrocería). El usuario tiene que poder **repetir cada medición él mismo** y ver de dónde sale cada dato. Se generan con `scripts/fuentes.py`, NUNCA a mano. Sin bloque de fuentes el informe NO se entrega."
 
 ---
 
@@ -52,6 +53,21 @@
 ### A21 — Entregar sin enlaces (anuncio + fuentes) (17-ago-2026)
 
 **Error típico:** Claude entrega tablas de candidatos con precio/año/km pero sin las URLs de los anuncios, o informes sin la lista de fuentes consultadas con sus enlaces. El usuario no puede verificar nada y tiene que buscar cada coche a mano.
+
+### A33 — Fuentes re-ejecutables por modelo (15-sep-2026)
+
+**Error típico:** el informe dice "Golf R Variant: 30 ofertas en DE, suelo 16.299 €" pero no enseña la URL con la que se midió. El usuario no puede comprobar de dónde sale el número ni repetir la búsqueda, así que tiene que fiarse. Caso real 15-sep-2026: pidió "un plan de búsqueda por marca" para las SUVs deportivas (RSQ3, Tiguan R y rivales) y recibió tablas sin los enlaces de cada medición.
+
+Guardar la query en `datos_mercado.json` es solo la mitad (eso ya lo pedía la regla dura de `query_reejecutable`): el enlace tiene que estar **a la vista en el informe**.
+
+**Regla:**
+1. **Cada modelo-versión** del informe (plan de búsqueda, informe MODELO, informe de mercado) lleva debajo de su título el bloque de fuentes: URL 🇩🇪 mobile.de + URL 🇪🇸 Coches.net, cada una con los **parámetros escritos al lado** — marca=ID, modelo=ID, carrocería, año, km, potencia en kW **y** en cv, y el orden (precio ascendente).
+2. Las URLs las genera `scripts/fuentes.py` (`--spec` por modelo, `--seccion` para el encabezado). **Nunca a mano:** los IDs de portal no se inventan (ver `references/mobile-de-ids.json`).
+3. Si el modelo no está en el catálogo, el script avisa y explica el plan B (`q=` en mobile.de, `Versions[0]` en coches.net) → ese aviso se copia en la **nota metodológica** del informe, no se esconde.
+4. La URL tiene que ser **la medición real**: los MISMOS filtros del conteo (año, km, potencia). Una URL sin `ml` / `MinYear` / `MaxKms` enseña más oferta que la medida y es peor que no ponerla.
+5. **Bloqueante:** sin bloque de fuentes el informe no se entrega; el checklist de cierre lo bloquea.
+
+**Verificación rápida:** abrir las 2 URLs y comprobar que el `<h1>` del portal nombra el modelo correcto y que el conteo cuadra con el del informe.
 
 ### A22 — Filtrar datos internos al folleto/cliente (18-ago-2026)
 
@@ -211,6 +227,7 @@ Antes de cerrar cualquier informe, verificar:
 - [ ] ¿Informe Flujo A tiene precio máximo? (A5)
 - [ ] ¿Todas las tablas tienen columna ENLACE? (A6)
 - [ ] **¿TODO lo entregado lleva enlace al anuncio + fuentes con URL? (A21)**
+- [ ] **¿Cada modelo-versión lleva sus URLs de búsqueda (DE+ES) con los parámetros al lado? (A33)**
 - [ ] ¿Sondeo D1 con navegación real, no búsqueda web? (A15)
 - [ ] ¿Informe D2 lista TODOS los modelos del filtro, sin "otros por explorar"? (A16)
 - [ ] ¿En Flujo C/E trabajé con listados, no abriendo fichas de cada unidad? (A17)
@@ -245,3 +262,4 @@ Antes de cerrar cualquier informe, verificar:
 | A22b | El enlace del cliente es público: fugas reales detectadas en la ficha en producción | 07-sep-2026 |
 | A31 | ZIP nunca en `Downloads\` ni en `Desktop\` (usar `--laravel-storage`) | 09-sep-2026 |
 | A32 | Gestor, no vendedor: nunca vendemos ni damos garantía (instrucción directa del usuario) | 07-sep-2026 |
+| A33 | Informe sin las URLs de búsqueda por modelo ("plan de búsqueda por marca" de las SUVs deportivas: pidió los enlaces de cada fuente) | 15-sep-2026 |

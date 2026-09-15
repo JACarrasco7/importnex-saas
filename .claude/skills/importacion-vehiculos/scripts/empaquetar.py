@@ -1840,13 +1840,16 @@ CARROCERIA_ID_MOBILE_DE = {
 
 
 def _url_mobile_de(marca: str, modelo: str, anio_min: int, anio_max: int,
-                   cv_min: int, cv_max: int, carroceria: str) -> str:
+                   cv_min: int, cv_max: int, carroceria: str,
+                   km_max: int | None = None) -> str:
     """URL de busqueda mobile.de ordenada por precio (el SUELO).
 
     - `pw` va en **kW**, NO en cv: kW = cv x 0,7355 (+-4 kW de margen). Mandar cv
       filtraba por una potencia imposible y dejaba FUERA el propio coche.
     - `ms` son **cinco campos** (`makeId;modelId;;;`). Sin `modelId` la pagina
       cae en modo formulario sin tarjetas, asi que ahi se filtra por texto (`q=`).
+    - `ml=:<km>` es el tope de kilometros (`%3A180000`). Si se omite, la URL
+      devuelve MAS oferta que la medida y deja de ser re-ejecutable.
     - `dam=0` (sin siniestros), `sb=p` (precio ascendente), `isSearchRequest=true`.
     """
     make_id = _make_id_mobile_de(marca)
@@ -1855,13 +1858,15 @@ def _url_mobile_de(marca: str, modelo: str, anio_min: int, anio_max: int,
 
     params = {
         "dam": "0",
-        "fr": f"{anio_min}:{anio_max}",
+        "fr": f"{anio_min}:{anio_max or ''}",
         "isSearchRequest": "true",
         "od": "up",
         "s": "Car",
         "sb": "p",
         "vc": "Car",
     }
+    if km_max:
+        params["ml"] = f":{int(km_max)}"
     if cid:
         params["c"] = cid
 
@@ -1895,9 +1900,16 @@ def _url_autoscout24_es(marca: str, modelo: str, anio_min: int, anio_max: int,
 
 
 def _url_coches_net(marca: str, modelo: str, anio_min: int, anio_max: int,
-                    cv_min: int, cv_max: int, carroceria: str) -> str:
+                    cv_min: int, cv_max: int, carroceria: str,
+                    km_max: int | None = None) -> str:
     """URL de búsqueda en coches.net (mercado español). Usa MakeIds y
-    Versions como query param array; el ID exacto de marca hay que mapearlo."""
+    Versions como query param array; el ID exacto de marca hay que mapearlo.
+
+    ⚠️ Los años y el tope de km forman parte de la MEDICIÓN: una URL sin
+    `MinYear`/`MaxKms` enseña más oferta de la que se midió y deja de ser
+    re-ejecutable (regla dura 15-sep-2026). Orden de parámetros = el que usa
+    el navegador de coches.net, para que la URL se vea igual que la real.
+    """
     # MakeIds[0] de coches.net desde el catalogo compartido (fuente unica con
     # Laravel). La tabla anterior era INVENTADA: `bmw=11` devolvia CITROEN,
     # `mercedes=12` DAEWOO, `opel=7` BMW, `toyota=10` CHRYSLER, `volvo=26`
@@ -1921,6 +1933,12 @@ def _url_coches_net(marca: str, modelo: str, anio_min: int, anio_max: int,
     if cv_min and cv_max:
         parts.append(f"PowerHpFrom={cv_min}")
         parts.append(f"PowerHpTo={cv_max}")
+    if km_max:
+        parts.append(f"MaxKms={int(km_max)}")
+    if anio_min:
+        parts.append(f"MinYear={int(anio_min)}")
+    if anio_max:
+        parts.append(f"MaxYear={int(anio_max)}")
     parts.append("fi=Price")
     parts.append("or=1")
     return f"https://www.coches.net/segunda-mano/?{'&'.join(parts)}"

@@ -5,6 +5,21 @@ Todos los cambios notables en el skill `estudio-mercado` se documentarán en est
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.4.5] - 2026-09-15
+
+**§10 FUENTES CONSULTADAS: obligatoria en el informe de mercado.**
+
+Misma regla que A33 en la skill hermana: cada versión medida lleva la URL exacta de 🇩🇪
+mobile.de y 🇪🇸 Coches.net, **los parámetros al lado** y el conteo medido, para que el usuario
+rehaga la búsqueda él mismo y compruebe de dónde sale cada dato. Guardar la query solo en
+`datos_mercado.json` no bastaba: era auditoría interna, invisible para él.
+
+- `informe_mercado.md`: nueva sección **§10** en la estructura obligatoria (el checklist pasa a
+  §11), línea en los dos checklists de entrega y plantilla con ejemplo real (Golf R Variant).
+- `SKILL.md`: regla dura junto a la regla de IDs de portal.
+- El generador vive en la skill hermana (`importacion-vehiculos/scripts/fuentes.py`) — **no se
+  duplica** para no crear otra fuente de verdad que pueda divergir.
+
 ## [0.4.4] - 2026-09-13
 
 **Catálogo compartido ampliado: 14 marcas con modelos y metadatos honestos.**

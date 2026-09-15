@@ -1,6 +1,6 @@
 ---
 name: estudio-mercado
-version: 0.4.4
+version: 0.4.5
 description: >
   Estudio profundo del mercado de coches de 2ª mano en España y Alemania para
   JJ Import Motors. Genera un mapa de mercado persistente (datos_mercado.json)
@@ -250,6 +250,16 @@ filtrar por texto (`q=`) **antes** que inventarse un ID.
 > ⚠️ Una tabla anterior de este ecosistema tenía IDs **inventados** que devolvían OTRA MARCA
 > (`bmw=11` → CITROEN · `mercedes=12` → DAEWOO · `ford=24500` → TVR). No fiarse de IDs de
 > memoria: mirar el catálogo. Procedimiento de refresco en el playbook de la skill hermana.
+
+**🔴 REGLA DURA — LAS URLs DE CADA MEDICIÓN VAN EN EL INFORME (15-sep-2026):** cada versión
+medida lleva su **§10 FUENTES CONSULTADAS** con la URL exacta de 🇩🇪 mobile.de y de 🇪🇸
+Coches.net, **sus parámetros escritos al lado** (marca=ID, modelo=ID, año, km, potencia en kW
+y en cv, carrocería, orden) y el conteo medido. El usuario tiene que poder **rehacer la
+búsqueda él mismo** y comprobar de dónde sale cada dato: guardar la query solo en
+`datos_mercado.json` no basta (un número que no se puede reproducir con un clic no es un dato,
+es una opinión). Se generan con `scripts/fuentes.py` de la skill hermana — **nunca a mano**,
+los IDs no se inventan. **Sin §10 el informe NO se entrega.** Plantilla y ejemplo:
+`informe_mercado.md` §FUENTES CONSULTADAS.
 
 FASE 3 — CRUCE y veredicto:
   └─ hueco_pct (bruto) = (mediana_es − mediana_de) / mediana_es × 100  ← comparable con historial y umbrales

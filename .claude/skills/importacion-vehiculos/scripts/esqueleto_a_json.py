@@ -30,6 +30,15 @@ Salida: un .json por archivo, con esta forma:
 import json
 import re
 import sys
+
+# La salida lleva emojis (✅). En una consola Windows con cp1252 eso lanzaba
+# UnicodeEncodeError DESPUES de escribir el JSON, asi que el script salia con
+# codigo 1 aunque hubiera funcionado. Forzar utf-8 (con reemplazo, para no
+# romper nunca por un caracter) hace que el exit code refleje la realidad.
+try:
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+except Exception:
+    pass
 from datetime import date
 from pathlib import Path
 
