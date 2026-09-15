@@ -16,7 +16,7 @@
   - ⚙️ Alta rotación → criterio: hueco % + demanda masiva ES + fiabilidad.
   - 💎 Gemas → criterio: accesibilidad, coste de mantener/asegurar, durabilidad.
   Fallo real: Cupra (showstopper que el usuario SÍ quería) se descartó por "sin hueco" aplicando criterio de reventa — criterio equivocado para su categoría.
-2. **Entregable = informe de búsqueda** (como Flujo C): Markdown + PDF de investigación con plantilla de marca (`assets/plantilla_pdf_marca.html`) + JSON. **NUNCA `.docx`** salvo pedido explícito.
+2. **Entregable = informe de búsqueda** (como Flujo C): **1 solo Markdown** con la estructura de `03-informes/informe_busqueda.md` + el JSON de catálogo. **NUNCA `.docx`, y PDF solo si el usuario lo pide** (los enlaces no funcionan en PDF).
 3. **Listado-first (A17):** trabajar con LISTADOS, **NO abrir fichas**. Detalle solo 2-3 unidades como ejemplo (las de mejor precio relativo).
 4. **Sellos de precio del listado (A17):** usar "Super precio"/"Buen precio" (Coches.net) y "Sehr guter/Guter/Fairer Preis" (mobile.de/AS24) para elegir muestras y entender el mercado sin abrir fichas. Selectores y escala en `../memoria/filtros-portales.md`.
 5. **Precio verificado (A8):** DE = mobile.de, ES = Coches.net. **AS24 NUNCA para precio.**
@@ -58,18 +58,12 @@
 
 ---
 
-## 📄 Plantilla de ficha de BÚSQUEDA (por modelo, NO anuncio)
+## 📄 Ficha por modelo
 
-```markdown
-## [Marca Modelo · versión] — precio-desde [origen]
-**Categoría:** 🔥/⚙️/💎 · **Origen:** DE/ES
-- Nº anuncios DE: X · ES: X
-- Mediana DE: X € · mediana ES: X €
-- Hueco %: X% · sello de precio en listado: "Super precio"/"Buen precio"/"Sehr guter Preis"/...
-- Precio-desde verificado (mobile.de/Coches.net): X €
-- Veredicto: 🟢/🟡/🔴
-- 1 enlace de ejemplo (anexo interno)
-```
+> La estructura de la ficha por modelo **NO se define aquí**: es la **§5 de
+> `03-informes/informe_busqueda.md`** (bloque de datos + **bloque 🔗 FUENTES obligatorio**).
+> Este documento solo añade lo propio del Flujo E: la **categoría** (🔥/⚙️/💎) y el **origen**
+> (DE/ES) van en la cabecera de cada ficha, y el filtro de selección es el de la regla 1c.
 
 > **NUNCA** copy de Instagram/Facebook, hashtags, ni ficha marketplace en este flujo. Eso es marketing, otro encargo posterior.
 
@@ -79,11 +73,12 @@
 
 | Archivo | Formato | Destino |
 |---|---|---|
-| `informe_busqueda_<fecha>.md` | Markdown (usuario) | `informes\stock\` |
-| `informe_busqueda_<fecha>.pdf` | PDF de investigación (plantilla de marca `assets/plantilla_pdf_marca.html` → Chrome headless) | `informes\stock\` |
-| `stock_<fecha>.json` | JSON (catálogo para Laravel) | `laravel\export\` |
+| `informe_busqueda_<categoria>_<YYYY-MM-DD>.md` | Markdown — **el entregable** | `informes\stock\` |
+| `export/stock-<YYYY-MM-DD>.json` | JSON (catálogo para Laravel) | `laravel\export\` |
 
-**Es un INFORME DE BÚSQUEDA (Flujo C)**: misma estructura que `informe_busqueda_*.md` + PDF con el estilo de marca. **NUNCA .docx.** Si el usuario pide Word explícitamente, se convierte desde el Markdown, pero el entregable primario es Markdown + PDF de marca + JSON.
+**Es un INFORME DE BÚSQUEDA**: usa la estructura de `03-informes/informe_busqueda.md` (no se
+copia aquí, para que no haya dos versiones). **PDF solo si el usuario lo pide.** **NUNCA .docx.**
+Nombres y carpetas canónicos: `03-informes/entregables.md`.
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: estudio-mercado
-version: 0.4.5
+version: 0.4.6
 description: >
   Estudio profundo del mercado de coches de 2ª mano en España y Alemania para
   JJ Import Motors. Genera un mapa de mercado persistente (datos_mercado.json)
@@ -275,7 +275,8 @@ FASE 4 — GUARDAR el mapa (estricta, sin decisiones libres):
 
 FASE 5 — GENERAR EL INFORME (estricta, la nube NO improvisa):
   └─ **Usar la plantilla `informe_mercado.md` AL PIE DE LA LETRA.**
-  └─ **Respetar las 10 secciones en orden fijo** (ver tabla en la plantilla).
+  └─ **Respetar TODAS las filas de la tabla §ESTRUCTURA OBLIGATORIA de la plantilla, en ese
+     orden** (no poner el número a mano: la tabla manda y cambia con las versiones).
   └─ **NO saltarse secciones.** Si falta muestra, poner 1 línea justificada y seguir.
   └─ **NO decidir formato.** SIEMPRE 1 .md. PDF solo si el usuario lo pide.
   └─ **NO decidir gastos.** Por defecto 1.500 € (ver regla "💶 GASTOS FIJOS").

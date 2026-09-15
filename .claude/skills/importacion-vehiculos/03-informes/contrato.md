@@ -13,7 +13,9 @@
 |---|---|---|---|
 | **A: UNIDAD** | `informe.json` dentro del ZIP | Vista completa, un solo coche | Crea/actualiza `Car` |
 | **B: MODELO** | `export/flujo-b-<modelo>-<fecha>.json` | Igual que A, sin `publicidad` | Histórico cacheable |
-| **C: MERCADO** | `export/flujo-c-<fecha>.json` | Estructura agregada con N modelos | Tabla scouting |
+| **C: MERCADO** | `export/flujo-c-<fecha>.json` | Estructura agregada con N modelos | Tabla `scouting_mercado` |
+| **E: STOCK** | `export/stock-<fecha>.json` | Catálogo por categorías | Stock bajo pedido |
+| **D: DESCUBRIMIENTO** | — (no genera JSON) | Su entregable es el INFORME DE MODELOS | — |
 
 ---
 
@@ -50,7 +52,7 @@ Bloques de primer nivel (siempre presentes en A y B):
 ```
 
 - `schema_version`: 1 (actual)
-- `flujo`: "A" | "B" | "C"
+- `flujo`: "A" | "B" | "C" | "E"
 - `coche_id`: nombre archivo respaldo
 - `client_id`: si se rellena, Laravel enlaza el coche a ese cliente
 
@@ -566,8 +568,10 @@ class Esqueleto
 | `informe-interno.txt` | Ver `informe_tecnico.md` §formato-txt (15 secciones, ~60 bloques). **Los bloques `MARGEN`, `VENTA`, `IEDMT_SENSIBILIDAD`, `SCORE_DIM`, `RIESGO`, `BANDERA_ROJA/AMARILLA`, `COBERTURA`, `CAND_*`, `NEG_*`, `COMP_AJUSTE`, `VENDIBILIDAD_FACTOR`, `ACCION` se renderizan como filas/tablas en `informe-interno.blade.php`.** |
 | `dossier-cliente.txt` | Ver `dossier_cliente.md` §formato-txt (15 secciones, ~50 bloques). **Los bloques `FICHA_TECNICA`, `EQUIPAMIENTO`, `MERCADO_*`, `COSTE_LINEA`, `TIMELINE_SEMANA`, `FAQ_Q/A`, `PASOS`, `GARANTIA_*`, `ESTADO_*`, `DE_VS_ES`, `EVAL_*` se renderizan en el documento del cliente de Laravel (`ficha-coche.blade.php`); `dossier.blade.php` NO existe.** |
 | `ficha-cliente.txt` | **v2 (07-sep-2026)** — la PÁGINA que se manda al cliente por enlace, 14 secciones: FC_TITULO, FC_SUBTITULO, FC_PRECIO, FC_PRECIO_NOTA, FC_ESTADO_PROCESO · FC_RESUMEN_BUENO/OJO/PASO · FC_SPEC (lista `Etiqueta \| Valor`, 16 campos) · FC_EQUIP, FC_EQUIP_PENDIENTE · FC_VERIFICADO, FC_PENDIENTE_COMPROBAR · FC_FOTOS · FC_ARGUMENTO · FC_MERCADO_MIN/MEDIANA/MAX/N/FECHA/NOTA · FC_INCLUYE, FC_NO_INCLUYE · FC_PASO (lista `Semana \| Qué pasa`) · **FC_HACEMOS, FC_NO_HACEMOS, FC_NO_GARANTIA (fijos, A31)** · FC_FAQ (mín. 6) · FC_CTA, FC_CONTACTO · FC_AVISO_LEGAL, FC_FECHA_DATOS. Spec: `../07-marketing/ficha_cliente.md` |
-| `redes-sociales.txt` | GANCHO, POST_LARGO, POST_CORTO, STORIES, HASHTAGS, PIE_FOTO |
-| `anuncio-portales.txt` | TITULO, DESCRIPCION, FICHA_RAPIDA, QUE_INCLUYE, AVISO_LEGAL |
+| `redes-sociales.txt` | **v2 — vocabulario POR CANAL**: `IG_*` (feed) y `INSTAGRAM_STORY_*`, `VT_*` (vídeo), `FB_*` y `FACEBOOK_STORY_*` (página), `FBMP_*` (Marketplace), `TIKTOK_*`. Spec: `../07-marketing/copy_engine.md` · claves exactas del JSON: `scripts/esqueleto_a_json.py` |
+| `anuncio-portales.txt` | **v2 — un bloque por portal** (`PT_*`: `PT_TITULO`, `PT_FICHA`, `PT_QUE_INCLUYE`, `PT_ESTADO`, `PT_AVISO_LEGAL`…). Spec: `../07-marketing/portales_anuncio.md` |
+
+> ⚠️ **El vocabulario v1 está RETIRADO** (`GANCHO`, `POST_LARGO`, `POST_CORTO`, `STORIES`, `HASHTAGS`, `PIE_FOTO`, `TITULO`, `DESCRIPCION`, `FICHA_RAPIDA`, `QUE_INCLUYE`, `AVISO_LEGAL`). Hasta la v3.9.1 los 4 canales recibían el mismo texto porque el ingestor solo leía el v1; desde entonces lee el v2, así que **una pieza escrita en v1 llega vacía al panel**. Escribir siempre en v2.
 
 > **`VALORACION` (folleto del coche):** 1-2 frases de venta PARA EL CLIENTE sobre por qué este coche vale la pena (estado, equipamiento, precio vs. mercado). **Prohibido** hablar de margen, honorarios, negociación con el vendedor, estrategia de venta o cualquier dato interno. Es lo que el folleto (`folleto-coche.blade.php`) muestra en "Nuestra valoración". Si no se incluye, el folleto cae al `valuation` del coche o no muestra esa sección. Los campos `verdict_reasoning` y `recommendation` son INTERNOS (informe interno) y **nunca** van al folleto del cliente.
 

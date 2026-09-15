@@ -216,7 +216,7 @@ FASE E · CIERRE (2 min)
 |---|---|
 | Inicio de sesión | **LEER** este MD + `informe_mercado.md` + `schema_datos_mercado.md`. Sin esto, NO empezar. |
 | Cuando el usuario da un mandato vago ("estudia X", "busca X") | **PREGUNTAR** antes de gastar peticiones. Versión/año/km/equipamiento/precio. 1 sola tanda de preguntas, formato claro (ver `informe_mercado.md` §CUÁNDO PREGUNTAR). |
-| Antes de generar el informe | **APLICAR las 10 secciones en orden fijo** de la plantilla. Sin saltarse ninguna. |
+| Antes de generar el informe | **APLICAR la tabla §ESTRUCTURA OBLIGATORIA de la plantilla, en orden fijo.** Sin saltarse ninguna fila (no poner el número a mano: la tabla manda). Plantilla según el informe: `03-informes/informe_busqueda.md` (búsqueda) · `03-informes/informe_tecnico.md` (unidad) · `../../estudio-mercado/informe_mercado.md` (mercado). |
 | Si falta muestra para segmentar | Poner 1 línea justificada y seguir. NO decidir "lo omito porque es largo". |
 | Si el usuario pide algo no contemplado | Hacerlo + añadir 1 línea: "He añadido [X] porque me lo has pedido explícitamente." |
 | Si hay ambigüedad (ej. "estudia el Golf") | PARAR y preguntar UNA sola vez. NO asumir versión/año/precio. |
@@ -238,7 +238,7 @@ FASE E · CIERRE (2 min)
 
 ### 📏 Si la nube tiene una duda que NO está resuelta aquí
 
-**PARAR y preguntar UNA sola vez.** Nada de "interpretaré lo más razonable". Si la pregunta es trivial, decidir con la regla por defecto (1.500 € gastos, 1 .md, 10 secciones, etc.). Si la pregunta es de negocio (ej. "qué versión del Golf estudio"), preguntar al usuario.
+**PARAR y preguntar UNA sola vez.** Nada de "interpretaré lo más razonable". Si la pregunta es trivial, decidir con la regla por defecto (1.500 € gastos, 1 `.md`, las secciones que marque la plantilla, etc.). Si la pregunta es de negocio (ej. "qué versión del Golf estudio"), preguntar al usuario.
 
 ---
 

@@ -1,7 +1,7 @@
 ﻿# Skills — punto único de verdad
 
 > **Documento canónico.** Si hay conflicto entre lo que dice la skill, el código, o algún README suelto: **este archivo gana**.
-> _Última regeneración: 2026-09-15 — importacion-vehiculos **v3.9.9** (regla A33: los enlaces de cada medición van en el informe + `scripts/fuentes.py`) / estudio-mercado **v0.4.5** (§10 FUENTES CONSULTADAS obligatoria)_
+> _Última regeneración: 2026-09-15 — importacion-vehiculos **v3.9.10** (informes: plantilla única `informe_busqueda.md` + `entregables.md`, una sola regla de formato y nombres) / estudio-mercado **v0.4.6** (contadores de secciones fuera de la prosa)_
 
 ## 📦 ZIPs de skill (builds actuales)
 
@@ -9,8 +9,8 @@ Generados por `scripts/build-skill-zips.ps1` (wrapper de `.claude/skills/_dist/b
 
 | Skill | ZIP | Version | Tamano | SHA256 |
 |---|---|---|---|---|
-| `importacion-vehiculos` | `.claude/skills/_dist/skills-importacion-vehiculos-v3.9.9-20260915.zip` | 3.9.9 | 536 KB | `88d3d76c2de6f1e721398e1be54b51d3ee030e30bcfa1588d138de464badc2e0` |
-| `estudio-mercado` | `.claude/skills/_dist/skills-estudio-mercado-v0.4.5-20260915.zip` | 0.4.5 | 66 KB | `2f2b380e57dede7eebc81664f83af7545d3b73c94db6ba64ad17e931f868c66c` |
+| `importacion-vehiculos` | `.claude/skills/_dist/skills-importacion-vehiculos-v3.9.10-20260915.zip` | 3.9.10 | 547 KB | `200b6a31ae3622602417bf6269ff267d6e32119802f9f952e47f6104601c5d91` |
+| `estudio-mercado` | `.claude/skills/_dist/skills-estudio-mercado-v0.4.6-20260915.zip` | 0.4.6 | 66 KB | `592f7fea9ea7f8aafac927bf20bb87ac11661403ee8b240cb1d6970720c93e75` |
 
 ## 🔀 Las 3 copias que NO se sincronizan solas (12-sep-2026)
 

@@ -1,12 +1,14 @@
 ---
 name: importacion-vehiculos
-version: 3.9.9
+version: 3.9.10
 description: >
   Negocio JJ Import Motors (Huelva): servicio de búsqueda e importación de coches
   (desde Alemania y dentro de España). NO compra stock, solo oferta el servicio
-  con honorarios fijos. Cuatro flujos: UNIDAD (URL concreta), MODELO (buscar un modelo),
-  MERCADO (escanear oportunidades), DESCUBRIMIENTO (cliente sin modelo: sondear
-  modelos/motorizaciones que caben en presupuesto y embudar a MODELO).
+  con honorarios fijos. Cinco flujos + marketing: UNIDAD (URL concreta), MODELO (buscar un
+  modelo), MERCADO (escanear oportunidades), DESCUBRIMIENTO (cliente sin modelo: sondear
+  modelos/motorizaciones que caben en presupuesto y embudar a MODELO), STOCK (catálogo bajo
+  pedido). Marketing (anuncios/redes) solo si se pide. Cada flujo tiene su informe y su
+  nombre de fichero: ver `03-informes/entregables.md`.
   Usa 7 fuentes. Genera ZIP para Laravel.
 triggers:
   - evalúa este coche
@@ -56,7 +58,7 @@ Localizar coches (desde Alemania y dentro de España) y **ofertar el servicio de
 > 
 > 📚 **Módulos especializados:** `03-informes/comparables.md` (ajuste 9 claves) · `04-negocio/costes.md` (IEDMT + desglose) · `04-negocio/riesgos.md` (motores problemáticos) · `05-operaciones/operaciones_cierre.md` (cierre + KPIs + sync)
 >
-> 📄 **Informes ( outputs finales):** `03-informes/informe_tecnico.md` (análisis interno 15 secciones + score 0-100) · `03-informes/dossier_cliente.md` (PDF profesional para cliente, 15 secciones, genera confianza)
+> 📄 **Informes ( outputs finales):** **`03-informes/entregables.md`** (**tabla única**: qué informe toca, cómo se llama y dónde va) · **`03-informes/informe_busqueda.md`** (informe de BÚSQUEDA — flujos B/C/E) · `03-informes/informe_tecnico.md` (análisis interno 15 secciones + score 0-100) · `03-informes/dossier_cliente.md` (PDF profesional para cliente, 15 secciones, genera confianza)
 >
 > 🧠 **Memoria persistente (12-ago-2026):** `memoria/MEMORIA.md` (léeme primero) · `memoria/modelos-medidos.md` · `memoria/vendedores-confianza.md` · `memoria/trampas-encontradas.md` · `memoria/mejoras-aplicadas.md`
 >
@@ -172,6 +174,8 @@ Si no se llega al mínimo → **NO dar veredicto**. Poner: *"Cobertura insuficie
 
 - Qué flujo aplicar (A/B/C/D/E) → **detección automática**.
 - Estructura del informe técnico → **15 secciones fijas** (`03-informes/informe_tecnico.md`).
+- Estructura del informe de búsqueda → **`03-informes/informe_busqueda.md`** (12 secciones en orden fijo).
+- Qué entregable toca, cómo se llama y en qué carpeta → **`03-informes/entregables.md`**.
 - Estructura del dossier cliente → **filtros ya definidos** (`03-informes/dossier_cliente.md`).
 - Estructura de la ficha publicitaria → **bloques ejecutivos ya definidos** (ver §REGLAS DURAS al inicio).
 - Fuentes a usar → **7 fuentes fijas** (mobile.de, Coches.net, AS24, AutoUncle, kleinanzeigen, Wallapop, Milanuncios).
@@ -888,8 +892,8 @@ ENCARGO (Flujo B: MODELO)
 
 | Fase | Entregable | Contenido mínimo | Formato / archivo |
 |---|---|---|---|
-| **1 · Búsqueda** (fin de Fase 1/2 de fuentes) | **INFORME DE BÚSQUEDA + candidatos** | Cobertura por fuente (URL, filtros, nº resultados, estado), tabla de candidatos con precio/año/km/enlace, qué se excluyó y por qué, qué fuente quedó sin peinar y por qué | `informe_busqueda_<modelo>.md` (o en el chat si breve). NO es un informe de valoración |
-| **2 · Avance con candidato** (usuario elige uno) | **INFORME DE UNIDAD** | Las 15 secciones de `03-informes/informe_tecnico.md` (o las 11 no negociables del flujo MODELO) SOLO del candidato elegido | `informe_unidad_<modelo>_<unidad>.md` + esqueletos `.txt` |
+| **1 · Búsqueda** (fin de Fase 1/2 de fuentes) | **INFORME DE BÚSQUEDA + candidatos** | La estructura de `03-informes/informe_busqueda.md` (orden fijo, con el bloque 🔗 FUENTES por modelo-versión). NO es un informe de valoración | `informe_busqueda_<objeto>_<YYYY-MM-DD>.md` (nombre y carpeta: `03-informes/entregables.md`) |
+| **2 · Avance con candidato** (usuario elige uno) | **INFORME DE UNIDAD** | Las 15 secciones de `03-informes/informe_tecnico.md` SOLO del candidato elegido | `informe_unidad_<marca>-<modelo>_<YYYY-MM-DD>.md` + esqueletos `.txt` |
 | **3 · Cierre** (veredicto 🟢/🔵) | **ZIP Laravel** | `informe.json` + `manifest.json` + `contenido/*.txt` + `fotos/` | `[coche_id].zip` → se sube a Laravel |
 
 ### 🗺️ MAPA DE PDFs y 📁 RUTAS DE GUARDADO — ver `05-operaciones/operaciones.md`
@@ -1017,7 +1021,7 @@ TRAS ELEGIR CANDIDATO (nueva fase aprobada → ejecutar)
 **Cuándo emitir dossier cliente:** 🟢 Comprar siempre · 🔵 Comprar si baja de precio siempre · 🟡 Dudoso solo si el cliente pidió evaluarlo · 🔴 Descartar nunca (carta breve en su lugar).
 
 **⚠️ QUIÉN GENERA CADA PDF (revisado 18-ago-2026):**
-- **Claude SOLO genera 2 PDFs** (siempre para el equipo): el **informe de búsqueda** y el **informe de unidad** (`informe_busqueda_*.pdf` / `informe_unidad_*.pdf`, con plantilla de marca + Chrome).
+- **Claude NO genera PDFs por defecto** (los enlaces de candidatos y de fuentes no funcionan en PDF → inútiles para decidir). Solo si el usuario lo pide expresamente: el **informe de búsqueda** o el **informe de unidad** (`informe_busqueda_*.pdf` / `informe_unidad_*.pdf`, plantilla de marca + Chrome). El formato por defecto es **1 solo `.md`** — ver `03-informes/entregables.md` §4.
 - **Claude genera el TEXTO (esqueletos `.txt` [MARCADOR])** de TODOS los demás documentos: `ficha-publicitaria.txt` (ficha + folleto del coche), `informe-interno.txt`, `dossier-cliente.txt`. **Claude decide qué se pone y qué NO** en cada uno — especialmente en el folleto del cliente.
 - **Laravel SOLO maqueta**: convierte los esqueletos `.txt` en PDF (Blade + Browsershot) cuando el coche ya está en inventario. Laravel **no decide contenido**: muestra lo que Claude escribió.
 - **El folleto del coche** (`folleto-coche.blade.php`) se genera desde `ficha-publicitaria.txt`. Claude escribe el bloque `[VALORACION]` (1-2 frases de venta) y `[ARGUMENTO]`/`[EQUIPAMIENTO]` presentables. **PROHIBIDO** en el folleto/cliente: margen, honorarios, negociación, estrategia de venta, `verdict_reasoning`, `recommendation` — son internos (informe interno) y nunca van al folleto.
@@ -1144,7 +1148,7 @@ Las reglas duras (A1-A33) viven en `06-reglas/anti_patrones.md`. Cargarlas cuand
 |---|---|---|
 | **A: UNIDAD** | `informe.json` dentro del ZIP | `{_meta, vehiculo, anuncio, investigacion, balance, veredicto, costes, mercado, avisos, publicidad}` — un solo coche, contrato completo |
 | **B: MODELO** | `informe.json` suelto en `export/` | Misma estructura que A, pero SIN `publicidad` (no se generan esqueletos de venta). El usuario decide si promover a Flujo A después. |
-| **C: MERCADO** | `informe.json` agregado | `{_meta, modelos: [{modelo, segmento, hueco_pct, n_uds_de, vendibilidad_estimada, mejor_anuncio_url}, ...]}` — N entradas, sin detalle por unidad. Se guarda en `export/scouting_<fecha>.json` para histórico. |
+| **C: MERCADO** | `informe.json` agregado | `{_meta, modelos: [{modelo, segmento, hueco_pct, n_uds_de, vendibilidad_estimada, mejor_anuncio_url}, ...]}` — N entradas, sin detalle por unidad. Se guarda en `export/flujo-c-<YYYY-MM-DD>.json` para histórico. |
 | **E: STOCK** | `stock_<fecha>.json` en `export/` | `{_meta, categorias: [{nombre, modelos: [{modelo, n_uds_de, n_uds_es, mediana_de, mediana_es, hueco_pct, veredicto, enlace_ejemplo}], ...}]}` — catálogo por categorías para Laravel. Sin `publicidad`. |
 
 ---

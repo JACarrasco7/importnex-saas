@@ -1,3 +1,43 @@
+## [3.9.10] - 2026-09-15
+
+**Informes: una sola plantilla, un solo nombre y una sola regla de formato.**
+
+El usuario: *"la creación de informes es un poco ambigua y no hace justo lo que pide… se lía
+bastante y no identifica qué informe es para crearlo bien"*. La auditoría de las dos skills dio
+cuatro causas, todas con evidencia:
+
+1. **El informe de búsqueda NO tenía plantilla.** Es el entregable de fin de Fase 1 en los flujos
+   B, C y E, y solo existían 5 líneas en prosa (`SKILL.md:891`). El Flujo E se remitía a *"misma
+   estructura que `informe_busqueda_*.md`"* — un fichero que no existía → la IA **improvisaba la
+   estructura** en cada entrega. **Nuevo `03-informes/informe_busqueda.md`**: 12 secciones en
+   orden fijo, con el bloque 🔗 FUENTES dentro de la ficha de cada modelo-versión y checklist
+   de cierre copiable.
+2. **El mismo informe tenía 2-4 nombres.** `informe_busqueda_<modelo>.md` vs `<fecha>.md`;
+   el JSON de C era `scouting_<fecha>.json`, `flujo-c-<fecha>.json` y `scouting/scouting_…`
+   (las dos primeras dentro del MISMO documento). **Nuevo `03-informes/entregables.md`**: tabla
+   única de qué informe toca, nombre canónico, carpeta y formato, más la lista de nombres
+   retirados.
+3. **PDF prohibido y obligatorio a la vez.** Una sola regla: **1 `.md` por defecto; PDF, `.docx`
+   o ZIP solo si el usuario lo pide** (los enlaces de candidatos y fuentes no funcionan en PDF).
+   Alineado en `SKILL.md`, `operaciones.md` (mapa de 8 PDFs) y `stock-marketing.md`.
+4. **Referencias muertas por correcciones apiladas.** `SKILL.md:892` exigía *"las 11 no
+   negociables del flujo MODELO"*: no existen en ningún fichero (ese "11" es el recuento VIEJO
+   del informe técnico, que hoy tiene 15). Y `contrato.md` publicaba el vocabulario de marketing
+   **v1** (GANCHO, POST_LARGO…) como contrato vigente cuando el vigente es el **v2** (`IG_*`,
+   `VT_*`, `FB_*`, `FBMP_*`, `PT_*`) → una pieza escrita en v1 llega **vacía** al panel.
+
+Además, para que **entienda la petición o pregunte** (lo pedido explícitamente):
+- `01-arranque/guia_prompts.md`: tabla intención→entregable ampliada a TODOS los entregables
+  (unidad, búsqueda, modelos, stock, marketing, mercado, comparativa) + bloque nuevo
+  **"🛑 Si no encaja en ninguna fila (o caben dos) → PREGUNTAR"** con la pregunta exacta.
+- Frontmatter: decía "Cuatro flujos" cuando el cuerpo define 5 + marketing.
+- `01-arranque/guia_prompts.md`: arreglado un carácter corrupto (U+FFFD) en el título.
+
+**Contadores de secciones fuera de la prosa:** `estudio-mercado/SKILL.md` y
+`como_deben_ser_las_sesiones.md` decían "las 10 secciones" mientras la plantilla ya tenía 11
+(§10 FUENTES de la v3.9.9). Ahora remiten a la tabla §ESTRUCTURA OBLIGATORIA, que es la que
+manda: así añadir una sección no vuelve a desajustar la documentación.
+
 ## [3.9.9] - 2026-09-15
 
 **Regla A33: los enlaces de cada medición van EN el informe (no solo en el JSON).**

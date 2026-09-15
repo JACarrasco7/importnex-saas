@@ -5,6 +5,15 @@ Todos los cambios notables en el skill `estudio-mercado` se documentarán en est
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.4.6] - 2026-09-15
+
+**Contadores de secciones fuera de la prosa.**
+
+`SKILL.md` mandaba "respetar las **10 secciones** en orden fijo" mientras la plantilla ya tenía
+**11** (el §10 FUENTES CONSULTADAS de la 0.4.5). Un número escrito a mano se desajusta cada vez
+que la plantilla crece. Ahora remite a la **tabla §ESTRUCTURA OBLIGATORIA de
+`informe_mercado.md`**, que es la que manda, sin repetir el número en ningún sitio.
+
 ## [0.4.5] - 2026-09-15
 
 **§10 FUENTES CONSULTADAS: obligatoria en el informe de mercado.**

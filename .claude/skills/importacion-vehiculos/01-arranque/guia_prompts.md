@@ -235,7 +235,7 @@ Si no es esto, dime en 1 palabra qué cambio y arranco.
 
 > **Anti-inercia:** si los 4 datos están claros, NO se hace ninguna pregunta — solo el ACK. Preguntar por preguntar es el fallo contrario (desperdicia tokens y cabrea al usuario).
 
-## �🧭 Dimensión de INTENCIÓN y ENTREGABLE (17-ago-2026) — se aplica SIEMPRE
+## 🧭 Dimensión de INTENCIÓN y ENTREGABLE (17-ago-2026) — se aplica SIEMPRE
 
 > El Prompt Improver clásico (arriba) completa PARÁMETROS que faltan (año, km, presupuesto). Esta dimensión aclara la **INTENCIÓN y el ENTREGABLE que espera el usuario**. Se ejecuta en TODO encargo, aunque los parámetros estén completos.
 
@@ -246,13 +246,31 @@ Si no es esto, dime en 1 palabra qué cambio y arranco.
 
 ### Tabla de intención → flujo → entregable (contrastar SIEMPRE)
 
+> **La fuente de verdad es `../03-informes/entregables.md`** (incluye nombre de fichero, carpeta y formato). Esta tabla es el atajo para decidir rápido.
+
 | El usuario dice… | Flujo | Entregable correcto |
 |---|---|---|
-| "evalúa esta URL" | A (UNIDAD) | Informe unidad + dossier + ZIP |
-| "busca [modelo]" | B (MODELO) | Informe modelo + top 5 |
-| "qué merece la pena / escanea mercado" | C (MERCADO) | Informe búsqueda |
-| "cliente sin modelo + presupuesto" | D (DESCUBRIMIENTO) | Informe de modelos por país |
-| "stock recurrente / catálogo bajo pedido / busca por categorías" | E (STOCK) | Informe de búsqueda (Markdown+PDF+JSON) — SIN copy RRSS |
+| "evalúa esta URL" · "mira este coche" | A (UNIDAD) | Informe de **unidad** + dossier + ZIP |
+| "busca [modelo]" | B (MODELO) | Informe de **búsqueda** (un modelo) + Top 5 |
+| "qué merece la pena / escanea mercado / revisa este segmento o familia" | C (MERCADO) | Informe de **búsqueda** (N modelos) |
+| "cliente sin modelo + presupuesto" | D (DESCUBRIMIENTO) | Informe de **modelos** por país (sin anuncios) |
+| "stock recurrente / catálogo bajo pedido / busca por categorías" | E (STOCK) | Informe de **búsqueda** por categorías — SIN copy RRSS |
+| "dame los anuncios / copy para redes / ficha de publicación" | M (MARKETING) | `redes-sociales.txt` + `anuncio-portales.txt` |
+| "estudia el mercado de <modelo>" | estudio-mercado | Informe de **mercado** (estudio) |
+| "compáralos" (varios candidatos) | A/B | **Comparativa** de candidatos |
+
+### 🛑 Si no encaja en ninguna fila (o caben dos) → PREGUNTAR
+
+**Nunca improvisar el tipo de informe.** BÚSQUEDA y UNIDAD son los que más se confunden
+(búsqueda = mercado y modelos; unidad = un coche concreto a fondo). Una sola pregunta, corta,
+ en la misma línea que el plan:
+
+```
+No lo tengo claro del todo. ¿Qué te preparo?
+  a) Dónde está la oportunidad en el mercado (modelos, oferta, hueco) → informe de búsqueda
+  b) Analizar este coche concreto a fondo → informe de unidad
+  c) Los anuncios/copy para publicarlo → piezas de marketing
+```
 
 ### Regla de oro de intención
 **Ante ambigüedad entre BÚSQUEDA y MARKETING (o cualquier par de entregables), PREGUNTAR antes de ejecutar — 1 pregunta, en la misma línea que el plan de fase.** Nunca mezclar ambos en un solo entregable. Si el usuario pide ambos, separar en 2 fases con checkpoint entre ellas.

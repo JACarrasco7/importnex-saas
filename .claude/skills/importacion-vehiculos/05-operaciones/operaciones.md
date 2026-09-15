@@ -7,14 +7,15 @@
 
 ## 🗺️ MAPA DE PDFs — TIPOS y DÓNDE SE CREA CADA UNO (movido de SKILL.md, 15-ago-2026)
 
-> **Hay 8 PDFs en total: 3 los genera CLAUDE (investigación) y 5 los genera LARAVEL (venta/documento).**
+> **Hay 8 PDFs en total: 3 puede generarlos CLAUDE (investigación, SOLO si el usuario los pide) y 5 los genera LARAVEL (venta/documento).**
+> ⚠️ **El formato por defecto de un informe es 1 solo `.md`.** Los PDFs de investigación no se generan «porque quedan mejor»: no funcionan los enlaces. Ver `../03-informes/entregables.md` §4.
 > **El briefing PDF ya NO existe** (eliminado 15-ago-2026). El status de cliente 'Briefing' (pipeline) y `../01-arranque/briefing_encargo.md` (cuestionario previo) NO son el PDF briefing y se mantienen.
 
 | # | PDF | Tipo | Quién lo genera | De qué sale | Dónde se crea |
 |---|---|---|---|---|---|
-| 1 | `informe_busqueda_*.pdf` | Investigación (búsqueda) | **CLAUDE** | Markdown Fase 1 | HTML de marca → Chrome headless, plantilla `assets/plantilla_pdf_marca.html` |
-| 2 | `informe_unidad_*.pdf` | Investigación (unidad) | **CLAUDE** | `../03-informes/informe_tecnico.md` (15 sec) | Idem plantilla de marca |
-| 3 | informe técnico unidad (Flujo A) | Investigación (técnico) | **CLAUDE** | `../03-informes/informe_tecnico.md` | Idem plantilla de marca |
+| 1 | `informe_busqueda_*.pdf` | Investigación (búsqueda) | **CLAUDE** *(solo a petición)* | `../03-informes/informe_busqueda.md` | HTML de marca → Chrome headless, plantilla `assets/plantilla_pdf_marca.html` |
+| 2 | `informe_unidad_*.pdf` | Investigación (unidad) | **CLAUDE** *(solo a petición)* | `../03-informes/informe_tecnico.md` (15 sec) | Idem plantilla de marca |
+| 3 | informe técnico unidad (Flujo A) | Investigación (técnico) | **CLAUDE** *(solo a petición)* | `../03-informes/informe_tecnico.md` | Idem plantilla de marca |
 | 4 | Dossier cliente | Venta / cliente | **LARAVEL** | `contenido/dossier-cliente.txt` | Blade `ficha-coche.blade.php` (documento cliente) |
 | 5 | Ficha del coche | Venta / cliente | **LARAVEL** | `contenido/ficha-publicitaria.txt` | Blade `ficha-coche.blade.php` · `PaqueteValoracionController@ficha` · ruta `cars.ficha` |
 | 6 | Informe interno | Venta / equipo | **LARAVEL** | `contenido/informe-interno.txt` | Blade `informe-interno.blade.php` · `PaqueteValoracionController@interno` · ruta `cars.informe-interno` |
@@ -23,7 +24,8 @@
 
 **Reglas duras del mapa:**
 1. **Claude NUNCA genera los PDFs de venta** (ficha, informe interno, folleto) — los hace Laravel con Blade + Browsershot tras recibir el ZIP.
-2. **Laravel NUNCA genera los PDFs de investigación** — los hace Claude en el Desktop con la plantilla de marca.
+2. **Laravel NUNCA genera los PDFs de investigación.** Los genera Claude **solo si el usuario los pide** (por defecto el informe es 1 `.md`), con la plantilla de marca + Chrome headless.
+   ⚠️ Las filas **2 y 3 son el MISMO PDF** (el informe técnico de unidad entregado como `informe_unidad_*.pdf`): no se generan dos.
 3. El **informe interno** (margen, honorarios, URLs de comparables) es SOLO equipo; el **dossier/ficha/folleto** es para el cliente (sin margen).
 4. Los esqueletos `.txt` (`contenido/*.txt`) son la ÚNICA entrada de Laravel: `ficha-publicitaria.txt`, `informe-interno.txt`, `dossier-cliente.txt` (solo veredicto Comprar*), **`redes-sociales.txt` y `anuncio-portales.txt`** (marketing — 03-sep-2026). El **folleto del coche reutiliza `ficha-publicitaria.txt`** — no requiere esqueleto propio.
 5. **Claude decide el contenido de cada esqueleto** (qué poner y qué NO en el folleto/cliente — A22). Laravel **solo maqueta**: no añade ni quita contenido. En el folleto del cliente NUNCA va margen, honorarios, negociación ni `verdict_reasoning`/`recommendation`.
@@ -49,14 +51,16 @@
 
 **Tabla única de rutas — QUÉ archivo va DÓNDE:**
 
+> **Nombres canónicos y carpetas: `../03-informes/entregables.md`** — manda sobre esta tabla.
+
 | Archivo | Ruta | Quién lo usa | Cuándo |
 |---|---|---|---|
-| `informe_busqueda_<fecha>.md` | `informes\<marca>\<modelo>\` | El usuario (lectura) | Fin Fase 1 (Flujo B/C) |
-| `informe_unidad_<fecha>.md` | `informes\<marca>\<modelo>\` | El usuario (lectura) | Fase 2, candidato elegido |
-| `comparativa_<fecha>.md` | `informes\<marca>\<modelo>\` | El usuario (lectura) | Si compara varios candidatos |
+| `informe_busqueda_<objeto>_<YYYY-MM-DD>.md` | según `../03-informes/entregables.md` §3 | El usuario (lectura) | Fin Fase 1 (Flujo B/C/E) |
+| `informe_unidad_<marca>-<modelo>_<YYYY-MM-DD>.md` | `informes\<marca>\<modelo>\` | El usuario (lectura) | Fase 2, candidato elegido |
+| `comparativa_<YYYY-MM-DD>.md` | `informes\<marca>\<modelo>\` | El usuario (lectura) | Si compara varios candidatos |
 | `export\flujo-a-<coche_id>.json` | `laravel\` | `empaquetar.py` | Flujo A (entrada del ZIP) |
 | `export\flujo-b-<modelo>-<fecha>.json` | `laravel\` | Laravel (histórico cacheable) | Flujo B |
-| `export\scouting_<fecha>.json` | `laravel\` | Laravel (scouting) | Flujo C |
+| `export\flujo-c-<fecha>.json` | `laravel\` | Laravel (scouting) | Flujo C |
 | `<coche_id>.zip` | `laravel\paquetes\` | Subida a Laravel | Cierre Flujo A |
 | `informe.json` | **SOLO dentro del ZIP** | Laravel | Lo genera `empaquetar.py` — NO existe suelto |
 | Fotos del candidato | `<coche_id>_fotos\` junto al JSON de `export\` | `empaquetar.py` | Se descargan al elegir candidato |
@@ -78,14 +82,14 @@
 C:\Users\jacar\Desktop\JJImportMotors\
 ├── informes\                        ← SOLO .md para el USUARIO, por marca/modelo
 │   └── <marca>\<modelo>\            ← ej. vw\tiguan
-│       ├── informe_busqueda_<fecha>.md
-│       ├── informe_unidad_<fecha>.md
+│       ├── informe_busqueda_<objeto>_<YYYY-MM-DD>.md
+│       ├── informe_unidad_<marca>-<modelo>_<YYYY-MM-DD>.md
 │       └── comparativa_<fecha>.md
 └── laravel\                         ← trabajo de scripts y contrato con Laravel
     ├── export\
     │   ├── flujo-a-<coche_id>.json  ← entrada de empaquetar.py (Flujo A)
     │   ├── flujo-b-<modelo>-<fecha>.json
-    │   └── scouting_<fecha>.json
+    │   └── flujo-c-<YYYY-MM-DD>.json
     └── paquetes\
         └── <coche_id>.zip           ← contiene informe.json + manifest + contenido\ + fotos\
 ```
@@ -261,8 +265,8 @@ py scripts/sync_indice.py --dry-run        # imprime el JSON sin escribir
 JJImportMotors/informes/                  ← SOLO .md para el USUARIO (por marca/modelo)
 └── <marca>/
     └── <modelo>/
-        ├── informe_busqueda_<fecha>.md   ← Fase 1: cobertura + candidatos
-        ├── informe_unidad_<fecha>.md     ← Fase 2: informe del candidato elegido
+        ├── informe_busqueda_<objeto>_<YYYY-MM-DD>.md   ← Fase 1: cobertura + candidatos
+        ├── informe_unidad_<marca>-<modelo>_<YYYY-MM-DD>.md   ← Fase 2: informe del candidato elegido
         └── comparativa_<fecha>.md        ← si compara varios candidatos
 
 JJImportMotors/laravel/                   ← scripts Python, JSON de contrato y ZIPs
@@ -285,7 +289,7 @@ JJImportMotors/laravel/                   ← scripts Python, JSON de contrato y
 │       └── <marca>/<modelo-slug>/
 │           └── informe_<fecha>.json     ← JSONs Flujo A y B completos
 └── scouting/                            ← Solo Flujo C
-    └── scouting_<fecha>.json            ← Tabla multi-modelo agregada
+    └── flujo-c-<YYYY-MM-DD>.json            ← Tabla multi-modelo agregada
 ```
 
 **Reglas de guardado (15-ago-2026):**
@@ -589,7 +593,7 @@ Ver `../references/cell_map.md` para referencia rápida de dónde vive cada dato
 3. Claude prioriza por ROI y hace Fase 1 por cada modelo (3 fuentes × N modelos).
 4. Claude muestra informe BUSQUEDA con tabla multi-modelo.
 5. Tú curas: "¿profundizo en estos 3?" → pasa a Flujo A o B.
-6. Tabla guardada en `scouting/scouting_<fecha>.json`.
+6. Tabla guardada en `export/flujo-c-<YYYY-MM-DD>.json`.
 
 ### Honorarios por tramo
 
