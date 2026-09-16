@@ -19,6 +19,7 @@
 | [06-informes](06-informes.md) | Leer informes de valoración + briefing PDF | Al entregar a cliente |
 | [07-cierre-venta](07-cierre-venta.md) | Registrar ventas y ver KPIs en `/kpis` | Cada venta / fin de mes |
 | [08-solucion-problemas](08-solucion-problemas.md) | FAQ y troubleshooting | Cuando algo falla |
+| [09-guia-skill-ecommerce](09-guia-skill-ecommerce.md) | Skill `ecommerce-tuning` (tienda accesorios, OTRO negocio) | Cuando uses la tienda online |
 
 ---
 
@@ -36,6 +37,8 @@ solo qué flujo aplicar. Estas son las frases que disparan cada uno:
 | Quieres **stock para ofertar** (varios candidatos) | *"Consígueme 5 Golf GTI para ofertar"* | **E · STOCK** |
 
 > **Flujo M (marketing)** no se pide: se dispara solo cuando un Flujo A termina con veredicto 🟢.
+
+> **Skill hermana (otro negocio, NO mezclar):** `ecommerce-tuning` (v0.1.0) — tienda de accesorios/tuning tramitadora. Su guía está en [09-guia-skill-ecommerce](09-guia-skill-ecommerce.md).
 >
 > ⚠️ Si tu encargo **no encaja** en ninguno, el skill **debe preguntarte** qué flujo aplicar.
 > Nunca improvisa. Si ves que se lo salta, avísale.

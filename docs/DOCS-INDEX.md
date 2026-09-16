@@ -25,6 +25,7 @@
 | [`AUDITORIA_ronda4_2026-09-13.md`](AUDITORIA_ronda4_2026-09-13.md) | Auditoría ronda 4 (2 pasadas externas): race condition encargos.md, multi-tenant en comandos, HSTS, chunk/OOM, `public/hot` | Activo |
 | [`PENDIENTES_v3.9.2_2026-09-12.md`](PENDIENTES_v3.9.2_2026-09-12.md) | Pendientes abiertos de la 3.9.2 | Activo |
 | [`ecommerce.md`](ecommerce.md) | Guía + plan del e-commerce de accesorios/tuning: modelo tramitador puro (sin almacén), agente IA de viabilidad (§14) y skill `ecommerce-tuning` (§15) | Activo |
+| [`guias/09-guia-skill-ecommerce.md`](guias/09-guia-skill-ecommerce.md) | Guía de uso de la skill `ecommerce-tuning` (S/P/F/M, filtro, navegador) | Activo |
 
 Regla dura de sincronización de skills: [`../.ai/rules/skills-sync.md`](../.ai/rules/skills-sync.md)
 (qué comando correr tras editar una skill, qué NO hacer).

@@ -35,6 +35,7 @@ class GuideController extends Controller
         'informes' => 'docs/guias/06-informes.md',
         'cierre-venta' => 'docs/guias/07-cierre-venta.md',
         'solucion-problemas' => 'docs/guias/08-solucion-problemas.md',
+        'guia-skill-ecommerce' => 'docs/guias/09-guia-skill-ecommerce.md',
     ];
 
     /** Abre la primera guía del índice. */
