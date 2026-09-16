@@ -8,7 +8,7 @@
 #   - El modulo zipfile de Python genera ZIPs PKZIP 2.0 estandar con
 #     separador '/' y filtra paths problematicos antes de incluirlos.
 #
-# Regenera los ZIPs portables de las 2 skills del negocio y
+# Regenera los ZIPs portables de las 3 skills del negocio y
 # actualiza docs/SKILLS.md con SHA256/version/fecha/tamano.
 #
 # Uso:
@@ -20,7 +20,7 @@
 
 [CmdletBinding()]
 param(
-    [ValidateSet('all', 'importacion-vehiculos', 'estudio-mercado')]
+    [ValidateSet('all', 'importacion-vehiculos', 'estudio-mercado', 'ecommerce-tuning')]
     [string]$SkillOnly = 'all',
 
     [switch]$NoCommit,
@@ -76,7 +76,7 @@ if ($LASTEXITCODE -ne 0) {
 # build a "all" se la comia igualmente. Ahora respeta el scope.
 $scope = if ($SkillOnly -ne 'all') { $SkillOnly } else { 'all' }
 $keptNames = @()
-foreach ($skill in @('importacion-vehiculos','estudio-mercado')) {
+foreach ($skill in @('importacion-vehiculos','estudio-mercado','ecommerce-tuning')) {
     if ($scope -eq 'all' -or $scope -eq $skill) {
         $kept = Get-ChildItem $distDir -Filter "skills-$skill-*.zip" -File -ErrorAction SilentlyContinue
         if ($kept) { $keptNames += $kept.Name }
@@ -101,7 +101,7 @@ if (-not (Test-Path $docsFile)) {
     $tableLines = @()
     $tableLines += '| Skill | ZIP | Version | Tamano | SHA256 |'
     $tableLines += '|---|---|---|---|---|'
-    foreach ($skill in @('importacion-vehiculos', 'estudio-mercado')) {
+    foreach ($skill in @('importacion-vehiculos', 'estudio-mercado', 'ecommerce-tuning')) {
         if ($SkillOnly -ne 'all' -and $SkillOnly -ne $skill) { continue }
         $zipPath = Get-ChildItem $distDir -Filter "skills-$skill-*.zip" -File |
             Sort-Object LastWriteTime -Descending | Select-Object -First 1

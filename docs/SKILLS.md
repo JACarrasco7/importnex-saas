@@ -9,8 +9,9 @@ Generados por `scripts/build-skill-zips.ps1` (wrapper de `.claude/skills/_dist/b
 
 | Skill | ZIP | Version | Tamano | SHA256 |
 |---|---|---|---|---|
-| `importacion-vehiculos` | `.claude/skills/_dist/skills-importacion-vehiculos-v3.9.10-20260915.zip` | 3.9.10 | 547 KB | `200b6a31ae3622602417bf6269ff267d6e32119802f9f952e47f6104601c5d91` |
-| `estudio-mercado` | `.claude/skills/_dist/skills-estudio-mercado-v0.4.6-20260915.zip` | 0.4.6 | 66 KB | `592f7fea9ea7f8aafac927bf20bb87ac11661403ee8b240cb1d6970720c93e75` |
+| `importacion-vehiculos` | `.claude/skills/_dist/skills-importacion-vehiculos-v3.9.10-20260916.zip` | 3.9.10 | 547 KB | `200b6a31ae3622602417bf6269ff267d6e32119802f9f952e47f6104601c5d91` |
+| `estudio-mercado` | `.claude/skills/_dist/skills-estudio-mercado-v0.4.6-20260916.zip` | 0.4.6 | 66 KB | `592f7fea9ea7f8aafac927bf20bb87ac11661403ee8b240cb1d6970720c93e75` |
+| `ecommerce-tuning` | `.claude/skills/_dist/skills-ecommerce-tuning-v0.1.0-20260916.zip` | 0.1.0 | 8 KB | `cb91abad118dceab525c5033c61d78a11f22acc6cc746141cb92e31b0a405892` |
 
 ## 🔀 Las 3 copias que NO se sincronizan solas (12-sep-2026)
 
