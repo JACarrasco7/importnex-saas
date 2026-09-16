@@ -24,6 +24,17 @@
 
 ---
 
+## 2026-09-16 19:00 · Copilot-VSCode · e-commerce tuning: guía v2 (tramitador puro) + skill ecommerce-tuning
+
+- **Pedido:** adaptar el plan de agente IA de e-commerce al modelo "tramitador puro" (sin almacén), añadir plan de marketing multicanal Meta/TikTok y crear la skill de automatización con el navegador de Claude.
+- Hecho: `docs/ecommerce.md` v2 — §2 tramitador puro (fuera el mini-stock), §7 escenario proveedor almacén UE, §10 plan Meta/TikTok por fases con umbrales de corte, §14 agente IA (captura de señales + fórmulas Score/margen + pipeline), §15 skill; plan 90 días sin lote de stock.
+- Hecho: skill nueva `.claude/skills/ecommerce-tuning/` v0.1.0 (flujos S/P/F/M, reglas E1-E12, memoria propia). Registrada en `build-skill-zips.ps1`; ZIP generado y pusheado (c0086e0).
+- ⚠️ PENDIENTE para Claude Desktop: importar `skills-ecommerce-tuning-v0.1.0-20260916.zip` (en `_dist/`) en Desktop + Cowork y descomprimir en `%USERPROFILE%\.claude\skills\`. Es de OTRO negocio (tienda tuning): NO mezclar criterios/costes con `importacion-vehiculos`.
+- ⚠️ Sin commitear (cambio del usuario, no mío): `app/Services/ValuationImporter.php`.
+- Commit: ver `git log` (rama master)
+
+---
+
 ## 2026-09-13 19:43 · Copilot-VSCode · sección "Guía" dentro de la app (menú de la organización)
 
 - **Lo que pedía el usuario:** ver las guías **dentro de la web**, no solo en markdown suelto. Ya había un intento a medias: el sidebar traía la sección preparada pero **comentada** ("la ruta `guide.index` aún no existe y Ziggy lanza errores") y existía un `Pages/Guide/Index.vue` con una guía **escrita a mano en HTML**.
