@@ -18,7 +18,7 @@ class MarketplaceEnhancementsTest extends TestCase
         $car = Car::factory()->create([
             'organization_id' => $org->id,
             'is_marketplace' => true,
-            'status' => 'Delivered',
+            'status' => 'Located',
             'verdict' => 'Buy',
             'purchase_price' => 10000,
             'marketplace_views' => 0,
@@ -34,7 +34,7 @@ class MarketplaceEnhancementsTest extends TestCase
         $car = Car::factory()->create([
             'organization_id' => $org->id,
             'is_marketplace' => true,
-            'status' => 'Delivered',
+            'status' => 'Located',
             'verdict' => 'Buy',
             'purchase_price' => 10000,
             'marketplace_views' => 5,
@@ -53,7 +53,7 @@ class MarketplaceEnhancementsTest extends TestCase
         $car = Car::factory()->create([
             'organization_id' => $org->id,
             'is_marketplace' => true,
-            'status' => 'Delivered',
+            'status' => 'Located',
             'verdict' => 'Buy',
         ]);
 

@@ -210,19 +210,42 @@ class Car extends Model
     }
 
     /**
+     * Estados en los que el coche YA NO ESTÁ EN VENTA: no se publica nunca en
+     * la web pública, aunque el toggle esté marcado.
+     *
+     * OJO: `Delivered` es el ÚLTIMO estado del kanban (coche ya entregado al
+     * cliente). Antes el marketplace lo EXIGÍA, así que solo publicaba coches
+     * ya vendidos y en la práctica no aparecía ninguno (bug detectado
+     * 25-sep-2026: todos los coches estaban en `Located` y la web salía vacía).
+     */
+    public const MARKETPLACE_EXCLUDED_STATUSES = ['Delivered', 'Discarded'];
+
+    /**
+     * Scope: coches publicables en el marketplace público.
+     *
+     * FUENTE ÚNICA DE VERDAD de la visibilidad pública. La usan los 4 sitios
+     * del `PublicMarketplaceController` (index, filterOptions, compare, show)
+     * para que no puedan desincronizarse (antes la condición estaba copiada en
+     * 4 sitios y por eso el bug de `Delivered` pasó desapercibido).
+     *
+     * Regla: manda el toggle del operador (`is_marketplace`); las únicas
+     * exclusiones son hechos objetivos —organización no pública y coche ya
+     * vendido o descartado— que nadie querría publicar.
+     */
+    public function scopePublicMarketplace($query)
+    {
+        return $query
+            ->whereHas('organization', fn ($q) => $q->where('is_public', true))
+            ->where('is_marketplace', true)
+            ->whereNotIn('status', self::MARKETPLACE_EXCLUDED_STATUSES);
+    }
+
+    /**
      * Estado de publicación en el marketplace público.
      *
-     * Un coche aparece en `/marketplace` SOLO si cumple las 4 condiciones que
-     * aplica `PublicMarketplaceController@index`:
-     *   1. `is_marketplace` = true (el toggle que activa el operador)
-     *   2. `status` = Delivered
-     *   3. `verdict` IN (Buy, Buy if price drops)
-     *   4. La organización tiene `is_public` = true
-     *
-     * Este método es la FUENTE ÚNICA DE VERDAD del criterio: la ficha lo usa
-     * para avisar POR QUÉ no aparece, en vez de dejar al operador marcando el
-     * toggle sin entender por qué el coche no se publica (queja real: "lo
-     * marqué y no sale").
+     * Refleja exactamente el scope `publicMarketplace()`. La ficha lo usa para
+     * avisar de lo que impide publicar, en vez de dejar al operador marcando el
+     * toggle sin entender por qué el coche no aparece.
      *
      * @return array{visible: bool, checks: array<int, array{key: string, ok: bool}>}
      */
@@ -230,8 +253,7 @@ class Car extends Model
     {
         $checks = [
             ['key' => 'is_marketplace', 'ok' => (bool) $this->is_marketplace],
-            ['key' => 'status', 'ok' => $this->status === 'Delivered'],
-            ['key' => 'verdict', 'ok' => in_array($this->verdict, ['Buy', 'Buy if price drops'], true)],
+            ['key' => 'status', 'ok' => ! in_array($this->status, self::MARKETPLACE_EXCLUDED_STATUSES, true)],
             ['key' => 'organization', 'ok' => (bool) optional($this->organization)->is_public],
         ];
 

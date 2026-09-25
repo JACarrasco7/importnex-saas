@@ -9,19 +9,19 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * §marketplace (25-sep-2026) — toggle de publicación desde la ficha.
+ * §marketplace (25-sep-2026) — visibilidad pública y toggle desde la ficha.
  *
- * Un coche aparece en la web pública SOLO si cumple 4 condiciones:
- *   1. `is_marketplace` = true
- *   2. `status` = Delivered
- *   3. `verdict` IN (Buy, Buy if price drops)
- *   4. La organización tiene `is_public` = true
+ * REGLA: manda el toggle del operador. Un coche marcado se publica.
  *
- * Este test cubre el cálculo del estado (`Car::marketplaceStatus()`, fuente
- * única de verdad compartida con la ficha) y el endpoint del toggle
- * (`PATCH /cars/{car}/marketplace`), incluido el mensaje que avisa de lo que
- * falta cuando el coche está marcado pero aún no es visible — el fallo de UX
- * real: "lo marqué y no aparece".
+ * Exclusiones automáticas (hechos objetivos, no configuración):
+ *   - La organización no es pública.
+ *   - El coche ya no está en venta: `Delivered` (vendido/entregado) o
+ *     `Discarded` (descartado).
+ *
+ * BUG QUE ESTE TEST BLOQUEA (25-sep-2026): antes se EXIGÍA `status=Delivered`,
+ * es decir, solo se publicaban coches YA VENDIDOS. Como el default del status
+ * es `Located`, la web pública salía siempre vacía. El test
+ * `test_un_coche_en_located_marcado_si_aparece_en_la_web` reproduce ese caso.
  */
 class CarMarketplaceToggleTest extends TestCase
 {
@@ -46,6 +46,7 @@ class CarMarketplaceToggleTest extends TestCase
             'year' => '2020',
             'fuel' => 'Gasolina',
             'transmission' => 'Manual',
+            'status' => 'Located',
         ], $attrs));
     }
 
@@ -54,95 +55,178 @@ class CarMarketplaceToggleTest extends TestCase
         return User::factory()->create(['organization_id' => $org->id]);
     }
 
-    public function test_marketplace_status_devuelve_las_4_condiciones_en_falso_por_defecto(): void
+    // ── Car::marketplaceStatus() ────────────────────────────────────────────
+
+    public function test_status_sin_marcar_no_es_visible(): void
     {
-        // Org NO pública: así el coche recién creado falla las 4 condiciones.
-        $car = $this->car($this->org(false));
+        $car = $this->car($this->org(true), ['is_marketplace' => false]);
 
         $status = $car->marketplaceStatus();
 
         $this->assertFalse($status['visible']);
-        $this->assertCount(4, $status['checks']);
-        foreach ($status['checks'] as $check) {
-            $this->assertFalse($check['ok'], "La condición {$check['key']} debería estar en false");
-        }
+        $this->assertCount(3, $status['checks']);
+        $this->assertFalse($status['checks'][0]['ok'], 'is_marketplace debe estar en false');
     }
 
-    public function test_marketplace_status_visible_con_las_4_condiciones(): void
+    /**
+     * EL BUG: un coche recién localizado (default `Located`) marcado para
+     * publicar DEBE aparecer. Antes no aparecía porque se exigía `Delivered`.
+     */
+    public function test_un_coche_en_located_marcado_es_visible(): void
     {
         $car = $this->car($this->org(true), [
             'is_marketplace' => true,
-            'status' => 'Delivered',
-            'verdict' => 'Buy',
+            'status' => 'Located',
         ]);
+
+        $this->assertTrue(
+            $car->marketplaceStatus()['visible'],
+            'Un coche en Located con el toggle marcado debe ser visible (era el bug)'
+        );
+    }
+
+    public function test_cualquier_estado_en_venta_es_publicable(): void
+    {
+        // Recorremos el workflow real del kanban menos los terminales.
+        foreach (['Located', 'Valuing', 'Offered', 'Reserved', 'Purchased', 'In_transit', 'Processing'] as $status) {
+            $car = $this->car($this->org(true), ['is_marketplace' => true, 'status' => $status]);
+
+            $this->assertTrue(
+                $car->marketplaceStatus()['visible'],
+                "El estado {$status} debe poder publicarse"
+            );
+        }
+    }
+
+    public function test_coche_ya_entregado_no_se_publica(): void
+    {
+        $car = $this->car($this->org(true), ['is_marketplace' => true, 'status' => 'Delivered']);
+
+        $this->assertFalse($car->marketplaceStatus()['visible'], 'un coche ya vendido no se publica');
+    }
+
+    public function test_coche_descartado_no_se_publica(): void
+    {
+        $car = $this->car($this->org(true), ['is_marketplace' => true, 'status' => 'Discarded']);
+
+        $this->assertFalse($car->marketplaceStatus()['visible'], 'un coche descartado no se publica');
+    }
+
+    public function test_organizacion_privada_no_publica(): void
+    {
+        $car = $this->car($this->org(false), ['is_marketplace' => true, 'status' => 'Located']);
+
+        $this->assertFalse($car->marketplaceStatus()['visible']);
+    }
+
+    /**
+     * El veredicto YA NO es requisito: el operador decide con el toggle.
+     * (Antes exigía Buy / Buy if price drops y bloqueaba publicar por sorpresa.)
+     */
+    public function test_el_veredicto_no_bloquea_la_publicacion(): void
+    {
+        foreach (['Buy', 'Buy if price drops', 'Doubtful', 'Discard', null] as $verdict) {
+            $car = $this->car($this->org(true), [
+                'is_marketplace' => true,
+                'status' => 'Located',
+                'verdict' => $verdict,
+            ]);
+
+            $this->assertTrue(
+                $car->marketplaceStatus()['visible'],
+                'El veredicto '.var_export($verdict, true).' no debe bloquear'
+            );
+        }
+    }
+
+    public function test_visible_cuando_cumple_todo(): void
+    {
+        $car = $this->car($this->org(true), ['is_marketplace' => true, 'status' => 'Offered']);
 
         $status = $car->marketplaceStatus();
 
         $this->assertTrue($status['visible']);
-        $this->assertCount(4, array_filter($status['checks'], fn ($c) => $c['ok']));
+        $this->assertCount(3, array_filter($status['checks'], fn ($c) => $c['ok']));
     }
 
-    public function test_cada_condicion_rota_impide_la_visibilidad(): void
-    {
-        // 1. Sin is_marketplace
-        $car = $this->car($this->org(true), ['status' => 'Delivered', 'verdict' => 'Buy']);
-        $this->assertFalse($car->marketplaceStatus()['visible'], 'sin is_marketplace no es visible');
+    // ── Integración: la web pública lo muestra ─────────────────────────────
 
-        // 2. Status distinto de Delivered
-        $car = $this->car($this->org(true), ['is_marketplace' => true, 'status' => 'Purchased', 'verdict' => 'Buy']);
-        $this->assertFalse($car->marketplaceStatus()['visible'], 'status != Delivered no es visible');
-
-        // 3. Verdict negativo
-        $car = $this->car($this->org(true), ['is_marketplace' => true, 'status' => 'Delivered', 'verdict' => 'Discard']);
-        $this->assertFalse($car->marketplaceStatus()['visible'], 'verdict Discard no es visible');
-
-        // 4. Organización no pública
-        $car = $this->car($this->org(false), ['is_marketplace' => true, 'status' => 'Delivered', 'verdict' => 'Buy']);
-        $this->assertFalse($car->marketplaceStatus()['visible'], 'organización no pública no es visible');
-    }
-
-    public function test_veredicto_buy_if_price_drops_tambien_publica(): void
-    {
-        $car = $this->car($this->org(true), [
-            'is_marketplace' => true,
-            'status' => 'Delivered',
-            'verdict' => 'Buy if price drops',
-        ]);
-
-        $this->assertTrue($car->marketplaceStatus()['visible']);
-    }
-
-    public function test_toggle_activa_y_avisa_si_aun_no_es_visible(): void
+    public function test_un_coche_en_located_marcado_si_aparece_en_la_web(): void
     {
         $org = $this->org(true);
-        $car = $this->car($org, ['status' => 'Purchased', 'verdict' => 'Doubtful']);
+        $this->car($org, ['is_marketplace' => true, 'status' => 'Located']);
+
+        $this->get(route('marketplace.index'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->has('cars.data', 1));
+    }
+
+    public function test_un_coche_sin_marcar_no_aparece_en_la_web(): void
+    {
+        $org = $this->org(true);
+        $this->car($org, ['is_marketplace' => false, 'status' => 'Located']);
+
+        $this->get(route('marketplace.index'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->has('cars.data', 0));
+    }
+
+    public function test_un_coche_entregado_no_aparece_aunque_este_marcado(): void
+    {
+        $org = $this->org(true);
+        $this->car($org, ['is_marketplace' => true, 'status' => 'Delivered']);
+
+        $this->get(route('marketplace.index'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->has('cars.data', 0));
+    }
+
+    public function test_la_ficha_publica_del_coche_marcado_responde_200(): void
+    {
+        $org = $this->org(true);
+        $car = $this->car($org, ['is_marketplace' => true, 'status' => 'Located']);
+
+        $this->get(route('marketplace.show', $car->id))->assertOk();
+    }
+
+    public function test_la_ficha_publica_de_un_coche_sin_marcar_da_404(): void
+    {
+        $org = $this->org(true);
+        $car = $this->car($org, ['is_marketplace' => false, 'status' => 'Located']);
+
+        $this->get(route('marketplace.show', $car->id))->assertNotFound();
+    }
+
+    // ── Endpoint del toggle ────────────────────────────────────────────────
+
+    public function test_toggle_publica_y_avisa(): void
+    {
+        $org = $this->org(true);
+        $car = $this->car($org, ['status' => 'Located']);
 
         $response = $this->actingAs($this->admin($org))
             ->patch(route('cars.toggle-marketplace', $car->id), ['is_marketplace' => true]);
 
         $response->assertRedirect();
         $this->assertTrue($car->fresh()->is_marketplace);
-        $response->assertSessionHas('success', fn ($msg) => str_contains($msg, 'NO aparece'));
+        $response->assertSessionHas('success', fn ($msg) => str_contains($msg, 'publicado'));
     }
 
-    public function test_toggle_avisa_publicado_cuando_cumple_todo(): void
+    public function test_toggle_avisa_cuando_el_coche_esta_entregado(): void
     {
         $org = $this->org(true);
-        $car = $this->car($org, ['status' => 'Delivered', 'verdict' => 'Buy']);
+        $car = $this->car($org, ['status' => 'Delivered']);
 
         $response = $this->actingAs($this->admin($org))
             ->patch(route('cars.toggle-marketplace', $car->id), ['is_marketplace' => true]);
 
-        $response->assertSessionHas('success', fn ($msg) => str_contains($msg, 'publicado'));
-        $this->assertTrue($car->fresh()->marketplaceStatus()['visible']);
+        $response->assertSessionHas('success', fn ($msg) => str_contains($msg, 'NO aparece'));
     }
 
-    public function test_toggle_desactiva_retira_del_marketplace(): void
+    public function test_toggle_retira_del_marketplace(): void
     {
         $org = $this->org(true);
-        $car = $this->car($org, [
-            'is_marketplace' => true, 'status' => 'Delivered', 'verdict' => 'Buy',
-        ]);
+        $car = $this->car($org, ['is_marketplace' => true, 'status' => 'Located']);
 
         $response = $this->actingAs($this->admin($org))
             ->patch(route('cars.toggle-marketplace', $car->id), ['is_marketplace' => false]);
@@ -161,12 +245,10 @@ class CarMarketplaceToggleTest extends TestCase
             ->assertSessionHasErrors('is_marketplace');
     }
 
-    public function test_la_ficha_expone_marketplace_status(): void
+    public function test_la_ficha_admin_expone_marketplace_status(): void
     {
         $org = $this->org(true);
-        $car = $this->car($org, [
-            'is_marketplace' => true, 'status' => 'Delivered', 'verdict' => 'Buy',
-        ]);
+        $car = $this->car($org, ['is_marketplace' => true, 'status' => 'Located']);
 
         $this->actingAs($this->admin($org))
             ->get(route('cars.show', $car->id))
@@ -174,6 +256,6 @@ class CarMarketplaceToggleTest extends TestCase
             ->assertInertia(fn ($page) => $page
                 ->component('Cars/Show')
                 ->where('derived.marketplace_status.visible', true)
-                ->has('derived.marketplace_status.checks', 4));
+                ->has('derived.marketplace_status.checks', 3));
     }
 }

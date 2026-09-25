@@ -47,7 +47,7 @@ class PerformanceAuditTest extends TestCase
         Car::factory()->count(30)->create([
             'organization_id' => $org->id,
             'is_marketplace' => true,
-            'status' => 'Delivered',
+            'status' => 'Located',
             'verdict' => 'Buy',
         ]);
 
@@ -65,7 +65,7 @@ class PerformanceAuditTest extends TestCase
         $car = Car::factory()->create([
             'organization_id' => $org->id,
             'is_marketplace' => true,
-            'status' => 'Delivered',
+            'status' => 'Located',
             'verdict' => 'Buy',
         ]);
 
@@ -103,7 +103,7 @@ class PerformanceAuditTest extends TestCase
         $car = Car::factory()->create([
             'organization_id' => $org->id,
             'is_marketplace' => true,
-            'status' => 'Delivered',
+            'status' => 'Located',
             'verdict' => 'Buy',
         ]);
         CarPhoto::factory()->count(3)->create(['car_id' => $car->id]);
@@ -132,7 +132,7 @@ class PerformanceAuditTest extends TestCase
         Car::factory()->count(5)->create([
             'organization_id' => $org->id,
             'is_marketplace' => true,
-            'status' => 'Delivered',
+            'status' => 'Located',
             'verdict' => 'Buy',
         ]);
 
@@ -160,7 +160,7 @@ class PerformanceAuditTest extends TestCase
         $car = Car::factory()->create([
             'organization_id' => $org->id,
             'is_marketplace' => true,
-            'status' => 'Delivered',
+            'status' => 'Located',
             'verdict' => 'Buy',
         ]);
 

@@ -40,7 +40,7 @@ Nuevo campo `is_marketplace` (boolean) en `cars`:
 - **Admin UI:**
   - `Cars/Edit.vue`: toggle "Publicar en el Marketplace" (switch estoril) en la sección Status & location.
   - `Cars/Index.vue`: badge 🌐 Marketplace en la tarjeta cuando está publicado.
-- **Visibilidad pública:** `PublicMarketplaceController` (index y show) exige `is_marketplace = true` además de organización pública, estado `Delivered` y veredicto positivo.
+- **Visibilidad pública:** `PublicMarketplaceController` (index y show) exige `is_marketplace = true` además de organización pública y coche no vendido/descartado (`status NOT IN ('Delivered','Discarded')`). Criterio único en `Car::scopePublicMarketplace()`. ⚠️ El veredicto NO filtra desde 25-sep-2026 (antes exigía `Delivered` + veredicto positivo, lo que dejaba la web siempre vacía).
 
 ### Reglas de publicación (combinadas)
 

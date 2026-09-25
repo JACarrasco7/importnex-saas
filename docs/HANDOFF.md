@@ -24,6 +24,23 @@
 
 ---
 
+## 2026-09-25 17:30 · Copilot-VSCode · 🔴 FIX: el marketplace público nunca publicaba nada
+
+- **Pedido del usuario:** *"¿por qué entregado? debería salir a menos que lo quite, no? si está marcado debe ponerse y punto"*.
+- **BUG DE NEGOCIO CONFIRMADO:** `PublicMarketplaceController` exigía `status = 'Delivered'`. Pero `Delivered` es el **ÚLTIMO** estado del kanban (`Located → Valuing → Offered → Reserved → Purchased → In_transit → Processing → Delivered`), o sea **coche YA ENTREGADO AL CLIENTE**. Y el default del status es `Located`. Resultado: **la web pública solo publicaba coches ya vendidos → siempre vacía** (los 19 coches de la BD están en `Located`).
+- **Además exigía `verdict IN (Buy, Buy if price drops)`** — otra condición oculta que sorprendía al operador.
+- **Arreglado:**
+  - **`Car::scopePublicMarketplace()`** (nuevo): **fuente única de verdad**. Criterio = `is_marketplace` (manda el toggle) + org pública + `status NOT IN (Delivered, Discarded)`.
+  - Sustituye la condición **copiada en 4 sitios** del controller (index, filterOptions, compare, show) — por eso el bug pasó desapercibido y se desincronizó.
+  - `Car::marketplaceStatus()` actualizado al mismo criterio (3 checks, no 4).
+  - i18n: el aviso ya no dice "cambia el estado a Delivered"; ahora explica que el coche está vendido/descartado.
+  - Docs corregidas: `.ai/rules/marketplace.md` y `docs/PLAN_MARKETPLACE.md` documentaban la regla rota.
+- **Tests:** `CarMarketplaceToggleTest` reescrito (18 casos) + 2 nuevos de integración que reproducen el bug (**un coche en `Located` marcado SÍ aparece en `/marketplace`**). Actualizados `MarketplaceCompareTest` (nuevos criterios), `MarketplaceEnhancementsTest`, `MarketplaceFilterCacheTest`, `PerformanceAuditTest`.
+- **Verificación:** 736 passed / 0 failed / 2690 assertions. Pint passed.
+- ✅ Sin migraciones.
+
+---
+
 ## 2026-09-25 16:45 · Copilot-VSCode · Toggle de marketplace en la ficha del coche
 
 - **Pedido:** "¿cómo se pone un coche en el marketplace? debería ser un checkbox bonito en la ficha, no?".

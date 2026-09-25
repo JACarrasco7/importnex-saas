@@ -18,15 +18,12 @@ class PublicMarketplaceController extends Controller
      */
     public function index(Request $request): Response
     {
-        // Define what makes a car "publicly available"
-        // From organizations that are public, with delivered status and positive verdict
+        // Criterio de visibilidad pública: scope único en el modelo
+        // (`Car::scopePublicMarketplace()`) — toggle del operador + org pública
+        // + coche no vendido/descartado. Antes exigía `status=Delivered`
+        // (coche YA entregado), así que la web nunca mostraba nada.
         $cars = Car::query()
-            ->whereHas('organization', function ($query) {
-                $query->where('is_public', true);
-            })
-            ->where('is_marketplace', true) // Solo coches marcados para publicar
-            ->whereIn('status', ['Delivered']) // Only show delivered cars
-            ->whereIn('verdict', ['Buy', 'Buy if price drops']) // Only show positive verdicts
+            ->publicMarketplace()
             ->when($request->input('search'), function ($q, $s) {
                 $q->where(function ($sub) use ($s) {
                     $sub->where('brand', 'like', "%$s%")
@@ -52,11 +49,7 @@ class PublicMarketplaceController extends Controller
 
         // Opciones de filtro cacheadas (invalidadas por CarObserver al cambiar marketplace)
         $filterOptions = Cache::remember('marketplace.filter_options', 1800, function () {
-            $base = fn () => Car::query()
-                ->whereHas('organization', fn ($q) => $q->where('is_public', true))
-                ->where('is_marketplace', true)
-                ->whereIn('status', ['Delivered'])
-                ->whereIn('verdict', ['Buy', 'Buy if price drops']);
+            $base = fn () => Car::query()->publicMarketplace();
 
             return [
                 'brands' => $base()->distinct()->orderBy('brand')->pluck('brand')->values(),
@@ -91,10 +84,7 @@ class PublicMarketplaceController extends Controller
             ->values();
 
         $cars = Car::query()
-            ->whereHas('organization', fn ($query) => $query->where('is_public', true))
-            ->where('is_marketplace', true)
-            ->whereIn('status', ['Delivered'])
-            ->whereIn('verdict', ['Buy', 'Buy if price drops'])
+            ->publicMarketplace()
             ->whereIn('id', $ids->all())
             ->with(['photos', 'organization'])
             ->get();
@@ -112,11 +102,10 @@ class PublicMarketplaceController extends Controller
      */
     public function show(Car $car): Response
     {
-        // Verify this car should be publicly visible
-        if (! $car->organization || ! $car->organization->is_public ||
-            ! $car->is_marketplace ||
-            ! in_array($car->status, ['Delivered']) ||
-            ! in_array($car->verdict, ['Buy', 'Buy if price drops'])) {
+        // Verificar visibilidad pública con el MISMO criterio que el listado
+        // (scope único en Car — antes estaba copiado aquí y se desincronizó).
+        $visible = Car::query()->publicMarketplace()->whereKey($car->getKey())->exists();
+        if (! $visible) {
             abort(404);
         }
 
