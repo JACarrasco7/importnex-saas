@@ -21,13 +21,18 @@
 
 ## Cómo desplegar
 
-Forge despliega automáticamente desde GitHub al hacer push a `main`:
+Forge despliega automáticamente desde GitHub al hacer push a **`master`**:
 
 ```powershell
 git add .
 git commit -m "descripcion de cambios"
-git push origin main
+git push origin master
 ```
+
+> ⚠️ **La rama de deploy es `master`, no `main`.** Verificado por SSH el 25-sep-2026:
+> `cd /home/forge/jjimportmotors.on-forge.com/current && git rev-parse --abbrev-ref HEAD` → `master`.
+> La rama local `main` está **187 commits por detrás** y NO se despliega (residuo histórico).
+> El hook `.git/hooks/post-commit` ya lo refleja: recuerda `git push origin master`.
 
 Forge hace: pull → composer install → npm build → migraciones → symlink `current`.
 
