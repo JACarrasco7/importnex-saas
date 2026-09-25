@@ -9,14 +9,27 @@ Uso:
     python empaquetar.py export/flujo-a-<coche_id>.json --strict
     python empaquetar.py export/flujo-a-<coche_id>.json --no-photos  # sólo esqueletos
 
-Reglas duras (15-ago-2026 + 03-sep-2026):
+Validación PRE-ZIP (v3.9.13): los checks de copy corren ANTES de comprimir.
+Un hallazgo 🔴 aborta SIN crear el ZIP (exit 5) citando los bloques a corregir.
+Las fotos descargadas quedan en .fotos_cache/ junto al ZIP: relanzar tras
+corregir el copy NO vuelve a descargar nada (0 HTTP, no re-dispara el 403).
+
+Reglas duras (15-ago-2026 + 03-sep-2026 + 23-sep-2026 v3.9.12):
 - FOTOS: SIEMPRE descargadas de la URL del anuncio (vehiculo.fotos[]),
   con UA navegador + Referer del anuncio. NUNCA capturas de pantalla.
+- FOTOS — ÁLBUM COMPLETO (regla 1b v3.9.11): el objetivo es bajar TODAS las
+  fotos que el anuncio exponga. MIN_PHOTOS_NORMAL=3 y MIN_PHOTOS_STRICT=5
+  son SUELOS de validación para no publicar por debajo, NUNCA un objetivo
+  al que aspirar. Si el anuncio tiene 25, bajar 25; si tiene 40, bajar 40.
+  Caso bloqueo anti-bot (mobile.de / classistatic.de devuelven 403): parar,
+  NUNCA inventar fotos ni sustituirlas por capturas. Subir el ZIP con
+  vehiculo.fotos[] = URLs originales y avisar al operador; Laravel reintenta.
 - MARKETING: SIEMPRE se generan contenido/redes-sociales.txt y
   contenido/anuncio-portales.txt (Laravel los importa a CarMarketingContent).
 - paquete_version: 2 (contenido/*.txt en vez de documentos/*.pdf + publicidad/*.pdf).
 - Validación dura de fotos en modo --strict: falla si 0 fotos válidas.
-- Validación mínima en modo normal: warning si <3 fotos.
+- Validación mínima en modo normal: warning si 0 fotos válidas (no 3:
+  3 era el suelo histórico de la v1, no del álbum completo de v2.9.11+).
 
 Estructura del ZIP:
 
@@ -43,7 +56,9 @@ import datetime
 import hashlib
 import json
 import os
+import random
 import re
+import shutil
 import sys
 import time
 import unicodedata
@@ -342,7 +357,14 @@ def download_photo(
     referer: str | None,
     dest: Path,
 ) -> tuple[bool, str]:
-    """Descarga una foto. Devuelve (ok, mensaje). NUNCA captura."""
+    """Descarga una foto. Devuelve (ok, mensaje). NUNCA captura.
+
+    Reintentos automáticos (regla añadida 23-sep-2026 tras bloqueo anti-bot
+    de mobile.de / klasses(classistatic.de)/autoscout24 que devolvían 403
+    "Zugriff verweigert" al descargar el álbum entero de un anuncio).
+    Estrategia: backoff exponencial con jitter; reintentar máx 3 veces
+    ante 403/429/5xx; respetar Retry-After si el server lo envía.
+    """
     if not url or not url.lower().startswith(("http://", "https://")):
         return False, "URL vacía o no http(s)"
 
@@ -350,26 +372,63 @@ def download_photo(
     if referer:
         headers["Referer"] = referer
 
-    req = urllib.request.Request(url, headers=headers)
-    try:
-        with urllib.request.urlopen(req, timeout=TIMEOUT_S) as resp:
-            status = resp.status
-            ct = resp.headers.get("Content-Type", "")
-            data = resp.read(MAX_PHOTO_BYTES + 1)
-    except urllib.error.HTTPError as e:
-        return False, f"HTTP {e.code}"
-    except urllib.error.URLError as e:
-        return False, f"URL error: {e.reason}"
-    except TimeoutError:
-        return False, "timeout"
-    except Exception as e:  # noqa: BLE001
-        return False, f"error: {type(e).__name__} {e}"
+    # Reintentos: máx 2 vía urllib (regla 24-sep-2026, ya que la CDN
+    # de mobile.de / classistatic bloquea por ASN no por reintentos);
+    # sólo 403/429/5xx. 4xx cliente (404, etc.) no.
+    last_error = ""
+    for intento in range(2):
+        req = urllib.request.Request(url, headers=headers)
+        try:
+            with urllib.request.urlopen(req, timeout=TIMEOUT_S) as resp:
+                status = resp.status
+                ct = resp.headers.get("Content-Type", "")
+                retry_after = resp.headers.get("Retry-After")
+                data = resp.read(MAX_PHOTO_BYTES + 1)
+        except urllib.error.HTTPError as e:
+            status = e.code
+            last_error = f"HTTP {e.code}"
+            ct = e.headers.get("Content-Type", "") if hasattr(e, "headers") else ""
+            retry_after = e.headers.get("Retry-After") if hasattr(e, "headers") else None
+            data = b""
+        except urllib.error.URLError as e:
+            last_error = f"URL error: {e.reason}"
+            status = 0
+            ct = ""
+            retry_after = None
+            data = b""
+        except TimeoutError:
+            last_error = "timeout"
+            status = 0
+            ct = ""
+            retry_after = None
+            data = b""
+        except Exception as e:  # noqa: BLE001
+            last_error = f"error: {type(e).__name__} {e}"
+            status = 0
+            ct = ""
+            retry_after = None
+            data = b""
+
+        # Si NO es un error transitorio, salimos del bucle ya
+        es_transitorio = status == 0 or status == 429 or status == 403 or (500 <= status < 600)
+        if not es_transitorio:
+            break
+        if intento < 1:
+            # Backoff: 1s + jitter 0-500ms (un único reintento).
+            espera = (2 ** intento) + random.uniform(0, 0.5)
+            if retry_after and retry_after.isdigit():
+                espera = max(espera, int(retry_after))
+            warn(f"foto {url[:60]}… → HTTP {status}, reintento {intento + 1}/2 en {espera:.1f}s")
+            time.sleep(espera)
 
     if status != 200:
-        return False, f"HTTP {status}"
+        return False, last_error or f"HTTP {status}"
 
     if len(data) > MAX_PHOTO_BYTES:
         return False, f"> {MAX_PHOTO_BYTES // (1024*1024)} MB"
+
+    if data == b"":
+        return False, last_error or "cuerpo vacío"
 
     if not ct.lower().startswith("image/"):
         return False, f"Content-Type no es imagen: {ct!r}"
@@ -380,6 +439,19 @@ def download_photo(
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_bytes(data)
     return True, f"{len(data)//1024} KB · {ct.split(';')[0]}"
+
+
+def _cache_key(coche_id: str, url: str) -> str:
+    """Clave SHA-256 para el caché de fotos.
+
+    FIX v3.10.1 (25-sep-2026): el caché SOLO por URL mezclaba dos investigaciones
+    distintas del mismo modelo (p.ej. dos Audi Q2 con IDs mobile.de distintos
+    que comparten CDN de classistatic con mismas imágenes del fabricante). El
+    resultado era que el ZIP del coche A llevaba una foto real del coche B.
+    Aislamiento: `sha256(coche_id + '\n' + url)` para que el espacio sea por
+    coche y por URL; dos coches distintos del mismo modelo nunca colisionan.
+    """
+    return hashlib.sha256(f"{coche_id}\n{url}".encode("utf-8")).hexdigest()
 
 
 def collect_photos(
@@ -396,10 +468,22 @@ def collect_photos(
     urls = vehiculo.get("fotos") or []
     anuncio = payload.get("anuncio") or {}
     referer = anuncio.get("url") or ""
+    coche_id = payload.get("_meta", {}).get("coche_id") or "coche-sin-id"
 
     warnings: list[str] = []
     saved: list[dict] = []
     seen_hashes: set[str] = set()
+    seen_urls: set[str] = set()
+
+    # FIX 3.9.13 (23-sep-2026) — caché de fotos por URL: vive en out_dir (fuera
+    # del work_dir temporal, que se borra), así regenerar el ZIP del mismo coche
+    # NO vuelve a tocar la red. Es lo que evita re-disparar el 403 anti-bot de
+    # mobile.de/classistatic al re-empaquetar y hace la 2ª ejecución instantánea.
+    #
+    # FIX v3.10.1 (25-sep-2026) — la caché se aisla por coche_id para que dos
+    # investigaciones concurrentes del mismo modelo (p.ej. dos Audi Q2) NO
+    # compartan fotos vía el mismo SHA. La foto es del coche, no de la URL.
+    cache_dir = fotos_dir.parent.parent / ".fotos_cache" / coche_id
 
     if skip_photos:
         warn("--no-photos: se omite la descarga (no válido para entrega)")
@@ -421,13 +505,43 @@ def collect_photos(
             warnings.append(f"foto #{idx}: URL vacía")
             continue
 
-        # Bajada provisional a /tmp para inspeccionar Content-Type
+        # Dedup por URL exacta: si la misma URL aparece varias veces en el
+        # payload (a veces Claude las repite al componer), no descargamos ni
+        # ocupamos slots duplicados. La dedup binaria (sha256) sigue protegiendo
+        # de URLs distintas con el mismo contenido (p.ej. ?rule=mo-1600 vs ?rule=mo-1024).
+        if url in seen_urls:
+            warnings.append(f"foto #{idx}: URL duplicada — descartada")
+            continue
+        seen_urls.add(url)
+
+        # Bajada provisional a /tmp para inspeccionar Content-Type.
+        # FIX 3.9.13: consultar la caché ANTES de la red (regenerar = 0 HTTP).
+        # FIX v3.10.1: la clave del caché incluye coche_id para aislamiento.
         tmp_path = fotos_dir / f"_tmp_{idx:03d}"
-        ok_dl, motivo = download_photo(url, referer, tmp_path)
+        cache_path = cache_dir / _cache_key(coche_id, url)
+        if cache_path.exists():
+            tmp_path.write_bytes(cache_path.read_bytes())
+            ok_dl, motivo = True, f"caché · {cache_path.stat().st_size // 1024} KB"
+        else:
+            ok_dl, motivo = download_photo(url, referer, tmp_path)
         if not ok_dl:
             warnings.append(f"foto #{idx} ({url[:80]}…): {motivo}")
             try:
                 tmp_path.unlink(missing_ok=True)
+            except OSError:
+                pass
+            # FIX 3.9.13 (24-sep-2026) — cuando urllib falla, marcamos la URL
+            # como pendiente para que la descargue el navegador (Claude for
+            # Chrome MCP) en una segunda pasada del flujo.
+            #
+            # FIX v3.10.1 (25-sep-2026) — el nombre del .url incluye el
+            # coche_id para que dos investigaciones concurrentes (p.ej. dos
+            # Audi Q2 en la misma carpeta modelo) NO compitan por el mismo
+            # _pending/<idx>.url y acaben intercambiando fotos entre ZIPs.
+            pending_dir = fotos_dir.parent.parent / ".fotos_cache" / "_pending" / coche_id
+            try:
+                pending_dir.mkdir(parents=True, exist_ok=True)
+                (pending_dir / f"{idx:03d}.url").write_text(url, encoding="utf-8")
             except OSError:
                 pass
             continue
@@ -440,10 +554,16 @@ def collect_photos(
             continue
         seen_hashes.add(h)
 
-        ext = detect_image_ext(
-            "", tmp_path.read_bytes()[:0]  # content-type ya consumido
-        )
-        # Mejor: detectar desde URL por consistencia
+        # FIX 3.9.13: alimentar la caché tras una descarga válida (best-effort).
+        if not cache_path.exists():
+            try:
+                cache_dir.mkdir(parents=True, exist_ok=True)
+                cache_path.write_bytes(tmp_path.read_bytes())
+            except OSError:
+                pass
+
+        # Detectar extensión desde la URL (más estable que Content-Type, que ya
+        # consumimos al leer el body).
         url_ext = Path(urllib.parse.urlparse(url).path).suffix.lower()
         ext = url_ext if url_ext in IMAGE_EXTS else ".jpg"
 
@@ -471,12 +591,42 @@ def collect_photos(
             sys.exit(3)
         warn("0 fotos válidas en el ZIP; Laravel descargará desde vehiculo.fotos[] si hay URLs.")
     elif len(saved) < MIN_PHOTOS_NORMAL:
-        warn(f"Solo {len(saved)} fotos válidas (< {MIN_PHOTOS_NORMAL} mínimas)")
+        # Regla 1b (v3.9.11): álbum completo NUNCA un mínimo. 3 es suelo histórico
+        # de la v1, no objetivo. Avisar como SOSPECHA de fallo del álbum completo
+        # (puede que el anuncio tenga más y no se hayan bajado por 403 transitorio).
+        warn(
+            f"Solo {len(saved)} fotos válidas — sospechar álbum incompleto "
+            "(regla 1b v3.9.11: el objetivo es TODAS las fotos del anuncio, "
+            "no {MIN_PHOTOS_NORMAL}). Volver a bajar si el anuncio tenía más."
+        )
     elif len(saved) < MIN_PHOTOS_STRICT and strict:
         warn(
             f"Solo {len(saved)} fotos (< {MIN_PHOTOS_STRICT} en --strict). "
-            "Considere añadir más antes de subir."
+            "Sospechar álbum incompleto — la mayoría de anuncios tienen 8+ fotos."
         )
+
+    # FIX 3.9.13 (24-sep-2026) — avisar al flujo Claude si quedan URLs
+    # pendientes para descargar por navegador (Claude for Chrome MCP).
+    #
+    # FIX v3.10.1 (25-sep-2026) — el aviso se limita al subdirectorio de este
+    # coche_id (no a TODO _pending/) para no liar al operador con URLs de
+    # otros coches investigados a la vez.
+    pending_dir = cache_dir.parent / "_pending" / coche_id
+    if pending_dir.is_dir():
+        pendientes = sorted(pending_dir.glob("*.url"))
+        if pendientes and not skip_photos:
+            urls_pendientes = [p.read_text(encoding="utf-8").strip() for p in pendientes]
+            warn(
+                f"🌐 {len(pendientes)} foto(s) NO descargables por urllib "
+                "(CDN bloquea ASN) para este coche. El flujo Claude debe "
+                "abrir cada URL con el navegador (mcp_zai-mcp-serve / "
+                "claude for Chrome) y guardar el resultado en "
+                f".fotos_cache/{coche_id}/<sha256> con el nombre de archivo "
+                "que usaría download_photo(); el siguiente relanzamiento de "
+                "empaquetar.py los recogerá de caché sin volver a la red."
+            )
+            for u in urls_pendientes:
+                warn(f"  → {u}")
 
     return saved, warnings
 
@@ -2136,18 +2286,6 @@ def main() -> int:
         payload["mercado"]["busquedas_realizadas"] = busquedas
         info(f"{len(busquedas)} búsqueda(s) de mercado generadas (mobile.de, coches.net…)")
 
-    # C2 auditoría 09-sep-2026: inyectamos las URLs de búsqueda de mercado
-    # (mobile.de / autoscout24 / coches.net / wallapop) en informe.json →
-    # mercado.busquedas_realizadas[] para que el panel admin pueda
-    # mostrarlas. Si el payload YA las trae, se respetan (manual).
-    busquedas = generar_busquedas_realizadas(payload)
-    if busquedas:
-        payload.setdefault("mercado", {})
-        if not isinstance(payload["mercado"], dict):
-            payload["mercado"] = {}
-        payload["mercado"]["busquedas_realizadas"] = busquedas
-        info(f"{len(busquedas)} búsqueda(s) de mercado generadas (mobile.de, coches.net…)")
-
     if args.auto_path:
         out_dir = derive_auto_path(payload)
         out_dir.mkdir(parents=True, exist_ok=True)
@@ -2210,40 +2348,48 @@ def main() -> int:
         fail("Veredicto Comprar* pero sin dossier-cliente.txt — modo --strict aborta")
         return 4
 
-    # 3) Manifest
-    manifest = build_manifest(
-        coche_id, payload, fotos_ok,
-        has_dossier=bool(dossier_lines),
-        has_ficha_cliente=bool(ficha_cliente_lines),
-        json_files=sorted(json_docs.keys()),
-    )
+    # 3) Escribir los esqueletos a disco para poder validarlos ANTES de comprimir.
+    #    FIX 3.9.13 (23-sep-2026): antes se comprimía el ZIP y se validaba después,
+    #    así que cualquier hallazgo 🔴 obligaba a regenerar el ZIP entero (el dolor
+    #    nº1 reportado: "tengo que regenerar el zip un par de veces"). Ahora un
+    #    hallazgo crítico aborta SIN crear el ZIP; las fotos siguen en caché y la
+    #    re-ejecución tras corregir el copy es rápida y sin red.
+    contenido_dir = work_dir / "contenido"
+    contenido_dir.mkdir(parents=True, exist_ok=True)
+    for nombre_archivo, lineas in contents.items():
+        if lineas is None:
+            continue
+        (contenido_dir / nombre_archivo).write_text("\n".join(lineas) + "\n", encoding="utf-8")
 
-    # 4) ZIP
-    info("Empaquetando ZIP…")
-    n_fotos = build_zip(zip_path, payload, manifest, contents, fotos_dir, json_docs)
-    ok(f"ZIP generado: {zip_path} ({n_fotos} fotos)")
+    # 4) Validación PRE-ZIP (A5 auditoría 09-sep-2026, reordenada 3.9.13).
+    #    Los validadores aceptan un .txt suelto; si el esqueleto no se generó
+    #    (p.ej. sin ficha-cliente), no hay nada que validar de ese check.
+    def _primer_existente(*nombres: str) -> str | None:
+        for n in nombres:
+            p = contenido_dir / n
+            if p.exists():
+                return str(p)
+        return None
 
-    # 5) Validación de calidad — A5 auditoría 09-sep-2026.
-    #    El ZIP se genera aunque el copy no cumpla los checks; eso hace que
-    #    la ficha llegue al panel sin control. Ahora los dos validadores se
-    #    ejecutan ANTES del cleanup. Con --strict, un hallazgo 🔴 aborta.
     check_args = [
-        ("check_marketing.py", [str(zip_path)]),
-        ("check_ficha_cliente.py", [str(zip_path)]),
+        ("check_marketing.py", _primer_existente("redes-sociales.txt", "ficha-publicitaria.txt")),
+        ("check_ficha_cliente.py", _primer_existente("ficha-cliente.txt")),
     ]
     criticos_totales: list[str] = []
-    for script, script_args in check_args:
+    for script, target_txt in check_args:
+        if target_txt is None:
+            continue
         ruta_check = Path(__file__).parent / script
         if not ruta_check.exists():
             warn(f"{script} no encontrado en {ruta_check.parent} — saltando validación")
             continue
         info(f"Ejecutando {script}…")
-        criticos = run_validator(ruta_check, script_args, work_dir)
+        criticos = run_validator(ruta_check, [target_txt], work_dir)
         criticos_totales.extend(criticos)
 
     if criticos_totales:
         print()
-        warn(f"{len(criticos_totales)} hallazgo(s) CRÍTICO(S) en la validación del ZIP:")
+        warn(f"{len(criticos_totales)} hallazgo(s) CRÍTICO(S): el ZIP NO se ha generado.")
         for c in criticos_totales:
             # Forzar UTF-8 stdout en Windows (cp1252 no soporta 🔴).
             try:
@@ -2255,17 +2401,31 @@ def main() -> int:
             except UnicodeEncodeError:
                 # Fallback: reemplazar el emoji por ASCII para Windows cp1252.
                 print(f"     [CRIT] {c.encode('ascii', 'replace').decode('ascii')}")
-        if args.strict:
-            fail(f"Modo --strict: abortando por {len(criticos_totales)} hallazgo(s) crítico(s).")
-            return 5
+        fail(
+            "Corrige los bloques citados y vuelve a lanzar empaquetar.py con el MISMO "
+            "JSON: las fotos ya están en caché (.fotos_cache/) y no se volverá a tocar "
+            "la red. Los .txt quedan en: " + str(contenido_dir)
+        )
+        return 5
 
-    # 6) Cleanup
+    # 5) Manifest + ZIP (solo con la validación en verde).
+    manifest = build_manifest(
+        coche_id, payload, fotos_ok,
+        has_dossier=bool(dossier_lines),
+        has_ficha_cliente=bool(ficha_cliente_lines),
+        json_files=sorted(json_docs.keys()),
+    )
+
+    info("Empaquetando ZIP…")
+    n_fotos = build_zip(zip_path, payload, manifest, contents, fotos_dir, json_docs)
+    ok(f"ZIP generado: {zip_path} ({n_fotos} fotos)")
+
+    # 6) Cleanup — árbol recursivo: contenido/ y fotos/ son subdirectorios.
+    #    (FIX 3.9.13: antes unlink+rmdir dejaba work_dir sin borrar cuando
+    #    existía contenido/, que ahora se crea siempre para validar pre-ZIP.)
     if not args.keep_tmp:
         try:
-            for p in work_dir.glob("**/*"):
-                if p.is_file():
-                    p.unlink()
-            work_dir.rmdir()
+            shutil.rmtree(work_dir, ignore_errors=True)
         except OSError:
             warn(f"No se pudo limpiar tmp {work_dir} — usa --keep-tmp para diagnóstico")
 
@@ -2275,6 +2435,8 @@ def main() -> int:
     print(f"   Coche:       {coche_id}")
     print(f"   ZIP:         {zip_path}")
     print(f"   Fotos:       {n_fotos} (warnings: {len(photo_warnings)})")
+    if cache_dir.exists():
+        print(f"   Caché fotos: {len(list(cache_dir.glob('*')))} archivo(s) en {cache_dir}")
     print(f"   Esqueletos:  {n_generados}/6")
     print(f"   Ficha cliente: {'SÍ' if ficha_cliente_lines else 'NO (solo con veredicto Comprar*)'}")
     print(f"   JSON panel:  {len(json_docs)} en contenido/json/")

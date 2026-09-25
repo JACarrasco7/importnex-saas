@@ -1,0 +1,407 @@
+{
+  "_meta": {
+    "version": 1,
+    "actualizado": "2026-09-24",
+    "proposito": "Mapa de generaciones (chasis) por marca/modelo para la regla A34 de separacion por generacion. La skill lo consulta ANTES de medir cualquier modelo en Flujo B/C/D. Si el modelo tiene mas de una generacion dentro del rango de anos del encargo, la version se PARTE en sub-fichas usando corte_seguro_desde/hasta y el suelo se verifica abriendo la ficha (campo 'Gama de modelos' de mobile.de).",
+    "regla_de_oro": "Un filtro de ano (fr=2017) NUNCA garantiza la generacion cuando el modelo cambio de chasis dentro de la ventana. La trampa real: Q3 S line parecia ahorrar 5.600 EUR comparando 1a gen alemana con 2a gen espanola; corregido = -490 EUR (perdida).",
+    "mantenimiento": "Enriquecer con cada estudio: si mides un modelo que no esta aqui y la marca tiene historial de cambio de generacion en la ventana, investigar primero, medir despues, y anadir la entrada al finalizar el encargo."
+  },
+  "audi": {
+    "a3": {
+      "riesgo": "ALTO",
+      "generaciones": [
+        { "nombre": "8V (3ª gen)", "desde": "2012", "hasta": "2020" },
+        { "nombre": "8Y (4ª gen)", "desde": "2021", "hasta": null, "corte_seguro_desde": 2021 }
+      ]
+    },
+    "a4": {
+      "riesgo": "MEDIO",
+      "notas": "B9 2016-2023 (FL 2019); la nueva A4 paso a llamarse A5 (B10) en 2024.",
+      "generaciones": [
+        { "nombre": "B9", "desde": "2016", "hasta": "2023", "corte_seguro_hasta": 2023 }
+      ]
+    },
+    "q2": {
+      "riesgo": "BAJO",
+      "notas": "Generacion unica (2016+); solo restylings 2020 y 2023. Sin cambio de chasis.",
+      "generaciones": [
+        { "nombre": "GA (única)", "desde": "2016", "hasta": null }
+      ]
+    },
+    "q3": {
+      "riesgo": "ALTO",
+      "codigo_mobilede": "8U / FJ",
+      "notas": "Cambio real jul-2018. La 2ª gen llega como 2019 model year; coches 2018 matriculados en jun-jul pueden ser de ambas.",
+      "generaciones": [
+        { "nombre": "8U (1ª gen)", "desde": "2011", "hasta": "2018-07", "corte_seguro_hasta": 2017 },
+        { "nombre": "F3 (2ª gen)", "desde": "2018-07", "hasta": null, "corte_seguro_desde": 2019 }
+      ]
+    },
+    "rsq3": {
+      "riesgo": "MEDIO",
+      "notas": "1ª gen (8U): 310cv (2013-14) y 367cv performance (2015-16), fuera de produccion en 2016. 2ª gen (F3): 400cv desde 2019. El filtro de potencia 394-405cv aísla la 2ª gen por sí solo.",
+      "generaciones": [
+        { "nombre": "8U", "desde": "2013", "hasta": "2016", "cv": "310/367" },
+        { "nombre": "F3", "desde": "2019", "hasta": null, "cv": "400", "corte_seguro_desde": 2019 }
+      ]
+    },
+    "q5": {
+      "riesgo": "ALTO",
+      "codigo_mobilede": "8R / FY",
+      "notas": "El lanzamiento FY fue ene/mar-2017: quedan 8R y FY matriculados en 2017 muy próximos. Un filtro de año NO separa el Q5; usar corte 2019 (conservador) y verificar 'Gama de modelos' en ficha.",
+      "generaciones": [
+        { "nombre": "8R (1ª gen)", "desde": "2008", "hasta": "2017", "corte_seguro_hasta": 2016 },
+        { "nombre": "FY (2ª gen)", "desde": "2017", "hasta": null, "corte_seguro_desde": 2019 }
+      ]
+    },
+    "sq5": {
+      "riesgo": "ALTO",
+      "codigo_mobilede": "8R / FY",
+      "notas": "CRÍTICO: en Europa el SQ5 8R (2013-2017) fue SOLO diésel (313cv; 340cv 'plus' desde 2016). El FY lanzado jun-2017 salió SOLO gasolina (354cv); el diésel no volvió hasta 2019 (347cv; 341cv tras FL 2021). Cualquier SQ5 diésel 2017-2018 es 8R; cualquier SQ5 gasolina ≥2017 es FY.",
+      "generaciones": [
+        { "nombre": "8R diésel", "desde": "2013", "hasta": "2017", "cv": "313/340", "combustible": "diesel" },
+        { "nombre": "FY gasolina", "desde": "2017-06", "hasta": null, "cv": "354", "combustible": "gasolina" },
+        { "nombre": "FY diésel", "desde": "2019", "hasta": null, "cv": "347/341", "combustible": "diesel", "corte_seguro_desde": 2019 }
+      ]
+    },
+    "q8": {
+      "riesgo": "BAJO",
+      "notas": "Generación única 4M (2018+); solo restyling 2022. Sin cambio de chasis.",
+      "generaciones": [
+        { "nombre": "4M (única)", "desde": "2018", "hasta": null }
+      ]
+    },
+    "tt": {
+      "riesgo": "BAJO",
+      "generaciones": [
+        { "nombre": "Mk3 (8S)", "desde": "2014", "hasta": "2023", "corte_seguro_hasta": 2023 }
+      ]
+    }
+  },
+  "vw": {
+    "golf": {
+      "riesgo": "ALTO",
+      "notas": "Golf 7 (2012-2020, FL '7.5' en 2017), Golf 8 (2020+). Ojo al Golf R: 7R 300cv, 7.5 R 310cv, 8 R 320cv.",
+      "generaciones": [
+        { "nombre": "Mk7 / 7.5", "desde": "2012", "hasta": "2020", "corte_seguro_hasta": 2019 },
+        { "nombre": "Mk8", "desde": "2020", "hasta": null, "corte_seguro_desde": 2021 }
+      ]
+    },
+    "tiguan": {
+      "riesgo": "BAJO",
+      "notas": "2ª gen AD1 desde 2016 (FL 2020). Si el encargo es ≥2017 no hay mezcla; para rangos que incluyan 2016, separar.",
+      "generaciones": [
+        { "nombre": "AD1 (2ª gen)", "desde": "2016", "hasta": null }
+      ]
+    },
+    "arteon": {
+      "riesgo": "BAJO",
+      "notas": "Generación única (2017+, FL 2020, Shooting Brake desde 2020).",
+      "generaciones": [
+        { "nombre": "única", "desde": "2017", "hasta": null }
+      ]
+    },
+    "t-roc": {
+      "riesgo": "BAJO",
+      "generaciones": [
+        { "nombre": "A11 (única)", "desde": "2017", "hasta": null }
+      ]
+    },
+    "passat": {
+      "riesgo": "MEDIO",
+      "generaciones": [
+        { "nombre": "B8", "desde": "2014", "hasta": "2023", "corte_seguro_hasta": 2023 }
+      ]
+    },
+    "touran": {
+      "riesgo": "MEDIO",
+      "generaciones": [
+        { "nombre": "T3 (3ª gen)", "desde": "2015", "hasta": null }
+      ]
+    },
+    "t-cross": {
+      "riesgo": "BAJO",
+      "generaciones": [
+        { "nombre": "única", "desde": "2018", "hasta": null }
+      ]
+    },
+    "sharan": {
+      "riesgo": "BAJO",
+      "generaciones": [
+        { "nombre": "2ª gen", "desde": "2010", "hasta": "2022", "corte_seguro_hasta": 2022 }
+      ]
+    }
+  },
+  "cupra": {
+    "ateca": {
+      "riesgo": "BAJO",
+      "notas": "Generación única (2016+). VZ 300cv.",
+      "generaciones": [
+        { "nombre": "única", "desde": "2016", "hasta": null }
+      ]
+    },
+    "formentor": {
+      "riesgo": "BAJO",
+      "notas": "Generación única (2020+). VZ 310cv / VZ5 390cv.",
+      "generaciones": [
+        { "nombre": "única", "desde": "2020", "hasta": null }
+      ]
+    },
+    "leon": {
+      "riesgo": "ALTO",
+      "codigo_mobilede": "5F / KL",
+      "generaciones": [
+        { "nombre": "5F (3ª gen)", "desde": "2012", "hasta": "2020", "corte_seguro_hasta": 2019 },
+        { "nombre": "KL (4ª gen)", "desde": "2020", "hasta": null, "corte_seguro_desde": 2021 }
+      ]
+    }
+  },
+  "seat": {
+    "ibiza": {
+      "riesgo": "ALTO",
+      "generaciones": [
+        { "nombre": "5F (6ª gen... KJ)", "desde": "2017", "hasta": null }
+      ],
+      "notas": "6ª gen KJ desde 2017; 5F 6L/6P anteriores. Si el encargo es ≥2017 no hay mezcla."
+    },
+    "leon": {
+      "riesgo": "ALTO",
+      "generaciones": [
+        { "nombre": "5F", "desde": "2012", "hasta": "2020", "corte_seguro_hasta": 2019 },
+        { "nombre": "KL", "desde": "2020", "hasta": null, "corte_seguro_desde": 2021 }
+      ]
+    },
+    "ateca": {
+      "riesgo": "BAJO",
+      "generaciones": [
+        { "nombre": "única", "desde": "2016", "hasta": null }
+      ]
+    },
+    "arona": {
+      "riesgo": "BAJO",
+      "generaciones": [
+        { "nombre": "única", "desde": "2017", "hasta": null }
+      ]
+    },
+    "tarraco": {
+      "riesgo": "BAJO",
+      "generaciones": [
+        { "nombre": "única", "desde": "2018", "hasta": null }
+      ]
+    }
+  },
+  "skoda": {
+    "octavia": {
+      "riesgo": "ALTO",
+      "generaciones": [
+        { "nombre": "5E (3ª gen)", "desde": "2012", "hasta": "2020", "corte_seguro_hasta": 2019 },
+        { "nombre": "NX (4ª gen)", "desde": "2020", "hasta": null, "corte_seguro_desde": 2021 }
+      ]
+    },
+    "kodiaq": {
+      "riesgo": "BAJO",
+      "generaciones": [
+        { "nombre": "NS7 (1ª gen)", "desde": "2017", "hasta": "2023", "corte_seguro_hasta": 2023 }
+      ]
+    },
+    "superb": {
+      "riesgo": "MEDIO",
+      "generaciones": [
+        { "nombre": "B8 (3ª gen)", "desde": "2015", "hasta": "2024", "corte_seguro_hasta": 2024 }
+      ]
+    },
+    "karoq": {
+      "riesgo": "BAJO",
+      "generaciones": [
+        { "nombre": "única", "desde": "2017", "hasta": null }
+      ]
+    }
+  },
+  "hyundai": {
+    "kona": {
+      "riesgo": "ALTO",
+      "notas": "Kona N = solo 1ª gen (280cv). 2ª gen desde 2023.",
+      "generaciones": [
+        { "nombre": "1ª gen", "desde": "2017", "hasta": "2023", "corte_seguro_hasta": 2022 },
+        { "nombre": "2ª gen (SX2)", "desde": "2023", "hasta": null, "corte_seguro_desde": 2024 }
+      ]
+    },
+    "i30": {
+      "riesgo": "MEDIO",
+      "notas": "3ª gen (PD) desde 2017; FL 2020. N = 250-280cv solo 3ª gen.",
+      "generaciones": [
+        { "nombre": "PD (3ª gen)", "desde": "2017", "hasta": "2024", "corte_seguro_hasta": 2024 }
+      ]
+    },
+    "tucson": {
+      "riesgo": "ALTO",
+      "generaciones": [
+        { "nombre": "TL (3ª gen)", "desde": "2015", "hasta": "2020", "corte_seguro_hasta": 2019 },
+        { "nombre": "NX4 (4ª gen)", "desde": "2020", "hasta": null, "corte_seguro_desde": 2021 }
+      ]
+    }
+  },
+  "kia": {
+    "sportage": {
+      "riesgo": "ALTO",
+      "generaciones": [
+        { "nombre": "QL (4ª gen)", "desde": "2015", "hasta": "2021", "corte_seguro_hasta": 2020 },
+        { "nombre": "NQ5 (5ª gen)", "desde": "2021", "hasta": null, "corte_seguro_desde": 2022 }
+      ]
+    },
+    "cee-d": {
+      "riesgo": "ALTO",
+      "generaciones": [
+        { "nombre": "JD (2ª gen)", "desde": "2012", "hasta": "2018", "corte_seguro_hasta": 2018 },
+        { "nombre": "CD (3ª gen)", "desde": "2018", "hasta": null, "corte_seguro_desde": 2019 }
+      ]
+    },
+    "xceed": {
+      "riesgo": "BAJO",
+      "generaciones": [
+        { "nombre": "única", "desde": "2019", "hasta": null }
+      ]
+    }
+  },
+  "bmw": {
+    "serie-3": {
+      "riesgo": "ALTO",
+      "codigo_mobilede": "F30 / G20",
+      "generaciones": [
+        { "nombre": "F30/F31 (6ª gen)", "desde": "2011", "hasta": "2019", "corte_seguro_hasta": 2018 },
+        { "nombre": "G20/G21 (7ª gen)", "desde": "2019", "hasta": null, "corte_seguro_desde": 2020 }
+      ]
+    },
+    "serie-1": {
+      "riesgo": "ALTO",
+      "generaciones": [
+        { "nombre": "F20/F21 (2ª gen)", "desde": "2011", "hasta": "2019", "corte_seguro_hasta": 2019 },
+        { "nombre": "F40 (3ª gen)", "desde": "2019", "hasta": null, "corte_seguro_desde": 2020 }
+      ]
+    },
+    "serie-2": {
+      "riesgo": "ALTO",
+      "notas": "F22 coupé 2014-2021; G42 coupé 2021+; F44 Gran Coupé 2020+. Carrocerías distintas = generaciones distintas.",
+      "generaciones": [
+        { "nombre": "F22/F23", "desde": "2014", "hasta": "2021", "corte_seguro_hasta": 2020 },
+        { "nombre": "G42", "desde": "2021", "hasta": null, "corte_seguro_desde": 2022 },
+        { "nombre": "F44 Gran Coupé", "desde": "2020", "hasta": null, "corte_seguro_desde": 2021 }
+      ]
+    },
+    "x3": {
+      "riesgo": "ALTO",
+      "generaciones": [
+        { "nombre": "F25 (2ª gen)", "desde": "2010", "hasta": "2017", "corte_seguro_hasta": 2017 },
+        { "nombre": "G01 (3ª gen)", "desde": "2017", "hasta": null, "corte_seguro_desde": 2018 }
+      ]
+    },
+    "x5": {
+      "riesgo": "ALTO",
+      "generaciones": [
+        { "nombre": "F15 (3ª gen)", "desde": "2013", "hasta": "2018", "corte_seguro_hasta": 2018 },
+        { "nombre": "G05 (4ª gen)", "desde": "2018", "hasta": null, "corte_seguro_desde": 2019 }
+      ]
+    }
+  },
+  "mercedes": {
+    "clase-c": {
+      "riesgo": "ALTO",
+      "codigo_mobilede": "W205 / W206",
+      "generaciones": [
+        { "nombre": "W205", "desde": "2014", "hasta": "2021", "corte_seguro_hasta": 2020 },
+        { "nombre": "W206", "desde": "2021", "hasta": null, "corte_seguro_desde": 2022 }
+      ]
+    },
+    "clase-a": {
+      "riesgo": "ALTO",
+      "generaciones": [
+        { "nombre": "W176", "desde": "2012", "hasta": "2018", "corte_seguro_hasta": 2018 },
+        { "nombre": "W177", "desde": "2018", "hasta": null, "corte_seguro_desde": 2019 }
+      ]
+    },
+    "clase-e": {
+      "riesgo": "ALTO",
+      "generaciones": [
+        { "nombre": "W212", "desde": "2009", "hasta": "2016", "corte_seguro_hasta": 2016 },
+        { "nombre": "W213", "desde": "2016", "hasta": "2023", "corte_seguro_desde": 2017 },
+        { "nombre": "W214", "desde": "2023", "hasta": null, "corte_seguro_desde": 2024 }
+      ]
+    },
+    "glc": {
+      "riesgo": "ALTO",
+      "generaciones": [
+        { "nombre": "X253", "desde": "2015", "hasta": "2022", "corte_seguro_hasta": 2022 },
+        { "nombre": "X254", "desde": "2023", "hasta": null, "corte_seguro_desde": 2023 }
+      ]
+    },
+    "gla": {
+      "riesgo": "ALTO",
+      "generaciones": [
+        { "nombre": "X156", "desde": "2013", "hasta": "2020", "corte_seguro_hasta": 2019 },
+        { "nombre": "H247", "desde": "2020", "hasta": null, "corte_seguro_desde": 2021 }
+      ]
+    }
+  },
+  "volvo": {
+    "xc60": {
+      "riesgo": "ALTO",
+      "generaciones": [
+        { "nombre": "2ª gen (SPA)", "desde": "2017", "hasta": null }
+      ],
+      "notas": "1ª gen (2008-2017) fuera si el encargo es ≥2017; el cambio fue en 2017 — para rangos que incluyan 2017 usar corte 2018."
+    },
+    "xc40": {
+      "riesgo": "BAJO",
+      "generaciones": [
+        { "nombre": "única (CMA)", "desde": "2017", "hasta": null }
+      ]
+    },
+    "s60-v60": {
+      "riesgo": "ALTO",
+      "generaciones": [
+        { "nombre": "3ª gen (SPA)", "desde": "2018", "hasta": null, "corte_seguro_desde": 2019 }
+      ]
+    }
+  },
+  "ford": {
+    "focus": {
+      "riesgo": "ALTO",
+      "generaciones": [
+        { "nombre": "4ª gen", "desde": "2018", "hasta": null, "corte_seguro_desde": 2019 }
+      ],
+      "notas": "3ª gen (2011-2018) y 4ª conviven en 2018; usar corte 2019."
+    },
+    "kuga": {
+      "riesgo": "ALTO",
+      "generaciones": [
+        { "nombre": "3ª gen", "desde": "2019", "hasta": null, "corte_seguro_desde": 2020 }
+      ]
+    },
+    "puma": {
+      "riesgo": "BAJO",
+      "generaciones": [
+        { "nombre": "única (modern)", "desde": "2019", "hasta": null }
+      ]
+    }
+  },
+  "toyota": {
+    "corolla": {
+      "riesgo": "BAJO",
+      "generaciones": [
+        { "nombre": "E210 (12ª gen)", "desde": "2018", "hasta": null, "corte_seguro_desde": 2019 }
+      ]
+    },
+    "c-hr": {
+      "riesgo": "ALTO",
+      "generaciones": [
+        { "nombre": "1ª gen", "desde": "2016", "hasta": "2023", "corte_seguro_hasta": 2023 }
+      ]
+    },
+    "rav4": {
+      "riesgo": "ALTO",
+      "generaciones": [
+        { "nombre": "5ª gen (XA50)", "desde": "2018", "hasta": null, "corte_seguro_desde": 2019 }
+      ]
+    }
+  }
+}

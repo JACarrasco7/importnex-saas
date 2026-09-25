@@ -55,6 +55,7 @@ Regla de nombres: **minúsculas, sin tildes, sin espacios** (guiones), fecha **`
 | Informe de modelos (D) | `informe_modelos_<cliente-o-segmento>_<YYYY-MM-DD>.md` |
 | Informe de mercado (estudio) | `informe_mercado_<marca>-<modelo>_<YYYY-MM-DD>.md` |
 | Comparativa de candidatos | `comparativa_<YYYY-MM-DD>.md` |
+| **PDF del informe de búsqueda/mercado (v3.10.0)** | **misma base que el .md con extensión `.pdf`** — generado SIEMPRE con `scripts/mercado_pdf.py <informe>.md`; es el entregable que lee el operador (el .md queda como contrato interno) |
 
 **JSON (contrato con Laravel):**
 

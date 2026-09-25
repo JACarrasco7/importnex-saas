@@ -9,7 +9,7 @@ Generados por `scripts/build-skill-zips.ps1` (wrapper de `.claude/skills/_dist/b
 
 | Skill | ZIP | Version | Tamano | SHA256 |
 |---|---|---|---|---|
-| `ecommerce-tuning` | `.claude/skills/_dist/skills-ecommerce-tuning-v0.1.0-20260917.zip` | 0.1.0 | 7 KB | `e720e3974d61aa73ea9bdd8efb0b82116a16ad659f68f556a66ca8ba77431d05` |
+| `importacion-vehiculos` | `.claude/skills/_dist/skills-importacion-vehiculos-v3.9.13-20260923.zip` | 3.9.13 | 503 KB | `c25b42cee648841e6c9768c64f249b137b6160db42bc5eaecd00fc850713811e` |
 
 ## 🔀 Las 3 copias que NO se sincronizan solas (12-sep-2026)
 

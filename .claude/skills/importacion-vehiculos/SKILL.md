@@ -1,6 +1,6 @@
 ---
 name: importacion-vehiculos
-version: 3.9.10
+version: 3.10.3
 description: >
   Negocio JJ Import Motors (Huelva): servicio de búsqueda e importación de coches
   (desde Alemania y dentro de España). NO compra stock, solo oferta el servicio
@@ -60,9 +60,32 @@ Localizar coches (desde Alemania y dentro de España) y **ofertar el servicio de
 >
 > 📄 **Informes ( outputs finales):** **`03-informes/entregables.md`** (**tabla única**: qué informe toca, cómo se llama y dónde va) · **`03-informes/informe_busqueda.md`** (informe de BÚSQUEDA — flujos B/C/E) · `03-informes/informe_tecnico.md` (análisis interno 15 secciones + score 0-100) · `03-informes/dossier_cliente.md` (PDF profesional para cliente, 15 secciones, genera confianza)
 >
+> 🧾 **PDF del informe de mercado (24-sep-2026 · v3.10.0):** los informes de BÚSQUEDA/MERCADO se generan en .md (contrato interno) y se **entregan al operador como PDF visual** con `scripts/mercado_pdf.py <informe.md>` — portada con KPIs (mejor oportunidad, cambio de veredicto), tabla de decisión con filas semáforo, una página por modelo, callouts para trampas y fuentes re-ejecutables al final. Paleta de marca (estoril/asphalt/platinum). El operador NO lee el MD: lee el PDF y elige finalistas desde ahí. Renderiza con Chrome/Edge headless (sin Laravel).
+>
 > 🧠 **Memoria persistente (12-ago-2026):** `memoria/MEMORIA.md` (léeme primero) · `memoria/modelos-medidos.md` · `memoria/vendedores-confianza.md` · `memoria/trampas-encontradas.md` · `memoria/mejoras-aplicadas.md`
 >
 > 🎯 **Briefing de encargo (12-ago-2026):** `01-arranque/briefing_encargo.md` — preguntas previas OBLIGATORIAS antes de navegar (año mín, km máx, presupuesto, potencia si tope de gama). Ahorra tokens y evita re-búsquedas.
+
+---
+
+## 📦 PRESUPUESTO DE CONTEXTO — leer SOLO lo que el flujo pide (23-sep-2026 · v3.9.13)
+
+> **El problema que resuelve:** cada búsqueda de un coche llenaba la memoria de la sesión antes de navegar. Causas medidas: SKILL.md (~90 KB) + leer compañeros "por si acaso" + pegar anuncios completos al contexto + regenerar ZIPs. Reglas:
+
+1. **Presupuesto de lectura por flujo: SKILL.md + MÁXIMO 2-3 compañeros.** Tabla:
+   | Flujo | Leer (aparte de este SKILL.md) |
+   |---|---|
+   | **A: UNIDAD** | `02-flujos/navegacion_real.md` + `03-informes/contrato.md` (solo al generar el JSON final) |
+   | **A + marketing** | + `07-marketing/copy_engine.md` (solo si toca redactar copy v2) |
+   | **B/C: MODELO/MERCADO** | `03-informes/informe_busqueda.md` + `02-flujos/playbook_filtrado.md` (§del portal que toque) |
+   | **D: DESCUBRIMIENTO** | `01-arranque/briefing_encargo.md` |
+   | **E: STOCK** | `02-flujos/stock-marketing.md` |
+   | Empaquetar | nada extra: `empaquetar.py` ya valida y guía |
+2. **PROHIBIDO** leer directorios enteros, archivos "compañeros" fuera de la tabla, o el CHANGELOG/ROADMAP durante un encargo. Este SKILL.md ya contiene las reglas duras; los demás archivos son profundidad bajo demanda.
+3. **Los textos literales de anuncios van a FICHERO** (`informes\<marca>\<modelo>\...`), nunca pegados al contexto: del anuncio solo suben las cifras y la decisión. `descripcion_original` se copia del anuncio al JSON, no "se lee" dos veces.
+4. **Una regla consultada queda aplicada**: no re-leer el mismo archivo en la misma sesión. Si dudas de un detalle, usa lo ya cargado; solo re-lees si el usuario cambia el encargo.
+5. **Regenerar ZIP es GRATIS en fotos**: `.fotos_cache/` junto al ZIP evita re-descargar (y re-disparar el 403). Si `check_marketing`/`check_ficha_cliente` abortan, corrige SOLO los bloques citados y relanza `empaquetar.py` con el mismo JSON — no re-investigues nada.
+6. **Si algo es ambiguo o falta un dato crítico: PREGUNTA al usuario ANTES de navegar.** Una pregunta cuesta menos que una investigación repetida (§CUÁNDO PREGUNTAR).
 
 ---
 
@@ -906,15 +929,28 @@ ENCARGO (Flujo B: MODELO)
 > 4. Normalizar nombres: minúsculas, sin tildes, guiones (`vw\tiguan`), fecha `YYYY-MM-DD`.
 > 5. **`empaquetar.py --laravel-storage`** es la ruta preferida desde el repo: guarda en `<root>/storage/app/private/investigaciones/<marca>/<modelo>/<coche>-<fecha>.zip`. **NUNCA** dejar que el ZIP baje a `C:\Users\jacar\Downloads\` (A31).
 
-### 📸 FOTOS REALES · ENLACES DE ANUNCIO · FUENTES CON URL (15-ago-2026 · v2.9.4)
+### 📸 FOTOS REALES · ENLACES DE ANUNCIO · FUENTES CON URL (15-ago-2026 · v2.9.4 / actualizada v2.9.5 · 23-sep-2026)
 
-> **Reglas duras exigidas por el usuario en cada entrega.** Fallo real 15-ago (Tiguan): se subieron **capturas de pantalla** en vez de las fotos reales del anuncio, enlaces genéricos y sin la lista de fuentes.
+> **Reglas duras exigidas por el usuario en cada entrega.** Fallo real 15-ago (Tiguan): se subieron **capturas de pantalla** en vez de las fotos reales del anuncio, enlaces genéricos y sin la lista de fuentes. Fallo real 23-sep (Audi Q2/Q3): 4 anuncios sucesivos donde solo se bajó una parte del álbum por confundir mínimos con objetivo.
 
 **1. Fotos = descargadas del ANUNCIO, NUNCA capturas.**
 - Las fotos del candidato son las **imágenes reales del anuncio** (URLs `https://...jpg|png|webp` de la ficha del portal), descargadas a `<coche_id>_fotos\`.
 - **PROHIBIDO** subir capturas de pantalla del navegador ni screenshots del listado.
 - Van en el JSON como **`vehiculo.fotos`** (Laravel las descarga desde ahí al importar).
-- Si el portal bloquea la descarga (hotlink), reintentar con User-Agent de navegador y avisar de las que fallen — **nunca** sustituirlas por capturas.
+- Si el portal bloquea la descarga (hotlink), reintentar con User-Agent de navegador; si sigue 403, abrir la galería con el navegador integrado (Claude for Chrome MCP) y guardar las fotos desde ahí — **nunca** sustituirlas por capturas.
+
+**1b. Álbum COMPLETO del anuncio, NUNCA un mínimo. (v2.9.5 · 23-sep-2026)**
+- El álbum completo del anuncio es el **objetivo**, no un máximo. Nunca bajar 3/5/8 fotos y dar por bueno: bajar **TODAS** las que el anuncio exponga.
+- Los números `MIN_PHOTOS_NORMAL = 3` y `MIN_PHOTOS_STRICT = 5` que aparecen en `empaquetar.py` son **suelos de validación para no publicar por debajo** (un ZIP con <3 fotos se considera roto). **NO** son un objetivo al que aspirar — son un mínimo irreducible por debajo del cual NO se entrega.
+- Si el anuncio tiene 25 fotos, baja 25. Si tiene 40, baja 40. La galería del cliente debe verse igual que la del anuncio original (mismo orden, mismas imágenes, misma calidad visible).
+- **Caso de bloqueo anti-bot (mobile.de / classistatic devuelve 403 a `urllib`/`requests`/`Http::get`):** la CDN rechaza cabeceras no-navegador. **Procedimiento obligatorio (v2.9.6 · 24-sep-2026):**
+    1. **NO reintentar más de 2 veces** con el mismo cliente HTTP (esa es la regla actual del `User-Agent` con `Referer`). Si sigue 403, no es transitorio: la IP/ASN está en lista negra temporal.
+    2. **PASAR A NAVEGADOR REAL** automáticamente. Claude activa la skill `mcp_zai-mcp-serve` con `open_browser_page(url)` y `click_element`/`run_playwright_code` para abrir la galería del anuncio, hacer scroll hasta agotar la lista, y guardar cada foto en `.fotos_cache/<sha256(url)>` con el mismo nombre que usaría `download_photo()`.
+    3. Si la CDN exige `Referer` que apunte a la ficha (p.ej. `https://suchen.mobile.de/fahrzeuge/details.html?id=<id>`), el navegador ya lo lleva en la cabecera — aprovechar el contexto de navegación.
+    4. Las cookies y el TLS fingerprint del navegador son válidos para classistatic, por lo que el navegador SIEMPRE funciona cuando `urllib` falla — **esta es la ruta por defecto**, no el fallback.
+    5. Marcador en el log: `descarga_origen=navegador` cuando se haya usado el navegador (vs. `descarga_origen=http`).
+- Si el bloqueo persiste incluso en navegador, GENERAR EL PAQUETE con `vehiculo.fotos[]` igual a las URLs originales del anuncio (Laravel reintentará al subir con `skipRemotePhotos=true`) y avisar en "📡 Estado del scraping".
+- **Marcador de calidad:** si tras una sesión quedan ZIPs con menos del 80% de las fotos del anuncio, se reabre el cargo en `memoria/trampas-encontradas.md` y se cala el siguiente flujo con esa entrada.
 
 **2. Enlaces = del ANUNCIO individual, NUNCA genéricos.**
 - Toda URL de candidato/comparable es la **ficha del vehículo** (ej. `mobile.de/fahrzeuge/details.html?id=<id>`, slug de Coches.net, `/app/item/<id>` de Wallapop).
@@ -1067,6 +1103,10 @@ Las reglas duras (A1-A33) viven en `06-reglas/anti_patrones.md`. Cargarlas cuand
 
 > 🔴 **A33 — FUENTES RE-EJECUTABLES POR MODELO (15-sep-2026):** cada modelo-versión del informe lleva debajo su bloque con la URL completa de 🇩🇪 mobile.de y 🇪🇸 Coches.net **y los parámetros al lado**, para que el usuario rehaga la búsqueda él mismo. Se genera con `scripts/fuentes.py` (nunca a mano). Sin bloque de fuentes el informe NO se entrega.
 
+> 🔴 **A34 — SEPARACIÓN POR GENERACIÓN ANTES DE MEDIR (24-sep-2026):** ANTES de medir cualquier modelo en Flujo B/C/D, consultar **`references/generaciones.json`**. Si el modelo tiene **más de una generación (chasis) dentro del rango de años del encargo**, la versión se **PARTE en sub-fichas por generación** usando los cortes de año seguros del JSON (`corte_seguro_desde`/`hasta`), y el suelo de cada sub-ficha se **verifica abriendo la ficha** (campo «Gama de modelos» de mobile.de: 8U/FJ, 8R/FY, 5F/KL…). Comparar suelos de generaciones distintas está **PROHIBIDO** — no se emite veredicto. Si el modelo NO está en el JSON y la marca tiene historial de cambio de generación en la ventana, **investigar primero y medir después**, y al terminar el encargo añadir la entrada al JSON (se enriquece con cada estudio). Fallo real que originó la regla: Q3 S line parecía ahorrar 5.600 € comparando 1ª gen alemana con 2ª española; corregido = **−490 € (pérdida)**.
+
+> 🔴 **A35 — UNA INVESTIGACIÓN = UN COCHE AISLADO (25-sep-2026):** cuando se investigan varios coches del **mismo modelo** (p.ej. dos Audi Q2 distintos) en la misma carpeta `Desktop/JJImportMotors/investigaciones/<marca>/<modelo>/`, el caché de fotos y la cola `_pending/` se **aislan por `coche_id`** — clave SHA-256 = `sha256(coche_id + '\n' + url)` en `.fotos_cache/<coche_id>/`, y `.fotos_cache/_pending/<coche_id>/<idx>.url`. **Nunca** mezclar investigaciones de varios coches en una misma ejecución; nunca cruzar fotos entre ZIPs de coches distintos aunque la URL o el sha256 binario coincidan. Si la skill compone varios ZIPs a la vez, cada uno en su sesión de `empaquetar.py`. Fallo real: dos Audi Q2 distintos investigados en paralelo, la caché compartida metía una foto del Q2-A en el ZIP del Q2-B porque la CDN de classistatic servía la misma imagen del fabricante.
+
 **Resumen rápido:**
 - **A1** No descartar por silencio (sello `man`, no exclusión)
 - **A2** mobile.de SIEMPRE en cobertura (OK o bloqueada+intentos)
@@ -1086,6 +1126,8 @@ Las reglas duras (A1-A33) viven en `06-reglas/anti_patrones.md`. Cargarlas cuand
 - **A16** El sondeo D1 es por FILTROS, no por modelo: una pasada con los filtros del encargo devuelve TODOS los modelos; prohibido elegir 3-4 a mano ni dejar "otros por explorar" sin sondear. Potencia = mínimo ≥Xcv, no solo la variante tope.
 - **A21** ENLACES SIEMPRE (17-ago-2026): TODO lo que se entregue lleva enlace directo al anuncio (ficha) + fuentes con URL. Candidatos, comparables, comparativas, informes, dossier, JSON y ZIP. Un dato sin su enlace NO se entrega como concluido. Es la regla que el usuario más repite.
 - **A33** FUENTES RE-EJECUTABLES POR MODELO (15-sep-2026): cada modelo-versión lleva debajo su bloque con la URL de búsqueda DE+ES y los parámetros al lado (marca=ID, modelo=ID, año, km, potencia). Se genera con `scripts/fuentes.py`; sin él el informe no se entrega.
+- **A34** SEPARACIÓN POR GENERACIÓN (24-sep-2026): consultar `references/generaciones.json` ANTES de medir; si hay >1 generación en la ventana de años → partir en sub-fichas por generación (cortes seguros del JSON) + verificar suelo en ficha («Gama de modelos»). Comparar generaciones distintas = PROHIBIDO. Modelo ausente del JSON + riesgo → investigar antes de medir y añadir entrada al terminar.
+- **A35** UNA INVESTIGACIÓN = UN COCHE AISLADO (25-sep-2026): caché de fotos y `_pending/` separados por `coche_id`. SHA-256 = `sha256(coche_id + url)`. NUNCA mezclar investigaciones paralelas del mismo modelo en una sola ejecución de `empaquetar.py`; cada coche con su sesión y su ZIP.
 
 ---
 

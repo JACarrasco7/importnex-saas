@@ -89,6 +89,12 @@ class ValuationPackageIngestor
 
             $this->warnPackageGaps($car, $packageVersion, $contentFiles, $photos, $warnings);
 
+            // Copia espejo del ZIP a Desktop\JJImportMotors\informes\<marca>\<modelo>\.
+            // Se hace aquí (antes de deleteDirectory) para validar que el ZIP
+            // original se podía abrir. Si falla, warning; nunca aborta la
+            // importación: la BD ya tiene el coche con todas sus relaciones.
+            $this->mirrorZipToDesktop($zipPath, $payload, $warnings);
+
             return [
                 'car' => $car->refresh(),
                 'was_new' => $wasNew,
@@ -100,6 +106,194 @@ class ValuationPackageIngestor
             ];
         } finally {
             File::deleteDirectory($workDir);
+        }
+    }
+
+    /**
+     * Procesa N ZIPs en una sola llamada. Best-effort: si uno falla, los demás
+     * siguen. Devuelve un array por ZIP con ok/error.
+     *
+     * Regla (25-sep-2026): cuando el operador investiga varios coches a la vez
+     * y arrastra los 4 ZIPs al panel, no queremos que un ZIP corrupto (p.ej.
+     * descarga truncada de mobile.de) bloquee a los otros 3. Cada ingest() se
+     * ejecuta aislado: su propio workDir, su propia transacción implícita en
+     * `importer->apply()` (DB::transaction), sus propios warnings. Si falla,
+     * capturamos la excepción, registramos el error y seguimos con el siguiente.
+     *
+     * @param  array<int, string>  $zipPaths  Rutas absolutas a los ZIPs en disco
+     *                                        (típicamente `$uploaded->getRealPath()`).
+     * @param  array<int, string>  $basenames  Nombres originales para mostrar
+     *                                         al operador (p.ej. `audi-q2-….zip`).
+     * @return array{
+     *   ok: bool,
+     *   processed: int,
+     *   failed: int,
+     *   results: array<int, array{
+     *     basename: string,
+     *     ok: bool,
+     *     car_id?: int,
+     *     was_new?: bool,
+     *     photos?: int,
+     *     error?: string,
+     *     warnings?: array<int,string>,
+     *   }>,
+     *   summary: string,
+     * }
+     */
+    public function ingestBatch(array $zipPaths, array $basenames, Organization $org): array
+    {
+        $results = [];
+        $ok = 0;
+        $failed = 0;
+
+        foreach ($zipPaths as $idx => $zipPath) {
+            $basename = $basenames[$idx] ?? basename($zipPath);
+
+            if (! is_file($zipPath)) {
+                $results[] = [
+                    'basename' => $basename,
+                    'ok' => false,
+                    'error' => 'Archivo no encontrado en disco temporal.',
+                ];
+                $failed++;
+
+                continue;
+            }
+
+            try {
+                $result = $this->ingest($zipPath, $org);
+                $results[] = [
+                    'basename' => $basename,
+                    'ok' => true,
+                    'car_id' => $result['car']->id,
+                    'was_new' => $result['was_new'],
+                    'photos' => $result['photos'] ?? 0,
+                    'documents' => $result['documents'] ?? 0,
+                    'contents' => $result['contents'] ?? 0,
+                    'marketing' => $result['marketing'] ?? 0,
+                    'warnings' => $result['warnings'] ?? [],
+                ];
+                $ok++;
+            } catch (\Throwable $e) {
+                Log::error('ValuationPackageIngestor::ingestBatch: ZIP falló, continuando con el resto', [
+                    'basename' => $basename,
+                    'zip' => $zipPath,
+                    'error' => $e->getMessage(),
+                    'class' => get_class($e),
+                ]);
+                $results[] = [
+                    'basename' => $basename,
+                    'ok' => false,
+                    'error' => $e->getMessage(),
+                ];
+                $failed++;
+            }
+        }
+
+        // Si todos fallaron, marcamos ok=false para que el controlador pueda
+        // devolver error con código; si al menos uno entró, devolvemos ok=true
+        // y los resultados parciales.
+        $partial = $ok > 0;
+
+        $parts = [];
+        if ($ok > 0) {
+            $parts[] = "{$ok} coche(s) importado(s)";
+        }
+        if ($failed > 0) {
+            $parts[] = "{$failed} con error";
+        }
+        $summary = $parts === [] ? 'Ningún ZIP procesado.' : implode(' · ', $parts);
+
+        return [
+            'ok' => $partial,
+            'processed' => $ok,
+            'failed' => $failed,
+            'results' => $results,
+            'summary' => $summary,
+        ];
+    }
+
+    /**
+     * Copia espejo del ZIP en `C:\Users\<usuario>\Desktop\JJImportMotors\informes\<coche_id>\`.
+     * Independiente del flag `save_zip_to_desktop` — se ejecuta SIEMPRE que se
+     * pueda resolver el home del usuario y la carpeta destino sea escribible.
+     *
+     * Regla de oro (Nº3 del sistema JJ Import Motors): el ZIP original NUNCA
+     * se pierde mientras esté en Desktop, aunque Laravel borre el temporal.
+     * La copia se hace DESPUÉS de extraer (validamos que el ZIP se pueda abrir)
+     * y ANTES de `File::deleteDirectory($workDir)`. Si falla, se registra como
+     * warning pero NO aborta la importación — el ZIP ya está importado en BD.
+     *
+     * Ruta canónica: `~/Desktop/JJImportMotors/informes/<coche_id>/<coche_id>.zip`
+     * (subcarpeta por coche para no mezclar Q2/Q3/Q5 en el mismo directorio).
+     */
+    private function mirrorZipToDesktop(string $zipPath, array $payload, array $warnings): void
+    {
+        $home = getenv('HOME') ?: (getenv('USERPROFILE') ?: ($_SERVER['HOME'] ?? $_SERVER['USERPROFILE'] ?? null));
+        if (! $home) {
+            $warnings[] = 'No se pudo resolver el home del usuario (HOME/USERPROFILE vacíos); ZIP NO copiado a Desktop.';
+
+            return;
+        }
+
+        $marca = strtolower(trim((string) ($payload['vehiculo']['marca'] ?? 'sin-marca')));
+        $modelo = strtolower(trim((string) ($payload['vehiculo']['modelo'] ?? 'sin-modelo')));
+        $cocheId = $payload['_meta']['coche_id'] ?? null;
+
+        // Normalizar marca/modelo: sin acentos, sin espacios, slug seguro.
+        $marca = $marca !== '' ? preg_replace('/[^a-z0-9-]+/', '-', $marca) : 'sin-marca';
+        $modelo = $modelo !== '' ? preg_replace('/[^a-z0-9-]+/', '-', $modelo) : 'sin-modelo';
+        $marca = trim($marca, '-') ?: 'sin-marca';
+        $modelo = trim($modelo, '-') ?: 'sin-modelo';
+
+        $destDir = $home.DIRECTORY_SEPARATOR.'Desktop'
+            .DIRECTORY_SEPARATOR.'JJImportMotors'
+            .DIRECTORY_SEPARATOR.'informes'
+            .DIRECTORY_SEPARATOR.$marca
+            .DIRECTORY_SEPARATOR.$modelo;
+
+        try {
+            if (! is_dir($destDir) && ! @mkdir($destDir, 0755, true) && ! is_dir($destDir)) {
+                $warnings[] = "No se pudo crear el directorio destino: {$destDir}";
+
+                return;
+            }
+
+            // Nombre de archivo: preferimos coche_id del meta; si falta, marca-modelo-<timestamp>.zip
+            $basename = $cocheId ?: sprintf('%s-%s-%s', $marca, $modelo, date('Ymd-His'));
+            $destPath = $destDir.DIRECTORY_SEPARATOR.$basename.'.zip';
+
+            // Si el ZIP ya está en su destino final (caso típico: el operador
+            // subió un ZIP que YA vivía en Desktop\JJImportMotors\informes\)
+            // no copiamos: sería un no-op. Resolvemos symlinks y comparamos
+            // paths normalizados para no duplicar el archivo.
+            $realZip = realpath($zipPath);
+            $realDest = realpath($destPath) ?: $destPath;
+            if ($realZip && $realDest === $realZip) {
+                // Ya está en el destino: nada que hacer (y evitamos warnings
+                // de "ZIP copiado a Desktop" ruidosos).
+                return;
+            }
+
+            // copy() devuelve false si falla, sin lanzar excepción.
+            if (! @copy($zipPath, $destPath)) {
+                $warnings[] = "No se pudo copiar el ZIP a Desktop: {$destPath}";
+
+                return;
+            }
+
+            Log::info('ValuationPackageIngestor: ZIP copiado a Desktop', [
+                'from' => $zipPath,
+                'to' => $destPath,
+                'size_bytes' => filesize($destPath),
+            ]);
+        } catch (\Throwable $e) {
+            // Defensa en profundidad: si algo raro pasa (permisos, path extraño)
+            // NO abortamos la importación. La BD ya tiene el coche.
+            $warnings[] = 'Copia espejo a Desktop falló: '.$e->getMessage();
+            Log::warning('ValuationPackageIngestor: mirrorZipToDesktop failed', [
+                'error' => $e->getMessage(),
+            ]);
         }
     }
 
@@ -186,7 +380,14 @@ class ValuationPackageIngestor
             $path = $relative ? $this->resolveInside($dir, $relative) : null;
 
             if ($path && File::exists($path)) {
-                $photos[$path] = [
+                // FIX (23-sep-2026): normalizar la clave para que coincida con
+                // los paths que devuelve File::allFiles() (que en Windows usa
+                // backslashes + forwards mixto según Symfony Finder). Sin esto,
+                // dedup por `isset($photos[$path])` falla: las 8 fotos del
+                // manifest se añadían una segunda vez desde el paso 2,
+                // resultando en 16 fotos en BD y 16 archivos en disco.
+                $key = $this->normalizePathKey($path);
+                $photos[$key] = [
                     'path' => $path,
                     'order' => is_array($entry) ? (int) ($entry['orden'] ?? $index + 1) : $index + 1,
                     'type' => is_array($entry) ? ($entry['categoria'] ?? 'exterior') : 'exterior',
@@ -197,7 +398,8 @@ class ValuationPackageIngestor
         // 2) Lo que haya en fotos/ y no estuviera declarado.
         foreach ($this->allFiles($dir) as $file) {
             $path = $file->getPathname();
-            if (isset($photos[$path])) {
+            $key = $this->normalizePathKey($path);
+            if (isset($photos[$key])) {
                 continue;
             }
             if (! in_array(strtolower($file->getExtension()), self::IMAGE_EXTENSIONS, true)) {
@@ -207,7 +409,7 @@ class ValuationPackageIngestor
                 continue;
             }
 
-            $photos[$path] = ['path' => $path, 'order' => count($photos) + 1, 'type' => 'exterior'];
+            $photos[$key] = ['path' => $path, 'order' => count($photos) + 1, 'type' => 'exterior'];
         }
 
         $list = array_values($photos);
@@ -229,7 +431,8 @@ class ValuationPackageIngestor
                 $path = $relative ? $this->resolveInside($dir, $relative) : null;
 
                 if ($path && File::exists($path)) {
-                    $docs[$path] = [
+                    $key = $this->normalizePathKey($path);
+                    $docs[$key] = [
                         'path' => $path,
                         'title' => is_array($entry)
                             ? ($entry['titulo'] ?? basename($path))
@@ -241,11 +444,12 @@ class ValuationPackageIngestor
 
         foreach ($this->allFiles($dir) as $file) {
             $path = $file->getPathname();
-            if (isset($docs[$path]) || strtolower($file->getExtension()) !== 'pdf') {
+            $key = $this->normalizePathKey($path);
+            if (isset($docs[$key]) || strtolower($file->getExtension()) !== 'pdf') {
                 continue;
             }
 
-            $docs[$path] = ['path' => $path, 'title' => $file->getFilename()];
+            $docs[$key] = ['path' => $path, 'title' => $file->getFilename()];
         }
 
         return array_values($docs);
@@ -270,7 +474,8 @@ class ValuationPackageIngestor
             $path = $relative ? $this->resolveInside($dir, $relative) : null;
 
             if ($path && File::exists($path)) {
-                $contenidos[$path] = [
+                $key = $this->normalizePathKey($path);
+                $contenidos[$key] = [
                     'path' => $path,
                     'archivo' => basename($path),
                     'plantilla' => is_array($entry) ? ($entry['plantilla'] ?? null) : null,
@@ -284,14 +489,15 @@ class ValuationPackageIngestor
         //    el Blade del dossier público: ver 07-marketing/handoff_laravel.md.
         foreach ($this->allFiles($dir) as $file) {
             $path = $file->getPathname();
-            if (isset($contenidos[$path]) || ! in_array(strtolower($file->getExtension()), ['txt', 'json'], true)) {
+            $key = $this->normalizePathKey($path);
+            if (isset($contenidos[$key]) || ! in_array(strtolower($file->getExtension()), ['txt', 'json'], true)) {
                 continue;
             }
             if (! $this->inFolder($dir, $path, self::CONTENT_FOLDER)) {
                 continue;
             }
 
-            $contenidos[$path] = [
+            $contenidos[$key] = [
                 'path' => $path,
                 'archivo' => $file->getFilename(),
                 'plantilla' => null,
@@ -1382,6 +1588,21 @@ class ValuationPackageIngestor
         }
 
         return null;
+    }
+
+    /**
+     * Normaliza una ruta para usarla como clave de deduplicación. Convierte a
+     * minúsculas + forward-slashes y aplica realpath cuando existe, para que
+     * rutas equivalentes devuelvan la misma clave aunque provengan de fuentes
+     * con convenciones de separador distintas (realpath() vs Symfony Finder
+     * en Windows).
+     */
+    private function normalizePathKey(string $path): string
+    {
+        $real = realpath($path);
+        $normalized = $real !== false ? $real : $path;
+
+        return strtolower(str_replace('\\', '/', $normalized));
     }
 
     private function inFolder(string $dir, string $path, string $folder): bool

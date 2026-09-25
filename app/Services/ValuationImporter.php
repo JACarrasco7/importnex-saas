@@ -243,8 +243,17 @@ class ValuationImporter
             }
         }
 
-        // Buscar por combinación de marca, modelo y año (para casos sin VIN ni URL)
-        if ($brand && $model && $normalizedYear) {
+        // Buscar por combinación de marca, modelo y año — SOLO si el paquete
+        // no trae ni VIN ni URL. Si trae URL y no ha encontrado coche por
+        // ella (bloque anterior), es una unidad genuinamente nueva: dos
+        // coches reales distintos pueden compartir marca+modelo+versión+año
+        // (mismo generación, sin VIN declarado) y este fallback los fusionaba
+        // por error en uno solo. Bug real 14-sep-2026: dos Golf R Variant
+        // Mk7.5 2018 (id=458852596 e id=42897351811488) se pisaban entre sí
+        // al subir el segundo ZIP.
+        $hasVin = $vin && ! empty(trim($vin));
+        $hasUrl = $url && ! empty(trim($url));
+        if (! $hasVin && ! $hasUrl && $brand && $model && $normalizedYear) {
             $car = Car::withoutGlobalScope('organization')
                 ->where('organization_id', $org->id)
                 ->where('brand', trim($brand))
@@ -253,7 +262,7 @@ class ValuationImporter
                 ->first();
 
             if ($car) {
-                Log::info("Coche encontrado por marca/modelo/año: {$brand} {$model} {$normalizedYear}", ['car_id' => $car->id]);
+                Log::info("Coche encontrado por marca/modelo/año (sin VIN ni URL): {$brand} {$model} {$normalizedYear}", ['car_id' => $car->id]);
 
                 return $car;
             }
@@ -532,6 +541,13 @@ class ValuationImporter
      *  - Se descargan con User-Agent y Referer. Los CDN de los portales
      *    (classistatic.de y compania) rechazan file_get_contents sin cabeceras,
      *    que era la razon por la que no entraba ninguna foto.
+     *
+     * Regla (23-sep-2026): reintentos automáticos con backoff para tolerar
+     * bloqueos anti-bot (mobile.de / classistatic.de devuelven 403 cuando se
+     * descarga el álbum entero en poco tiempo). 3 intentos, espera 1s/2s/4s
+     * con jitter. Si tras 3 intentos sigue fallando, se registra como warning
+     * y el coche queda sin fotos — el operador puede reimportar el ZIP cuando
+     * el bloqueo se levante.
      */
     private function savePhotos(Car $car, array $photoUrls): void
     {
@@ -543,11 +559,67 @@ class ValuationImporter
         $referer = $car->url_link ?: null;
         $order = 0;
 
+        // FIX v3.10.1 (25-sep-2026) — protección contra duplicación cruzada
+        // cuando la skill envía un payload con URLs repetidas (la skill ya
+        // debería deduplicarlas, pero esto es la red de seguridad). Sin esta
+        // dedup, dos vehículos distintos del mismo modelo investigados en
+        // paralelo y subidos a la vez podían acabar compartiendo el mismo
+        // archivo físico en disco: el `001.jpg` del A era una foto real del
+        // B porque la caché de la skill las mezcló.
+        $seenUrls = [];
+        $seenHashes = [];
+
         foreach ($photoUrls as $url) {
             if (! is_string($url) || ! filter_var($url, FILTER_VALIDATE_URL)) {
                 continue;
             }
+            if (isset($seenUrls[$url])) {
+                Log::info('savePhotos: URL repetida en el payload, descartada', [
+                    'car_id' => $car->id, 'url' => $url,
+                ]);
 
+                continue;
+            }
+            $seenUrls[$url] = true;
+
+            $downloaded = $this->downloadPhotoWithRetry($car, $url, $referer, $order);
+            if ($downloaded !== null) {
+                [$extension, $body] = $downloaded;
+                // Doble dedup: si dos URLs distintas devuelven exactamente el
+                // mismo cuerpo (clásico en CDN de fabricante), una sola vez.
+                $hash = hash('sha256', $body);
+                if (isset($seenHashes[$hash])) {
+                    Log::info('savePhotos: cuerpo de foto duplicado, descartado', [
+                        'car_id' => $car->id, 'hash' => substr($hash, 0, 12),
+                    ]);
+
+                    continue;
+                }
+                $seenHashes[$hash] = true;
+                $order++;
+                $path = sprintf('cars/%d/photos/%03d.%s', $car->id, $order, $extension);
+
+                Storage::disk('public')->put($path, $body);
+
+                $car->photos()->create([
+                    'organization_id' => $car->organization_id,
+                    'url' => $path,
+                    'sort_order' => $order,
+                    'photo_type' => 'exterior',
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Descarga una foto con reintentos (3 máx) ante 403/429/5xx. Devuelve
+     * [extension, body] o null si todos los intentos fallaron.
+     */
+    private function downloadPhotoWithRetry(Car $car, string $url, ?string $referer, int $orderSoFar): ?array
+    {
+        $maxIntentos = 3;
+
+        for ($intento = 1; $intento <= $maxIntentos; $intento++) {
             try {
                 $request = Http::timeout(20)->withHeaders(array_filter([
                     'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36',
@@ -557,32 +629,47 @@ class ValuationImporter
 
                 $response = $request->get($url);
 
-                if (! $response->successful() || $response->body() === '') {
-                    Log::warning('Could not download photo', [
-                        'url' => $url, 'car_id' => $car->id, 'status' => $response->status(),
-                    ]);
-
-                    continue;
+                if ($response->successful() && $response->body() !== '') {
+                    return [
+                        $this->guessImageExtension($response->header('Content-Type'), $url),
+                        $response->body(),
+                    ];
                 }
 
-                $order++;
-                $extension = $this->guessImageExtension($response->header('Content-Type'), $url);
-                $path = sprintf('cars/%d/photos/%03d.%s', $car->id, $order, $extension);
+                $status = $response->status();
+                $transitorio = $status === 429 || $status === 403 || ($status >= 500 && $status < 600);
 
-                Storage::disk('public')->put($path, $response->body());
+                if (! $transitorio || $intento === $maxIntentos) {
+                    Log::warning('Could not download photo', [
+                        'url' => $url, 'car_id' => $car->id, 'status' => $status,
+                        'intentos' => $intento,
+                    ]);
 
-                $car->photos()->create([
-                    'organization_id' => $car->organization_id,
-                    'url' => $path,
-                    'sort_order' => $order,
-                    'photo_type' => 'exterior',
+                    return null;
+                }
+
+                // Backoff: 1s, 2s, 4s + jitter 0-500ms
+                $espera = (2 ** ($intento - 1)) + (mt_rand(0, 500) / 1000);
+                Log::info('Photo download retry', [
+                    'url' => $url, 'car_id' => $car->id, 'status' => $status,
+                    'intento' => $intento, 'espera_s' => round($espera, 2),
                 ]);
+                usleep((int) ($espera * 1_000_000));
             } catch (\Throwable $e) {
-                Log::warning('Photo download failed', [
-                    'url' => $url, 'car_id' => $car->id, 'error' => $e->getMessage(),
-                ]);
+                if ($intento === $maxIntentos) {
+                    Log::warning('Photo download failed after retries', [
+                        'url' => $url, 'car_id' => $car->id,
+                        'intentos' => $intento, 'error' => $e->getMessage(),
+                    ]);
+
+                    return null;
+                }
+                $espera = (2 ** ($intento - 1)) + (mt_rand(0, 500) / 1000);
+                usleep((int) ($espera * 1_000_000));
             }
         }
+
+        return null;
     }
 
     private function guessImageExtension(?string $contentType, string $url): string

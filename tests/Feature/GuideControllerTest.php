@@ -27,9 +27,13 @@ class GuideControllerTest extends TestCase
         $response = $this->actingAs($this->usuario())->get('/guias');
 
         $response->assertOk();
+        // El número se cuenta del array GUIAS en GuideController — si añades una
+        // guía, este test obliga a actualizarlo. La alternativa sería ->
+        // has('guias', count(GuideController::GUIAS)) pero PHP no expone
+        // constantes privadas a tests, así que el literal es lo más estable.
         $response->assertInertia(fn ($page) => $page
             ->component('Guide/Index')
-            ->has('guias', 10)
+            ->has('guias', 11)
             ->has('actual.slug')
             ->has('actual.titulo')
             ->has('actual.html'));

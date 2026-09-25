@@ -133,14 +133,18 @@ class Hallazgo:
     """Comprobación individual del validador."""
 
     check: str
-    severidad: str  # "ALTO" | "MEDIO" | "BAJO"
+    severidad: str  # "ALTO" | "CRIT" (alias de ALTO) | "MEDIO" | "BAJO"
     canal: str | None
     mensaje: str
     bloque: str | None = None
     linea: int | None = None
 
     def formato_corto(self) -> str:
-        prefix = {"ALTO": "🔴", "MEDIO": "🟠", "BAJO": "🟡"}[self.severidad]
+        # FIX 3.9.13: C17 emite severidad "CRIT" que faltaba en el mapa →
+        # KeyError al imprimir y el hallazgo nunca llegaba a reportarse.
+        prefix = {"ALTO": "🔴", "CRIT": "🔴", "MEDIO": "🟠", "BAJO": "🟡"}.get(
+            self.severidad, "🔴"
+        )
         canal = f" [{self.canal}]" if self.canal else ""
         linea = f":{self.linea}" if self.linea else ""
         return f"  {prefix}{canal} {self.check}{linea}: {self.mensaje}"
@@ -155,7 +159,8 @@ class ResultadoCanal:
 
     @property
     def rojos(self) -> list[Hallazgo]:
-        return [h for h in self.hallazgos if h.severidad == "ALTO"]
+        # FIX 3.9.13: "CRIT" también bloquea (era severidad huérfana).
+        return [h for h in self.hallazgos if h.severidad in ("ALTO", "CRIT")]
 
     @property
     def naranjas(self) -> list[Hallazgo]:
@@ -942,7 +947,7 @@ def consolidar(resultados: Iterable[ResultadoArchivo]) -> tuple[int, int, int]:
     for r in resultados:
         for canal in r.canales.values():
             for h in canal.hallazgos:
-                if h.severidad == "ALTO":
+                if h.severidad in ("ALTO", "CRIT"):  # FIX 3.9.13: CRIT bloquea
                     rojos += 1
                 elif h.severidad == "MEDIO":
                     naranjas += 1

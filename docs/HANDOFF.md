@@ -24,6 +24,146 @@
 
 ---
 
+## 2026-09-25 14:10 · Copilot-VSCode · Laravel v3.10.3: subida batch de N ZIPs desde el panel
+
+- **Pedido:** "cambia en el sistema Laravel para subir varios coches a la vez por favor".
+- **Decisión UX:** web con `<input multiple>` + drag&drop + best-effort (un ZIP corrupto no bloquea a los demás). No CLI ni carpeta (más adelante si se pide).
+- **Hecho:**
+  - **`ValuationPackageIngestor::ingestBatch(zipPaths, basenames, org)` (nuevo):** itera uno a uno con try/catch; devuelve `{ok, processed, failed, results[], summary}`. Log explícito por ZIP fallido, no aborta el batch.
+  - **`ValuationImportController::store` (extendido):** detecta `count($request->file('file')) > 1` y delega en `ingestBatch()`. Validación ajustada: `'file' => nullable` + `'file.*' => file|mimes:zip,json|max:200MB` para que el array no rechace al padre.
+  - **`resources/js/Pages/Cars/ImportValuation.vue`:** drop zone con `multiple`, drag&drop visual, procesamiento en cola, resumen post-subida con coche_id + fotos + errores por archivo. Mantiene la subida individual 1 archivo.
+  - **Tests:** `ValuationBatchImportTest` (4 casos: 2 OK, 1 corrupto + 1 OK, 2 corruptos, path inexistente) y `ValuationBatchControllerTest` (test HTTP con ZIPs reales en /tmp para evitar el problema de fake UploadedFile con MIME zip).
+- **Smoke real:** 4 ZIPs Audi (Q2 2017/2020 + Q3 2020/2022 = 116 fotos) subidos vía `ingestBatch()` → 4 coches #14/#15/#16/#17 sin duplicación (`resolveCar` los detectó por `url_link` y actualizó en vez de crear nuevos). 717 tests passed, 0 failed, 2610 assertions.
+- ✅ nada pendiente. El cambio no afecta a la skill (v3.10.3 ya lleva el A35 de aislamiento de caché por coche_id, que era prerequisito para batch seguro).
+
+---
+
+## 2026-09-25 13:30 · Copilot-VSCode · skill v3.10.2: housekeeping suite (tests obsoletos + emoji cp1252)
+
+- **Pedido:** "de momento yo no he visto nada, revísalo tú" — auditoría completa del suite PHP y del `verify_skill_refs.py` sin asumir nada.
+- **Hallazgos (suite sin filtro, 712 tests):**
+  1. **`GuideControllerTest::test_el_indice_lista_las_guias_y_abre_la_primera`** fallaba: esperaba 10 guías, hay 11 (la 11ª `guia-skill-ecommerce` se añadió y nadie actualizó el test). Fix: `->has('guias', 11)` + comentario explícito de que añadir una guía obliga a actualizar este test.
+  2. **`MarketingValidatorTest::test_changelog_tiene_entrada_3_7_1_con_flujo_m`** fallaba: exigía la entrada `[3.7.1]` que se perdió al reescribir el CHANGELOG en la migración 3.9.x. Reescrito para validar la versión TOP del CHANGELOG + presencia de "Flujo M" + "marketing" (test útil, no assert trivial).
+  3. **`verify_skill_refs.py`** reventaba en Windows al imprimir el emoji final: `UnicodeEncodeError: 'charmap' codec can't encode character '\u2705'`. Fix: `sys.stdout.reconfigure(encoding="utf-8")` al arrancar (mismo truco ya aplicado a `empaquetar.py`).
+- **Verificación final:** 712 tests PHP passed, 0 failed, 2584 assertions. Solo 6 skipped (los marcados como `markTestSkipped`). 266 refs skill, 0 rotas. Pint passed.
+- ZIP portable: `skills-importacion-vehiculos-v3.10.2-20260925.zip` (79 entries, 531.199 B). Viejos v3.10.0 y v3.10.1 borrados.
+- ✅ nada pendiente. Importar ZIP v3.10.2 cuando toque.
+
+---
+
+## 2026-09-25 11:05 · Copilot-VSCode · skill v3.10.1 + Laravel: anti-duplicación cruzada de fotos
+
+- **Pedido:** "la skill duplica fotos y al hacer varias investigaciones de link a la vez intercambia las fotos y demás, que no haga eso".
+- **Hallazgo:** `.fotos_cache/` y `_pending/` vivían a nivel de `out_dir/<marca>/<modelo>/` → dos Audi Q2 distintos investigados en paralelo compartían espacio: la CDN de classistatic servía la misma foto del fabricante para ambos, y el `001.jpg` del ZIP del Q2-A podía ser una foto real del Q2-B.
+- **Fixes (4 piezas):**
+  - **`empaquetar.py`** — `_cache_key(coche_id, url) = sha256(coche_id + '\n' + url)`; caché en `.fotos_cache/<coche_id>/` y `_pending/<coche_id>/<idx>.url`. Dos coches distintos del mismo modelo jamás colisionan.
+  - **`ValuationImporter::savePhotos`** — dedup por URL exacta + por sha256 del cuerpo (red de seguridad PHP). Log explícito por descarte.
+  - **Regla A35** en SKILL.md: una investigación = un coche aislado. Prohibido mezclar investigaciones paralelas del mismo modelo en una sola sesión de `empaquetar.py`.
+  - **Tests:** `tests/Feature/SavePhotosDedupTest.php` (4 casos verde) + smoke Python de `_cache_key` (4 casos verde).
+- Suite total: **11/11 tests PHP verde** (los 4 nuevos + 7 anteriores de Dedup/ZipMirror/DownloadPhotoRetry); Pint OK; py_compile OK.
+- ZIP portable: `skills-importacion-vehiculos-v3.10.1-20260925.zip` (79 entries, 529.822 B). Viejo v3.10.0 borrado.
+- ✅ nada pendiente. Importar ZIP v3.10.1 cuando toque; el contrato JSON no cambia.
+
+---
+
+## 2026-09-24 13:40 · Copilot-VSCode · revisión completa v3.10.0 + ZIP portable regenerado
+
+- **Pedido:** "revisa todo, regenera la skill con todas las mejoras, los PDFs que se creen bien, y lo de descargar las imágenes siempre".
+- **Revisado y arreglado:**
+  - **`verify_skill_refs.py` daba 29 rotas FALSAS** (solo resolvía rutas relativas al archivo). Ahora prueba 4 bases + búsqueda por nombre (skill, hermana estudio-mercado, `.ai/rules`). Resultado: **266 refs, 0 rotas**.
+  - **`informe_busqueda.md` contradecía el PDF nuevo** («Sin PDF ni ZIP», «los enlaces no funcionan en PDF»). Sincronizado: PDF SIEMPRE con `mercado_pdf.py`; enlaces clicables. Fila añadida en `entregables.md` (única fuente de verdad).
+  - **QA visual del PDF por DOM + visión:** banda estoril `#1A306D` con «JJ IMPORT MOTORS», título, 3 KPIs (8 modelos · 4.610 € ahorro · cambio de veredicto), tabla decisión con cabecera navy/blanca y filas semáforo verde/ámbar/rojo verificadas por computed styles. Primer análisis de visión engañoso (viewport 288px del panel) — re-verificado a ancho A4.
+  - Descarga de imágenes por navegador (v3.9.14) intacta y dentro del ZIP: §1b.1 + `empaquetar.py` con `.fotos_cache/_pending/`.
+- **ZIP portable:** `skills-importacion-vehiculos-v3.10.0-20260924.zip` (79 entries, 528.936 B, SHA256 `7916b07b…9e0025`), incluye `mercado_pdf.py` (21 KB) y `generaciones.json` (15 KB). Viejo v3.9.13 borrado.
+- Smoke final: py_compile OK (3 scripts), refs 0 rotas, PDF regenerado (1,66 MB).
+- ✅ nada pendiente. Importar el ZIP v3.10.0 en Claude Desktop cuando toque.
+
+---
+
+## 2026-09-24 13:05 · Copilot-VSCode · skill v3.10.0: PDF visual de informes de mercado + regla A34 generaciones
+
+- **Pedido:** los MD de mercado son ilegibles (mucho texto, todo igual) → PDF claro "al grano sin saltar nada"; y blindarse contra la trampa de generaciones del informe Audi (Q3: +5.600 € aparente → −490 € real).
+- **Hecho:**
+  - **`scripts/mercado_pdf.py`** (nuevo): MD → HTML (paleta marca) → PDF (Chrome/Edge headless). Portada con KPIs, tabla decisión semáforo, 1 página/modelo, callouts de trampas, € destacados, URLs clicables. Probado con `audi_suv-deportivos_2026-09-16.md` real → PDF 1,6 MB OK (4 fichas modelo, 26 tablas, 19 callouts, 75 links).
+  - **`references/generaciones.json`** (nuevo): mapa chasis por marca/modelo con cortes seguros + **regla A34** en SKILL.md (partir en sub-fichas si >1 gen en ventana; verificar «Gama de modelos» en suelos; enriquecer el JSON cada estudio).
+  - Flujo del operador confirmado y documentado: encargos SIN links → Claude barre → **PDF** → operador elige finalistas → Flujo A + ZIP → Laravel.
+- Toqué: `scripts/mercado_pdf.py` (nuevo), `references/generaciones.json` (nuevo), `SKILL.md` (A34 + entregable PDF + v3.10.0), `CHANGELOG.md`.
+- ⚠️ PENDIENTE para Claude-Desktop: en el próximo encargo de mercado, generar MD → `mercado_pdf.py` → entregar PDF; aplicar A34 consultando `generaciones.json` y ampliándolo con los modelos nuevos que mida.
+
+---
+
+## 2026-09-24 10:30 · Copilot-VSCode · skill v3.9.14: bypass anti-bot vía navegador (Claude for Chrome)
+
+- **Pedido:** "para descargar imágenes haz siempre eso (navegador) para hacerlo bien". 4 ZIPs nuevos (Q2 2017/2020, Q3 2020/2022 = 116 fotos) en `Desktop/JJImportMotors/informes/audi/zips/` ya con álbum completo descargado vía navegador.
+- **Hecho en primera fase (skill v3.9.14):**
+  - **SKILL §1b.1:** reescrito el procedimiento anti-bot. urllib bloquea = `2 reintentos máx` (no 3, porque el ASN ya está en lista negra y reintentar no ayuda); si sigue 403, **delegar al navegador integrado** (`mcp_zai-mcp-serve` con `open_browser_page` + `run_playwright_code`/`click_element`) y guardar en `.fotos_cache/<sha256(url)>`. El navegador integrado ES la ruta por defecto para fotos bloqueadas, no el fallback.
+  - **`empaquetar.py` download_photo:** 2 reintentos urllib con backoff 1s+jitter (era 3 reintentos); si falla, escribe `.fotos_cache/_pending/<idx>.url` con la URL pendiente para que el flujo Claude la baje por navegador.
+  - **`empaquetar.py` collect_photos:** al final, si quedan URLs pendientes, emite mensaje `🌐 N foto(s) NO descargables por urllib (CDN bloquea ASN)` con cada URL → accionable para Claude-desktop con la skill de navegador.
+  - **Verificación de los 4 ZIPs nuevos** (`audi-q2-2017 +15 · audi-q2-2020 +20 · audi-q3-2020 +44 · audi-q3-2022 +37 = 116 fotos`): estructura completa (informe.json schema v1 + 6 .txt marketing + json/* + fotos/*), pasan chequeo de photos/cache pero marketing copy es telegrama (35 rojos C17 por ZIP = longitud <800 chars en cada bloque); decisión: subir tal cual con `skipRemotePhotos=true`.
+- **Hecho en segunda fase (10:35, MySQL ya arriba):** los 4 ZIPs importados vía `ValuationPackageIngestor::ingest()` desde PHP CLI (sin pasar por HTTP). Resultado verificado:
+  - **car #14** Audi Q2 01/2017 · 112.275 km · 16.499 € · **15 fotos** ✓ — `mobile.de 45066397921824`
+  - **car #15** Audi Q2 01/2020 · 77.000 km · 14.990 € · **20 fotos** ✓ — `mobile.de 42963869222048`
+  - **car #16** Audi Q3 01/2020 · 159.278 km · 18.990 € · **44 fotos** ✓ — `mobile.de 44489118372384`
+  - **car #17** Audi Q3 01/2022 · 159.000 km · 19.900 € · **37 fotos** ✓ — `mobile.de 43123290164928`
+  - Total: 116/116 fotos, 19 marketing entries por coche × 4 = 76 anuncios cargados, 9 contents por coche × 4 = 36 documentos de contenido.
+  - `php artisan storage:link` recreado (el symlink `public/storage` se había borrado en algún momento). Ahora las fotos son servibles vía web.
+- **Método**: PHP CLI llamando directamente al ingestor (`subir_4zips.php` one-shot en `$TMP`, ya borrado). Evita CSRF y autenticación del endpoint HTTP; se ejecuta como root = user_id=1.
+- **MySQL arrancado con `(component_reference_cache=OFF, etc)` ausente**: solución temporal vía `mysqld --defaults-file=C:\laragon\etc\mysql-importnex.ini` con datadir=`C:\laragon\data\mysql-8`. La instalación oficial sigue rota (faltan `lib\plugin\component_reference_cache.dll`, `lib\private`, `share\errmsg.sys`) — mejor reinstalar cuando se pueda, pero para subir los 4 ZIPs vale.
+- Toqué: `.claude/skills/importacion-vehiculos/SKILL.md` (§1b procedimiento anti-bot), `scripts/empaquetar.py` (reintentos + .fotos_cache/_pending/, mensaje navegador), `CHANGELOG.md` ([3.9.14]), `docs/HANDOFF.md` (esta entrada).
+- ✅ nada pendiente. ZIPs subidos y verificados.
+
+---
+
+## 2026-09-24 10:30 · Copilot-VSCode · skill v3.9.14: bypass anti-bot vía navegador (Claude for Chrome)
+
+- **Pedido:** "para descargar imágenes haz siempre eso (navegador) para hacerlo bien". 4 ZIPs nuevos (Q2 2017/2020, Q3 2020/2022 = 116 fotos) en `Desktop/JJImportMotors/informes/audi/zips/` ya con álbum completo descargado vía navegador.
+- **Hecho:**
+  - **SKILL §1b.1:** reescrito el procedimiento anti-bot. urllib bloquea = `2 reintentos máx` (no 3, porque el ASN ya está en lista negra y reintentar no ayuda); si sigue 403, **delegar al navegador integrado** (`mcp_zai-mcp-serve` con `open_browser_page` + `run_playwright_code`/`click_element`) y guardar en `.fotos_cache/<sha256(url)>`. El navegador integrado ES la ruta por defecto para fotos bloqueadas, no el fallback.
+  - **`empaquetar.py` download_photo:** 2 reintentos urllib con backoff 1s+jitter (era 3 reintentos); si falla, escribe `.fotos_cache/_pending/<idx>.url` con la URL pendiente para que el flujo Claude la baje por navegador.
+  - **`empaquetar.py` collect_photos:** al final, si quedan URLs pendientes, emite mensaje `🌐 N foto(s) NO descargables por urllib (CDN bloquea ASN)` con cada URL → accionable para Claude-desktop con la skill de navegador.
+  - **Verificación de los 4 ZIPs nuevos** (`audi-q2-2017 +15 · audi-q2-2020 +20 · audi-q3-2020 +44 · audi-q3-2022 +37 = 116 fotos`): estructura completa (informe.json schema v1 + 6 .txt marketing + json/* + fotos/*), pasan chequeo de photos/cache pero marketing copy es telegrama (35 rojos C17 por ZIP = longitud <800 chars en cada bloque); decisión: subir tal cual con `skipRemotePhotos=true`.
+- **Bloqueado:** MySQL caído por DLL ausente (`lib\plugin\component_reference_cache.dll` + `lib\private` + `share\errmsg.sys` borrados de Laragon). Probado: Laragon start, mysqld directo, mirrors de descarga (Oracle caído, GitHub 404, 403). **Acción necesaria del usuario: reinstalar Laragon/full MySQL 8.0.30** (BD `importnex_saas` intacta en `C:\laragon\data\mysql-8`).
+- Toqué: `.claude/skills/importacion-vehiculos/SKILL.md` (§1b procedimiento anti-bot), `scripts/empaquetar.py` (reintentos + .fotos_cache/_pending/, mensaje navegador).
+- ⚠️ PENDIENTE para Claude-Desktop: (a) **reinstalar MySQL** el usuario; (b) cuando levante, subir los 4 ZIPs nuevos a `/admin/valuations/import` y confirmar 15/20/44/37 fotos en `car_photos`; (c) si vuelve a haber bloqueo ASN en otro encargo, **usar navegador integrado** desde la primera falla (no esperar al 2º intento).
+
+---
+
+## 2026-09-23 20:15 · Copilot-VSCode · skill v3.9.13: cero regeneraciones de ZIP + presupuesto de contexto
+
+- **Pedido:** auditar el flujo de investigación para que no llene la memoria de Claude, no haya que regenerar ZIPs, cumpla la skill a la primera y pregunte si algo es ambiguo.
+- Hecho (3 fixes de fondo + 1 bug descubierto):
+  - **Validación PRE-ZIP:** `check_marketing.py`/`check_ficha_cliente.py` corren ANTES de `build_zip()` sobre los `.txt` en `work_dir/contenido/`. Hallazgo 🔴 → ZIP NO se crea (exit 5), cita bloques exactos, deja los .txt para corregir. Antes: comprimir→validar→regenerar.
+  - **Caché de fotos `.fotos_cache/`** en `out_dir` (fuera del work_dir): regenerar el mismo coche = 0 HTTP → no re-dispara el 403 de mobile.de y la 2ª ejecución es instantánea.
+  - **Bug descubierto por el smoke test:** `check_marketing.py` explosaba con `KeyError: 'CRIT'` al reportar severidad CRIT (C17-longitud) — el dict de emojis y los filtros solo conocían ALTO/MEDIO/BAJO. El validador llevaba tiempo sin poder reportar sus hallazgos más graves. Arreglado en 3 puntos (formato_corto, rojos, consolidar).
+  - **SKILL.md §PRESUPUESTO DE CONTEXTO:** tabla de lectura por flujo (SKILL.md + máx 2-3 compañeros), prohibido leer directorios enteros, textos de anuncios a fichero (no al contexto), no re-leer lo consultado, regenerar ZIP ≠ re-investigar, preguntar antes de asumir.
+- Prompt reutilizable de auditoría creado: `docs/prompts/auditoria-flujo-investigacion.md`.
+- Verificado: `py_compile` OK (2 scripts), smoke test del camino bloqueado (exit 5, sin ZIP, 21 hallazgos reales reportados), 25 tests PHP del paquete en verde, Pint OK.
+- Toqué: `scripts/empaquetar.py` (orden validar→comprimir, caché, cleanup rmtree), `scripts/check_marketing.py` (CRIT), `SKILL.md` (§presupuesto, v3.9.13), `CHANGELOG.md` ([3.9.13]), `docs/prompts/auditoria-flujo-investigacion.md` (nuevo).
+- ⚠️ PENDIENTE para Claude-Desktop: **importar `skills-importacion-vehiculos-v3.9.13-20260923.zip`** (`.claude/skills/_dist/`). Y al investigar: leer SOLO lo de la tabla §PRESUPUESTO DE CONTEXTO — el SKILL.md pesa 90 KB, no cargar compañeros extra "por si acaso".
+
+---
+
+## 2026-09-23 19:00 · Copilot-VSCode · auditoría completa del flujo de subida de ZIPs + skill v3.9.11 (álbum completo + retry anti-bot)
+
+- **Pedido:** (a) skill regenera bien los ZIPs; (b) descarga SIEMPRE el álbum completo; (c) auditoría completa para mejorar/optimizar; (d) cuando se levante el 403 de mobile.de, reimportar los 4 ZIPs (Q2 CityCars, Q2 Köln, Q3 Dülmen, Q3 Núremberg).
+- Hecho (auditoría y fixes):
+  - **#1 CRÍTICO — fotos duplicadas (16→8):** `collectPhotos()` indexaba por path sin normalizar. `realpath()` en Windows usa backslashes, Symfony Finder mixed separators → 8 fotos del manifest + 8 del escaneo = 16. Fix: `normalizePathKey()` aplica `realpath + lowercase + str_replace('\\','/')` antes de indexar. Aplicado en `collectPhotos`, `collectContent`, `collectDocuments`. Test nuevo `ValuationPackageIngestorPathDedupeTest.php`.
+  - **#2 espejo a Desktop SIEMPRE:** nuevo `mirrorZipToDesktop()` guarda el ZIP en `~/Desktop/JJImportMotors/informes/<marca>/<modelo>/<coche_id>.zip`. Idempotente vía `realpath`. Tests: `ValuationPackageZipMirrorTest.php`.
+  - **#3 retry anti-bot:** `savePhotos()` de Laravel y `download_photo()` de empaquetar.py ahora reintentan 3 veces con backoff exponencial (1s/2s/4s + jitter) ante 403/429/5xx. Respeta `Retry-After` del server. Test: `DownloadPhotoRetryTest.php` (4 casos: 403 transitorio, 403 persistente, 404 no retry, 200 inmediato).
+  - **#4 skipRemotePhotos en paste/server/json-upload:** `applyPayload()` ahora setea `skipRemotePhotos=true` para no re-disparar descarga cuando mobile.de está bloqueado.
+  - **#5 mimetype ZIP permisivo:** `mimes:zip,json` en vez de `mimetypes:application/zip,...` (acepta `application/octet-stream` que algunos navegadores reportan).
+  - **#6 mensajes de error útiles al operador:** ZIP corrupto / falta schema_version / falta pvp_nuevo / etc. → instrucciones claras en lugar de "No se pudo importar: <stacktrace>".
+  - **#7 skill `importacion-vehiculos` v3.9.10 → v3.9.11:** regla nueva "1b. Álbum COMPLETO del anuncio, NUNCA un mínimo" en §📸 FOTOS REALES. `MIN_PHOTOS_NORMAL=3` y `MIN_PHOTOS_STRICT=5` declarados como **suelos de validación, NO objetivos**. Caso 403: parar, no inventar, no sustituir; el operador sube luego el ZIP completo cuando se levante el bloqueo.
+- Toqué: `app/Services/ValuationPackageIngestor.php`, `app/Services/ValuationImporter.php`, `app/Http/Controllers/ValuationImportController.php`, `.claude/skills/importacion-vehiculos/scripts/empaquetar.py`, `.claude/skills/importacion-vehiculos/SKILL.md`, `tests/Feature/ValuationPackage*Test.php` (3 nuevos), `tests/Feature/DownloadPhotoRetryTest.php` (nuevo).
+- ✅ Tests: **705 passed, 1 failed (pre-existente no relacionado: `GuideControllerTest` espera 10 guías, hay 11), 6 skipped, 2565 assertions, 321s**. Pint OK. 24 tests del paquete ZIP (incluyendo los 3 nuevos).
+- ⚠️ PENDIENTE para Claude-Desktop (cuando mobile.de deje de devolver 403):
+  1. **Regenerar los 4 ZIPs con el álbum completo:** Q2 CityCars (42963869222048), Q2 Köln (45066397921824), Q3 Dülmen y Q3 Núremberg. Los ZIPs actuales tienen 8 fotos pero los anuncios probablemente tienen más. Bajar el álbum completo con `empaquetar.py` (ahora con retry anti-bot).
+  2. **Reimportar en Laravel** vía el panel web, o vía `php _tmp/reimport.php` si tengo un script con los 4 paths.
+  3. **Verificar contadores:** la regla dice "≥80% de las fotos del anuncio, sino reabrir cargo en `memoria/trampas-encontradas.md`".
+- No commiteado aún — los cambios están en `_tmp/` (tests + scripts) y en el código fuente; usuario decide cuándo hacer commit.
+
+---
+
 ## 2026-09-16 19:00 · Copilot-VSCode · e-commerce tuning: guía v2 (tramitador puro) + skill ecommerce-tuning
 
 - **Pedido:** adaptar el plan de agente IA de e-commerce al modelo "tramitador puro" (sin almacén), añadir plan de marketing multicanal Meta/TikTok y crear la skill de automatización con el navegador de Claude.

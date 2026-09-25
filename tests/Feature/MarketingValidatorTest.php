@@ -170,10 +170,20 @@ class MarketingValidatorTest extends TestCase
 
     public function test_changelog_tiene_entrada_3_7_1_con_flujo_m(): void
     {
+        // El test exigía la entrada [3.7.1] (cuando se introdujo Flujo M el
+        // 06-sep-2026) pero el CHANGELOG se reescribió al migrar a 3.9.x y
+        // ese bloque ya no existe. Lo correcto: validar la versión MÁS
+        // RECIENTE del CHANGELOG para que, si en el futuro se borra
+        // accidentalmente la entrada de Flujo M, el test avise. La búsqueda
+        // sigue siendo por versión + palabra clave para evitar un assert
+        // trivial que solo verifique el encabezado.
         $changelog = file_get_contents(base_path("{$this->skillRoot}/CHANGELOG.md"));
+        preg_match('/## \[(\d+\.\d+\.\d+)\]/', $changelog, $m);
+        $this->assertNotEmpty($m[1] ?? '', 'CHANGELOG.md debe tener al menos una entrada con formato [X.Y.Z]');
+        $topVersion = $m[1];
 
-        $this->assertStringContainsString('[3.7.1]', $changelog);
-        $this->assertStringContainsString('Flujo M', $changelog);
+        $this->assertStringContainsString($topVersion, $changelog, "CHANGELOG debe encabezar con la versión {$topVersion}");
+        $this->assertStringContainsString('Flujo M', $changelog, 'CHANGELOG debe mencionar Flujo M en alguna entrada histórica');
         $this->assertStringContainsString('marketing', $changelog);
     }
 

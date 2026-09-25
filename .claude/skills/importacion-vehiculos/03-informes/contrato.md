@@ -594,6 +594,11 @@ class Esqueleto
 > | **TikTok** (viral 15-30s) | hook en el primer segundo, hashtag trending + nicho | 3 posts + 3 stories + hashtags + pasos | `[TIKTOK_POST_1..3]` + `[TIKTOK_STORY_1..3]` + `[TIKTOK_HASHTAGS]` (N) + `[TIKTOK_SUBIR_PASOS]` |
 > | **Instagram** (visual storytelling) | estética cuidada, hashtags nichos (15-20) | 3 posts + 3 stories + hashtags + pasos | `[INSTAGRAM_POST_1..3]` + `[INSTAGRAM_STORY_1..3]` + `[INSTAGRAM_HASHTAGS]` (N) + `[INSTAGRAM_SUBIR_PASOS]` |
 > | **Facebook** (informativo masivo) | datos y precio visibles, hashtags mínimos (3-5) | 3 posts + 3 stories + hashtags + pasos | `[FACEBOOK_POST_1..3]` + `[FACEBOOK_STORY_1..3]` + `[FACEBOOK_HASHTAGS]` (N) + `[FACEBOOK_SUBIR_PASOS]` |
+
+> ⚠️ **Solapamiento de canal `facebook` (auditoría 23-sep-2026 · v3.9.12):** el string `facebook` aparece **dos veces** en el esquema (`CarMarketingContent::CHANNELS = [..., 'facebook']`) — una como red social (`kind=post|story`, slot 1-3) y otra como Facebook Marketplace (kind=`ad`, slot=1). La distinción NO es por nombre de canal sino por:
+> - **Red social Facebook:** `kind ∈ {post, story}`, copy en `[FACEBOOK_POST_N]` / `[FACEBOOK_STORY_N]`. Hasta 9 filas (3 posts + 3 stories × 3 slots).
+> - **Facebook Marketplace (portal):** `kind=ad`, copy en bloques v2 propios `[FBMP_*]` que viven en `redes-sociales.json → canales.fb_marketplace`. Una sola fila `(car_id, channel='facebook', kind='ad', slot=1)`.
+> - El v1 (vocabulario retirado) creaba la fila Marketplace con el mismo texto que el resto de portales — bug 12-sep-2026 que el v2 corrige. **Si el ZIP trae los bloques v2, el ingestor toma el copy específico de FBMP_*; si NO los trae, cae al texto base de portal + warning** (no es regresión, es fallback documentado).
 >
 > **Esquema v2 — portales web (1 ficha base reutilizada en 4 portales = 4 filas):**
 >

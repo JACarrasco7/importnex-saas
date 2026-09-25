@@ -47,6 +47,7 @@ BLOQUE_RE = re.compile(r"^\[([A-Z0-9_]+)\](.*)$")
 # Bloques que SIEMPRE son lista aunque aparezcan una vez
 LISTAS = {
     "FC_SPEC", "FC_EQUIP", "FC_EQUIP_PENDIENTE", "FC_VERIFICADO", "FC_PENDIENTE_COMPROBAR",
+    "FC_FOTOS",  # FIX 3.9.12 (23-sep-2026): antes faltaba y `ficha.fotos` llegaba vacío.
     "FC_ARGUMENTO", "FC_INCLUYE", "FC_NO_INCLUYE", "FC_PASO", "FC_HACEMOS", "FC_NO_HACEMOS",
     "FC_FAQ", "IG_FICHA", "FB_FICHA", "FB_INCLUYE", "MP_FICHA", "ST_PANTALLA", "RL_ESCENA",
     "PT_FICHA", "PT_ESTADO", "PT_QUE_INCLUYE", "CAMPO", "FUENTE_DATO", "PROOF", "PENDIENTE",

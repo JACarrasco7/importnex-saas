@@ -250,8 +250,9 @@ fecha de medición al lado. Si un modelo no está en el catálogo, se indica el 
   ✅ Equipamiento solo lo verificado en ficha (A18)
 
 ✅ Entrega:
-  ✅ UN solo .md (el nombre y la carpeta de `03-informes/entregables.md`)
-  ✅ Sin PDF ni ZIP salvo petición explícita
+  ✅ UN solo .md (el nombre y la carpeta de `03-informes/entregables.md`) + SU PDF
+  ✅ PDF generado SIEMPRE con `scripts/mercado_pdf.py <informe>.md` (v3.10.0): es lo que lee el operador
+  ✅ Sin ZIP salvo petición explícita (el ZIP es del Flujo A)
   ✅ Sin copia del informe en la carpeta de outputs
   ✅ Sin marketing (anuncios, copy de redes, fichas de publicación)
   ✅ Sin jerga (sincronizado, merge, volcado, fuente_medicion)
@@ -267,7 +268,7 @@ fecha de medición al lado. Si un modelo no está en el catálogo, se indica el 
 | Anuncios, copy de redes, hashtags, fichas de publicación | Es búsqueda, no marketing (A20) | Flujo M, solo si lo pide después |
 | Comparables ajustados línea a línea | Es Fase 1, sin unidad elegida | Informe de unidad (`informe_tecnico.md`) |
 | IEDMT exacto y `hueco_neto_pct` técnico | Se calcula cuando hay unidad concreta | Mapa `datos_mercado.json` / informe de unidad |
-| PDF y ZIP | Los enlaces no funcionan en PDF | Solo si el usuario lo pide |
+| ZIP del paquete | Es Fase 1, sin unidad elegida | Flujo A (`empaquetar.py`) |
 | Margen, honorarios, `verdict_reasoning` | Datos internos (A22) | Informe interno |
 | «Precio final», «llave en mano», «garantizamos» | No somos vendedores (A32) | En ningún sitio |
 | Jerga de IA y narrativa del proceso | No es legible para negocio | En ningún sitio |
@@ -276,7 +277,10 @@ fecha de medición al lado. Si un modelo no está en el catálogo, se indica el 
 
 ## 📤 Cómo se cierra
 
-1. Se entrega el `.md` (nombre y carpeta según `03-informes/entregables.md`).
+1. Se genera el `.md` (nombre y carpeta según `03-informes/entregables.md`) y a
+   continuación **su PDF** con `scripts/mercado_pdf.py <informe>.md` — el PDF es el
+   entregable que lee el operador (portada con KPIs, tabla semáforo, 1 página por
+   modelo); el `.md` queda como contrato interno para diffs y para el flujo siguiente.
 2. Se para en el **checkpoint** del flujo: **CP1** (B) · **CP-C** (C) · categoría (E).
    *"Informe de búsqueda entregado. ¿Sigo con …?"* — **no** se avanza a la Fase 2 por iniciativa
    propia.
