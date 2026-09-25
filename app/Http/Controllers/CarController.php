@@ -156,6 +156,10 @@ class CarController extends Controller
                 'research_gaps' => $car->researchGaps,
                 'comparables_stats' => $car->comparablesStats,
                 'comparables_stats_by_country' => $car->comparablesStatsByCountry,
+                // §marketplace (25-sep-2026) — estado de publicación en la web
+                // pública: las 4 condiciones + por qué falla. La ficha muestra
+                // el toggle y avisa de lo que falta para que aparezca.
+                'marketplace_status' => $car->marketplaceStatus(),
                 // C2 auditoría 09-sep-2026: URLs de las búsquedas de mercado
                 // (mobile.de / autoscout24 / coches.net / wallapop). La pestaña
                 // Mercado del panel admin las muestra como "Búsquedas
@@ -594,6 +598,45 @@ class CarController extends Controller
 
         return redirect()->route('cars.index')
             ->with('success', 'Car updated successfully.');
+    }
+
+    /**
+     * Activa/desactiva la publicación en el marketplace público desde la
+     * propia ficha, sin pasar por el formulario de edición completo.
+     *
+     * Regla (25-sep-2026): el toggle solo cambia `is_marketplace`. El coche NO
+     * se publica hasta cumplir las otras 3 condiciones (`status=Delivered`,
+     * `verdict` positivo, organización `is_public`); la ficha las lista para
+     * que el operador sepa qué falta — antes marcaba el toggle y no entendía
+     * por qué el coche no aparecía.
+     *
+     * La caché del marketplace y el sitemap se invalidan solos: `CarObserver`
+     * observa `is_marketplace` en `saved()`.
+     */
+    public function toggleMarketplace(Request $request, Car $car): RedirectResponse
+    {
+        $validated = $request->validate([
+            'is_marketplace' => ['required', 'boolean'],
+        ]);
+
+        $car->update(['is_marketplace' => (bool) $validated['is_marketplace']]);
+
+        // Releer el estado tras el update (el observer ya refrescó cachés).
+        $status = $car->fresh()->marketplaceStatus();
+
+        if (! $validated['is_marketplace']) {
+            $mensaje = 'Coche retirado del marketplace público.';
+        } elseif ($status['visible']) {
+            $mensaje = 'Coche publicado en el marketplace público.';
+        } else {
+            $pendientes = collect($status['checks'])
+                ->reject(fn ($c) => $c['ok'])
+                ->pluck('key')
+                ->implode(', ');
+            $mensaje = 'Marcado para publicar, pero aún NO aparece en la web: falta '.$pendientes.'. Ver condiciones en la ficha.';
+        }
+
+        return back()->with('success', $mensaje);
     }
 
     public function destroy(Car $car): RedirectResponse

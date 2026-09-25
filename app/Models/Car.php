@@ -209,6 +209,38 @@ class Car extends Model
         return true;
     }
 
+    /**
+     * Estado de publicación en el marketplace público.
+     *
+     * Un coche aparece en `/marketplace` SOLO si cumple las 4 condiciones que
+     * aplica `PublicMarketplaceController@index`:
+     *   1. `is_marketplace` = true (el toggle que activa el operador)
+     *   2. `status` = Delivered
+     *   3. `verdict` IN (Buy, Buy if price drops)
+     *   4. La organización tiene `is_public` = true
+     *
+     * Este método es la FUENTE ÚNICA DE VERDAD del criterio: la ficha lo usa
+     * para avisar POR QUÉ no aparece, en vez de dejar al operador marcando el
+     * toggle sin entender por qué el coche no se publica (queja real: "lo
+     * marqué y no sale").
+     *
+     * @return array{visible: bool, checks: array<int, array{key: string, ok: bool}>}
+     */
+    public function marketplaceStatus(): array
+    {
+        $checks = [
+            ['key' => 'is_marketplace', 'ok' => (bool) $this->is_marketplace],
+            ['key' => 'status', 'ok' => $this->status === 'Delivered'],
+            ['key' => 'verdict', 'ok' => in_array($this->verdict, ['Buy', 'Buy if price drops'], true)],
+            ['key' => 'organization', 'ok' => (bool) optional($this->organization)->is_public],
+        ];
+
+        return [
+            'visible' => ! in_array(false, array_column($checks, 'ok'), true),
+            'checks' => $checks,
+        ];
+    }
+
     public function calculateIEDMT()
     {
         // Unidad española: sin IEDMT (no hay importación).

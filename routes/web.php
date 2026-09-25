@@ -219,6 +219,11 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::patch('/cars/{car}', [CarController::class, 'update'])
         ->where('car', '[0-9]+')
         ->name('cars.update');
+    // Toggle rápido de publicación en el marketplace desde la ficha (§25-sep-2026).
+    // Separado de `cars.update` para no redirigir a cars.index desde la ficha.
+    Route::patch('/cars/{car}/marketplace', [CarController::class, 'toggleMarketplace'])
+        ->where('car', '[0-9]+')
+        ->name('cars.toggle-marketplace');
     Route::delete('/cars/{car}', [CarController::class, 'destroy'])
         ->where('car', '[0-9]+')
         ->name('cars.destroy');

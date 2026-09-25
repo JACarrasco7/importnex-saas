@@ -24,6 +24,22 @@
 
 ---
 
+## 2026-09-25 16:45 · Copilot-VSCode · Toggle de marketplace en la ficha del coche
+
+- **Pedido:** "¿cómo se pone un coche en el marketplace? debería ser un checkbox bonito en la ficha, no?".
+- **Diagnóstico:** solo se podía desde `Cars/Edit.vue` (formulario completo). Y marcar `is_marketplace` **no basta**: hacen falta 4 condiciones (`is_marketplace` + `status=Delivered` + `verdict IN (Buy, Buy if price drops)` + `organization.is_public`). El operador marcaba el toggle y no entendía por qué no aparecía.
+- **Hecho:**
+  - **`Car::marketplaceStatus()`** (nuevo): **fuente única de verdad** del criterio, con las mismas 4 condiciones que aplica `PublicMarketplaceController@index`. Devuelve `{visible, checks[]}`.
+  - **`PATCH cars/{car}/marketplace` → `CarController@toggleMarketplace`**: endpoint dedicado (no `cars.update`, que redirige a `cars.index`). Mensaje contextual: «publicado» / «retirado» / «NO aparece, falta X». Protegido por auth + verified + organization.
+  - **`HeaderBar.vue`**: toggle switch bonito (mismo estilo que Edit.vue) + color de estado (🟢 publicado / 🟡 marcado sin cumplir / ⚪ sin marcar) + lista de condiciones pendientes + enlace a la ficha pública cuando visible.
+  - **i18n** es+en (12 claves nuevas).
+  - **`CarMarketplaceToggleTest`**: 9 casos (las 4 condiciones, cada una rota, veredicto `Buy if price drops`, toggle activar/desactivar, validación del boolean, prop en la ficha).
+- **Verificación:** 726 passed / 0 failed / 2644 assertions (+9 nuevos). Pint passed. 0 errores de editor.
+- **⚠️ El front necesita `npm run build`** (no lo lanzo yo — regla del proyecto); en deploys, Forge lo compila.
+- ✅ Sin migraciones → el deploy no toca la BD.
+
+---
+
 ## 2026-09-25 15:30 · Copilot-VSCode · 🚀 DEPLOY A PRODUCCIÓN (batch upload + skill v3.10.3)
 
 - **Pedido:** "sube todo a prod y pruébalo todo, déjalo sin inconsistencias".
