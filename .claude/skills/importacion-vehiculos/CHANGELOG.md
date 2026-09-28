@@ -1,5 +1,42 @@
 ﻿
 
+## [3.10.4] - 28-sep-2026
+
+**Generador de fuentes completo + bug `ArrBodyType` de SUV (para el informe de mercado v0.5.0).**
+
+Dolor reportado: el bloque §FUENTES del informe de mercado salía incompleto — sin el conteo de anuncios
+(se pegaba a mano, con erratas), sin fecha, sin los filtros de precio/país/combustible, y **dos versiones
+del mismo modelo (Golf GTI vs Golf R) generaban la MISMA URL** porque el generador no podía expresar el
+filtro de versión. Además el informe de SUV del 16-sep detectó que el filtro de carrocería SUV no funcionaba.
+
+### `scripts/empaquetar.py`
+
+1. **`_url_mobile_de`** gana `precio_max` (`p=:40000`), `solo_alemania` (`cn=DE`), `combustible`
+   (`ft=DIESEL|PETROL`) y `q_extra` (`q=` texto libre para acabados sin ID de modelo).
+2. **`_url_coches_net`** gana `precio_max` (`MaxPrice`), `combustible` (`Fueltype2List=1|2` diesel/gasolina)
+   y `version_extra` (`Versions[0]` **adicional** a `ModelIds[0]`, que es lo que separa dos versiones del
+   mismo modelo).
+3. 🔴 **Bug corregido:** el mapa de carrocerías de Coches.net tenía `suv: 5`, pero **5 es Monovolumen**;
+   el SUV es **6**. Evidencia: el T-Roc (SUV) daba **0 anuncios** con `ArrBodyType=5`. Corregido a
+   `suv: 6, monovolumen: 5`. **Regla nueva: validar todo filtro de carrocería por conteo** (si da 0 o un
+   conteo absurdo, el ID es de otra carrocería).
+
+### `scripts/fuentes.py`
+
+4. **`--spec` de 9 a 13 campos:** `marca|modelo|etiqueta|cv_min|cv_max|anio_desde|anio_hasta|km|carroceria|anuncios_de|anuncios_es|versions_es|q_de`.
+5. **Flags nuevas:** `--anuncios-de`, `--anuncios-es`, `--fecha` (formatea `16 de septiembre de 2026`),
+   `--precio-max`, `--pais-de`, `--combustible`, `--versions-es`, `--q-de`. Las globales actúan de
+   default; el `--spec` manda (el conteo es distinto en cada versión).
+6. La línea de cada portal sale ya como `- 🇩🇪 mobile.de: \`URL\` (params) → **1.276 anuncios** (medido 16 de septiembre de 2026)`:
+   deja de montarse a mano.
+7. La cabecera de `--seccion` pasa a `## 🔗 FUENTES CONSULTADAS — re-ejecutables` (coincide con la §8 de
+   la plantilla de informe).
+
+**Retrocompatible:** las firmas nuevas son `kwargs` opcionales y los `--spec` de 9 campos siguen funcionando
+(los campos nuevos quedan vacíos).
+
+**Bump:** v3.10.3 → **v3.10.4**.
+
 ## [3.10.3] - 25-sep-2026
 
 **Subida batch de N ZIPs desde el panel (Laravel).**

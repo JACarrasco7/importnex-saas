@@ -2,8 +2,8 @@
 
 > **Para:** Equipo de JJ Import Motors (Huelva)
 > **Qué es:** Uso diario del skill `importacion-vehiculos` (importar coches de Alemania sin stock, cobrando honorarios).
-> **Actualizado:** 2026-09-13 (skill **v3.9.7**)
-> **Skill hermana:** `estudio-mercado` (v0.4.4) — estudia el mercado y deja el mapa `datos_mercado.json` que esta skill consulta **antes** de buscar. Ver [`../SKILLS.md`](../SKILLS.md).
+> **Actualizado:** 2026-09-28 (skill **v3.10.4**)
+> **Skill hermana:** `estudio-mercado` (v0.5.0) — estudia el mercado y deja el mapa `datos_mercado.json` que esta skill consulta **antes** de buscar. Ver [`../SKILLS.md`](../SKILLS.md).
 
 ---
 

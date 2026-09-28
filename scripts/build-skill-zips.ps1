@@ -126,7 +126,15 @@ if (-not (Test-Path $docsFile)) {
     $replacement = $heading + "`n`n" + $intro + "`n`n" + $newTable + "`n`n"
     $content     = [regex]::Replace($content, $pattern, $replacement)
 
-    $content = $content -replace '_Última regeneraci[oó]n: .*_', "_Última regeneracion: $today_"
+    # El patron va SIN acentos literales a proposito: PowerShell 5.1 lee este .ps1
+    # como ANSI (el fichero no lleva BOM), asi que 'Ultima'/'regeneracion' escritos
+    # aqui llegan corruptos y el regex NUNCA casaba — la linea se quedaba con la
+    # fecha vieja mientras la tabla si se regeneraba (bug detectado 28-sep-2026).
+    # Las vocales acentuadas se inyectan con [char] 0xDA (U) y 0xF3 (o).
+    $resumen = '> _' + [char]0xDA + 'ltima regeneraci' + [char]0xF3 + 'n: ' +
+               (Get-Date -Format 'yyyy-MM-dd') +
+               '. Versiones vigentes: las de la tabla de abajo (y el CHANGELOG.md de cada skill)._';
+    $content = [regex]::Replace($content, '(?m)^> _.ltima regeneraci.n: .*$', $resumen)
 
     Set-Content -Path $docsFile -Value $content -Encoding UTF8 -NoNewline
     Write-Host "[OK] docs/SKILLS.md actualizado" -ForegroundColor Cyan

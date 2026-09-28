@@ -1,6 +1,6 @@
-# 📄 Plantilla de informe de mercado — estudio-mercado (23-ago-2026 v0.3.8)
+# 📄 Plantilla de informe de mercado — estudio-mercado (28-sep-2026 v0.5.0)
 
-> **Para quién es este informe:** para **ti** (Jacar). Lenguaje de negocio, sin jerga técnica. El objetivo es que en 1 minuto sepas: **¿cuál de estos coches merece la pena importar? ¿cuál es su precio real en Alemania y en España? ¿cuánto me costaría puesto en Huelva?**.
+> **Para quién es este informe:** para **ti** (Jacar). Lenguaje de negocio, sin jerga técnica. Sondeo rápido del mercado: solo el número, el hueco y los enlaces para que **investigues tú** abriendo los listados.
 >
 > **Regla de ORO (23-ago-2026 v0.3.8): la nube NO decide nada por su cuenta.** Cada decisión que pueda tomarse de dos formas está resuelta aquí con un SI/ENTONCES explícito. Si una situación no está contemplada, se PARA y pregunta. NO improvisa.
 
@@ -12,9 +12,10 @@
 
 | Situación | Comportamiento OBLIGATORIO |
 |---|---|
-| Hay que decidir si incluir el desglose por variables | **SIEMPRE incluirlo.** Si no hay muestra suficiente (>2 anuncios por combinación) → poner 1 línea "No hay muestra suficiente para segmentar" y omitir la tabla. NO decidir "es opcional". |
+| Hay que decidir si incluir el desglose por variables o los mejores anuncios | **NO se incluyen.** Desde v0.5.0 (28-sep-2026) el informe es un **sondeo**: nada de fichas de anuncios ni desglose por equipamiento. Si el usuario los pide expresamente, se añaden como anexo al final y se avisa en 1 línea. |
+| Hay que decidir si incluir §FUENTES con conteo y fecha | **SIEMPRE.** Es la única sección imprescindible: sin ella el informe no sirve (el usuario no puede rehacer la búsqueda). |
 | Hay que decidir si incluir comparables | **SIEMPRE incluir al menos 1 comparable** de modelos ya estudiados (ver `modelos-medidos.md`). Si no hay ninguno, poner 1 línea "Sin comparables todavía" y seguir. |
-| Hay que decidir el formato del archivo | **SIEMPRE 1 único Markdown** (`<marca>-<modelo>_<YYYY-MM-DD>.md`). NO PDF, NO duplicados, NO varios formatos a la vez. |
+| Hay que decidir el formato del archivo | **SIEMPRE 1 único Markdown** (`<marca>_<segmento>_<enfoque>_<YYYY-MM-DD>.md`). NO PDF, NO duplicados, NO varios formatos a la vez. |
 | Hay que decidir los gastos fijos (1.500 € vs otro) | **PREGUNTAR** al usuario al inicio (ver §CUÁNDO PREGUNTAR). NO asumir 1.500 € ni inventar otra cifra. |
 | Hay que decidir el IVA de importación / IEDMT | **NO incluir en las tablas.** SOLO mencionar en la sección "💶 Desglose de los 1.500 €" con el orden de magnitud realista (+3.500 a +5.500 € todo incluido). NO calcular por coche. |
 | Hay que decidir si el suelo es fiable | Marcar ✅ (verificado en ficha) · 👁️ (solo listado) · ⚠️ (con reserva/siniestro/financiado). NUNCA sin marca. |
@@ -42,11 +43,12 @@
 | "Busca un SUV compacto" | ¿Presupuesto? · ¿año mín? · ¿km máx? · ¿gasolina/diesel/híbrido? · ¿marca preferida? · ¿uso principal? |
 | "Hazme un estudio de mercado" | ¿De qué modelo/marca? (si no lo dice) |
 | "Completa el X" | ¿Qué parte exactamente? ¿qué versión? |
-| "Importa este MD" | ¿Es `informes/mercado/<archivo>.md`? ¿hay sesión activa o es en frío? |
+| "Importa este MD" | ¿Es `informes/<marca>/<marca>_<segmento>_<enfoque>_<YYYY-MM-DD>.md`? ¿hay sesión activa o es en frío? |
 
 ### ❌ NUNCA preguntar (ya está decidido por la plantilla)
 
-- Si incluir desglose por variables → **SIEMPRE sí**.
+- Si incluir desglose por variables o los mejores anuncios → **NO** (desde v0.5.0).
+- Si incluir §FUENTES con URL + parámetros + conteo + fecha → **SIEMPRE sí**.
 - Si incluir comparables → **SIEMPRE sí**.
 - Formato del archivo → **SIEMPRE 1 .md**.
 - Orden de secciones → **fijo**.
@@ -86,18 +88,16 @@ Para no inventar datos, necesito confirmar 4 cosas:
 > **Antes de dar el informe por terminado**, la nube escribe este bloque al final (con ✅/❌ en cada línea). NO entregar si hay algún ❌ sin resolver.
 
 ```
-✅ Check — Estructura completa:
-  ✅ §CONCLUSIÓN con párrafo + tabla resumen
-  ✅ §CANDIDATOS con 1-2 por versión + URL visible
-  ✅ §DESGLOSE POR VARIABLES (combinaciones + §3.b segmentación amplia si muestra ≥50)
-  ✅ §3.c LIMITACIONES Y TRAMPAS DETECTADAS (siempre declarar, ⚠️ si no se pudo medir)
-  ✅ §COMPARABLES (al menos 1)
-  ✅ §TRAMPAS (al menos 1, si las hay)
-  ✅ §RESUMEN PARA COPIAR (1 párrafo)
-  ✅ §ARCHIVO GENERADO
-  ✅ §DESGLOSE 1.500 € GASTOS
-  ✅ §COBERTURA Y METODOLOGÍA (al final)
-  ✅ §FUENTES CONSULTADAS con la URL exacta de cada medición (re-ejecutable)
+✅ Check — Estructura completa (9 secciones, en orden):
+  ✅ 1. §CONCLUSIÓN — tabla resumen + 4-6 líneas
+  ✅ 2. §VERSIÓN A VERSIÓN — tabla de números + nota de 1 línea
+  ✅ 3. §COMPARABLES (al menos 1; "Sin comparables todavía" si no hay)
+  ✅ 4. §TRAMPAS ("Sin trampas detectadas" si no hay)
+  ✅ 5. §RESUMEN PARA COPIAR (1 párrafo, sin enlaces)
+  ✅ 6. §DESGLOSE 1.500 € GASTOS
+  ✅ 7. §COBERTURA Y METODOLOGÍA
+  ✅ 8. §FUENTES CONSULTADAS — URL exacta de cada medición + conteo + fecha
+  ✅ 9. §CHECKLIST (auto-verificación)
 
 ✅ Check — Datos consistentes:
   ✅ Suelos DE/ES con marca de fiabilidad (✅/👁️/⚠️)
@@ -109,7 +109,7 @@ Para no inventar datos, necesito confirmar 4 cosas:
 
 ✅ Check — Archivos:
   ✅ UN solo .md, sin duplicados
-  ✅ Nombre: <marca>-<modelo>_<YYYY-MM-DD>.md
+  ✅ Nombre: <marca>_<segmento>_<enfoque>_<YYYY-MM-DD>.md
   ✅ Sin PDF generado
 ```
 
@@ -122,18 +122,21 @@ Para no inventar datos, necesito confirmar 4 cosas:
 | # | Sección | Obligatoria | Si falta muestra |
 |---|---|:---:|---|
 | 1 | 🏁 CONCLUSIÓN (párrafo + tabla resumen) | ✅ | — |
-| 2 | 🎯 LOS 2 MEJORES ANUNCIOS POR VERSIÓN | ✅ | — |
-| 3 | 📊 DESGLOSE POR VARIABLES | ✅ | Poner 1 línea y omitir tablas |
-| 4 | 🧩 COMPARABLES | ✅ | Poner "Sin comparables todavía" |
-| 5 | ⚠️ TRAMPAS | ✅ si hay | Poner "Sin trampas detectadas" |
-| 6 | 📋 RESUMEN PARA COPIAR | ✅ | — |
-| 7 | 💶 DESGLOSE 1.500 € GASTOS | ✅ | — |
-| 8 | 📁 ARCHIVO GENERADO | ✅ | — |
-| 9 | 📋 COBERTURA Y METODOLOGÍA | ✅ | — |
-| 10 | 🔗 FUENTES CONSULTADAS (URL de cada medición, re-ejecutable) | ✅ | — |
-| 11 | ✅ CHECKLIST (auto-verificación) | ✅ | — |
+| 2 | 🎯 VERSIÓN A VERSIÓN (tabla de números + nota de 1 línea) | ✅ | — |
+| 3 | 🧩 COMPARABLES | ✅ | Poner "Sin comparables todavía" |
+| 4 | ⚠️ TRAMPAS | ✅ si hay | Poner "Sin trampas detectadas" |
+| 5 | 📋 RESUMEN PARA COPIAR | ✅ | — |
+| 6 | 💶 DESGLOSE 1.500 € GASTOS | ✅ | — |
+| 7 | 📋 COBERTURA Y METODOLOGÍA (+ 📁 ARCHIVO GENERADO) | ✅ | — |
+| 8 | 🔗 FUENTES CONSULTADAS (URL + parámetros + conteo + fecha) | ✅ | — |
+| 9 | ✅ CHECKLIST (auto-verificación) | ✅ | — |
 
-Guardar como: `informes\mercado\<marca>-<modelo>_<YYYY-MM-DD>.md`
+Guardar como: `informes\<marca>\<marca>_<segmento>_<enfoque>_<YYYY-MM-DD>.md`
+
+> `<segmento>` ∈ `compacto · suv · berlina · deportivo · familiar · urbano` (valores del schema) · `<enfoque>` ∈ `deportivo · generalista · accesible · premium · mixto`. Marca en corto y minúsculas (`vw`, `audi`, `bmw`, `mercedes`...).
+> Estudio de un modelo concreto (no la marca entera): `<marca>-<modelo>_<segmento>_<enfoque>_<YYYY-MM-DD>.md`.
+>
+> **Lo que se ELIMINÓ de la plantilla el 28-sep-2026 (v0.5.0) — y NO se vuelve a poner:** fichas con los 2 mejores anuncios, desglose por variables (cambio/techo/cuadro digital), §3.b segmentación amplia y §3.c limitaciones dentro de cada ficha. Esto es un **sondeo de mercado**, no un dossier: el detalle de anuncios lo aporta el usuario abriendo las URLs de la sección 8.
 
 ---
 
@@ -172,174 +175,14 @@ Guardar como: `informes\mercado\<marca>-<modelo>_<YYYY-MM-DD>.md`
 
 ---
 
-## 🎯 LOS 2 MEJORES ANUNCIOS POR VERSIÓN (para ver ahora)
+## 🎯 VERSIÓN A VERSIÓN — el matiz de cada una
 
-> Solo los que pasan filtro: precio fiable, equipamiento acorde y vendedor decente. Click en el enlace → ves el anuncio original.
->
-> **Columna "Puesto en Huelva"**: precio alemán + 1.500 € de gastos fijos estimados (1.000 € transporte + 200 € ITV + 300 € gestoría/ausfuhr). **IVA de importación aparte** (depende del CO₂ y año del coche, se calcula cuando hay unidad concreta).
->
-> **Columna "Ahorro real"**: suelo España − puesto en Huelva. Es lo que te ahorras de verdad.
+> Los números están en la tabla de la conclusión. Aquí, solo lo que **cambia la decisión**, versión a versión (2-3 líneas cada una, sin tablas y **sin abrir anuncios ni fichas** — eso lo haces tú con las URLs de la sección 8).
 
-### GTI (230/245cv)
-
-| Precio | Puesto Huelva | Año | Km | Por qué mola | Enlace |
-|---:|---:|---|---:|---|---|
-| 15.999 € | **17.499 €** | 2017 | 106.726 | Suelo Alemania, 5p DSG, cuadro digital, sin accidentes | https://www.mobile.de/es/vehículos/detalles.html?id=40947884798464 |
-| 19.690 € | — | 2017 | 155.361 | Suelo España, 3p manual, 245cv Performance | https://www.coches.net/volkswagen-golf-gti-performance-20-tsi-245cv-5p-gasolina-2017-en-madrid-71274163-covo.aspx |
-
-> Traer el GTI de Alemania te sale por **17.499 € puesto en Huelva** (sin IVA). El mismo coche en España cuesta **19.690 €** → te ahorras **2.191 €**.
-
-### GTI TCR (290cv)
-
-| Precio | Puesto Huelva | Año | Km | Por qué mola | Enlace |
-|---:|---:|---|---:|---|---|
-| 19.699 € | **21.199 €** | 2019 | 149.702 | Suelo Alemania, 5p DSG, completo | https://www.mobile.de/es/vehículos/detalles.html?id=38717798642208 |
-| 28.900 € | — | 2019 | 117.949 | Suelo España limpio, con techo y cuadro digital | https://www.coches.net/volkswagen-golf-gti-tcr-20-tsi-213kw290cv-dsg-5p-gasolina-2019-en-madrid-71332726-covo.aspx |
-
-> Traer el TCR te sale por **21.199 €** vs **28.900 €** en España → te ahorras **7.701 €**. El TCR tiene el hueco más grande de todos los Golf del estudio.
-
-### GTI Clubsport (265cv) — **Mk7, no Mk7.5**
-
-| Precio | Puesto Huelva | Año | Km | Por qué mola | Enlace |
-|---:|---:|---|---:|---|---|
-| 16.499 € | **17.999 €** | 2016 | 153.000 | Suelo Alemania original, sin tocar | https://www.mobile.de/es/vehículos/detalles.html?id=452337727 |
-| 22.490 € | — | 2016 | 143.000 | Suelo España, techo solar, "precio justo" | https://www.coches.net/volkswagen-golf-gti-clubsport-20-tsi-265cv-bmt-dsg-5p-gasolina-2016-en-barcelona-71264521-covo.aspx |
-
-> Traer el Clubsport Mk7 te sale por **17.999 €** vs **22.490 €** en España → te ahorras **4.491 €**. Ojo: Clubsport NO existe en Mk7.5 (si te ofrecen Clubsport 7.5 es un error).
-
-### Golf R (310cv)
-
-| Precio | Puesto Huelva | Año | Km | Por qué mola | Enlace |
-|---:|---:|---|---:|---|---|
-| 16.899 € | **18.399 €** | 2017 | 176.147 | Suelo Alemania limpio, 5p DSG | https://www.mobile.de/es/vehículos/detalles.html?id=461400725 |
-| 22.880 € | — | 2017 | 130.000 | Suelo España "super precio", 3p DSG, techo | https://www.coches.net/volkswagen-golf-r-20-tsi-228kw-310cv-4motion-dsg-3p-gasolina-2017-en-sevilla-70611650-covo.aspx |
-
-> Traer el Golf R te sale por **18.399 €** vs **22.880 €** en España → te ahorras **4.481 €**. El Golf R es el ganador claro en relación riesgo/beneficio.
-
----
-
-## 📊 DESGLOSE POR VARIABLES — cuánto cambia el precio según equipamiento
-
-> **Esta es la parte que casi siempre se salta la IA.** El mismo coche cambia mucho de precio según **puertas (3p/5p), cambio (manual/DSG), techo solar y cuadro digital**. Aquí se ve con números.
->
-> **Cómo se lee:** cada variable se compara sola, manteniendo el resto fijo. Ejemplo: "el GTI 5p DSG es 800 € más barato que el 3p manual en Alemania", pero la DSG en España son +1.200 € más caras.
->
-> **Si el usuario no pidió este desglose**, sigue saliendo igual: la segmentación siempre se incluye cuando hay muestra suficiente (>2 anuncios por combinación). Si el mercado no permite separarlo, se dice en 1 línea y se omite la tabla.
->
-> **Subsección §3.b "Segmentación amplia por ejes" (24-ago-2026):** cuando el estudio se hace con **muestra grande (≥50 ofertas por mercado)**, además de las combinaciones anteriores se incluye una segmentación por **eje único** (cambio / puertas / techo / cuadro digital) con conteos grandes, % y suelo de cada bucket. Escala mucho mejor que la tabla de combinaciones y deja ver la cuota real de mercado (ej. "DSG 89% en Golf R DE"). **Plantilla abajo.**
-
-### GTI (230/245cv) — Alemania
-
-| Combinación | Cuantos hay | Precio medio | Comentario |
-|---|---:|---:|---|
-| 3p · manual · sin techo | 4/14 | 16.450 € | El más barato, los caprichosos lo quieren |
-| 3p · manual · techo solar | 1/14 | 17.900 € | Raro, +1.450 € |
-| 5p · DSG · sin techo | 5/14 | 16.700 € | El típico familiar |
-| 5p · DSG · techo solar | 1/14 | 18.200 € | Muy raro, +1.500 € |
-| 5p · DSG · **cuadro digital** | 7/14 | 16.700 € | Cuadro digital NO sube el precio en DE (va incluido en el acabado) |
-
-> **Resumen GTI Alemania:** puertas y cambio NO marcan precio claro. Solo el techo solar sube el precio (+1.500 €). El cuadro digital está incluido en cualquier acabado del 2017-2018.
-
-### GTI (230/245cv) — España
-
-| Combinación | Cuantos hay | Precio medio | Comentario |
-|---|---:|---:|---|
-| 3p · manual · sin techo | 1/3 | 19.690 € | Suelo de partida |
-| 5p · DSG · sin techo | 1/3 | 21.990 € | +2.300 € sobre el 3p manual (España prima la practicidad) |
-| 5p · DSG · techo + cuadro | 1/3 | 24.500 € | El full equipado en ES lleva ambos y sube 2.500 € |
-
-> **Resumen GTI España:** la 5p DSG se paga +2.300 € sobre la 3p manual. El full sube +2.500 € sobre la misma base.
-
-### GTI TCR (290cv)
-
-> Solo existe 5p + DSG de fábrica → no se puede segmentar. Todos los precios los决定 km y estado. La media real (sin filtros) está en 27.900 € en ES vs 24.500 € en DE.
-
-### GTI Clubsport (Mk7) — Alemania
-
-| Variable | Cuantos hay | Prima |
-|---|---:|---:|
-| Manual (vs DSG) | 2/12 | **-0 €** (no cambia el precio) |
-| Techo solar | 0/12 | No hay Clubsport con techo solar |
-| Menos de 50.000 km | 2/12 | +7.000 € sobre la media |
-| **Re-chipeado** (stage 1 / OPF quitado) | 5/12 | -2.500 € vs los limpios |
-
-### Golf R (310cv) — Alemania
-
-| Variable | Cuantos hay | Prima |
-|---|---:|---:|
-| Manual (vs DSG) | 2/14 | **+0 €** (los manuales no se penalizan) |
-| Techo solar | 3/14 | +800 € |
-| **Re-chipeado** (stage 1 / OPF fuera) | 5/14 | -2.000 € vs los limpios |
-| Menos de 80.000 km | 4/14 | +3.000 € |
-
-> **Resumen Golf R Alemania:** km y re-chipeo son los que más mueven el precio. Equipamiento (techo, cuadro digital) está incluido en la mayoría.
-
-### Golf R (310cv) — España
-
-| Variable | Cuantos hay | Prima |
-|---|---:|---:|
-| 3p (vs 5p) | 1/3 | **-0 €** (raro, pero no penaliza) |
-| Techo solar | 1/3 | +1.200 € |
-| Menos de 100.000 km | 1/3 | +1.500 € |
-
-### 🔬 §3.b — Segmentación amplia por ejes (24-ago-2026, opcional pero recomendada si muestra grande)
-
-> **Cuándo incluirla:** muestra ≥50 ofertas por mercado en la variante. Si no, omitir y dejar solo las combinaciones de arriba.
->
-> **Qué aporta:** en lugar de combinaciones (3p+manual+sin techo: 4/14) se segmenta por **eje único** manteniendo los demás libres, lo que da conteos grandes y revela la cuota real de mercado (ej. "DSG 89% en Golf R DE"). Referencia: informe Golf 7.5 v3 `informes-mercado/volkswagen-golf-75_gti-tcr-clubsport-r_2026-08-23.md` §5.
-
-**Plantilla por variante (replicar para cada variante del estudio):**
-
-```
-### <Variante> (rango potencia, año, km máx)
-
-**DE — mobile.de** (rango kW/cv exacto): <N ofertas>
-
-| Eje        | Bucket           | Ofertas | %    | Suelo | Comentario |
-|------------|------------------|--------:|-----:|------:|------------|
-| Cambio     | Manual           | <n>     | <%>  | <€>   |            |
-| Cambio     | Automático (DSG) | <n>     | <%>  | <€>   |            |
-| Puertas    | 3p               | <n>     | <%>  | <€>   | (si está disponible en DE) |
-| Puertas    | 5p               | <n>     | <%>  | <€>   |            |
-| Techo      | Con techo solar  | <n>     | <%>  | <€>   | (faceta mobile.de) |
-| Techo      | Sin techo solar  | <n>     | <%>  | <€>   |            |
-| Cuadro dig.| Con AID          | <n>     | <%>  | <€>   | (raro medirlo, ver §Limitaciones) |
-| Cuadro dig.| Sin AID          | <n>     | <%>  | <€>   |            |
-| **Total**  |                  | **<N>** |      |       |            |
-
-**ES — Coches.net** (rango CV exacto): <N ofertas>
-
-| Eje        | Bucket           | Ofertas | %    | Suelo | Comentario |
-|------------|------------------|--------:|-----:|------:|------------|
-| Cambio     | Manual           | <n>     | <%>  | <€>   |            |
-| Cambio     | Automático       | <n>     | <%>  | <€>   |            |
-| Puertas    | 3p               | <n>     | <%>  | <€>   |            |
-| Puertas    | 5p               | <n>     | <%>  | <€>   |            |
-| Techo      | Con techo        | <n>     | <%>  | <€>   | (Coches.net SÍ tiene este checkbox) |
-| Techo      | Sin techo        | <n>     | <%>  | <€>   |            |
-| Cuadro dig.| —                | —       | —    | —     | ⚠️ NO disponible en Coches.net |
-```
-
-### 📌 §3.c — Limitaciones y trampas detectadas (siempre declarar)
-
-> **Siempre incluir este bloque tras la segmentación.** Cualquier cosa que no se haya podido medir va aquí con ⚠️. Es mejor declarar limitación que inventarse un dato.
-
-**Plantilla de limitaciones conocidas (24-ago-2026):**
-
-```
-⚠️ **Techo y cuadro digital en ES:** Coches.net no tiene checkbox de cuadro
-   digital (limitación ya documentada); el de techo sí está.
-⚠️ **Puertas y cuadro digital en DE:** el combobox "Número de puertas" de
-   mobile.de (TWO_OR_THREE / FOUR_OR_FIVE / SIX_OR_SEVEN) no se ha podido
-   aplicar como filtro verificable ni por URL ni por clic esta sesión.
-   El checkbox "Panel de instrumentos digital" vive detrás de un "Más..."
-   que no expande. Se declara como limitación, no como dato ausente.
-⚠️ **Trampa TransmissionTypeId en Golf R:** el filtro `TransmissionTypeId=2`
-   (Manual) en Coches.net puede devolver fichas etiquetadas como "DSG" en su
-   propio título. Verificar ficha individual antes de presentar un "R manual".
-```
-
-> Cualquier otra trampa detectada (etiquetado erróneo, potencia alterada sin avisar, etc.) se añade con ⚠️ + 1 frase explicando el caso. **NUNCA** se inventa un dato para llenar una celda vacía — se declara limitación.
+- **GTI (230/245cv)** — DE tiene 5x la oferta de ES; el hueco es real pero justito. Ojo con el Performance de 245cv: cambia el filtro de potencia.
+- **GTI TCR (290cv)** — el hueco más grande del estudio. La muestra española es corta (n=3): el suelo ES puede ser puntual.
+- **GTI Clubsport (265cv)** — solo existe en Mk7 (2016-2017). Si aparece algo etiquetado "7.5", es un error de etiquetado.
+- **Golf R (310cv)** — el ganador en riesgo/beneficio (hueco con mercado 6x mayor). Lupa en el re-chipeo: 5 de 14 anuncios DE llevan "stage 1" silencioso.
 
 ---
 
@@ -400,76 +243,64 @@ en la próxima sesión.
 
 ---
 
-## 📁 ARCHIVO GENERADO
-
-```
-informes/mercado/volKSwagen-golf-75_2026-08-23.md
-```
-
-(El mapa de mercado en `datos_mercado.json` lo actualiza Copilot cuando le digas
-"importa este MD al mapa" — la nube no tiene acceso a tu disco.)
-
----
-
-## 💶 DESGLOSE DE LOS 1.500 € DE GASTOS FIJOS (para que sepas qué incluye)
-
-> **Por qué una cifra redonda de 1.500 € y no el desglose técnico:** el estudio de mercado mira precios de compra en Alemania vs España. Los gastos de traer un coche son **variables según el coche concreto** (CO₂, año, peso, provincia de matriculación). Para decidir si **merece la pena importar** un modelo basta con esa cifra redonda.
->
-> Cuando elijas una unidad concreta (Flujo A), entonces sí se calcula el IVA de importación + IEDMT exacto, basado en ficha técnica.
+##  DESGLOSE DE LOS 1.500 € DE GASTOS FIJOS
 
 | Concepto | Estimado | Notas |
 |---|---:|---|
-| Transporte Alemania → Huelva | 1.000 € | Camión cerrado, ≈7-10 días, depende de ruta |
-| ITV + homologación | 200 € | Tarifa estándar, sube si hay reformas |
-| Gestoría + ausfuhr | 300 € | Baja en Alemania + matriculación provisional |
-| **TOTAL gastos fijos** | **1.500 €** | Sin IVA de importación |
+| Transporte Alemania → Huelva | 1.000 € | Camión cerrado, ≈7-10 días según ruta |
+| ITV + homologación | 200 € | Sube si hay reformas |
+| Gestoría + ausfuhr | 300 € | Baja en Alemania + matrícula provisional |
+| **TOTAL gastos fijos** | **1.500 €** | Sin IVA ni impuesto de matriculación |
 
-**Lo que NO incluye (se calcula por coche en Flujo A):**
-- **IVA de importación:** 21% sobre el valor en aduana (precio compra + transporte + seguro). Se puede deducir si el coche es para revender con margen, pero como particular se paga.
-- **IEDMT (impuesto de matriculación):** depende del CO₂ y año del coche. Un GTI de 2017 con ≈170 g/km CO₂ paga alrededor de 700-1.000 €. Un TCR más potente, ≈1.500-2.000 €. Un Golf R, ≈1.800-2.500 €.
-- **Seguro de tránsito** (≈100 €) — opcional.
-- **Gestión de placas y matrícula española** (≈150 €).
+**Lo que NO incluye** (se calcula por coche concreto en Flujo A): **IVA de importación** (21% sobre precio + transporte + seguro) e **IEDMT** (según CO₂ y antigüedad; en híbridos enchufables puede ser 0). Orden de magnitud todo incluido: **+3.500 € a +5.500 €**; bastante más en V6/V8 muy contaminantes.
 
-**Orden de magnitud realista total:**
-- Coche barato traerlo (sin IVA ni IEDMT): +1.500 €
-- Coche "traído y matricular" todo incluido: +3.500 € a +5.500 € dependiendo del modelo
-
-> Si quieres que el informe use una cifra distinta (ej. "suma 2.000 € porque mis gastos son más altos"), lo recalculo en 1 minuto.
+> Si quieres que el informe use otra cifra fija (ej. "suma 2.000 € porque mis gastos son más altos"), se recalcula en 1 minuto.
 
 ---
 
-## 📋 COBERTURA Y METODOLOGÍA (esto es solo si quieres saber cómo se midió)
-
-- **Fuentes:** solo mobile.de (Alemania) + Coches.net (España). El resto de portales quedan para buscar unidades concretas.
-- **Filtros comunes:** año 2017-2019 · km ≤ 180.000 · Volkswagen Golf 7.5 (excepto Clubsport, que es Mk7).
-- **Cuántos anuncios se miraron:** ~14 por versión en Alemania, ~3 por versión en España.
-- **Verificación de equipamiento:** filtros estructurados (potencia + combustible + año + km) en Coches.net. El filtro "Version=" texto libre NO funciona.
-- **Cobertura incompleta del Golf R en Alemania:** solo página 1 de 6. Hace falta mirar las otras 5 antes de lanzar una campaña.
-- **Tamaño de muestra:** 2-9 verificados por lado. Es una foto del mercado hoy, no una mediana robusta.
-- **Pendiente:** cubrir las páginas 2-6 del Golf R en Alemania antes de ofertar basado en el suelo alemán.
-
----
-
-## 🔗 FUENTES CONSULTADAS — re-ejecutable (sección 10, obligatoria)
-
-> **Para qué sirve:** que puedas **comprobar de dónde sale cada dato** y repetir la búsqueda tú mismo. Un número sin su enlace no es un dato: es una opinión.
-
-Una entrada **por cada versión medida** (las mismas filas de la tabla del estudio):
+## � ARCHIVO GENERADO
 
 ```
-Golf R Variant Mk7.5 (310cv, 2017-2020)
+informes/vw/vw-compacto-deportivo_2026-08-23.md
+```
 
-- 🇩🇪 mobile.de: `https://suchen.mobile.de/fahrzeuge/search.html?dam=0&fr=2017%3A2020&isSearchRequest=true&ml=%3A180000&ms=25200%3B14%3B%3B%3B&od=up&s=Car&sb=p&vc=Car&pw=224%3A232&c=EstateCar` (marca VW=25200, modelo Golf=14, carrocería familiar, año 2017-2020, km≤180.000, potencia 224-232 kW = 305-315 cv, orden precio ascendente) → **30 ofertas** (medido 15-sep-2026)
-- 🇪🇸 Coches.net: `https://www.coches.net/segunda-mano/?MakeIds[0]=47&ModelIds[0]=89&ArrBodyType=4&PowerHpFrom=305&PowerHpTo=315&MaxKms=180000&MinYear=2017&MaxYear=2020&fi=Price&or=1` → **3 ofertas** (medido 15-sep-2026)
+(El mapa `datos_mercado.json` lo actualiza Copilot cuando le pases este MD — la nube no tiene acceso a tu disco.)
+
+---
+
+## �📋 COBERTURA Y METODOLOGÍA
+
+- **Fuentes:** solo mobile.de (DE) + Coches.net (ES). El resto de portales quedan para buscar unidades concretas.
+- **Filtros comunes:** año ≥2017 · km ≤180.000 · precio como se acordara · gastos fijos 1.500 €.
+- **Aislamiento por versión:** potencia (kW/cv) + combustible + carrocería. El campo de texto libre `Versions[]`/`Version=` NO se usa como filtro en Coches.net.
+- **Muestra:** N anuncios DE / N ES por versión. Es una foto del mercado de hoy, no una mediana robusta.
+- **Presupuesto:** 2 peticiones por versión y mercado (conteo + suelo). **No se abren fichas ni anuncios** — fiabilidad 👁️ por defecto; ✅ solo si el usuario pide verificar a mano.
+- **Cobertura incompleta** (si la hay): declarar qué quedó sin revisar, con números.
+
+---
+
+## 🔗 FUENTES CONSULTADAS — re-ejecutables (OBLIGATORIA)
+
+> **Para qué sirve:** que puedas **rehacer la búsqueda tú mismo** y quedarte con los anuncios que quieras. Un número sin su enlace no es un dato: es una opinión. **Sin esta sección el informe NO se entrega.**
+
+Una entrada **por cada versión medida** (las mismas filas de la tabla de la conclusión). Formato literal:
+
+```
+**🔗 Fuentes (re-ejecutables)**
+
+- 🇩🇪 mobile.de: `<URL>` (marca VW=25200, modelo Golf=14, potencia 224-232 kW = 305-315 cv, año ≥2017, km ≤170.000, precio ≤40.000 €, solo vendedores en Alemania (cn=DE), sin daños, orden precio ascendente) → **30 anuncios** (medido 16 de septiembre de 2026)
+- 🇪🇸 Coches.net: `<URL>` (marca VW=MakeIds[0]=47, modelo Golf=ModelIds[0]=89, potencia 305-315 cv, año ≥2017, km ≤170.000, precio ≤40.000 €, orden precio ascendente) → **3 anuncios** (medido 16 de septiembre de 2026)
 ```
 
 **Reglas duras de esta sección:**
 1. **Una URL por portal y por versión**, con TODOS los filtros de la medición. No vale la URL de la marca entera.
-2. Los **parámetros van escritos al lado** (marca=ID, modelo=ID, año, km, potencia en kW y en cv, carrocería, orden) para que se vea qué se filtró.
-3. Se aade el **conteo medido** de cada URL y la fecha. Si al abrirla el conteo no cuadra → incidencia en §3.c.
-4. Se generan con el script, **nunca a mano:** `py .claude/skills/importacion-vehiculos/scripts/fuentes.py --seccion --spec "Marca|Modelo|Etiqueta|cv_min|cv_max|anio_desde|anio_hasta|km|carroceria"` (un `--spec` por versión). Los IDs salen del catálogo compartido (`references/mobile-de-ids.json`, idéntico en las dos skills): **no se inventan nunca**.
-5. Si un modelo no está en el catálogo, el script avisa del plan B (`q=` en mobile.de, `Versions[0]` en coches.net) → ese aviso se copia en §3.c LIMITACIONES, no se esconde.
-6. **Sin esta sección el informe NO se entrega** (el checklist de arriba lo bloquea).
+2. Los **parámetros van escritos al lado** (marca=ID, modelo=ID, potencia en kW y en cv, año, km, precio, país del vendedor, orden) para que se vea qué se filtró.
+3. Se añade el **conteo medido** de cada URL más la **fecha de medición**. Si al abrirla el conteo no cuadra → declararlo en §COBERTURA.
+4. Se generan con el script, **nunca a mano** (un número copiado a mano se cuela mal):
+   `py .claude/skills/importacion-vehiculos/scripts/fuentes.py --seccion --fecha YYYY-MM-DD --precio-max 40000 --pais-de DE --spec "Marca|Modelo|Etiqueta|cv_min|cv_max|anio_desde|anio_hasta|km|carroceria|anuncios_de|anuncios_es|versions_es|q_de"` → **todos los `--spec` del informe en UNA sola llamada** (el conteo de anuncios va POR VERSIÓN dentro de su `--spec`).
+5. **Filtro de versión:** cuando dos versiones comparten modelo (GTI vs R, S line vs RS), el campo `versions_es` mete `Versions[0]` en la URL de Coches.net y `q_de` el texto libre en mobile.de. Sin eso, las dos versiones dan la MISMA URL y la medición no es reproducible.
+5. Los IDs salen del catálogo compartido (`references/mobile-de-ids.json`, idéntico en las dos skills): **no se inventan nunca**. Un ID inventado no falla: devuelve otra marca.
+6. Si un modelo no está en el catálogo, el script avisa del plan B (`q=` en mobile.de, `Versions[0]` en coches.net) → ese aviso se declara en §COBERTURA, no se esconde.
 
 ---
 
@@ -478,33 +309,36 @@ Golf R Variant Mk7.5 (310cv, 2017-2020)
 > La nube rellena este bloque al final del informe con ✅ en cada línea. NO entregar si hay algún ❌ sin resolver.
 
 ```
-✅ Estructura completa:
-  ✅ §CONCLUSIÓN con párrafo + tabla resumen
-  ✅ §CANDIDATOS con 1-2 por versión + URL visible
-  ✅ §DESGLOSE POR VARIABLES (combinaciones + §3.b si muestra ≥50)
-  ✅ §3.c LIMITACIONES detectadas (cuadro digital / puertas / TransmissionTypeId Golf R si aplica)
-  ✅ §COMPARABLES (al menos 1)
-  ✅ §TRAMPAS (al menos 1 si las hay)
-  ✅ §RESUMEN PARA COPIAR (1 párrafo)
-  ✅ §ARCHIVO GENERADO
-  ✅ §DESGLOSE 1.500 € GASTOS
-  ✅ §COBERTURA Y METODOLOGÍA (al final)
-  ✅ §FUENTES CONSULTADAS con la URL exacta de cada medición (re-ejecutable)
+✅ Estructura completa (9 secciones, en orden):
+  ✅ 1. §CONCLUSIÓN con párrafo + tabla resumen
+  ✅ 2. §VERSIÓN A VERSIÓN (nota por versión, SIN tablas de anuncios)
+  ✅ 3. §COMPARABLES (al menos 1)
+  ✅ 4. §TRAMPAS (al menos 1 si las hay)
+  ✅ 5. §RESUMEN PARA COPIAR (1 párrafo, sin enlaces)
+  ✅ 6. §DESGLOSE 1.500 € GASTOS
+  ✅ 7. §COBERTURA Y METODOLOGÍA
+  ✅ 8. §FUENTES CONSULTADAS — URL + parámetros + conteo + fecha de CADA medición
+  ✅ 9. §CHECKLIST
 
 ✅ Datos consistentes:
-  ✅ Suelos DE/ES con marca de fiabilidad (✅/👁️/⚠️)
+  ✅ Suelos DE/ES con marca de fiabilidad (👁️/✅/⚠️)
   ✅ Columna "Puesto en Huelva" = suelo DE + 1.500 €
   ✅ Columna "Ahorro real" = suelo ES − puesto Huelva
   ✅ URLs completas y visibles (no "ver [enlace]")
   ✅ Sin jerga IA (sincronizado, merge, volcado, fuente_medicion)
   ✅ Cobertura incompleta declarada con números
 
+✅ Lo que NO debe aparecer (eliminado en v0.5.0):
+  ✅ Sin fichas "2 mejores anuncios"
+  ✅ Sin desglose por variables (cambio / techo / cuadro digital)
+  ✅ Sin §3.b segmentación amplia ni §3.c de límites por ficha
+
 ✅ Archivos:
   ✅ UN solo .md, sin duplicados
-  ✅ Nombre: <marca>-<modelo>_<YYYY-MM-DD>.md
+  ✅ Nombre: <marca>_<segmento>_<enfoque>_<YYYY-MM-DD>.md
   ✅ Sin PDF generado
 
 ✅ Mensaje de cierre:
-  ✅ Última línea: "Archivo: informes/mercado/<archivo>.md. Pásale
+  ✅ Última línea: "Archivo: informes/<marca>/<archivo>.md. Pásale
      este MD a Copilot en VS Code y dile 'importa este MD al mapa'."
 ```

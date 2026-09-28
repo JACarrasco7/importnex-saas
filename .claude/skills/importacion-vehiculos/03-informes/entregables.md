@@ -53,9 +53,10 @@ Regla de nombres: **minúsculas, sin tildes, sin espacios** (guiones), fecha **`
 | Informe de búsqueda (C/E) | `informe_busqueda_<segmento-o-categoria>_<YYYY-MM-DD>.md` |
 | Informe de unidad (A) | `informe_unidad_<marca>-<modelo>_<YYYY-MM-DD>.md` |
 | Informe de modelos (D) | `informe_modelos_<cliente-o-segmento>_<YYYY-MM-DD>.md` |
-| Informe de mercado (estudio) | `informe_mercado_<marca>-<modelo>_<YYYY-MM-DD>.md` |
+| Informe de mercado (estudio) | `<marca>_<segmento>_<enfoque>_<YYYY-MM-DD>.md` (p. ej. `vw_compacto_deportivo_2026-09-27.md`) |
 | Comparativa de candidatos | `comparativa_<YYYY-MM-DD>.md` |
-| **PDF del informe de búsqueda/mercado (v3.10.0)** | **misma base que el .md con extensión `.pdf`** — generado SIEMPRE con `scripts/mercado_pdf.py <informe>.md`; es el entregable que lee el operador (el .md queda como contrato interno) |
+| **PDF del informe de búsqueda (v3.10.0)** | **misma base que el .md con extensión `.pdf`** — generado SIEMPRE con `scripts/mercado_pdf.py <informe>.md`; es el entregable que lee el operador (el .md queda como contrato interno) |
+| **Informe de mercado (estudio)** | **solo `.md`** — es un sondeo conciso y los enlaces tienen que funcionar; PDF únicamente si el usuario lo pide. Ver `../estudio-mercado/informe_mercado.md` (v0.5.0) |
 
 **JSON (contrato con Laravel):**
 
@@ -75,10 +76,10 @@ Regla de nombres: **minúsculas, sin tildes, sin espacios** (guiones), fecha **`
 
 | Cuándo | Carpeta |
 |---|---|
-| Hay marca y modelo claros (A, B, estudio) | `informes\<marca>\<modelo>\` |
+| Hay marca y modelo claros (A, B) | `informes\<marca>\<modelo>\` |
 | Es descubrimiento (D) | `informes\descubrimiento\` |
 | Es stock por categorías (E) | `informes\stock\` |
-| Es estudio de mercado | `informes\mercado\` |
+| Es estudio de mercado | `informes\<marca>\` (sin subcarpeta de modelo) |
 | Comparativas | junto al informe del encargo que las originó |
 
 - **Los `.md` que lee el usuario van al Escritorio** (nunca a `AppData\…\outputs\`).

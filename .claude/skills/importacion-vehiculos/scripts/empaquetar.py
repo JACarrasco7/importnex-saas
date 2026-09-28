@@ -1991,7 +1991,11 @@ CARROCERIA_ID_MOBILE_DE = {
 
 def _url_mobile_de(marca: str, modelo: str, anio_min: int, anio_max: int,
                    cv_min: int, cv_max: int, carroceria: str,
-                   km_max: int | None = None) -> str:
+                   km_max: int | None = None,
+                   precio_max: int | None = None,
+                   solo_alemania: bool = False,
+                   combustible: str = "",
+                   q_extra: str = "") -> str:
     """URL de busqueda mobile.de ordenada por precio (el SUELO).
 
     - `pw` va en **kW**, NO en cv: kW = cv x 0,7355 (+-4 kW de margen). Mandar cv
@@ -2000,6 +2004,8 @@ def _url_mobile_de(marca: str, modelo: str, anio_min: int, anio_max: int,
       cae en modo formulario sin tarjetas, asi que ahi se filtra por texto (`q=`).
     - `ml=:<km>` es el tope de kilometros (`%3A180000`). Si se omite, la URL
       devuelve MAS oferta que la medida y deja de ser re-ejecutable.
+    - `p=:<precio>` tope de precio · `cn=DE` solo vendedores alemanes ·
+      `ft=DIESEL|PETROL` combustible. Sin ellos la URL no reproduce la medicion.
     - `dam=0` (sin siniestros), `sb=p` (precio ascendente), `isSearchRequest=true`.
     """
     make_id = _make_id_mobile_de(marca)
@@ -2017,8 +2023,16 @@ def _url_mobile_de(marca: str, modelo: str, anio_min: int, anio_max: int,
     }
     if km_max:
         params["ml"] = f":{int(km_max)}"
+    if precio_max:
+        params["p"] = f":{int(precio_max)}"
+    if solo_alemania:
+        params["cn"] = "DE"
     if cid:
         params["c"] = cid
+    ft = {"diesel": "DIESEL", "dies": "DIESEL", "petrol": "PETROL",
+          "gasolina": "PETROL", "gas": "PETROL"}.get(combustible.strip().lower(), "")
+    if ft:
+        params["ft"] = ft
 
     if cv_min and cv_max:
         kw_desde = int(cv_min * 0.7355) - 4
@@ -2028,6 +2042,12 @@ def _url_mobile_de(marca: str, modelo: str, anio_min: int, anio_max: int,
 
     if make_id and modelo_id:
         params["ms"] = f"{make_id};{modelo_id};;;"
+        if q_extra.strip():
+            # Acabado/version por texto del vendedor (R-Line, S line...). Va ADEMAS
+            # del `ms`: sin el, la URL devuelve todo el modelo y no reproduce la medicion.
+            params["q"] = q_extra.strip()
+    elif q_extra.strip():
+        params["q"] = q_extra.strip()
     else:
         params["q"] = f"{marca} {modelo}".strip()
 
@@ -2051,7 +2071,10 @@ def _url_autoscout24_es(marca: str, modelo: str, anio_min: int, anio_max: int,
 
 def _url_coches_net(marca: str, modelo: str, anio_min: int, anio_max: int,
                     cv_min: int, cv_max: int, carroceria: str,
-                    km_max: int | None = None) -> str:
+                    km_max: int | None = None,
+                    precio_max: int | None = None,
+                    combustible: str = "",
+                    version_extra: str = "") -> str:
     """URL de búsqueda en coches.net (mercado español). Usa MakeIds y
     Versions como query param array; el ID exacto de marca hay que mapearlo.
 
@@ -2059,14 +2082,19 @@ def _url_coches_net(marca: str, modelo: str, anio_min: int, anio_max: int,
     `MinYear`/`MaxKms` enseña más oferta de la que se midió y deja de ser
     re-ejecutable (regla dura 15-sep-2026). Orden de parámetros = el que usa
     el navegador de coches.net, para que la URL se vea igual que la real.
+
+    ⚠️ **`ArrBodyType=5` NO es SUV: es Monovolumen.** Verificado por conteo el
+    16-sep-2026 (el T-Roc, que es SUV, devolvía 0 anuncios con `=5`). El SUV es
+    `=6`. Regla: **todo filtro de carrocería se valida por conteo antes de
+    publicar la URL** — si da 0 o un conteo absurdo, el ID es de otra carrocería.
     """
     # MakeIds[0] de coches.net desde el catalogo compartido (fuente unica con
     # Laravel). La tabla anterior era INVENTADA: `bmw=11` devolvia CITROEN,
     # `mercedes=12` DAEWOO, `opel=7` BMW, `toyota=10` CHRYSLER, `volvo=26`
     # MASERATI... Solo acertaban VW=47 y Audi=4.
     body_type = {
-        "sedan": 1, "compacto": 2, "familiar": 4, "suv": 5,
-        "monovolumen": 6, "coupe": 7,
+        "sedan": 1, "compacto": 2, "familiar": 4, "suv": 6,
+        "monovolumen": 5, "coupe": 7,
     }
     make_id = _make_id_coches_net(marca)
     bt = body_type.get(carroceria.lower(), 0)
@@ -2078,6 +2106,12 @@ def _url_coches_net(marca: str, modelo: str, anio_min: int, anio_max: int,
         parts.append(f"ModelIds[0]={modelo_id}")
     elif modelo:
         parts.append(f"Versions[0]={quote_plus(modelo)}")
+    if version_extra.strip():
+        # Acabado/version (GTI, R, S line...) EN ADICION a ModelIds[0]: es lo que
+        # separa dos versiones del mismo modelo en la misma medicion (regla dura
+        # v3.3.8: usar `Versions[]` como UNICO filtro NO vale, pero como filtro
+        # ADICIONAL sobre ModelIds[0] si es re-ejecutable).
+        parts.append(f"Versions[0]={quote_plus(version_extra.strip())}")
     if bt:
         parts.append(f"ArrBodyType={bt}")
     if cv_min and cv_max:
@@ -2085,6 +2119,12 @@ def _url_coches_net(marca: str, modelo: str, anio_min: int, anio_max: int,
         parts.append(f"PowerHpTo={cv_max}")
     if km_max:
         parts.append(f"MaxKms={int(km_max)}")
+    if precio_max:
+        parts.append(f"MaxPrice={int(precio_max)}")
+    fuel = {"diesel": 1, "dies": 1, "petrol": 2, "gasolina": 2,
+            "gas": 2}.get(combustible.strip().lower(), 0)
+    if fuel:
+        parts.append(f"Fueltype2List={fuel}")
     if anio_min:
         parts.append(f"MinYear={int(anio_min)}")
     if anio_max:

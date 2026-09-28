@@ -1,6 +1,6 @@
 ---
 name: estudio-mercado
-version: 0.4.6
+version: 0.5.0
 description: >
   Estudio profundo del mercado de coches de 2ª mano en España y Alemania para
   JJ Import Motors. Genera un mapa de mercado persistente (datos_mercado.json)
@@ -251,15 +251,34 @@ filtrar por texto (`q=`) **antes** que inventarse un ID.
 > (`bmw=11` → CITROEN · `mercedes=12` → DAEWOO · `ford=24500` → TVR). No fiarse de IDs de
 > memoria: mirar el catálogo. Procedimiento de refresco en el playbook de la skill hermana.
 
-**🔴 REGLA DURA — LAS URLs DE CADA MEDICIÓN VAN EN EL INFORME (15-sep-2026):** cada versión
-medida lleva su **§10 FUENTES CONSULTADAS** con la URL exacta de 🇩🇪 mobile.de y de 🇪🇸
-Coches.net, **sus parámetros escritos al lado** (marca=ID, modelo=ID, año, km, potencia en kW
-y en cv, carrocería, orden) y el conteo medido. El usuario tiene que poder **rehacer la
-búsqueda él mismo** y comprobar de dónde sale cada dato: guardar la query solo en
-`datos_mercado.json` no basta (un número que no se puede reproducir con un clic no es un dato,
-es una opinión). Se generan con `scripts/fuentes.py` de la skill hermana — **nunca a mano**,
-los IDs no se inventan. **Sin §10 el informe NO se entrega.** Plantilla y ejemplo:
-`informe_mercado.md` §FUENTES CONSULTADAS.
+**🔴 REGLA DURA — LAS URLs DE CADA MEDICIÓN VAN EN EL INFORME (15-sep-2026, ampliada 28-sep-2026):** cada versión
+medida lleva su **§8 FUENTES CONSULTADAS — re-ejecutables** con la URL exacta de 🇩🇪 mobile.de y de 🇪🇸
+Coches.net, **sus parámetros escritos al lado** (marca=ID, modelo=ID, potencia en kW y en cv, año, km,
+precio, país del vendedor, orden), el **conteo medido** y la **fecha de medición**. El usuario tiene que poder
+**rehacer la búsqueda él mismo** y quedarse con los anuncios que quiera: guardar la query solo en
+`datos_mercado.json` no basta (un número que no se puede reproducir con un clic no es un dato, es una opinión).
+Se generan con `scripts/fuentes.py` de la skill hermana — **nunca a mano**, los IDs no se inventan.
+**Todos los `--spec` del informe en UNA sola llamada** (no una sesión por versión):
+`py .claude/skills/importacion-vehiculos/scripts/fuentes.py --seccion --fecha YYYY-MM-DD --precio-max 40000 --pais-de DE --spec "Marca|Modelo|Etiqueta|cv_min|cv_max|anio_desde|anio_hasta|km|carroceria|anuncios_de|anuncios_es|versions_es|q_de" --spec "..."`.
+**Sin esta sección el informe NO se entrega.** Plantilla y ejemplo: `informe_mercado.md` §FUENTES CONSULTADAS.
+
+**🔴 REGLA DURA — UNA SOLA PLANTILLA, CONCISA (28-sep-2026 v0.5.0):** TODOS los informes de
+marca/segmento usan la MISMA plantilla (`informe_mercado.md`), **sin variantes por segmento**
+(SUV, hatchback, familiar, berlina…). Es un **sondeo de mercado rápido**, NO un dossier: **no** se
+incluyen fichas con "los 2 mejores anuncios", **no** desglose por variables (cambio / techo /
+cuadro digital), **no** §3.b segmentación amplia, **no** verificación de fichas a posteriori.
+El detalle de anuncios lo aporta el usuario abriendo las URLs de §FUENTES. Si el usuario pide esos
+detalles expresamente, se añaden como anexo al final y se avisa en 1 línea.
+
+**Ruta y nombre canónicos (obligatorio):**
+`informes/<marca>/<marca>_<segmento>_<enfoque>_<YYYY-MM-DD>.md`
+- `<marca>`: corto y en minúsculas (`vw`, `audi`, `bmw`, `mercedes`, `seat`, `cupra`…).
+- `<segmento>`: valor del schema (`compacto|suv|berlina|deportivo|familiar|urbano`).
+- `<enfoque>`: `deportivo|generalista|accesible|premium|mixto`.
+- Estudio de un modelo concreto: `<marca>-<modelo>_<segmento>_<enfoque>_<YYYY-MM-DD>.md`.
+- Ejemplo: `informes/vw/vw_compacto_deportivo_2026-09-27.md`.
+
+> Los informes entregados ANTES del 28-sep-2026 **no se renombran**: la regla rige desde el próximo.
 
 FASE 3 — CRUCE y veredicto:
   └─ hueco_pct (bruto) = (mediana_es − mediana_de) / mediana_es × 100  ← comparable con historial y umbrales
@@ -283,7 +302,7 @@ FASE 5 — GENERAR EL INFORME (estricta, la nube NO improvisa):
   └─ **NO incluir jerga IA** (sincronizado, merge, volcado, fuente_medicion).
   └─ **Rellenar el CHECKLIST final** de la plantilla con ✅/❌ antes de entregar.
   └─ **Última línea del informe** (literal, sin cambios):
-     *"Archivo: `informes/mercado/<archivo>.md`. Pásale este MD a Copilot en VS Code y dile 'importa este MD al mapa'."*
+     *"Archivo: `informes/<marca>/<archivo>.md`. Pásale este MD a Copilot en VS Code y dile 'importa este MD al mapa'."*
 
 ⛔ **PROHIBIDO en FASE 5** (la nube NO puede):
   - Inventar datos que no están en el JSON.
@@ -437,27 +456,32 @@ Para cada modelo/versión, el mapa guarda (esquema completo en `schema_datos_mer
 | Archivo | Formato | Destino |
 |---|---|---|
 | `datos_mercado.json` | JSON (mapa de mercado persistente) | **RUTA DUAL** (L2):<br>1. `C:/Users/jacar/Desktop/JJImportMotors/datos_mercado.json`<br>2. `C:/laragon/www/importnexcore/.claude/skills/datos_mercado.json` |
-| `informe_mercado_<fecha>.md` | Markdown (documento de decisión para el usuario) | `informes\mercado\` |
+| `<marca>_<segmento>_<enfoque>_<YYYY-MM-DD>.md` | Markdown (sondeo de mercado para el usuario) | `informes\<marca>\` (Desktop: `JJImportMotors/informes/<marca>/`) |
 
-> **PLANTILLA OBLIGATORIA del informe (23-ago-2026):** usar `informe_mercado.md` (plantilla en esta carpeta).
+> **PLANTILLA OBLIGATORIA del informe (28-sep-2026 v0.5.0):** usar `informe_mercado.md` (plantilla en esta carpeta).
 > El informe está **escrito para el usuario** (Jacar), no para otra IA. Lenguaje de negocio, sin jerga técnica.
-> Estructura fija:
+> Es un **sondeo de mercado conciso**: el número y las fuentes, no un dossier. Estructura fija (9 secciones):
 >
-> 1. **🏁 CONCLUSIÓN** (4-6 líneas + tabla por versión, lo primero) → lector decide en 1 minuto.
-> 2. **🎯 LOS 2 MEJORES ANUNCIOS POR VERSIÓN** (precio + año + km + por qué mola + URL visible).
-> 3. **📊 DESGLOSE POR VARIABLES** (puertas / cambio / techo / cuadro digital) — **obligatorio cuando hay muestra**. Si el usuario no lo pidió, se incluye igual porque es donde se ve el valor real.
-> 4. **🧩 COMPARABLES** con modelos ya estudiados antes.
-> 5. **⚠️ TRAMPAS** que pueden costar dinero.
-> 6. **📋 RESUMEN PARA COPIAR** (1 párrafo sin enlaces, listo para WhatsApp/nota/WhatsApp al socio).
-> 7. **📁 ARCHIVO GENERADO** (la ruta del .md).
-> 8. **📋 COBERTURA Y METODOLOGÍA** al final (lo que NO necesita leer para decidir).
+> 1. **🏁 CONCLUSIÓN** (4-6 líneas + tabla resumen por versión, lo primero) → lector decide en 1 minuto.
+> 2. **🎯 VERSIÓN A VERSIÓN** (2-3 líneas de matiz por versión; SIN tablas de anuncios).
+> 3. **🧩 COMPARABLES** con modelos ya estudiados antes.
+> 4. **⚠️ TRAMPAS** que pueden costar dinero.
+> 5. **📋 RESUMEN PARA COPIAR** (1 párrafo sin enlaces, listo para WhatsApp/nota).
+> 6. **💶 DESGLOSE 1.500 € GASTOS**.
+> 7. **📋 COBERTURA Y METODOLOGÍA** (+ 📁 ARCHIVO GENERADO) al final.
+> 8. **🔗 FUENTES CONSULTADAS — re-ejecutables** (obligatoria: URL + parámetros + conteo + fecha).
+> 9. **✅ CHECKLIST** de auto-verificación.
+>
+> **Lo que NO se incluye (eliminado en v0.5.0):** fichas con los 2 mejores anuncios, desglose por
+> variables (cambio/techo/cuadro), §3.b segmentación amplia, §3.c límites por ficha y verificación
+de fichas a posteriori.
 >
 > **Reglas de entrega (humano, no IA):**
 > - SIEMPRE un único Markdown (`.md`). Los enlaces funcionan.
 > - PDF SOLO si el usuario lo pide explícito (en PDF se rompen los enlaces → copia la URL visible en la tabla).
 > - NUNCA duplicar el mismo informe. UN archivo por estudio.
 > - La nube **NO escribe** en `C:/Users/jacar/Desktop/...` ni en `.claude/skills/...` (no tiene acceso a tu disco). Al final, imprime:
->   *"Archivo: `informes/mercado/<archivo>.md`. Pásale este MD a Copilot en VS Code y dile 'importa este MD al mapa de mercado (ambas rutas)'."*
+>   *"Archivo: `informes/<marca>/<archivo>.md`. Pásale este MD a Copilot en VS Code y dile 'importa este MD al mapa de mercado (ambas rutas)'."*
 >
 > El `datos_mercado.json` es la **fuente de verdad de criterio** para la skill hermana y el **origen de datos del SaaS Laravel** (comando `market:import`). Mantenerlo al día es la misión de esta skill.
 
@@ -475,7 +499,7 @@ Para cada modelo/versión, el mapa guarda (esquema completo en `schema_datos_mer
 
 ## 🚀 MEJORAS v2 — habilidades y bucle con el SaaS (17-ago-2026)
 
-1. **Informe de estudio por marca (plantilla).** Cuando el estudio es `por_marca`, el informe sigue la plantilla `informe_mercado.md` (resumen de la marca → modelos estudiados con hueco/veredicto/vendibilidad → mejor candidato por segmento → notas por modelo). Guardar en `informes\mercado\<marca>_<fecha>.md`. La conclusión SIEMPRE arriba, la metodología al final.
+1. **Informe de estudio por marca (plantilla).** Cuando el estudio es `por_marca`, el informe sigue la plantilla `informe_mercado.md` (9 secciones: conclusión → versión a versión → comparables → trampas → resumen → gastos → cobertura → fuentes → checklist). Guardar en `informes\<marca>\<marca>_<segmento>_<enfoque>_<YYYY-MM-DD>.md`. La conclusión SIEMPRE arriba, las fuentes re-ejecutables SIEMPRE (obligatorias) y la metodología al final.
 2. **Priorización automática del estudio.** En FASE 0, si el usuario no acota, recomendar estudiar lo más caducado primero (leer `refrescar_antes_de` por categoría del JSON): "la siguiente pasada toca showstoppers (caduca el 31-08)". No preguntar a ciegas.
 3. **IEDMT estimado por tramo de CO₂.** Para el hueco neto, estimar IEDMT por segmento/motorización con la fórmula de `importacion-vehiculos/04-negocio/costes.md` §IEDMT (coef. Anexo IV + tipo por emisiones) y guardarlo en `iedmt_estimado`. El exacto se calcula en Flujo A con la unidad concreta.
 4. **Modo "solo validar".** Para un modelo con cache reciente, refresco ultraligero: 1 lectura por portal (mobile.de/Coches.net), confirmar que mediana y hueco siguen en rango, actualizar `refrescar_antes_de_categoria` y NO re-buscar. Ahorro máximo en el delta.

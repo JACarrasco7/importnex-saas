@@ -24,6 +24,20 @@
 
 ---
 
+## 2026-09-28 12:10 · Copilot-VSCode · 🧹 Estudio de mercado: plantilla única concisa + ruta/nomenclatura + bug de carrocería
+
+- **Pedido:** *"los informes deben tener la organización del de SUVs pero menos denso, un sondeo rápido"* + *"la ruta de carpeta siempre la misma y la nomenclatura de los informes"*.
+- `estudio-mercado` **0.4.6 → 0.5.0**: `informe_mercado.md` baja de 11 a **9 secciones**; fuera las fichas de "2 mejores anuncios", el desglose por variables (cambio/techo/cuadro), §3.b segmentación amplia y §3.c límites por ficha. El detalle de anuncios lo aporta el usuario abriendo las URLs de §FUENTES.
+- **Ruta/nomenclatura única:** `informes/<marca>/<marca>_<segmento>_<enfoque>_<YYYY-MM-DD>.md` (marca corta minúscula; segmento del schema; enfoque `deportivo|generalista|accesible|premium|mixto`). Los ya entregados **no** se renombran.
+- **§FUENTES sale ya con conteo + fecha** desde el script: `--anuncios-de/--anuncios-es/--fecha/--precio-max/--pais-de/--combustible/--versions-es/--q-de`; `--spec` de 9 → 13 campos. Antes el conteo se montaba a mano y dos versiones del mismo modelo (GTI vs R) generaban **la misma URL**.
+- 🔴 **Bug en `empaquetar.py`:** `ArrBodyType=5` en Coches.net es **Monovolumen**, no SUV (SUV = **6**); con 5 el T-Roc daba 0 anuncios. Regla nueva: validar carrocería por conteo.
+- `importacion-vehiculos` **3.10.3 → 3.10.4** (scripts compartidos, cambio aditivo). Docs realineadas: `entregables.md`, `docs/informes/README.md`, `_dist/README.md` (obsoleto, invitaba a instalar v3.6.1) y `docs/_sync/LEEME.md` (marcado OBSOLETO).
+- 🔧 **Bug en `scripts/build-skill-zips.ps1`:** su regex de la línea "_Última regeneración_" nunca casaba (PS 5.1 lee el `.ps1` sin BOM como ANSI → acentos corruptos); la tabla se regeneraba pero la línea quedaba con la fecha vieja.
+- Verificación: `fuentes.py` probado con 1 y 2 versiones · 266 refs OK (`verify_skill_refs.py`) · `MarketingValidatorTest` 12 passed.
+- ⚠️ **PENDIENTE para el otro:** Desktop + Cowork siguen con las skills viejas → subir `_dist/skills-estudio-mercado-v0.5.0-20260928.zip` y `_dist/skills-importacion-vehiculos-v3.10.4-20260928.zip`. Y decidir si se borra `docs/_sync/` (tiene copias muertas v0.4.0).
+
+---
+
 ## 2026-09-25 17:30 · Copilot-VSCode · 🔴 FIX: el marketplace público nunca publicaba nada
 
 - **Pedido del usuario:** *"¿por qué entregado? debería salir a menos que lo quite, no? si está marcado debe ponerse y punto"*.

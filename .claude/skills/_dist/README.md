@@ -1,8 +1,11 @@
-# Skills del negocio JJ Import Motors — Paquete v2026-09-05
+# `.claude/skills/_dist/` — histórico de entregas de ZIPs
 
-> 2 ZIPs portables para cargar en Claude Desktop. Reemplazan las versiones cacheadas en `~/.claude/skills/`.
+> ⚠️ **OBSOLETO — no instalar desde aquí.** Las versiones vigentes (ZIP, versión, tamaño, SHA256) las
+> escribe `scripts/build-skill-zips.ps1` en **[`docs/SKILLS.md`](../../docs/SKILLS.md)**, que es el
+> documento canónico. Lo de abajo es la entrega del **05-sep-2026**: sus nombres de fichero ya no
+> existen en `_dist/` (el script borra los ZIPs viejos). Se conserva solo como histórico.
 
-## 📦 Archivos
+## 📦 Archivos de la entrega del 05-sep-2026
 
 | Skill | ZIP | Versión | Tamaño | SHA256 |
 |---|---|---|---|---|

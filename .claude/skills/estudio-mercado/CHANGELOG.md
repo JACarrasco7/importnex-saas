@@ -5,6 +5,73 @@ Todos los cambios notables en el skill `estudio-mercado` se documentarán en est
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.5.0] - 2026-09-28
+
+**Plantilla ÚNICA y concisa + ruta/nomenclatura canónica + §FUENTES con conteo y fecha.**
+
+> **Motivo:** tres informes de marca entregados en el mismo mes (SUV, hatchback, familiares) salieron con
+> tres formatos distintos según el segmento — y todos con más detalle del que el usuario necesita. El
+> detalle de anuncios lo aporta él después, abriendo los listados; lo que necesita del informe es el
+> **número** y **los enlaces de búsqueda**. Además, la plantilla se contradecía con la realidad en tres
+> cosas: ruta (`informes/mercado/` vs `informes/<marca>/` en disco), nombre del fichero (3 convenciones
+> distintas) y el conteo de anuncios de §FUENTES (que se ensamblaba a mano).
+
+### 📄 `informe_mercado.md` — plantilla reducida a 9 secciones
+
+Secciones (orden fijo): **1** CONCLUSIÓN · **2** VERSIÓN A VERSIÓN · **3** COMPARABLES · **4** TRAMPAS ·
+**5** RESUMEN PARA COPIAR · **6** DESGLOSE 1.500 € · **7** COBERTURA Y METODOLOGÍA (+ ARCHIVO GENERADO) ·
+**8** FUENTES CONSULTADAS · **9** CHECKLIST.
+
+**ELIMINADO (y prohibido):** fichas con "los 2 mejores anuncios" (precio/año/km/motor/enlace por versión),
+📊 DESGLOSE POR VARIABLES (cambio / puertas / techo / cuadro digital con tablas DE+ES), §3.b segmentación
+amplia por ejes, §3.c limitaciones dentro de cada ficha y la verificación de fichas a posteriori. La
+sección 2 pasa a ser 2-3 líneas de matiz por versión. Si el usuario pide esos detalles, se añaden como
+anexo al final y se avisa en 1 línea.
+
+Se actualizan también las reglas SI/ENTONCES y la lista de "NUNCA preguntar" que aún exigían el desglose
+por variables.
+
+### 📍 Ruta y nombre canónicos (una sola convención)
+
+`informes/<marca>/<marca>_<segmento>_<enfoque>_<YYYY-MM-DD>.md`
+
+- `<marca>` corto y en minúsculas (`vw`, `audi`, `bmw`, `mercedes`…).
+- `<segmento>` = valor del schema (`compacto|suv|berlina|deportivo|familiar|urbano`).
+- `<enfoque>` = `deportivo|generalista|accesible|premium|mixto`.
+- Estudio de un modelo concreto: `<marca>-<modelo>_<segmento>_<enfoque>_<YYYY-MM-DD>.md`.
+
+Ejemplo: `informes/vw/vw_compacto_deportivo_2026-09-27.md`. Corregidas las 6 menciones a la ruta vieja
+`informes\mercado\` en `SKILL.md` (tabla §Output, FASE 5, §MEJORAS v2) y en `informe_mercado.md`
+(mensaje de cierre, ejemplo roto `volKSwagen-golf-75_2026-08-23.md`). **Los informes ya entregados NO se
+renombran:** la regla rige desde el próximo.
+
+### 🔗 §FUENTES reforzada (sección 8, obligatoria)
+
+- Nombre de sección unificado a `## 🔗 FUENTES CONSULTADAS — re-ejecutables`.
+- El formato documentado ya incluye el **conteo** y la **fecha**: `... → **1.276 anuncios** (medido 16 de septiembre de 2026)`.
+- Se documenta que se genera con **una sola llamada** a `scripts/fuentes.py` con todos los `--spec` del informe.
+
+### 🔧 `importacion-vehiculos/scripts/fuentes.py` (cambio aditivo, no rompe el uso anterior)
+
+- `--spec` pasa a 13 campos: `marca|modelo|etiqueta|cv_min|cv_max|anio_desde|anio_hasta|km|carroceria|anuncios_de|anuncios_es|versions_es|q_de`.
+- Nuevas flags: `--anuncios-de`, `--anuncios-es`, `--fecha` (formatea "16 de septiembre de 2026"),
+  `--precio-max`, `--pais-de DE`, `--combustible`, `--versions-es`, `--q-de`.
+- La línea de cada portal sale ya con `→ **N anuncios** (medido …)`: deja de ensamblarse a mano.
+- `versions_es` añade `Versions[0]` en Coches.net **además** de `ModelIds[0]`; `q_de` añade el texto libre
+  en mobile.de. Sin esto, dos versiones del mismo modelo (GTI vs R) generaban **la misma URL**.
+
+### 🔧 `importacion-vehiculos/scripts/empaquetar.py`
+
+- `_url_mobile_de`: nuevos parámetros `precio_max` (`p=:40000`), `solo_alemania` (`cn=DE`),
+  `combustible` (`ft=DIESEL|PETROL`) y `q_extra` (`q=`).
+- `_url_coches_net`: nuevos parámetros `precio_max` (`MaxPrice`), `combustible` (`Fueltype2List=1|2`) y
+  `version_extra` (`Versions[0]` adicional).
+- 🔴 **Bug corregido — `ArrBodyType` de SUV:** el mapa usaba `suv: 5`, pero en Coches.net **5 es
+  Monovolumen** (el SUV es **6**). Evidencia: con `ArrBodyType=5` el T-Roc (SUV) devolvía **0 anuncios**
+  (informe `vw_suv-deportivos_2026-09-16.md` §3.c). Corregido a `suv: 6, monovolumen: 5` en
+  `empaquetar.py` y en `fuentes.py`. Regla nueva: **todo filtro de carrocería se valida por conteo**
+  antes de publicar la URL.
+
 ## [0.4.6] - 2026-09-15
 
 **Contadores de secciones fuera de la prosa.**

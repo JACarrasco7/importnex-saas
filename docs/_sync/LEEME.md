@@ -1,8 +1,18 @@
-# `_sync` — dónde están las skills actualizadas y qué hacer con ellas
+# `_sync` — OBSOLETO (histórico del 12-sep-2026)
 
-> Carpeta creada el 12-sep-2026. Claude deja aquí las skills actualizadas porque
-> **no puede escribir bajo `.claude\`** (regla fija del puente remoto) ni ejecutar
-> `git` (el puente de terminal está roto desde la actualización de Windows del 8-sep).
+> 🔴 **OBSOLETO — no usar.** Las copias de skill que hay aquí dentro están **congeladas**
+> (v3.9.3 / v0.4.0) y **contradicen** a las del repo (v3.10.4 / v0.5.0): su
+> `estudio-mercado/informe_mercado.md` es una plantilla vieja que ya no rige.
+> El puente de terminal ya funciona, así que el procedimiento vigente es
+> `.ai/rules/skills-sync.md` + `scripts/build-skill-zips.ps1` — **nada pasa por esta carpeta**.
+> Regla del repo (`.ai/rules/skills-sync.md`): `docs/_sync/` **no** debe usarse como mecanismo de
+> sincronización permanente. **No copiar los ficheros de aquí.**
+>
+> ---
+>
+> Carpeta creada el 12-sep-2026. Claude dejaba aquí las skills actualizadas porque
+> **no podía escribir bajo `.claude\`** (regla fija del puente remoto) ni ejecutar
+> `git` (el puente de terminal estaba roto desde la actualización de Windows del 8-sep).
 
 ## Estado de las 3 copias de cada skill (12-sep-2026 19:55 UTC+2)
 
