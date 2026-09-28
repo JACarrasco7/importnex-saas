@@ -36,6 +36,21 @@
 - Verificación: `fuentes.py` probado con 1 y 2 versiones · 266 refs OK (`verify_skill_refs.py`) · `MarketingValidatorTest` 12 passed.
 - ⚠️ **PENDIENTE para el otro:** Desktop + Cowork siguen con las skills viejas → subir `_dist/skills-estudio-mercado-v0.5.0-20260928.zip` y `_dist/skills-importacion-vehiculos-v3.10.4-20260928.zip`. Y decidir si se borra `docs/_sync/` (tiene copias muertas v0.4.0).
 
+## 2026-09-28 23:10 · Copilot-VSCode · 🧹 Limpieza Desktop + borrado de `docs/_sync/`
+
+- **Pedido del usuario:** *"haz todo eso y elimina los informes que están mal de la carpeta"*.
+- **Desktop — informes de mercado renombrados al formato canónico** (5 ficheros en `C:\Users\jacar\Desktop\JJImportMotors\informes\`):
+  - `vw_suv-deportivos_2026-09-16.md` → `vw/vw_suv_deportivo_2026-09-16.md`
+  - `vw_hatchback-deportivo_2026-09-27.md` → `vw/vw_compacto_deportivo_2026-09-27.md`
+  - `informe_marca_volkswagen_familiares_deportivos_2026-09-15.md` → `vw/vw_familiar_deportivo_2026-09-15.md`
+  - `audi_suv-deportivos_2026-09-16.md` → `audi/audi_suv_deportivo_2026-09-16.md`
+  - `audi_hatchback-deportivo_2026-09-27.md` → `audi/audi_compacto_deportivo_2026-09-27.md`
+- **Duplicados eliminados:** `vw/hatchback/volkswagen_2026-09-27.md` y `audi/hatchback/audi_2026-09-27.md` (carpetas completas borradas) — son los mismos ficheros renombrados arriba.
+- **Archivados en `_archive/`** (15 ficheros que estaban duplicados o con nomenclatura vieja): 5 informes `informe_marca_*` / `informe_general_*` / `plan_busqueda_general_*` (15-sep) + 9 ficheros de `mercado/` (el índice del 16-sep y 27-sep, el SUV-aspiracional del 16-sep, los 4 `informe_mercado_2026-08-17*` y los 2 `modelos_medidos_*`). El `plan_busqueda_familiares_vw` movido a `vw/golf-variant/` (es Flujo C→A, no de mercado).
+- **Carpeta `mercado/` borrada** (vacía tras los archivos). Ahora todo el mercado vive en `informes\<marca>\`.
+- **Repo:** `git rm -r docs/_sync/` (7 ficheros: la skill congelada v0.4.0 + LEEME.md + 2 ZIPs de v3.9.2/v0.4.0). El wrapper oficial `scripts/build-skill-zips.ps1` ya no necesita esa carpeta obsoleta.
+- ⚠️ **PENDIENTE para el otro:** sigue sin hacerse. Subir los ZIPs a Desktop + Cowork.
+
 ---
 
 ## 2026-09-25 17:30 · Copilot-VSCode · 🔴 FIX: el marketplace público nunca publicaba nada
