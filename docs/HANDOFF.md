@@ -24,6 +24,16 @@
 
 ---
 
+## 2026-09-30 21:07 · Copilot-VSCode · skill importacion-vehiculos 3.10.5 — validador deja pasar el vocabulario v2
+
+- Hice: los 4 arreglos del diagnóstico de Claude (denegado por permisos en su sesión): C17 POR PIEZA (agrega `IG_/VT_/FB_/FBMP_/PT_`, excluye `*_FUENTES`/`*STORY*`, FBMP con su banda), C21 exige `VT_FUENTES`, generadores emiten los 5 `*_FUENTES` con `anuncio.url`, `collect_photos` crea `fotos_dir` con 100% caché. De regalo, el test cazó 2 bugs más: `run_validator` contaba `Resumen: 🔴 0 🟠 0 🟡 1` como crítico (bloqueaba cualquier paquete con un 🟡) y `main()` tenía un `NameError` de `cache_dir` tras crear el ZIP.
+- Verificado end-to-end: payload sintético + fotos SOLO de caché → `🔴 0 🟠 0 🟡 0`, ZIP creado, exit 0.
+- Toqué: `.claude/skills/importacion-vehiculos/scripts/{check_marketing,empaquetar}.py`, `SKILL.md` (3.10.4→3.10.5), `CHANGELOG.md`, `docs/HANDOFF.md`.
+- ⚠️ PENDIENTE para Claude-Desktop: regenerado ZIP `_dist` + `sync-desktop`; reimporta la skill v3.10.5 y saca los 3 ZIP en `informes\vw\{arteon,golf-variant}\` (fotos en `Descargas\jjfotos_vw_3unidades.zip`, JSONs en `informes\vw\`). La copia global `~\.claude\skills` está vieja (pre-3.9.13): usa la del proyecto/Desktop.
+- Commit: ver `git log` (rama master).
+
+---
+
 ## 2026-09-28 12:10 · Copilot-VSCode · 🧹 Estudio de mercado: plantilla única concisa + ruta/nomenclatura + bug de carrocería
 
 - **Pedido:** *"los informes deben tener la organización del de SUVs pero menos denso, un sondeo rápido"* + *"la ruta de carpeta siempre la misma y la nomenclatura de los informes"*.

@@ -184,10 +184,16 @@ def run_validator(script: Path, args: list[str], cwd: Path) -> list[str]:
         return []
 
     output = (proc.stdout or "") + "\n" + (proc.stderr or "")
+    # FIX 30-sep-2026: la línea de resumen ("Resumen: 🔴 0 🟠 0 🟡 1") contiene
+    # 🔴 aunque no haya críticos reales y bloqueaba cualquier paquete con un
+    # solo hallazgo 🟡. Se ignora cuando el propio resumen reporta 0 críticos.
+    resumen_sin_criticos = re.compile(r"^Resumen:\s*🔴\s*0\b")
     criticos: list[str] = []
     for linea in output.splitlines():
         stripped = linea.strip()
         if not stripped:
+            continue
+        if resumen_sin_criticos.match(stripped):
             continue
         if "🔴" in stripped:
             criticos.append(stripped)
@@ -496,6 +502,12 @@ def collect_photos(
             sys.exit(3)
         warn(msg)
         return saved, warnings
+
+    # FIX 30-sep-2026: cuando TODAS las fotos salen de caché nadie llama a
+    # download_photo() (el único sitio que creaba fotos_dir vía
+    # dest.parent.mkdir) y el write_bytes del tmp reventaba con
+    # FileNotFoundError porque work_dir/fotos no existía.
+    fotos_dir.mkdir(parents=True, exist_ok=True)
 
     info(f"Descargando {len(urls)} foto(s) del anuncio…")
     for idx, raw_url in enumerate(urls, start=1):
@@ -1400,6 +1412,7 @@ def _bloques_v2_redes(payload: dict) -> list[str]:
     inv = payload.get("investigacion") or {}
     cost = payload.get("costes") or {}
     merc = payload.get("mercado") or {}
+    anun = payload.get("anuncio") or {}
 
     etq = inv.get("etiqueta_ambiental", {}).get("etiqueta") if isinstance(inv.get("etiqueta_ambiental"), dict) else None
     km_txt = f"{veh.get('km', 0):,}".replace(",", ".") if veh.get("km") else None
@@ -1470,6 +1483,13 @@ def _bloques_v2_redes(payload: dict) -> list[str]:
         L.append(bloque("FBMP_PRECIO", fmt_eur(precio)))
     L.append(bloque("FBMP_CONTACTO", "Escríbeme por Messenger y te paso la ficha completa."))
 
+    # M-12 / C21: el link del anuncio original acompaña SIEMPRE al copy de
+    # cada pieza. bloque() devuelve "" si no hay URL → C21 reporta el bloque
+    # como ausente y el paquete no sale sin fuente (comportamiento deseado).
+    url_anuncio = anun.get("url") or ""
+    for nombre_fuentes in ("IG_FUENTES", "VT_FUENTES", "FB_FUENTES", "FBMP_FUENTES"):
+        L.append(bloque(nombre_fuentes, url_anuncio))
+
     return L
 
 
@@ -1479,6 +1499,7 @@ def _bloques_v2_portales(payload: dict) -> list[str]:
     pub = payload.get("publicidad") or {}
     inv = payload.get("investigacion") or {}
     dos = payload.get("dossier") or {}
+    anun = payload.get("anuncio") or {}
 
     etq = inv.get("etiqueta_ambiental", {}).get("etiqueta") if isinstance(inv.get("etiqueta_ambiental"), dict) else None
     km_txt = f"{veh.get('km', 0):,}".replace(",", ".") if veh.get("km") else None
@@ -1549,6 +1570,11 @@ def _bloques_v2_portales(payload: dict) -> list[str]:
         "Garantía: JJ Import Motors no ofrece garantía sobre el vehículo (A31). La que exista corresponde al vendedor.",
         f"Fecha de primera matriculación: {primera_matriculacion}.",
     ]))
+
+    # M-12 / C21: el link del anuncio original en portales (C07 lo exime de
+    # la prohibición de enlaces externos).
+    L.append(bloque("PT_FUENTES", anun.get("url") or ""))
+
     return L
 
 
@@ -2475,6 +2501,10 @@ def main() -> int:
     print(f"   Coche:       {coche_id}")
     print(f"   ZIP:         {zip_path}")
     print(f"   Fotos:       {n_fotos} (warnings: {len(photo_warnings)})")
+    # FIX 30-sep-2026: cache_dir era un local de collect_photos() y aquí no
+    # existía → NameError DESPUÉS de crear el ZIP (exit 1 con paquete válido).
+    # Mismo cálculo: fotos_dir.parent.parent == out_dir.
+    cache_dir = out_dir / ".fotos_cache" / coche_id
     if cache_dir.exists():
         print(f"   Caché fotos: {len(list(cache_dir.glob('*')))} archivo(s) en {cache_dir}")
     print(f"   Esqueletos:  {n_generados}/6")

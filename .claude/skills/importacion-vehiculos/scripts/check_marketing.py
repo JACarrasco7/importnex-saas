@@ -699,9 +699,20 @@ def check_17_longitud_por_canal(
 ) -> list[Hallazgo]:
     """Longitud recomendada por canal, POR PIEZA.
 
-    B5 auditoría 09-sep-2026: antes medía el agregado del canal (concatenando
-    todos los bloques) y eso pasaba textos de 78 chars al sumar 3 posts. Ahora
-    medimos cada bloque individualmente. Severidad:
+    Una "pieza" (vocabulario v2 de empaquetar.py) es el conjunto de bloques del
+    mismo prefijo de canal que se publican JUNTOS: la pieza de Instagram son
+    TODOS los [IG_*] (gancho + ficha + contexto + argumentos + pega + CTA +
+    hashtags). Historia:
+      - B5 auditoría 09-sep-2026: medía el agregado de TODO el canal y eso
+        pasaba textos de 78 chars al sumar 3 posts.
+      - FIX 30-sep-2026: medir cada bloque suelto era imposible de pasar en el
+        vocabulario v2 (un [IG_HASHTAGS] de 72 chars o un [FBMP_PRECIO] de 8
+        nunca llegan al mínimo). Ahora se suman los bloques de cada pieza
+        (prefijos IG_/VT_/FB_/FBMP_/PT_, excluidos *_FUENTES y *STORY*) y se
+        mide el conjunto con las mismas bandas: la pieza FBMP usa la banda de
+        fb_marketplace y el resto la banda de su canal. Los bloques fuera del
+        vocabulario v2 (p.ej. TIKTOK_POST_1) se siguen midiendo uno a uno.
+    Severidad:
       - muy por debajo del mínimo (chars < lo/2) → CRIT (antes BAJO).
       - por debajo del mínimo (lo/2 ≤ chars < lo) → BAJO.
       - por encima del máximo (chars > hi) → MEDIO.
@@ -715,11 +726,31 @@ def check_17_longitud_por_canal(
         "portal": (800, 3000),
     }
     lo, hi = bandas[canal]
-    critico_lo = lo // 2
+
+    prefijos_pieza = ("IG_", "VT_", "FB_", "FBMP_", "PT_")
+    # (etiqueta_visible, bloque_del_hallazgo, texto, prefijo_v2 o None si legacy)
+    piezas: list[tuple[str, str | None, str, str | None]] = []
+    grupos: dict[str, list[str]] = {}
 
     for nombre_bloque, texto in bloques.items():
         if prefijo_a_canal(nombre_bloque) != canal:
             continue
+        if any(nombre_bloque.startswith(p) for p in prefijos_pieza):
+            # *_FUENTES no es parte de la pieza (es el enlace del anuncio, lo
+            # valida C21) y las STORIES son piezas cortas por diseño.
+            if nombre_bloque.endswith("_FUENTES") or "STORY" in nombre_bloque:
+                continue
+            prefijo = nombre_bloque.split("_", 1)[0]
+            grupos.setdefault(prefijo, []).append(texto)
+        else:
+            piezas.append((nombre_bloque, nombre_bloque, texto, None))
+
+    for prefijo, textos in grupos.items():
+        piezas.append((f"{prefijo}_*", None, "\n".join(textos), prefijo))
+
+    for etiqueta, nombre_bloque, texto, prefijo in piezas:
+        p_lo, p_hi = bandas["fb_marketplace"] if prefijo == "FBMP" else (lo, hi)
+        critico_lo = p_lo // 2
         chars = len(texto.strip())
         if chars == 0:
             continue
@@ -731,28 +762,28 @@ def check_17_longitud_por_canal(
                     severidad="CRIT",
                     canal=canal,
                     bloque=nombre_bloque,
-                    mensaje=f"[{nombre_bloque}] Muy corto ({chars} chars, mínimo útil {critico_lo}; mínimo recomendado {lo})",
+                    mensaje=f"[{etiqueta}] Muy corto ({chars} chars, mínimo útil {critico_lo}; mínimo recomendado {p_lo})",
                 )
             )
         # Por debajo del mínimo → BAJO.
-        elif chars < lo:
+        elif chars < p_lo:
             hallazgos.append(
                 Hallazgo(
                     check="C17-longitud-min",
                     severidad="BAJO",
                     canal=canal,
                     bloque=nombre_bloque,
-                    mensaje=f"[{nombre_bloque}] Corto ({chars} chars, mínimo recomendado {lo})",
+                    mensaje=f"[{etiqueta}] Corto ({chars} chars, mínimo recomendado {p_lo})",
                 )
             )
-        elif chars > hi:
+        elif chars > p_hi:
             hallazgos.append(
                 Hallazgo(
                     check="C17-longitud-max",
                     severidad="MEDIO",
                     canal=canal,
                     bloque=nombre_bloque,
-                    mensaje=f"[{nombre_bloque}] Largo ({chars} chars, máximo recomendado {hi})",
+                    mensaje=f"[{etiqueta}] Largo ({chars} chars, máximo recomendado {p_hi})",
                 )
             )
     return hallazgos
@@ -832,10 +863,12 @@ def check_21_link_original_anuncio(
     bloques: dict[str, str], canal: str
 ) -> list[Hallazgo]:
     """M-12: el link original del anuncio SIEMPRE acompaña al copy.
-    Bloques [IG_FUENTES] / [PT_FUENTES] deben contener una URL válida."""
+    Bloques [IG_FUENTES] / [VT_FUENTES] / [FB_FUENTES] / [FBMP_FUENTES] /
+    [PT_FUENTES] deben contener una URL válida."""
     hallazgos: list[Hallazgo] = []
     nombre_fuentes = {
         "instagram": "IG_FUENTES",
+        "video_corto": "VT_FUENTES",
         "facebook": "FB_FUENTES",
         "fb_marketplace": "FBMP_FUENTES",
         "portal": "PT_FUENTES",

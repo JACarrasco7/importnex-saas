@@ -1,5 +1,41 @@
 ﻿
 
+## [3.10.5] - 30-sep-2026
+
+**El validador ya deja pasar el vocabulario v2: C17 POR PIEZA + bloques FUENTES + 3 bugs del empaquetador.**
+
+Dolor: con los esqueletos v2 (`_bloques_v2_redes`) NINGÚN coche podía pasar `check_marketing.py`.
+C17 decía medir «por pieza» pero medía cada bloque suelto (un `[IG_HASHTAGS]` de 72 chars o un
+`[FBMP_PRECIO]` de 8 nunca llegan a 300) y C21 exigía bloques `*_FUENTES` que el generador nunca
+emitía. Además, con todas las fotos servidas desde caché el empaquetador reventaba antes de crear
+el ZIP.
+
+### `scripts/check_marketing.py`
+
+1. **C17 POR PIEZA:** los bloques con prefijo `IG_`/`VT_`/`FB_`/`FBMP_`/`PT_` se SUMAN por pieza
+   (excluidos `*_FUENTES` y `*STORY*`) y se miden como una sola pieza con las mismas bandas; la
+   pieza FBMP usa la banda `fb_marketplace`. Los bloques fuera del vocabulario v2 (p.ej.
+   `TIKTOK_POST_1`) se siguen midiendo uno a uno. La exigencia se mantiene: un post de Instagram
+   tiene que llegar a 600 chars, pero sumando sus bloques.
+2. **C21** exige también `VT_FUENTES` para la pieza de vídeo corto.
+
+### `scripts/empaquetar.py`
+
+3. **`_bloques_v2_redes`** emite `IG_FUENTES`/`VT_FUENTES`/`FB_FUENTES`/`FBMP_FUENTES` y
+   **`_bloques_v2_portales`** emite `PT_FUENTES`, todos con `anuncio.url` (M-12). Sin URL en el
+   JSON, C21 bloquea el paquete — comportamiento deseado.
+4. 🔴 **`collect_photos` con 100% caché:** nadie llamaba a `download_photo()` (el único sitio que
+   creaba `work_dir/fotos`) → `FileNotFoundError` en el `write_bytes` del tmp. Ahora
+   `fotos_dir.mkdir(parents=True, exist_ok=True)` antes del bucle.
+5. 🔴 **`run_validator`:** la línea de resumen `Resumen: 🔴 0 🟠 0 🟡 1` se contaba como hallazgo
+   crítico → cualquier paquete con un solo 🟡 abortaba sin ZIP. Se ignora cuando el propio resumen
+   reporta 0 críticos.
+6. 🔴 **`main()`:** `cache_dir` no estaba definido en el resumen final → `NameError` DESPUÉS de
+   crear el ZIP (exit 1 con paquete válido). Definido como `out_dir/.fotos_cache/<coche_id>`.
+
+Verificado end-to-end (30-sep-2026): payload sintético + 3 fotos SOLO de caché → validación en
+verde (`🔴 0 🟠 0 🟡 0`), ZIP creado, exit 0. Los .txt llevan los 5 bloques `*_FUENTES`.
+
 ## [3.10.4] - 28-sep-2026
 
 **Generador de fuentes completo + bug `ArrBodyType` de SUV (para el informe de mercado v0.5.0).**
