@@ -1,7 +1,7 @@
 ﻿# Skills — punto único de verdad
 
 > **Documento canónico.** Si hay conflicto entre lo que dice la skill, el código, o algún README suelto: **este archivo gana**.
-> _Última regeneración: 2026-09-28. Versiones vigentes: las de la tabla de abajo (y el CHANGELOG.md de cada skill)._
+> _Última regeneración: 2026-09-30. Versiones vigentes: las de la tabla de abajo (y el CHANGELOG.md de cada skill)._
 
 ## 📦 ZIPs de skill (builds actuales)
 
@@ -9,9 +9,9 @@ Generados por `scripts/build-skill-zips.ps1` (wrapper de `.claude/skills/_dist/b
 
 | Skill | ZIP | Version | Tamano | SHA256 |
 |---|---|---|---|---|
-| `importacion-vehiculos` | `.claude/skills/_dist/skills-importacion-vehiculos-v3.10.4-20260928.zip` | 3.10.4 | 523 KB | `3abe5e9be0afb8cc3a91eb602e37b475f196b05c23204edce738f5e5ea043704` |
-| `estudio-mercado` | `.claude/skills/_dist/skills-estudio-mercado-v0.5.0-20260928.zip` | 0.5.0 | 66 KB | `b9343efb53219f16571d72e2193a4078dbccb1a1d1bad3b7dbf9426ea0bf575d` |
-| `ecommerce-tuning` | `.claude/skills/_dist/skills-ecommerce-tuning-v0.1.0-20260928.zip` | 0.1.0 | 7 KB | `e720e3974d61aa73ea9bdd8efb0b82116a16ad659f68f556a66ca8ba77431d05` |
+| `importacion-vehiculos` | `.claude/skills/_dist/skills-importacion-vehiculos-v3.10.4-20260930.zip` | 3.10.4 | 523 KB | `3abe5e9be0afb8cc3a91eb602e37b475f196b05c23204edce738f5e5ea043704` |
+| `estudio-mercado` | `.claude/skills/_dist/skills-estudio-mercado-v0.5.0-20260930.zip` | 0.5.0 | 66 KB | `b9343efb53219f16571d72e2193a4078dbccb1a1d1bad3b7dbf9426ea0bf575d` |
+| `ecommerce-tuning` | `.claude/skills/_dist/skills-ecommerce-tuning-v0.1.0-20260930.zip` | 0.1.0 | 7 KB | `e720e3974d61aa73ea9bdd8efb0b82116a16ad659f68f556a66ca8ba77431d05` |
 
 ## 🔀 Las 3 copias que NO se sincronizan solas (12-sep-2026)
 
