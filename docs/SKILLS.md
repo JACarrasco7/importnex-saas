@@ -1,7 +1,7 @@
 ﻿# Skills — punto único de verdad
 
 > **Documento canónico.** Si hay conflicto entre lo que dice la skill, el código, o algún README suelto: **este archivo gana**.
-> _Última regeneración: 2026-09-30. Versiones vigentes: las de la tabla de abajo (y el CHANGELOG.md de cada skill)._
+> _Última regeneración: 2026-10-06. Versiones vigentes: las de la tabla de abajo (y el CHANGELOG.md de cada skill)._
 
 ## 📦 ZIPs de skill (builds actuales)
 
@@ -9,7 +9,7 @@ Generados por `scripts/build-skill-zips.ps1` (wrapper de `.claude/skills/_dist/b
 
 | Skill | ZIP | Version | Tamano | SHA256 |
 |---|---|---|---|---|
-| `importacion-vehiculos` | `.claude/skills/_dist/skills-importacion-vehiculos-v3.10.5-20260930.zip` | 3.10.5 | 525 KB | `b7b2220a6ad714750cf6bb61a29b450e82f72981046ac016c15dab3fcb44cb47` |
+| `estudio-mercado` | `.claude/skills/_dist/skills-estudio-mercado-v0.5.1-20261006.zip` | 0.5.1 | 1,2 MB | `b0cb37f4def8a287ed024342bd65798bf3e26cd84ceae58e2a76e2c8dff7104f` |
 
 ## 🔀 Las 3 copias que NO se sincronizan solas (12-sep-2026)
 
