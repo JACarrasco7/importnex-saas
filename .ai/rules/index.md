@@ -7,6 +7,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | docs/guias/**,app/Http/Controllers/GuideController.php | .ai/rules/controllers.md |
 | .claude/skills/ecommerce-tuning/** | .ai/rules/ecommerce-tuning.md |
 | .claude/skills/estudio-mercado/** | .ai/rules/estudio-mercado.md |
+| .claude/skills/importacion-vehiculos/** | .ai/rules/importacion-vehiculos.md |
 | resources/js/Pages/** | .ai/rules/pages.md |
 | public/sw.js | .ai/rules/public.md |
 | routes/web.php | .ai/rules/routes.md |
