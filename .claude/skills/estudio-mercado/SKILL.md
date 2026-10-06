@@ -1,6 +1,6 @@
 ---
 name: estudio-mercado
-version: 0.5.0
+version: 0.5.1
 description: >
   Estudio profundo del mercado de coches de 2ª mano en España y Alemania para
   JJ Import Motors. Genera un mapa de mercado persistente (datos_mercado.json)
@@ -457,6 +457,7 @@ Para cada modelo/versión, el mapa guarda (esquema completo en `schema_datos_mer
 |---|---|---|
 | `datos_mercado.json` | JSON (mapa de mercado persistente) | **RUTA DUAL** (L2):<br>1. `C:/Users/jacar/Desktop/JJImportMotors/datos_mercado.json`<br>2. `C:/laragon/www/importnexcore/.claude/skills/datos_mercado.json` |
 | `<marca>_<segmento>_<enfoque>_<YYYY-MM-DD>.md` | Markdown (sondeo de mercado para el usuario) | `informes\<marca>\` (Desktop: `JJImportMotors/informes/<marca>/`) |
+| `guia-<marca>_<fecha>.md|pdf` + `00-INDICE.md` | Guía de búsqueda manual por marca (MD+PDF) | `C:/Users/jacar/Desktop/JJImportMotors/guias-busqueda/` + espejo `informes-mercado/` — generar con `py .claude/skills/estudio-mercado/scripts/generar_guia_marcas.py` (v0.5.1) |
 
 > **PLANTILLA OBLIGATORIA del informe (28-sep-2026 v0.5.0):** usar `informe_mercado.md` (plantilla en esta carpeta).
 > El informe está **escrito para el usuario** (Jacar), no para otra IA. Lenguaje de negocio, sin jerga técnica.

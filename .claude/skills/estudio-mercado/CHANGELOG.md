@@ -5,6 +5,28 @@ Todos los cambios notables en el skill `estudio-mercado` se documentarán en est
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.5.1] - 2026-10-06
+
+**Guías de búsqueda manual por marca (`scripts/generar_guia_marcas.py`) — MD+PDF para el usuario.**
+
+> **Motivo:** el usuario busca a mano en los portales (sliders de filtro) y necesitaba una referencia
+> por marca que explique generación por años, CV por motor y qué filtro usar y POR QUÉ. No es un
+> sondeo de mercado: es documentación de usuario generada desde `datos_mercado.json` + un diccionario
+> curado de identificación (`IDENT`).
+
+### ➕ Nuevo `scripts/generar_guia_marcas.py`
+- Genera una guía MD+PDF por marca (14 marcas, todos sus modelos del mapa) en ruta dual:
+  `C:/Users/jacar/Desktop/JJImportMotors/guias-busqueda/` + `informes-mercado/` (espejo).
+- Nombre canónico: `guia-<marca>_<fecha>.md|pdf` + índice `00-INDICE.md` en cada carpeta.
+- CLI: `--marca` (repetible), `--out`, `--no-pdf`, `--fecha`. Sin `--marca`: todas.
+- Cada guía: resumen de modelos, chuleta de filtros, sección por modelo (motores/CV por año,
+  filtros con justificación, datos del estudio, búsquedas listas, trampas, notas de estudio).
+- PDF vía Chrome headless (`--headless=new`, rutas ABSOLUTAS — con relativas falla en silencio).
+- stdout en UTF-8 forzado (con pipe en Windows, cp1252 rompía con los emojis).
+- **Mantenimiento:** al entrar un modelo nuevo en `datos_mercado.json`, añadir su entrada al
+  dict `IDENT` (generación/años, motores con CV, trampa). Sin entrada curada, la guía sale con
+  huecos.
+
 ## [0.5.0] - 2026-09-28
 
 **Plantilla ÚNICA y concisa + ruta/nomenclatura canónica + §FUENTES con conteo y fecha.**

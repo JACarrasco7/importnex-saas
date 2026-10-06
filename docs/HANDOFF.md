@@ -24,6 +24,16 @@
 
 ---
 
+## 2026-10-06 16:40 · Copilot-VSCode · estudio-mercado 0.5.1 — guías de búsqueda manual por marca (MD+PDF)
+
+- Hice: `scripts/generar_guia_marcas.py` genera una guía por marca (14 marcas, todos sus modelos del mapa) para que el usuario busque a mano en los portales: qué filtro poner (año=generación, CV=motor) y POR QUÉ. Ya están generadas en `Desktop\JJImportMotors\guias-busqueda\` (MD+PDF+`00-INDICE.md`) y espejadas en `informes-mercado/`.
+- Mantenimiento: al entrar un modelo nuevo en `datos_mercado.json`, añadir su entrada al dict `IDENT` del script. Regenerar con `py .claude/skills/estudio-mercado/scripts/generar_guia_marcas.py [--marca X]`.
+- Toqué: `scripts/generar_guia_marcas.py` (nuevo), `SKILL.md` (0.5.0→0.5.1), `CHANGELOG.md`, `docs/HANDOFF.md`.
+- ⚠️ PENDIENTE para Claude-Desktop: reimporta la skill v0.5.1 desde `_dist` (tras `sync-desktop`) — no es urgente, las guías ya están generadas en Disco.
+- Commit: ver `git log` (rama master).
+
+---
+
 ## 2026-09-30 21:07 · Copilot-VSCode · skill importacion-vehiculos 3.10.5 — validador deja pasar el vocabulario v2
 
 - Hice: los 4 arreglos del diagnóstico de Claude (denegado por permisos en su sesión): C17 POR PIEZA (agrega `IG_/VT_/FB_/FBMP_/PT_`, excluye `*_FUENTES`/`*STORY*`, FBMP con su banda), C21 exige `VT_FUENTES`, generadores emiten los 5 `*_FUENTES` con `anuncio.url`, `collect_photos` crea `fotos_dir` con 100% caché. De regalo, el test cazó 2 bugs más: `run_validator` contaba `Resumen: 🔴 0 🟠 0 🟡 1` como crítico (bloqueaba cualquier paquete con un 🟡) y `main()` tenía un `NameError` de `cache_dir` tras crear el ZIP.
