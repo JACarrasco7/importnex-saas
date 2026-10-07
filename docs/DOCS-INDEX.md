@@ -23,6 +23,8 @@
 | [`PLAN_MARKETING_MULTICANAL_2026-09-06.md`](PLAN_MARKETING_MULTICANAL_2026-09-06.md) | Plan del Flujo M (marketing multicanal 6 canales) | Activo |
 | [`AUDITORIA_estudio-mercado_2026-09-12.md`](AUDITORIA_estudio-mercado_2026-09-12.md) | Auditoría de la skill estudio-mercado (v0.4.0) | Activo |
 | [`AUDITORIA_ronda4_2026-09-13.md`](AUDITORIA_ronda4_2026-09-13.md) | Auditoría ronda 4 (2 pasadas externas): race condition encargos.md, multi-tenant en comandos, HSTS, chunk/OOM, `public/hot` | Activo |
+| [`prompts/auditoria-flujo-investigacion.md`](prompts/auditoria-flujo-investigacion.md) | Prompt reutilizable: auditoría de contexto/flujo (Claude Desktop) | Activo |
+| [`prompts/auditoria-skills-2026-10-07.md`](prompts/auditoria-skills-2026-10-07.md) | Prompt reutilizable: auditoría PROFESIONAL de las 2 skills (mercado + importación, 10 dimensiones) | Activo |
 | [`PENDIENTES_v3.9.2_2026-09-12.md`](PENDIENTES_v3.9.2_2026-09-12.md) | Pendientes abiertos de la 3.9.2 | Activo |
 | [`ecommerce.md`](ecommerce.md) | Guía + plan del e-commerce de accesorios/tuning: modelo tramitador puro (sin almacén), agente IA de viabilidad (§14) y skill `ecommerce-tuning` (§15) | Activo |
 | [`guias/09-guia-skill-ecommerce.md`](guias/09-guia-skill-ecommerce.md) | Guía de uso de la skill `ecommerce-tuning` (S/P/F/M, filtro, navegador) | Activo |
