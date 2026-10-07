@@ -32,6 +32,13 @@
 - ⚠️ PENDIENTE: 5 decisiones de producto en el plan §3 (¿crear "00" ya? ¿PDF en Drive? ¿skill C? ¿proyecto GCP nuevo? ¿SA compartida con el compañero?). Cuando respondas, implemento la fase 1 (regla ya está) y fase 2 (skill A → Drive, 2-3h).
 - Commit: `e0ad757`.
 
+## 2026-10-07 19:55 · Copilot-VSCode · prompt auditoría v4 — corregido: modelo por defecto Opus 5.5 (SÍ existe)
+
+- Hice: el usuario me enseñó su selector de modelo en Claude Desktop: **Opus 5.5 SÍ está disponible** (marcado con check azul, "Para trabajo complejo y tareas cotidianas"). También se ven: Opus 5, 4.8, 4.7, 4.6, 3, Sonnet 5, 4.6, Haiku 4.5, Fable 5.1. Mi knowledge decía que Opus 5.5 no existía — **me equivoqué** y el prompt ahora lo corrige explícitamente ("CORREGIDA"). Modelo por defecto: **Opus 5.5**; regla clara de qué sirve y qué NO (Sonnet 5/4.6 ❌, Haiku ❌, Fable ❌). Añado fila "Esfuerzo: Alto" al lado del selector de modelo.
+- Toqué: `docs/prompts/auditoria-skills-2026-10-07.md` (cabecera + bloque Config + nota al pie), `docs/DOCS-INDEX.md`, `docs/HANDOFF.md`.
+- ⚠️ PENDIENTE: nada.
+- Commit: pendiente.
+
 ## 2026-10-07 19:30 · Copilot-VSCode · prompt auditoría v3 — D13 Legibilidad MD+PDF + D14 Contexto perpetuo + Opus 4.5
 
 - Hice: ampliada la auditoría a **14D**: **D13 Legibilidad** (TL;DR pág 1, máx 3 niveles h1-h3, 1 idea por bloque, 0 jerga, marcas ✅/👁️/⚠️, URLs visibles, no muros de texto, sin info de relleno) y **D14 Contexto perpetuo** (cabecera con marca/modelo/versión/fecha/URL, ficha repite modelo, footer del PDF con marca+modelo, txt de marketing con cabecera, fecha al lado de cifras que caducan). Añado bloque "Configuración Opus 4.5" con extended thinking + tools read-only (Nota: Opus 5.5 no existe aún — me consta que la familia actual es Opus 4.1/4.5 + Sonnet 4.5).

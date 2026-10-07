@@ -2,7 +2,7 @@
 
 > **Cuándo usar:** cuando se quiera elevar el sistema JJ Import Motors a una versión profesional madura. Audita a la vez: 3 skills de IA, el panel Laravel que las orquesta, y la sincronización con Drive de la cartera completa.
 >
-> **Última revisión del prompt:** 2026-10-07 (tabla de 8 flujos + D11 Drive + D12 flujos + **D13 Legibilidad MD+PDF + D14 Contexto perpetuo**).
+> **Última revisión del prompt:** 2026-10-07 19:50 v4 — modelo por defecto **Opus 5.5** (existe en Claude Desktop) + tabla de modelos alternativos + nota Sonnet 5 / Opus 3.
 >
 > **Auditorías previas que NO hay que re-detectar:**
 > - `docs/AUDITORIA_estudio-mercado_2026-09-12.md` (3 hallazgos: IVA fantasma, dos costes en paralelo, falta de horquilla).
@@ -13,21 +13,33 @@
 
 ## Configuración recomendada del modelo
 
-> **Nota del 2026-10-07:** Claude **Opus 5.5** aún no está disponible a fecha de este prompt
-> (los modelos Anthropic disponibles en Claude Desktop a día de hoy son la familia **Opus 4.1 / 4.5**
-> y **Sonnet 4.5**). Si cuando leas esto ya existe Opus 5.5 o un modelo superior, aplica este
-> prompt igualmente: las capacidades que aprovechamos son las del nivel Opus (razonamiento
-> profundo multi-archivo, tools extendidas, contexto largo, salida estructurada), y todos los
-> Opus 4.x las tienen. **Lo que NO debes hacer es degradar a Sonnet 4.5** para esta tarea:
-> el razonamiento sobre 14 dimensiones + 8 flujos + 3 skills simultáneas consume
-> demasiado contexto de planificación; Sonnet tiende a saltarse D11/D12/D13/D14.
+> **Nota del 2026-10-07 19:50 (CORREGIDA):** Tu Claude Desktop **SÍ muestra Opus 5.5**
+> (y Opus 5, 4.8, 4.7, 4.6, 3, Sonnet 5, 4.6, Haiku 4.5, Fable). Por defecto
+> **Opus 5.5** es el modelo correcto para esta auditoría.
+>
+> **Regla de selección de modelo** (verificado en tu UI 2026-10-07):
+>
+> | Modelo | ¿Sirve para esta auditoría? | Por qué |
+> |---|:---:|---|
+> | **Opus 5.5** (por defecto) | ✅ SÍ | "Trabajo complejo y tareas cotidianas". 14D + 8 flujos + 3 skills en una sesión. |
+> | **Opus 5** | ✅ Sí | Si 5.5 no está disponible (límite de plan). Mismo nivel. |
+> | **Opus 4.8 / 4.7 / 4.6** | ✅ Sí | Razonamiento sostenido, suficiente para 14D. |
+> | **Opus 3** | 🟡 Solo si NO hay nada mejor | Capacidad limitada, puede saltarse D11-D14. |
+> | **Sonnet 5 / 4.6** | ❌ NO recomendado | Salta D11-D14; contexto de planificación muy justo. |
+> | **Haiku 4.5** | ❌ NO | Pensamiento superficial, no apto. |
+> | **Fable 5.1** | ❌ NO | Otro vertical. |
+>
+> **Si tu UI ya no muestra Opus 5.5** (rotación de modelos), usa el Opus más alto
+> disponible. **Nunca degrades a Sonnet** para esta tarea: el bloque
+> "LO QUE NO DEBES HACER" se refuerza solo en Opus.
 
 **Cómo lanzar la auditoría en Claude Desktop:**
 
 | Parámetro | Valor | Por qué |
 |---|---|---|
-| **Modelo** | Opus 4.5 (o el Opus más alto disponible) | Razonamiento sostenido sobre 14D + 8 flujos |
+| **Modelo** | **Opus 5.5** (preferente) o el Opus más alto disponible | Razonamiento sostenido sobre 14D + 8 flujos |
 | **Modo** | "Pro" / "Extended thinking" si está disponible | Pensar antes de actuar reduce hallazgos fantasma |
+| **Esfuerzo** | "Alto" (no "Bajo") | El toggle está al lado del selector de modelo en tu UI |
 | **Contexto** | Ventana completa (no recortes) | Debe leer SKILL.md de 3 skills + planes + reglas .ai en una sola sesión |
 | **Tools habilitadas** | `Read`, `Grep`, `Glob`, `Bash` (sólo lectura: `cat`, `head`, `wc`, `git log`, `git show`) — **NO** `Write`/`Edit`/`WebFetch` agresivo | Es una auditoría de LECTURA; el bloque "LO QUE NO DEBES HACER" lo refuerza |
 | **Workspace mount** | `c:\laragon\www\importnexcore` (raíz del repo) | Para que pueda leer `.claude/`, `docs/`, `.ai/` |
@@ -636,17 +648,19 @@ Imprime al terminar:
   Si se te ocurre uno que YO no he incluido, dímelo y lo
   añadimos antes de pasar el prompt.
 
-- **Cómo lo uso en Claude Desktop (Opus 4.5 / Opus 4.1):**
+- **Cómo lo uso en Claude Desktop (Opus 5.5):**
   1. Abrir Claude Desktop con el workspace ImportnexCore y seleccionar
-     **Opus 4.5** (o el Opus más alto disponible — NO Sonnet).
-  2. Activar "Pro" / "Extended thinking" si la UI lo permite.
-  3. Pegar el bloque desde `## Prompt` hasta el último ``` literal.
-  4. Dejarle trabajar. Tardará ~30-60 min (Opus 4.5 con thinking
-     extendido es el doble de lento que Sonnet, pero el triple de
-     riguroso en D11/D12/D13/D14).
-  5. Al terminar te dice dónde están los MDs. Tú los abres en
+     **Opus 5.5** en el selector de modelo (NO Sonnet, NO Haiku).
+  2. Poner el toggle de **Esfuerzo en "Alto"** (visible al lado del
+     selector de modelo en tu UI).
+  3. Activar "Pro" / "Extended thinking" si la UI lo permite.
+  4. Pegar el bloque desde `## Prompt` hasta el último ``` literal.
+  5. Dejarle trabajar. Tardará ~30-60 min (Opus 5.5 con thinking
+     extendido es más lento que Sonnet, pero el triple de riguroso
+     en D11/D12/D13/D14).
+  6. Al terminar te dice dónde están los MDs. Tú los abres en
      VS Code y aplicas los fixes con Copilot (o me los pasas).
-  6. **Si en el futuro aparece Opus 5.5 o superior:** este prompt
+  7. **Si en el futuro aparece Opus 6 o superior:** este prompt
      sigue válido tal cual. Lo único que cambia es el "Modelo" en
      la tabla de arriba.
 
