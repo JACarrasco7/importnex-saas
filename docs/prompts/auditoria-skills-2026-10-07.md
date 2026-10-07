@@ -2,7 +2,7 @@
 
 > **Cuándo usar:** cuando se quiera elevar el sistema JJ Import Motors a una versión profesional madura. Audita a la vez: 3 skills de IA, el panel Laravel que las orquesta, y la sincronización con Drive de la cartera completa.
 >
-> **Última revisión del prompt:** 2026-10-07 (tabla de 8 flujos + D11 Drive + D12 flujos).
+> **Última revisión del prompt:** 2026-10-07 (tabla de 8 flujos + D11 Drive + D12 flujos + **D13 Legibilidad MD+PDF + D14 Contexto perpetuo**).
 >
 > **Auditorías previas que NO hay que re-detectar:**
 > - `docs/AUDITORIA_estudio-mercado_2026-09-12.md` (3 hallazgos: IVA fantasma, dos costes en paralelo, falta de horquilla).
@@ -19,14 +19,14 @@
 > prompt igualmente: las capacidades que aprovechamos son las del nivel Opus (razonamiento
 > profundo multi-archivo, tools extendidas, contexto largo, salida estructurada), y todos los
 > Opus 4.x las tienen. **Lo que NO debes hacer es degradar a Sonnet 4.5** para esta tarea:
-> el razonamiento sobre 12 dimensiones + 8 flujos + 3 skills simultáneas consume
-> demasiado contexto de planificación; Sonnet tiende a saltarse D11/D12.
+> el razonamiento sobre 14 dimensiones + 8 flujos + 3 skills simultáneas consume
+> demasiado contexto de planificación; Sonnet tiende a saltarse D11/D12/D13/D14.
 
 **Cómo lanzar la auditoría en Claude Desktop:**
 
 | Parámetro | Valor | Por qué |
 |---|---|---|
-| **Modelo** | Opus 4.5 (o el Opus más alto disponible) | Razonamiento sostenido sobre 12D + 8 flujos |
+| **Modelo** | Opus 4.5 (o el Opus más alto disponible) | Razonamiento sostenido sobre 14D + 8 flujos |
 | **Modo** | "Pro" / "Extended thinking" si está disponible | Pensar antes de actuar reduce hallazgos fantasma |
 | **Contexto** | Ventana completa (no recortes) | Debe leer SKILL.md de 3 skills + planes + reglas .ai en una sola sesión |
 | **Tools habilitadas** | `Read`, `Grep`, `Glob`, `Bash` (sólo lectura: `cat`, `head`, `wc`, `git log`, `git show`) — **NO** `Write`/`Edit`/`WebFetch` agresivo | Es una auditoría de LECTURA; el bloque "LO QUE NO DEBES HACER" lo refuerza |
@@ -255,7 +255,7 @@ NOTA — ALCANCE DEL PROMPT:
    de a qué skill debería pertenecer y qué plantilla necesitaría).
 
 ═══════════════════════════════════════════════════════════════════
-DIMENSIONES A AUDITAR (12 — no te saltes ninguna)
+DIMENSIONES A AUDITAR (14 — no te saltes ninguna)
 ═══════════════════════════════════════════════════════════════════
 
 D1. COHERENCIA ENTRE SKILLS (la más crítica).
@@ -420,6 +420,82 @@ D12. FLUJOS DE TRABAJO (nueva dimensión — verifica los 8 flujos
      - ¿Hay un flujo huérfano (la IA hace X sin que esté en la tabla)?
        → Listarlo en "Flujos que faltan".
 
+D13. LEGIBILIDAD MD + PDF (nueva dimensión — el informe ES el
+     producto, no un byproduct).
+     - **El usuario (Jacar) NO es desarrollador.** Los informes se
+       leen en el móvil, en PDF impreso, o en una pestaña rápida del
+       navegador. Audita que cada plantilla + generador + render PDF
+       cumpla estas REGLAS DE ORO:
+         □ Resumen ejecutivo en la PRIMERA página / primeras 20 líneas
+           (el "TL;DR" en 3-5 frases que el usuario lee en 30s).
+         □ La tabla principal (decisión, precios, modelos) está en la
+           página 1 o 2 del PDF y se ve SIN scroll horizontal.
+         □ Jerarquía visual: máximo 3 niveles de titular (h1/h2/h3).
+           Si la plantilla tiene 5 niveles, marcarla como 🔴.
+         □ Cada bloque tiene 1 sola idea. Si un bullet mezcla 2 cosas
+           (ej. "ahorra 1.500 € pero ojo con la versión X"), partirlo.
+         □ Cero jerga interna (no "sincronizado", "merge", "scoping",
+           "deliverable", "scope", "stack"). Si la plantilla la usa,
+           cambiarla por palabra de negocio.
+         □ Datos sensibles: si la cifra tiene reserva, marádala
+           visualmente (✅/👁️/⚠️ o un callout). NUNCA dato pelado.
+         □ URLs visibles: el PDF no debe tapar la URL detrás de "[aquí]"
+           ni de "ver enlace"; pegar la URL completa (el render ya
+           aplica word-break).
+         □ El PDF no debe ser un muro de texto: jerarquía, aire,
+           callouts en color (ya hay CSS base en mercado_pdf.py).
+         □ Cada página del PDF tiene footer (fecha + versión de la
+           skill) — ya está en el script, auditar que se mantenga.
+     - **Compara el PDF con la regla "el PDF lo lee el operador,
+       el .md es el contrato interno".** El PDF tiene que ser
+       autoexplicativo: portada + KPIs + semáforo + fichas + fuentes.
+       Si un PDF no tiene portada o la portada no dice modelo/marca/
+       fecha, es 🔴.
+     - **No debe haber "info de relleno"**: si una sección dice
+       "Sin trampas detectadas" o "Sin comparables todavía" y esa
+       frase es el 80% del bloque, mejor quitar la sección en ese
+       informe. La nube debería saber cuándo NO incluir una sección
+       (regla de "concisa" heredada de v0.5.0).
+     - Audita también la regla "1 idea por bloque" en las plantillas
+       txt (ficha-publicitaria, informe-interno): cada [H2] + [INCLUYE]
+       + [ARGUMENTO] tiene que ser digerible en 1 minuto.
+
+D14. CONTEXTO PERPETUO (nueva dimensión — el informe se tiene que
+     poder leer ENTERO sin abrir nada más).
+     - El usuario abre el PDF en el coche del cliente, en el teléfono,
+       o semanas después. Audita que cada informe lleva SIEMPRE:
+         □ Cabecera con: marca, modelo, versión, fecha, fuente del
+           estudio (URL) y, si aplica, presupuesto del cliente o
+           segmento.
+         □ En cada sección de "ficha por versión" (cuando aplique),
+           se repite el nombre del modelo en el título o pill — para
+           que un print de esa página siga siendo entendible solo.
+         □ En el PDF, cada página repite marca+modelo en el footer o
+           cabecera (no solo en la portada). Si hoy no lo hace,
+           proponer añadirlo como regla A34+ "pie de ficha con
+           contexto".
+         □ Los bloques de marketing (redes-sociales.txt,
+           anuncio-portales.txt) llevan SIEMPRE marca+modelo+versión
+           en la primera línea (cabecera del fichero), no en mitad
+           del copy.
+         □ El informe de mercado (estudio-mercado) lleva en cada
+           página del PDF: marca/segmento + fecha del estudio +
+           nº anuncios consultados. Así, si el usuario imprime solo
+           la página 4, sigue sabiendo qué está mirando.
+         □ Las cifras que cambian con el tiempo (precio, oferta)
+           llevan fecha de medición al lado. Si no, el informe envejece
+           en silencio y la siguiente sesión toma decisiones con datos
+           podridos.
+     - **Regla de oro del usuario (28-ago-2026, ya en informe_mercado.md):**
+       "Para TI (Jacar). Lenguaje de negocio, sin jerga técnica.
+       Sondeo rápido del mercado: solo el número, el hueco y los
+       enlaces." → audita que CADA plantilla (no solo la de mercado)
+       cumpla esa regla.
+     - Audita también: ¿la IA tiene el contexto "en cada momento" o
+       lo pierde entre secciones? Si la sección 5 (trampas) habla de
+       "ese motor" sin recordar cuál (ya mencionado en §1 o §2),
+       es hallazgo 🟠.
+
 ═══════════════════════════════════════════════════════════════════
 FORMATO DE SALIDA (obligatorio — así entrego yo el informe)
 ═══════════════════════════════════════════════════════════════════
@@ -534,7 +610,7 @@ Imprime al terminar:
     skill dueña, plantilla, fichero, carpeta, validador, Drive y
     riesgo crítico POR FLUJO. Si el auditor mide algo que no está
     en el mapa, está midiendo mal.
-  - 12 DIMENSIONES concretas y disjuntas (no "audita todo"), incluida
+  - 14 DIMENSIONES concretas y disjuntas (no "audita todo"), incluidas
     D11 (Drive) y D12 (flujos) que faltaban en rondas previas.
   - FORMATO de salida idéntico a las 2 auditorías previas → 3-4 MDs
     integrables con `AUDITORIA_*.md` ya existentes y comparables.
@@ -567,7 +643,7 @@ Imprime al terminar:
   3. Pegar el bloque desde `## Prompt` hasta el último ``` literal.
   4. Dejarle trabajar. Tardará ~30-60 min (Opus 4.5 con thinking
      extendido es el doble de lento que Sonnet, pero el triple de
-     riguroso en D11/D12).
+     riguroso en D11/D12/D13/D14).
   5. Al terminar te dice dónde están los MDs. Tú los abres en
      VS Code y aplicas los fixes con Copilot (o me los pasas).
   6. **Si en el futuro aparece Opus 5.5 o superior:** este prompt
