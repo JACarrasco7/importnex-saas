@@ -2,12 +2,44 @@
 
 > **Cuándo usar:** cuando se quiera elevar el sistema JJ Import Motors a una versión profesional madura. Audita a la vez: 3 skills de IA, el panel Laravel que las orquesta, y la sincronización con Drive de la cartera completa.
 >
-> **Última revisión del prompt:** 2026-10-07 (con tabla de flujos explícita + D11 Drive + D12 flujos de trabajo).
+> **Última revisión del prompt:** 2026-10-07 (tabla de 8 flujos + D11 Drive + D12 flujos).
 >
 > **Auditorías previas que NO hay que re-detectar:**
 > - `docs/AUDITORIA_estudio-mercado_2026-09-12.md` (3 hallazgos: IVA fantasma, dos costes en paralelo, falta de horquilla).
 > - `docs/AUDITORIA_ronda4_2026-09-13.md` (4A race conditions; 4B multi-tenant/OOMs).
 > - `docs/SYNC-DRIVE-PLAN.md` (contrato Drive; este prompt lo audita en D11).
+
+---
+
+## Configuración recomendada del modelo
+
+> **Nota del 2026-10-07:** Claude **Opus 5.5** aún no está disponible a fecha de este prompt
+> (los modelos Anthropic disponibles en Claude Desktop a día de hoy son la familia **Opus 4.1 / 4.5**
+> y **Sonnet 4.5**). Si cuando leas esto ya existe Opus 5.5 o un modelo superior, aplica este
+> prompt igualmente: las capacidades que aprovechamos son las del nivel Opus (razonamiento
+> profundo multi-archivo, tools extendidas, contexto largo, salida estructurada), y todos los
+> Opus 4.x las tienen. **Lo que NO debes hacer es degradar a Sonnet 4.5** para esta tarea:
+> el razonamiento sobre 12 dimensiones + 8 flujos + 3 skills simultáneas consume
+> demasiado contexto de planificación; Sonnet tiende a saltarse D11/D12.
+
+**Cómo lanzar la auditoría en Claude Desktop:**
+
+| Parámetro | Valor | Por qué |
+|---|---|---|
+| **Modelo** | Opus 4.5 (o el Opus más alto disponible) | Razonamiento sostenido sobre 12D + 8 flujos |
+| **Modo** | "Pro" / "Extended thinking" si está disponible | Pensar antes de actuar reduce hallazgos fantasma |
+| **Contexto** | Ventana completa (no recortes) | Debe leer SKILL.md de 3 skills + planes + reglas .ai en una sola sesión |
+| **Tools habilitadas** | `Read`, `Grep`, `Glob`, `Bash` (sólo lectura: `cat`, `head`, `wc`, `git log`, `git show`) — **NO** `Write`/`Edit`/`WebFetch` agresivo | Es una auditoría de LECTURA; el bloque "LO QUE NO DEBES HACER" lo refuerza |
+| **Workspace mount** | `c:\laragon\www\importnexcore` (raíz del repo) | Para que pueda leer `.claude/`, `docs/`, `.ai/` |
+| **Tamaño esperado de salida** | 3-4 MDs en `docs/AUDITORIA_*.md` (5-25 KB cada uno) + bloque final en chat | Si Opus devuelve < 2 KB, ha medido mal |
+
+**Variables de entorno opcionales** (si el cliente Claude Desktop las soporta):
+
+```text
+AUDIT_DATE=2026-10-07
+AUDIT_SCOPE=3skills+laravel+drive
+AUDIT_LEVEL=professional
+```
 
 ---
 
@@ -528,13 +560,19 @@ Imprime al terminar:
   Si se te ocurre uno que YO no he incluido, dímelo y lo
   añadimos antes de pasar el prompt.
 
-- **Cómo lo uso en Claude Desktop:**
-  1. Abrir Claude Desktop con el workspace ImportnexCore.
-  2. Pegar el bloque desde `## Prompt` hasta el último ```.
-  3. Dejarle trabajar. Tardará ~30-45 min (depende de cuánto
-     contexto cargue; él mismo debe aplicar las reglas de D6).
-  4. Al terminar te dice dónde están los MDs. Tú los abres en
+- **Cómo lo uso en Claude Desktop (Opus 4.5 / Opus 4.1):**
+  1. Abrir Claude Desktop con el workspace ImportnexCore y seleccionar
+     **Opus 4.5** (o el Opus más alto disponible — NO Sonnet).
+  2. Activar "Pro" / "Extended thinking" si la UI lo permite.
+  3. Pegar el bloque desde `## Prompt` hasta el último ``` literal.
+  4. Dejarle trabajar. Tardará ~30-60 min (Opus 4.5 con thinking
+     extendido es el doble de lento que Sonnet, pero el triple de
+     riguroso en D11/D12).
+  5. Al terminar te dice dónde están los MDs. Tú los abres en
      VS Code y aplicas los fixes con Copilot (o me los pasas).
+  6. **Si en el futuro aparece Opus 5.5 o superior:** este prompt
+     sigue válido tal cual. Lo único que cambia es el "Modelo" en
+     la tabla de arriba.
 
 - **Cadencia recomendada:** 1 vez al trimestre o tras 5+ cambios
   mayores en cualquier skill. No más (las auditorías tienen coste
