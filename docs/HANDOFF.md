@@ -24,6 +24,14 @@
 
 ---
 
+## 2026-10-07 12:30 · Copilot-VSCode · prompt profesional de auditoría conjunta de las 2 skills
+
+- Hice: `docs/prompts/auditoria-skills-2026-10-07.md` — prompt para Claude Desktop que audita `estudio-mercado` + `importacion-vehiculos` en 10 dimensiones (coherencia entre skills, fuentes, anti-patrones, validadores, contexto, redacción, memoria, integración Laravel, riesgos legales). Formato de salida idéntico a las auditorías previas → MDs integrables. Indexado en `DOCS-INDEX.md`.
+- Uso recomendado: 1 vez/trimestre o tras 5+ cambios mayores. Pegar el bloque en Claude Desktop, dejarle escribir 2 MDs en `docs/`, aplicar yo los fixes en VS Code.
+- Toqué: `docs/prompts/auditoria-skills-2026-10-07.md`, `docs/DOCS-INDEX.md`, `docs/HANDOFF.md`.
+- ⚠️ PENDIENTE: nada.
+- Commit: `7e17df2`.
+
 ## 2026-10-06 16:40 · Copilot-VSCode · estudio-mercado 0.5.1 — guías de búsqueda manual por marca (MD+PDF)
 
 - Hice: `scripts/generar_guia_marcas.py` genera una guía por marca (14 marcas, todos sus modelos del mapa) para que el usuario busque a mano en los portales: qué filtro poner (año=generación, CV=motor) y POR QUÉ. Ya están generadas en `Desktop\JJImportMotors\guias-busqueda\` (MD+PDF+`00-INDICE.md`) y espejadas en `informes-mercado/`.
