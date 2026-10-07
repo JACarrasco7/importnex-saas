@@ -32,6 +32,14 @@
 - ⚠️ PENDIENTE: 5 decisiones de producto en el plan §3 (¿crear "00" ya? ¿PDF en Drive? ¿skill C? ¿proyecto GCP nuevo? ¿SA compartida con el compañero?). Cuando respondas, implemento la fase 1 (regla ya está) y fase 2 (skill A → Drive, 2-3h).
 - Commit: `e0ad757`.
 
+## 2026-10-07 18:50 · Copilot-VSCode · prompt auditoría integral v2 (3 skills + Laravel + Drive + 8 flujos)
+
+- Hice: ampliado `docs/prompts/auditoria-skills-2026-10-07.md` con (a) tabla MAESTRA de 8 flujos (A, B, C, D, E, M, F-EM, F-GM) con skill/plantilla/fichero/carpeta/validador/Drive/riesgo POR flujo, (b) D11 Drive (validar SYNC-DRIVE-PLAN.md contra realidad), (c) D12 flujos (verificación sistemática + "Flujos que faltan"). 12D en total, 3-4 MDs entregables. Reglas "NO contradecir entregables.md" + "mapa maestro es la verdad".
+- Mapeo de los flujos que más usa el usuario: A (unidad) + F-EM (estudio por marca) + F-GM (estudio por segmento, ej. "SUVs de Audi / familiares de VW" = N informes por marca en subcarpetas).
+- Toqué: `docs/prompts/auditoria-skills-2026-10-07.md`, `docs/DOCS-INDEX.md`, `docs/HANDOFF.md`.
+- ⚠️ PENDIENTE: si el usuario descubre un workflow nuevo que NO encaje en los 8 flujos, añadirlo al mapa antes de pasar el prompt a Claude Desktop.
+- Commit: pendiente.
+
 ## 2026-10-07 12:30 · Copilot-VSCode · prompt profesional de auditoría conjunta de las 2 skills
 
 - Hice: `docs/prompts/auditoria-skills-2026-10-07.md` — prompt para Claude Desktop que audita `estudio-mercado` + `importacion-vehiculos` en 10 dimensiones (coherencia entre skills, fuentes, anti-patrones, validadores, contexto, redacción, memoria, integración Laravel, riesgos legales). Formato de salida idéntico a las auditorías previas → MDs integrables. Indexado en `DOCS-INDEX.md`.
