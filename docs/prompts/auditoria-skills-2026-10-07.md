@@ -15,16 +15,33 @@ ROL
 
 Actúa como AUDITOR SENIOR del sistema JJ Import Motors, especializado en
 calidad de skills de IA para negocio de búsqueda/importación de coches.
-Vas a hacer una auditoría PROFUNDA, PROFESIONAL y CONJUNTA de las DOS skills
-que forman el núcleo del sistema:
+Vas a hacer una auditoría PROFUNDA, PROFESIONAL y CONJUNTA de las TRES
+skills que forman el núcleo del sistema Y del panel Laravel que las
+orquesta:
 
-  A) .claude/skills/estudio-mercado/     (mapa de mercado persistente)
+  A) .claude/skills/estudio-mercado/       (mapa de mercado persistente)
   B) .claude/skills/importacion-vehiculos/ (búsqueda + valoración + ZIP)
+  C) .claude/skills/ecommerce-tuning/      (e-commerce de accesorios
+     y tuning; modelo tramitador puro S/P/F/M, sin almacén)
 
-Ambas viven en el workspace c:\laragon\www\importnexcore y se sincronizan a
-C:\Users\jacar\Desktop\JJImportMotors\ vía scripts/sync-desktop.ps1.
-El panel Laravel (ImportnexCore) consume AMBAS: estudio-mercado da el
-CRITERIO de selección (PASO 0), importacion-vehiculos ejecuta los FLUJOS.
+  D) Panel Laravel (ImportnexCore)
+     - Stack: Laravel 11.55 + PHP 8.5 + Inertia 2 + Vue 3 + Tailwind 3.4
+     - Rutas: /billing/* /vehicles/* /imports/* /valuations/* /marketplace/*
+       /public/*
+     - Multi-tenant via organization_id (NO confundir con plan/subscription)
+     - Comandos artisan: app/Console/Commands/ (MarketImport, MarketAlerts,
+       MarketExport, ImportValuation, MarketFreshness...)
+     - Composer: maatwebsite/excel (xlsx local), Stripe (cashier), NO
+       hay cliente Google todavía (ni google/apiclient, ni flysystem-
+       google-drive, ni league/oauth2-client) — es un hueco conocido.
+
+Las tres skills viven en el workspace c:\laragon\www\importnexcore y se
+sincronizan a C:\Users\jacar\Desktop\JJImportMotors\ vía
+scripts/sync-desktop.ps1. La skill A da el CRITERIO de selección que la B
+consume en su PASO 0; la C opera en otro vertical (accesorios) y solo
+comparte el principio de "tramitador puro, sin stock" del negocio.
+El panel Laravel es el consumidor final de las dos primeras (la C no
+genera ZIP para Laravel aún).
 
 ═══════════════════════════════════════════════════════════════════
 CONTEXTO MÍNIMO OBLIGATORIO (lee ANTES de auditar)
@@ -43,6 +60,7 @@ CONTEXTO MÍNIMO OBLIGATORIO (lee ANTES de auditar)
 2. SKILLS — empieza por el frontal:
    - .claude/skills/estudio-mercado/SKILL.md
    - .claude/skills/importacion-vehiculos/SKILL.md
+   - .claude/skills/ecommerce-tuning/SKILL.md
    Y después, SOLO los compañeros que cita el frontal en cada flujo (no
    leas directorios enteros).
 
@@ -60,7 +78,7 @@ CONTEXTO MÍNIMO OBLIGATORIO (lee ANTES de auditar)
    - importacion-vehiculos: 3.10.5 (validador v2, generador v2).
 
 ═══════════════════════════════════════════════════════════════════
-DIMENSIONES A AUDITAR (10 — no te saltes ninguna)
+DIMENSIONES A AUDITAR (11 — no te saltes ninguna)
 ═══════════════════════════════════════════════════════════════════
 
 D1. COHERENCIA ENTRE SKILLS (la más crítica de esta auditoría).
@@ -178,6 +196,30 @@ D10. RIESGOS DE MODELO DE NEGOCIO (lo que NO se ve en el código).
      - ¿Las reglas RGPD/AVISO LEGAL son robustas? (especialmente
         en la ficha cliente que se comparte por WhatsApp).
 
+D11. SINCRONIZACIÓN DRIVE TRANSVERSAL Y CONSISTENCIA MULTI-CANAL.
+     - Hoy solo `importacion-vehiculos/references/google_drive.md`
+        tiene flujo Drive (xlsx/json a 2 carpetas: "07 Vehículos
+        (operaciones)" y "06 CRM y clientes"). ¿La skill A
+        (estudio-mercado) y la C (ecommerce-tuning) deberían también
+        subir a Drive? ¿Qué artefactos concretos? (ej: informes
+        por marca a una carpeta "00 Estudios de mercado").
+     - ¿La skill C tiene entregables que merezca la pena subir
+        (informe-senales.md, informe-viabilidad-<slug>.md)?
+     - ¿El panel Laravel debería tener un canal inverso — webhook
+        de Drive → re-leer plantilla → regenerar ZIP? Hoy solo
+        escribe IA → Drive.
+     - Comprobar el módulo Drive hoy: ¿usa `base64Content`
+        (correcto) o `content` (corrupto)? ¿Maneja los duplicados
+        en "actualizar" o crea copia nueva cada vez? ¿Respeta las
+        dos carpetas canónicas? ¿Está versionado en alguna regla
+        .ai/rules/drive.md o vive solo dentro de la skill?
+     - ¿Hay features del panel (paquete valoración, marketplace, B2B)
+        que NO tienen reflejo en ninguna skill y por tanto la IA nunca
+        las genera bien?
+     - Si la respuesta a D11 es "hay que integrar Drive transversal",
+        el plan técnico vive en docs/SYNC-DRIVE-PLAN.md — leerlo
+        primero (es el contrato que fija el diseño).
+
 ═══════════════════════════════════════════════════════════════════
 FORMATO DE SALIDA (obligatorio — así entrego yo el informe)
 ═══════════════════════════════════════════════════════════════════
@@ -266,7 +308,7 @@ Y NUNCA escribas en C:\Users\jacar\Desktop\JJImportMotors\ ni en
   - Define ROL explícito (auditor senior, no asistente genérico).
   - Obliga a leer el contexto MÍNIMO antes de auditar (sin contexto
     cualquier auditoría es opinión).
-  - 10 DIMENSIONES concretas y disjuntas (no "audita todo").
+  - 11 DIMENSIONES concretas y disjuntas (no "audita todo").
   - FORMATO de salida idéntico a las 2 auditorías previas → resultado
     integrable con `AUDITORIA_*.md` ya existentes y comparables.
   - Lista LO QUE NO DEBE HACER (anti-patrones del auditor).

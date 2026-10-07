@@ -12,5 +12,6 @@ Before planning or editing, find the row whose globs match the file's path and r
 | public/sw.js | .ai/rules/public.md |
 | routes/web.php | .ai/rules/routes.md |
 | .claude/skills/** | .ai/rules/skills.md |
+| docs/SYNC-DRIVE-PLAN.md,app/Services/Google/**,app/Jobs/UploadToDrive.php | .ai/rules/drive.md |
 | app/Support/** | .ai/rules/support.md |
 | resources/views/** | .ai/rules/views.md |
