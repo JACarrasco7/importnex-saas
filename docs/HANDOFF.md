@@ -24,6 +24,14 @@
 
 ---
 
+## 2026-10-07 18:20 · Copilot-VSCode · plan transversal de sincronización con Google Drive (3 skills + Laravel)
+
+- Hice: el prompt de auditoría de 12:30 (que ahora es DRAFT) tenía 2 skills + 10 dim; lo he ampliado a **3 skills + Laravel + 11 dim** (D11 = sync Drive transversal). Y como contrato de esa D11, he creado [docs/SYNC-DRIVE-PLAN.md](docs/SYNC-DRIVE-PLAN.md): 5 fases (regla fundacional → skill A → skill C opcional → Laravel → doc+audit) + decisiones pendientes + riesgos + métricas. Regla [.ai/rules/drive.md](.ai/rules/drive.md) con reglas duras (carpetas 00/06/07/08/09, `base64Content`, lock de 30s, `enable_uploads=false` por defecto).
+- Estado del gap: hoy solo `importacion-vehiculos` tiene Drive maduro (`references/google_drive.md`); Laravel NO tiene cliente Google (sin `google/apiclient` en composer); estudio-mercado y ecommerce-tuning NO suben nada.
+- Toqué: `docs/prompts/auditoria-skills-2026-10-07.md` (10→11 dim), `docs/SYNC-DRIVE-PLAN.md` (nuevo, 380 líneas), `docs/DOCS-INDEX.md`, `.ai/rules/{index,drive}.md`.
+- ⚠️ PENDIENTE: 5 decisiones de producto en el plan §3 (¿crear "00" ya? ¿PDF en Drive? ¿skill C? ¿proyecto GCP nuevo? ¿SA compartida con el compañero?). Cuando respondas, implemento la fase 1 (regla ya está) y fase 2 (skill A → Drive, 2-3h).
+- Commit: `e0ad757`.
+
 ## 2026-10-07 12:30 · Copilot-VSCode · prompt profesional de auditoría conjunta de las 2 skills
 
 - Hice: `docs/prompts/auditoria-skills-2026-10-07.md` — prompt para Claude Desktop que audita `estudio-mercado` + `importacion-vehiculos` en 10 dimensiones (coherencia entre skills, fuentes, anti-patrones, validadores, contexto, redacción, memoria, integración Laravel, riesgos legales). Formato de salida idéntico a las auditorías previas → MDs integrables. Indexado en `DOCS-INDEX.md`.
