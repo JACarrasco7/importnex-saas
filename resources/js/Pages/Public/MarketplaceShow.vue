@@ -18,6 +18,7 @@ import {
 } from '@heroicons/vue/24/outline';
 import MarketplaceLayout from '@/Layouts/MarketplaceLayout.vue';
 import { useTranslations } from '@/Composables/useTranslations';
+import { useFormat } from '@/Composables/useFormat';
 import { photoUrl } from '@/Composables/usePhotoUrl';
 
 const props = defineProps({
@@ -31,6 +32,7 @@ const props = defineProps({
 });
 
 const { t, locale } = useTranslations();
+const { currency } = useFormat();
 
 const fmt = (n) => {
     const num = Number(n);

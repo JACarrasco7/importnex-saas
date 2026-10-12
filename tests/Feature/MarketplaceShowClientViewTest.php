@@ -60,6 +60,28 @@ class MarketplaceShowClientViewTest extends TestCase
             ->missing('car.cons'));
     }
 
+    public function test_verdict_and_traffic_light_no_t_exposed_in_inertia(): void
+    {
+        // El verdict (texto admin: "Comprar con confianza baja...") y el
+        // traffic_light (badge "neutral") son señales internas — no deben
+        // llegar al cliente (decision 12-oct-2026 tras feedback del usuario).
+        $car = $this->makeCar([
+            'verdict' => 'Comprar con confianza baja (cobertura parcial 2/7)',
+            'verdict_confidence' => 'low',
+            'verdict_at' => now(),
+            'traffic_light' => 'amber',
+        ]);
+
+        $response = $this->get('/marketplace/'.$car->id);
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('Public/MarketplaceShow')
+            ->missing('car.verdict')
+            ->missing('car.verdict_confidence')
+            ->missing('car.verdict_at')
+            ->missing('car.traffic_light'));
+    }
+
     public function test_notes_and_red_flags_no_t_exposed_in_inertia(): void
     {
         $car = $this->makeCar([
