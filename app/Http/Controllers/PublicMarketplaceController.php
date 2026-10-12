@@ -8,6 +8,7 @@ use App\Models\MarketplaceVisit;
 use App\Models\Organization;
 use App\Support\CostBreakdown;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -32,13 +33,27 @@ class PublicMarketplaceController extends Controller
      * Resolves the public request-form URL for the marketplace CTA
      * ("Enviar solicitud"). Falls back to the first public org
      * when no car organization can be determined.
+     *
+     * Si se pasa `$query` con un car_id, lo añade como `?car=ID` para que
+     * el formulario sepa que viene de una ficha concreta y pueda
+     * pre-rellenar la marca/modelo. (ver #3)
+     *
+     * @param  array<string,mixed>  $query
      */
-    private function publicRequestUrl(?Organization $organization = null): ?string
+    private function publicRequestUrl(?Organization $organization = null, array $query = []): ?string
     {
         $org = $organization
             ?? Organization::query()->where('is_public', true)->orderBy('id')->first();
 
-        return $org?->public_url;
+        $url = $org?->public_url;
+        if (! $url) {
+            return null;
+        }
+        if ($query !== []) {
+            $url .= (str_contains($url, '?') ? '&' : '?').http_build_query($query);
+        }
+
+        return $url;
     }
 
     /**
@@ -178,12 +193,14 @@ class PublicMarketplaceController extends Controller
             ->publicMarketplace()
             ->whereIn('id', $ids->all())
             ->with(['photos', 'organization'])
-            ->get();
+            ->get()
+            ->map(fn (Car $c) => $this->publicCarPayload($c));
 
+        // El primer coche ya viene como array (publicCarPayload), pero la
+        // org esta en su clave 'organization' (modelo serializado).
         $firstCar = $cars->first();
-        $requestUrl = $this->publicRequestUrl(
-            $firstCar?->relationLoaded('organization') ? $firstCar->organization : null
-        );
+        $firstCarOrg = is_array($firstCar) ? ($firstCar['organization'] ?? null) : $firstCar?->organization;
+        $requestUrl = $this->publicRequestUrl($firstCarOrg);
 
         return Inertia::render('Public/MarketplaceCompare', [
             'cars' => $cars,
@@ -217,8 +234,9 @@ class PublicMarketplaceController extends Controller
 
         return Inertia::render('Public/MarketplaceShow', [
             'car' => $this->publicCarPayload($car),
-            'requestUrl' => $this->publicRequestUrl($car->organization),
+            'requestUrl' => $this->publicRequestUrl($car->organization, ['car' => $car->id]),
             'publicProfileUrl' => $car->public_profile_url,
+            'dossierUrl' => $car->dossier_url,
             'relatedCars' => $this->relatedCars($car),
             'isSharedProfile' => false,
             'derived' => [
@@ -235,7 +253,7 @@ class PublicMarketplaceController extends Controller
      * Coches relacionados: misma marca, distinto id, mismo estado de visibilidad.
      * Usado en la ficha para sugerir alternativas sin salir del marketplace.
      */
-    private function relatedCars(Car $car): \Illuminate\Support\Collection
+    private function relatedCars(Car $car): Collection
     {
         return Car::query()
             ->publicMarketplace()
@@ -297,7 +315,8 @@ class PublicMarketplaceController extends Controller
         return Inertia::render('Public/MarketplaceShow', [
             'car' => $this->publicCarPayload($car),
             'publicProfileUrl' => $link->publicProfileUrl(),
-            'requestUrl' => $this->publicRequestUrl($car->organization),
+            'dossierUrl' => $link->publicUrl(),
+            'requestUrl' => $this->publicRequestUrl($car->organization, ['car' => $car->id]),
             'relatedCars' => $this->relatedCars($car),
             'isSharedProfile' => true,
             'derived' => [

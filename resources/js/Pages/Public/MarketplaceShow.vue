@@ -15,6 +15,8 @@ import {
     CheckBadgeIcon,
     TruckIcon,
     BanknotesIcon,
+    EnvelopeIcon,
+    DocumentArrowDownIcon,
 } from '@heroicons/vue/24/outline';
 import MarketplaceLayout from '@/Layouts/MarketplaceLayout.vue';
 import { useTranslations } from '@/Composables/useTranslations';
@@ -27,6 +29,7 @@ const props = defineProps({
     requestUrl: { type: String, default: null },
     relatedCars: { type: Array, default: () => [] },
     publicProfileUrl: { type: String, default: null },
+    dossierUrl: { type: String, default: null },
     isSharedProfile: { type: Boolean, default: false },
     costBreakdown: { type: Object, default: () => ({ car_price: 0, transport: 0, processing: 0, iedmt: 0, honorarios: 1000, total: 0, has_data: false }) },
 });
@@ -299,6 +302,38 @@ const specItems = computed(() => [
                                 </button>
                             </div>
                         </div>
+                    </div>
+                </section>
+
+                <!-- CTA contextual: enviar solicitud sobre este coche + ver ficha completa -->
+                <section class="flex flex-col items-start justify-between gap-3 rounded-2xl bg-gradient-to-br from-asphalt-900 to-estoril-900 p-5 text-white shadow-sm sm:flex-row sm:items-center">
+                    <div>
+                        <p class="text-base font-semibold">
+                            {{ t('marketplace_show.cta_request_title', { default: '¿Te interesa este coche?' }) }}
+                        </p>
+                        <p class="mt-1 text-sm text-estoril-100">
+                            {{ t('marketplace_show.cta_request_desc', { default: 'Te enviamos más información y organizamos una visita sin compromiso.' }) }}
+                        </p>
+                    </div>
+                    <div class="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row">
+                        <a
+                            v-if="dossierUrl"
+                            :href="dossierUrl"
+                            target="_blank"
+                            rel="noopener"
+                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-white/30 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-white/20"
+                        >
+                            <DocumentArrowDownIcon class="h-4 w-4" />
+                            {{ t('marketplace_show.cta_full_dossier', { default: 'Ver ficha completa' }) }}
+                        </a>
+                        <a
+                            v-if="requestUrl"
+                            :href="requestUrl"
+                            class="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-estoril-800 shadow-sm transition hover:bg-estoril-50"
+                        >
+                            <EnvelopeIcon class="h-4 w-4" />
+                            {{ t('marketplace_show.cta_request_form', { default: 'Enviar solicitud' }) }}
+                        </a>
                     </div>
                 </section>
 

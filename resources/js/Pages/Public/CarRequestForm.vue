@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, useForm, Link } from '@inertiajs/vue3';
 import {
     TruckIcon,
     CheckCircleIcon,
@@ -8,6 +8,7 @@ import {
     InformationCircleIcon,
     ExclamationCircleIcon,
     ArrowPathIcon,
+    XCircleIcon,
 } from '@heroicons/vue/24/outline';
 import MarketplaceLayout from '@/Layouts/MarketplaceLayout.vue';
 import { useTranslations } from '@/Composables/useTranslations';
@@ -24,6 +25,38 @@ const yearOptions = Array.from({ length: 15 }, (_, i) => currentYear - i);
 // Clave de localStorage por organización para no mezclar borradores
 // entre distintos tenants (poco probable en la práctica pero correcto).
 const draftKey = computed(() => `car-request-draft:${props.organization?.slug ?? 'unknown'}`);
+
+// Si la URL trae `?car=ID&brand=...&model=...` (enviado desde una ficha
+// de marketplace), mostramos la marca/modelo arriba del formulario para
+// que el cliente sepa sobre qué coche pregunta y pre-rellenamos los
+// campos brand/model. Usamos query params (no API) para no acoplar el
+// form publico a endpoints de lectura. (ver #3)
+const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+const contextCarId = computed(() => urlParams?.get('car') ?? null);
+const contextCar = computed(() => {
+    if (! contextCarId.value) return null;
+    return {
+        id: contextCarId.value,
+        brand: urlParams?.get('brand') ?? '',
+        model: urlParams?.get('model') ?? '',
+        version: urlParams?.get('version') ?? '',
+        year: urlParams?.get('year') ?? '',
+        href: urlParams?.get('href') ?? null,
+    };
+});
+
+// Pre-rellenar brand/model desde el contexto si el borrador está vacío.
+if (contextCar.value) {
+    // Lo hacemos en onMounted para no pisar un draft existente.
+}
+
+function clearContextCar() {
+    if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href);
+        ['car', 'brand', 'model', 'version', 'year', 'href'].forEach((p) => url.searchParams.delete(p));
+        window.history.replaceState({}, '', url);
+    }
+}
 
 // Campos obligatorios que alimentan la barra de progreso. Coinciden con
 // los validadores `required` del backend (PublicCarRequestController::store).
@@ -116,6 +149,14 @@ watch(form, (val) => {
     }
 }, { deep: true });
 
+// Pre-rellenar brand/model desde el contexto (?car=ID&brand=BMW&model=320d)
+// si el form está vacío. Si hay draft, respetamos lo escrito por el usuario.
+if (contextCar.value) {
+    const ctx = contextCar.value;
+    if (! form.brand && ctx.brand) form.brand = ctx.brand;
+    if (! form.model && ctx.model) form.model = ctx.model;
+}
+
 // ── Progress indicator ──────────────────────────────────────────────
 const progress = computed(() => {
     const filled = REQUIRED_FIELDS.filter((f) => {
@@ -169,6 +210,40 @@ const submit = () => {
     <MarketplaceLayout>
         <div class="bg-linear-to-br from-estoril-50 via-white to-platinum-100 transition-colors duration-300 dark:from-asphalt-900 dark:via-asphalt-900 dark:to-asphalt-800">
             <div class="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
+            <!-- Banner: contexto del coche (cuando vienen de una ficha) -->
+            <div
+                v-if="contextCar"
+                class="mb-6 flex items-start gap-3 rounded-2xl border border-estoril-200 bg-estoril-50 p-4 dark:border-estoril-800 dark:bg-estoril-900/30"
+                role="status"
+            >
+                <TruckIcon class="h-5 w-5 shrink-0 text-estoril-700 dark:text-estoril-300" />
+                <div class="flex-1">
+                    <p class="text-sm font-semibold text-estoril-900 dark:text-estoril-100">
+                        {{ t('car_request_form.context_title', { default: 'Sobre este coche' }) }}
+                    </p>
+                    <p class="mt-1 text-sm text-estoril-800 dark:text-estoril-200">
+                        <strong>{{ contextCar.brand }} {{ contextCar.model }}</strong>
+                        <span v-if="contextCar.version"> · {{ contextCar.version }}</span>
+                        <span v-if="contextCar.year"> · {{ contextCar.year }}</span>
+                    </p>
+                </div>
+                <Link
+                    v-if="contextCar.href"
+                    :href="contextCar.href"
+                    class="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-xs font-semibold text-estoril-700 ring-1 ring-estoril-200 transition hover:bg-estoril-100 dark:bg-asphalt-800 dark:text-estoril-300 dark:ring-estoril-700 dark:hover:bg-asphalt-700"
+                >
+                    {{ t('car_request_form.context_back_to_car', { default: 'Ver ficha completa' }) }}
+                </Link>
+                <button
+                    type="button"
+                    @click="clearContextCar"
+                    :aria-label="t('car_request_form.context_dismiss', { default: 'Quitar contexto' })"
+                    class="rounded-md p-1 text-estoril-700 transition hover:bg-estoril-100 dark:text-estoril-300 dark:hover:bg-estoril-900/40"
+                >
+                    <XCircleIcon class="h-5 w-5" />
+                </button>
+            </div>
+
             <!-- Header -->
             <div class="mb-10 text-center">
                 <div v-if="organization.logo" class="mx-auto mb-6 h-20 w-20 overflow-hidden rounded-2xl bg-white shadow-lg">

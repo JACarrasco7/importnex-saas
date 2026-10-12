@@ -178,7 +178,10 @@ class MarketplaceEnhancementsTest extends TestCase
         $response->assertOk();
         $response->assertInertia(fn ($page) => $page
             ->component('Public/MarketplaceShow')
-            ->where('requestUrl', url('/request/jj-import-motors'))
+            ->where('requestUrl', url('/request/jj-import-motors?car='.$car->id))
+            // El observer auto-genera un CarPublicLink al crear el coche
+            // con is_marketplace=true, asi que dossierUrl sera /c/{token}.
+            ->has('dossierUrl')
         );
     }
 
@@ -461,6 +464,51 @@ class MarketplaceEnhancementsTest extends TestCase
         $car->update(['is_marketplace' => false]);
 
         $this->get("/p/{$link->token}")->assertStatus(404);
+    }
+
+    public function test_marketplace_show_passes_contextual_request_url_with_car_id(): void
+    {
+        // El CTA "Enviar solicitud" en /marketplace/{id} debe llevar al
+        // formulario con `?car={ID}` para que el form sepa sobre qué
+        // coche pregunta y pueda pre-rellenar la marca/modelo. (ver #3)
+        $org = Organization::factory()->create(['is_public' => true, 'slug' => 't']);
+        $car = Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+        ]);
+
+        $this->get("/marketplace/{$car->id}")
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Public/MarketplaceShow')
+                ->where('requestUrl', url('/request/t?car='.$car->id))
+            );
+    }
+
+    public function test_marketplace_show_passes_dossier_url_when_public_link_exists(): void
+    {
+        // El CTA "Ver ficha completa" debe llevar al dossier
+        // (/c/{token}) cuando hay un CarPublicLink activo para el coche.
+        $org = Organization::factory()->create(['is_public' => true, 'slug' => 't']);
+        $car = Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+        ]);
+
+        // El observer ya autogenera el link al crear con is_marketplace=true
+        $link = $car->fresh()->activePublicLink();
+        $this->assertNotNull($link);
+
+        $this->get("/marketplace/{$car->id}")
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Public/MarketplaceShow')
+                ->where('dossierUrl', $link->publicUrl())
+            );
     }
 
     public function test_public_marketplace_does_not_leak_admin_verdict_text(): void

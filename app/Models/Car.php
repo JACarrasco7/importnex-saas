@@ -187,6 +187,18 @@ class Car extends Model
         return $this->activePublicLink()?->publicProfileUrl();
     }
 
+    /**
+     * Accessor: URL del dossier completo (ficha comercial larga en Blade,
+     * distinta del perfil Inertia). Mismo token que el perfil público.
+     * El dossier incluye la ficha tecnica detallada y el boton de
+     * "Aceptar contrato" — es lo que comparte el operador con clientes
+     * potenciales. (ver #3)
+     */
+    public function getDossierUrlAttribute(): ?string
+    {
+        return $this->activePublicLink()?->publicUrl();
+    }
+
     /** Última aceptación de contrato del coche (o null). */
     public function latestContractAcceptance()
     {
