@@ -24,6 +24,12 @@
 
 ---
 
+## 2026-10-12 16:00 · Copilot-VSCode · /cars — auditoría UX + 2 commits pusheados a skill-v4
+- Hice: (1) commit `f5b0d92` paginación (arriba+abajo, sort determinista, statusCounts en tabs); (2) commit `9aeb789` auditoría UX — stats cards ahora globales (lightCounts + totalInventoryValue desde server, no de la página), selector de orden (?sort= con whitelist recent/oldest/price_asc|desc/mileage_asc|desc), botón "Limpiar filtros" condicional, empty state diferenciado (no hay coches vs no matches con filtro), placeholder de foto con SVG + marca/modelo sobre degradado. i18n ES+EN nuevas claves. Tests 16/16 OK.
+- Toqué: `CarController`, `Pages/Cars/Index.vue`, `Components/Pagination.vue` (nuevo), `i18n/{es,en}.js`, `CarCrudTest`.
+- ⚠️ PENDIENTE: los commits están en `origin/skill-v4` pero NO en `main` (main tiene commits no relacionados 982e0e3/2eae6d1/70ae0f0 de otro flujo, no mergeable por ff). **Para que Forge despliegue en jjimportmotors.on-forge.com hace falta merge a main (o cambiar la rama de deploy en Forge a skill-v4).**
+- Commit: `9aeb789` (UX audit) + `f5b0d92` (pagination), pusheados a `origin/skill-v4`.
+
 ## 2026-10-12 15:50 · Copilot-VSCode · /cars paginación rota (15/page sin UI en Index.vue)
 - Hice: diagnóstico + fix. Backend: `CarController::index` añade `orderBy('id','desc')` para paginación determinista y devuelve `statusCounts` (count por estado, sin filtrar). Frontend: `Pages/Cars/Index.vue` quita el filtrado cliente redundante, hace que cambiar tab dispare `router.get` con `page=1`, importa nuevo `<Pagination>` (extraído a `Components/Pagination.vue`) y lo pinta arriba Y abajo del grid. Tests `CarCrudTest`: 5 nuevos (15/page, page=2, status filter, statusCounts, statusCounts independientes del filtro) — 12/12 OK. Pint OK.
 - Toqué: `app/Http/Controllers/CarController.php`, `resources/js/Pages/Cars/Index.vue`, `resources/js/Components/Pagination.vue` (nuevo), `tests/Feature/CarCrudTest.php`, este handoff.
