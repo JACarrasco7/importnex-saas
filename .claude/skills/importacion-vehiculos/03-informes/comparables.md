@@ -143,6 +143,7 @@ def es_competencia(descripcion: str) -> bool:
 | Tracción total (AWD/4MOTION/quattro) | +1.500-2.500 € | Clave en SUV |
 | Faros LED/Matrix | +500-800 € | Estándar en premium 2020+ |
 | Audio premium (Burmester, B&O, Harman) | +300-600 € | Solo si es tope gama |
+| **Cuadro digital de instrumentos (Virtual Cockpit / Digitales Kombiinstrument)** | **+500-1.000 €** | **LO MÁS DEMANDADO por jóvenes/compradores de coche moderno (feedback 18-ago). Si el DE lo trae y el ES no, ajustar sí o sí** |
 | Virtual cockpit / HUD | +300-600 € | Valorado en Audi/BMW |
 | Cámara 360° + sensores | +400-700 € | Estándar en premium 2018+ |
 | Asientos ventilados/masaje | +200-500 € | Poco común en compactos |
@@ -150,6 +151,8 @@ def es_competencia(descripcion: str) -> bool:
 | Enganche remolque | +150-300 € | Solo si es extra, no de serie |
 
 **Ajuste manual:** Solo sumar primas que el candidato DE tenga y el comparable ES **no** tenga (o viceversa). No sumar todo el equipamiento.
+
+> **⚠️ REGLA (18-ago-2026):** comparar por defecto a **MÁXIMO equipamiento**. Un ES "3% más barato a igual año/precio" NO es comparable si el DE viene full (cuadro digital + techo + LED) y el ES base. Antes de dar un hueco, verificar el nivel de equipamiento de ambos lados; si no coinciden, ajustar el ES al alza con estas primas o marcar el hueco como no definitivo.
 
 ---
 

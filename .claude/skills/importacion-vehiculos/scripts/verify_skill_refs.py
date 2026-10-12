@@ -17,6 +17,13 @@ import sys
 import os
 from pathlib import Path
 
+# FIX v3.10.1 (25-sep-2026) — forzar UTF-8 en stdout en Windows. Sin esto,
+# los emojis (✅, 🔴, etc.) revientan con UnicodeEncodeError en cp1252.
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+except (AttributeError, ValueError):
+    pass
+
 # Patrón: `... .md` o `... .md §seccion` o `[texto](... .md ...)`
 BACKTICK_REF = re.compile(r"`([^`]*?\.md)`")
 LINK_REF = re.compile(r"\]\(([^)]*?\.md)(?:#[^)]*)?\)")
@@ -30,6 +37,9 @@ EXTERNAL_PREFIXES = (
     ".claude/",          # memoria del proyecto Desktop
     "docs/",             # documentación del repo Laravel
     "assets/",           # plantillas HTML + xlsx (excluidas del ZIP)
+    "Downloads/",        # archivos del usuario fuera del skill
+    "memoria/decisiones-historicas/",  # archivos versionados antiguos
+    "modelos_medidos_20",  # snapshots versionados históricos (memoria): el vigente es modelos-medidos.md
     "INSTRUCCIONES_PROYECTO.md",
     "copilot-instructions.md",
     "CLAUDE.md",
@@ -74,8 +84,16 @@ def find_references(text: str) -> list[str]:
     return refs
 
 
-def resolve_ref(base_dir: Path, ref: str) -> Path | None:
-    """Resuelve una referencia a una ruta absoluta, si es local al skill."""
+def resolve_ref(base_dir: Path, ref: str, skill_root: Path, repo_root: Path) -> Path | None:
+    """Resuelve una referencia a una ruta absoluta, si es local al skill.
+
+    FIX (24-sep-2026 · v3.10.0): los .md del skill mezclan TRES convenciones de
+    ruta — relativa al propio archivo, relativa a la RAÍZ del skill y relativa
+    a la skill hermana `estudio-mercado`. Antes solo se probaba la primera y
+    salían ~29 falsas rotas. Ahora se prueban las cuatro bases en orden y se
+    devuelve la primera que exista; si ninguna existe, se devuelve la candidata
+    file-relative (para el reporte) marcándola como rota real.
+    """
     # Descarta URLs externas
     if "://" in ref or ref.startswith("http"):
         return None
@@ -88,8 +106,32 @@ def resolve_ref(base_dir: Path, ref: str) -> Path | None:
         return None
     # Normaliza backslashes
     ref = ref.replace("\\", "/")
-    candidate = (base_dir / ref).resolve()
-    return candidate
+    candidates = [
+        (base_dir / ref),          # relativa al archivo que contiene la ref
+        (skill_root / ref),        # relativa a la raíz del skill
+        (skill_root.parent / ref), # ../<ref> — refs a la skill hermana con prefijo
+        (repo_root / ref),         # repo Laravel (.ai/rules/... etc.)
+    ]
+    for c in candidates:
+        cc = c.resolve()
+        if cc.exists():
+            return cc
+    # Fallback final: buscar por NOMBRE de archivo dentro del skill (los .md
+    # citan a veces solo el nombre — `operaciones.md`, `contrato.md` — sin la
+    # carpeta). Coste bajo: el skill tiene ~50 .md. También en la skill
+    # hermana estudio-mercado y en .ai/rules del repo (business-model.md).
+    name = Path(ref).name
+    if name.endswith(".md"):
+        search_roots = [skill_root, skill_root.parent / "estudio-mercado"]
+        for root in search_roots:
+            if root.is_dir():
+                for hit in root.rglob(name):
+                    if "assets" not in str(hit):
+                        return hit.resolve()
+        ai_rules = repo_root / ".ai" / "rules" / name
+        if ai_rules.exists():
+            return ai_rules.resolve()
+    return candidates[0].resolve()  # rota real: devolver candidata principal
 
 
 def main() -> int:
@@ -102,11 +144,14 @@ def main() -> int:
     broken = []
     checked = 0
 
+    # repo Laravel: .claude/skills/<skill> → 3 niveles arriba
+    repo_root = base.parent.parent.parent
+
     for f in md_files:
         text = f.read_text(encoding="utf-8", errors="replace")
         refs = find_references(text)
         for ref in refs:
-            target = resolve_ref(f.parent, ref)
+            target = resolve_ref(f.parent, ref, base, repo_root)
             if target is None:
                 continue
             checked += 1
@@ -122,7 +167,7 @@ def main() -> int:
             print(f"  - {src}  →  `{ref}`  (NO existe)")
         return 1
 
-    print("\n✅ Todas las referencias cruzadas apuntan a archivos existentes.")
+    print("\n[OK] Todas las referencias cruzadas apuntan a archivos existentes.")
     return 0
 
 

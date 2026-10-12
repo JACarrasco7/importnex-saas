@@ -31,9 +31,9 @@ class StripeWebhookController extends CashierWebhookController
         // Acquire lock to deduplicate Stripe retries. If another worker is
         // already processing this event (or it has been processed within 24h),
         // skip silently to avoid duplicate plan flips.
-        try {
-            $lock = Cache::lock($lockKey, $lockTtl);
+        $lock = Cache::lock($lockKey, $lockTtl);
 
+        try {
             if (! $lock->get()) {
                 Log::info('Stripe webhook skipped (already processed or in-flight)', [
                     'event_id' => $eventId,
@@ -45,15 +45,20 @@ class StripeWebhookController extends CashierWebhookController
 
             Log::info('Stripe webhook received', ['event_id' => $eventId, 'type' => $request->input('type')]);
             parent::handleWebhook($request);
-            $lock->release();
         } catch (\Throwable $e) {
             Log::error('Stripe webhook failed', [
                 'event_id' => $eventId,
                 'type' => $request->input('type'),
                 'error' => $e->getMessage(),
             ]);
+            // Liberar el lock para que Stripe pueda reintentar el evento en la
+            // siguiente rafaga (la doc de Cashier dice release() solo se llama
+            // en happy path; sin esto un error 500 deja el evento bloqueado 24h).
+            $lock->release();
             throw $e;
         }
+
+        $lock->release();
 
         return response('OK', 200);
     }
@@ -110,9 +115,11 @@ class StripeWebhookController extends CashierWebhookController
     }
 
     /**
-     * Handle invoice payment failed. Marks the org as payment_failed and
-     * degrades to starter. The frontend will display a banner using
-     * `payment_failed_at` until the user reactivates a subscription.
+     * Handle invoice payment failed. Marca payment_failed_at sin degradar:
+     * el downgrade real lo hace el comando programado
+     * `subscription:downgrade-expire` tras SUBSCRIPTION_GRACE_DAYS días.
+     * Esto da margen al cliente para corregir el método de pago (p.ej.
+     * tarjeta caducada) sin perder sus features inmediatamente.
      */
     protected function handleInvoicePaymentFailed(array $payload): void
     {
@@ -135,9 +142,12 @@ class StripeWebhookController extends CashierWebhookController
         ]);
 
         $org->update([
-            'plan' => 'starter',
-            'payment_failed_at' => now(),
+            // Solo marcar el timestamp. El comando artisan
+            // `subscription:downgrade-expire` degrada a starter tras
+            // SUBSCRIPTION_GRACE_DAYS si llega el caso.
+            'payment_failed_at' => $org->payment_failed_at ?? now(),
         ]);
+        Cache::forget("billing.dashboard.{$org->id}.1");
     }
 
     /**
@@ -162,6 +172,7 @@ class StripeWebhookController extends CashierWebhookController
                 'subscribed_at' => now(),
                 'payment_failed_at' => null,
             ]);
+            Cache::forget("billing.dashboard.{$org->id}.1");
         }
 
         Log::info('Subscription created', ['organization_id' => $org->id, 'plan' => $plan]);

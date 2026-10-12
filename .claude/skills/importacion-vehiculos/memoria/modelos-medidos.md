@@ -117,6 +117,107 @@
 
 ---
 
+## 🚗 Seat León gasolina (2016+) — SIN BANDA medido
+
+### Seat León gasolina 2016+ · 2026-08-18 (control de año + sin banda)
+- **Tipo:** MODELO (control: 2019+ en ambos mercados, SIN banda)
+- **N anuncios DE:** 753 · **N anuncios ES:** 4.727
+- **Mediana DE:** 20.920 € · **Mediana ES:** 19.400 €
+- **Hueco bruto:** −7,8% (ES mejor) → **Hueco neto:** −15,4%
+- **Suelo verificado:** DE 8.000 € · ES 8.000 € (origen `categorias.gemas_economicas`)
+- **Veredicto:** 🟡 Dudoso para importación (ES mejor) — **gema nacional** (compra cliente directo en ES)
+- **Mejor candidato (si importara):** habría que esperar — la banda 8-17k con control 2019+ dio −7,7% neto; sin banda es peor
+- **Fuentes cubiertas:** 2/7 (mobile.de + Coches.net) · **Peticiones usadas:** ~10
+- **Refrescar antes de:** 2026-09-14 (caduca gemas +4 sem)
+- **Notas:**
+  - **CONFIRMA** el patrón "marca nacional": León gasolina más barato en ES (Martorell, stock abundante).
+  - **NO descartar la regla** — se mantiene la corrección 18-ago de la Cupra (suelo DE 15-16k → ahí sí hay hueco real, distinto al caso León gasolina).
+  - Map: `datos_mercado.json → hueco_sin_banda[1]` + `categorias.gemas_economicas[5]`.
+
+---
+
+## 🚙 Cupra León — pendiente RE-MEDIR sin banda + máximo equipamiento (18-ago)
+
+### Cupra León (veredicto NO fiable)
+- **Tipo:** MODELO · **Última medición:** 2026-08-17 (mediana con banda `≥20k` en AMBOS mercados)
+- **N anuncios DE:** 5.321 · **N anuncios ES:** 655 (586 son 2023+)
+- **Mediana DE:** 30.790 € · **Mediana ES:** 27.970 €
+- **Hueco bruto:** −10,1% (banda ≥20k) → **Hueco neto:** −20,6%
+- **Suelo registrado:** DE 15.500 € · ES 19.500 €
+- **Veredicto actual:** 🟢 verde (medición sesgada, NO de fiar)
+- **Motivo RE-MEDIR:** la banda ≥20k recortó la cola barata DE → sesgo metodológico (mismo error que Golf v2). La regla Seat/Cupra dice **mirar el suelo sin banda**: DE 15-16k vs ES 19,5k → **hueco POSITIVO probable**.
+- **Refrescar antes de:** 2026-08-31 (showstoppers caduca)
+- **Plan:**
+  1. ES (Coches.net): `cupra-leon?MinPrice=15500&fi=Price&or=1` SIN techo de banda → recoger mediana real, marca equipamiento (en Coches.net solo hay techo solar como proxy full).
+  2. DE (mobile.de): `ms=3;6;;&sb=p&od=up` SIN `p=` mínimo + checkboxes full (cuadro digital+Head-up+calefacción+techo+LED) + `pw=:` para aislar VZ. Suelo 15.500 € abajo.
+  3. Recalcular hueco bruto y neto (coste_importacion 2.929 + IEDMT 1.800).
+  4. Reemplazar entrada en `datos_mercado.json` con `fuente_medicion: estudio`, `pendiente_fase2: false`, `confianza_precio: 3-4`.
+- **Notas:**
+  - Categoría: showstopper · segmento: deportivo · rango: 25k+ · tipo_cliente: impacto_showstopper / deporte_ocio / premium_imagen.
+  - Si el nuevo hueco sale ≥10% bruto y ≥0% neto → verde real con suelo de 15.500 €.
+
+---
+
+## 🚗 VW Golf 7.5 — estudio granular (GTI · TCR · Clubsport · R) · 2026-08-23
+
+> Estudio de mercado suelo-a-suelo SIN banda (km ≤180.000), solo mobile.de + Coches.net. Informe completo: `Downloads/estudio_mercado_golf75_gti-tcr-clubsport-r_2026-08-22.md`. Mapa: 4 entradas granulares en `datos_mercado.json → categorias.showstoppers` + `hueco_sin_banda`.
+
+| Variante | Suelo DE | Suelo ES | Hueco bruto | Neto | Veredicto | Refrescar |
+|---|---|---|---|---|---|---|
+| **GTI** (230/245cv) | 15.999 € (106k km) | 19.690 € (3p manual) / 20.500 € (5p DSG+techo) | +18,7% | **+12,9%** | 🟢 verde · conf 4 | 2026-09-06 |
+| **GTI TCR** (290cv) | 19.699 € (149k km) | 23.695 € (con reserva) / 28.900 € (limpio) | +16,9% / +31,8% | **+12,1% / +27,9%** | 🟢 verde · conf 3 | 2026-09-06 |
+| **GTI Clubsport** (265cv, ⚠️ Mk7 pre-FL) | 16.499 € (153k km) | 22.490 € (techo, BCN) | +26,6% | **+21,6%** | 🟢 verde · conf 3 | 2026-09-06 |
+| **Golf R** (310cv) | 16.899 € limpio / 15.950 € con reservas | 22.880 € ("Super precio", SEV) | +26,1% / +30,3% | **+21,2% / +25,3%** | 🟡 amarillo · conf 2 | 2026-09-06 |
+
+- **Fuentes cubiertas:** 2/7 (mobile.de + Coches.net — resto reservado para unidades) · **Peticiones:** ~50 (2 sesiones)
+- **Claves del estudio:**
+  - ⚠️ **Clubsport SOLO existe Mk7 pre-facelift (2016-2017)** — nunca hubo Mk7.5. Corrige el informe por-generación del 20-ago.
+  - ⚠️ **Re-chipeo endémico** en R/Clubsport DE (36% fichas R con OPF quitado/potencia alterada; 2/5 Clubsport sin aviso en título) → leer descripción completa + potencia vs catálogo SIEMPRE. Los R de 14.400 € de la sesión anterior eran modificados (fuera).
+  - Coches.net: filtro `Version=` texto libre NO fiable → usar filtros estructurados (`PowerHpFrom/To` + `MinYear` + `MaxKms` + `fi=Price&or=1` — el orden por URL SÍ funciona).
+  - Precio financiado < contado (usar contado) · coche "ES" físicamente en DE sin matricular (Tarragona) no es suelo ES · techo vinilado ≠ techo solar.
+- **Pendiente:** Golf R DE páginas 2-6 (~95 anuncios) → por eso R queda 🟡 con `pendiente_fase2=true`.
+- **Cola:** GTI/TCR/Clubsport → `pendiente_busqueda` · R → `estudiado` · `siguiente_busqueda=vw-golf-7-clubsport`.
+
+### Golf R Mk7.5 (310cv) · 2026-08-23 · Flujo B 7/7
+- **Tipo:** MODELO (informe modelo completo) · **Origen:** Alemania (import)
+- **Cobertura:** 7/7 fuentes · **Peticiones:** alta (estudio + Flujo B)
+- **Suelo DE:** 15.950€ (con reservas mecánicas) / **16.500€ limpio** (manual, 191k km, 2º prop, ITV may-26)
+- **Suelo ES:** 22.880€ (Sevilla, "Super precio", 1 prop, panorámico)
+- **Hueco bruto:** +27,9% (limpio) / +30,3% (con reservas) · **Neto:** +23,0% / +25,3%
+- **Veredicto:** 🟢 verde (conf 4 — subió de amarillo al completar cobertura DE 7/7) · **Mejor mercado:** DE
+- **Mejor candidato:** 16.500€ mobile.de (id=461349083) — equilibrio riesgo/margen; verificar VIN/recalls + inspección (191k km)
+- **Refrescar antes de:** 2026-09-06
+- **Notas:**
+  - Mejor hueco neto de las 4 variantes Golf 7.5 (R +23,0 > Clubsport +21,6 > GTI +12,9).
+  - Cobertura DE completa: 129 anuncios / 7 páginas, orden asc confirmado, sin ocultos.
+  - ⚠️ 36% fichas DE con OPF quitado (verificar descripción) · filtro potencia captura GTI tuneados (comprobar 4Motion) · confusión generaciones (pre-FL 300cv / Mk8 320+).
+  - IEDMT por unidad + modalidad M1/M2/M3 pendientes si hay cliente.
+  - En cola: `pendiente_busqueda` · `siguiente_busqueda=vw-golf-75-r`.
+
+### BMW 320d (3 variantes) · 2026-09-09 — barrido crudo mobile.de
+- **Tipo:** LISTADO CRUDO (no Flujo A/B completo)
+- **N anuncios DE:** 11 únicos (12 entradas en bruto — 1 duplicado)
+- **N anuncios ES:** no barrido
+- **Filtros aplicados:**
+  - F30 Berlina: `ms=25200;14` · `fr=2017:2020` · `pw=224:232` kW · `ml=:180000` · `p=:22500` · `dam=false` (2 ads)
+  - G20 Berlina: `ms=25200;14` · `fr=2022:2026` · `pw=231:239` kW · `p=:30000` · `dam=false` (3 ads)
+  - G21 Touring: `ms=25200;64` · `fr=2020:2026` · `pw=231:239` kW · `p=:30000` · `dam=false` (6 ads, 1 con `ecol=BLUE`)
+- **Hueco %:** no calculado (listado crudo, sin informe)
+- **Veredicto:** no emitido
+- **Mejor candidato:** ninguno sin verificar ficha
+- **Fuentes cubiertas:** 1/7 (mobile.de crudo, sin AS24/Wallapop/Milanuncios/Coches.net/AutoUncle/kleinanzeigen)
+- **Peticiones usadas:** 0 (pegado a mano por el usuario)
+- **Refrescar antes de:** 2026-09-16 (7 días — barrido de mercado)
+- **Notas:**
+  - **⚠️ Filtro de potencia atípico** (224-239 kW): el 320d estándar son 140 kW. Los 224-239 kW sugieren M340d (240 kW reales) o tuning no declarado.
+  - **Duplicado detectado**: id=`43641335703360` aparece 2× en el listado original. Verificar si fue error de copiar-pegar.
+  - **Una unidad con `ecol=BLUE`** (id=447819922, G21 Touring ≤35k €) — revisar disponibilidad de este color en M340d.
+  - **No se ha pasado el validador `check_marketing.py`** — esto NO es copy, es un listado de insumos.
+  - Próximo paso si se quiere Flujo A: **abrir las 11 fichas y verificar** (versión real, kW reales, siniestros no declarados).
+  - Documentación completa del barrido: `docs/informes/busqueda-bmw-320d-alemania-2026-09-09.md`.
+
+---
+
 ## 🚗 VW Golf GTI (pendiente)
 
 ### Pendiente medir

@@ -74,6 +74,14 @@ return [
         // `openssl rand -hex 32` y pegar el mismo valor aqui y en el sitio
         // desde el que llama el chat. No es password de ningun usuario.
         'token' => env('IMPORTNEX_CHAT_IMPORT_TOKEN'),
+
+        // Webhook saliente (12-sep-2026): tras importar un coche, Laravel
+        // envia un POST a esta URL para que el Desktop local pueda anotar el
+        // encargo en encargos.md del skill sin esperar a subir-informe.ps1.
+        // Dejar vacio para desactivar. Ver NotifyImportWebhook listener.
+        'webhook_url' => env('IMPORTNEX_CHAT_WEBHOOK_URL'),
+        'webhook_secret' => env('IMPORTNEX_CHAT_WEBHOOK_SECRET'),
+        'webhook_timeout' => (int) env('IMPORTNEX_CHAT_WEBHOOK_TIMEOUT', 2),
     ],
 
     'onesignal' => [

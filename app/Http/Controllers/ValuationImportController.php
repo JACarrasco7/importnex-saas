@@ -53,10 +53,17 @@ class ValuationImportController extends Controller
         ValuationImporter $importer
     ): RedirectResponse {
         $request->validate([
-            'mode' => ['nullable', 'string', 'in:paste,upload,server'],
+            'mode' => ['nullable', 'string', 'in:paste,upload,server,batch'],
             'json' => ['nullable', 'string'],
             'path' => ['nullable', 'string'],
-            'file' => ['nullable', 'file', 'mimetypes:application/zip,application/x-zip-compressed,application/json', 'max:204800'],
+            // mimes (no mimetypes) para tolerar application/octet-stream que
+            // algunos navegadores reportan al subir .zip. La validación dura
+            // del contenido (ZipArchive::open) ocurre después en el ingestor.
+            // max 200 MB por archivo: con 30+ fotos a 200KB cada una, ronda los
+            // 6-8 MB. La regla cubre TANTO 1 archivo como N archivos
+            // (file[]); `file.*` aplica a cada elemento del array.
+            'file' => ['nullable'],
+            'file.*' => ['file', 'mimes:zip,json', 'max:204800'],
         ]);
 
         $org = Organization::where('name', 'JJ Import Motors')->first() ?? auth()->user()->organization;
@@ -81,13 +88,22 @@ class ValuationImportController extends Controller
                     ->with('success', 'Coche importado correctamente.');
             }
 
-            // Mode 'server': JSON file from importnex/import directory
+            // Mode 'server': JSON file from importnex/import directory.
+            // El path lo introduce el operador desde un file picker local que
+            // pre-filtra a storage/app/importnex/import, pero igualmente
+            // validamos aquí para impedir path traversal (../../etc/passwd).
             if ($mode === 'server') {
                 $path = $request->input('path');
                 if (! $path || ! is_file($path)) {
                     return back()->withErrors(['path' => 'Archivo no encontrado.']);
                 }
-                $content = file_get_contents($path);
+                $allowedBase = realpath(storage_path('app/importnex/import'));
+                $resolved = realpath($path);
+                if ($allowedBase === false || $resolved === false
+                    || ! str_starts_with($resolved, $allowedBase)) {
+                    return back()->withErrors(['path' => 'Ruta fuera del directorio permitido.']);
+                }
+                $content = file_get_contents($resolved);
                 $payload = json_decode($content, true);
                 if (! is_array($payload)) {
                     return back()->withErrors(['path' => 'JSON inválido.']);
@@ -95,13 +111,19 @@ class ValuationImportController extends Controller
 
                 $car = $this->applyPayload($importer, $payload, $org);
 
-                // Move file to processed/ with timestamp
+                // Mover el archivo al directorio processed/ (no user-controlled).
                 $processedDir = storage_path('app/importnex/processed');
                 if (! is_dir($processedDir)) {
-                    mkdir($processedDir, 0755, true);
+                    if (! @mkdir($processedDir, 0755, true) && ! is_dir($processedDir)) {
+                        Log::warning('No se pudo crear processed dir', ['dir' => $processedDir]);
+                    }
                 }
-                $basename = basename($path);
-                @rename($path, $processedDir.'/'.$basename.'.'.now()->format('Ymd-His'));
+                $basename = basename($resolved);
+                if (! @rename($resolved, $processedDir.'/'.$basename.'.'.now()->format('Ymd-His'))) {
+                    Log::warning('No se pudo mover el archivo procesado', [
+                        'from' => $resolved, 'to_dir' => $processedDir,
+                    ]);
+                }
 
                 return redirect()
                     ->route('cars.show', $car->id)
@@ -113,7 +135,50 @@ class ValuationImportController extends Controller
                 return back()->withErrors(['file' => 'Debes subir un archivo ZIP o pegar JSON.']);
             }
 
-            $uploaded = $request->file('file');
+            // §v3.10.3 (25-sep-2026) — BATCH: si llegan varios ZIPs a la vez
+            // (file[] con multiple), delegamos en ingestBatch() que procesa
+            // uno por uno con best-effort (un ZIP corrupto no bloquea a los
+            // demás). Devolvemos la respuesta consolidada a Inertia.
+            //
+            // Modo batch explícito (mode=batch): se usa cuando el operador
+            // arrastra varios ZIPs sueltos desde una carpeta. Modo upload
+            // normal con varios ZIPs también entra aquí.
+            if ($mode === 'batch') {
+                $uploadedFiles = $request->file('file');
+                if (! is_array($uploadedFiles)) {
+                    return back()->withErrors(['file' => 'Modo batch requiere varios archivos.']);
+                }
+            } else {
+                $uploadedFiles = $request->file('file');
+            }
+            if (is_array($uploadedFiles) && count($uploadedFiles) > 1) {
+                $zipPaths = [];
+                $basenames = [];
+                foreach ($uploadedFiles as $uf) {
+                    if (! $uf->isValid()) {
+                        continue;
+                    }
+                    $zipPaths[] = $uf->getRealPath();
+                    $basenames[] = $uf->getClientOriginalName();
+                }
+
+                if ($zipPaths === []) {
+                    return back()->withErrors(['file' => 'Ningún archivo válido en la selección.']);
+                }
+
+                $batch = $ingestor->ingestBatch($zipPaths, $basenames, $org);
+
+                return back()
+                    ->with('batch_result', $batch)
+                    ->with(
+                        $batch['ok'] ? 'success' : 'error',
+                        $batch['summary'].($batch['failed'] > 0
+                            ? ' — revisa el detalle abajo.'
+                            : ''),
+                    );
+            }
+
+            $uploaded = is_array($uploadedFiles) ? $uploadedFiles[0] : $uploadedFiles;
             $ext = strtolower($uploaded->getClientOriginalExtension());
 
             // JSON file uploaded directly
@@ -136,19 +201,49 @@ class ValuationImportController extends Controller
                 ->route('cars.show', $result['car']->id)
                 ->with('success', $this->packageSummary($result));
         } catch (\Throwable $e) {
-            Log::error('ValuationImportController::store failed', ['error' => $e->getMessage()]);
+            Log::error('ValuationImportController::store failed', [
+                'error' => $e->getMessage(),
+                'class' => get_class($e),
+                'mode' => $mode,
+                'mode_input' => $request->input('mode'),
+                'has_file' => $request->hasFile('file'),
+                'file_size' => $request->hasFile('file') ? $request->file('file')->getSize() : null,
+                'file_mime' => $request->hasFile('file') ? $request->file('file')->getMimeType() : null,
+                'user_id' => auth()->id(),
+            ]);
+
+            // Mensaje al operador: distinguir las 3 causas más probables
+            // para que sepa qué hacer sin mirar logs.
+            $msg = $e->getMessage();
+            $mensajeOperador = match (true) {
+                str_contains($msg, 'No se pudo abrir el .zip') => 'El archivo ZIP está corrupto o truncado. Vuelve a descargarlo del chat y súbelo de nuevo.',
+                str_contains($msg, '_meta.schema_version') => 'El JSON interno del ZIP no es compatible (falta _meta.schema_version). Pídele a Claude que regenere el ZIP con la skill actualizada.',
+                str_contains($msg, 'vehiculo.marca') || str_contains($msg, 'vehiculo.modelo') => 'El JSON interno del ZIP no tiene vehiculo.marca o vehiculo.modelo. Pídele a Claude que regenere el ZIP con la skill actualizada.',
+                str_contains($msg, 'pvp_nuevo') => 'Falta costes.pvp_nuevo en el informe. Sin él, IEDMT = 0 €. Pídele a Claude que regenere el ZIP.',
+                default => 'No se pudo importar: '.$msg,
+            };
 
             return back()
-                ->withErrors(['file' => 'No se pudo importar: '.$e->getMessage()]);
+                ->withErrors(['file' => $mensajeOperador])
+                ->with('error_detail', $msg);
         }
     }
 
     /**
      * Validate + apply JSON payload to a new car.
+     *
+     * Regla (23-sep-2026): `skipRemotePhotos=true` SIEMPRE en este flujo.
+     * Motivo: paste/server/json-upload NO traen ZIP con fotos locales — solo
+     * URLs en `vehiculo.fotos[]`. Si las URLs vienen de mobile.de y ese
+     * portal está bloqueado (403 anti-bot), NO queremos re-disparar la
+     * descarga desde Laravel: cada intento empeora el bloqueo. Dejamos que
+     * el operador suba luego el ZIP completo, o que las fotos se descarguen
+     * vía comando programado en horas valle.
      */
     private function applyPayload(ValuationImporter $importer, array $payload, Organization $org): Car
     {
         $payload = $importer->validate($payload);
+        $importer->skipRemotePhotos = true;
         $car = new Car(['organization_id' => $org->id]);
         $importer->apply($car, $payload);
         $car->save();
@@ -157,7 +252,7 @@ class ValuationImportController extends Controller
     }
 
     /**
-     * @param  array{car:Car, was_new:bool, photos:int, documents:int, contents?:int, warnings:array<int,string>}  $result
+     * @param  array{car:Car, was_new:bool, photos:int, documents:int, contents?:int, marketing?:int, warnings:array<int,string>}  $result
      */
     private function packageSummary(array $result): string
     {
@@ -165,6 +260,9 @@ class ValuationImportController extends Controller
 
         if (($result['contents'] ?? 0) > 0) {
             $parts[] = $result['contents'].' documento(s) de contenido maquetable(s)';
+        }
+        if (($result['marketing'] ?? 0) > 0) {
+            $parts[] = $result['marketing'].' anuncio(s) de marketing importado(s)';
         }
         if ($result['documents'] > 0) {
             $parts[] = $result['documents'].' documento(s) adjuntado(s)';

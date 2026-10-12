@@ -290,32 +290,37 @@ Semana 5-6 · Entrega
 - **Timeline visual con semanas numeradas**
 - **Trampa:** no prometer fechas exactas. Hablar en semanas.
 
-### §12 — Garantías y respaldo JJ Import Motors
+### §12 — Qué hacemos y qué NO hacemos (bloque fijo · A31)
+
+> ⚠️ **No se reescribe libremente.** JJ Import Motors **no vende coches y no da garantía**.
 
 ```
-QUÉ CUBRE JJ IMPORT MOTORS
-
-✓ Gestión integral del proceso (usted no firma nada en alemán)
-✓ Verificación documental completa (COC, TÜV, historial)
+QUÉ HACEMOS
+✓ Localizamos la unidad y comprobamos su historial y su documentación
+✓ Negociamos y coordinamos la compra con el vendedor
 ✓ Inspección previa a la compra en destino (fotos + vídeo)
-✓ Tramitación ITV importación y matriculación
-✓ Acompañamiento hasta entrega de llaves
-✓ Soporte post-venta 30 días (incidencias documentales)
+✓ Organizamos el transporte hasta España
+✓ Tramitamos la ITV de importación, los impuestos y la matriculación
+✓ Le acompañamos hasta la entrega, con el coche ya a su nombre
 
-NO CUBRE (porque no está en nuestra mano):
-✗ Garantía mecánica del vehículo (la ofrecida por el vendedor alemán,
-  si la hubiera, se traslada; en caso contrario, recomendamos asegurar
-  con terceros)
-✗ Problemas ocultos no detectables en inspección visual
-✗ Costes de mantenimiento ordinario
+QUÉ NO HACEMOS
+✗ No vendemos coches: JJ Import Motors no es la vendedora ni la propietaria del
+  vehículo. La compraventa es entre el vendedor y usted, y el coche se matricula
+  directamente a su nombre.
+✗ No ofrecemos garantía de ningún tipo sobre el vehículo. Cualquier garantía o
+  responsabilidad que exista corresponde al vendedor, según la ley que le sea
+  aplicable. Si desea cobertura mecánica, puede contratarla aparte con una
+  compañía especializada.
+✗ No respondemos de averías, desgastes o defectos que no sean visibles en la
+  documentación y en la inspección previa.
+✗ No hacemos mantenimiento, reparaciones ni ofrecemos financiación.
 
-IMPORTANTE: somos intermediarios de confianza, no propietarios del
-vehículo. El coche se matricula a su nombre desde el primer día.
+Nuestro trabajo es la GESTIÓN, con unos honorarios acordados de antemano.
 ```
 
-- **Honestidad radical sobre qué cubre y qué no** → reduce disputas posteriores
-- **Recomendaciones de terceros** para lo que no cubrimos (seguro mecánico)
-- **Trampa:** nunca prometer "garantía total". Es mentira y nos expone legalmente.
+- La honestidad sobre qué cubre y qué no reduce disputas posteriores.
+- La cobertura mecánica se recomienda siempre como **de terceros**, contratada aparte.
+- **Prohibido:** "garantizamos", "te aseguramos", "respondemos del coche", "nuestro coche", "en venta", "concesionario" (A31).
 
 ### §13 — Preguntas frecuentes
 
@@ -543,7 +548,7 @@ Motor EA888 2.0 TSI 300 CV: fiabilidad buena...
 3. **NUNCA** mostrar el anuncio alemán original al cliente.
 4. **NUNCA** inventar datos. Lo desconocido se dice ("pendiente de inspección").
 5. **NUNCA** prometer plazos exactos. Hablar en semanas + % de cumplimiento.
-6. **NUNCA** garantizar mecánicamente. Remitir a seguro externo.
+6. **NUNCA** dar garantía ni insinuarla, ni presentarnos como vendedores (A31). Para cobertura mecánica, remitir a un tercero contratable aparte.
 7. **SIEMPRE** citar fecha de captura de datos (antigüedad = credibilidad).
 8. **SIEMPRE** explicar el IEDMT como estimación y citar AEAT.
 9. **SIEMPRE** mostrar honorarios como línea explícita y única (transparencia).

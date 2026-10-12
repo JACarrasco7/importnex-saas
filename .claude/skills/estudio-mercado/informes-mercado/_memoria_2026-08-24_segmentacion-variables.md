@@ -1,0 +1,18 @@
+# Memoria de sesión — 24-ago-2026 — Segmentación Golf 7.5 (GTI/TCR/Clubsport/R)
+
+## Qué se hizo
+
+Se amplió `informes/estudio_mercado_golf75_gti-tcr-clubsport-r_2026-08-22.md` (mismo fichero, no se creó uno nuevo) con una nueva sección §5 "Desglose por variables": puertas (3p/5p), cambio (manual/DSG) y techo corredizo para GTI, GTI Clubsport y Golf R, en DE (mobile.de) y ES (Coches.net). GTI TCR se dejó sin segmentar (5p+DSG fijo de fábrica; el intento de aislar por potencia dio 86 ofertas DE, contaminado por GTI rechipados a ~290cv — descartado).
+
+## Trampas/aprendizajes nuevos para la skill
+
+1. **mobile.de — URL de resultados reales que SÍ funciona:** `https://suchen.mobile.de/fahrzeuge/search.html?dam=0&fr=<añoDesde>%3A<añoHasta>&isSearchRequest=true&ml=%3A<kmMax>&ms=<makeId>%3B<modelId>%3B%3B%3B&od=up&s=Car&sb=p&vc=Car&pw=<kWdesde>%3A<kWhasta>&tr=MANUAL_GEAR|AUTOMATIC_GEAR`. Claves: `ms=` va como `makeId;modelId;;;` (make;model;vacío;vacío;vacío — NO `make;;variante` como se probó al principio y fallaba). `sb=p` (precio) SÍ funciona en esta URL combinado con `ms` — sin él, la página cae en modo "formulario avanzado" sin resultados. La URL `www.mobile.de/es/s/auto?s=Car&vc=Car&ms=...` (sin pasar por `suchen.mobile.de`) es ese modo formulario: muestra el conteo pero no las tarjetas, tiene un botón "Ofertas" que no navega a resultados reales vía click. Usar siempre `suchen.mobile.de/fahrzeuge/search.html`.
+2. **mobile.de — extracción de tarjetas:** `get_page_text` en esta página solo devuelve el panel de filtros (nunca las tarjetas). Para leer precios/tarjetas hay que `find()` el contenedor de resultados (query: "container/list element that holds all the vehicle result cards") y luego `read_page(ref_id=...)`. Es virtualizado: solo se lee la tarjeta patrocinada + la primera orgánica montada; para ver más hay que hacer scroll real (`computer scroll`) y re-leer o usar `screenshot` (cuando funciona) para lectura visual rápida de precio+título+km+año.
+3. **mobile.de — filtro de puertas no confirmado:** el combobox "Número de puertas" (`TWO_OR_THREE`/`FOUR_OR_FIVE`/`SIX_OR_SEVEN`) no se ha conseguido aplicar como filtro verificable ni por URL ni por clic esta sesión. Sigue como limitación abierta.
+4. **mobile.de — "Panel de instrumentos digital" (cuadro digital):** vive detrás de un enlace "Más..." en la sección Conjuntos de funciones que no respondió a los intentos de expansión. Sigue sin filtro fiable en ningún portal para este equipamiento.
+5. **Coches.net — `TransmissionTypeId` no siempre fiable:** para Golf R (310cv), el filtro `TransmissionTypeId=2` ("Manual" en el chip de la UI) devolvió 3 fichas cuyo propio título dice "DSG". Para GTI y Clubsport el mapeo 1=Automático/2=Manual sí coincidió con los títulos. Tratar `TransmissionTypeId=2` con cautela en Golf R específicamente — verificar ficha antes de presentar un "Golf R manual" al cliente.
+6. **Discrepancia de volumen JSON vs mercado real:** el `datos_mercado.json` registra ofertas mucho más bajas (GTI 13 DE/14 ES, Clubsport 12 DE/25 ES) que lo medido en vivo el 24-ago (GTI 717 DE/241 ES, Clubsport 50 DE/26 ES). Golf R sí coincide bien (129 JSON vs 142 medido DE; 51 vs 51 ES). No se ha determinado la causa (posible filtro adicional no documentado en el JSON) — pendiente de revisar en el propio JSON desde Claude Desktop.
+
+## Próximo paso sugerido
+
+Si se quiere cerrar el eje cuadro digital, probablemente haga falta Claude Desktop (navegador más estable) o verificación ficha a ficha en Flujo B en vez de filtrado agregado de mercado.

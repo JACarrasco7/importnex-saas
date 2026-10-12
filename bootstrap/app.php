@@ -6,6 +6,7 @@ use App\Http\Middleware\ForceBaseUrl;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\ImportToken;
 use App\Http\Middleware\PlanLimitMiddleware;
+use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -23,6 +24,9 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
             ForceBaseUrl::class,
+            // Auditoria 2026-09-06 (D10): X-Content-Type-Options, X-Frame-Options,
+            // Referrer-Policy, Permissions-Policy en TODAS las respuestas.
+            SecurityHeaders::class,
         ]);
 
         $middleware->alias([

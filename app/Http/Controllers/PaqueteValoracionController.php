@@ -36,6 +36,31 @@ class PaqueteValoracionController extends Controller
         $e = Esqueleto::desde($contenido);
         $qrUrl = $e->uno('QR') ?? route('public.car-request.index', ['slug' => 'jj-import-motors']);
 
+        return $this->wrapper('Ficha', $car, 'ficha', 'jj-import.ficha-coche', [
+            'e' => $e,
+            'car' => $car,
+            'logo_base64' => $this->logo(),
+            'fotos' => $this->fotos($car),
+            'qr_svg' => QrCode::format('svg')
+                ->size(220)->margin(1)->errorCorrection('H')
+                ->backgroundColor(255, 255, 255)->color(6, 16, 31)
+                ->generate($qrUrl),
+            'telefono_1' => '675 70 14 39',
+            'telefono_2' => '691 48 59 27',
+            'email' => 'jjimportmotors@gmail.com',
+        ]);
+    }
+
+    public function fichaRaw(Car $car)
+    {
+        $contenido = $this->leer($car, 'ficha-publicitaria.txt');
+        if ($contenido === null) {
+            $contenido = $this->fichaDesdeCar($car);
+        }
+
+        $e = Esqueleto::desde($contenido);
+        $qrUrl = $e->uno('QR') ?? route('public.car-request.index', ['slug' => 'jj-import-motors']);
+
         return $this->pdf('jj-import.ficha-coche', [
             'e' => $e,
             'car' => $car,
@@ -57,31 +82,6 @@ class PaqueteValoracionController extends Controller
      *
      * GET /cars/{car}/folleto
      */
-    public function folleto(Car $car)
-    {
-        $contenido = $this->leer($car, 'ficha-publicitaria.txt');
-        if ($contenido === null) {
-            $contenido = $this->fichaDesdeCar($car);
-        }
-
-        $e = Esqueleto::desde($contenido);
-        $qrUrl = $e->uno('QR') ?? route('public.car-request.index', ['slug' => 'jj-import-motors']);
-
-        return $this->pdf('jj-import.folleto-coche', [
-            'e' => $e,
-            'car' => $car,
-            'logo_base64' => $this->logo(),
-            'fotos' => $this->fotos($car),
-            'qr_svg' => QrCode::format('svg')
-                ->size(200)->margin(1)->errorCorrection('H')
-                ->backgroundColor(255, 255, 255)->color(6, 16, 31)
-                ->generate($qrUrl),
-            'telefono_1' => '675 70 14 39',
-            'telefono_2' => '691 48 59 27',
-            'email' => 'jjimportmotors@gmail.com',
-        ], 'Folleto_'.$this->slug($car));
-    }
-
     public function interno(Car $car)
     {
         // Requisito duro: solo el equipo interno (rol owner/operator autenticado).
@@ -89,23 +89,39 @@ class PaqueteValoracionController extends Controller
             abort(403);
         }
 
+        return $this->wrapper('Informe interno', $car, 'informe-interno', 'jj-import.informe-interno',
+            $this->internoDatos($car));
+    }
+
+    public function internoRaw(Car $car)
+    {
+        // Requisito duro: solo el equipo interno (rol owner/operator autenticado).
+        if (! auth()->check() || ! in_array(auth()->user()->role, ['owner', 'operator'], true)) {
+            abort(403);
+        }
+
+        return $this->pdf('jj-import.informe-interno',
+            $this->internoDatos($car),
+            'Informe_interno_'.$this->slug($car));
+    }
+
+    private function internoDatos(Car $car): array
+    {
         $contenido = $this->leer($car, 'informe-interno.txt');
         if ($contenido === null) {
-            // Fallback: si el ZIP no trajo esqueleto, generamos uno mínimo
-            // desde los datos del coche para que la ruta nunca quede vacía.
             $contenido = $this->esqueletoDesdeCar($car);
         }
 
         $e = Esqueleto::desde($contenido);
 
-        return $this->pdf('jj-import.informe-interno', [
+        return [
             'e' => $e,
             'car' => $car,
             'logo_base64' => $this->logo(),
             'telefono_1' => '675 70 14 39',
             'telefono_2' => '691 48 59 27',
             'email' => 'jjimportmotors@gmail.com',
-        ], 'Informe_interno_'.$this->slug($car));
+        ];
     }
 
     // ── helpers ──────────────────────────────────────────────────────────────
@@ -142,8 +158,12 @@ class PaqueteValoracionController extends Controller
             $lines[] = '[ARGUMENTO] '.$car->description;
         }
 
-        if ($car->purchase_price) {
-            $lines[] = '[PRECIO] '.number_format((float) $car->purchase_price, 0, ',', '.');
+        // Precio TOTAL real para el cliente (compra + transporte + ITV + COC +
+        // DGT + honorarios). Nunca purchase_price solo en un documento de venta:
+        // sería un precio incompleto y engañoso (A4).
+        $total = $car->calculateTotalCost();
+        if ($total > 0) {
+            $lines[] = '[PRECIO] '.number_format($total, 0, ',', '.');
         }
 
         return implode("\n", $lines);
@@ -258,13 +278,42 @@ class PaqueteValoracionController extends Controller
         return preg_replace('/[^A-Za-z0-9]+/', '-', trim($car->brand.' '.$car->model)) ?? 'coche';
     }
 
-    private function pdf(string $vista, array $datos, string $nombreArchivo)
+    /**
+     * Envuelve el PDF en una vista HTML que renderiza el documento con PDF.js
+     * (canvas). El PDF se incrusta como base64 en la propia página: NO hay
+     * navegación a un .pdf, NO hay fetch de sesión y NO hay handler de app
+     * de escritorio que pueda interceptarlo. Infalible ante PWA/chrome-apps.
+     *
+     * @param  'ficha'|'folleto'|'informe-interno'  $tipo
+     */
+    private function wrapper(string $titulo, Car $car, string $tipo, string $vista, array $datos)
     {
-        $html = View::make($vista, $datos)->render();
+        $bytes = $this->pdfBytes($vista, $datos);
 
+        if ($bytes === null) {
+            // Sin Chrome o fallo de generación: servimos el HTML imprimible.
+            return response(View::make($vista, $datos)->render(), 200)
+                ->header('Content-Type', 'text/html; charset=utf-8');
+        }
+
+        return response()->view('jj-import.pdf-viewer', [
+            'titulo' => $titulo.' · '.$car->brand.' '.$car->model,
+            'pdfBase64' => base64_encode($bytes),
+            'filename' => $titulo.'_'.$this->slug($car).'.pdf',
+        ]);
+    }
+
+    /**
+     * Genera el PDF (Browsershot + Chrome headless) y devuelve los bytes.
+     * null si no hay Chrome o falló la generación.
+     */
+    private function pdfBytes(string $vista, array $datos): ?string
+    {
         $chrome = ChromePath::resolve();
         if (! $chrome) {
-            return response($html, 200)->header('Content-Type', 'text/html');
+            Log::warning('PaqueteValoracion PDF sin Chrome', ['vista' => $vista]);
+
+            return null;
         }
 
         $pdfPath = storage_path('app/private/tmp/'.uniqid('pdf_', true).'.pdf');
@@ -273,7 +322,8 @@ class PaqueteValoracionController extends Controller
         }
 
         try {
-            Browsershot::html($html)
+            Browsershot::html(View::make($vista, $datos)->render())
+                ->noSandbox()
                 ->setNodeBinary(ChromePath::nodeBinary())
                 ->setChromePath($chrome)
                 ->format('A4')
@@ -285,15 +335,35 @@ class PaqueteValoracionController extends Controller
                 ->scale(1)
                 ->savePdf($pdfPath);
 
-            $download = response()->download($pdfPath, $nombreArchivo.'.pdf');
-            register_shutdown_function(fn () => @unlink($pdfPath));
+            $bytes = file_get_contents($pdfPath) ?: null;
+            @unlink($pdfPath);
 
-            return $download;
+            return $bytes;
         } catch (\Throwable $e) {
             @unlink($pdfPath);
             Log::warning('PaqueteValoracion PDF failed', ['error' => $e->getMessage()]);
 
-            return response($html, 200)->header('Content-Type', 'text/html');
+            return null;
         }
+    }
+
+    /**
+     * Sirve el PDF como archivo (usado por los endpoints /raw, que solo se
+     * consumen desde el botón "Descargar" del viewer).
+     */
+    private function pdf(string $vista, array $datos, string $nombreArchivo)
+    {
+        $bytes = $this->pdfBytes($vista, $datos);
+
+        if ($bytes === null) {
+            return response(View::make($vista, $datos)->render(), 200)
+                ->header('Content-Type', 'text/html; charset=utf-8')
+                ->header('Content-Disposition', 'inline; filename="'.$nombreArchivo.'.html"');
+        }
+
+        return response($bytes, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$nombreArchivo.'.pdf"',
+        ]);
     }
 }

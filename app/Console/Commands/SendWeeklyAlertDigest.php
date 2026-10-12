@@ -19,73 +19,75 @@ class SendWeeklyAlertDigest extends Command
         $dryRun = $this->option('dry-run');
         $weekAgo = now()->subWeek();
 
-        $organizations = Organization::query()
-            ->whereHas('users')
-            ->get();
-
-        $this->info("Found {$organizations->count()} organizations.");
-
+        // (auditoria ronda 4, sep-2026): con muchas orgs + usuarios, ->get() OOM.
+        $orgCount = 0;
         $sent = 0;
         $skipped = 0;
 
-        foreach ($organizations as $org) {
-            // Solo owners (los que reciben mails transaccionales del producto)
-            $owner = $org->users()->where('role', 'owner')->first()
-                ?? $org->users()->first();
-            if (! $owner || ! $owner->email) {
-                $skipped++;
+        Organization::query()
+            ->whereHas('users')
+            ->chunk(100, function ($organizations) use (&$orgCount, &$sent, &$skipped, $dryRun, $weekAgo) {
+                foreach ($organizations as $org) {
+                    $orgCount++;
 
-                continue;
-            }
+                    $owner = $org->users()->where('role', 'owner')->first()
+                        ?? $org->users()->first();
+                    if (! $owner || ! $owner->email) {
+                        $skipped++;
 
-            $query = Alert::query()->where('organization_id', $org->id);
+                        continue;
+                    }
 
-            $stats = [
-                'new_week' => (clone $query)->where('created_at', '>=', $weekAgo)->where('resolved', false)->count(),
-                'resolved_week' => (clone $query)->where('resolved_at', '>=', $weekAgo)->count(),
-                'pending' => (clone $query)->where('resolved', false)->count(),
-                'snoozed' => (clone $query)->where('resolved', false)->where('snoozed_until', '>', now())->count(),
-            ];
+                    $query = Alert::query()->where('organization_id', $org->id);
 
-            // Si no hay nada relevante, no enviar (ahorra mails y mejora engagement)
-            if ($stats['new_week'] === 0 && $stats['resolved_week'] === 0 && $stats['pending'] === 0) {
-                $skipped++;
-                $this->line("  · {$org->name}: sin actividad, skip");
+                    $stats = [
+                        'new_week' => (clone $query)->where('created_at', '>=', $weekAgo)->where('resolved', false)->count(),
+                        'resolved_week' => (clone $query)->where('resolved_at', '>=', $weekAgo)->count(),
+                        'pending' => (clone $query)->where('resolved', false)->count(),
+                        'snoozed' => (clone $query)->where('resolved', false)->where('snoozed_until', '>', now())->count(),
+                    ];
 
-                continue;
-            }
+                    // Si no hay nada relevante, no enviar (ahorra mails y mejora engagement)
+                    if ($stats['new_week'] === 0 && $stats['resolved_week'] === 0 && $stats['pending'] === 0) {
+                        $skipped++;
+                        $this->line("  · {$org->name}: sin actividad, skip");
 
-            $recentAlerts = (clone $query)
-                ->where('created_at', '>=', $weekAgo)
-                ->orderByDesc('created_at')
-                ->limit(10)
-                ->get()
-                ->each->append('target_url');
+                        continue;
+                    }
 
-            $locale = $org->locale ?? 'es';
+                    $recentAlerts = (clone $query)
+                        ->where('created_at', '>=', $weekAgo)
+                        ->orderByDesc('created_at')
+                        ->limit(10)
+                        ->get()
+                        ->each->append('target_url');
 
-            $this->line(sprintf(
-                '  · %s: new=%d resolved=%d pending=%d -> %s',
-                $org->name,
-                $stats['new_week'],
-                $stats['resolved_week'],
-                $stats['pending'],
-                $owner->email,
-            ));
+                    $locale = $org->locale ?? 'es';
 
-            if ($dryRun) {
-                continue;
-            }
+                    $this->line(sprintf(
+                        '  · %s: new=%d resolved=%d pending=%d -> %s',
+                        $org->name,
+                        $stats['new_week'],
+                        $stats['resolved_week'],
+                        $stats['pending'],
+                        $owner->email,
+                    ));
 
-            try {
-                Mail::to($owner->email)->send(new WeeklyAlertDigest($org, $stats, $recentAlerts, $locale));
-                $sent++;
-            } catch (\Throwable $e) {
-                $this->error("  ! Failed for {$org->name}: {$e->getMessage()}");
-                $skipped++;
-            }
-        }
+                    if ($dryRun) {
+                        continue;
+                    }
 
+                    try {
+                        Mail::to($owner->email)->send(new WeeklyAlertDigest($org, $stats, $recentAlerts, $locale));
+                        $sent++;
+                    } catch (\Throwable $e) {
+                        $this->error("  ! Failed for {$org->name}: {$e->getMessage()}");
+                        $skipped++;
+                    }
+                }
+            });
+
+        $this->info("Found {$orgCount} organizations.");
         $this->info("Done. Sent: {$sent}, Skipped: {$skipped}");
 
         return self::SUCCESS;

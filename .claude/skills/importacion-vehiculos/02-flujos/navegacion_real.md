@@ -79,7 +79,7 @@
 
 **Trucos:**
 - Los listados a veces tardan; si ves esqueleto, espera 2-3 s antes de leer.
-- `suchen.mobile.de` a veces falla → usa `www.mobile.de/fahrzeuge/search.html?...`.
+- ⚠️ **CORREGIDO 24-ago-2026:** el consejo anterior decía "si `suchen.mobile.de` falla → usa `www.mobile.de/...`". Eso es al revés para resultados: **`suchen.mobile.de/fahrzeuge/search.html?...&sb=p` es la ÚNICA URL que muestra tarjetas reales** (la `www.mobile.de/es/...` cae en modo formulario: conteo sí, fichas NO). Si `suchen` falla → reintento con recarga + espera → declarar fuente bloqueada. Ver `playbook_filtrado.md` §URL de resultados reales.
 - El conteo total a veces está en "X Ergebnisse" o "von X Anzeigen".
 
 ### 🇩🇪 AutoScout24.de — verificación cruzada

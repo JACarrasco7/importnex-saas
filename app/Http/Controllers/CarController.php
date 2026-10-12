@@ -12,14 +12,34 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class CarController extends Controller
 {
+    /**
+     * Opciones de ordenación permitidas para el listado de coches.
+     * Cada valor es [columna, dirección]; 'recent' usa created_at + id
+     * para tener un orden determinista en imports en lote.
+     */
+    private const SORT_OPTIONS = [
+        'recent' => [['created_at', 'desc'], ['id', 'desc']],
+        'oldest' => [['created_at', 'asc'], ['id', 'asc']],
+        'price_asc' => [['purchase_price', 'asc'], ['id', 'asc']],
+        'price_desc' => [['purchase_price', 'desc'], ['id', 'desc']],
+        'mileage_asc' => [['mileage', 'asc'], ['id', 'asc']],
+        'mileage_desc' => [['mileage', 'desc'], ['id', 'desc']],
+    ];
+
     public function index(Request $request): Response
     {
+        $sort = $request->input('sort', 'recent');
+        if (! array_key_exists($sort, self::SORT_OPTIONS)) {
+            $sort = 'recent';
+        }
+
         $cars = Car::query()
             ->with('photos')
             ->when($request->input('status'), fn ($q, $s) => $q->where('status', $s))
@@ -30,10 +50,29 @@ class CarController extends Controller
                         ->orWhere('model', 'like', "%$s%")
                         ->orWhere('vin', 'like', "%$s%");
                 });
-            })
-            ->orderBy('created_at', 'desc')
-            ->paginate(15)
-            ->withQueryString();
+            });
+        foreach (self::SORT_OPTIONS[$sort] as [$column, $direction]) {
+            $cars->orderBy($column, $direction);
+        }
+        $cars = $cars->paginate(15)->withQueryString();
+
+        // Conteos por status y traffic_light (sin filtros aplicados) para
+        // que las pestañas y los stats cards muestren totales reales,
+        // no solo los de la página actual.
+        $statusCounts = Car::query()
+            ->selectRaw('status, COUNT(*) as count')
+            ->groupBy('status')
+            ->pluck('count', 'status')
+            ->all();
+
+        $lightCounts = Car::query()
+            ->selectRaw('traffic_light, COUNT(*) as count')
+            ->groupBy('traffic_light')
+            ->pluck('count', 'traffic_light')
+            ->all();
+
+        // Valor total del inventario (sin filtros) para el stat card "Total value".
+        $totalInventoryValue = (float) Car::query()->sum('purchase_price');
 
         $statuses = Car::STATUSES;
         $lights = ['green', 'amber', 'red', 'neutral'];
@@ -42,6 +81,11 @@ class CarController extends Controller
             'cars' => Inertia::defer(fn () => $cars),
             'statuses' => $statuses,
             'lights' => $lights,
+            'statusCounts' => $statusCounts,
+            'lightCounts' => $lightCounts,
+            'totalInventoryValue' => $totalInventoryValue,
+            'sort' => $sort,
+            'sortOptions' => array_keys(self::SORT_OPTIONS),
             'filters' => $request->only(['status', 'traffic_light', 'search']),
         ]);
     }
@@ -93,12 +137,23 @@ class CarController extends Controller
 
     public function show(Car $car): Response
     {
-        $car->load(['photos', 'documents', 'expenses', 'checklists', 'client']);
+        $car->load([
+            'photos',
+            'documents',
+            'expenses',
+            'checklists',
+            'client',
+            'contractAcceptances',
+            // Solo columnas necesarias para el badge N/6 del módulo marketing
+            // (ver resources/js/Pages/Cars/Show.vue → marketingContents count).
+            'marketingContents:car_id,channel,status,source',
+        ]);
 
         // Pre-compute derived data for the enriched valuation UI
-        $car->researchGaps;       // touch accessor
-        $car->comparablesStats;    // touch accessor
-        $car->calculateTotalCost(); // touch method
+        $car->researchGaps;             // touch accessor
+        $car->comparablesStats;          // touch accessor
+        $car->comparablesStatsByCountry; // touch accessor (09-sep-2026)
+        // totalCost + iedmt se calculan una sola vez más abajo en `derived`.
 
         $checklistMilestones = $car->checklists->where('kind', 'milestone')->values();
         $checklistInspections = $car->checklists->where('kind', 'inspection')->values();
@@ -132,91 +187,169 @@ class CarController extends Controller
             'total' => $checklistInspections->count(),
         ];
 
+        // Auditoria 2026-09-06 (Q5): calculateTotalCost() se llamaba 2 veces
+        // (touch + array 'derived'). Calcular una vez y reusar.
+        $totalCost = $car->calculateTotalCost();
+
         return Inertia::render('Cars/Show', [
             'car' => $car,
             'derived' => [
-                'total_cost' => $car->calculateTotalCost(),
+                'total_cost' => $totalCost,
                 'iedmt' => $car->calculateIEDMT(),
                 'research_gaps' => $car->researchGaps,
                 'comparables_stats' => $car->comparablesStats,
+                'comparables_stats_by_country' => $car->comparablesStatsByCountry,
+                // §marketplace (25-sep-2026) — estado de publicación en la web
+                // pública: las 4 condiciones + por qué falla. La ficha muestra
+                // el toggle y avisa de lo que falta para que aparezca.
+                'marketplace_status' => $car->marketplaceStatus(),
+                // C2 auditoría 09-sep-2026: URLs de las búsquedas de mercado
+                // (mobile.de / autoscout24 / coches.net / wallapop). La pestaña
+                // Mercado del panel admin las muestra como "Búsquedas
+                // realizadas".
+                'busquedas_por_pais' => $car->busquedasPorPais,
+                // Enlaces "ver suelo" (mobile.de + coches.net) generados desde
+                // los datos del coche, ordenados por precio. Cubren los coches
+                // que no traen `mercado.busquedas_realizadas[]` en el ZIP.
+                'enlaces_suelo' => $car->enlacesSuelo,
                 'milestones_progress' => $milestonesProgress,
                 'inspections_progress' => $inspectionsProgress,
                 'inspections_by_section' => $inspectionsBySection,
                 'documents_by_group' => $documentsByGroup,
-                'matching_requests' => $car->client ? [] : $this->matchingRequests($car),
+                'selectable_requests' => $car->client ? [] : $this->selectableRequests($car),
                 'linked_request' => $this->linkedRequest($car),
                 'laravel_pdfs' => $this->laravelPdfs($car),
+                'contract' => $this->contractSummary($car),
+                'public_link' => $this->publicLinkSummary($car),
+                'tracking' => [
+                    'is_shared' => $car->is_tracking_shared,
+                    'is_public_trackable' => $car->is_public_trackable,
+                    'url' => $car->tracking_url,
+                    'token' => $car->tracking_token,
+                    'shared_at' => $car->tracking_shared_at?->toIso8601String(),
+                    'shared_with_email' => $car->tracking_shared_with_email,
+                    'views' => (int) $car->tracking_views,
+                ],
             ],
         ]);
     }
 
     /**
      * PDFs que genera LARAVEL (Blade + Browsershot) a partir de los esqueletos
-     * .txt del ZIP. Se listan en la pestaña Documentos para diferenciarlos de
-     * los PDFs que genera Claude (informe de búsqueda/unidad).
+     * .txt del ZIP (o con fallback desde los datos del coche). Se listan en la
+     * pestaña Documentos para diferenciarlos de los PDFs que genera Claude.
+     *
+     * Los 2 están SIEMPRE disponibles: las rutas sirven el esqueleto del ZIP
+     * si existe y, si no, generan el documento desde los datos del coche
+     * (PaqueteValoracionController tiene fallbacks propios).
      *
      * @return array<int, array{key: string, label: string, route: string, available: bool}>
      */
     private function laravelPdfs(Car $car): array
     {
-        $contenidoDir = 'cars/'.$car->id.'/contenido';
-        $has = function (string $file) use ($contenidoDir): bool {
-            foreach (['local', 'public'] as $disk) {
-                if (Storage::disk($disk)->exists($contenidoDir.'/'.$file)) {
-                    return true;
-                }
-            }
-
-            return false;
-        };
-
         return [
             [
                 'key' => 'ficha',
-                'label' => 'Ficha cliente',
+                'label' => 'Informe cliente',
                 'route' => route('cars.ficha', $car->id),
-                'available' => $has('ficha-publicitaria.txt'),
-            ],
-            [
-                'key' => 'folleto',
-                'label' => 'Folleto',
-                'route' => route('cars.folleto', $car->id),
                 'available' => true,
             ],
             [
                 'key' => 'informe_interno',
                 'label' => 'Informe interno',
                 'route' => route('cars.informe-interno', $car->id),
-                'available' => $has('informe-interno.txt'),
+                'available' => true,
             ],
         ];
     }
 
     /**
-     * Solicitudes de clientes compatibles con este coche: misma marca y, si la
-     * solicitud concreta modelo, que coincida también. Solo estados vivos
-     * (pendiente / contactada / en curso). Sirve para vincular el coche al
-     * cliente de la solicitud en un clic tras importarlo.
+     * Resumen del contrato (último creado) para mostrar el panel en Cars/Show.
+     * Si no hay ninguno, devuelve null y la UI muestra el botón "Generar".
+     * Incluye un QR (SVG data URI) para que el cliente escanee y abra el
+     * contrato desde el móvil sin escribir el enlace.
+     *
+     * @return array{public_url:string, pdf_url:string, accepted_at:?string, hash:string, qr_svg:string}|null
+     */
+    private function contractSummary(Car $car): ?array
+    {
+        $contract = $car->contractAcceptances()->latest('accepted_at')->latest('id')->first();
+        if (! $contract) {
+            return null;
+        }
+
+        $qr = QrCode::format('svg')->size(160)->margin(0)->generate($contract->public_url);
+
+        return [
+            'public_url' => $contract->public_url,
+            'pdf_url' => $contract->accepted_at
+                ? route('public.contract.pdf', $contract->public_token)
+                : null,
+            'accepted_at' => $contract->accepted_at?->toIso8601String(),
+            'hash' => $contract->contract_hash,
+            'version' => $contract->contract_version,
+            'qr_svg' => 'data:image/svg+xml;base64,'.base64_encode($qr),
+        ];
+    }
+
+    /**
+     * Resumen de los links públicos (dossier ficha + folleto) del coche,
+     * para mostrar el estado en la pestaña Documentos y permitir revocar.
+     *
+     * @return array{active: ?array, last: ?array}
+     */
+    private function publicLinkSummary(Car $car): array
+    {
+        $links = $car->publicLinks()->latest('id')->limit(2)->get();
+        $active = $links->first(fn ($l) => $l->isActive());
+        $last = $links->first(fn ($l) => $l->revoked_at !== null);
+
+        $toArray = function ($l) {
+            return [
+                'id' => $l->id,
+                'url' => $l->publicUrl(),
+                'views_count' => (int) $l->views_count,
+                'last_viewed_at' => $l->last_viewed_at?->toIso8601String(),
+                'created_at' => $l->created_at->toIso8601String(),
+                'revoked_at' => $l->revoked_at?->toIso8601String(),
+            ];
+        };
+
+        return [
+            'active' => $active ? $toArray($active) : null,
+            'last' => $last ? $toArray($last) : null,
+        ];
+    }
+
+    /**
+     * Solicitudes seleccionables para vincular a este coche: todas las de la
+     * organización en estado pendiente/contactada (aún sin coche asignado).
+     * El usuario elige una desde un <select> en la ficha y la vincula en un
+     * clic. Excluye solicitudes cuyo cliente ya tiene otro coche asignado.
      *
      * @return array<int, array<string, mixed>>
      */
-    private function matchingRequests(Car $car): array
+    private function selectableRequests(Car $car): array
     {
         return CarRequest::query()
             // Multi-tenancy: CarRequest NO tiene global scope propio (a
             // diferencia de Car), así que el filtro por organización es
             // obligatorio aquí o se filtraría información de otros tenants.
             ->where('organization_id', $car->organization_id)
-            ->whereIn('status', ['pending', 'contacted', 'in_progress'])
+            ->whereIn('status', ['pending', 'contacted'])
+            // Incluir solicitudes sin cliente (client_id NULL) y excluir
+            // solo las cuyo cliente ya tiene otro coche asignado en la org.
             ->where(fn ($q) => $q
-                ->whereNull('brand')
-                ->orWhere('brand', 'like', '%'.$car->brand.'%'))
-            ->where(fn ($q) => $q
-                ->where(fn ($q2) => $q2->whereNull('model')->orWhere('model', ''))
-                ->orWhere('model', 'like', '%'.$car->model.'%'))
+                ->whereNull('client_id')
+                ->orWhereNotIn('client_id', function ($q2) use ($car) {
+                    $q2->select('client_id')
+                        ->from('cars')
+                        ->where('organization_id', $car->organization_id)
+                        ->whereNotNull('client_id');
+                }))
             ->with('client:id,name')
             ->orderByDesc('created_at')
-            ->limit(10)
+            ->limit(50)
             ->get(['id', 'client_id', 'name', 'brand', 'model', 'budget_max', 'status', 'created_at'])
             ->map(fn ($r) => [
                 'id' => $r->id,
@@ -276,26 +409,209 @@ class CarController extends Controller
      */
     public function matchRequest(Car $car, CarRequest $carRequest): RedirectResponse
     {
-        abort_unless(
-            (int) $carRequest->organization_id === (int) $car->organization_id,
-            403,
-            'La solicitud pertenece a otra organización.'
-        );
+        Log::info('cars.match-request: start', [
+            'car_id' => $car->id,
+            'car_org' => $car->organization_id,
+            'car_client_before' => $car->client_id,
+            'car_request_id' => $carRequest->id,
+            'car_request_org' => $carRequest->organization_id,
+            'car_request_status' => $carRequest->status,
+            'car_request_client' => $carRequest->client_id,
+            'car_request_brand' => $carRequest->brand,
+            'car_request_model' => $carRequest->model,
+        ]);
 
-        return DB::transaction(function () use ($car, $carRequest) {
-            if ($carRequest->client_id) {
-                $car->client_id = $carRequest->client_id;
-                $car->save();
-            }
+        if ((int) $carRequest->organization_id !== (int) $car->organization_id) {
+            Log::warning('cars.match-request: 403 cross-org', [
+                'car_id' => $car->id,
+                'car_org' => $car->organization_id,
+                'car_request_id' => $carRequest->id,
+                'car_request_org' => $carRequest->organization_id,
+            ]);
+            abort(403, 'La solicitud pertenece a otra organización.');
+        }
 
-            $carRequest->status = 'in_progress';
-            $carRequest->notes = trim(($carRequest->notes ? $carRequest->notes."\n" : '')
-                .'['.now()->format('d/m/Y H:i')."] Vinculado a vehículo #{$car->id} ({$car->brand} {$car->model}).");
-            $carRequest->save();
+        // El coche ya tiene cliente → no se puede vincular otro sin desvincular primero.
+        if ($car->client_id && $car->client_id !== $carRequest->client_id) {
+            Log::warning('cars.match-request: car already linked to another client', [
+                'car_id' => $car->id,
+                'existing_client_id' => $car->client_id,
+                'incoming_request_id' => $carRequest->id,
+                'incoming_client_id' => $carRequest->client_id,
+            ]);
 
             return redirect()->route('cars.show', $car->id)
-                ->with('success', 'Vehículo vinculado a la solicitud.');
+                ->with('error', 'Este coche ya tiene un cliente vinculado. Desvincúlalo primero si quieres cambiarlo.');
+        }
+
+        try {
+            return DB::transaction(function () use ($car, $carRequest) {
+                // Fallback: si la solicitud no tiene cliente (datos viejos o manuales),
+                // crearlo a partir de sus datos para que el coche nunca quede sin cliente.
+                if (! $carRequest->client_id) {
+                    $client = $this->createClientFromRequestData($carRequest);
+                    $carRequest->client_id = $client->id;
+                    Log::info('cars.match-request: client created from request data', [
+                        'car_request_id' => $carRequest->id,
+                        'new_client_id' => $client->id,
+                    ]);
+                }
+
+                $car->client_id = $carRequest->client_id;
+                // Al vincular a un cliente, el coche queda RESERVADO para él (visible en kanban).
+                $this->markCarReserved($car);
+                $car->save();
+
+                $carRequest->status = 'in_progress';
+                $carRequest->notes = trim(($carRequest->notes ? $carRequest->notes."\n" : '')
+                    .'['.now()->format('d/m/Y H:i')."] Vinculado a vehículo #{$car->id} ({$car->brand} {$car->model}).");
+                $carRequest->save();
+
+                Log::info('cars.match-request: OK', [
+                    'car_id' => $car->id,
+                    'car_request_id' => $carRequest->id,
+                    'final_client_id' => $car->client_id,
+                ]);
+
+                return redirect()->route('cars.show', $car->id)
+                    ->with('success', 'Vehículo vinculado a la solicitud y reservado para el cliente.');
+            });
+        } catch (\Throwable $e) {
+            Log::error('cars.match-request: exception', [
+                'car_id' => $car->id,
+                'car_request_id' => $carRequest->id,
+                'message' => $e->getMessage(),
+                'class' => get_class($e),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return redirect()->route('cars.show', $car->id)
+                ->with('error', 'No se pudo vincular el vehículo: '.$e->getMessage());
+        }
+    }
+
+    /**
+     * Crea una SOLICITUD para este coche (boca a boca / manual): la solicitud
+     * es el acto primario — de ella nace el cliente (se busca por email/phone
+     * o se crea), se vincula al coche y pasa a "en curso".
+     *
+     * Regla (21-ago-2026): se crea la solicitud y con eso se crea el cliente.
+     * NUNCA al revés (cliente suelto que luego inventa una solicitud).
+     */
+    public function createRequest(Car $car, Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:50'],
+            'requirements' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        return DB::transaction(function () use ($car, $data) {
+            $client = $this->resolveClientFromData($data, $car->organization_id);
+
+            $carRequest = CarRequest::create([
+                'organization_id' => $car->organization_id,
+                'client_id' => $client->id,
+                'name' => $data['name'],
+                'email' => $data['email'] ?? null,
+                'phone' => $data['phone'] ?? null,
+                'brand' => $car->brand,
+                'model' => $car->model,
+                'status' => 'in_progress',
+                'requirements' => $data['requirements']
+                    ?? 'Solicitud creada desde la ficha del vehículo (boca a boca / manual).',
+                'notes' => '['.now()->format('d/m/Y H:i')."] Vinculado a vehículo #{$car->id} ({$car->brand} {$car->model}).",
+            ]);
+
+            $car->client_id = $client->id;
+            // Al crear la solicitud y vincular, el coche queda RESERVADO para el cliente.
+            $this->markCarReserved($car);
+            $car->save();
+
+            return redirect()->route('cars.show', $car->id)
+                ->with('success', 'Solicitud creada y cliente vinculado al vehículo.');
         });
+    }
+
+    /**
+     * Pasa el coche a "Reserved" (reservado para cliente) si aún está en una
+     * fase previa del pipeline (Located/Valuing/Offered). No toca estados ya
+     * avanzados (Purchased/In_transit/Processing/Delivered) ni la entrega.
+     */
+    private function markCarReserved(Car $car): void
+    {
+        if (in_array($car->status, ['Located', 'Valuing', 'Offered'], true)) {
+            $car->status = 'Reserved';
+        }
+    }
+
+    /**
+     * Busca un cliente por email (y por teléfono como fallback); si no existe,
+     * lo crea a partir de los datos dados. Compatible con MySQL y SQLite.
+     */
+    private function resolveClientFromData(array $data, int $organizationId): Client
+    {
+        $email = $data['email'] ?? null;
+        $phone = $data['phone'] ?? null;
+
+        if ($email) {
+            $client = Client::where('organization_id', $organizationId)
+                ->where('contact_info', 'like', '%"email":"'.$email.'"%')
+                ->first();
+
+            if ($client) {
+                return $client;
+            }
+        }
+
+        if ($phone) {
+            $normalizedPhone = preg_replace('/[^0-9]/', '', $phone);
+            $client = Client::where('organization_id', $organizationId)
+                ->where('contact_info', 'like', '%"phone":"%'.substr($normalizedPhone, -9).'%')
+                ->first();
+
+            if ($client) {
+                return $client;
+            }
+        }
+
+        return Client::create([
+            'organization_id' => $organizationId,
+            'name' => $data['name'],
+            'contact_info' => json_encode([
+                'email' => $email,
+                'phone' => $phone,
+            ]),
+            'status' => 'New',
+        ]);
+    }
+
+    /**
+     * Crea un cliente a partir de los datos de una solicitud que no lo tenía.
+     */
+    private function createClientFromRequestData(CarRequest $carRequest): Client
+    {
+        $existing = Client::where('organization_id', $carRequest->organization_id)
+            ->where('name', $carRequest->name)
+            ->first();
+
+        if ($existing) {
+            return $existing;
+        }
+
+        return Client::create([
+            'organization_id' => $carRequest->organization_id,
+            'name' => $carRequest->name ?: 'Cliente sin nombre',
+            'contact_info' => json_encode([
+                'email' => $carRequest->email,
+                'phone' => $carRequest->phone,
+            ]),
+            'looking_for' => trim(($carRequest->brand ?? '').' '.($carRequest->model ?? '')),
+            'budget_min' => $carRequest->budget_min,
+            'budget_max' => $carRequest->budget_max,
+            'status' => 'New',
+        ]);
     }
 
     private function docGroupLabel(string $group): string
@@ -325,6 +641,45 @@ class CarController extends Controller
 
         return redirect()->route('cars.index')
             ->with('success', 'Car updated successfully.');
+    }
+
+    /**
+     * Activa/desactiva la publicación en el marketplace público desde la
+     * propia ficha, sin pasar por el formulario de edición completo.
+     *
+     * Regla (25-sep-2026): el toggle solo cambia `is_marketplace`. El coche NO
+     * se publica hasta cumplir las otras 3 condiciones (`status=Delivered`,
+     * `verdict` positivo, organización `is_public`); la ficha las lista para
+     * que el operador sepa qué falta — antes marcaba el toggle y no entendía
+     * por qué el coche no aparecía.
+     *
+     * La caché del marketplace y el sitemap se invalidan solos: `CarObserver`
+     * observa `is_marketplace` en `saved()`.
+     */
+    public function toggleMarketplace(Request $request, Car $car): RedirectResponse
+    {
+        $validated = $request->validate([
+            'is_marketplace' => ['required', 'boolean'],
+        ]);
+
+        $car->update(['is_marketplace' => (bool) $validated['is_marketplace']]);
+
+        // Releer el estado tras el update (el observer ya refrescó cachés).
+        $status = $car->fresh()->marketplaceStatus();
+
+        if (! $validated['is_marketplace']) {
+            $mensaje = 'Coche retirado del marketplace público.';
+        } elseif ($status['visible']) {
+            $mensaje = 'Coche publicado en el marketplace público.';
+        } else {
+            $pendientes = collect($status['checks'])
+                ->reject(fn ($c) => $c['ok'])
+                ->pluck('key')
+                ->implode(', ');
+            $mensaje = 'Marcado para publicar, pero aún NO aparece en la web: falta '.$pendientes.'. Ver condiciones en la ficha.';
+        }
+
+        return back()->with('success', $mensaje);
     }
 
     public function destroy(Car $car): RedirectResponse

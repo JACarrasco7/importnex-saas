@@ -507,9 +507,44 @@ Archivo que `empaquetar.py` escribe dentro del ZIP. Bloques `[MARCADOR]` para Bl
 # Cabecera
 [COCHE_ID]              vw-golf-gti-clubsport-2021-8b3f4a2c
 [FECHA_INFORME]         2026-08-12 14:32
+[VALIDO_HASTA]          2026-08-19
 [FLUJO]                 A
 [SCORE_GLOBAL]          84
 [RECOMENDACION]         COMPRA PRIORITARIA
+[ORIGEN]                Alemania (Múnich)
+[VIN]                   WVWZZZCDZMW123456
+[URL_ANUNCIO]           https://www.mobile.de/fahrzeuge/details.html?id=...
+[PRECIO_OBJETIVO]       25950
+
+# Cabecera ejecutiva (se muestra en la "Executive card" del blade)
+[SEMAFORO]              verde
+[DICTAMEN]              Compra recomendada
+[CONFIANZA]             Alta
+[RESUMEN]               **Golf GTI Clubsport Performance** con historial 1 dueño en concesionario. Mediana ES 34.500 € → margen estimado 21%.
+[RAZONAMIENTO]          El coche está ~6.500 € por debajo de la mediana ES por su pack Performance y único dueño. El IEDMT es el único coste sensible (ver [IEDMT_SENSIBILIDAD]).
+[QUE_CAMBIARIA]         Negociar 850 € adicionales usando el comparable ajustado (34.300 €) y el tiempo publicado (45 días).
+
+# Balance (argumento | peso alto/medio/bajo)
+[A_FAVOR] Historial completo 1 dueño | alto
+[A_FAVOR] Pack Performance poco común en ES | alto
+[A_FAVOR] Km contenidos (9.5k/año) | medio
+[EN_CONTRA] 45 días publicado → posible sobreprecio | medio
+[EN_CONTRA] Mantenimiento del pack caro | bajo
+
+# Auditoría por aspecto (grupo: abre con [ASPECTO], cierra al repetirse o con [H2])
+[ASPECTO] Mecánica
+[VALORACION] Positiva
+[TEXTO] Sin ruidos, arranque limpio, historial en Audi.
+[FUENTE] Inspección + historial concesionario
+[ASPECTO] Carrocería
+[VALORACION] Positiva
+[TEXTO] Sin golpes ni repintados. 2 arañazos leves.
+[FUENTE] Inspección visual + fotos
+
+# Checklist de cierre
+[CHECK] Confirmado historial 1 dueño
+[CHECK] COC solicitado al vendedor
+[CHECK] Seguro transporte contratado
 
 # Cobertura
 [COBERTURA] mobile.de | OK | 5 | mediana DE, 12 fichas

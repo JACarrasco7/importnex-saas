@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AiChatController;
 use App\Http\Controllers\AlertController;
+use App\Http\Controllers\Api\PublicMarketController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\CarChecklistController;
 use App\Http\Controllers\CarController;
@@ -11,17 +12,20 @@ use App\Http\Controllers\CarMapController;
 use App\Http\Controllers\CarMarketingController;
 use App\Http\Controllers\CarPhotoController;
 use App\Http\Controllers\CarRequestController;
+use App\Http\Controllers\CarSharingController;
 use App\Http\Controllers\CarVerificationController;
 use App\Http\Controllers\ClientContactLogController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FinanceController;
+use App\Http\Controllers\GuideController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\JJImportFolletoController;
 use App\Http\Controllers\KpiController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\MarketingController;
+use App\Http\Controllers\MercadoController;
 use App\Http\Controllers\MessageTemplateController;
 use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\OnboardingController;
@@ -29,8 +33,11 @@ use App\Http\Controllers\OpenApiController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\PaqueteValoracionController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PublicCarController;
 use App\Http\Controllers\PublicCarRequestController;
+use App\Http\Controllers\PublicContractController;
 use App\Http\Controllers\PublicMarketplaceController;
+use App\Http\Controllers\PublicTrackingController;
 use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\StripeWebhookController;
@@ -100,7 +107,11 @@ Route::get('/sw.js', function () {
 })->name('pwa.sw');
 
 // Stripe webhook (must be outside auth/csrf middleware)
-Route::post('stripe/webhook', [StripeWebhookController::class, 'handleWebhook']);
+// (auditoria ronda 4, sep-2026): throttle nombrado evita que un atacante
+// spammee webhooks invalidos forzando verificacion HMAC-SHA256 por peticion.
+// 60/min es suficiente para retries reales de Stripe (max 3 dias x N eventos).
+Route::post('stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])
+    ->middleware('throttle:stripe-webhook');
 
 // Public car request form
 // URL: /request/{slug} — public form for clients to send car preferences
@@ -120,19 +131,45 @@ Route::prefix('marketplace')->name('marketplace.')->group(function () {
     Route::get('/{car}', [PublicMarketplaceController::class, 'show'])->name('show');
 });
 
-Route::middleware('auth', 'has.organization')->group(function () {
-    Route::get('organization/create', [OrganizationController::class, 'create'])
-        ->name('organization.create');
-    Route::post('organization', [OrganizationController::class, 'store'])
-        ->name('organization.store');
-});
+// Public catalog "bajo pedido" from the market map (skill estudio-mercado)
+// URL: /mercado — public catalog of under-order vehicles
+Route::get('/mercado', [MercadoController::class, 'index'])->name('mercado.index');
 
+// #2 — Lead capture desde el catálogo público + #3 — calculadora de coste
+Route::post('/mercado/{marketModel}/interes', [MercadoController::class, 'storeLead'])
+    ->middleware('throttle:api-heavy')
+    ->where('marketModel', '[0-9]+')
+    ->name('mercado.interest');
+Route::get('/mercado/{marketModel}/coste', [MercadoController::class, 'coste'])
+    ->where('marketModel', '[0-9]+')
+    ->name('mercado.coste');
+
+// #6 — API pública del catálogo (sin auth, modelos publicados)
+Route::get('/api/public/market', [PublicMarketController::class, 'index'])
+    ->name('mercado.public-api');
+Route::get('/api/public/market/stats', [PublicMarketController::class, 'stats'])
+    ->name('mercado.public-api.stats');
 Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, '__invoke'])
         ->name('dashboard');
 
     // Dashboard de KPIs del skill importacion-vehiculos (§3.8)
     Route::get('/kpis', [KpiController::class, '__invoke'])->name('kpis.index');
+
+    // Guías internas — sección "Guía" del menú lateral (ver GuideController)
+    Route::get('/guias', [GuideController::class, 'index'])->name('guide.index');
+    Route::get('/guias/{slug}', [GuideController::class, 'show'])->name('guide.show');
+
+    // Mapa de mercado — panel admin (skill estudio-mercado)
+    Route::get('/mercado/admin', [MercadoController::class, 'admin'])->name('mercado.admin');
+    Route::get('/mercado/admin/leads', [MercadoController::class, 'leads'])->name('mercado.admin.leads');
+    Route::get('/mercado/admin/reportes', [MercadoController::class, 'reportes'])->name('mercado.admin.reportes');
+    Route::patch('/mercado/admin/{marketModel}', [MercadoController::class, 'update'])
+        ->where('marketModel', '[0-9]+')
+        ->name('mercado.admin.update');
+    Route::patch('/mercado/admin/leads/{marketLead}', [MercadoController::class, 'updateLead'])
+        ->where('marketLead', '[0-9]+')
+        ->name('mercado.admin.lead.update');
 
     // Onboarding wizard (redirige a dashboard si ya está completado)
     Route::get('/onboarding', [OnboardingController::class, 'index'])
@@ -182,6 +219,11 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::patch('/cars/{car}', [CarController::class, 'update'])
         ->where('car', '[0-9]+')
         ->name('cars.update');
+    // Toggle rápido de publicación en el marketplace desde la ficha (§25-sep-2026).
+    // Separado de `cars.update` para no redirigir a cars.index desde la ficha.
+    Route::patch('/cars/{car}/marketplace', [CarController::class, 'toggleMarketplace'])
+        ->where('car', '[0-9]+')
+        ->name('cars.toggle-marketplace');
     Route::delete('/cars/{car}', [CarController::class, 'destroy'])
         ->where('car', '[0-9]+')
         ->name('cars.destroy');
@@ -191,6 +233,11 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
         ->where('car', '[0-9]+')
         ->where('carRequest', '[0-9]+')
         ->name('cars.match-request');
+
+    // Crear solicitud para este coche (boca a boca / manual): la solicitud crea el cliente
+    Route::post('/cars/{car}/create-request', [CarController::class, 'createRequest'])
+        ->where('car', '[0-9]+')
+        ->name('cars.create-request');
 
     // Car Photos
     Route::post('/cars/{car}/photos', [CarPhotoController::class, 'store'])->name('cars.photos.store');
@@ -220,12 +267,37 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::post('/cars/{car}/marketing/publish', [CarMarketingController::class, 'publish'])->name('cars.marketing.publish');
 
     // Paquete de valoración (esqueletos .txt → PDF con Blade + Browsershot)
-    // Ficha del cliente: cuelga del expediente (autenticado).
+    // Ficha del cliente: vista HTML con iframe embebido (SIEMPRE inline).
     Route::get('/cars/{car}/ficha', [PaqueteValoracionController::class, 'ficha'])->name('cars.ficha');
-    // Folleto del coche: versión visual/compacta para venta.
-    Route::get('/cars/{car}/folleto', [PaqueteValoracionController::class, 'folleto'])->name('cars.folleto');
     // Informe interno: SOLO equipo, nunca expuesto al cliente.
     Route::get('/cars/{car}/informe-interno', [PaqueteValoracionController::class, 'interno'])->name('cars.informe-interno');
+    // PDF binario (lo que carga el iframe).
+    Route::get('/cars/{car}/ficha/raw', [PaqueteValoracionController::class, 'fichaRaw'])->name('cars.ficha.raw');
+    Route::get('/cars/{car}/informe-interno/raw', [PaqueteValoracionController::class, 'internoRaw'])->name('cars.informe-interno.raw');
+
+    // Compartir/revocar el seguimiento público con el cliente.
+    Route::post('/cars/{car}/share-tracking', [CarSharingController::class, 'share'])
+        ->where('car', '[0-9]+')
+        ->name('cars.share-tracking');
+    Route::delete('/cars/{car}/tracking', [CarSharingController::class, 'revoke'])
+        ->where('car', '[0-9]+')
+        ->name('cars.revoke-tracking');
+
+    // Link público del dossier del coche (ficha + folleto en HTML) sin login.
+    Route::post('/cars/{car}/public-link', [CarSharingController::class, 'createPublicLink'])
+        ->where('car', '[0-9]+')
+        ->name('cars.create-public-link');
+    Route::delete('/cars/{car}/public-link/{link}', [CarSharingController::class, 'revokePublicLink'])
+        ->where(['car' => '[0-9]+', 'link' => '[0-9]+'])
+        ->name('cars.revoke-public-link');
+    Route::post('/cars/{car}/tracking/regenerate', [CarSharingController::class, 'regenerate'])
+        ->where('car', '[0-9]+')
+        ->name('cars.regenerate-tracking');
+
+    // Generar contrato para que el cliente lo firme.
+    Route::post('/cars/{car}/contract', [CarSharingController::class, 'createContract'])
+        ->where('car', '[0-9]+')
+        ->name('cars.contract.create');
 
     // Marketing overview
     Route::get('/marketing', [MarketingController::class, 'index'])->name('marketing.index');
@@ -272,7 +344,9 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
 
     // AI generic chat
     Route::get('/ai/chat', [AiChatController::class, 'index'])->name('ai.chat');
-    Route::post('/ai/chat', [AiChatController::class, 'send'])->name('ai.chat.send');
+    Route::post('/ai/chat', [AiChatController::class, 'send'])
+        ->middleware('throttle:api-heavy')
+        ->name('ai.chat.send');
 
     // Alerts — específicas primero para no ser interceptadas por {alert}
     Route::get('/alerts', [AlertController::class, 'index'])->name('alerts.index');
@@ -324,8 +398,34 @@ Route::middleware(['auth', 'verified'])->group(function () {
 // JJ Import Motors folleto PDF
 Route::get('/jj-import/folleto', [JJImportFolletoController::class, 'download'])->name('jj-import.folleto');
 
+// Tracking público del proceso de importación (sin auth).
+Route::get('/tracking/{token}', [PublicTrackingController::class, 'show'])
+    ->where('token', '[A-Za-z0-9_-]{20,80}')
+    ->name('public.tracking.show');
+
+// Contrato público de prestación de servicios (sin auth).
+Route::prefix('contrato/{token}')->where(['token' => '[A-Za-z0-9_-]{20,80}'])->name('public.contract.')->group(function () {
+    Route::get('/', [PublicContractController::class, 'show'])->name('show');
+    Route::post('/aceptar', [PublicContractController::class, 'accept'])->name('accept');
+    Route::get('/pdf', [PublicContractController::class, 'pdf'])->name('pdf');
+});
+
 // Marketplace item 12: newsletter public (sin auth, con rate limit)
 Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
 Route::delete('/newsletter/unsubscribe', [NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
+
+// Dossier público del coche (sin auth, con token): informe completo en HTML
+// para compartir con el cliente por WhatsApp.
+Route::get('/c/{token}', [PublicCarController::class, 'show'])
+    ->where('token', '[A-Za-z0-9_-]{20,80}')
+    ->name('public.car.show');
+
+// Fotos del dossier público. Se sirven por ruta (no por /storage/...) para no
+// depender del symlink public/storage: si falta, el enlace del cliente se queda
+// sin fotos y sin previsualización en WhatsApp.
+Route::get('/c/{token}/foto/{indice}', [PublicCarController::class, 'foto'])
+    ->where('token', '[A-Za-z0-9_-]{20,80}')
+    ->where('indice', '[0-9]{1,3}')
+    ->name('public.car.photo');
 
 require __DIR__.'/auth.php';

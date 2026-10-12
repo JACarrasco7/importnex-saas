@@ -110,14 +110,14 @@ class CarDocumentTest extends TestCase
         $car1 = Car::factory()->create(['organization_id' => $org1->id]);
         $car2 = Car::factory()->create(['organization_id' => $org2->id]);
 
-        // Las 17 filas del expediente se crean automáticamente al crear el coche.
+        // Las 19 filas del expediente se crean automáticamente al crear el coche.
         // Sólo añadimos un doc extra a cada coche para verificar el aislamiento.
         CarDocument::factory()->create(['car_id' => $car1->id, 'organization_id' => $org1->id]);
         CarDocument::factory()->create(['car_id' => $car2->id, 'organization_id' => $org2->id]);
 
-        // Cada coche tiene sus 17 + 1 = 18 docs propios, ninguno del otro.
-        $this->assertEquals(18, $car1->documents()->count());
-        $this->assertEquals(18, $car2->documents()->count());
+        // Cada coche tiene sus 19 + 1 = 20 docs propios, ninguno del otro.
+        $this->assertEquals(20, $car1->documents()->count());
+        $this->assertEquals(20, $car2->documents()->count());
 
         // El aislamiento se verifica también: ningún doc del org2 aparece en car1.
         $this->assertEquals(0, $car1->documents()->where('organization_id', $org2->id)->count());

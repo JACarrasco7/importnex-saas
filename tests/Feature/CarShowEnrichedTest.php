@@ -23,7 +23,7 @@ class CarShowEnrichedTest extends TestCase
             'model' => 'Astra',
             'research' => [
                 'common_issues' => ['finding' => 'Turbo wear', 'source' => 'https://forum.example', 'rating' => 'unfavorable', 'date' => '2026-07-29'],
-                'recalls'       => ['finding' => 'No recalls', 'source' => 'https://dgt.example', 'rating' => 'favorable', 'date' => '2026-07-29'],
+                'recalls' => ['finding' => 'No recalls', 'source' => 'https://dgt.example', 'rating' => 'favorable', 'date' => '2026-07-29'],
             ],
             'pros' => [
                 ['text' => 'Low mileage', 'weight' => 'high'],
@@ -114,12 +114,13 @@ class CarShowEnrichedTest extends TestCase
         $response->assertStatus(200);
 
         $page = $this->getInertiaProps($response);
-        $this->assertCount(3, $page['derived']['documents_by_group']);
+        $this->assertCount(4, $page['derived']['documents_by_group']);
     }
 
     private function getInertiaProps($response): array
     {
         $response->assertViewHas('page');
+
         return json_decode(json_encode($response->viewData('page')), true)['props'];
     }
 }

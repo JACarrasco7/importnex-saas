@@ -11,7 +11,12 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('guest')->group(function () {
+// Auditoria 2026-09-06 (C1): el rate limiter 'auth' (6/min por IP) ya
+// estaba definido en AppServiceProvider pero solo se aplicaba a verify-email.
+// login/register/forgot/reset estaban SIN throttle explicito — un atacante
+// podia intentar miles de passwords/seg. Anadido throttle:auth a todos los
+// POST sensibles de auth.
+Route::middleware(['guest', 'throttle:auth'])->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])
         ->name('register');
 
@@ -20,18 +25,21 @@ Route::middleware('guest')->group(function () {
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
         ->name('login');
 
-    Route::post('login', [AuthenticatedSessionController::class, 'store']);
+    Route::post('login', [AuthenticatedSessionController::class, 'store'])
+        ->middleware('throttle:auth');
 
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
         ->name('password.request');
 
     Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
+        ->middleware('throttle:auth')
         ->name('password.email');
 
     Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])
         ->name('password.reset');
 
     Route::post('reset-password', [NewPasswordController::class, 'store'])
+        ->middleware('throttle:auth')
         ->name('password.store');
 });
 

@@ -5,7 +5,7 @@
 
 ---
 
-## 🛡️ Los 16 anti-patrones
+## 🛡️ Los 32 anti-patrones
 
 | # | Anti-patrón | Regla dura |
 |---|---|---|
@@ -25,10 +25,94 @@
 | **A14** | Abandonar el camino en silencio | "El flujo es un camino numerado con waypoint 📍 en cada mensaje. Una pregunta lateral del usuario es una misión lateral: se responde y se RETOMA el paso (↩⃾ Vuelvo al paso N). Si tras una desviación el entregable de la fase no llegó, es un fallo. Un cambio de destino real se declara (🔀 Cambio de camino)." |
 | **A15** | Sondeo D1 con búsqueda web | "El sondeo de modelos del Flujo D se hace SIEMPRE con navegación real a Coches.net + mobile.de con los filtros del encargo. La búsqueda web (snippets/agregadores) NO es método de sondeo: da cifras inconsistentes que contradicen la navegación real (caso 15-ago: Focus ES '~9.900 €' cuando la navegación real daba 3.000-6.990 €; 308 DE '10.980-12.600 €' sin confirmar). Degradado solo con portal bloqueado + reintentos (A2/A7)." |
 | **A16** | Selección manual de modelos en D1 | "El sondeo es por FILTROS, no por modelo: una pasada con los filtros del encargo devuelve TODOS los modelos que caben. Prohibido elegir 3-4 a mano y dejar 'otros por explorar' sin sondear. Listar TODOS los que salen. La potencia es mínimo (≥Xcv) → versiones 125/130/150 valen igual; nunca sondear solo la variante tope." |
+| **A17** | Abrir fichas en comparativas/listados | "Listado-first (17-ago-2026): en comparativas / Flujo C / Flujo E, trabajar con LISTADOS por defecto; abrir ficha de anuncio solo 2-3 unidades como ejemplo (las de mejor precio relativo, confirmado con el usuario). Prohibido perseguir el permalink de cada unidad — quema peticiones sin aportar. Aprovechar los sellos de precio visibles EN el listado (Coches.net: 'Buen precio'=4 / 'Precio justo'=3 · mobile.de/AS24: 'Sehr guter/Guter/Fairer Preis') para elegir las mejores muestras y entender el mercado sin abrir fichas. El detalle individual es de Flujo A/B, cuando el embudo es pequeño." |
+| **A18** | Equipamiento inventado | "Solo publicar equipamiento VERIFICADO en la ficha real del anuncio; lo que viene del slug/título se marca 'por confirmar'. PROHIBIDO inventar equipamiento, sobre todo anacrónico (caso real 17-ago: MINI Cooper 2011 con 'Apple CarPlay', que no existía de fábrica en 2011). Contenido falso en publicaciones públicas = riesgo legal." |
+| **A19** | Acotarse a los ejemplos del usuario | "Los modelos que el usuario nombra como ejemplo de una categoría NO limitan la búsqueda. Explorar TODO el segmento y añadir modelos no nombrados. NUNCA limitarse a los 5-6 ejemplos dados (caso real 17-ago: showstoppers se quedó en los 7 ejemplos, sin añadir i30N, Megane RS, etc.)." |
+| **A20** | Mezclar búsqueda con marketing | "Buscar coches = informe de búsqueda con datos de mercado (nº anuncios, mediana, hueco). Generar anuncios/copy IG-FB/fichas de publicación SOLO si el usuario lo pide explícitamente DESPUÉS. NUNCA inventar el formato de publicación si el usuario solo pidió localizar coches (caso real 17-ago: se entregó un .docx lleno de copy IG/FB cuando el usuario solo quería buscar coches)." |
+| **A21** | Entregar sin enlaces (anuncio + fuentes) | "TODO lo que se entregue lleva el enlace directo al anuncio (ficha del vehículo) y las fuentes con su URL. Candidatos, comparables, comparativas, informes, dossier, JSON y ZIP. Un dato sin su enlace NO se entrega como concluido. Es la regla que el usuario más repite: sin enlaces la entrega NO vale." |
+| **A22** | Filtrar datos internos al folleto/cliente | "El folleto del coche (y cualquier documento del cliente: ficha, dossier) SOLO lleva texto de venta presentable. PROHIBIDO margen, honorarios, negociación con el vendedor, estrategia de venta, `verdict_reasoning`, `recommendation` — son internos (informe interno) y nunca van al folleto. Claude decide el contenido del esqueleto (`[VALORACION]`, `[ARGUMENTO]`, `[EQUIPAMIENTO]`) pensando en el cliente; Laravel solo maqueta lo que Claude escribe." |
+| **A31** | ZIP del coche guardado en `C:\Users\jacar\Downloads\` | "El ZIP final de un Flujo A NUNCA debe quedar en `Downloads\` ni en `Desktop\`. La ruta preferida es `--laravel-storage` que guarda en `<repo>/storage/app/private/investigaciones/<marca>/<modelo>/<coche>-<fecha>.zip` (es del proyecto y queda versionable). Otras rutas válidas: `--auto-path` (Desktop/JJImportMotors/investigaciones/) o `--out <ruta>` (custom). **Nunca** dejar que el navegador baje el ZIP a Downloads: el ZIP queda ahí muerto y el siguiente paso (subirlo a Laravel) requiere copiarlo a mano. Caso real 09-sep-2026: `vw-arteon-r-sb-2023-447819922.zip` acabó en Downloads por usar el navegador; el fix fue añadir `--laravel-storage` a `empaquetar.py`." |
+| **A23** | ZIP sin fotos reales validadas o sin marketing (entrega inválida) | "El ZIP de Laravel (Flujo A) SIN fotos reales del anuncio o SIN los esqueletos `contenido/redes-sociales.txt` + `contenido/anuncio-portales.txt` es una **entrega INVÁLIDA** y NO se sube. La única vía válida es `scripts/empaquetar.py` (NUNCA armar ZIP a mano). Validación de fotos: HTTP 200 + `Content-Type: image/*` + >1 KB + dedup por hash. Una foto que falla genera warning y se continúa; NUNCA se sustituye por captura de pantalla. Marketing obligatorio: con `empaquetar.py` se generan SIEMPRE ambos `.txt` y se crean hasta 6 filas en `car_marketing_contents` (2 redes + 4 portales; el ingestor aplica guardas anti-fila-fantasma si un bloque viene vacío)." |
+| **A24** | Superlativos y ganchos vacíos en copy | "En `redes-sociales.txt` / `anuncio-portales.txt` PROHIBIDO empezar el gancho con: ¡Brutal!, ¡Increíble!, ¡Espectacular!, ¡No te lo pierdas!, Chollo, Oportunidad única, Última oportunidad, Una vez en la vida, Date prisa, Última unidad, joya, maquina, bomba, pepinazo. Bajan la calidad percibida y filtran al público equivocado. El gancho de JJ Import Motors **informa**, no emociona artificialmente. La biblioteca de ángulos `07-marketing/biblioteca_ganchos.md` ofrece 8 alternativas (rareza, ahorro vs mercado, edición especial, mecánica robusta, baja importación, recién revisado, etiqueta ambiental favorable, km verificado)." |
+| **A25** | Emoji decorativo en copy | "PROHIBIDO en copy público: 🔥💥🚀😍🤩✨💯🙌👏 excepto 🔥 (1 vez por pieza, solo en gancho de showstopper). La regla A26 ya prohíbe iconos en portales y FB Marketplace; aquí se aplica a todos los canales. Pictogramas informativos (`🗓️`, `🛣️`, `⚙️`, `⛽`, `🐎`, `🏷️`, `👤`, `🔧`, `📄`, `📍`, `📦`, `💶`, `✅`, `⚠️`, `🇩🇪`, `🇪🇸`) son los únicos admitidos y solo al inicio de línea." |
+| **A26** | Aviso legal incompleto en portales | "Toda pieza de portal (`[PT_*]`) lleva bloque `[PT_AVISO]` con: identidad del empresario (nombre, NIF, dirección, email, teléfono), 'el vehículo NO es propiedad del establecimiento', 'Precio total cliente: <X> € (impuestos incluidos)', 'No incluye: <lista>', 'Fecha de primera matriculación: MM/AAAA', y referencia a la garantía legal aplicable. Coches.net rechaza el anuncio si faltan estos elementos. Adicionalmente: sin enlaces externos, sin teléfono, sin email en bloques distintos del `[PT_AVISO]`, y sin iconos en `[PT_*]` (excepto ⚠️ y ✅ en `[PT_ESTADO]`)." |
+| **A27** | Sin fecha de primera matriculación en portales | "Era un requisito del RDL 1/2007 (art. 20) y de la Ley 11/2022. Sin fecha de 1ª matriculación el anuncio es inválido en Coches.net / Milanuncios / Wallapop. Formato `MM/AAAA` o `AAAA-MM`. La fecha debe ir en `[PT_FICHA]` y en `[PT_AVISO]` (vigente desde la modificación de la LGDCU por Ley 11/2022)." |
+| **A28** | Pega honesta ausente | "Toda pieza larga (IG feed, FB, FBMP, PT) lleva **obligatoriamente** un punto flojo real con su solución: `⚠️ <hecho>: <solución>`. Si la unidad no tiene pega real, se sustituye por 'se ha revisado qué para poder afirmarlo' (ej: `✅ ITV pasada, 0 defectos en inspección de 150 puntos`). Sin pega = pieza inválida. Sin excepción." |
+| **A29** | Icono ⚠️ sin pega | "El pictograma ⚠️ SOLO aparece acompañando una pega real. Si va suelto, el validador `scripts/check_marketing.py` lo detecta como `C15-icono-alerta-sin-pega` (severidad 🟠). Regla simétrica a A28." |
+| **A30** | "Garantía" sin detalle | "La palabra 'garantía' SOLO se usa si se dice cuál, quién la da y cuánto dura. La garantía legal de un VO (RDL 1/2007 modificado por Ley 11/2022) es de 3 años reducible por pacto a 1 año mínimo. JJ Import Motors NO concede garantía propia: la del vehículo la cubre el vendedor original. La pieza debe decir: 'Garantía: <cuál>. <Quién la concede>. <Cuánto dura>.' o no decir nada." |
+| **A22b** | Tratar el enlace del cliente como si fuera privado | "El enlace `/c/<token>` **es público**: se reenvía por WhatsApp, no caduca y no pide contraseña. Aplica la MISMA lista de prohibiciones que un anuncio de portal. Fugas reales detectadas en producción (07-sep-2026, ficha de un Clase A): «hueco de 8.969 € (26,4 %) antes de costes», «solo 11 unidades en toda España», «vendedor profesional 4.5★», «vendibilidad alta (84/100)», «ahorro estimado 4.214 €» y el veredicto interno «Excelente compra». Nada de eso vuelve a salir. En el panel lo corta `App\Support\FiltroPublico`; en la skill, `scripts/check_ficha_cliente.py`."
+| **A32** | Presentarnos como vendedor o insinuar garantía | "**JJ Import Motors NO vende coches y NO da garantía** (supera a A30, que solo pedía detallarla). Prestamos el servicio de gestión de búsqueda, verificación e importación con honorarios acordados; la compraventa es entre el vendedor y el cliente, y el coche se matricula a nombre del cliente. PROHIBIDO en cualquier texto público o de cliente: «vendemos», «se vende», «nuestro coche», «nuestro stock», «concesionario», «garantizamos», «con garantía», «te aseguramos», «respondemos del vehículo», «IVA incluido», «precio final», «llave en mano». La palabra garantía solo aparece para **negarla** o atribuirla al vendedor o a un tercero contratable aparte. Toda ficha de cliente lleva el bloque fijo `[FC_NO_GARANTIA]` (ver `../07-marketing/ficha_cliente.md` §4). Base: `.ai/rules/business-model.md` del panel."
+| **A33** | Informe sin las URLs de búsqueda de cada medición | "Cada modelo-versión del informe lleva justo debajo su bloque de fuentes: URL 🇩🇪 mobile.de + URL 🇪🇸 Coches.net, con los parámetros escritos al lado (marca=ID, modelo=ID, año, km, potencia, carrocería). El usuario tiene que poder **repetir cada medición él mismo** y ver de dónde sale cada dato. Se generan con `scripts/fuentes.py`, NUNCA a mano. Sin bloque de fuentes el informe NO se entrega."
+
+---
 
 ---
 
 ## 🔍 Detalle de cada uno
+
+### A21 — Entregar sin enlaces (anuncio + fuentes) (17-ago-2026)
+
+**Error típico:** Claude entrega tablas de candidatos con precio/año/km pero sin las URLs de los anuncios, o informes sin la lista de fuentes consultadas con sus enlaces. El usuario no puede verificar nada y tiene que buscar cada coche a mano.
+
+### A33 — Fuentes re-ejecutables por modelo (15-sep-2026)
+
+**Error típico:** el informe dice "Golf R Variant: 30 ofertas en DE, suelo 16.299 €" pero no enseña la URL con la que se midió. El usuario no puede comprobar de dónde sale el número ni repetir la búsqueda, así que tiene que fiarse. Caso real 15-sep-2026: pidió "un plan de búsqueda por marca" para las SUVs deportivas (RSQ3, Tiguan R y rivales) y recibió tablas sin los enlaces de cada medición.
+
+Guardar la query en `datos_mercado.json` es solo la mitad (eso ya lo pedía la regla dura de `query_reejecutable`): el enlace tiene que estar **a la vista en el informe**.
+
+**Regla:**
+1. **Cada modelo-versión** del informe (plan de búsqueda, informe MODELO, informe de mercado) lleva debajo de su título el bloque de fuentes: URL 🇩🇪 mobile.de + URL 🇪🇸 Coches.net, cada una con los **parámetros escritos al lado** — marca=ID, modelo=ID, carrocería, año, km, potencia en kW **y** en cv, y el orden (precio ascendente).
+2. Las URLs las genera `scripts/fuentes.py` (`--spec` por modelo, `--seccion` para el encabezado). **Nunca a mano:** los IDs de portal no se inventan (ver `references/mobile-de-ids.json`).
+3. Si el modelo no está en el catálogo, el script avisa y explica el plan B (`q=` en mobile.de, `Versions[0]` en coches.net) → ese aviso se copia en la **nota metodológica** del informe, no se esconde.
+4. La URL tiene que ser **la medición real**: los MISMOS filtros del conteo (año, km, potencia). Una URL sin `ml` / `MinYear` / `MaxKms` enseña más oferta que la medida y es peor que no ponerla.
+5. **Bloqueante:** sin bloque de fuentes el informe no se entrega; el checklist de cierre lo bloquea.
+
+**Verificación rápida:** abrir las 2 URLs y comprobar que el `<h1>` del portal nombra el modelo correcto y que el conteo cuadra con el del informe.
+
+### A22 — Filtrar datos internos al folleto/cliente (18-ago-2026)
+
+**Error típico:** el folleto del coche mostraba el `verdict_reasoning` y la `recommendation` de la verificación IA, que contienen lenguaje interno de negocio ("margen de reventa", "Cierra rápido", "Negocia el transporte"). El folleto es un documento de venta al cliente: esos datos son del informe interno y NUNCA se exponen.
+
+**Regla:**
+1. El folleto se genera desde `ficha-publicitaria.txt`. Claude escribe el contenido (bloques `[VALORACION]`, `[ARGUMENTO]`, `[EQUIPAMIENTO]`, `[SPEC]`) como texto de venta presentable.
+2. Prohibido en el folleto/cliente: margen, honorarios, negociación, estrategia de venta, comparables internos, `verdict_reasoning`, `recommendation`.
+3. Laravel solo maqueta (Blade + Browsershot): no decide contenido, muestra lo que Claude escribió.
+4. Los únicos PDFs que genera Claude son los informes de investigación (búsqueda + unidad), para el equipo.
+
+### A23 — ZIP sin fotos reales validadas o sin marketing (entrega inválida) (03-sep-2026)
+
+**Error típico:** Claude arma el ZIP "a mano" (con `zip`/`7z`/Explorador de Windows) tras escribir el JSON y se olvida de las fotos o de los esqueletos de marketing. El ZIP se sube a Laravel sin fotos, sin `redes-sociales.txt` o sin `anuncio-portales.txt` y el módulo de marketing del panel queda vacío. Fallo real 03-sep-2026: varios encargos sin marketing al importar.
+
+**Regla:**
+1. **Vía única de armado:** SIEMPRE `python scripts/empaquetar.py export/flujo-a-<coche_id>.json`. NUNCA armar el ZIP a mano.
+2. **FOTOS obligatorias (mínimo 3):** descargadas desde `vehiculo.fotos[]` con UA navegador + `Referer` del anuncio. Validación: HTTP 200 + `Content-Type: image/*` + >1 KB + dedup por hash. Si una falla: warning y se continúa; NUNCA se sustituye por captura de pantalla.
+3. **MARKETING obligatorio SIEMPRE:** el script genera `contenido/redes-sociales.txt` (bloques GANCHO/POST_LARGO/POST_CORTO/STORIES/HASHTAGS/PIE_FOTO) y `contenido/anuncio-portales.txt` (TITULO/DESCRIPCION/FICHA_RAPIDA/QUE_INCLUYE/AVISO_LEGAL). El ingestor Laravel los parsea con `App\Support\Esqueleto` y crea hasta 6 filas en `car_marketing_contents` (instagram + tiktok + 4 portales) con `status=draft`.
+4. **Guardas anti-fila-fantasma del ingestor** (en `ValuationPackageIngestor::attachMarketing`): una fila SOLO se crea si el bloque clave trae contenido real:
+   - Instagram: `[GANCHO]` no vacío.
+   - TikTok: `[GANCHO]` no vacío Y (`[STORIES]` o `[POST_CORTO]`) no vacío.
+   - 4 portales: `[TITULO]` Y `[DESCRIPCION]` no vacíos (si falta uno, no se crea ninguno de los 4 para mantener coherencia entre canales del mismo anuncio).
+5. **Veredicto Comprar\* → dossier:** si el veredicto es `Comprar` o `Comprar si baja`, también se genera `contenido/dossier-cliente.txt` (15 secciones, ver `dossier_cliente.md`).
+6. **Modo `--strict` aborta** si 0 fotos válidas, dossier faltante o marketing incompleto. Modo normal: avisa pero genera el ZIP.
+7. **Reimport = siempre a `draft`:** si una fila estaba en `status=published` y se reimporta el ZIP, el ingestor la devuelve a `draft` (el operador debe revisar antes de republicar). Esto es intencional y testeado.
+
+**Casos reales:**
+- ❌ ZIP sin `fotos/` → Laravel crea el coche pero la galería queda vacía.
+- ❌ ZIP sin `contenido/redes-sociales.txt` → el módulo de marketing no muestra contenido para Instagram/TikTok.
+- ❌ ZIP armado a mano con `7z a coche.zip contenido/` → olvida el manifest, el ingestor cae a v1 y solo procesa `documentos/*.pdf` (carpeta vacía).
+- ✅ `python empaquetar.py export/flujo-a-bmw-320d.json` → genera `paquetes/bmw-320d.zip` con todo OK.
+
+**Regla (la que el usuario más repite — NUNCA saltarla):**
+1. **Cada candidato/comparable lleva SIEMPRE su enlace directo al anuncio** (ficha del vehículo, no búsqueda/filtro — A6). En tablas, en comparativas, en informes, en dossier, en JSON (`mercado.comparables[].url`) y en ZIP.
+2. **Cada informe incluye la sección "Fuentes consultadas"** con todas las fuentes del flujo, su estado (OK / 0 resultados / bloqueada+intentos) y su enlace cuando aplique.
+3. **Un dato/cifra/afirmación sin su enlace NO se entrega como concluido**: se declara cómo se obtuvo o se pide permiso para omitirlo.
+4. **Al cerrar cualquier entrega, re-verificar con lupa**: si cualquier candidato, comparable o fuente carece de enlace, el trabajo está incompleto y hay que completarlo antes de entregar.
+
+**Casos reales:**
+- ❌ Tabla de top 5 sin columna de enlaces → el usuario no puede abrir los anuncios.
+- ❌ Informe de unidad sin "Fuentes consultadas" → no se sabe qué se miró y qué no.
+- ✅ Todo candidato con su ficha (`mobile.de/fahrzeuge/details.html?id=<id>`, slug Coches.net, `/app/item/<id>` Wallapop) + lista de fuentes al final.
+
+---
 
 ### A1 — Descartar por silencio
 
@@ -142,8 +226,16 @@ Antes de cerrar cualquier informe, verificar:
 - [ ] ¿Veredicto contra cuartil bajo también? (A4)
 - [ ] ¿Informe Flujo A tiene precio máximo? (A5)
 - [ ] ¿Todas las tablas tienen columna ENLACE? (A6)
+- [ ] **¿TODO lo entregado lleva enlace al anuncio + fuentes con URL? (A21)**
+- [ ] **¿Cada modelo-versión lleva sus URLs de búsqueda (DE+ES) con los parámetros al lado? (A33)**
 - [ ] ¿Sondeo D1 con navegación real, no búsqueda web? (A15)
 - [ ] ¿Informe D2 lista TODOS los modelos del filtro, sin "otros por explorar"? (A16)
+- [ ] ¿En Flujo C/E trabajé con listados, no abriendo fichas de cada unidad? (A17)
+- [ ] ¿El equipamiento publicado está VERIFICADO en la ficha, no inventado? (A18)
+- [ ] ¿Exploré TODO el segmento, no solo los ejemplos del usuario? (A19)
+- [ ] ¿No mezclé búsqueda con marketing (copy IG/FB)? (A20)
+- [ ] **¿El ZIP de Laravel trae fotos reales (≥3) + `contenido/redes-sociales.txt` + `contenido/anuncio-portales.txt`? (A23)**
+- [ ] **¿El ZIP se generó con `python scripts/empaquetar.py` y no a mano? (A23)**
 
 ---
 
@@ -160,3 +252,14 @@ Antes de cerrar cualquier informe, verificar:
 | A13 (ext) | Usar rango más restrictivo que el aprobado (2016+ tras aprobar 2012+) | 15-ago-2026 |
 | A15 | Sondeo D1 con búsqueda web — datos inconsistentes vs navegación real | 15-ago-2026 |
 | A16 | Selección manual de modelos en D1 ("otros por explorar") | 15-ago-2026 |
+| A17 | Abrir fichas en comparativas/listados (stock: permalink de cada unidad) | 17-ago-2026 |
+| A18 | Equipamiento inventado/anacrónico (MINI 2011 con "Apple CarPlay") | 17-ago-2026 |
+| A19 | Acotarse a los ejemplos del usuario (no explorar el segmento completo) | 17-ago-2026 |
+| A20 | Mezclar búsqueda con marketing (entregar copy IG/FB sin que lo pidan) | 17-ago-2026 |
+| A21 | Entregar sin enlaces de anuncio/fuentes (la regla que el usuario más repite) | 17-ago-2026 |
+| A22 | Filtrar datos internos al folleto (margen, honorarios, veredicto) | 18-ago-2026 |
+| A23 | ZIP sin fotos reales o sin marketing (entrega inválida) | 03-sep-2026 |
+| A22b | El enlace del cliente es público: fugas reales detectadas en la ficha en producción | 07-sep-2026 |
+| A31 | ZIP nunca en `Downloads\` ni en `Desktop\` (usar `--laravel-storage`) | 09-sep-2026 |
+| A32 | Gestor, no vendedor: nunca vendemos ni damos garantía (instrucción directa del usuario) | 07-sep-2026 |
+| A33 | Informe sin las URLs de búsqueda por modelo ("plan de búsqueda por marca" de las SUVs deportivas: pidió los enlaces de cada fuente) | 15-sep-2026 |

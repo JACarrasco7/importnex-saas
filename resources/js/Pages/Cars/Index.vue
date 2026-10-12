@@ -1,12 +1,13 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { MagnifyingGlassIcon, PlusIcon, Squares2X2Icon, PencilIcon, EyeIcon, TrashIcon, SparklesIcon } from '@heroicons/vue/24/outline';
+import { MagnifyingGlassIcon, PlusIcon, Squares2X2Icon, PencilIcon, EyeIcon, TrashIcon, SparklesIcon, XMarkIcon } from '@heroicons/vue/24/outline';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Badge from '@/Components/Badge.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import EmptyState from '@/Components/EmptyState.vue';
 import ConfirmDialog from '@/Components/ConfirmDialog.vue';
+import Pagination from '@/Components/Pagination.vue';
 import { useFormat } from '@/Composables/useFormat';
 import { useTranslations } from '@/Composables/useTranslations';
 
@@ -14,14 +15,33 @@ const props = defineProps({
     cars: Object,
     statuses: Array,
     lights: Array,
+    statusCounts: Object,
+    lightCounts: Object,
+    totalInventoryValue: Number,
+    sort: String,
+    sortOptions: Array,
     filters: Object,
 });
 
 const search = ref(props.filters?.search || '');
 const lightFilter = ref(props.filters?.traffic_light || '');
 const currentTab = ref(props.filters?.status || 'all');
+const sort = ref(props.sort || 'recent');
 const showDelete = ref(false);
 const carToDelete = ref(null);
+
+// Devuelve true si hay algún filtro/orden activo, para mostrar el botón Reset.
+const hasActiveFilters = computed(() =>
+    Boolean(search.value || lightFilter.value || (currentTab.value && currentTab.value !== 'all') || (sort.value && sort.value !== 'recent'))
+);
+
+const resetFilters = () => {
+    search.value = '';
+    lightFilter.value = '';
+    currentTab.value = 'all';
+    sort.value = 'recent';
+    router.get(route('cars.index'), { page: 1 }, { preserveState: false, preserveScroll: true });
+};
 
 const { currency, statusLabel, statusVariant, trafficLightVariant } = useFormat();
 const { t } = useTranslations();
@@ -36,44 +56,30 @@ const tabs = computed(() => {
         ...ordered.map(status => ({
             id: status,
             label: t(`cars.status.${status}`),
-            count: props.cars?.data?.filter(c => c.status === status).length || 0
+            count: props.statusCounts?.[status] || 0
         })),
         ...remaining.map(status => ({
             id: status,
             label: t(`cars.status.${status}`),
-            count: props.cars?.data?.filter(c => c.status === status).length || 0
+            count: props.statusCounts?.[status] || 0
         }))
     ];
 });
 
-const stats = computed(() => {
-    const cars = props.cars?.data || [];
-    return {
-        green: cars.filter(c => c.traffic_light === 'green').length,
-        amber: cars.filter(c => c.traffic_light === 'amber').length,
-        red: cars.filter(c => c.traffic_light === 'red').length,
-        totalValue: cars.reduce((sum, c) => sum + (Number(c.purchase_price) || 0), 0),
-    };
-});
+// Stats globales del inventario (no de la página actual). Antes se
+// calculaban a partir de cars.data (15 coches) y engañaban al usuario
+// cuando había más inventario detrás.
+const stats = computed(() => ({
+    green: Number(props.lightCounts?.green || 0),
+    amber: Number(props.lightCounts?.amber || 0),
+    red: Number(props.lightCounts?.red || 0),
+    totalValue: Number(props.totalInventoryValue || 0),
+}));
 
-const filteredCars = computed(() => {
-    let result = props.cars?.data || [];
-    if (currentTab.value !== 'all') {
-        result = result.filter(c => c.status === currentTab.value);
-    }
-    if (search.value) {
-        const term = search.value.toLowerCase();
-        result = result.filter(c =>
-            (c.brand && c.brand.toLowerCase().includes(term)) ||
-            (c.model && c.model.toLowerCase().includes(term)) ||
-            (c.vin && c.vin.toLowerCase().includes(term))
-        );
-    }
-    if (lightFilter.value) {
-        result = result.filter(c => c.traffic_light === lightFilter.value);
-    }
-    return result;
-});
+// El backend ya aplica status / traffic_light / search sobre la consulta
+// paginada. Aquí sólo mostramos la página actual sin re-filtrar en cliente
+// (antes había un filtrado redundante que confundía la paginación).
+const filteredCars = computed(() => props.cars?.data || []);
 
 // Foto activa por card (carrusel). Key = car.id.
 const activePhoto = ref({});
@@ -104,7 +110,7 @@ const nextPhoto = (car) => {
 
 // Debounce 300ms para no disparar una request por tecla (auditoría M3).
 let searchTimer = null;
-watch([search, lightFilter], () => {
+watch([search, lightFilter, currentTab, sort], () => {
     clearTimeout(searchTimer);
     searchTimer = setTimeout(() => {
         router.get(
@@ -113,6 +119,8 @@ watch([search, lightFilter], () => {
             search: search.value || undefined,
             status: currentTab.value === 'all' ? undefined : currentTab.value,
             traffic_light: lightFilter.value || undefined,
+            sort: sort.value === 'recent' ? undefined : sort.value,
+            page: 1,
         },
         { preserveState: true, preserveScroll: true }
     );
@@ -166,7 +174,7 @@ const confirmDelete = () => {
 
                 <!-- Filters -->
                 <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
-                    <div class="grid grid-cols-1 gap-4 p-4 sm:grid-cols-3">
+                    <div class="grid grid-cols-1 gap-4 p-4 sm:grid-cols-4">
                         <div>
                             <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">{{ t('app.search') }}</label>
                             <div class="relative">
@@ -180,6 +188,23 @@ const confirmDelete = () => {
                                 <option value="">{{ t('common.all') }}</option>
                                 <option v-for="light in lights" :key="light" :value="light">{{ t('cars.light.' + light) }}</option>
                             </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">{{ t('app.sort') }}</label>
+                            <select v-model="sort" class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-500 focus:ring-estoril-500">
+                                <option v-for="option in sortOptions" :key="option" :value="option">{{ t('cars.sort.' + option) }}</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <button
+                                v-if="hasActiveFilters"
+                                type="button"
+                                @click="resetFilters"
+                                class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50"
+                            >
+                                <XMarkIcon class="h-4 w-4" />
+                                {{ t('common.reset_filters') }}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -224,6 +249,9 @@ const confirmDelete = () => {
                     </nav>
                 </div>
 
+                <!-- Pagination (top) -->
+                <Pagination :pagination="cars" />
+
                 <!-- Cards Grid -->
                 <div v-if="filteredCars.length > 0" class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                     <div
@@ -235,8 +263,11 @@ const confirmDelete = () => {
                         <div class="relative aspect-video overflow-hidden bg-gray-100">
                             <Link :href="route('cars.show', car.id)" class="block h-full w-full">
                                 <img v-if="photoSrc(car)" :src="photoSrc(car)" :alt="`${car.brand} ${car.model}`" class="h-full w-full object-cover transition-transform group-hover:scale-105" loading="lazy" />
-                                <div v-else class="flex h-full w-full items-center justify-center">
-                                    <span class="text-4xl">🚗</span>
+                                <div v-else class="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 text-gray-400">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="mb-1 h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                                    </svg>
+                                    <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-500">{{ car.brand }} {{ car.model }}</span>
                                 </div>
                             </Link>
                             <!-- Carousel controls -->
@@ -310,7 +341,34 @@ const confirmDelete = () => {
                     </div>
                 </div>
 
-                <EmptyState v-else icon="🚗" :title="t('cars.no_cars_found')" :description="t('cars.no_cars_found_desc')" :action-text="t('cars.add_first_car')" :action-route="route('cars.create')" />
+                <!-- Empty states: diferenciar "no hay coches" vs "no hay coincidencias con los filtros" -->
+                <div
+                    v-else-if="hasActiveFilters"
+                    class="rounded-2xl bg-white px-6 py-12 text-center shadow-sm ring-1 ring-gray-200"
+                >
+                    <div class="mx-auto mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 text-3xl">🔍</div>
+                    <h3 class="mb-1 text-lg font-semibold text-gray-900">{{ t('cars.no_matches_title') }}</h3>
+                    <p class="mx-auto mb-6 max-w-md text-sm text-gray-500">{{ t('cars.no_matches_desc') }}</p>
+                    <button
+                        type="button"
+                        @click="resetFilters"
+                        class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500"
+                    >
+                        <XMarkIcon class="h-4 w-4" />
+                        {{ t('common.reset_filters') }}
+                    </button>
+                </div>
+                <EmptyState
+                    v-else
+                    icon="🚗"
+                    :title="t('cars.no_cars_found')"
+                    :description="t('cars.no_cars_found_desc')"
+                    :action-text="t('cars.add_first_car')"
+                    :action-route="route('cars.create')"
+                />
+
+                <!-- Pagination (bottom) -->
+                <Pagination :pagination="cars" />
             </div>
         </div>
 

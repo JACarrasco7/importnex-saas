@@ -23,9 +23,9 @@ class DatabaseSeeder extends Seeder
         );
 
         User::updateOrCreate(
-            ['email' => 'carra@jjimportmotors.com'],
+            ['email' => 'jacarrasco@jjimportmotors.com'],
             [
-                'name' => 'Carra',
+                'name' => 'JACarrasco',
                 'password' => Hash::make('joselete7'),
                 'organization_id' => $jjImport->id,
                 'role' => 'owner',
@@ -34,10 +34,10 @@ class DatabaseSeeder extends Seeder
         );
 
         User::updateOrCreate(
-            ['email' => 'jmepegounpeo@jjimportmotors.com'],
+            ['email' => 'jmpo@jjimportmotors.com'],
             [
-                'name' => 'Jmepegounpeo',
-                'password' => Hash::make('paraquelaquieresabermecagoentoquelargalaputacontrasehna'),
+                'name' => 'JoseMPO',
+                'password' => Hash::make('admin1234.'),
                 'organization_id' => $jjImport->id,
                 'role' => 'owner',
                 'email_verified_at' => now(),

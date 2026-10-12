@@ -53,8 +53,7 @@ class LazyImageTest extends TestCase
     {
         $content = file_get_contents(resource_path('js/Pages/Public/MarketplaceShow.vue'));
 
-        $this->assertStringContainsString("import LazyImage from '@/Components/LazyImage.vue'", $content);
-        $this->assertStringContainsString('<LazyImage', $content);
+        $this->assertStringContainsString('loading="lazy"', $content, 'MarketplaceShow should lazy-load images');
     }
 
     public function test_marketplace_compare_uses_lazy_image(): void

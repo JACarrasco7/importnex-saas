@@ -75,6 +75,27 @@ class OpenApiTest extends TestCase
         $this->assertContains('sharedToken', array_keys($path['security'][0]));
     }
 
+    public function test_openapi_documents_dry_run_support(): void
+    {
+        // Auditoria ronda 3: el spec no puede envejecer respecto al controller.
+        $spec = $this->get('/openapi.json')->json();
+        $path = $spec['paths']['/api/import-valuation']['post'];
+
+        // Parametro ?dry=1
+        $this->assertArrayHasKey('parameters', $path);
+        $dryParam = collect($path['parameters'])->firstWhere('name', 'dry');
+        $this->assertNotNull($dryParam, 'Falta el parametro dry en el spec');
+        $this->assertSame('query', $dryParam['in']);
+
+        // Header X-Dry-Run
+        $dryHeader = collect($path['parameters'])->firstWhere('name', 'X-Dry-Run');
+        $this->assertNotNull($dryHeader, 'Falta el header X-Dry-Run en el spec');
+
+        // Respuesta 200 dry_run_ok
+        $this->assertArrayHasKey('200', $path['responses']);
+        $this->assertStringContainsString('dry_run', $path['responses']['200']['description']);
+    }
+
     public function test_openapi_car_schema_is_complete(): void
     {
         $spec = $this->get('/openapi.json')->json();

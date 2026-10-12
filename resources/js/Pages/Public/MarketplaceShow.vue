@@ -112,8 +112,8 @@ const marketPosition = computed(() => {
                     <span v-if="car.year" class="text-sm text-gray-500">{{ car.year }}</span>
                 </div>
 
-                <!-- IEDMT estimation warning -->
-                <div class="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                <!-- IEDMT estimation warning (solo si hay importación; en unidades ES no se devenga) -->
+                <div v-if="derived?.iedmt > 0" class="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
                     <ExclamationTriangleIcon class="h-5 w-5 flex-shrink-0 text-amber-600" />
                     <div class="text-sm text-amber-900">
                         <p class="font-semibold">{{ t('marketplace_show.iedmt_warning_title') }}</p>

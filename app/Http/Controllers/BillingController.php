@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -21,42 +22,67 @@ class BillingController extends Controller
         $hasStripeId = (bool) ($organization?->stripe_id);
         $stripeConfigured = $this->stripeIsConfigured();
 
-        if ($hasStripeId && $stripeConfigured) {
-            try {
-                $subscription = $organization->subscription();
-            } catch (\Throwable $e) {
-                Log::warning('Billing: subscription load failed', ['err' => $e->getMessage()]);
-            }
+        // Cache 60s del payload completo: 4 round-trips a Stripe por hit, sin
+        // cachear latency 500-800ms en cada /billing. Invalidado por el
+        // webhook de Stripe (ver StripeWebhookController) en eventos que
+        // cambian el estado: subscription.created/updated, invoice.paid,
+        // invoice.payment_failed.
+        $cacheKey = "billing.dashboard.{$organization?->id}.{$hasStripeId}";
+        $cacheTtl = 60;
 
-            try {
-                $invoices = $organization->invoices(true)->take(50)->map(fn ($invoice) => [
-                    'id' => $invoice->id,
-                    'number' => $invoice->number,
-                    'date' => $invoice->date()?->toDateTimeString(),
-                    'total' => $invoice->total(),
-                    'currency' => $invoice->currency,
-                    'status' => $invoice->paid ? 'paid' : 'open',
-                    'pdf_url' => $invoice->invoice_pdf,
-                    'hosted_url' => $invoice->hosted_invoice_url,
-                ])->values();
-            } catch (\Throwable $e) {
-                Log::warning('Billing: invoices load failed', ['err' => $e->getMessage()]);
-            }
-
-            try {
-                if ($subscription?->active()) {
-                    $upcomingInvoice = $organization->upcomingInvoice();
+        $payload = Cache::remember($cacheKey, $cacheTtl, function () use ($organization, $hasStripeId, $stripeConfigured, &$invoices, &$subscription, &$paymentMethod, &$upcomingInvoice) {
+            if ($hasStripeId && $stripeConfigured) {
+                try {
+                    $subscription = $organization->subscription();
+                } catch (\Throwable $e) {
+                    Log::warning('Billing: subscription load failed', ['err' => $e->getMessage()]);
                 }
-            } catch (\Throwable $e) {
-                $upcomingInvoice = null;
+
+                try {
+                    $invoices = $organization->invoices(true)->take(50)->map(fn ($invoice) => [
+                        'id' => $invoice->id,
+                        'number' => $invoice->number,
+                        'date' => $invoice->date()?->toDateTimeString(),
+                        'total' => $invoice->total(),
+                        'currency' => $invoice->currency,
+                        'status' => $invoice->paid ? 'paid' : 'open',
+                        'pdf_url' => $invoice->invoice_pdf,
+                        'hosted_url' => $invoice->hosted_invoice_url,
+                    ])->values();
+                } catch (\Throwable $e) {
+                    Log::warning('Billing: invoices load failed', ['err' => $e->getMessage()]);
+                }
+
+                try {
+                    if ($subscription?->active()) {
+                        $upcomingInvoice = $organization->upcomingInvoice();
+                    }
+                } catch (\Throwable $e) {
+                    $upcomingInvoice = null;
+                }
+
+                try {
+                    $paymentMethod = $organization->defaultPaymentMethod();
+                } catch (\Throwable $e) {
+                    $paymentMethod = null;
+                }
             }
 
-            try {
-                $paymentMethod = $organization->defaultPaymentMethod();
-            } catch (\Throwable $e) {
-                $paymentMethod = null;
-            }
-        }
+            return [
+                'subscription' => $subscription,
+                'invoices' => $invoices,
+                'paymentMethod' => $paymentMethod,
+                'upcomingInvoice' => $upcomingInvoice,
+            ];
+        });
+
+        // Reutilizamos las refs ya evaluadas dentro del closure (si el cache
+        // fallo: ya estan populadas; si fue hit: son null pero el payload trae
+        // los valores).
+        $subscription ??= $payload['subscription'];
+        $invoices ??= $payload['invoices'];
+        $paymentMethod ??= $payload['paymentMethod'];
+        $upcomingInvoice ??= $payload['upcomingInvoice'];
 
         $stats = [
             'total_paid' => $invoices->where('status', 'paid')->sum(fn ($i) => $i['total'] / 100),

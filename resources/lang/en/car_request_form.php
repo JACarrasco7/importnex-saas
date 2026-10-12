@@ -48,4 +48,6 @@ return [
     'submit' => 'Send request',
     'sending' => 'Sending...',
     'rights' => 'All rights reserved',
+    'fuel_help_title' => 'JJ Import Motors tip',
+    'fuel_help_body' => 'If you mainly drive around the city, petrol is more efficient and quieter. If you do long trips or many kilometres per year, diesel usually pays off.',
 ];

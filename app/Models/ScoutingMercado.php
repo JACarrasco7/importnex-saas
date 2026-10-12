@@ -23,13 +23,16 @@ class ScoutingMercado extends Model
         'organization_id',
     ];
 
-    protected $casts = [
-        'generado_el' => 'datetime',
-        'schema_version' => 'integer',
-        'modelos_escaneados' => 'integer',
-        'modelos_con_hueco' => 'integer',
-        'modelos_sin_hueco' => 'integer',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'generado_el' => 'datetime',
+            'schema_version' => 'integer',
+            'modelos_escaneados' => 'integer',
+            'modelos_con_hueco' => 'integer',
+            'modelos_sin_hueco' => 'integer',
+        ];
+    }
 
     public function modelos(): HasMany
     {

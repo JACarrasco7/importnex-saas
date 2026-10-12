@@ -214,3 +214,45 @@ curl.exe 6 rutas
 ```
 
 Si algún paso falla → NO seguir. Arreglar primero.
+
+---
+
+## 📦 Política "Archivar primero, borrar después"
+
+> **Regla añadida 2026-09-06.** Ante la duda de si algo está en uso o no:
+> **NUNCA borrar a la primera. Mover a `.ai/_archive/<fecha>-<razon>/<subcarpeta>/`**.
+
+### Procedimiento
+
+1. Identifica candidatos (controllers/models sin refs, docs obsoletos, scripts no usados).
+2. **NO uses `Remove-Item`.** Usa `Move-Item` a:
+   ```
+   .ai/_archive/YYYY-MM-DD-<razon>/<NN-categoria>/
+   ```
+3. Subcarpetas estándar:
+   - `01-controllers-huerfanos/` — controllers sin refs en `routes/`
+   - `02-models-vacios-o-sin-uso/` — modelos con 0 filas o sin uso real
+   - `03-services-sin-uso/` — services sin referencias
+   - `04-support-sin-uso/` — support/helper sin uso
+   - `05-desktop-investigaciones-obsoletas/` — JSON/ZIPs antiguos en Desktop
+4. **Verificar uso real** antes de archivar:
+   ```bash
+   # Ejemplo: ver si "GeoCoder" se usa en app/
+   grep -r "GeoCoder" app/ database/
+   ```
+   Si hay >=1 referencia real, NO archivar.
+5. Commit con mensaje claro: `chore(archive): mover [clase] a _archive/`.
+6. **Borrado efectivo**: solo tras confirmar 30+ días sin que nada lo reclame.
+   Para entonces, ejecutar `git rm -r .ai/_archive/YYYY-MM-DD-<razon>/`.
+
+### Por qué
+
+- Si algo falta después, está en `.ai/_archive/` y se restaura con `git mv`.
+- El borrado precipitado ha costado bugs en sesiones previas (ver `.ai/memory/incidente-forge-oom-2026-08-03.md`).
+- El archive se commitea, queda en Git, no se pierde.
+
+### Excepciones (borrado directo OK)
+
+- `build/`, `node_modules/` (ya en `.gitignore`).
+- Archivos generados (`.zip`, `.bak`, `.tmp`, `.pyc`, `__pycache__/`).
+- Migrations huérfanas (con confirmación previa al usuario).

@@ -134,4 +134,37 @@ class SubscriptionTest extends TestCase
         $this->assertEquals(1, $org->clients()->count());
         $this->assertEquals(1, $otherOrg->clients()->count());
     }
+
+    public function test_downgrade_command_only_affects_orgs_past_grace_period(): void
+    {
+        config(['subscription.payment_failed_grace_days' => 7]);
+
+        $fresh = Organization::factory()->create(['plan' => 'pro']);
+        $expired = Organization::factory()->create([
+            'plan' => 'pro',
+            'payment_failed_at' => now()->subDays(8),
+        ]);
+        $justFailed = Organization::factory()->create([
+            'plan' => 'pro',
+            'payment_failed_at' => now()->subDays(2),
+        ]);
+
+        $this->artisan('subscription:downgrade-expired-grace')->assertSuccessful();
+
+        $this->assertSame('pro', $fresh->fresh()->plan, 'Sin payment_failed_at no se degrada');
+        $this->assertSame('starter', $expired->fresh()->plan, 'Pasados 7 días se degrada');
+        $this->assertSame('pro', $justFailed->fresh()->plan, 'Dentro del grace no se degrada');
+    }
+
+    public function test_downgrade_command_dry_run_does_not_modify(): void
+    {
+        config(['subscription.payment_failed_grace_days' => 7]);
+        $org = Organization::factory()->create([
+            'plan' => 'pro',
+            'payment_failed_at' => now()->subDays(10),
+        ]);
+
+        $this->artisan('subscription:downgrade-expired-grace --dry-run')->assertSuccessful();
+        $this->assertSame('pro', $org->fresh()->plan);
+    }
 }

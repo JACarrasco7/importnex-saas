@@ -1,0 +1,411 @@
+# Changelog
+
+Todos los cambios notables en el skill `estudio-mercado` se documentarán en este archivo.
+
+El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
+y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
+
+## [0.5.1] - 2026-10-06
+
+**Guías de búsqueda manual por marca (`scripts/generar_guia_marcas.py`) — MD+PDF para el usuario.**
+
+> **Motivo:** el usuario busca a mano en los portales (sliders de filtro) y necesitaba una referencia
+> por marca que explique generación por años, CV por motor y qué filtro usar y POR QUÉ. No es un
+> sondeo de mercado: es documentación de usuario generada desde `datos_mercado.json` + un diccionario
+> curado de identificación (`IDENT`).
+
+### ➕ Nuevo `scripts/generar_guia_marcas.py`
+- Genera una guía MD+PDF por marca (14 marcas, todos sus modelos del mapa) en ruta dual:
+  `C:/Users/jacar/Desktop/JJImportMotors/guias-busqueda/` + `informes-mercado/` (espejo).
+- Nombre canónico: `guia-<marca>_<fecha>.md|pdf` + índice `00-INDICE.md` en cada carpeta.
+- CLI: `--marca` (repetible), `--out`, `--no-pdf`, `--fecha`. Sin `--marca`: todas.
+- Cada guía: resumen de modelos, chuleta de filtros, sección por modelo (motores/CV por año,
+  filtros con justificación, datos del estudio, búsquedas listas, trampas, notas de estudio).
+- PDF vía Chrome headless (`--headless=new`, rutas ABSOLUTAS — con relativas falla en silencio).
+- stdout en UTF-8 forzado (con pipe en Windows, cp1252 rompía con los emojis).
+- **Mantenimiento:** al entrar un modelo nuevo en `datos_mercado.json`, añadir su entrada al
+  dict `IDENT` (generación/años, motores con CV, trampa). Sin entrada curada, la guía sale con
+  huecos.
+
+## [0.5.0] - 2026-09-28
+
+**Plantilla ÚNICA y concisa + ruta/nomenclatura canónica + §FUENTES con conteo y fecha.**
+
+> **Motivo:** tres informes de marca entregados en el mismo mes (SUV, hatchback, familiares) salieron con
+> tres formatos distintos según el segmento — y todos con más detalle del que el usuario necesita. El
+> detalle de anuncios lo aporta él después, abriendo los listados; lo que necesita del informe es el
+> **número** y **los enlaces de búsqueda**. Además, la plantilla se contradecía con la realidad en tres
+> cosas: ruta (`informes/mercado/` vs `informes/<marca>/` en disco), nombre del fichero (3 convenciones
+> distintas) y el conteo de anuncios de §FUENTES (que se ensamblaba a mano).
+
+### 📄 `informe_mercado.md` — plantilla reducida a 9 secciones
+
+Secciones (orden fijo): **1** CONCLUSIÓN · **2** VERSIÓN A VERSIÓN · **3** COMPARABLES · **4** TRAMPAS ·
+**5** RESUMEN PARA COPIAR · **6** DESGLOSE 1.500 € · **7** COBERTURA Y METODOLOGÍA (+ ARCHIVO GENERADO) ·
+**8** FUENTES CONSULTADAS · **9** CHECKLIST.
+
+**ELIMINADO (y prohibido):** fichas con "los 2 mejores anuncios" (precio/año/km/motor/enlace por versión),
+📊 DESGLOSE POR VARIABLES (cambio / puertas / techo / cuadro digital con tablas DE+ES), §3.b segmentación
+amplia por ejes, §3.c limitaciones dentro de cada ficha y la verificación de fichas a posteriori. La
+sección 2 pasa a ser 2-3 líneas de matiz por versión. Si el usuario pide esos detalles, se añaden como
+anexo al final y se avisa en 1 línea.
+
+Se actualizan también las reglas SI/ENTONCES y la lista de "NUNCA preguntar" que aún exigían el desglose
+por variables.
+
+### 📍 Ruta y nombre canónicos (una sola convención)
+
+`informes/<marca>/<marca>_<segmento>_<enfoque>_<YYYY-MM-DD>.md`
+
+- `<marca>` corto y en minúsculas (`vw`, `audi`, `bmw`, `mercedes`…).
+- `<segmento>` = valor del schema (`compacto|suv|berlina|deportivo|familiar|urbano`).
+- `<enfoque>` = `deportivo|generalista|accesible|premium|mixto`.
+- Estudio de un modelo concreto: `<marca>-<modelo>_<segmento>_<enfoque>_<YYYY-MM-DD>.md`.
+
+Ejemplo: `informes/vw/vw_compacto_deportivo_2026-09-27.md`. Corregidas las 6 menciones a la ruta vieja
+`informes\mercado\` en `SKILL.md` (tabla §Output, FASE 5, §MEJORAS v2) y en `informe_mercado.md`
+(mensaje de cierre, ejemplo roto `volKSwagen-golf-75_2026-08-23.md`). **Los informes ya entregados NO se
+renombran:** la regla rige desde el próximo.
+
+### 🔗 §FUENTES reforzada (sección 8, obligatoria)
+
+- Nombre de sección unificado a `## 🔗 FUENTES CONSULTADAS — re-ejecutables`.
+- El formato documentado ya incluye el **conteo** y la **fecha**: `... → **1.276 anuncios** (medido 16 de septiembre de 2026)`.
+- Se documenta que se genera con **una sola llamada** a `scripts/fuentes.py` con todos los `--spec` del informe.
+
+### 🔧 `importacion-vehiculos/scripts/fuentes.py` (cambio aditivo, no rompe el uso anterior)
+
+- `--spec` pasa a 13 campos: `marca|modelo|etiqueta|cv_min|cv_max|anio_desde|anio_hasta|km|carroceria|anuncios_de|anuncios_es|versions_es|q_de`.
+- Nuevas flags: `--anuncios-de`, `--anuncios-es`, `--fecha` (formatea "16 de septiembre de 2026"),
+  `--precio-max`, `--pais-de DE`, `--combustible`, `--versions-es`, `--q-de`.
+- La línea de cada portal sale ya con `→ **N anuncios** (medido …)`: deja de ensamblarse a mano.
+- `versions_es` añade `Versions[0]` en Coches.net **además** de `ModelIds[0]`; `q_de` añade el texto libre
+  en mobile.de. Sin esto, dos versiones del mismo modelo (GTI vs R) generaban **la misma URL**.
+
+### 🔧 `importacion-vehiculos/scripts/empaquetar.py`
+
+- `_url_mobile_de`: nuevos parámetros `precio_max` (`p=:40000`), `solo_alemania` (`cn=DE`),
+  `combustible` (`ft=DIESEL|PETROL`) y `q_extra` (`q=`).
+- `_url_coches_net`: nuevos parámetros `precio_max` (`MaxPrice`), `combustible` (`Fueltype2List=1|2`) y
+  `version_extra` (`Versions[0]` adicional).
+- 🔴 **Bug corregido — `ArrBodyType` de SUV:** el mapa usaba `suv: 5`, pero en Coches.net **5 es
+  Monovolumen** (el SUV es **6**). Evidencia: con `ArrBodyType=5` el T-Roc (SUV) devolvía **0 anuncios**
+  (informe `vw_suv-deportivos_2026-09-16.md` §3.c). Corregido a `suv: 6, monovolumen: 5` en
+  `empaquetar.py` y en `fuentes.py`. Regla nueva: **todo filtro de carrocería se valida por conteo**
+  antes de publicar la URL.
+
+## [0.4.6] - 2026-09-15
+
+**Contadores de secciones fuera de la prosa.**
+
+`SKILL.md` mandaba "respetar las **10 secciones** en orden fijo" mientras la plantilla ya tenía
+**11** (el §10 FUENTES CONSULTADAS de la 0.4.5). Un número escrito a mano se desajusta cada vez
+que la plantilla crece. Ahora remite a la **tabla §ESTRUCTURA OBLIGATORIA de
+`informe_mercado.md`**, que es la que manda, sin repetir el número en ningún sitio.
+
+## [0.4.5] - 2026-09-15
+
+**§10 FUENTES CONSULTADAS: obligatoria en el informe de mercado.**
+
+Misma regla que A33 en la skill hermana: cada versión medida lleva la URL exacta de 🇩🇪
+mobile.de y 🇪🇸 Coches.net, **los parámetros al lado** y el conteo medido, para que el usuario
+rehaga la búsqueda él mismo y compruebe de dónde sale cada dato. Guardar la query solo en
+`datos_mercado.json` no bastaba: era auditoría interna, invisible para él.
+
+- `informe_mercado.md`: nueva sección **§10** en la estructura obligatoria (el checklist pasa a
+  §11), línea en los dos checklists de entrega y plantilla con ejemplo real (Golf R Variant).
+- `SKILL.md`: regla dura junto a la regla de IDs de portal.
+- El generador vive en la skill hermana (`importacion-vehiculos/scripts/fuentes.py`) — **no se
+  duplica** para no crear otra fuente de verdad que pueda divergir.
+
+## [0.4.4] - 2026-09-13
+
+**Catálogo compartido ampliado: 14 marcas con modelos y metadatos honestos.**
+
+`references/mobile-de-ids.json` gana los modelos de **Toyota** (55), **Citroën** (53) y
+**Dacia** (11), extraídos de `modelsCache` y confirmados leyendo el `<h1>` en vivo
+(`corolla=9` → 2.108 anuncios, `c3=11` → 6.399, `duster=2` → 4.867). Es el mismo archivo
+que usan la skill hermana y Laravel.
+
+Además se comprobaron **las 53 marcas** del mapa (53/53 correctas) y se reescribieron las
+notas del catálogo: antes decían "verificado por conteo" de todo, cuando 37 marcas venían
+solo del payload sin comprobar. Regla que queda escrita: **un ID del payload oficial es
+autoritativo; lo prohibido es inventarlo** — un ID inventado no falla, devuelve otra marca.
+
+## [0.4.3] - 2026-09-13
+
+**Catálogo compartido actualizado: sección `coches.net`.**
+
+`references/mobile-de-ids.json` gana la sección `cochesnet` (**134 marcas** +
+`ModelIds`), extraída del payload de coches.net. Es el **mismo archivo** que usan
+la skill hermana y Laravel, así que los IDs de coches.net ya no se duplican ni
+divergen. Los IDs no van por orden alfabético (Mercedes=28, VW=47, Cupra=1400):
+no inventar, consultar el catálogo.
+
+## [0.4.2] - 2026-09-13 — Catálogo de IDs de portal (deja de inventarlos)
+
+> **Motivo:** la skill construye URLs de búsqueda con IDs numéricos de mobile.de
+> (`ms=`) y coches.net (`MakeIds[]`). Esos IDs **no son adivinables** (no van en orden
+> alfabético simple: `BMW=7` pero `Mercedes-Benz=28` y `Cupra=1400`) y **caducan**. La
+> skill hermana `importacion-vehiculos` tenía una tabla de IDs inventada que devolvía OTRA
+> MARCA (`bmw=11` → CITROEN, `mercedes=12` → DAEWOO, `ford=24500` → TVR).
+>
+> **Añadido:** `references/mobile-de-ids.json` — catálogo verificado por conteo real de
+> anuncios (13-sep-2026) con marcas + modelIds de VW, Audi, BMW, Mercedes-Benz, Porsche,
+> Ford, Seat, Cupra, Skoda, Opel y Volvo. Es el **mismo fichero que usa Laravel**, para que
+> las URLs del estudio y las del panel admin coincidan.
+>
+> **Regla nueva en el SKILL.md:** usar SIEMPRE el catálogo; si un modelo no está, filtrar
+> por texto (`q=`) antes que inventar un ID. Añadida también la tabla de formas correctas
+> (`ms` de 5 campos, `pw` en **kW** = cv × 0,7355 ±4, `MakeIds[0]`/`ModelIds[0]`).
+>
+> ⚠️ **Los IDs caducan:** `Golf Mk7.5 = 12603` devolvía **0 anuncios** el 13-sep-2026; el
+> vigente es `14` (57.717). Validar siempre por conteo.
+
+## [0.4.1] - 2026-09-13 — `ms=` de mobile.de alineado a los 5 campos canónicos
+
+> **Motivo:** el mapa (`datos_mercado.json`) guardaba las URLs de mobile.de con **4
+> campos** (`ms=25200;14;;`) cuando la forma canónica verificada es de **5**
+> (`ms=25200;14;;;`) — así aparece en el playbook y la memoria de `importacion-vehiculos`
+> y en todos los ejemplos reales. Corregidas las **18 ocurrencias** (9 en claro + 9
+> URL-encoded), respetando si el fichero usaba `;` o `%3B`.
+>
+> Los `modelId` del mapa **sí estaban bien** y coinciden con el catálogo verificado por
+> conteo: Golf=14 · Audi S3=19 · Mercedes-Benz A 45 AMG=229 · Ford Focus=20 · BMW M135=69.
+>
+> ⚠️ **No se pudo verificar en vivo** al aplicar el cambio: mobile.de empezó a limitar
+> las peticiones (la URL de Golf que devolvía 57.717 anuncios quince minutos antes dejó
+> de mostrar contador). Pendiente reconfirmar por conteo cuando el portal desbloquee.
+
+> **Aviso de caducidad (13-sep-2026):** la última consulta a portales es del **17-ago**.
+> `refrescar_antes_de` → `showstoppers` caducó el **31-ago** (13 días) y `alta_rotacion`
+> el **07-sep** (6 días); `gemas_economicas` caduca el **14-sep**. Según la regla dura de
+> cache del SKILL.md, esos modelos hay que **re-medir**. Toca pasada de refresco.
+
+## [0.4.0] - 2026-09-12 — Fix bug nombre ZIP (build-zips.py: version real del SKILL.md)
+
+> **Motivo:** el script `_dist/build-zips.py` tenia las rutas de los ZIPs
+> **hardcodeadas** con `v3.7.1-20260906` y `v0.3.12-20260906` desde el 06-sep,
+> ignorando la version real del `SKILL.md` de cada skill. Resultado: la v3.9.3
+> del repo se empaquetaba con nombre `v3.7.1` en `_dist/`, y `docs/SKILLS.md`
+> (que se regenera del ZIP, no del SKILL.md) reportaba la version vieja. El
+> skill de Cowork/Desktop quedaba con v3.6.1 mientras el repo "parecia"
+> haber subido a v3.9.3 por el nombre real del SKILL.md — el peor escenario
+> para auditar divergencias.
+
+### `._dist/build-zips.py`
+- Aniadidas funciones `read_skill_version()` y `build_dst_path()` que leen el
+  frontmatter `version:` del `SKILL.md` y construyen el nombre del ZIP
+  `skills-<skill>-v<VERSION>-<YYYYMMDD>.zip`.
+- La lista de skills ya no lleva ruta hardcodeada: `(skill_dir, None)` y se
+  resuelve con `build_dst_path()` en tiempo de ejecucion.
+
+### `SKILL.md`
+- Bump version 0.3.12 → **0.4.0** (el frontmatter iba retrasado respecto al CHANGELOG).
+
+### Resultado
+- Tras ejecutar `scripts/build-skill-zips.ps1`, `_dist/` contiene:
+  - `skills-importacion-vehiculos-v3.9.3-YYYYMMDD.zip`
+  - `skills-estudio-mercado-v0.4.0-YYYYMMDD.zip`
+- `scripts/sync-desktop.ps1` (nuevo) detecta automaticamente si Desktop/Cowork
+  tienen una version vieja de la skill.
+
+## [0.3.12] - 2026-08-24 — Segmentación amplia por variables (24-ago) + informe Golf 7.5 ejemplo
+
+> **Motivo:** la pasada en vivo del 23-24 ago del Golf 7.5 (GTI/TCR/Clubsport/R) demostró que el §3 "DESGLOSE POR VARIABLES" de la plantilla se quedaba corto: solo cubría combinaciones (3p+manual+sin techo: 4/14) con muestras muy pequeñas, mientras que la realidad permite segmentar por **eje único** (cambio, puertas, techo, cuadro digital) con conteos grandes (132 manuales sobre 717 ofertas GTI, 84% DSG Clubsport, etc.) + detección de limitaciones reales (cuadro digital no medible, puertas no en DE, trampa TransmissionTypeId Golf R). Se sube el listón de la plantilla y se guarda el informe generado como referencia.
+
+### 📄 `informe_mercado.md` — §3 DESGLOSE POR VARIABLES ampliado
+- **Subsección nueva §3.b "🔬 Segmentación amplia por ejes (24-ago-2026, opcional pero recomendado)"**: una tabla por eje (cambio / puertas / techo / cuadro digital) con `bucket | ofertas | % | suelo | comentarios`. Pensada para cuando el estudio se hace con muestra grande (≥50 ofertas por mercado) — escala mucho mejor que la tabla de combinaciones anterior.
+- **Subsección "📌 Limitaciones y trampas detectadas (siempre declarar)"**: cuadro digital no medible, puertas no en DE, trampa de etiquetado `TransmissionTypeId` en Golf R, etc. Cualquier limitación/fallo de portal se documenta aquí con `⚠️` antes que inventarse un dato.
+- **Actualizado el checklist** para que pida la nueva subsección si hay muestra grande, o 1 línea "no hay muestra suficiente" si no.
+
+### 📂 `informes-mercado/` — carpeta nueva con ejemplo real
+- **`volkswagen-golf-75_gti-tcr-clubsport-r_2026-08-23.md`**: informe completo del estudio Golf 7.5 (4 variantes) generado por Claude Desktop el 23-ago y ampliado el 24-ago con §5 segmentación por variables. Sirve como **referencia del nivel de profundidad esperado** para futuros estudios multi-variante.
+- **`_memoria_2026-08-24_segmentacion-variables.md`**: memoria de sesión con las 6 lecciones aprendidas en la pasada del 24-ago (URL mobile.de que SÍ funciona, extracción de tarjetas virtualizadas, etc.). Las más críticas (1, 2, 5, 6) ya están reflejadas en el playbook de `importacion-vehiculos` v3.4.0.
+
+### 🔧 SKILL.md
+- Bump versión 0.3.11 → **0.3.12** en frontmatter.
+- §Output referencia la nueva carpeta `informes-mercado/` para ejemplos reales.
+
+---
+
+## [0.3.11] - 2026-08-23 — Ruta dual del mapa (Desktop + workspace)
+
+> **Motivo:** el usuario quiere que `datos_mercado.json` viva en 2 rutas para tener copia accesible a diario sin abrir VS Code:
+> 1. `C:/Users/jacar/Desktop/JJImportMotors/datos_mercado.json` (ruta principal)
+> 2. `C:/laragon/www/importnexcore/.claude/skills/datos_mercado.json` (ruta espejo)
+
+### 📍 SKILL.md §RUTA PACTADA (L2)
+- Cambio de "ruta única" a **ruta dual**. El campo `ruta_canonica` lista ambas separadas por `|`.
+- Si `importacion-vehiculos` no encuentra el JSON en ninguna → NO fallback silencioso: avisa y continúa con `modelos-medidos.md`.
+- **Regla de sincronización:** la IA escribe en 1 ruta y Copilot (VS Code) espeja a la otra. NUNCA divergir.
+
+### 📤 SKILL.md §Output
+- Tabla de output actualizada con las 2 rutas.
+
+### 🤖 SKILL.md §Reglas de entrega
+- Mensaje de cierre literal actualizado: "importa este MD al mapa de mercado (ambas rutas)".
+
+---
+
+## [0.3.10] - 2026-08-23 — Filtros estructurados SIEMPRE + regla de cache dura
+
+> **Motivo:** el usuario recordó que el campo de versión de texto de Coches.net es trampa conocida (mezcla generaciones). Reforzar como regla dura. Además, evitar re-medir cache vigente.
+
+### 🔴 SKILL.md — Regla dura de filtrado (nueva)
+- En Coches.net **NUNCA** filtrar por `Versions[]`/`Version=` (mezcla Mk7/Mk7.5/Mk8).
+- **SIEMPRE** filtros individuales estructurados por URL (`PowerHpFrom-To` / `MinYear` / `MaxKms` / `Fueltype2List` / `ArrBodyType` / `minDoors` / `TransmissionTypeId` + `fi=Price&or=1`).
+- En mobile.de: filtros estructurados + doble pasada por kW.
+- **Si la IA usa el campo de versión de texto, el estudio entero es INVÁLIDO.**
+
+### 🔴 SKILL.md — Regla dura de cache (nueva)
+- Antes de estudiar un modelo, **RELEER `datos_mercado.json` y comprobar `refrescar_antes_de_categoria`**.
+- Si fecha es FUTURA + `confianza_precio ≥ 3` → **NO re-medir**, devolver cache con 1 línea.
+- Si caducado o confianza <3 → medir de cero.
+- **NUNCA gastar peticiones re-calculando cache vigente.**
+
+---
+
+## [0.3.9] - 2026-08-23 — "Mejor preguntar 1 vez que inventar 1 dato"
+
+> **Motivo:** la IA recibía reglas con "por defecto 1.500 € de gastos", "asume versión según el mercado" y decidía por su cuenta. El usuario prefiere que **pregunte** en decisiones de negocio (versión, año, km, precio, equipamiento, perfil) en vez de asumir.
+
+### ❓ `informe_mercado.md` §CUÁNDO PREGUNTAR (nueva sección)
+- **SIEMPRE preguntar** cuando el usuario da un mandato vago: "estudia X", "busca X", "completa X" → preguntar versión, año, km, precio, equipamiento.
+- **NUNCA preguntar** decisiones mecánicas ya resueltas (formato, secciones, checklist, cobertura).
+- **PREGUNTAR si hay 2+ opciones razonables** (2 versiones, 3 motorizaciones, perfil vago, 2 carrocerías).
+- **Formato de la pregunta** literal: 1 línea por pregunta + recordatorio "(una vez respondas, lanzo el estudio sin más paradas)".
+
+### 🔧 Cambios en las reglas SI/ENTONCES
+- Fila "Hay que decidir los gastos fijos": antes "Por defecto 1.500 €", ahora **"PREGUNTAR al usuario al inicio"**.
+- 3 filas nuevas en la tabla: "El usuario dice 'estudia X' sin más detalle" → **PREGUNTAR**. "El usuario dice 'completa el Golf R DE' sin más" → **PREGUNTAR**. "Hay 2 versiones razonables" → **PREGUNTAR**. "La nube detecta un error en el JSON" → **AVISAR**.
+
+### 📚 `como_deben_ser_las_sesiones.md`
+- Nuevo **principio v0.3.9** al inicio: "mejor preguntar 1 vez que inventar 1 dato". Las decisiones de negocio SE PREGUNTAN; las mecánicas YA ESTÁN RESUELTAS.
+- Nueva fila en la tabla OBLIGATORIO: "Cuando el usuario da un mandato vago → PREGUNTAR antes de gastar peticiones".
+
+### 🔧 `SKILL.md` FASE 0
+- Renombrada a "**PREGUNTAR PRIMERO**". Nueva línea obligatoria: "¿Gastos fijos para 'Puesto en Huelva'? (por defecto 1.500 €, preguntar al usuario)". Y **NO empezar el estudio sin ACK del usuario**.
+
+---
+
+## [0.3.8] - 2026-08-23 — Flujo ESTRICTO: la nube no improvisa, SI/ENTONCES + checklist obligatorio
+
+> **Motivo:** la IA recibía zonas con "si conviene, si hay muestra, si el usuario lo pide, opcionalmente…" y se salía del flujo. **Esto se acabó.** Cada decisión de 2 formas está resuelta de antemano; la nube NO consulta, NO propone alternativas, NO improvisa.
+
+### 🔒 Reglas estrictas SI/ENTONCES (`informe_mercado.md`)
+- **NUEVO §REGLAS ESTRICTAS SI/ENTONCES**: 10 condiciones con comportamiento obligatorio. Cubre: desglose por variables, comparables, formato, gastos fijos, IVA/IEDMT, fiabilidad, cobertura incompleta, prevalencia del JSON, secciones obligatorias, peticiones explícitas.
+- **NUEVO §CHECKLIST OBLIGATORIO ANTES DE ENTREGAR**: 3 bloques (Estructura / Datos / Archivos) con ✅/❌ que la nube DEBE rellenar y mostrar.
+- **NUEVO §ESTRUCTURA OBLIGATORIA**: tabla con las 10 secciones en orden fijo. Reordenar/fusionar está prohibido.
+- **NUEVO §CHECKLIST en el propio informe**: al final del informe la nube autocompleta con ✅/❌ cada punto (estructura, datos, archivos, mensaje de cierre).
+
+### ⛔ FASE 5 rígida en `SKILL.md`
+- Renombre FASE 4 ("GUARDAR el mapa") y FASE 5 ("GENERAR EL INFORME") para que estén separadas.
+- 8 prohibiciones explícitas en FASE 5 (inventar datos, mezclar recordados, decidir formato/gastos, saltarse secciones, cambiar orden, jerga IA, PDF/ZIP sin pedir, decir "sincronizado" sin verificar).
+
+### 📚 `como_deben_ser_las_sesiones.md`
+- **NUEVO §REGLAS DE ORO**: tabla con 6 comportamientos obligatorios + 10 prohibiciones. Si hay duda no resuelta → PARAR y preguntar UNA sola vez.
+
+---
+
+## [0.3.7] - 2026-08-23 — "Puesto en Huelva" + ahorro real con gastos fijos de 1.500 €
+
+> **Motivo:** el usuario pidió ver de un vistazo cuánto le costaría el coche **puesto en casa**, no el cálculo técnico del `hueco_neto_pct` (que incluye IEDMT variable por CO₂). Para decidir si merece la pena importar, basta con una cifra redonda de gastos fijos.
+
+### 📄 Informe (`informe_mercado.md`)
+- **NUEVA columna "Puesto en Huelva"** en la tabla resumen y en las 4 tablas de candidatos. `puesto_huelva = precio_alemania + 1.500 €` (1.000 € transporte + 200 € ITV + 300 € gestoría/ausfuhr).
+- **NUEVA columna "Ahorro real"** = suelo España − puesto en Huelva. Es lo que el usuario se ahorra de verdad.
+- **NUEVA sección "💶 DESGLOSE DE LOS 1.500 € DE GASTOS FIJOS"** al final, antes de la metodología. Explica qué incluye (transporte, ITV, gestoría) y qué NO (IVA importación, IEDMT), con orden de magnitud realista (+3.500 € a +5.500 € "todo incluido").
+- **Resumen para copiar actualizado** con los nuevos números "puesto en Huelva" para WhatsApp/notas.
+
+### 📚 Reglas actualizadas
+- `SKILL.md` §Cálculo del hueco: nueva subsección "💶 GASTOS FIJOS ESTIMADOS PARA EL INFORME" con la regla, fórmula, qué se incluye y qué no.
+- `como_deben_ser_las_sesiones.md` §REGLAS DE ENTREGA punto 9: cifra de 1.500 € por defecto, recalcular si el usuario pide otra cifra.
+
+---
+
+## [0.3.6] - 2026-08-23 — Informe para el usuario: desglose por variables, comparables, resumen para copiar
+
+> **Motivo:** el informe estaba escrito con jerga IA (sincronización, merge, fuente_medicion, bloque de volcado JSON) y el usuario tenía que interpretar términos técnicos para decidir. El informe es **para Jacar**, no para otra IA.
+
+### 📄 Informe (`informe_mercado.md`) reescrito de arriba abajo
+- **Tono de persona, no de IA.** Sin "sincronizado", "merge", "volcado", "fuente_medicion". Palabras de negocio.
+- **NUEVA sección obligatoria "📊 DESGLOSE POR VARIABLES"**: puertas (3p/5p), cambio (manual/DSG), techo solar y cuadro digital se cruzan con precios reales (cuántos hay + prima +/−). Cuando no hay muestra suficiente se dice en 1 línea y se omite la tabla.
+- **NUEVA sección "🧩 COMPARABLES"**: cruza el estudio actual con modelos ya medidos antes (ej. "Astra OPC julio = 30% de hueco, este Golf R = 22%, pero mercado 6× más grande"). Evita tener que abrir 3 informes para poner el dato en contexto.
+- **NUEVA sección "📋 RESUMEN PARA COPIAR"**: 1 párrafo autocontenido al final, sin enlaces, listo para WhatsApp/nota/WhatsApp al socio.
+- **Reordenado**: CONCLUSION primero, METODOLOGÍA al final (ya estaba, ahora sin BLOQUE DE VOLCADO JSON).
+- **Quitado el "📦 BLOQUE DE VOLCADO" JSON.** La nube no tiene acceso al disco del usuario; ahora la última línea dice literalmente: *"Archivo: `informes/mercado/<archivo>.md`. Pásale este MD a Copilot en VS Code y dile 'importa este MD al mapa'."*
+
+### 📚 Reglas de entrega actualizadas (`como_deben_ser_las_sesiones.md`)
+- Punto 5: mensaje final humanizado, sin jerga técnica.
+- Punto 6 (nuevo): **desglose por variables obligatorio** aunque el usuario no lo pida (ahí se ve el valor real).
+- Punto 7 (nuevo): **resumen para copiar** obligatorio.
+- Punto 8 (nuevo): **comparables con estudios anteriores** obligatorios.
+
+### 🔧 `SKILL.md` §Output
+- Mismas 8 secciones obligatorias documentadas en la skill principal.
+- Aclarado que la nube **NO escribe** en el disco del usuario (no tiene acceso).
+
+---
+
+## [0.3.5] - 2026-08-23 — Auditoría flujo de volcado: contrato nube→local + fixes críticos
+
+> **Motivo:** auditoría independiente del flujo investigación→informe→volcado detectó 3 críticos que falseaban datos en `datos_mercado.json` y en el bucle skill↔SaaS.
+
+### 🔴 Fixes críticos
+- **`market:export` ya no borra la cola de trabajo** (Laravel): preserva `cola_trabajo`, `hueco_sin_banda`, `notas_metodologicas`, `candidatos_pendientes_de_estudio`, `alcance_pasada`, `costes_referencia`, `contexto_macro` del JSON existente al exportar desde la BD — antes un `market:export` los sobrescribía en silencio.
+- **Golf R duplicado resuelto**: `vw-golf-r` (agregado, 🟡 obsoleto) marcado con `reemplazado_por: "vw-golf-75-r"` (nuevo campo, documentado en el schema) para que el SaaS y el enrutador no muestren dos veredictos contradictorios del mismo modelo.
+- **`estado_cola` desincronizado corregido**: `vw-golf-75-r` tenía 3 fuentes contradictorias (objeto/cola/nota). Ahora consistente: `pendiente_busqueda` en los 3 sitios.
+- **Mojibake reparado**: 12 campos con UTF-8 doble/triple codificado (`vehÃculos`, `â‚¬`, `Ãƒâ€š...`) causado por ediciones repetidas con PowerShell. Reparado con `iconv` iterativo (CP1252↔UTF-8) validando integridad numérica contra backup — 0 restantes, 0 pérdida de datos.
+
+### 📄 Contrato nube→local
+- **`informe_mercado.md`**: nueva sección obligatoria "📦 BLOQUE DE VOLCADO" — 1 objeto JSON por variante con los campos mínimos del schema, al final del informe. Cierra el volcado mecánico sin reinterpretar el informe.
+- **Advertencia "la nube nunca afirma sincronizado"**: Claude Desktop no puede verificar el JSON del Desktop del usuario — el informe debe decir "pendiente de fusión" en vez de "sincronizado" (evita la falsa sensación de sincronía vista en el informe del Golf R).
+- **`MarketModel::FUENTES_MEDICION`** ahora incluye `mini_estudio` (ya estaba en el schema, faltaba en el modelo Eloquent).
+
+### 🛠️ Reglas nuevas documentadas
+- **Regla mojibake** en `schema_datos_mercado.md`: preferir PHP sobre PowerShell para editar el JSON (no reinterpreta bytes); reparación con `iconv` iterativo si ya ocurrió.
+
+## [0.3.4] - 2026-08-23 — Plantilla informe: suelo de listado vs verificado
+
+- **`informe_mercado.md`**: nueva nota "🏷️ Fiabilidad de cada suelo" — cada precio lleva ✅ (verificado en ficha) o 👁️ (de listado, pendiente). El suelo oficial es el ✅ más bajo; los 👁️ se anotan aparte como posibles suelos inferiores.
+- Encaja con el método oficial de Coches.net por URL (importacion-vehiculos v3.3.4).
+
+## [0.3.3] - 2026-08-23 — Plantilla de informe de mercado al grano + regla MD vs PDF
+
+> **Motivo:** el informe de estudio (ej. Golf 7.5) se generaba con estructura ad-hoc: 10 secciones metodológicas, la conclusión al final, candidatos "a ver" escondidos en tablas largas y duplicación MD+PDF (enlaces muertos en PDF).
+
+### 📄 Informe
+- **NUEVO `informe_mercado.md`** — plantilla obligatoria del informe de estudio, estructurada como documento de decisión (1 minuto de lectura):
+  1. 🏁 CONCLUSIÓN (resumen + tabla por variante con hueco bruto/neto + veredicto) — lo primero
+  2. 🎯 CANDIDATOS A VER (1-2 por variante, URL visible completa, por qué merece la pena)
+  3. 📊 POR VARIANTE (3-5 líneas c/u; la segmentación solo si afecta al precio)
+  4. ⚠️ AVISOS/TRAMPAS (solo las que cambian la decisión)
+  5. 📋 COBERTURA/METODOLOGÍA (al final, no al principio)
+- **Regla MD vs PDF:** SIEMPRE Markdown (fuente, enlaces clicables). PDF solo si el usuario lo pide explícitamente; en el PDF la URL va visible porque los enlaces no funcionan. NUNCA MD+PDF por defecto.
+- **SKILL.md**: §Output referencia la plantilla obligatoria + §MEJORAS #1 actualizada.
+
+## [0.3.2] - 2026-08-21 — Fixes de auditoría (C1-C4 + medios)
+
+- **schema**: estado `estudiando` añadido al enum (sesión corta/interrumpida) · regla 6 de merge de la cola entre sesiones (E10, solo tocar lo de esta sesión) · `estado_cola` degradado a ⚠️ (fuente de verdad = `cola_trabajo.estados`) · ejemplo de `cola_trabajo` corregido (`cupra-leon=pendiente_estudio`).
+- **SKILL.md**: L3 ampliado (medianas las escriben estudio/flujo_b/**mini_estudio**) · §Métricas #13 enum con `mini_estudio`.
+
+## [0.3.1] - 2026-08-21 — Refinado tras dry-run: transiciones por fuente + enum mini_estudio
+
+- **schema_datos_mercado.md**: `fuente_medicion` añade `mini_estudio` (medición inline del Flujo B, confianza 2-3) · nueva tabla "Estado resultante según quién mide" (estudio→estudiado · mini_estudio→estudiado · flujo_b→buscado · flujo_a→buscado/pendiente_estudio · flujo_e_delta→estudiado).
+- **`datos_mercado.json`**: `cola_trabajo` inicializada con 35 modelos de los 6 segmentos y `siguiente_estudio=vw-golf-75-tcr`.
+
+## [0.3.0] - 2026-08-21 — Pipeline conjunto con importacion-vehiculos (modelo por modelo)
+
+> **Motivo:** la búsqueda por segmentos de golpe ("Compactos deportivos") durante 3 días no dio resultado (límite 5h, unidades que no encajan). El estudio debe ir modelo por modelo.
+
+### 🔄 Pipeline conjunto
+- **SKILL.md §PIPELINE CONJUNTO**: 1 modelo por pasada (ES + DE + cruce), PARADA obligatoria entre modelos, feedback bidireccional con `importacion-vehiculos` (vuelca mediciones reales con `fuente_medicion: flujo_b`).
+- **schema_datos_mercado.md §Cola de trabajo**: campo `cola_trabajo` en el JSON (estados + enrutador `siguiente_*`) y campo `estado_cola` en cada modelo. Estados: `pendiente_estudio` → `estudiado` → `pendiente_busqueda` → `buscado` → `descartado`.
+- **Referencia al MD maestro** `../importacion-vehiculos/02-flujos/como_deben_ser_las_sesiones.md` (formato de sesión obligatorio).
+- **SKILL.md**: bump 0.2.1 → **0.3.0**.
+
+## [0.2.1] - 2026-08-18 — Regla Seat/Cupra corregida + equipamiento máximo
+- Regla Seat/Cupra: la nacionalidad NO es criterio; mirar suelo sin banda (Cupra DE 15.500 vs ES 19.500).
+- Equipamiento máximo por defecto (5 checkboxes full en mobile.de ES, proxy techo en Coches.net).
+- Selectores data-testid estables de mobile.de ES documentados.

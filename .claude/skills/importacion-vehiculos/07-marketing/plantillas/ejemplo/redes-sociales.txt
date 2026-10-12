@@ -1,0 +1,117 @@
+# EJEMPLO RELLENO — Opel Astra OPC (coche de ejemplo canónico de la skill).
+# Sirve de patrón de calidad y de fixture del validador. NO son datos de una unidad real.
+
+[COCHE_ID] EJEMPLO-astra-opc-2015
+[FECHA] 06/09/2026
+[CATEGORIA] showstopper
+[ANGULO] 1
+
+[IG_GANCHO] 280 CV, un solo dueño y 8.800 km al año. Los tres a la vez casi no se ven.
+
+[IG_GANCHO_B] Todo el mundo busca un GTI. Este da 280 CV y no lo mira nadie.
+
+[PROOF] 1 combinación improbable | vehiculo.km + anuncio.propietarios + vehiculo.potencia_cv
+[PROOF] 2 el olvidado | mercado.es.mediana
+
+[IG_CONTEXTO]
+El Astra OPC es el compacto deportivo que nadie mira cuando busca un GTI, y por eso todavía se puede comprar bien. Este lo localizamos en Alemania y ya está verificado.
+
+[IG_FICHA] 🗓️ 2015
+[IG_FICHA] 🛣️ 62.400 km
+[IG_FICHA] 🐎 280 CV, cambio manual de 6 velocidades
+[IG_FICHA] 👤 1 propietario
+[IG_FICHA] 🔧 Libro de mantenimiento sellado
+[IG_FICHA] 🏷️ Etiqueta C
+
+[IG_PEGA] ⚠️ Neumáticos al 50 %: se sustituyen antes de la entrega.
+
+[IG_ENCAJE] Entra en las ZBE sin restricciones y su precio queda por debajo de la mediana española.
+
+[IG_PRECIO] 💶 Precio cerrado con transporte, ITV de importación y trámites incluidos.
+
+[IG_CTA] Te paso la ficha completa por DM.
+
+[IG_SEND_ASK] Mándaselo a quien lleve medio año buscando un compacto así.
+
+[IG_HASHTAGS] #AstraOPC #CompactosDeportivos #ImportacionDeCoches #Huelva #JJImportMotors
+
+[ST_PANTALLA] 🐎 280 CV. Un solo dueño. | ninguno
+[ST_PANTALLA] Opel Astra OPC · 2015 · 62.400 km | ninguno
+[ST_PANTALLA] 🔧 Libro sellado y etiqueta C | encuesta:¿lo pondrías en tu garaje?
+[ST_PANTALLA] 📦 Transporte, ITV y trámites incluidos | ninguno
+[ST_PANTALLA] Escríbenos y te paso la ficha | enlace
+
+[RL_ESCENA] 0-3s | frontal acercándose | 280 CV. Un dueño.
+[RL_ESCENA] 3-8s | detalle palanca | Manual de 6
+[RL_ESCENA] 8-15s | cuadro de mandos | 62.400 km reales
+[RL_ESCENA] 15-22s | exterior 3/4 | Traído y legalizado
+[RL_ESCENA] 22-30s | estático con rótulo | Te lo buscamos igual
+
+[RL_CAPTION]
+El compacto de 280 CV que nadie busca y por eso todavía se compra bien.
+🗓️ 2015 · 🛣️ 62.400 km · 🏷️ Etiqueta C
+Comenta OPC y te paso la ficha.
+
+[TT_CAPTION]
+280 CV, un dueño y 62.400 km. Lo trajimos de Alemania ya verificado.
+Comenta OPC si quieres la ficha.
+
+[TT_GANCHO_HABLADO] Este compacto tiene 280 caballos y un solo dueño.
+
+[YS_TITULO] Opel Astra OPC 280 CV · 2015 · 62.400 km
+
+[YS_CAPTION]
+Compacto deportivo de 280 CV con un único propietario, importado de Alemania y verificado antes de entregarlo.
+
+[RL_HASHTAGS] #AstraOPC #ImportacionDeCoches #Huelva #JJImportMotors
+
+[FB_APERTURA]
+Buscar un compacto deportivo con pocos dueños en España se ha vuelto complicado: o están muy rodados, o piden precio de coche nuevo.
+
+[FB_HISTORIA]
+Este Opel Astra OPC lo localizamos en Alemania. Antes de moverlo comprobamos el historial, las llamadas a revisión del modelo y el precio real contra ocho anuncios españoles comparables. Solo entonces lo pusimos en marcha.
+
+[FB_FICHA] 🗓️ 2015, con 62.400 km
+[FB_FICHA] 🐎 280 CV con cambio manual de 6 velocidades
+[FB_FICHA] 👤 1 propietario
+[FB_FICHA] 🔧 Libro de mantenimiento sellado
+[FB_FICHA] 🏷️ Etiqueta C, entra en ZBE
+[FB_FICHA] 📍 Origen Alemania, entrega en Huelva
+
+[FB_PEGA] ⚠️ Neumáticos al 50 %: se sustituyen antes de entregarlo.
+
+[FB_INCLUYE] Transporte hasta España
+[FB_INCLUYE] ITV de importación
+[FB_INCLUYE] Trámites de matriculación
+
+[FB_PRECIO] 💶 Precio cerrado, sin sorpresas al final.
+
+[FB_CTA] ¿Quieres la ficha completa con fotos y verificaciones? Escríbenos por WhatsApp.
+
+[FB_HASHTAGS] #ImportacionDeCoches #Huelva
+
+[MP_TITULO] Opel Astra OPC 280 CV · 2015 · 62.400 km
+[MP_FICHA] Año | 2015
+[MP_FICHA] Kilómetros | 62.400
+[MP_FICHA] Combustible | Gasolina
+[MP_FICHA] Cambio | Manual, 6 velocidades
+[MP_FICHA] Potencia | 280 CV
+[MP_FICHA] Etiqueta DGT | C
+
+[MP_DESCRIPCION]
+Unidad localizada en Alemania con un único propietario y libro de mantenimiento sellado. Verificamos historial y llamadas a revisión del modelo antes de moverlo. Neumáticos al 50 %, se sustituyen antes de la entrega. Equipamiento verificado en la ficha: asientos Recaro, navegador, climatizador bizona y sensores de aparcamiento. El precio incluye transporte hasta España, ITV de importación y trámites de matriculación.
+
+[MP_INCLUYE] Transporte hasta España | ITV de importación | Trámites de matriculación
+[MP_AVISO] JJ Import Motors actúa como gestor de búsqueda e importación, no como vendedor del vehículo. Disponibilidad sujeta a confirmación.
+[MP_CTA] Escríbeme por Messenger y te paso la ficha completa con fotos.
+
+[FUENTE_DATO] 62.400 km | vehiculo.km
+[FUENTE_DATO] 280 CV | vehiculo.potencia_cv
+[FUENTE_DATO] 1 propietario | anuncio.propietarios
+[FUENTE_DATO] Etiqueta C | vehiculo.etiqueta_dgt
+[FUENTE_DATO] 8.800 km/año | vehiculo.km / antigüedad
+[FUENTE_DATO] por debajo de la mediana española | mercado.es.mediana
+[FUENTE_DATO] libro sellado | anuncio.historial
+[FUENTE_DATO] sin llamadas a revisión | investigacion.aspectos.recalls
+
+[FOTOS] 01_frontal_34.jpg | 02_lateral.jpg | 03_trasera.jpg | 04_interior.jpg | 05_cuadro.jpg | 06_vertical_stories.jpg

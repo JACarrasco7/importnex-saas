@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\ImportValuationApiController;
+use App\Http\Controllers\Api\MarketApiController;
 use Illuminate\Support\Facades\Route;
 
 // Puente chat -> servidor: sube un informe de valoracion directamente,
@@ -42,5 +43,11 @@ Route::middleware('import-token')->group(function () {
     // Auditoría 3 (#7) — Lectura de scoutings (Flujo C) por organización.
     // Devuelve los escaneos de mercado importados, con sus modelos.
     Route::get('/scouting', [ImportValuationApiController::class, 'indexScouting'])
+        ->middleware('throttle:api-read');
+
+    // Mapa de mercado persistente (skill estudio-mercado) — market_models
+    Route::get('/market', [MarketApiController::class, 'index'])
+        ->middleware('throttle:api-read');
+    Route::get('/market/stats', [MarketApiController::class, 'stats'])
         ->middleware('throttle:api-read');
 });

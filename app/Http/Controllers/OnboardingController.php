@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Car;
 use App\Models\Organization;
 use App\Models\User;
 use App\Models\UserOnboardingProgress;
@@ -16,7 +15,7 @@ class OnboardingController extends Controller
     {
         $user = Auth::user();
 
-        if (!$user) {
+        if (! $user) {
             return redirect()->route('login');
         }
 
@@ -27,7 +26,7 @@ class OnboardingController extends Controller
         }
 
         // Crear progreso si no existe
-        if (!$progress) {
+        if (! $progress) {
             $progress = UserOnboardingProgress::create([
                 'user_id' => $user->id,
                 'organization_id' => $user->organization_id,
@@ -50,7 +49,7 @@ class OnboardingController extends Controller
         $user = Auth::user();
         $progress = $user->onboardingProgress;
 
-        if (!$progress) {
+        if (! $progress) {
             return back()->with('error', 'No se encontró progreso de onboarding');
         }
 
@@ -72,9 +71,16 @@ class OnboardingController extends Controller
                 break;
 
             case 3:
-                // Team invited (marcar como completado aunque no haya invitaciones)
-                $progress->completeStepTeamInvite();
-                $progress->advanceTo(4);
+                // Auditoria 2026-09-06 (M3): antes este paso se marcaba
+                // completado SIN verificar que realmente hay invitaciones
+                // aceptadas o +1 usuario en la org. KPI inflado. Ahora se
+                // exige que la org tenga >1 usuario (el owner + al menos
+                // 1 staff) para que el check sea honesto.
+                $org = $user->organization;
+                if ($org && $org->users()->count() > 1) {
+                    $progress->completeStepTeamInvite();
+                    $progress->advanceTo(4);
+                }
                 break;
 
             case 4:
@@ -83,11 +89,13 @@ class OnboardingController extends Controller
                 $progress->completed_at = now();
                 $progress->current_step = 99;
                 $progress->save();
+
                 return redirect()->route('dashboard')->with('success', '¡Bienvenido! Has completado el onboarding.');
 
             case 'skip':
                 // Saltar onboarding
                 $progress->skip();
+
                 return redirect()->route('dashboard')->with('info', 'Has saltado el onboarding. Puedes completarlo más tarde.');
         }
 

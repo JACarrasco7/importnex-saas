@@ -9,7 +9,10 @@ Marketplace público accesible sin auth en `/marketplace` y `/marketplace/{car}`
 
 - **Filtros server-side**: 12 filtros whitelisted en `PublicMarketplaceController@index` (`FILTER_RULES` constant).
 - **Paginación**: 12 coches/página. Backend filtra, NO cliente.
-- **Visibilidad**: `is_public=true` (organization) + `is_marketplace=true` (car) + `status=Delivered` + `verdict IN (Buy, Buy if price drops)`.
+- **Visibilidad**: `is_public=true` (organization) + `is_marketplace=true` (car) + `status NOT IN (Delivered, Discarded)`.
+  - **Manda el toggle del operador.** ⚠️ Antes se exigía `status=Delivered` + `verdict IN (Buy, Buy if price drops)`: como `Delivered` es el ÚLTIMO estado del kanban (coche ya entregado al cliente) **y** el default del status es `Located`, la web pública salía SIEMPRE VACÍA (bug detectado 25-sep-2026).
+  - Excluir `Delivered`/`Discarded` evita publicar algo ya vendido o descartado; el **veredicto NO filtra** (el operador decide).
+  - **Fuente única de verdad:** `Car::scopePublicMarketplace()` — la usan los 4 sitios del `PublicMarketplaceController` (index, filterOptions, compare, show). Antes la condición estaba copiada en 4 sitios y se desincronizó. Para el estado en la ficha: `Car::marketplaceStatus()`.
 
 ## Engagement features (2026-08-07)
 

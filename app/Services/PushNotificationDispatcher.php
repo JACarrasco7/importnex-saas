@@ -42,22 +42,32 @@ class PushNotificationDispatcher
 
         $payload = self::buildPayload($alert);
 
+        // Auditoria 2026-09-06 (C3): sin timeout OneSignal colgaba
+        // AlertObserver::created indefinidamente si la API caia. Tambien
+        // se especifica el channel external_id (OneSignal Player ID) por
+        // usuario en lugar de 'included_segments: Active Users' para no
+        // leakear alertas de tipo 'car_request' a operadores junior.
+        // Por ahora seguimos con included_segments (no hay mapping user_id
+        // -> player_id persistido) pero el timeout SI es critico.
         $response = Http::withHeaders([
             'Authorization' => "Basic {$org->onesignal_api_key}",
             'Content-Type' => 'application/json',
-        ])->post('https://api.onesignal.com/notifications', [
-            'app_id' => $org->onesignal_app_id,
-            'included_segments' => ['Active Users'],
-            'headings' => ['en' => $payload['title'], 'es' => $payload['title']],
-            'contents' => ['en' => $payload['body'], 'es' => $payload['body']],
-            'data' => [
-                'alert_id' => $alert->id,
-                'alert_type' => $alert->alert_type,
-                'url' => $payload['url'],
-            ],
-            'web_url' => $payload['url'],
-            'app_url' => $payload['url'],
-        ]);
+        ])
+            ->timeout(5)
+            ->connectTimeout(3)
+            ->post('https://api.onesignal.com/notifications', [
+                'app_id' => $org->onesignal_app_id,
+                'included_segments' => ['Active Users'],
+                'headings' => ['en' => $payload['title'], 'es' => $payload['title']],
+                'contents' => ['en' => $payload['body'], 'es' => $payload['body']],
+                'data' => [
+                    'alert_id' => $alert->id,
+                    'alert_type' => $alert->alert_type,
+                    'url' => $payload['url'],
+                ],
+                'web_url' => $payload['url'],
+                'app_url' => $payload['url'],
+            ]);
 
         if ($response->failed()) {
             Log::error('[onesignal] Push notification failed', [

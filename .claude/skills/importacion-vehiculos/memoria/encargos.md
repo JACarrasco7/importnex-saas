@@ -90,3 +90,20 @@
 - **Flujo:** D → (abortado antes de B) · **Estado:** abortado 🔴
 - **Entregables:** informe_modelos parcial
 - **Notas:** se navegó a anuncios reales sin modelo elegido → informe PARCIAL. Lección: D1 con navegación real y filtros, nunca snippets (A15). Foco ES dio Focus "~9.900 €" falso vs navegación real 3.000-6.990 €.
+
+### Anonimo · BMW 320d (3 variantes) · 2026-09-09
+- **Tipo:** BUSQUEDA (sin cliente, sin modalidad) — listado crudo pegado por el usuario en chat
+- **Modalidad:** — · **Origen:** solo DE (mobile.de)
+- **Presupuesto:** sin definir (filtros del usuario: ≤22.5k € F30 · ≤30k € G20 · ≤30-35k € G21)
+- **Requisitos:** potencia 224-239 kW (~305-325 CV) — **atípico** para 320d estándar (140 kW), sugiere M340d o tuning
+- **Flujo:** (no ejecutado) — solo listado crudo
+- **Estado:** en cola · **Entregables:** `docs/informes/busqueda-bmw-320d-alemania-2026-09-09.md` (11 URLs categorizadas en 3 grupos)
+- **Resultado:** sin emitir veredicto · pendiente verificar 11 fichas (versión real, kW, siniestros)
+- **Refrescar antes de:** 2026-09-16
+- **Notas:**
+  - Listado pegado en chat por el usuario el 09-sep. Sin briefing completo.
+  - Filtro potencia es **señal de alarma**: 320d estándar = 140 kW. Probable M340d (240 kW) o tuning no declarado.
+  - 1 duplicado detectado (id=43641335703360) en el listado original (12 entradas → 11 únicas).
+  - Próximo paso si se reactiva: **abrir 11 fichas** → confirmar versión + kW → recalcular IEDMT si M340d.
+  - Hipótesis a verificar: si todos son M340d, el filtro correcto es `pw=240:240` (no 231-239).
+  - NO se ha pasado el validador `check_marketing.py` — esto NO es copy, es un listado de insumos.

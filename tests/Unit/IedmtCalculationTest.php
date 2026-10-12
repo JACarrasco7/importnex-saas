@@ -128,4 +128,62 @@ class IedmtCalculationTest extends TestCase
         // Con boe_confirmed usa new_price (12000), no manual_tax_base (10000)
         $this->assertEquals(12000 * 0.39 * 0.0475, (float) $car->calculateIEDMT());
     }
+
+    public function test_iedmt_zero_when_spanish_unit(): void
+    {
+        $org = Organization::factory()->create();
+
+        // Unidad española (compra nacional): no se devenga IEDMT.
+        $car = Car::factory()->create([
+            'organization_id' => $org->id,
+            'year' => '01/2021',
+            'co2' => 165,
+            'manual_tax_base' => 30000,
+            'pais_origen' => 'España',
+        ]);
+
+        $this->assertFalse($car->isImport());
+        $this->assertEquals(0, $car->calculateIEDMT());
+        // El total excluye IEDMT: solo compra + costes (sin IEDMT).
+        $this->assertEquals(
+            (float) $car->purchase_price + (float) $car->transport + (float) $car->itv_fee
+            + (float) $car->coc_fee + (float) $car->dgt_fees + (float) $car->professional_fees,
+            (float) $car->calculateTotalCost()
+        );
+    }
+
+    public function test_iedmt_applies_for_german_unit(): void
+    {
+        $org = Organization::factory()->create();
+
+        $car = Car::factory()->create([
+            'organization_id' => $org->id,
+            'year' => '01/2021',
+            'co2' => 165,
+            'manual_tax_base' => 30000,
+            'pais_origen' => 'Alemania',
+            'boe_confirmed' => false,
+        ]);
+
+        $this->assertTrue($car->isImport());
+        // 5 años → 0.39, CO2 165 → 9.75%
+        $this->assertEquals(30000 * 0.39 * 0.0975, (float) $car->calculateIEDMT());
+    }
+
+    public function test_iedmt_applies_when_no_origin_legacy(): void
+    {
+        $org = Organization::factory()->create();
+
+        // Sin pais_origen (legacy) → se asume importación (comportamiento previo).
+        $car = Car::factory()->create([
+            'organization_id' => $org->id,
+            'year' => '01/2021',
+            'co2' => 165,
+            'manual_tax_base' => 30000,
+            'boe_confirmed' => false,
+        ]);
+
+        $this->assertTrue($car->isImport());
+        $this->assertEquals(30000 * 0.39 * 0.0975, (float) $car->calculateIEDMT());
+    }
 }

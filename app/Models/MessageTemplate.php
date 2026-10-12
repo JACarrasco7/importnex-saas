@@ -34,7 +34,7 @@ class MessageTemplate extends Model
         $content = $this->content;
 
         foreach ($this->placeholders ?? [] as $placeholder) {
-            $content = str_replace('{{' . $placeholder . '}}', $data[$placeholder] ?? '', $content);
+            $content = str_replace('{{'.$placeholder.'}}', $data[$placeholder] ?? '', $content);
         }
 
         return $content;

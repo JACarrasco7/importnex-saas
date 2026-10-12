@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Support\PortalSearchUrls;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 class Car extends Model
 {
@@ -31,7 +33,10 @@ class Car extends Model
         'verdict', 'verdict_confidence', 'verdict_reasoning', 'verdict_changes', 'verdict_at',
         'market_avg', 'market_min', 'market_max', 'estimated_saving',
         'research_source', 'schema_version',
-        'comparables_list', 'fotos_json', 'notes', 'organization_id', 'client_id',
+        'comparables_list', 'fotos_json', 'busquedas_realizadas', 'notes',
+        'organization_id', 'client_id',
+        'tracking_token', 'tracking_shared_at', 'tracking_shared_with_email',
+        'tracking_revoked_at', 'tracking_views', 'expected_delivery_date',
         'ai_analysis_json', 'ai_verified_at',
     ];
 
@@ -40,10 +45,18 @@ class Car extends Model
         'research' => 'array', 'pros' => 'array', 'cons' => 'array',
         'ai_analysis_json' => 'array',
         'ai_verified_at' => 'datetime',
-        'comparables_list' => 'array', 'fotos_json' => 'array', 'boe_confirmed' => 'boolean',
+        'comparables_list' => 'array', 'fotos_json' => 'array',
+        // C2 auditoría 09-sep-2026: URLs de las búsquedas de mercado
+        // (mobile.de / autoscout24 / coches.net / wallapop) que el panel
+        // admin muestra en la pestaña Mercado.
+        'busquedas_realizadas' => 'array',
+        'boe_confirmed' => 'boolean',
         'co2_confirmado' => 'boolean',
         'is_marketplace' => 'boolean',
         'verdict_at' => 'datetime',
+        'tracking_shared_at' => 'datetime',
+        'tracking_revoked_at' => 'datetime',
+        'expected_delivery_date' => 'date',
         'lat' => 'decimal:8', 'lng' => 'decimal:8',
         'purchase_price' => 'decimal:2', 'new_price' => 'decimal:2',
         'manual_tax_base' => 'decimal:2', 'transport' => 'decimal:2',
@@ -79,6 +92,14 @@ class Car extends Model
     public const KANBAN_STATUSES = [
         'Located', 'Valuing', 'Offered', 'Reserved', 'Purchased',
         'In_transit', 'Processing', 'Delivered',
+    ];
+
+    /** Estados en los que el tracking público está disponible para el cliente.
+     *  El cliente sigue el proceso desde que el coche se localiza hasta la
+     *  entrega: el seguimiento acompaña toda la importación. */
+    public const TRACKABLE_STATUSES = [
+        'Located', 'Valuing', 'Offered', 'Reserved', 'Purchased',
+        'In_transit', 'Processing', 'Pending review', 'Verifying', 'Delivered',
     ];
 
     public const CURRENT_SCHEMA_VERSION = 1;
@@ -127,6 +148,26 @@ class Car extends Model
         return $this->hasMany(CarMarketingContent::class);
     }
 
+    public function contractAcceptances()
+    {
+        return $this->hasMany(ContractAcceptance::class);
+    }
+
+    /**
+     * Links públicos (token) que el dealer puede compartir con el cliente
+     * para que vea la ficha + folleto del coche sin login.
+     */
+    public function publicLinks()
+    {
+        return $this->hasMany(CarPublicLink::class);
+    }
+
+    /** Última aceptación de contrato del coche (o null). */
+    public function latestContractAcceptance()
+    {
+        return $this->hasOne(ContractAcceptance::class)->latestOfMany('accepted_at');
+    }
+
     public function scopeActive($query)
     {
         return $query->whereIn('status', self::ACTIVE_STATUSES);
@@ -142,8 +183,93 @@ class Car extends Model
         return $query->where('traffic_light', $color);
     }
 
+    /**
+     * El IEDMT (impuesto de matriculación) solo se paga al IMPORTAR un coche
+     * de otro país. Si la unidad es de origen español (compra nacional), no
+     * se devenga: el método devuelve 0 y el coste total no lo suma.
+     *
+     * Sin `pais_origen` (legacy) se asume importación — el negocio es
+     * principalmente DE→ES y así se preserva el comportamiento previo.
+     */
+    public function isImport(): bool
+    {
+        $pais = strtolower((string) ($this->pais_origen ?? ''));
+
+        // Sin origen → asumir importación (comportamiento previo).
+        if ($pais === '') {
+            return true;
+        }
+
+        // Explícitamente español → compra nacional, sin IEDMT.
+        if ($pais === 'es' || str_contains($pais, 'espa')) {
+            return false;
+        }
+
+        // Cualquier otro país (de, alemania, ...) → importación.
+        return true;
+    }
+
+    /**
+     * Estados en los que el coche YA NO ESTÁ EN VENTA: no se publica nunca en
+     * la web pública, aunque el toggle esté marcado.
+     *
+     * OJO: `Delivered` es el ÚLTIMO estado del kanban (coche ya entregado al
+     * cliente). Antes el marketplace lo EXIGÍA, así que solo publicaba coches
+     * ya vendidos y en la práctica no aparecía ninguno (bug detectado
+     * 25-sep-2026: todos los coches estaban en `Located` y la web salía vacía).
+     */
+    public const MARKETPLACE_EXCLUDED_STATUSES = ['Delivered', 'Discarded'];
+
+    /**
+     * Scope: coches publicables en el marketplace público.
+     *
+     * FUENTE ÚNICA DE VERDAD de la visibilidad pública. La usan los 4 sitios
+     * del `PublicMarketplaceController` (index, filterOptions, compare, show)
+     * para que no puedan desincronizarse (antes la condición estaba copiada en
+     * 4 sitios y por eso el bug de `Delivered` pasó desapercibido).
+     *
+     * Regla: manda el toggle del operador (`is_marketplace`); las únicas
+     * exclusiones son hechos objetivos —organización no pública y coche ya
+     * vendido o descartado— que nadie querría publicar.
+     */
+    public function scopePublicMarketplace($query)
+    {
+        return $query
+            ->whereHas('organization', fn ($q) => $q->where('is_public', true))
+            ->where('is_marketplace', true)
+            ->whereNotIn('status', self::MARKETPLACE_EXCLUDED_STATUSES);
+    }
+
+    /**
+     * Estado de publicación en el marketplace público.
+     *
+     * Refleja exactamente el scope `publicMarketplace()`. La ficha lo usa para
+     * avisar de lo que impide publicar, en vez de dejar al operador marcando el
+     * toggle sin entender por qué el coche no aparece.
+     *
+     * @return array{visible: bool, checks: array<int, array{key: string, ok: bool}>}
+     */
+    public function marketplaceStatus(): array
+    {
+        $checks = [
+            ['key' => 'is_marketplace', 'ok' => (bool) $this->is_marketplace],
+            ['key' => 'status', 'ok' => ! in_array($this->status, self::MARKETPLACE_EXCLUDED_STATUSES, true)],
+            ['key' => 'organization', 'ok' => (bool) optional($this->organization)->is_public],
+        ];
+
+        return [
+            'visible' => ! in_array(false, array_column($checks, 'ok'), true),
+            'checks' => $checks,
+        ];
+    }
+
     public function calculateIEDMT()
     {
+        // Unidad española: sin IEDMT (no hay importación).
+        if (! $this->isImport()) {
+            return 0;
+        }
+
         if (! $this->co2) {
             return 0;
         }
@@ -234,6 +360,124 @@ class Car extends Model
     }
 
     /**
+     * Stats de mercado separadas por país (España vs Alemania).
+     * Devuelve `{es: {avg,min,max,count,items}, de: {...,items}, mixto: ...}` para que la UI
+     * pueda enseñar qué promedio es de qué mercado. Sin `country` en el comparable,
+     * se asigna a "desconocido".
+     *
+     * Formatos aceptados del campo país: "España"/"ES"/"Alemania"/"DE"/"🇩🇪"/"🇪🇸".
+     */
+    public function getComparablesStatsByCountryAttribute(): array
+    {
+        $comparables = $this->comparables_list ?? [];
+        $byCountry = ['es' => [], 'de' => [], 'mixto' => [], 'unknown' => []];
+
+        foreach ($comparables as $c) {
+            if (! is_array($c)) {
+                continue;
+            }
+            $raw = $c['price'] ?? $c['p'] ?? null;
+            if ($raw === null) {
+                continue;
+            }
+            if (is_numeric($raw)) {
+                $price = (float) $raw;
+            } elseif (preg_match('/(\d[\d\.]*)/', (string) $raw, $m)) {
+                $price = (float) str_replace('.', '', $m[1]);
+            } else {
+                continue;
+            }
+            $country = strtolower(trim((string) ($c['country'] ?? $c['pais'] ?? '')));
+            $bucket = match (true) {
+                in_array($country, ['es', 'españa', 'espana', '🇪🇸'], true), str_contains($country, 'esp') => 'es',
+                in_array($country, ['de', 'alemania', 'allemagne', 'deutschland', '🇩🇪'], true), str_contains($country, 'alem') => 'de',
+                $country === '' => 'unknown',
+                default => 'mixto',
+            };
+            $byCountry[$bucket][] = ['price' => $price, 'item' => $c];
+        }
+
+        $stats = function (array $arr): array {
+            if (empty($arr)) {
+                return ['avg' => null, 'min' => null, 'max' => null, 'count' => 0, 'items' => []];
+            }
+            $prices = array_column($arr, 'price');
+
+            return [
+                'avg' => array_sum($prices) / count($prices),
+                'min' => min($prices),
+                'max' => max($prices),
+                'count' => count($prices),
+                'items' => array_column($arr, 'item'),
+            ];
+        };
+
+        return [
+            'es' => $stats($byCountry['es']),
+            'de' => $stats($byCountry['de']),
+            'mixto' => $stats($byCountry['mixto']),
+            'unknown' => $stats($byCountry['unknown']),
+        ];
+    }
+
+    /**
+     * C2 auditoría 09-sep-2026: agrupa las URLs de búsqueda de mercado
+     * (mobile.de / autoscout24 / coches.net / wallapop) por país. La pestaña
+     * Mercado del panel admin lo usa para mostrar "Búsquedas realizadas"
+     * con bandera por sección.
+     *
+     * @return array{
+     *     DE: list<array{portal:string, url:string, descripcion:string|null}>,
+     *     ES: list<array{portal:string, url:string, descripcion:string|null}>,
+     *     otros: list<array{portal:string, url:string, descripcion:string|null}>
+     * }
+     */
+    public function getBusquedasPorPaisAttribute(): array
+    {
+        $items = $this->busquedas_realizadas ?? [];
+        $out = ['DE' => [], 'ES' => [], 'otros' => []];
+        foreach ($items as $b) {
+            if (! is_array($b) || empty($b['url'])) {
+                continue;
+            }
+            $pais = strtoupper((string) ($b['pais'] ?? ''));
+            $entry = [
+                'portal' => (string) ($b['portal'] ?? ''),
+                'url' => (string) $b['url'],
+                'descripcion' => $b['descripcion'] ?? null,
+            ];
+            if ($pais === 'DE') {
+                $out['DE'][] = $entry;
+            } elseif ($pais === 'ES') {
+                $out['ES'][] = $entry;
+            } else {
+                $out['otros'][] = $entry;
+            }
+        }
+
+        return $out;
+    }
+
+    /**
+     * Enlaces "ver suelo" (mobile.de DE + coches.net ES) generados desde los
+     * datos del coche, ordenados por precio ascendente para comprobar a mano
+     * el precio más bajo del modelo y compararlo con esta unidad.
+     *
+     * Complementa a `busquedasPorPais`: aquel expone las URLs reales que trajo
+     * el informe, este garantiza que la ficha siempre tenga enlaces aunque el
+     * ZIP no incluya `mercado.busquedas_realizadas[]`. El flag `en_informe`
+     * avisa de cuándo ya existe una búsqueda real para ese portal.
+     *
+     * ⚠️ Material interno (`.ai/rules/mercado.md`): panel admin, nunca público.
+     *
+     * @return list<array{portal:string, pais:string, url:string, descripcion:string, en_informe:bool}>
+     */
+    public function getEnlacesSueloAttribute(): array
+    {
+        return PortalSearchUrls::forCar($this);
+    }
+
+    /**
      * Crea una fila vacía de research para un aspecto si no existe.
      */
     public function setResearchAspect(string $aspect, array $data): void
@@ -246,5 +490,82 @@ class Car extends Model
             'date' => null,
         ], $data);
         $this->research = $research;
+    }
+
+    // ───────────────────────────────────────────────────────────────────────
+    // Tracking público del proceso (URL compartida con el cliente)
+    // ───────────────────────────────────────────────────────────────────────
+
+    /** Coches con token válido, no revocado y en estado trackeable. */
+    public function scopePublicTracking($query)
+    {
+        return $query
+            ->whereNotNull('tracking_token')
+            ->whereNull('tracking_revoked_at')
+            ->whereIn('status', self::TRACKABLE_STATUSES);
+    }
+
+    /** Genera un token único de 40 caracteres. NO persiste (uso interno). */
+    public static function generateTrackingToken(): string
+    {
+        do {
+            $token = Str::random(40);
+            // withoutGlobalScope('organization') — evita colisión con otra org;
+            // sin desactivar SoftDeletes (un token de coche borrado sigue ocupado).
+        } while (self::withoutGlobalScope('organization')->withTrashed()->where('tracking_token', $token)->exists());
+
+        return $token;
+    }
+
+    /** Genera un token nuevo, lo persiste y devuelve la URL pública completa. */
+    public function regenerateTrackingToken(): string
+    {
+        $this->tracking_token = self::generateTrackingToken();
+        $this->save();
+
+        return $this->tracking_url;
+    }
+
+    /** Marca como compartido: timestamp + email opcional + URL lista. */
+    public function shareTracking(?string $email = null): string
+    {
+        if (! $this->tracking_token) {
+            $this->tracking_token = self::generateTrackingToken();
+        }
+        $this->tracking_shared_at = now();
+        $this->tracking_revoked_at = null;
+        $this->tracking_shared_with_email = $email;
+        $this->save();
+
+        return $this->tracking_url;
+    }
+
+    /** Soft revoke: el token sigue existiendo pero deja de ser público. */
+    public function revokeTracking(): void
+    {
+        $this->tracking_revoked_at = now();
+        $this->save();
+    }
+
+    public function getTrackingUrlAttribute(): string
+    {
+        if (! $this->tracking_token) {
+            return '';
+        }
+
+        $base = rtrim(config('app.url', ''), '/');
+
+        return $base.'/tracking/'.$this->tracking_token;
+    }
+
+    public function getIsTrackingSharedAttribute(): bool
+    {
+        return ! empty($this->tracking_token) && empty($this->tracking_revoked_at);
+    }
+
+    public function getIsPublicTrackableAttribute(): bool
+    {
+        return $this->is_tracking_shared
+            && in_array($this->status, self::TRACKABLE_STATUSES, true);
     }
 }

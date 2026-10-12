@@ -18,7 +18,7 @@
     $telefono_2 = $telefono_2 ?? '691 48 59 27';
     $email = $email ?? 'jjimportmotors@gmail.com';
 
-    $semaforo = strtolower($e->uno('SEMAFORO') ?? 'gris');
+    $semaforo = strtolower($e->uno('SEMAFORO') ?? ($car->traffic_light ?? 'gris'));
     $semaforo_color = match ($semaforo) {
         'verde', 'green'  => '#10B981',
         'ambar', 'amber'  => '#F59E0B',
@@ -64,8 +64,11 @@
     if ($score_global !== null && str_contains($score_global, '/')) {
         $score_global = explode('/', $score_global)[0];
     }
-    $recomendacion = $e->uno('RECOMENDACION') ?? $e->uno('VEREDICTO');
-    $veredicto     = $e->uno('VEREDICTO') ?? $recomendacion;
+    // Fallbacks desde los campos de IA del modelo Car (si el esqueleto no los trae).
+    $recomendacion = $e->uno('RECOMENDACION') ?? $e->uno('VEREDICTO') ?? ($car->recommendation ?? null);
+    $veredicto     = $e->uno('VEREDICTO') ?? $recomendacion ?? ($car->verdict ?? null);
+    $razonamiento  = $e->uno('RAZONAMIENTO') ?? ($car->verdict_reasoning ?? null);
+    $confianza_ia  = $e->uno('CONFIANZA') ?? ($car->verdict_confidence ?? null);
 
     $cobertura_raw = $e->filas('COBERTURA');      // [fuente, estado, score, detalle]
     $cobertura_ok  = count(array_filter($cobertura_raw, fn ($c) => strtoupper(trim($c[1] ?? '')) === 'OK'));
@@ -142,9 +145,26 @@
             background:
                 radial-gradient(ellipse at 100% 0%, rgba(143, 163, 217, 0.1) 0%, transparent 45%),
                 linear-gradient(180deg, #0f1d42 0%, #14265a 50%, #0f1d42 100%);
+            /* Repite el degradado en CADA página impresa */
+            background-attachment: fixed;
         }
 
         .container { position: relative; z-index: 1; max-width: 1080px; margin: 0 auto; }
+
+        /* Evita que las secciones se partan a mitad de página */
+        .kpi-cards, .cobertura-grid, .exec, .cand-card, .fin-table,
+        .margen-table, .score-bars, .venta-table, .balance, .aspectos,
+        .comp-table, .fuentes, .riesgos, .check-list, .accion, .verdict-card,
+        .pie, .doc-head, .cover-grid {
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+
+        /* El veredicto final cierra en su propia página */
+        .verdict-final {
+            page-break-before: always;
+            break-before: page;
+        }
 
         .header {
             display: flex; justify-content: space-between; align-items: center;
@@ -415,8 +435,8 @@
             @if($e->uno('DICTAMEN'))
             <div class="exec-top">
                 <span class="semaforo" style="background: {{ $semaforo_color }}; box-shadow: 0 0 10px {{ $semaforo_color }};"></span>
-                <span class="dictamen" style="color: {{ $semaforo_color }};">{{ $e->uno('DICTAMEN') }}</span>
-                <span class="confianza">Confianza: <b>{{ $e->uno('CONFIANZA') }}</b></span>
+                <span class="dictamen" style="color: {{ $semaforo_color }};">{{ $e->uno('DICTAMEN') ?? $car->verdict ?? '—' }}</span>
+                <span class="confianza">Confianza: <b>{{ $confianza_ia ?? '—' }}</b></span>
             </div>
             @endif
             @if($e->uno('RESUMEN'))
@@ -676,15 +696,15 @@
         </div>
         @endif
 
-        {{-- ── VERDICT FINAL ─────────────────────────────────────────── --}}
+        {{-- ── VERDICT FINAL (cierra en página propia) ─────────────────── --}}
         @if($veredicto)
-        <div class="section">
+        <div class="section verdict-final">
             <div class="h2">Veredicto final</div>
             <div class="verdict-card">
                 <div class="verdict-title">Recomendación · {{ $veredicto }}</div>
                 <div class="verdict-text">
                     @if($cand_precio_obj)Compra objetivo: <strong>{{ $cand_precio_obj }} €</strong>.@endif
-                    @if($e->uno('CONFIANZA'))Confianza de la valoración: <strong>{{ $e->uno('CONFIANZA') }}</strong>.@endif
+                    @if($confianza_ia)Confianza de la valoración: <strong>{{ $confianza_ia }}</strong>.@endif
                     @if($score_global !== null)Score global de oportunidad: <strong>{{ $score_global }}/100</strong>.@endif
                     @if($mediana_de)Referencia mercado DE: {{ $mediana_de }} €.@endif
                     @if($mediana_es)Referencia mercado ES: {{ $mediana_es }} €.@endif

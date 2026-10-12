@@ -18,7 +18,7 @@ class MarketplaceFilterCacheTest extends TestCase
         Car::factory()->create([
             'organization_id' => $org->id,
             'is_marketplace' => true,
-            'status' => 'Delivered',
+            'status' => 'Located',
             'verdict' => 'Buy',
             'brand' => 'Audi',
             'fuel' => 'Diesel',
@@ -49,7 +49,7 @@ class MarketplaceFilterCacheTest extends TestCase
         Car::factory()->create([
             'organization_id' => $org->id,
             'is_marketplace' => true,
-            'status' => 'Delivered',
+            'status' => 'Located',
             'verdict' => 'Buy',
             'brand' => 'BMW',
         ]);
@@ -76,7 +76,7 @@ class MarketplaceFilterCacheTest extends TestCase
         Car::factory()->create([
             'organization_id' => $org->id,
             'is_marketplace' => true,
-            'status' => 'Delivered',
+            'status' => 'Located',
             'verdict' => 'Buy',
         ]);
 
@@ -112,7 +112,7 @@ class MarketplaceFilterCacheTest extends TestCase
         Car::factory()->create([
             'organization_id' => $org->id,
             'is_marketplace' => true,
-            'status' => 'Delivered',
+            'status' => 'Located',
             'verdict' => 'Buy',
             'brand' => 'Mercedes',
             'fuel' => 'Gasoline',

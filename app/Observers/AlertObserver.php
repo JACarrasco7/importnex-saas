@@ -3,9 +3,11 @@
 namespace App\Observers;
 
 use App\Models\Alert;
+use App\Models\User;
 use App\Services\AlertEmailDispatcher;
 use App\Services\AlertWebhookDispatcher;
 use App\Services\PushNotificationDispatcher;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class AlertObserver
@@ -60,6 +62,27 @@ class AlertObserver
                 'alert_id' => $alert->id,
                 'error' => $e->getMessage(),
             ]);
+        }
+
+        // Auditoria 2026-09-06 (B7): invalidar cache del middleware
+        // HandleInertiaRequests para que el badge de alertas pendientes se
+        // actualice al instante en el siguiente GET autenticado.
+        $this->forgetInertiaShareCache($alert->organization_id);
+    }
+
+    public function deleted(Alert $alert): void
+    {
+        $this->forgetInertiaShareCache($alert->organization_id);
+    }
+
+    private function forgetInertiaShareCache(int $orgId): void
+    {
+        // El middleware tiene la cache por user_id (múltiples usuarios pueden
+        // pertenecer a la misma org). Invalidamos el de TODOS los usuarios
+        // de la org iterando la lista — es un set pequeño por org.
+        $userIds = User::where('organization_id', $orgId)->pluck('id');
+        foreach ($userIds as $uid) {
+            Cache::forget('inertia.share.user.'.$uid);
         }
     }
 }

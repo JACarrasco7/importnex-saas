@@ -13,13 +13,41 @@ class PerformanceAuditTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * (auditoria ronda 4, 13-sep-2026) Los tests de TIEMPO se saltan si existe
+     * `public/hot` (marca del Vite dev server). Con HMR activo, Vite::prefetch()
+     * intenta alcanzar el dev server en cada request y añade ~2s de timeout
+     * — tiempo que NO existe en producción (sin dev server) y que falsea
+     * cualquier medición de performance.
+     *
+     * Solucion alternativa: parar `npm run dev` antes de correr la suite. Pero
+     * saltar con mensaje claro es mas honesto que fallar en falso.
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        if (file_exists(public_path('hot')) && $this->isTimingTest()) {
+            $this->markTestSkipped(
+                'Vite dev server activo (public/hot existe): los tiempos incluyen '
+                .'prefetch del dev server (~2s), no representan produccion. '
+                .'Para correrlos: para `npm run dev` y borra public/hot.'
+            );
+        }
+    }
+
+    private function isTimingTest(): bool
+    {
+        return str_contains($this->name(), 'under_');
+    }
+
     public function test_marketplace_index_renders_under_1_second(): void
     {
         $org = Organization::factory()->create(['is_public' => true]);
         Car::factory()->count(30)->create([
             'organization_id' => $org->id,
             'is_marketplace' => true,
-            'status' => 'Delivered',
+            'status' => 'Located',
             'verdict' => 'Buy',
         ]);
 
@@ -37,7 +65,7 @@ class PerformanceAuditTest extends TestCase
         $car = Car::factory()->create([
             'organization_id' => $org->id,
             'is_marketplace' => true,
-            'status' => 'Delivered',
+            'status' => 'Located',
             'verdict' => 'Buy',
         ]);
 
@@ -75,7 +103,7 @@ class PerformanceAuditTest extends TestCase
         $car = Car::factory()->create([
             'organization_id' => $org->id,
             'is_marketplace' => true,
-            'status' => 'Delivered',
+            'status' => 'Located',
             'verdict' => 'Buy',
         ]);
         CarPhoto::factory()->count(3)->create(['car_id' => $car->id]);
@@ -104,7 +132,7 @@ class PerformanceAuditTest extends TestCase
         Car::factory()->count(5)->create([
             'organization_id' => $org->id,
             'is_marketplace' => true,
-            'status' => 'Delivered',
+            'status' => 'Located',
             'verdict' => 'Buy',
         ]);
 
@@ -132,7 +160,7 @@ class PerformanceAuditTest extends TestCase
         $car = Car::factory()->create([
             'organization_id' => $org->id,
             'is_marketplace' => true,
-            'status' => 'Delivered',
+            'status' => 'Located',
             'verdict' => 'Buy',
         ]);
 

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\CarImported;
+use App\Http\Controllers\Api\Concerns\ParsesImportPayload;
 use App\Http\Controllers\Controller;
 use App\Models\Car;
 use App\Models\Cierre;
@@ -31,20 +33,15 @@ use Illuminate\Support\Facades\Log;
  */
 class ImportValuationApiController extends Controller
 {
+    use ParsesImportPayload;
+
     public function store(Request $request, ValuationImporter $importer): JsonResponse
     {
         $org = $request->attributes->get('import_org');
 
-        $payload = $request->json()->all();
-        if (empty($payload)) {
-            $payload = json_decode($request->getContent(), true);
-        }
-        if (empty($payload) || ! is_array($payload)) {
-            $rawBody = $request->getContent() ?: file_get_contents('php://input');
-            $payload = json_decode($rawBody, true);
-        }
-        if (empty($payload) || ! is_array($payload)) {
-            return response()->json(['error' => 'Empty or invalid JSON body.'], 422);
+        [$payload, $error] = $this->parseImportPayload($request);
+        if ($error !== null) {
+            return $error;
         }
 
         // §10.7 — validar estructura mínima de Flujo A (schema_version + bloques requeridos)
@@ -60,6 +57,20 @@ class ImportValuationApiController extends Controller
         try {
             $car = $importer->resolveCar($payload, $org);
             $wasNew = ! $car->exists;
+
+            // dry_run (?dry=1 o header X-Dry-Run: 1) valida pero NO escribe en BD.
+            // Util para que el chat verifique que un JSON entrara sin crear coche basura.
+            $dryRun = $request->boolean('dry') || strtolower((string) $request->header('X-Dry-Run')) === '1';
+            if ($dryRun) {
+                return response()->json([
+                    'status' => 'dry_run_ok',
+                    'would_create' => $wasNew,
+                    'car_id' => $wasNew ? null : $car->id,
+                    'car_url' => $wasNew ? null : url("/cars/{$car->id}"),
+                    'message' => 'JSON valido. dry_run=1: NO se importo a la BD.',
+                ], 200);
+            }
+
             $importer->apply($car, $payload);
         } catch (\RuntimeException $e) {
             // Auditoría 3 (#4) — validaciones de negocio = payload inválido (422), no 500
@@ -69,6 +80,16 @@ class ImportValuationApiController extends Controller
 
             return response()->json(['error' => 'Import failed: '.$e->getMessage()], 500);
         }
+
+        // Canal 7 (sin esto la sync de encargos.md se pierde): al importar un
+        // coche se despacha el evento; el listener NotifyImportWebhook avisa al
+        // Desktop local si IMPORTNEX_CHAT_WEBHOOK_URL esta configurado.
+        event(new CarImported(
+            car: $car,
+            flujo: 'A',
+            carUrl: url("/cars/{$car->id}"),
+            schemaVersion: (string) ($payload['_meta']['schema_version'] ?? '1'),
+        ));
 
         return response()->json([
             'status' => $wasNew ? 'created' : 'updated',
@@ -92,16 +113,9 @@ class ImportValuationApiController extends Controller
     {
         $org = $request->attributes->get('import_org');
 
-        $payload = $request->json()->all();
-        if (empty($payload)) {
-            $payload = json_decode($request->getContent(), true);
-        }
-        if (empty($payload) || ! is_array($payload)) {
-            $rawBody = $request->getContent() ?: file_get_contents('php://input');
-            $payload = json_decode($rawBody, true);
-        }
-        if (empty($payload) || ! is_array($payload)) {
-            return response()->json(['error' => 'Empty or invalid JSON body.'], 422);
+        [$payload, $error] = $this->parseImportPayload($request);
+        if ($error !== null) {
+            return $error;
         }
 
         // §10.6 — validar schema_version, flujo y bloques mínimos (Flujo B)
@@ -131,6 +145,14 @@ class ImportValuationApiController extends Controller
             return response()->json(['error' => 'Import failed: '.$e->getMessage()], 500);
         }
 
+        // Canal 7 — ver store() para la explicacion del evento.
+        event(new CarImported(
+            car: $car,
+            flujo: 'B',
+            carUrl: url("/cars/{$car->id}"),
+            schemaVersion: (string) ($payload['_meta']['schema_version'] ?? '1'),
+        ));
+
         return response()->json([
             'status' => $wasNew ? 'created' : 'updated',
             'flujo' => 'B',
@@ -152,16 +174,9 @@ class ImportValuationApiController extends Controller
     {
         $org = $request->attributes->get('import_org');
 
-        $payload = $request->json()->all();
-        if (empty($payload)) {
-            $payload = json_decode($request->getContent(), true);
-        }
-        if (empty($payload) || ! is_array($payload)) {
-            $rawBody = $request->getContent() ?: file_get_contents('php://input');
-            $payload = json_decode($rawBody, true);
-        }
-        if (empty($payload) || ! is_array($payload)) {
-            return response()->json(['error' => 'Empty or invalid JSON body.'], 422);
+        [$payload, $error] = $this->parseImportPayload($request);
+        if ($error !== null) {
+            return $error;
         }
 
         // §10.6 — validar schema_version, flujo y bloques mínimos (Flujo C)
@@ -181,6 +196,14 @@ class ImportValuationApiController extends Controller
 
         if (! is_array($payload['modelos'])) {
             return response()->json(['error' => 'Field "modelos" must be an array.'], 422);
+        }
+
+        // Limite defensivo (auditoria ronda 4, sep-2026): si llegan 100k modelos,
+        // el INSERT por modelo dentro de transaccion bloquea la BD minutos.
+        if (count($payload['modelos']) > 1000) {
+            return response()->json([
+                'error' => 'Field "modelos" exceeds max length (1000). Split into multiple scouting imports.',
+            ], 422);
         }
 
         // Validar campos requeridos en cada modelo
@@ -215,6 +238,7 @@ class ImportValuationApiController extends Controller
                     'organization_id' => $org->id,
                 ]
             );
+            $wasCreated = $scouting->wasRecentlyCreated;
 
             // Eliminar modelos anteriores si es actualización
             $scouting->modelos()->delete();
@@ -241,10 +265,10 @@ class ImportValuationApiController extends Controller
             ]);
 
             return response()->json([
-                'status' => 'created',
+                'status' => $wasCreated ? 'created' : 'updated',
                 'scouting_id' => $scouting->scouting_id,
                 'modelos_count' => $scouting->modelos()->count(),
-            ], 201);
+            ], $wasCreated ? 201 : 200);
 
         } catch (\Throwable $e) {
             Log::error('ImportValuationApiController::storeMercado failed', ['error' => $e->getMessage()]);
@@ -266,16 +290,9 @@ class ImportValuationApiController extends Controller
     {
         $org = $request->attributes->get('import_org');
 
-        $payload = $request->json()->all();
-        if (empty($payload)) {
-            $payload = json_decode($request->getContent(), true);
-        }
-        if (empty($payload) || ! is_array($payload)) {
-            $rawBody = $request->getContent() ?: file_get_contents('php://input');
-            $payload = json_decode($rawBody, true);
-        }
-        if (empty($payload) || ! is_array($payload)) {
-            return response()->json(['error' => 'Empty or invalid JSON body.'], 422);
+        [$payload, $error] = $this->parseImportPayload($request);
+        if ($error !== null) {
+            return $error;
         }
 
         // Validar campos requeridos
@@ -410,16 +427,9 @@ class ImportValuationApiController extends Controller
     {
         $org = $request->attributes->get('import_org');
 
-        $payload = $request->json()->all();
-        if (empty($payload)) {
-            $payload = json_decode($request->getContent(), true);
-        }
-        if (empty($payload) || ! is_array($payload)) {
-            $rawBody = $request->getContent() ?: file_get_contents('php://input');
-            $payload = json_decode($rawBody, true);
-        }
-        if (empty($payload) || ! is_array($payload)) {
-            return response()->json(['error' => 'Empty or invalid JSON body.'], 422);
+        [$payload, $error] = $this->parseImportPayload($request);
+        if ($error !== null) {
+            return $error;
         }
 
         // Validar campos requeridos
@@ -625,8 +635,9 @@ class ImportValuationApiController extends Controller
                 $query->veredictoPositivo();
             }
 
+            $limit = max(1, min(500, (int) $request->query('limit', 100)));
             $cierres = $query->orderByDesc('fecha_investigacion')
-                ->limit($request->query('limit', 100))
+                ->limit($limit)
                 ->get();
 
             // Agregar estadísticas resumidas
@@ -693,16 +704,17 @@ class ImportValuationApiController extends Controller
         $org = $request->attributes->get('import_org');
 
         try {
-            $scoutings = ScoutingMercado::with('modelos')
-                ->where('organization_id', $org->id)
-                ->orderByDesc('generado_el')
-                ->limit(max(1, min(100, (int) $request->query('limit', 20))))
-                ->get();
+            $limit = max(1, min(100, (int) $request->query('limit', 20)));
+            $query = ScoutingMercado::with('modelos')
+                ->where('organization_id', $org->id);
+
+            $total = (clone $query)->count();
+            $scoutings = $query->orderByDesc('generado_el')->limit($limit)->get();
 
             return response()->json([
                 'status' => 'ok',
                 'organization_id' => $org->id,
-                'total' => $scoutings->count(),
+                'total' => $total,
                 'scoutings' => $scoutings->map(fn ($s) => [
                     'id' => $s->id,
                     'scouting_id' => $s->scouting_id,

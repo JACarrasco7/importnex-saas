@@ -7,14 +7,15 @@
 
 ## 🗺️ MAPA DE PDFs — TIPOS y DÓNDE SE CREA CADA UNO (movido de SKILL.md, 15-ago-2026)
 
-> **Hay 7 PDFs en total: 3 los genera CLAUDE (investigación) y 4 los genera LARAVEL (venta/documento).**
+> **Hay 8 PDFs en total: 3 puede generarlos CLAUDE (investigación, SOLO si el usuario los pide) y 5 los genera LARAVEL (venta/documento).**
+> ⚠️ **El formato por defecto de un informe es 1 solo `.md`.** Los PDFs de investigación no se generan «porque quedan mejor»: no funcionan los enlaces. Ver `../03-informes/entregables.md` §4.
 > **El briefing PDF ya NO existe** (eliminado 15-ago-2026). El status de cliente 'Briefing' (pipeline) y `../01-arranque/briefing_encargo.md` (cuestionario previo) NO son el PDF briefing y se mantienen.
 
 | # | PDF | Tipo | Quién lo genera | De qué sale | Dónde se crea |
 |---|---|---|---|---|---|
-| 1 | `informe_busqueda_*.pdf` | Investigación (búsqueda) | **CLAUDE** | Markdown Fase 1 | HTML de marca → Chrome headless, plantilla `assets/plantilla_pdf_marca.html` |
-| 2 | `informe_unidad_*.pdf` | Investigación (unidad) | **CLAUDE** | `../03-informes/informe_tecnico.md` (15 sec) | Idem plantilla de marca |
-| 3 | informe técnico unidad (Flujo A) | Investigación (técnico) | **CLAUDE** | `../03-informes/informe_tecnico.md` | Idem plantilla de marca |
+| 1 | `informe_busqueda_*.pdf` | Investigación (búsqueda) | **CLAUDE** *(solo a petición)* | `../03-informes/informe_busqueda.md` | HTML de marca → Chrome headless, plantilla `assets/plantilla_pdf_marca.html` |
+| 2 | `informe_unidad_*.pdf` | Investigación (unidad) | **CLAUDE** *(solo a petición)* | `../03-informes/informe_tecnico.md` (15 sec) | Idem plantilla de marca |
+| 3 | informe técnico unidad (Flujo A) | Investigación (técnico) | **CLAUDE** *(solo a petición)* | `../03-informes/informe_tecnico.md` | Idem plantilla de marca |
 | 4 | Dossier cliente | Venta / cliente | **LARAVEL** | `contenido/dossier-cliente.txt` | Blade `ficha-coche.blade.php` (documento cliente) |
 | 5 | Ficha del coche | Venta / cliente | **LARAVEL** | `contenido/ficha-publicitaria.txt` | Blade `ficha-coche.blade.php` · `PaqueteValoracionController@ficha` · ruta `cars.ficha` |
 | 6 | Informe interno | Venta / equipo | **LARAVEL** | `contenido/informe-interno.txt` | Blade `informe-interno.blade.php` · `PaqueteValoracionController@interno` · ruta `cars.informe-interno` |
@@ -23,9 +24,22 @@
 
 **Reglas duras del mapa:**
 1. **Claude NUNCA genera los PDFs de venta** (ficha, informe interno, folleto) — los hace Laravel con Blade + Browsershot tras recibir el ZIP.
-2. **Laravel NUNCA genera los PDFs de investigación** — los hace Claude en el Desktop con la plantilla de marca.
+2. **Laravel NUNCA genera los PDFs de investigación.** Los genera Claude **solo si el usuario los pide** (por defecto el informe es 1 `.md`), con la plantilla de marca + Chrome headless.
+   ⚠️ Las filas **2 y 3 son el MISMO PDF** (el informe técnico de unidad entregado como `informe_unidad_*.pdf`): no se generan dos.
 3. El **informe interno** (margen, honorarios, URLs de comparables) es SOLO equipo; el **dossier/ficha/folleto** es para el cliente (sin margen).
-4. Los esqueletos `.txt` (`contenido/*.txt`) son la ÚNICA entrada de Laravel: `ficha-publicitaria.txt`, `informe-interno.txt`, `dossier-cliente.txt`. El **folleto del coche reutiliza `ficha-publicitaria.txt`** — no requiere esqueleto propio.
+4. Los esqueletos `.txt` (`contenido/*.txt`) son la ÚNICA entrada de Laravel: `ficha-publicitaria.txt`, `informe-interno.txt`, `dossier-cliente.txt` (solo veredicto Comprar*), **`redes-sociales.txt` y `anuncio-portales.txt`** (marketing — 03-sep-2026). El **folleto del coche reutiliza `ficha-publicitaria.txt`** — no requiere esqueleto propio.
+5. **Claude decide el contenido de cada esqueleto** (qué poner y qué NO en el folleto/cliente — A22). Laravel **solo maqueta**: no añade ni quita contenido. En el folleto del cliente NUNCA va margen, honorarios, negociación ni `verdict_reasoning`/`recommendation`.
+
+### 📣 Entregables de marketing (no son PDF) — 03-sep-2026
+
+| Archivo | Bloques | Qué alimenta en Laravel |
+|---|---|---|
+| `contenido/redes-sociales.txt` | `[GANCHO] [POST_LARGO] [POST_CORTO] [STORIES] [HASHTAGS] [PIE_FOTO]` | Tabla `car_marketing_contents` → canales **instagram** (GANCHO+POST_LARGO+HASHTAGS+PIE_FOTO) y **tiktok** (GANCHO+STORIES/POST_CORTO) |
+| `contenido/anuncio-portales.txt` | `[TITULO] [DESCRIPCION] [FICHA_RAPIDA] [QUE_INCLUYE] [AVISO_LEGAL]` | Tabla `car_marketing_contents` → canales **milanuncios, coches_net, wallapop, facebook** (mismo TITULO+DESCRIPCION) |
+
+- Ambos `.txt` son **OBLIGATORIOS** en el ZIP del Flujo A (A23): sin ellos el módulo de marketing del panel queda vacío.
+- Se importan con `status=draft` — el operador revisa y publica desde el panel (`/cars/{id}/marketing`).
+- El panel también puede **generar contenido con IA** para un canal (`cars.marketing.generate`): si se genera, sustituye el importado del ZIP (`updateOrCreate`). Ambos orígenes coexisten.
 
 ---
 
@@ -37,14 +51,16 @@
 
 **Tabla única de rutas — QUÉ archivo va DÓNDE:**
 
+> **Nombres canónicos y carpetas: `../03-informes/entregables.md`** — manda sobre esta tabla.
+
 | Archivo | Ruta | Quién lo usa | Cuándo |
 |---|---|---|---|
-| `informe_busqueda_<fecha>.md` | `informes\<marca>\<modelo>\` | El usuario (lectura) | Fin Fase 1 (Flujo B/C) |
-| `informe_unidad_<fecha>.md` | `informes\<marca>\<modelo>\` | El usuario (lectura) | Fase 2, candidato elegido |
-| `comparativa_<fecha>.md` | `informes\<marca>\<modelo>\` | El usuario (lectura) | Si compara varios candidatos |
+| `informe_busqueda_<objeto>_<YYYY-MM-DD>.md` | según `../03-informes/entregables.md` §3 | El usuario (lectura) | Fin Fase 1 (Flujo B/C/E) |
+| `informe_unidad_<marca>-<modelo>_<YYYY-MM-DD>.md` | `informes\<marca>\<modelo>\` | El usuario (lectura) | Fase 2, candidato elegido |
+| `comparativa_<YYYY-MM-DD>.md` | `informes\<marca>\<modelo>\` | El usuario (lectura) | Si compara varios candidatos |
 | `export\flujo-a-<coche_id>.json` | `laravel\` | `empaquetar.py` | Flujo A (entrada del ZIP) |
 | `export\flujo-b-<modelo>-<fecha>.json` | `laravel\` | Laravel (histórico cacheable) | Flujo B |
-| `export\scouting_<fecha>.json` | `laravel\` | Laravel (scouting) | Flujo C |
+| `export\flujo-c-<fecha>.json` | `laravel\` | Laravel (scouting) | Flujo C |
 | `<coche_id>.zip` | `laravel\paquetes\` | Subida a Laravel | Cierre Flujo A |
 | `informe.json` | **SOLO dentro del ZIP** | Laravel | Lo genera `empaquetar.py` — NO existe suelto |
 | Fotos del candidato | `<coche_id>_fotos\` junto al JSON de `export\` | `empaquetar.py` | Se descargan al elegir candidato |
@@ -66,14 +82,14 @@
 C:\Users\jacar\Desktop\JJImportMotors\
 ├── informes\                        ← SOLO .md para el USUARIO, por marca/modelo
 │   └── <marca>\<modelo>\            ← ej. vw\tiguan
-│       ├── informe_busqueda_<fecha>.md
-│       ├── informe_unidad_<fecha>.md
+│       ├── informe_busqueda_<objeto>_<YYYY-MM-DD>.md
+│       ├── informe_unidad_<marca>-<modelo>_<YYYY-MM-DD>.md
 │       └── comparativa_<fecha>.md
 └── laravel\                         ← trabajo de scripts y contrato con Laravel
     ├── export\
     │   ├── flujo-a-<coche_id>.json  ← entrada de empaquetar.py (Flujo A)
     │   ├── flujo-b-<modelo>-<fecha>.json
-    │   └── scouting_<fecha>.json
+    │   └── flujo-c-<YYYY-MM-DD>.json
     └── paquetes\
         └── <coche_id>.zip           ← contiene informe.json + manifest + contenido\ + fotos\
 ```
@@ -97,7 +113,7 @@ C:\Users\jacar\Desktop\JJImportMotors\
 
 2. 📦 SUBIR AL SISTEMA → el JSON se sube vía API (`/api/import-valuation` con `X-Import-Token`); el ZIP con fotos se sube desde el panel web (`POST /cars/import-valuation`).
    └─ Laravel (importnexcore) = REPOSITORIO ÚNICO y FUENTE DE VERDAD de:
-       ✓ PDFs de marketing (dossier, ficha, folleto — por Blade+Browsershot) · ✓ imágenes/fotos · ✓ JSON · ✓ dossier · ✓ folleto
+       ✓ PDFs de marketing (dossier, ficha, folleto — por Blade+Browsershot) · ✓ imágenes/fotos · ✓ JSON · ✓ dossier · ✓ folleto · ✓ contenido de redes/portales (`car_marketing_contents`, importado del ZIP)
 
 3. 📊 VER / MOSTRAR / GESTIONAR / ACTUALIZAR → TODO desde el sistema Laravel.
    └─ El sistema se encarga de las actualizaciones, iteraciones, nuevas versiones, etc.
@@ -110,6 +126,25 @@ C:\Users\jacar\Desktop\JJImportMotors\
 - El **repositorio de PDFs de marketing/imágenes/JSON es Laravel**. Claude genera el paquete y lo SUBE; además entrega al usuario los **PDFs de investigación** (búsqueda/unidad). Los PDFs de marketing (dossier/ficha/folleto) solo salen de Laravel.
 - Para **ver un informe/PDF/fotos** → consultar el sistema Laravel (nunca regenerar desde cero si ya está subido).
 - Claude NO consulta Laravel para "revisar" o "iterar". Cada entrega al sistema es el final del ciclo para Claude.
+
+---
+
+## 📥 QUÉ HACE LARAVEL AL IMPORTAR EL ZIP — flujo de ingestión (03-sep-2026)
+
+> `POST /cars/import-valuation` → `ValuationPackageIngestor::ingest()`. Una sola pasada, idempotente (reimportar el mismo ZIP sustituye, no duplica).
+
+| Paso | Qué hace | Dónde queda |
+|---|---|---|
+| 1. Crear/actualizar coche | Resuelve por VIN del `informe.json` (mismo VIN = mismo coche) + aplica campos del contrato | Tabla `cars` |
+| 2. Galería de fotos | `fotos/*.jpg` del ZIP → sustituye la galería anterior | `cars/{id}/photos/` (disco public) + tabla `car_photos` |
+| 3. Contenido .txt | `contenido/*.txt` → ficha, informe interno, dossier, redes, portales | `cars/{id}/contenido/` (disco local, privado) |
+| 4. **Marketing** | Parsea `redes-sociales.txt` + `anuncio-portales.txt` (`App\Support\Esqueleto`) → hasta 6 filas con `status=draft` (guardas: bloque clave vacío = no se crea la fila) | Tabla `car_marketing_contents` |
+| 5. Documentos | PDFs sueltos si el paquete los trae (v1) | `cars/{id}/documents/` |
+
+**Después de importar, el operador en Laravel:**
+1. Ficha del coche → `/cars/{id}` (galería + datos) · PDFs en `cars.ficha` / `cars.folleto` / `cars.informe-interno`.
+2. Marketing → `/cars/{id}/marketing`: revisa los 6 borradores importados, edita si quiere y publica por canal (`cars.marketing.publish`).
+3. Overview → `/marketing`: stats de coches con contenido / publicados / borradores.
 
 ---
 
@@ -230,8 +265,8 @@ py scripts/sync_indice.py --dry-run        # imprime el JSON sin escribir
 JJImportMotors/informes/                  ← SOLO .md para el USUARIO (por marca/modelo)
 └── <marca>/
     └── <modelo>/
-        ├── informe_busqueda_<fecha>.md   ← Fase 1: cobertura + candidatos
-        ├── informe_unidad_<fecha>.md     ← Fase 2: informe del candidato elegido
+        ├── informe_busqueda_<objeto>_<YYYY-MM-DD>.md   ← Fase 1: cobertura + candidatos
+        ├── informe_unidad_<marca>-<modelo>_<YYYY-MM-DD>.md   ← Fase 2: informe del candidato elegido
         └── comparativa_<fecha>.md        ← si compara varios candidatos
 
 JJImportMotors/laravel/                   ← scripts Python, JSON de contrato y ZIPs
@@ -254,7 +289,7 @@ JJImportMotors/laravel/                   ← scripts Python, JSON de contrato y
 │       └── <marca>/<modelo-slug>/
 │           └── informe_<fecha>.json     ← JSONs Flujo A y B completos
 └── scouting/                            ← Solo Flujo C
-    └── scouting_<fecha>.json            ← Tabla multi-modelo agregada
+    └── flujo-c-<YYYY-MM-DD>.json            ← Tabla multi-modelo agregada
 ```
 
 **Reglas de guardado (15-ago-2026):**
@@ -403,15 +438,35 @@ python franja.py --mediana 16400 --anio 12/2017 --co2 145 --pvp-nuevo 32250 --zo
 # 2. Desglose completo de un candidato concreto
 python franja.py ... --precio-aleman 13000 --km 102000 --nombre "Opel Astra OPC 2014"
 
-# 3. Confirmar OK y empaquetar
-python empaquetar.py export/flujo-a-opel-astra-opc-2014-a1b2c3.json
-# Genera: paquetes/opel-astra-opc-2014-a1b2c3.zip
+# 3. Confirmar OK y empaquetar — 4 rutas posibles (orden de preferencia):
+python scripts/empaquetar.py --laravel-storage export/flujo-a-<coche>.json
+# → Genera: <repo>/storage/app/private/investigaciones/<marca>/<modelo>/<coche>-<fecha>.zip
+#   (PREFERIDA desde el repo: no contamina Downloads; queda dentro del proyecto)
+
+python scripts/empaquetar.py --auto-path export/flujo-a-<coche>.json
+# → Genera: ~/Desktop/JJImportMotors/investigaciones/<marca>/<modelo>/<coche>-<fecha>.zip
+#   (Cuando se ejecuta desde Claude Desktop, fuera del repo)
+
+python scripts/empaquetar.py --out C:/ruta/custom export/flujo-a-<coche>.json
+# → Genera: <ruta-custom>/<coche>.zip (sin fecha en el nombre)
+#   (Solo si necesitas forzar una ruta específica)
+
+python scripts/empaquetar.py export/flujo-a-<coche>.json
+# → Genera: ./paquetes/<coche>.zip (default — desaconsejado: queda en el repo sin clasificar)
 
 # 4. Subir ZIP a Laravel
 # POST https://dev.aktive.cloud/importnexcore/api/import-valuation
 # Header: X-Import-Token: <token>
 # Body: ZIP (multipart) o JSON del informe.json (extraer del ZIP)
 ```
+
+> **Por qué `--laravel-storage` es la preferida**: la skill ejecuta desde
+> el repo del proyecto (`c:\laragon\www\importnexcore`) y guardar en
+> `storage/app/private/` mantiene el ZIP **dentro** del proyecto, versionable
+> y descargable por URL pública si se quiere. `--auto-path` queda para
+> Claude Desktop cuando el ZIP va al share de negocio. **Nunca** dejar que
+> el navegador baje el ZIP a `C:\Users\jacar\Downloads\` (de ahí el
+> problema que arreglamos el 09-sep-2026).
 
 #### Flujo B (MODELO)
 
@@ -538,7 +593,7 @@ Ver `../references/cell_map.md` para referencia rápida de dónde vive cada dato
 3. Claude prioriza por ROI y hace Fase 1 por cada modelo (3 fuentes × N modelos).
 4. Claude muestra informe BUSQUEDA con tabla multi-modelo.
 5. Tú curas: "¿profundizo en estos 3?" → pasa a Flujo A o B.
-6. Tabla guardada en `scouting/scouting_<fecha>.json`.
+6. Tabla guardada en `export/flujo-c-<YYYY-MM-DD>.json`.
 
 ### Honorarios por tramo
 

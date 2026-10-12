@@ -56,7 +56,7 @@ class FormRequestValidationTest extends TestCase
         [$org, $user] = $this->actingAsUser();
 
         $response = $this->actingAs($user)->post(route('cars.store'), $this->validPayload([
-            'year' => '2024', // wrong format, expects MM/YYYY
+            'year' => '2024/13', // wrong format (no MM/YYYY, YYYY, YYYY-MM ni YYYY-MM-DD)
         ]));
 
         $response->assertSessionHasErrors(['year']);

@@ -3,7 +3,7 @@
 > Define el formato exacto del JSON que se entrega a `dev.aktive.cloud/importnexcore`.
 > Cargar al generar el paquete final o al escribir el JSON de un coche.
 >
-> **Adaptado a los 4 flujos** (A: UNIDAD, B: MODELO, C: MERCADO, D: DESCUBRIMIENTO). El Flujo D no genera JSON de contrato (su entregable es el INFORME DE MODELOS); su embudo deriva a Flujo B/A.
+> **Adaptado a los 5 flujos** (A: UNIDAD, B: MODELO, C: MERCADO, D: DESCUBRIMIENTO, E: STOCK). El Flujo D no genera JSON de contrato (su entregable es el INFORME DE MODELOS); su embudo deriva a Flujo B/A. El Flujo E genera `stock_<fecha>.json` (catálogo) — sin publicidad ni valoración.
 
 ---
 
@@ -13,7 +13,9 @@
 |---|---|---|---|
 | **A: UNIDAD** | `informe.json` dentro del ZIP | Vista completa, un solo coche | Crea/actualiza `Car` |
 | **B: MODELO** | `export/flujo-b-<modelo>-<fecha>.json` | Igual que A, sin `publicidad` | Histórico cacheable |
-| **C: MERCADO** | `export/flujo-c-<fecha>.json` | Estructura agregada con N modelos | Tabla scouting |
+| **C: MERCADO** | `export/flujo-c-<fecha>.json` | Estructura agregada con N modelos | Tabla `scouting_mercado` |
+| **E: STOCK** | `export/stock-<fecha>.json` | Catálogo por categorías | Stock bajo pedido |
+| **D: DESCUBRIMIENTO** | — (no genera JSON) | Su entregable es el INFORME DE MODELOS | — |
 
 ---
 
@@ -50,7 +52,7 @@ Bloques de primer nivel (siempre presentes en A y B):
 ```
 
 - `schema_version`: 1 (actual)
-- `flujo`: "A" | "B" | "C"
+- `flujo`: "A" | "B" | "C" | "E"
 - `coche_id`: nombre archivo respaldo
 - `client_id`: si se rellena, Laravel enlaza el coche a ese cliente
 
@@ -262,6 +264,7 @@ Lista de strings. Mostrar siempre junto a la ficha.
   "publicidad": {
     "titular": "Opel Astra OPC 280 CV — el GTI que nadie espera",
     "claim": "280 caballos, un solo dueño y papeles al día.",
+    "valoracion": "OPC muy completo: 280 CV, único dueño y mantenimiento al día. Entra en las ZBE gracias a la etiqueta C y su precio está por debajo de la media del mercado español.",
     "argumentos": [
       "**Etiqueta C de la DGT:** entra en ZBE sin restricciones.",
       "**Muy poco uso:** 8.800 km/año de media."
@@ -272,6 +275,8 @@ Lista de strings. Mostrar siempre junto a la ficha.
 ```
 
 **`argumentos` nunca del `balance.a_favor`.** Eso es análisis interno (margen, reputación vendedor, riesgo) y no se muestra al cliente. Énfasis con `**negrita**` (no HTML).
+
+**`valoracion` → bloque `[VALORACION]`** de `ficha-publicitaria.txt`, que alimenta la sección "Nuestra valoración" del folleto del coche. 1-2 frases de venta para el cliente (estado, equipamiento, precio vs. mercado). **Prohibido** lenguaje interno: margen, honorarios, negociación, estrategia de venta.
 
 ---
 
@@ -548,17 +553,78 @@ class Esqueleto
 }
 ```
 
+> 🔴 **Laravel consume el JSON, no el `.txt` (07-sep-2026).** Antes de cerrar el ZIP se ejecuta
+> `python scripts/esqueleto_a_json.py contenido/ --out contenido/json/`, que genera
+> `contenido/json/ficha-cliente.json` (y los de redes y portales) con los bloques ya tipados
+> (`spec[]`, `faq[]`, `pasos[]`, listas, números de mercado) más `_meta.bloques_ausentes`.
+> Si esa lista no está vacía, la ficha **no se publica**. Contrato de render y mapa a componentes
+> Blade: `../07-marketing/handoff_laravel.md`.
+
 ### Bloques por archivo (Flujo A)
 
 | Archivo | Bloques esperados |
 |---|---|
-| `ficha-publicitaria.txt` | TITULO, SUBTITULO, PRECIO, AHORRO, ESPECIFICACIONES, ETIQUETA, DESTACADOS, DESCRIPCION, QUE_INCLUYE, AVISO_LEGAL, FOTOS, CONTACTO |
+| `ficha-publicitaria.txt` | TITULO, CLAIM, ETIQUETA_DGT, SPEC (Etiqueta \| Valor), PRECIO, PRECIO_CAPTION, PLAZO, PRECIO_NOTA, AHORRO, **H2 + INCLUYE/ARGUMENTO/EQUIPAMIENTO** (secciones), **DESCRIPCION**, **POR_QUE**, **VALORACION**, CTA, CONTACTO, QR, QR_TEXTO, LEGAL, FOTOS |
 | `informe-interno.txt` | Ver `informe_tecnico.md` §formato-txt (15 secciones, ~60 bloques). **Los bloques `MARGEN`, `VENTA`, `IEDMT_SENSIBILIDAD`, `SCORE_DIM`, `RIESGO`, `BANDERA_ROJA/AMARILLA`, `COBERTURA`, `CAND_*`, `NEG_*`, `COMP_AJUSTE`, `VENDIBILIDAD_FACTOR`, `ACCION` se renderizan como filas/tablas en `informe-interno.blade.php`.** |
 | `dossier-cliente.txt` | Ver `dossier_cliente.md` §formato-txt (15 secciones, ~50 bloques). **Los bloques `FICHA_TECNICA`, `EQUIPAMIENTO`, `MERCADO_*`, `COSTE_LINEA`, `TIMELINE_SEMANA`, `FAQ_Q/A`, `PASOS`, `GARANTIA_*`, `ESTADO_*`, `DE_VS_ES`, `EVAL_*` se renderizan en el documento del cliente de Laravel (`ficha-coche.blade.php`); `dossier.blade.php` NO existe.** |
-| `redes-sociales.txt` | GANCHO, POST_LARGO, POST_CORTO, STORIES, HASHTAGS, PIE_FOTO |
-| `anuncio-portales.txt` | TITULO, DESCRIPCION, FICHA_RAPIDA, QUE_INCLUYE, AVISO_LEGAL |
+| `ficha-cliente.txt` | **v2 (07-sep-2026)** — la PÁGINA que se manda al cliente por enlace, 14 secciones: FC_TITULO, FC_SUBTITULO, FC_PRECIO, FC_PRECIO_NOTA, FC_ESTADO_PROCESO · FC_RESUMEN_BUENO/OJO/PASO · FC_SPEC (lista `Etiqueta \| Valor`, 16 campos) · FC_EQUIP, FC_EQUIP_PENDIENTE · FC_VERIFICADO, FC_PENDIENTE_COMPROBAR · FC_FOTOS · FC_ARGUMENTO · FC_MERCADO_MIN/MEDIANA/MAX/N/FECHA/NOTA · FC_INCLUYE, FC_NO_INCLUYE · FC_PASO (lista `Semana \| Qué pasa`) · **FC_HACEMOS, FC_NO_HACEMOS, FC_NO_GARANTIA (fijos, A31)** · FC_FAQ (mín. 6) · FC_CTA, FC_CONTACTO · FC_AVISO_LEGAL, FC_FECHA_DATOS. Spec: `../07-marketing/ficha_cliente.md` |
+| `redes-sociales.txt` | **v2 — vocabulario POR CANAL**: `IG_*` (feed) y `INSTAGRAM_STORY_*`, `VT_*` (vídeo), `FB_*` y `FACEBOOK_STORY_*` (página), `FBMP_*` (Marketplace), `TIKTOK_*`. Spec: `../07-marketing/copy_engine.md` · claves exactas del JSON: `scripts/esqueleto_a_json.py` |
+| `anuncio-portales.txt` | **v2 — un bloque por portal** (`PT_*`: `PT_TITULO`, `PT_FICHA`, `PT_QUE_INCLUYE`, `PT_ESTADO`, `PT_AVISO_LEGAL`…). Spec: `../07-marketing/portales_anuncio.md` |
+
+> ⚠️ **El vocabulario v1 está RETIRADO** (`GANCHO`, `POST_LARGO`, `POST_CORTO`, `STORIES`, `HASHTAGS`, `PIE_FOTO`, `TITULO`, `DESCRIPCION`, `FICHA_RAPIDA`, `QUE_INCLUYE`, `AVISO_LEGAL`). Hasta la v3.9.1 los 4 canales recibían el mismo texto porque el ingestor solo leía el v1; desde entonces lee el v2, así que **una pieza escrita en v1 llega vacía al panel**. Escribir siempre en v2.
+
+> **`VALORACION` (folleto del coche):** 1-2 frases de venta PARA EL CLIENTE sobre por qué este coche vale la pena (estado, equipamiento, precio vs. mercado). **Prohibido** hablar de margen, honorarios, negociación con el vendedor, estrategia de venta o cualquier dato interno. Es lo que el folleto (`folleto-coche.blade.php`) muestra en "Nuestra valoración". Si no se incluye, el folleto cae al `valuation` del coche o no muestra esa sección. Los campos `verdict_reasoning` y `recommendation` son INTERNOS (informe interno) y **nunca** van al folleto del cliente.
+
+> **`DESCRIPCION` (ficha del coche):** descripción comercial de 60-120 palabras que vende el coche al cliente: estado, acabado, mecánica, equipamiento destacado, historial. Tono cercano y profesional, sin jerga interna. Si no se incluye, la ficha cae a `car->description`.
+
+> **`POR_QUE` (ficha del coche):** 2-4 frases "¿Por qué este coche?" — argumentos de compra claros para el cliente (equilibrio precio/estado, demanda del acabado, costes de uso, rareza). Si no se incluye, cae a `car->recommendation`. **Prohibido** lenguaje interno.
+
+> **Secciones `H2` (ficha):** cada `[H2] Título de sección` abre un bloque que admite `[INCLUYE]` (lista de incluidos), `[ARGUMENTO]` (punto con `**negrita**`) y `[EQUIPAMIENTO]` (chips). Úsalos para "Equipamiento de serie", "Por qué lo recomendamos", "Proceso de importación", etc. Máx. 3-4 secciones para no alargar el documento.
 
 > **Nota ingestor:** `ValuationPackageIngestor` guarda **cualquier `.txt` dentro de `contenido/`** del ZIP en `cars/{id}/contenido/`. Por tanto `dossier-cliente.txt` se persiste automáticamente sin tocar el ingestor. Rutas disponibles: `cars.ficha`, `cars.dossier` (autenticado), `cars.informe-interno` (solo owner/operator).
+
+> **📣 Marketing importado desde el ZIP (v2, 05-sep-2026):** los dos `.txt` de marketing se persisten como archivos Y además el ingestor los parsea con `App\Support\Esqueleto` para poblar la tabla `car_marketing_contents` (modelo `App\Models\CarMarketingContent`) con `status=published` (el copy que trae el ZIP viene listo de Claude, no es un borrador). Cada fila tiene `(car_id, channel, kind, slot)` únicos.
+>
+> **⚠️ Sin emoji de color en el copy:** la BD de Forge usa charset `utf8mb3`, que NO admite emoji >U+FFFF (🚀🔥💯⭐ etc.) — el ingestor los elimina al importar. Ver guía completa de redacción (límites por canal, tono, qué emoji evitar) en **`../06-reglas/copywriting_marketing.md`**.
+>
+> **Esquema v2 — redes sociales (3 redes × 6 piezas = 18 filas):**
+>
+> | Red | Tono | Piezas | Bloques en `redes-sociales.txt` |
+> |---|---|---|---|
+> | **TikTok** (viral 15-30s) | hook en el primer segundo, hashtag trending + nicho | 3 posts + 3 stories + hashtags + pasos | `[TIKTOK_POST_1..3]` + `[TIKTOK_STORY_1..3]` + `[TIKTOK_HASHTAGS]` (N) + `[TIKTOK_SUBIR_PASOS]` |
+> | **Instagram** (visual storytelling) | estética cuidada, hashtags nichos (15-20) | 3 posts + 3 stories + hashtags + pasos | `[INSTAGRAM_POST_1..3]` + `[INSTAGRAM_STORY_1..3]` + `[INSTAGRAM_HASHTAGS]` (N) + `[INSTAGRAM_SUBIR_PASOS]` |
+> | **Facebook** (informativo masivo) | datos y precio visibles, hashtags mínimos (3-5) | 3 posts + 3 stories + hashtags + pasos | `[FACEBOOK_POST_1..3]` + `[FACEBOOK_STORY_1..3]` + `[FACEBOOK_HASHTAGS]` (N) + `[FACEBOOK_SUBIR_PASOS]` |
+
+> ⚠️ **Solapamiento de canal `facebook` (auditoría 23-sep-2026 · v3.9.12):** el string `facebook` aparece **dos veces** en el esquema (`CarMarketingContent::CHANNELS = [..., 'facebook']`) — una como red social (`kind=post|story`, slot 1-3) y otra como Facebook Marketplace (kind=`ad`, slot=1). La distinción NO es por nombre de canal sino por:
+> - **Red social Facebook:** `kind ∈ {post, story}`, copy en `[FACEBOOK_POST_N]` / `[FACEBOOK_STORY_N]`. Hasta 9 filas (3 posts + 3 stories × 3 slots).
+> - **Facebook Marketplace (portal):** `kind=ad`, copy en bloques v2 propios `[FBMP_*]` que viven en `redes-sociales.json → canales.fb_marketplace`. Una sola fila `(car_id, channel='facebook', kind='ad', slot=1)`.
+> - El v1 (vocabulario retirado) creaba la fila Marketplace con el mismo texto que el resto de portales — bug 12-sep-2026 que el v2 corrige. **Si el ZIP trae los bloques v2, el ingestor toma el copy específico de FBMP_*; si NO los trae, cae al texto base de portal + warning** (no es regresión, es fallback documentado).
+>
+> **Esquema v2 — portales web (1 ficha base reutilizada en 4 portales = 4 filas):**
+>
+> | Portal | kind | slot | Bloques en `anuncio-portales.txt` |
+> |---|---|---|---|
+> | `milanuncios` | `ad` | `1` | `[TITULO]` + `[DESCRIPCION]` + `[FICHA_RAPIDA]` (N) + `[QUE_INCLUYE]` (N) + `[AVISO_LEGAL]` + `[SUBIR_PASOS]` |
+> | `coches_net` | `ad` | `1` | (mismo contenido que el bloque de arriba, el ingestor crea 4 filas idénticas) |
+> | `wallapop` | `ad` | `1` | (idem) |
+> | `facebook` (marketplace) | `ad` | `1` | (idem) |
+>
+> **Bloques comunes:** `[GANCHO]` (común a las 3 redes), `[HASHTAGS]` (fallback global si la red no trae los suyos), `[PIE_FOTO]` (N, slot 1 los lleva).
+>
+> **Total por coche con ZIP completo:** 18 redes + 4 portales = **22 filas en `car_marketing_contents`**.
+>
+> **Robustez (guardas anti-fila-fantasma):** el ingestor solo crea una fila si el bloque clave tiene contenido real:
+> - Cada `[RED]_POST_N` debe traer copy no vacío (si falta → warning).
+> - `[RED]_STORY_N` vacío → se omite en silencio (no es crítico).
+> - `[TIKTOK_STORY_1..3]` ausentes → no se crean stories de TikTok (solo posts).
+> - 4 portales: requieren `[TITULO]` Y `[DESCRIPCION]` no vacíos.
+> - `[GANCHO]` vacío en `redes-sociales.txt` → no se crea ninguna fila de red social.
+>
+> **Idempotente:** `updateOrCreate(['car_id','channel','kind','slot'])` — reimportar el mismo ZIP NO duplica filas. Si una fila ya existía (publicada o editada por el operador), el reimport **preserva su status actual** (no la resetea a draft: respeta el trabajo del operador). El campo `subir_pasos` se guarda solo en el slot 1 del primer post de cada red (en slots 2/3 queda vacío para no duplicar instrucciones).
+>
+> **Coexistencia ZIP ↔ IA:** el marketing generado con IA desde el panel (`CarMarketingService`) **coexiste** con el marketing importado desde el ZIP: ambos quedan en la misma tabla con `source = 'ai' | 'zip'`. El endpoint `cars.marketing.generate` actualiza la fila `(car_id, channel, kind='post', slot=1)` del canal; los demás slots los trae el ZIP.
+>
+> **Rutas:** `cars.marketing.show`, `cars.marketing.generate`, `cars.marketing.save` (con `kind`+`slot`), `cars.marketing.publish`. Frontend en `resources/js/Pages/Cars/Marketing.vue` con pestañas `Post 1..3` / `Story 1..3` por red.
 
 ### 🗺️ Mapa de PDFs — tipos y dónde se crean (15-ago-2026)
 

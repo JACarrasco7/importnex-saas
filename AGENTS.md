@@ -1,4 +1,8 @@
 <laravel-boost-guidelines>
+
+> 📋 **ANTES DE TRABAJAR:** lee [`docs/HANDOFF.md`](docs/HANDOFF.md) (última entrada) y [`docs/COMUNICACION-CLAUDE-VSCODE.md`](docs/COMUNICACION-CLAUDE-VSCODE.md) (guía operativa diaria). Al terminar, escribe tu entrada en HANDOFF.md (≤10 líneas, no edites la de otro agente).
+> Las reglas `.ai/rules/**` viven en `.ai/rules/index.md` — léelas según el glob del archivo que toques.
+
 === foundation rules ===
 
 # Laravel Boost Guidelines

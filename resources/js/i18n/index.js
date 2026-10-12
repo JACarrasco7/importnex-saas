@@ -119,7 +119,12 @@ function tFn(key, replacements = {}, fallback = null) {
             else if (value._other) value = value._other;
             else return typeof fallback === 'string' ? fallback : key;
         } else {
-            value = value._other || value._one || Object.values(value)[0] || key;
+            // Objeto sin plural keys: conservar el objeto entero (e.g. cars.fuel_options).
+            if (value._other || value._one) {
+                value = value._other || value._one;
+            } else {
+                return value;
+            }
             if (typeof value !== 'string') {
                 return typeof fallback === 'string' ? fallback : key;
             }

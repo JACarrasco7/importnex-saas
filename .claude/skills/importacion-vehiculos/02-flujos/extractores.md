@@ -5,7 +5,7 @@
 > `Runtime.evaluate`, `web_fetch` ni `browser_batch`. Lo único que existe es:
 > **ver (screenshot), clicar, escribir, tecla, scroll, esperar, zoom**.
 > Todo dato que no aparezca en la captura NO se puede leer → método degradado.
-> Adaptado a los **4 flujos** (A/B/C/D) y al **sistema de fases** (1=sondeo, 2=profunda) del SKILL.md.
+> Adaptado a los **5 flujos** (A/B/C/D/E) y al **sistema de fases** (1=sondeo, 2=profunda) del SKILL.md.
 
 ---
 
@@ -161,6 +161,8 @@ noticias**. Usa `/segunda-mano/coches/<marca>-<modelo>`.
 
 ### Pasada 1 — listado
 
+> ⚠️ **DEPRECADO 24-ago-2026 — la sintaxis `ms=<make>;<model>;<modelGroup>;<desc>` de esta sección (ej. `25200;;29;GTI`) FALLA en la versión ES y devuelve 0 resultados.** La sintaxis validada es `ms=<makeId>;<modelId>;;;` (CUATRO `;`) con `sb=p` en `suchen.mobile.de/fahrzeuge/search.html` — un `;` de más (`;;;;`, cinco) no da error pero rompe el filtro y devuelve todo el catálogo (reconfirmado en vivo 13-sep-2026). Ver **`playbook_filtrado.md` §"URL de resultados reales que SÍ funciona"** (fuente canónica única) y su tabla de IDs. Esta sección se mantiene solo como referencia histórica de la versión `lang=de`.
+
 URL: `/fahrzeuge/search.html?dam=false&isSearchRequest=true&ms=<make>;<model>;<modelGroup>;<desc>&p=<min>:<max>&ml=:<kmMax>&fr=<anio>:&pw=<minKW>:<maxKW>&s=Car&vc=Car&lang=de`
 
 **⚠️ IMPORTANTE:** La URL base usa `suchen.mobile.de`, pero ese subdominio puede bloquearse. Si falla, re-navega a `www.mobile.de/fahrzeuge/search.html?...`. Orden de reintento: `www.mobile.de` → recarga + espera → `bloqueada (captcha/denegado, N intentos)`.
@@ -187,6 +189,8 @@ Abre en pestaña/URL la ficha del anuncio (`https://www.mobile.de/fahrzeuge/deta
 Avisos: CO₂ falta a menudo → estimar y decirlo · <15 features = anuncio pobre (salvo topes de gama) · no hay VIN ni fecha de publicación.
 
 ### `ms` validados
+
+> ⚠️ **DEPRECADO 24-ago-2026 — NO usar esta tabla para construir URLs nuevas.** El formato `make;;modelGroup;desc` dejó de devolver resultados en la versión ES (hallazgo 24-ago). Los **makeIds** (VW=25200, Audi=1900, Cupra=3, Seat=22500, Mercedes=17200, BMW=3500) SIGUEN siendo válidos y están migrados a la tabla nueva del playbook; los modelGroup (29, 19, 36...) NO — los modelId nuevos son distintos (ej. Golf Mk7.5 = **14**, 57.717 anuncios el 13-sep-2026; el `12603` que citaba el playbook viejo devuelve **0**). Fuente canónica: `playbook_filtrado.md` §"URL de resultados reales que SÍ funciona" + §"Tabla de IDs mobile.de" y el catálogo `references/mobile-de-ids.json`.
 
 | Modelo | `ms` | | Modelo | `ms` |
 |---|---|---|---|---|

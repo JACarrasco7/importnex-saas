@@ -23,6 +23,9 @@
 [PRECIO_NOTA] Precio orientativo: puede variar según el impuesto de matriculación que liquide Hacienda.
 [PLAZO] 4-6 semanas desde la reserva
 
+[VALORACION] OPC muy completo: 280 CV, un solo dueño y mantenimiento al día. Entra en las ZBE gracias a la etiqueta C y su precio está por debajo de la media del mercado español.
+
+
 [H2] ¿Qué incluye ese precio?
 [INCLUYE] El vehículo
 [INCLUYE] Transporte hasta España
