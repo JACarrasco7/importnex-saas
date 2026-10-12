@@ -1,22 +1,22 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted, onUnmounted } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import {
-    ArrowLeftIcon,
-    ExclamationTriangleIcon,
+    EyeIcon,
     CheckCircleIcon,
-    XCircleIcon,
-    MinusCircleIcon,
-    LinkIcon,
-    EnvelopeIcon,
     ChevronLeftIcon,
     ChevronRightIcon,
     ShareIcon,
     ClipboardDocumentIcon,
+    MapPinIcon,
+    ChatBubbleLeftRightIcon,
+    PhoneIcon,
+    ShieldCheckIcon,
+    CheckBadgeIcon,
+    TruckIcon,
+    BanknotesIcon,
 } from '@heroicons/vue/24/outline';
-import Badge from '@/Components/Badge.vue';
 import MarketplaceLayout from '@/Layouts/MarketplaceLayout.vue';
-import { useFormat } from '@/Composables/useFormat';
 import { useTranslations } from '@/Composables/useTranslations';
 import { photoUrl } from '@/Composables/usePhotoUrl';
 
@@ -30,24 +30,33 @@ const props = defineProps({
     costBreakdown: { type: Object, default: () => ({ car_price: 0, transport: 0, processing: 0, iedmt: 0, honorarios: 1000, total: 0, has_data: false }) },
 });
 
-const { t } = useTranslations();
-const { currency, date } = useFormat();
+const { t, locale } = useTranslations();
 
-// Compartir: copia la URL pública al portapapeles y muestra confirmación.
+const fmt = (n) => {
+    const num = Number(n);
+    if (!Number.isFinite(num)) return '\u2014';
+    const loc = locale.value === 'en' ? 'en-US' : 'es-ES';
+    return new Intl.NumberFormat(loc, { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(num);
+};
+
+const fmtNumber = (n) => {
+    const num = Number(n);
+    if (!Number.isFinite(num)) return '\u2014';
+    const loc = locale.value === 'en' ? 'en-US' : 'es-ES';
+    return new Intl.NumberFormat(loc).format(num);
+};
+
+// Compartir: copia la URL publica al portapapeles.
 const shareCopied = ref(false);
 const shareError = ref('');
 const shareUrl = computed(() => props.publicProfileUrl || (typeof window !== 'undefined' ? window.location.href : ''));
-
 const copyShareUrl = async () => {
     shareError.value = '';
-    if (! shareUrl.value) {
-        return;
-    }
+    if (! shareUrl.value) return;
     try {
         if (navigator?.clipboard?.writeText) {
             await navigator.clipboard.writeText(shareUrl.value);
         } else if (typeof window !== 'undefined') {
-            // Fallback para navegadores sin clipboard API.
             const ta = document.createElement('textarea');
             ta.value = shareUrl.value;
             ta.style.position = 'fixed';
@@ -60,16 +69,13 @@ const copyShareUrl = async () => {
         shareCopied.value = true;
         setTimeout(() => { shareCopied.value = false; }, 2000);
     } catch (e) {
-        shareError.value = t('marketplace.share_error', { default: 'No se pudo copiar. Selecciona y copia manualmente.' });
+        shareError.value = t('marketplace.share_error', { default: 'No se pudo copiar.' });
     }
 };
 
-// Galería: índice de la foto activa (empieza en 0)
+// Galeria: indice de la foto activa.
 const activePhotoIndex = ref(0);
-const activePhoto = computed(() => {
-    const photos = props.car?.photos || [];
-    return photos[activePhotoIndex.value] || null;
-});
+const activePhoto = computed(() => (props.car?.photos || [])[activePhotoIndex.value] || null);
 const totalPhotos = computed(() => (props.car?.photos || []).length);
 const goPrev = () => {
     if (totalPhotos.value === 0) return;
@@ -80,68 +86,122 @@ const goNext = () => {
     activePhotoIndex.value = (activePhotoIndex.value + 1) % totalPhotos.value;
 };
 
-const costItems = [
-    { key: 'purchase_price', label: t('marketplace_show.cost_purchase') },
-    { key: 'new_price', label: t('marketplace_show.cost_new') },
-    { key: 'transport', label: t('marketplace_show.cost_transport') },
-    { key: 'itv_fee', label: t('marketplace_show.cost_itv') },
-    { key: 'coc_fee', label: t('marketplace_show.cost_coc') },
-    { key: 'dgt_fees', label: t('marketplace_show.cost_dgt') },
-    { key: 'professional_fees', label: t('marketplace_show.cost_professional') },
-    { key: 'deposit', label: t('marketplace_show.cost_deposit') },
-];
+// Scroll para la barra CTA fija.
+const scrollY = ref(0);
+const onScroll = () => { scrollY.value = window.scrollY; };
+onMounted(() => { window.addEventListener('scroll', onScroll, { passive: true }); });
+onUnmounted(() => { window.removeEventListener('scroll', onScroll); });
 
-const specItems = [
-    { key: 'brand', label: t('marketplace_show.brand') },
-    { key: 'model', label: t('marketplace_show.model') },
-    { key: 'year', label: t('marketplace_show.year') },
-    { key: 'mileage', label: t('marketplace_show.mileage'), suffix: ' km' },
-    { key: 'fuel', label: t('marketplace_show.fuel') },
-    { key: 'transmission', label: t('marketplace_show.transmission') },
-    { key: 'cv', label: t('marketplace_show.power'), suffix: ' CV' },
-    { key: 'co2', label: t('marketplace_show.co2'), suffix: ' g/km' },
-    { key: 'color', label: t('marketplace_show.color') },
-    { key: 'vin', label: t('marketplace_show.vin') },
-];
+// Linea de datos clave para el hero.
+const heroData = computed(() => {
+    const parts = [];
+    if (props.car?.year) parts.push(String(props.car.year));
+    if (props.car?.mileage) parts.push(fmtNumber(props.car.mileage) + ' km');
+    if (props.car?.fuel) parts.push(props.car.fuel);
+    if (props.car?.transmission) parts.push(props.car.transmission);
+    return parts.join(' \u00b7 ');
+});
 
-const ratingIcon = (r) => ({
-    favorable: CheckCircleIcon, neutral: MinusCircleIcon, unfavorable: XCircleIcon,
-}[r] || MinusCircleIcon);
+// Origen (Alemania / Espana / verificado).
+const originLabel = computed(() => {
+    const pais = String(props.car?.pais_origen || '').toLowerCase();
+    if (pais.includes('alem') || pais === 'de') {
+        return t('dossier.origin_germany', { default: 'Importado desde Alemania' });
+    }
+    if (pais.includes('espa') || pais === 'es') {
+        return t('dossier.origin_spain', { default: 'Localizado en Espana' });
+    }
+    return t('dossier.origin_verified', { default: 'Origen verificado' });
+});
 
-const researchAspectLabels = {
-    common_issues: t('marketplace_show.aspect_common_issues'),
-    recalls: t('marketplace_show.aspect_recalls'),
-    market_price: t('marketplace_show.aspect_market_price'),
-    reliability: t('marketplace_show.aspect_reliability'),
-    spain_homologation: t('marketplace_show.aspect_spain_homologation'),
-    dgt_label: t('marketplace_show.aspect_dgt_label'),
-    insurance_estimate: t('marketplace_show.aspect_insurance_estimate'),
-    parts_maintenance: t('marketplace_show.aspect_parts_maintenance'),
-    unit_specific: t('marketplace_show.aspect_unit_specific'),
+// Precio titular: total estimado si existe, si no purchase_price.
+const heroPrice = computed(() => {
+    const total = props.derived?.total_cost;
+    if (total && total > 0) return fmt(total);
+    if (props.car?.purchase_price) return fmt(props.car.purchase_price);
+    return null;
+});
+
+// Rango de mercado (barra).
+const marketRange = computed(() => {
+    const min = Number(props.car?.market_min);
+    const max = Number(props.car?.market_max);
+    const avg = Number(props.car?.market_avg);
+    const our = Number(props.derived?.total_cost || props.car?.purchase_price);
+    if (!Number.isFinite(min) || !Number.isFinite(max) || max <= min) return null;
+    let pos = null;
+    if (Number.isFinite(our) && our > 0) {
+        pos = ((our - min) / (max - min)) * 100;
+        pos = Math.max(2, Math.min(98, pos));
+    }
+    return { min, max, avg: Number.isFinite(avg) ? avg : null, pos };
+});
+
+// Equipamiento.
+const equipment = computed(() => {
+    const eq = props.car?.equipment;
+    if (!Array.isArray(eq)) return [];
+    return eq.filter((e) => typeof e === 'string' && e.trim() !== '');
+});
+
+// Pasos del proceso (5 pasos genericos del servicio).
+const processSteps = computed(() => [
+    { when: t('dossier.step_week_0'), what: t('dossier.step0') },
+    { when: t('dossier.step_week_1'), what: t('dossier.step1') },
+    { when: t('dossier.step_weeks_2_3'), what: t('dossier.step2') },
+    { when: t('dossier.step_weeks_3_4'), what: t('dossier.step3') },
+    { when: t('dossier.step_week_4'), what: t('dossier.step4') },
+]);
+
+// Incluido / no incluido.
+const includeItems = computed(() => [
+    t('dossier.include_search'),
+    t('dossier.include_negotiation'),
+    t('dossier.include_transport'),
+    t('dossier.include_itv'),
+    t('dossier.include_history'),
+    t('dossier.include_delivery'),
+]);
+const noIncludeItems = computed(() => [
+    t('dossier.no_include_insurance'),
+    t('dossier.no_include_tax'),
+    t('dossier.no_include_maintenance'),
+    t('dossier.no_include_warranty'),
+]);
+
+// Estado del semaforo (visible en la barra lateral del hero).
+const stateLabels = {
+    Located: 'Localizado',
+    Valuing: 'En valoracion',
+    Offered: 'Oferta enviada',
+    Reserved: 'Reservado',
+    Purchased: 'Comprado',
+    In_transit: 'En transito',
+    Processing: 'En tramites',
+    Delivered: 'Entregado',
 };
+const stateLabel = computed(() => stateLabels[props.car?.status] || t('dossier.state_default', { default: 'Disponible para gestion' }));
 
-const aspects = computed(() => {
-    const research = props.car.research || {};
-    const gaps = props.derived?.research_gaps || [];
-    return Object.entries(researchAspectLabels).map(([key, label]) => {
-        const entry = research[key] || [];
-        return { key, label, ...entry, missing: gaps.includes(key) };
-    });
+// URL WhatsApp con texto predefinido.
+const whatsappUrl = computed(() => {
+    const text = t('dossier.whatsapp_text', { brand: props.car?.brand || '', model: props.car?.model || '' });
+    return 'https://wa.me/34675701439?text=' + encodeURIComponent(text);
 });
 
-const marketPosition = computed(() => {
-    const stats = props.derived?.comparables_stats || {};
-    const total = props.derived?.total_cost || 0;
-    if (!stats.avg || !total) return null;
-    const ratio = total / stats.avg;
-    if (ratio <= 1.00) return { label: t('marketplace_show.market_below'), variant: 'success', ratio };
-    if (ratio <= 1.05) return { label: t('marketplace_show.market_at'), variant: 'warning', ratio };
-    return { label: t('marketplace_show.market_above'), variant: 'danger', ratio };
-});
-
-// El desglose "aproximado" con honorarios JJ Import se calcula en PHP
-// (App\Support\CostBreakdown) y llega como prop `costBreakdown`.
-// Reglas: 1.000 EUR por defecto; 1.500 EUR si el coche >= 30.000 EUR (12-oct-2026).
+// Especificaciones tecnicas (grid limpio).
+const specItems = computed(() => [
+    { key: 'brand', label: t('marketplace_show.brand'), value: props.car?.brand },
+    { key: 'model', label: t('marketplace_show.model'), value: props.car?.model },
+    { key: 'version', label: t('dossier.version', { default: 'Version' }), value: props.car?.version },
+    { key: 'year', label: t('marketplace_show.year'), value: props.car?.year },
+    { key: 'mileage', label: t('marketplace_show.mileage'), value: props.car?.mileage ? fmtNumber(props.car.mileage) + ' km' : null },
+    { key: 'fuel', label: t('marketplace_show.fuel'), value: props.car?.fuel },
+    { key: 'transmission', label: t('marketplace_show.transmission'), value: props.car?.transmission },
+    { key: 'cv', label: t('marketplace_show.power'), value: props.car?.cv ? props.car.cv + ' CV' : null },
+    { key: 'color', label: t('marketplace_show.color'), value: props.car?.color },
+    { key: 'doors', label: t('dossier.doors', { default: 'Puertas' }), value: props.car?.doors },
+    { key: 'vin', label: t('marketplace_show.vin'), value: props.car?.vin, mono: true },
+]);
 </script>
 
 <template>
@@ -357,86 +417,27 @@ const marketPosition = computed(() => {
                 </div>
 
                 <!-- Puntos a favor (decision 12-oct-2026: la valoracion,
-                     contras y 9 research aspects NO se muestran al cliente) -->
+                     contras y 9 research aspects NO se muestran al cliente.
+                     Solo pros, sin "EN CONTRA", sin alertas internas.) -->
                 <div v-if="car.pros?.length" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4">
                         <h3 class="text-base font-semibold text-gray-900">{{ t('marketplace_show.section_pros_title', { default: 'Puntos a favor' }) }}</h3>
                     </div>
-
-                    <!-- Verdict: la valoracion textual NO se muestra al cliente
-                         (decision 12-oct-2026). El badge Buy/Discard es interno
-                         del equipo; el texto de valoracion tambien. El cliente
-                         solo ve lo que aparece en las secciones externas. -->
-                    <div v-if="derived?.research_gaps?.length" class="px-6 py-4 text-sm text-amber-700">
-                        {{ derived.research_gaps.length === 1
-                            ? t('marketplace_show.aspects_pending', { count: derived.research_gaps.length })
-                            : t('marketplace_show.aspects_pending_plural', { count: derived.research_gaps.length }) }}
-                    </div>
-
-                    <!-- Solo pros (decision 12-oct-2026: al cliente solo lo bueno) -->
-                    <div v-if="car.pros?.length" class="p-6">
-                        <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-estoril-800">{{ t('marketplace_show.in_favor', { count: car.pros?.length || 0 }) }}</h4>
-                        <ul class="space-y-2">
-                            <li v-for="(pro, i) in car.pros" :key="i" class="flex items-start gap-2 rounded-lg border border-estoril-200 bg-estoril-50 p-3">
-                                <CheckCircleIcon class="mt-0.5 h-4 w-4 flex-shrink-0 text-estoril-700" />
-                                <div class="flex-1">
-                                    <p class="text-sm text-gray-900">{{ pro.text }}</p>
-                                    <span class="mt-1 inline-block text-xs font-medium uppercase text-estoril-800">{{ pro.weight }}</span>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-                    <p v-else-if="!car.pros?.length" class="p-6 text-sm italic text-gray-500">{{ t('marketplace_show.no_points_in_favor') }}</p>
+                    <ul class="space-y-2 p-6">
+                        <li v-for="(pro, i) in car.pros" :key="i" class="flex items-start gap-2 rounded-lg border border-estoril-200 bg-estoril-50 p-3">
+                            <CheckCircleIcon class="mt-0.5 h-5 w-5 shrink-0 text-estoril-700" />
+                            <p class="flex-1 text-sm text-gray-900">
+                                {{ typeof pro === 'string' ? pro : pro.text }}
+                            </p>
+                        </li>
+                    </ul>
                 </div>
 
-                <!-- Market comparables -->
-                <div v-if="car.market_avg || derived?.comparables_stats?.count" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
-                    <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-                        <h3 class="text-base font-semibold text-gray-900">{{ t('marketplace_show.section_market_comparables') }}</h3>
-                        <Badge v-if="marketPosition" :variant="marketPosition.variant">
-                            {{ marketPosition.label }} ({{ (marketPosition.ratio * 100).toFixed(1) }}%)
-                        </Badge>
-                    </div>
-                    <div class="grid grid-cols-1 gap-6 p-6 md:grid-cols-4">
-                        <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('marketplace_show.avg') }}</dt>
-                            <dd class="mt-1 font-mono text-lg font-semibold text-gray-900">{{ currency(car.market_avg) }}</dd>
-                        </div>
-                        <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('marketplace_show.minimum') }}</dt>
-                            <dd class="mt-1 font-mono text-lg font-semibold text-gray-900">{{ currency(car.market_min) }}</dd>
-                        </div>
-                        <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('marketplace_show.maximum') }}</dt>
-                            <dd class="mt-1 font-mono text-lg font-semibold text-gray-900">{{ currency(car.market_max) }}</dd>
-                        </div>
-                        <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('marketplace_show.estimated_saving') }}</dt>
-                            <dd class="mt-1 font-mono text-lg font-semibold text-estoril-800">{{ currency(car.estimated_saving) }}</dd>
-                        </div>
-                    </div>
-
-                    <div v-if="car.comparables_list?.length" class="border-t border-gray-200 px-6 py-4">
-                        <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('marketplace_show.comparables_count', { count: car.comparables_list.length }) }}</h4>
-                        <ul class="divide-y divide-gray-200 rounded-lg border border-gray-200">
-                            <li v-for="(comp, i) in car.comparables_list" :key="i" class="flex items-center justify-between px-4 py-3 hover:bg-gray-50">
-                                <div class="min-w-0 flex-1">
-                                    <p class="truncate text-sm font-medium text-gray-900">{{ comp.title || comp.t }}</p>
-                                    <p class="text-xs text-gray-500">
-                                        <span v-if="comp.km">{{ comp.km.toLocaleString() }} km</span>
-                                        <span v-if="comp.country"> &middot; {{ comp.country || comp.pais }}</span>
-                                    </p>
-                                </div>
-                                <div class="flex items-center gap-3">
-                                    <span class="font-mono text-sm font-semibold text-gray-900">{{ currency(comp.price ?? comp.p) }}</span>
-                                    <a v-if="comp.url || comp.u" :href="comp.url || comp.u" target="_blank" rel="noopener" class="text-estoril-600 hover:text-estoril-500">
-                                        <LinkIcon class="h-4 w-4" />
-                                    </a>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+                <!-- Comparables de mercado: el listado interno (coches similares
+                     con km/pais/enlace) NO se muestra al cliente (decision
+                     12-oct-2026, mismo argumento que pros/cons: info interna).
+                     La barra de rango + posicion sigue en la seccion "mercado"
+                     mas abajo, que es lo que el dossier muestra. -->
 
                 <!-- Import progress y notes: secciones internas (admin), no se
                      muestran al cliente (decision 12-oct-2026). -->

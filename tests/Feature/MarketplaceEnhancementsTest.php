@@ -462,4 +462,73 @@ class MarketplaceEnhancementsTest extends TestCase
 
         $this->get("/p/{$link->token}")->assertStatus(404);
     }
+
+    public function test_public_marketplace_does_not_leak_admin_verdict_text(): void
+    {
+        // El verdict en BD contiene texto admin-interno como
+        // "Comprar con confianza baja (cobertura parcial 2/7)" o
+        // "Dudoso: kilometraje muy alto para un R de 2024" — eso NO
+        // debe llegar nunca al cliente final, ni por la ficha
+        // /marketplace/{id} ni por el listado /marketplace.
+        $org = Organization::factory()->create(['is_public' => true, 'slug' => 't']);
+        $car = Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Comprar con confianza baja (cobertura parcial 2/7)',
+            'verdict_confidence' => 'low',
+            'verdict_reasoning' => 'Análisis interno que NO debe ver el cliente.',
+            'verdict_changes' => 'Notas internas que NO debe ver el cliente.',
+            'traffic_light' => 'neutral',
+        ]);
+
+        $sensitiveKeys = [
+            'verdict', 'verdict_confidence', 'verdict_reasoning',
+            'verdict_changes', 'verdict_at', 'traffic_light',
+        ];
+
+        // 1) Ficha /marketplace/{id} no expone los campos admin.
+        $response = $this->get("/marketplace/{$car->id}")->assertOk();
+        $body = $response->getContent();
+        foreach ($sensitiveKeys as $key) {
+            $this->assertStringNotContainsString(
+                '"'.$key.'":',
+                $body,
+                "La ficha pública filtra el campo admin '{$key}'"
+            );
+        }
+        $this->assertStringNotContainsString(
+            'Comprar con confianza baja',
+            $body,
+            'La ficha pública filtra el texto admin del verdict'
+        );
+
+        // 2) Listado /marketplace tampoco expone los campos admin.
+        $listingResponse = $this->get('/marketplace')->assertOk();
+        $listingBody = $listingResponse->getContent();
+        foreach ($sensitiveKeys as $key) {
+            $this->assertStringNotContainsString(
+                '"'.$key.'":',
+                $listingBody,
+                "El listado público filtra el campo admin '{$key}'"
+            );
+        }
+        $this->assertStringNotContainsString(
+            'Comprar con confianza baja',
+            $listingBody,
+            'El listado público filtra el texto admin del verdict'
+        );
+
+        // 3) La página /p/{token} (perfil público) tampoco.
+        $link = CarPublicLink::generateFor($car);
+        $profileResponse = $this->get("/p/{$link->token}")->assertOk();
+        $profileBody = $profileResponse->getContent();
+        foreach ($sensitiveKeys as $key) {
+            $this->assertStringNotContainsString(
+                '"'.$key.'":',
+                $profileBody,
+                "El perfil público /p/{token} filtra el campo admin '{$key}'"
+            );
+        }
+    }
 }

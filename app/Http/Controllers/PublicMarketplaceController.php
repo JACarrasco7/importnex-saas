@@ -319,7 +319,12 @@ class PublicMarketplaceController extends Controller
     /**
      * Filtra el Car para excluir campos internos que NO deben llegar al
      * cliente (decision 12-oct-2026):
+     *  - verdict, verdict_at, verdict_confidence: el verdict almacenado en
+     *    BD ya viene como texto admin-interno ("Comprar con confianza
+     *    baja (cobertura parcial 2/7)", "Dudoso: kilometraje muy alto
+     *    para un R de 2024", "Descartar por riesgo", etc.) — filtrar.
      *  - verdict_reasoning / verdict_changes: valoracion interna del equipo
+     *  - traffic_light: señal admin ("neutral", "amber"...), no aporta al cliente
      *  - cons: contras, el cliente solo ve lo bueno
      *  - notes: notas internas del operador
      *  - red_flags, research, tips, valuation internals
