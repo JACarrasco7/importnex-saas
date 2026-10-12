@@ -24,6 +24,24 @@
 
 ---
 
+## 2026-10-12 17:30 · Copilot-VSCode · marketplace: fix errores JS + perfil público por token
+- Hice dos rondas de fixes tras el feedback del usuario en producción:
+  - **Errores JS reportados en consola** (PWA / fichas de marketplace):
+    - `Cannot read properties of undefined (reading 'total')` en MarketplaceIndex → props.cars es undefined mientras cargan los deferred props. Fix: `safeCars` computed que devuelve un shape por defecto (data, from, to, total, last_page, links todos inicializados).
+    - `h(...) is not a function` en MarketplaceShow → `useFormat()` no exportaba `confidenceVariant` (estaba en el destructuring pero no en la factory). Fix: añadido `confidenceVariant` al composable.
+    - Pagination component: añadido defaults defensivos.
+  - **Perfil público por token** (sugerencia del usuario):
+    - Nueva ruta `GET /p/{token}` que reutiliza `Public/MarketplaceShow` con un banner "Estás viendo el perfil público" + un botón "Compartir" que copia la URL al portapapeles.
+    - `CarObserver::updated/created` auto-genera un `CarPublicLink` (token 32 chars) la primera vez que el coche se publica al marketplace. Si ya hay uno activo, lo respeta.
+    - `CarPublicLink::publicProfileUrl()` → `/p/{token}` (distinto del dossier comercial `/c/{token}`).
+    - `Car::activePublicLink()` y `Car::public_profile_url` (accessor) para consultar el link activo desde la UI.
+    - Migration `2026_10_12_170000_backfill_marketplace_public_links.php` que genera links retroactivos para todos los coches ya publicados.
+    - i18n es/en: `marketplace.shared_profile_badge/desc`, `marketplace.share_error`.
+- Tests: 5 nuevos en `MarketplaceEnhancementsTest` (auto-generate al publicar, ruta /p funciona, 404 en token inválido/revocado/coche no público). 28/28 OK. Pint OK.
+- Toqué: `useFormat.js`, `Pages/Public/MarketplaceIndex.vue` (safeCars), `Components/Pagination.vue` (defensivo), `PublicMarketplaceController` (showPublicProfile), `Pages/Public/MarketplaceShow.vue` (botón share), `Car`, `CarPublicLink`, `CarObserver`, `web.php` (ruta), `MarketplaceEnhancementsTest`, `i18n/{es,en}.js`, migration de backfill.
+- ⚠️ PENDIENTE: commit + push + rebuild Vite + correr backfill en prod (`php artisan migrate`).
+- Commit: pendiente.
+
 ## 2026-10-12 17:00 · Copilot-VSCode · marketplace: auditoría profunda + muchas mejoras
 - Hice: inventario completo (8 páginas Public/ + 2 layouts). Auditoría i18n: 1745 keys en es y en, sin missing. Inconsistencias y bugs encontrados y arreglados:
   - **MarketplaceIndex.vue**: NO tenía paginación (backend pagina a 12, no había UI) → añadido Pagination arriba+abajo. Selector de orden con whitelist (recent/oldest/price/price_desc/mileage/asc/desc) ahora server-side. Filtros movidos de client-side a server-side para que la paginación funcione correctamente. Empty state diferenciado (no matches con filtros vs sin coches). Reset filters condicional.

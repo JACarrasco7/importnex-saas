@@ -47,6 +47,16 @@ class CarPublicLink extends Model
         return url('/c/'.$this->token);
     }
 
+    /**
+     * URL del perfil público de marketing (Inertia, ver `PublicMarketplaceController@showPublicProfile`).
+     * Es distinto del dossier comercial (`/c/{token}`, ver `PublicCarController`):
+     * este es la ficha visual que cualquiera puede ver para conocer el coche.
+     */
+    public function publicProfileUrl(): string
+    {
+        return url('/p/'.$this->token);
+    }
+
     public static function generateFor(Car $car, ?Carbon $expiresAt = null): self
     {
         return self::create([

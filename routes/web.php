@@ -420,6 +420,15 @@ Route::get('/c/{token}', [PublicCarController::class, 'show'])
     ->where('token', '[A-Za-z0-9_-]{20,80}')
     ->name('public.car.show');
 
+// Perfil público de marketing del coche (sin auth, con token).
+// Misma ficha que /marketplace/{id} pero accesible sin saber el id del coche
+// — la URL se puede compartir por WhatsApp/email/redes sin exponer la
+// base de datos. El token se genera automáticamente al publicar el coche
+// al marketplace (CarObserver::updated).
+Route::get('/p/{token}', [PublicMarketplaceController::class, 'showPublicProfile'])
+    ->where('token', '[A-Za-z0-9_-]{20,80}')
+    ->name('public.car.profile');
+
 // Fotos del dossier público. Se sirven por ruta (no por /storage/...) para no
 // depender del symlink public/storage: si falta, el enlace del cliente se queda
 // sin fotos y sin previsualización en WhatsApp.

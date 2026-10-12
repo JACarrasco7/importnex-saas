@@ -162,6 +162,30 @@ class Car extends Model
         return $this->hasMany(CarPublicLink::class);
     }
 
+    /**
+     * Link público activo (no revocado, no expirado) o null.
+     * Usado por el marketplace para exponer la URL compartible.
+     */
+    public function activePublicLink(): ?CarPublicLink
+    {
+        return $this->publicLinks()
+            ->whereNull('revoked_at')
+            ->where(function ($q) {
+                $q->whereNull('expires_at')->orWhere('expires_at', '>', now());
+            })
+            ->latest('id')
+            ->first();
+    }
+
+    /**
+     * Accessor: URL pública de marketing del coche (perfil Inertia).
+     * Devuelve la URL si hay un link activo; null en otro caso.
+     */
+    public function getPublicProfileUrlAttribute(): ?string
+    {
+        return $this->activePublicLink()?->publicProfileUrl();
+    }
+
     /** Última aceptación de contrato del coche (o null). */
     public function latestContractAcceptance()
     {

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Car;
+use App\Models\CarPublicLink;
 use App\Models\Organization;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
@@ -198,7 +199,9 @@ class PublicMarketplaceController extends Controller
         return Inertia::render('Public/MarketplaceShow', [
             'car' => $car,
             'requestUrl' => $this->publicRequestUrl($car->organization),
+            'publicProfileUrl' => $car->public_profile_url,
             'relatedCars' => $this->relatedCars($car),
+            'isSharedProfile' => false,
             'derived' => [
                 'total_cost' => $car->calculateTotalCost(),
                 'iedmt' => $car->calculateIEDMT(),
@@ -222,5 +225,66 @@ class PublicMarketplaceController extends Controller
             ->limit(4)
             ->with('photos')
             ->get();
+    }
+
+    /**
+     * Perfil público de marketing accesible por token.
+     *
+     * URL: GET /p/{token}
+     *
+     * Es la misma ficha visual que /marketplace/{id} pero:
+     *  - No expone el id numérico del coche (más seguro de compartir).
+     *  - No incrementa marketplace_views (es una métrica del listado, no
+     *    de la ficha compartible).
+     *  - Se contabiliza en CarPublicLink.views_count (link de share).
+     *
+     * Si el token es inválido/revocado/expirado o el coche ya no es
+     * público (is_marketplace=false, status Delivered/Discarded) → 404.
+     */
+    public function showPublicProfile(string $token): Response
+    {
+        $link = CarPublicLink::where('token', $token)->first();
+        if (! $link || ! $link->isActive()) {
+            abort(404);
+        }
+
+        $car = $link->car()->first();
+        if (! $car) {
+            abort(404);
+        }
+
+        // Reutilizamos la misma verificación de visibilidad que show()
+        // (scope único en el modelo, ya documentado).
+        $visible = Car::query()->publicMarketplace()->whereKey($car->getKey())->exists();
+        if (! $visible) {
+            abort(404);
+        }
+
+        // Tracking de la vista del link de share (no bloquea si falla).
+        try {
+            $link->recordView();
+        } catch (\Throwable $e) {
+            // No interrumpimos la carga por un fallo de tracking.
+        }
+
+        $car->load(['photos', 'organization']);
+
+        $car->researchGaps;       // touch accessor
+        $car->comparablesStats;    // touch accessor
+        $car->calculateTotalCost(); // touch method
+
+        return Inertia::render('Public/MarketplaceShow', [
+            'car' => $car,
+            'publicProfileUrl' => $link->publicProfileUrl(),
+            'requestUrl' => $this->publicRequestUrl($car->organization),
+            'relatedCars' => $this->relatedCars($car),
+            'isSharedProfile' => true,
+            'derived' => [
+                'total_cost' => $car->calculateTotalCost(),
+                'iedmt' => $car->calculateIEDMT(),
+                'research_gaps' => $car->researchGaps,
+                'comparables_stats' => $car->comparablesStats,
+            ],
+        ]);
     }
 }

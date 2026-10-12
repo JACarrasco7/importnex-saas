@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Car;
 use App\Models\CarPhoto;
+use App\Models\CarPublicLink;
 use App\Models\NewsletterSubscription;
 use App\Models\Organization;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -379,5 +380,86 @@ class MarketplaceEnhancementsTest extends TestCase
             ->where('requestUrl', url('/request/t'))
             ->has('cars', 2)
         );
+    }
+
+    public function test_publishing_car_auto_creates_public_link(): void
+    {
+        $org = Organization::factory()->create(['is_public' => true, 'slug' => 't']);
+        $car = Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => false,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+        ]);
+
+        // Al cambiar is_marketplace a true, el observer debe generar un link.
+        $car->update(['is_marketplace' => true]);
+
+        $link = $car->fresh()->activePublicLink();
+        $this->assertNotNull($link, 'Publishing a car to the marketplace must auto-generate a CarPublicLink.');
+        $this->assertSame(32, strlen($link->token));
+        $this->assertStringStartsWith(url('/p/'), $link->publicProfileUrl());
+    }
+
+    public function test_public_profile_route_shows_car(): void
+    {
+        $org = Organization::factory()->create(['is_public' => true, 'slug' => 't']);
+        $car = Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+        ]);
+        $link = CarPublicLink::generateFor($car);
+
+        $response = $this->get("/p/{$link->token}");
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('Public/MarketplaceShow')
+            ->where('car.id', $car->id)
+            ->where('isSharedProfile', true)
+            ->where('publicProfileUrl', url('/p/'.$link->token))
+        );
+        // El link debe haberse contabilizado como vista.
+        $this->assertSame(1, $link->fresh()->views_count);
+    }
+
+    public function test_public_profile_route_404_on_invalid_token(): void
+    {
+        $this->get('/p/esto-no-es-un-token-valido-de-32-chars')->assertStatus(404);
+        $this->get('/p/short')->assertStatus(404);
+    }
+
+    public function test_public_profile_route_404_on_revoked_token(): void
+    {
+        $org = Organization::factory()->create(['is_public' => true, 'slug' => 't']);
+        $car = Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+        ]);
+        $link = CarPublicLink::generateFor($car);
+        $link->forceFill(['revoked_at' => now()])->save();
+
+        $this->get("/p/{$link->token}")->assertStatus(404);
+    }
+
+    public function test_public_profile_route_404_when_car_no_longer_public(): void
+    {
+        $org = Organization::factory()->create(['is_public' => true, 'slug' => 't']);
+        $car = Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+        ]);
+        $link = CarPublicLink::generateFor($car);
+
+        // El operador despublica el coche después de generar el link.
+        $car->update(['is_marketplace' => false]);
+
+        $this->get("/p/{$link->token}")->assertStatus(404);
     }
 }

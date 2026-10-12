@@ -6,6 +6,7 @@ use App\Http\Controllers\SitemapController;
 use App\Models\Car;
 use App\Models\CarChecklist;
 use App\Models\CarDocument;
+use App\Models\CarPublicLink;
 use App\Support\CarChecklistDefinitions;
 use App\Support\CarDocumentDefinitions;
 use Illuminate\Support\Facades\Cache;
@@ -62,6 +63,11 @@ class CarObserver
         if ($car->is_marketplace) {
             SitemapController::flush();
             Cache::forget('marketplace.filter_options');
+
+            // Generar link público automáticamente si el coche nace ya publicado.
+            if ($car->activePublicLink() === null) {
+                CarPublicLink::generateFor($car);
+            }
         }
     }
 
@@ -70,6 +76,14 @@ class CarObserver
         if ($car->wasChanged('is_marketplace')) {
             SitemapController::flush();
             Cache::forget('marketplace.filter_options');
+
+            // Cuando el coche se publica al marketplace por primera vez,
+            // generamos automáticamente un link público (token) para que
+            // el operador pueda compartirlo y el perfil Inertia /p/{token}
+            // funcione. Si ya hay uno activo, lo respetamos.
+            if ($car->is_marketplace && $car->activePublicLink() === null) {
+                CarPublicLink::generateFor($car);
+            }
         }
     }
 

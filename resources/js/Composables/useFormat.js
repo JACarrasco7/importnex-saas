@@ -163,5 +163,13 @@ export function useFormat() {
             };
             return map[verdict?.toLowerCase()] || 'gray';
         },
+        confidenceVariant: (confidence) => {
+            const map = {
+                high: 'green',
+                medium: 'amber',
+                low: 'red',
+            };
+            return map[confidence?.toLowerCase()] || 'gray';
+        },
     };
 }

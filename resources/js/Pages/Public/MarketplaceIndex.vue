@@ -99,6 +99,14 @@ const { currency, verdictVariant, trafficLightVariant } = useFormat();
 // no strings. Helper compartido en @/Composables/usePhotoUrl.
 const _photoUrl = (car) => photoUrl(car.photos?.[0]);
 
+// safeCars: mientras cargan los deferred props, props.cars es undefined.
+// Devuelve siempre un shape consistente para que el template no casque
+// con "Cannot read properties of undefined (reading 'total')".
+const safeCars = computed(() => props.cars || {
+    data: [], from: 0, to: 0, total: 0, last_page: 1, links: [],
+    current_page: 1, per_page: 12, path: '', first_page_url: null, last_page_url: null, next_page_url: null, prev_page_url: null,
+});
+
 // Watchers para sincronizar URL en cada cambio
 // Server-side filter + sort: navega al backend con los filtros para que
 // la paginación y el orden se apliquen a TODO el inventario (no solo a la
@@ -140,14 +148,14 @@ const brands = computed(() => {
     // brand, pero las queremos en el filtro chip de "todas las marcas" para
     // que el usuario pueda cambiarlas sin perder selección.
     const set = new Set();
-    (props.cars.data || []).forEach(c => { if (c.brand) set.add(c.brand); });
+    safeCars.value.data.forEach(c => { if (c.brand) set.add(c.brand); });
     return [...set].sort();
 });
 
 // El backend ya aplica todos los filtros sobre la consulta paginada.
 // Aquí sólo mostramos la página actual (sin re-filtrar en cliente, que
 // confundiría la paginación).
-const filteredCars = computed(() => props.cars.data || []);
+const filteredCars = computed(() => safeCars.value.data);
 
 // Trust signals
 const trustItems = computed(() => [
@@ -328,7 +336,7 @@ onMounted(() => {
                 <div class="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end">
                     <div>
                         <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">{{ t('marketplace.section_catalog') }}</h2>
-                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">{{ t('marketplace.catalog_desc').replace(':count', cars.total || 0) }}</p>
+                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">{{ t('marketplace.catalog_desc').replace(':count', safeCars.total) }}</p>
                     </div>
                     <a :href="requestHref" class="inline-flex items-center justify-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200">
                         <PhoneIcon class="h-4 w-4 shrink-0" />
@@ -437,25 +445,25 @@ onMounted(() => {
                 </div>
 
                 <!-- Pagination (top) + sort + count -->
-                <div v-if="cars.data && cars.data.length > 0" class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div v-if="safeCars.data.length > 0" class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <p class="text-sm text-gray-600 dark:text-gray-400">
-                        <span class="font-semibold text-gray-900 dark:text-white">{{ cars.from || 0 }}–{{ cars.to || 0 }}</span>
+                        <span class="font-semibold text-gray-900 dark:text-white">{{ safeCars.from }}–{{ safeCars.to }}</span>
                         <span class="mx-1">{{ t('marketplace.of_total', { default: 'de' }) }}</span>
-                        <span class="font-semibold text-gray-900 dark:text-white">{{ cars.total }}</span>
+                        <span class="font-semibold text-gray-900 dark:text-white">{{ safeCars.total }}</span>
                         <span class="ml-1">{{ t('marketplace.results_label', { default: 'vehículos' }) }}</span>
                     </p>
                     <div class="flex items-center gap-2">
                         <label class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                             {{ t('marketplace.sort_label', { default: 'Ordenar' }) }}
                         </label>
-                        <select v-model="sort" class="rounded-lg border-gray-200 text-sm focus:border-estoril-600 focus:ring-estoril-600 dark:border-asphalt-600 dark:bg-asphalt-800 dark:text-white">
+                        <select v-model="sort" class="rounded-lg border-gray-200 text-sm focus:border-estoril-600 focus:ring-estoril-600 dark:border-asphalt-600 dark:bg-asphalt-600 dark:bg-asphalt-800 dark:text-white">
                             <option v-for="option in sortOptions" :key="option" :value="option">
                                 {{ t('cars.sort.' + option, { default: option }) }}
                             </option>
                         </select>
                     </div>
                 </div>
-                <Pagination v-if="cars.data && cars.data.length > 0" :pagination="cars" />
+                <Pagination v-if="safeCars.data.length > 0" :pagination="safeCars" />
 
                 <!-- Cars grid -->
                 <div v-if="filteredCars.length > 0" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -660,7 +668,7 @@ onMounted(() => {
                         <option v-for="b in brands" :key="b" :value="b">{{ b }}</option>
                     </select>
                     <span class="hidden text-sm text-gray-500 sm:inline">
-                        {{ filteredCars.length }} / {{ cars.data?.length || 0 }}
+                        {{ filteredCars.length }} / {{ safeCars.data.length }}
                     </span>
                     <label class="flex cursor-pointer items-center gap-2 text-xs font-medium text-gray-700 dark:text-gray-200">
                         <input v-model="dealFilter" type="checkbox" class="rounded border-gray-300 text-estoril-600 dark:border-asphalt-600 dark:bg-asphalt-800" />

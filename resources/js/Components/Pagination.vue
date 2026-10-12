@@ -1,5 +1,5 @@
 ﻿<template>
-    <div v-if="pagination && pagination.links && pagination.last_page > 1" class="flex items-center justify-between rounded-xl bg-white px-4 py-3 shadow-sm ring-1 ring-gray-200">
+    <div v-if="pagination && pagination.links && pagination.links.length > 0 && pagination.last_page > 1" class="flex items-center justify-between rounded-xl bg-white px-4 py-3 shadow-sm ring-1 ring-gray-200">
         <div class="text-sm text-gray-700">
             {{ t('common.showing') }} <span class="font-semibold">{{ pagination.from }}</span> {{ t('common.to') }} <span class="font-semibold">{{ pagination.to }}</span> {{ t('common.of') }} <span class="font-semibold">{{ pagination.total }}</span>
         </div>
@@ -9,8 +9,8 @@
                 link.active ? 'bg-estoril-600 text-white' : 'text-gray-700 hover:bg-gray-100',
                 !link.url ? 'cursor-not-allowed opacity-50' : '',
             ]">
-                <ChevronLeftIcon v-if="link.label.includes('Previous')" class="h-4 w-4" />
-                <ChevronRightIcon v-else-if="link.label.includes('Next')" class="h-4 w-4" />
+                <ChevronLeftIcon v-if="link.label && link.label.includes('Previous')" class="h-4 w-4" />
+                <ChevronRightIcon v-else-if="link.label && link.label.includes('Next')" class="h-4 w-4" />
                 <span v-else v-html="link.label"></span>
             </component>
         </div>
@@ -23,7 +23,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/vue/24/outline';
 import { useTranslations } from '@/Composables/useTranslations';
 
 defineProps({
-    pagination: { type: Object, required: true },
+    pagination: { type: Object, required: false, default: () => ({ data: [], links: [] }) },
 });
 
 const { t } = useTranslations();

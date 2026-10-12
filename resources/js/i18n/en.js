@@ -1623,6 +1623,9 @@ export default {
     },
     share: 'Share',
     copied: 'Link copied',
+    share_error: 'Could not copy. Please select and copy manually.',
+    shared_profile_badge: 'Public profile',
+    shared_profile_desc: 'You are viewing the public profile of this car, shared by JJ Import Motors.',
   },
   marketplace_show: {
     back_to_marketplace: 'Back to marketplace',

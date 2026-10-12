@@ -1639,6 +1639,9 @@ export default {
     },
     share: 'Compartir',
     copied: 'Enlace copiado',
+    share_error: 'No se pudo copiar. Selecciona y copia manualmente.',
+    shared_profile_badge: 'Perfil público',
+    shared_profile_desc: 'Estás viendo el perfil público de este coche, compartido por JJ Import Motors.',
   },
   marketplace_show: {
     vin_label: 'VIN',

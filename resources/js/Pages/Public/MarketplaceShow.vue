@@ -11,6 +11,8 @@ import {
     EnvelopeIcon,
     ChevronLeftIcon,
     ChevronRightIcon,
+    ShareIcon,
+    ClipboardDocumentIcon,
 } from '@heroicons/vue/24/outline';
 import MapaLeaflet from '@/Components/MapaLeaflet.vue';
 import Badge from '@/Components/Badge.vue';
@@ -24,10 +26,43 @@ const props = defineProps({
     derived: Object,
     requestUrl: { type: String, default: null },
     relatedCars: { type: Array, default: () => [] },
+    publicProfileUrl: { type: String, default: null },
+    isSharedProfile: { type: Boolean, default: false },
 });
 
 const { t } = useTranslations();
 const { currency, date, trafficLightVariant, verdictVariant, confidenceVariant } = useFormat();
+
+// Compartir: copia la URL pública al portapapeles y muestra confirmación.
+const shareCopied = ref(false);
+const shareError = ref('');
+const shareUrl = computed(() => props.publicProfileUrl || (typeof window !== 'undefined' ? window.location.href : ''));
+
+const copyShareUrl = async () => {
+    shareError.value = '';
+    if (! shareUrl.value) {
+        return;
+    }
+    try {
+        if (navigator?.clipboard?.writeText) {
+            await navigator.clipboard.writeText(shareUrl.value);
+        } else if (typeof window !== 'undefined') {
+            // Fallback para navegadores sin clipboard API.
+            const ta = document.createElement('textarea');
+            ta.value = shareUrl.value;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+        }
+        shareCopied.value = true;
+        setTimeout(() => { shareCopied.value = false; }, 2000);
+    } catch (e) {
+        shareError.value = t('marketplace.share_error', { default: 'No se pudo copiar. Selecciona y copia manualmente.' });
+    }
+};
 
 // Galería: índice de la foto activa (empieza en 0)
 const activePhotoIndex = ref(0);
@@ -125,10 +160,39 @@ const marketPosition = computed(() => {
                         <span class="font-medium text-gray-900 dark:text-white">{{ car.brand }} {{ car.model }}</span>
                     </nav>
 
+                    <!-- Banner si el visitante llega por link de share /p/{token} -->
+                    <div v-if="isSharedProfile" class="flex items-start gap-3 rounded-2xl border border-estoril-200 bg-estoril-50 p-4 dark:border-estoril-800 dark:bg-estoril-900/30">
+                        <ShareIcon class="h-5 w-5 shrink-0 text-estoril-700 dark:text-estoril-300" />
+                        <div>
+                            <p class="text-sm font-semibold text-estoril-900 dark:text-estoril-100">
+                                {{ t('marketplace.shared_profile_badge', { default: 'Perfil público' }) }}
+                            </p>
+                            <p class="mt-1 text-sm text-estoril-800 dark:text-estoril-200">
+                                {{ t('marketplace.shared_profile_desc', { default: 'Estás viendo el perfil público de este coche, compartido por JJ Import Motors.' }) }}
+                            </p>
+                        </div>
+                    </div>
+
                     <!-- Header -->
                     <div class="border-b border-gray-200 pb-4 dark:border-asphalt-700">
-                        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ car.brand }} {{ car.model }}</h1>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ t('marketplace_show.vin_label') }} {{ car.vin || t('marketplace.not_available') }}</p>
+                        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                            <div class="min-w-0 flex-1">
+                                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ car.brand }} {{ car.model }}</h1>
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ t('marketplace_show.vin_label') }} {{ car.vin || t('marketplace.not_available') }}</p>
+                            </div>
+                            <!-- Botón Compartir: copia la URL pública /p/{token} al portapapeles -->
+                            <button
+                                v-if="publicProfileUrl"
+                                type="button"
+                                @click="copyShareUrl"
+                                class="inline-flex shrink-0 items-center gap-2 rounded-lg border border-estoril-200 bg-white px-4 py-2 text-sm font-semibold text-estoril-800 shadow-sm transition hover:bg-estoril-50 dark:border-asphalt-700 dark:bg-asphalt-800 dark:text-estoril-300 dark:hover:bg-asphalt-700"
+                                :aria-label="t('marketplace.share', { default: 'Compartir' })"
+                            >
+                                <component :is="shareCopied ? ClipboardDocumentIcon : ShareIcon" class="h-4 w-4" />
+                                <span>{{ shareCopied ? t('marketplace.copied', { default: 'Enlace copiado' }) : t('marketplace.share', { default: 'Compartir' }) }}</span>
+                            </button>
+                        </div>
+                        <p v-if="shareError" class="mt-2 text-xs text-rose-600">{{ shareError }}</p>
                     </div>
                 <!-- Status bar -->
                 <div class="flex flex-wrap items-center gap-3">
