@@ -586,3 +586,13 @@
 - Toqué: `app/Http/Controllers/Api/*`, `app/Events/CarImported.php`, `app/Listeners/NotifyImportWebhook.php`, `scripts/*`, `subir-informe.*`, `.github/workflows/build-skills.yml`, `docs/deploy/SINCRONIZACION-SISTEMAS.md`
 - ⚠️ PENDIENTE para Claude-Desktop: (1) reimportar skills ZIPs v3.9.3/v0.4.0 (Cowork sigue en 3.6.1/0.3.12); (2) al cerrar sesión, verificar `docs/memoria-desktop/MEMORIA.md` sigue siendo máster (regla `.ai/rules/doc-sync.md`); (3) si usas el webhook receptor, arranca `scripts/import-notify-receiver.ps1` con el secret.
 - Commit: ver `git log` — rama master, docs+sync
+
+## 2026-10-12 23:50 · Copilot-VSCode · contextual request CTA + dossier button
+- Hice: el boton "Enviar solicitud" en /marketplace/{id} ahora es CONTEXTUAL al coche (lleva `?car=ID&brand=...&model=...`). El boton "Ver ficha completa" (nuevo) lleva al dossier Blade /c/{token} con la ficha tecnica detallada.
+  - Backend: nuevo accessor `Car::getDossierUrlAttribute` resuelve `/c/{token}` del CarPublicLink activo. `publicRequestUrl()` ahora acepta `array $query` para anadir contexto al URL.
+  - Frontend ficha: doble CTA horizontal (dossier + form contextual). Banner "Sobre este coche" en el form con link a la ficha y X para cerrar. Pre-rellena brand/model.
+- Fix preexistente: el commit 621ce57 dejo `MarketplaceShow.vue` con `<script setup>` sin cerrar y `specItems` vacio — Vite 8.2 rechazaba el archivo. Restaurado `</script>` y ampliada la lista de specItems.
+- 2 tests nuevos: `test_marketplace_show_passes_contextual_request_url_with_car_id`, `test_marketplace_show_passes_dossier_url_when_public_link_exists`. 48/48 OK.
+- Commits: `e784abf` (feat CTA contextual + dossier) + `3a406b3` (fix </script>).
+- Prod verificado: /marketplace/71 → "Ver ficha completa" /c/{token} + "Enviar solicitud" /request/{slug}?car=71&brand=Volkswagen&model=Golf. Form muestra banner con marca/modelo/version/ano y pre-rellena los campos.
+
