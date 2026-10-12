@@ -24,6 +24,21 @@
 
 ---
 
+## 2026-10-12 17:00 · Copilot-VSCode · marketplace: auditoría profunda + muchas mejoras
+- Hice: inventario completo (8 páginas Public/ + 2 layouts). Auditoría i18n: 1745 keys en es y en, sin missing. Inconsistencias y bugs encontrados y arreglados:
+  - **MarketplaceIndex.vue**: NO tenía paginación (backend pagina a 12, no había UI) → añadido Pagination arriba+abajo. Selector de orden con whitelist (recent/oldest/price/price_desc/mileage/asc/desc) ahora server-side. Filtros movidos de client-side a server-side para que la paginación funcione correctamente. Empty state diferenciado (no matches con filtros vs sin coches). Reset filters condicional.
+  - **MarketplaceShow.vue**: wrapeado en MarketplaceLayout (antes tenía header custom). Breadcrumbs Inicio/Catálogo/Modelo. Hero gallery con carrusel + thumbnails. Bloque "Enviar solicitud" con gradiente → form público. **Nueva sección "Coches similares" (misma marca, max 4)**. Eliminada sección de fotos duplicada al final.
+  - **MarketplaceCompare.vue**: usa el composable compartido `photoUrl` (antes inconsistente con `.url || .photos[0]`). Nueva CTA "Enviar solicitud" al final.
+  - **CarRequestSuccess.vue**: wrapeada en MarketplaceLayout. Añadido botón "Volver al marketplace" junto al de "Enviar otra".
+  - **Tracking.vue**: añadido link "Volver al marketplace" en header + el logo apunta a la home.
+  - **usePhotoUrl composable**: extraído a `resources/js/Composables/usePhotoUrl.js` para no duplicar lógica.
+  - **PublicMarketplaceController**: añadido `SORT_OPTIONS` (mismo whitelist que /cars), `filterBounds` (cached), `relatedCars` para ficha, soporte server-side para `brand/deal/mileage/fuel/transmission/doors/color`. `Inertia::defer` mantenido en cars.
+  - i18n: añadidas claves nuevas en es/en (no_matches, sort_label, of_total, results_label, back_to_marketplace, breadcrumbs, share, copied, compare.remove, compare.contact_cta).
+- Tests: 6 nuevos en `MarketplaceEnhancementsTest` (sort, brand+fuel filter, filterBounds, relatedCars, compare requestUrl). 29/29 OK. Bug encontrado durante tests: en mi primera versión reemplacé `Inertia::defer(fn() => $cars)` por `$cars` al editar el controller → reloaded sin deferred props. Restaurado.
+- Toqué: `PublicMarketplaceController`, `Pages/Public/{MarketplaceIndex,MarketplaceShow,MarketplaceCompare,CarRequestSuccess,Tracking}.vue`, `Composables/usePhotoUrl.js` (nuevo), `i18n/{es,en}.js`, `MarketplaceEnhancementsTest`.
+- ⚠️ PENDIENTE: commit + push a master + rebuild Vite en Forge.
+- Commit: pendiente.
+
 ## 2026-10-12 16:10 · Copilot-VSCode · /cars merge a main + push a prod (Forge)
 - Hice: stash de los cambios no relacionados del worktree, `git checkout main`, `git merge --no-ff skill-v4` (commit `a227972`), `git push origin main` (982e0e3..a227972), vuelta a skill-v4, stash pop. Forge auto-desplegará desde main.
 - Toqué: solo el árbol git, sin código.

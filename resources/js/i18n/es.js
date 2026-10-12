@@ -1623,8 +1623,22 @@ export default {
       verdict: 'Veredicto',
       traffic_light: 'Tráfico',
       savings: 'Ahorro estimado',
-      view: 'Ver detalles'
-    }
+      view: 'Ver detalles',
+      remove: 'Quitar de la comparación',
+      contact_cta: '¿Convencido? Envíanos una solicitud',
+    },
+    no_matches_title: 'No hay coincidencias con tus filtros',
+    no_matches_desc: 'Prueba a quitar algún filtro o cambiar la búsqueda. Tenemos vehículos entrando cada semana.',
+    sort_label: 'Ordenar',
+    of_total: 'de',
+    results_label: 'vehículos',
+    back_to_marketplace: 'Volver al marketplace',
+    breadcrumbs: {
+      home: 'Inicio',
+      catalog: 'Catálogo',
+    },
+    share: 'Compartir',
+    copied: 'Enlace copiado',
   },
   marketplace_show: {
     vin_label: 'VIN',

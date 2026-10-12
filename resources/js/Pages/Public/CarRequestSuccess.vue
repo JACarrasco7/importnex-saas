@@ -1,6 +1,7 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
 import { CheckCircleIcon, TruckIcon, PhoneIcon, EnvelopeIcon } from '@heroicons/vue/24/outline';
+import MarketplaceLayout from '@/Layouts/MarketplaceLayout.vue';
 import { useTranslations } from '@/Composables/useTranslations';
 
 const props = defineProps({
@@ -13,8 +14,9 @@ const { t } = useTranslations();
 <template>
     <Head :title="t('car_request_success.title')" />
 
-    <div class="min-h-screen bg-linear-to-br from-estoril-50 via-white to-platinum-100 dark:from-asphalt-900 dark:via-asphalt-900 dark:to-asphalt-800">
-        <div class="mx-auto max-w-2xl px-4 py-16 sm:px-6 lg:px-8">
+    <MarketplaceLayout>
+        <div class="bg-linear-to-br from-estoril-50 via-white to-platinum-100 dark:from-asphalt-900 dark:via-asphalt-900 dark:to-asphalt-800">
+            <div class="mx-auto max-w-2xl px-4 py-16 sm:px-6 lg:px-8">
             <div class="overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700">
                 <div class="px-8 py-12 text-center">
                     <div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-estoril-100 dark:bg-estoril-900/40">
@@ -71,12 +73,18 @@ const { t } = useTranslations();
                     </div>
                 </div>
 
-                <div class="border-t border-gray-200 px-8 py-6 text-center dark:border-asphalt-700">
+                <div class="flex flex-col items-center justify-center gap-3 border-t border-gray-200 px-8 py-6 sm:flex-row dark:border-asphalt-700">
                     <Link
                         :href="route('public.car-request.index', organization.slug)"
                         class="inline-flex items-center gap-2 rounded-lg bg-estoril-700 px-6 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-800"
                     >
                         {{ t('car_request_success.send_another') }}
+                    </Link>
+                    <Link
+                        :href="route('marketplace.index')"
+                        class="inline-flex items-center gap-2 rounded-lg bg-white px-6 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-gray-300 hover:bg-gray-50"
+                    >
+                        {{ t('marketplace.back_to_marketplace') }}
                     </Link>
                 </div>
             </div>
@@ -85,5 +93,5 @@ const { t } = useTranslations();
                 <p>&copy; {{ new Date().getFullYear() }} {{ organization.name }}. {{ t('car_request_success.rights') }}</p>
             </div>
         </div>
-    </div>
+    </MarketplaceLayout>
 </template>

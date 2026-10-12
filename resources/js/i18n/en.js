@@ -1607,8 +1607,22 @@ export default {
       verdict: 'Verdict',
       traffic_light: 'Traffic light',
       savings: 'Estimated saving',
-      view: 'View details'
-    }
+      view: 'View details',
+      remove: 'Remove from compare',
+      contact_cta: 'Convinced? Send us a request',
+    },
+    no_matches_title: 'No matches with your filters',
+    no_matches_desc: 'Try removing a filter or changing the search. New cars arrive every week.',
+    sort_label: 'Sort',
+    of_total: 'of',
+    results_label: 'cars',
+    back_to_marketplace: 'Back to marketplace',
+    breadcrumbs: {
+      home: 'Home',
+      catalog: 'Catalog',
+    },
+    share: 'Share',
+    copied: 'Link copied',
   },
   marketplace_show: {
     back_to_marketplace: 'Back to marketplace',

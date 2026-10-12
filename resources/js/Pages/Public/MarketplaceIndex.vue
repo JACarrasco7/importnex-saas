@@ -27,15 +27,19 @@ import Badge from '@/Components/Badge.vue';
 import WishlistButton from '@/Components/WishlistButton.vue';
 import CompareBar from '@/Components/CompareBar.vue';
 import LazyImage from '@/Components/LazyImage.vue';
+import Pagination from '@/Components/Pagination.vue';
 import MarketplaceLayout from '@/Layouts/MarketplaceLayout.vue';
 import { useFormat } from '@/Composables/useFormat';
 import { useTranslations } from '@/Composables/useTranslations';
+import { photoUrl } from '@/Composables/usePhotoUrl';
 
 const props = defineProps({
     cars: Object,
     verdicts: Array,
     filters: Object,
     requestUrl: String,
+    sort: { type: String, default: 'recent' },
+    sortOptions: { type: Array, default: () => ['recent', 'oldest', 'price_asc', 'price_desc', 'mileage_asc', 'mileage_desc'] },
     filterBounds: { type: Object, default: () => ({ price: { min: 0, max: 9999999 }, year: { min: 1900, max: new Date().getFullYear() + 1 } }) },
     filterOptions: { type: Object, default: () => ({ fuels: [], transmissions: [], doors: [], colors: [] }) },
 });
@@ -61,26 +65,19 @@ const fuelFilter = ref(props.filters?.fuel || '');
 const transmissionFilter = ref(props.filters?.transmission || '');
 const doorsFilter = ref(props.filters?.doors || '');
 const colorFilter = ref(props.filters?.color || '');
+const sort = ref(props.sort || 'recent');
 
-// Marketplace-3.10: Sincronizar filtros con URL (compartible)
-const syncToUrl = () => {
-    const params = new URLSearchParams();
-    if (search.value) params.set('search', search.value);
-    if (brandFilter.value) params.set('brand', brandFilter.value);
-    if (dealFilter.value) params.set('deal', '1');
-    if (minPrice.value) params.set('min_price', minPrice.value);
-    if (maxPrice.value) params.set('max_price', maxPrice.value);
-    if (mileageFilter.value) params.set('mileage', mileageFilter.value);
-    if (fuelFilter.value) params.set('fuel', fuelFilter.value);
-    if (transmissionFilter.value) params.set('transmission', transmissionFilter.value);
-    if (doorsFilter.value) params.set('doors', doorsFilter.value);
-    if (colorFilter.value) params.set('color', colorFilter.value);
+const hasActiveFilters = computed(() =>
+    Boolean(
+        search.value || brandFilter.value || dealFilter.value
+        || minPrice.value || maxPrice.value || mileageFilter.value
+        || fuelFilter.value || transmissionFilter.value || doorsFilter.value || colorFilter.value
+        || (sort.value && sort.value !== 'recent')
+    )
+);
 
-    const qs = params.toString();
-    const url = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
-    window.history.replaceState({}, '', url);
-};
-
+// Marketplace-3.10: Sincronizar filtros con URL (compartible) — Inertia lo
+// hace ya con router.get, así que ya no necesitamos replaceState manual.
 const resetFilters = () => {
     search.value = '';
     brandFilter.value = '';
@@ -92,81 +89,65 @@ const resetFilters = () => {
     transmissionFilter.value = '';
     doorsFilter.value = '';
     colorFilter.value = '';
-    syncToUrl();
+    sort.value = 'recent';
+    applyFilters();
 };
 
 const { currency, verdictVariant, trafficLightVariant } = useFormat();
 
 // Marketplace item: las fotos son objetos CarPhoto ({id, url, photo_type, ...}),
-// no strings. Esta helper acepta ambos formatos por compat.
-const photoUrl = (car) => {
-    if (!car.photos || car.photos.length === 0) return null;
-    const p = car.photos[0];
-    const raw = typeof p === 'string' ? p : p?.url;
-    if (!raw) return null;
-    if (raw.startsWith('http')) return raw;
-    return `/storage/${raw}`;
-};
+// no strings. Helper compartido en @/Composables/usePhotoUrl.
+const _photoUrl = (car) => photoUrl(car.photos?.[0]);
 
 // Watchers para sincronizar URL en cada cambio
+// Server-side filter + sort: navega al backend con los filtros para que
+// la paginación y el orden se apliquen a TODO el inventario (no solo a la
+// página actual). Debounce 300ms para inputs de texto.
+import { router } from '@inertiajs/vue3';
 import { watch } from 'vue';
-watch([search, brandFilter, dealFilter, minPrice, maxPrice, mileageFilter, fuelFilter, transmissionFilter, doorsFilter, colorFilter], () => {
-    syncToUrl();
+
+const buildFilterParams = () => {
+    const params = { page: 1 };
+    if (search.value) params.search = search.value;
+    if (brandFilter.value) params.brand = brandFilter.value;
+    if (dealFilter.value) params.deal = '1';
+    if (minPrice.value) params.min_price = minPrice.value;
+    if (maxPrice.value) params.max_price = maxPrice.value;
+    if (mileageFilter.value) params.mileage = mileageFilter.value;
+    if (fuelFilter.value) params.fuel = fuelFilter.value;
+    if (transmissionFilter.value) params.transmission = transmissionFilter.value;
+    if (doorsFilter.value) params.doors = doorsFilter.value;
+    if (colorFilter.value) params.color = colorFilter.value;
+    if (sort.value && sort.value !== 'recent') params.sort = sort.value;
+    return params;
+};
+
+let filterTimer = null;
+const applyFilters = () => {
+    router.get(route('marketplace.index'), buildFilterParams(), {
+        preserveState: true,
+        preserveScroll: true,
+    });
+};
+watch([search, brandFilter, dealFilter, minPrice, maxPrice, mileageFilter, fuelFilter, transmissionFilter, doorsFilter, colorFilter, sort], () => {
+    clearTimeout(filterTimer);
+    filterTimer = setTimeout(applyFilters, 300);
 }, { flush: 'post' });
 
 // Marcas disponibles en el catálogo actual
 const brands = computed(() => {
+    // Marcas disponibles en el catálogo (sin filtrar). El server ya filtra por
+    // brand, pero las queremos en el filtro chip de "todas las marcas" para
+    // que el usuario pueda cambiarlas sin perder selección.
     const set = new Set();
     (props.cars.data || []).forEach(c => { if (c.brand) set.add(c.brand); });
     return [...set].sort();
 });
 
-const filteredCars = computed(() => {
-    let result = props.cars.data || [];
-    if (brandFilter.value) {
-        result = result.filter(c => c.brand === brandFilter.value);
-    }
-    if (dealFilter.value) {
-        result = result.filter(c => (c.estimated_saving || 0) > 0);
-    }
-    if (minPrice.value) {
-        const min = parseFloat(minPrice.value);
-        if (!isNaN(min)) {
-            result = result.filter(c => (c.purchase_price || 0) >= min);
-        }
-    }
-    if (maxPrice.value) {
-        const max = parseFloat(maxPrice.value);
-        if (!isNaN(max)) {
-            result = result.filter(c => (c.purchase_price || 0) <= max);
-        }
-    }
-    if (mileageFilter.value) {
-        const mileage = parseFloat(mileageFilter.value);
-        if (!isNaN(mileage)) {
-            result = result.filter(c => (c.mileage || 0) <= mileage);
-        }
-    }
-    if (search.value) {
-        const term = search.value.toLowerCase();
-        result = result.filter(c =>
-            (c.brand && c.brand.toLowerCase().includes(term)) ||
-            (c.model && c.model.toLowerCase().includes(term))
-        );
-    }
-    // Filtros extendidos (Marketplace item 2)
-    if (fuelFilter.value) {
-        result = result.filter(c => c.fuel === fuelFilter.value);
-    }
-    if (transmissionFilter.value) {
-        result = result.filter(c => c.transmission === transmissionFilter.value);
-    }
-    if (doorsFilter.value !== '' && doorsFilter.value !== null) {
-        result = result.filter(c => Number(c.doors) === Number(doorsFilter.value));
-    }
-    if (colorFilter.value) {
-        result = result.filter(c => c.color === colorFilter.value);
-    }
+// El backend ya aplica todos los filtros sobre la consulta paginada.
+// Aquí sólo mostramos la página actual (sin re-filtrar en cliente, que
+// confundiría la paginación).
+const filteredCars = computed(() => props.cars.data || []);
     return result;
 });
 
@@ -457,6 +438,27 @@ onMounted(() => {
                     </button>
                 </div>
 
+                <!-- Pagination (top) + sort + count -->
+                <div v-if="cars.data && cars.data.length > 0" class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                        <span class="font-semibold text-gray-900 dark:text-white">{{ cars.from || 0 }}–{{ cars.to || 0 }}</span>
+                        <span class="mx-1">{{ t('marketplace.of_total', { default: 'de' }) }}</span>
+                        <span class="font-semibold text-gray-900 dark:text-white">{{ cars.total }}</span>
+                        <span class="ml-1">{{ t('marketplace.results_label', { default: 'vehículos' }) }}</span>
+                    </p>
+                    <div class="flex items-center gap-2">
+                        <label class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                            {{ t('marketplace.sort_label', { default: 'Ordenar' }) }}
+                        </label>
+                        <select v-model="sort" class="rounded-lg border-gray-200 text-sm focus:border-estoril-600 focus:ring-estoril-600 dark:border-asphalt-600 dark:bg-asphalt-800 dark:text-white">
+                            <option v-for="option in sortOptions" :key="option" :value="option">
+                                {{ t('cars.sort.' + option, { default: option }) }}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <Pagination v-if="cars.data && cars.data.length > 0" :pagination="cars" />
+
                 <!-- Cars grid -->
                 <div v-if="filteredCars.length > 0" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     <div
@@ -468,8 +470,8 @@ onMounted(() => {
                         <!-- Photo (LazyImage for performance) -->
                         <div class="relative aspect-[16/10] overflow-hidden bg-linear-to-br from-asphalt-200 to-gray-300 dark:from-asphalt-700 dark:to-asphalt-600">
                             <LazyImage
-                                v-if="photoUrl(car)"
-                                :src="photoUrl(car)"
+                                v-if="_photoUrl(car)"
+                                :src="_photoUrl(car)"
                                 :alt="t('cars.marketplace_brand_model', { brand: car.brand, model: car.model })"
                                 ratio="aspect-[16/10]"
                                 fit="object-cover group-hover:scale-110 transition duration-700"
@@ -555,7 +557,22 @@ onMounted(() => {
                     </div>
                 </div>
 
-                <!-- Empty state -->
+                <!-- Empty state: diferenciar "no hay coches" vs "no hay matches con los filtros" -->
+                <div v-if="hasActiveFilters" class="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 p-12 text-center dark:border-asphalt-700 dark:bg-asphalt-800">
+                    <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/40">
+                        <SparklesIcon class="h-8 w-8 text-amber-600 dark:text-amber-300" />
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ t('marketplace.no_matches_title', { default: 'No hay coincidencias' }) }}</h3>
+                    <p class="mx-auto mt-2 w-full max-w-md text-sm text-gray-600 dark:text-gray-400">
+                        {{ t('marketplace.no_matches_desc', { default: 'Prueba a quitar algún filtro o cambiar la búsqueda.' }) }}
+                    </p>
+                    <button
+                        type="button"
+                        @click="resetFilters"
+                        class="mt-6 inline-flex items-center justify-center gap-2 rounded-lg bg-estoril-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-estoril-800">
+                        {{ t('common.reset_filters') }}
+                    </button>
+                </div>
                 <div v-else class="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 p-12 text-center dark:border-asphalt-700 dark:bg-asphalt-800">
                     <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-estoril-100 dark:bg-estoril-900/40">
                         <SparklesIcon class="h-8 w-8 text-estoril-700 dark:text-estoril-300" />
@@ -569,6 +586,9 @@ onMounted(() => {
                         <span class="text-center">{{ t('marketplace.cta_request_notify') }}</span>
                     </a>
                 </div>
+
+                <!-- Pagination (bottom) -->
+                <Pagination :pagination="cars" />
             </div>
         </section>
 

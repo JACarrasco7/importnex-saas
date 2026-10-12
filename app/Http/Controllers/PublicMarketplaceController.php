@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Car;
 use App\Models\Organization;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
@@ -11,6 +12,20 @@ use Inertia\Response;
 
 class PublicMarketplaceController extends Controller
 {
+    /**
+     * Opciones de ordenación permitidas para el listado público.
+     * Cada valor es [columna, dirección]; 'recent' usa created_at + id
+     * para tener un orden determinista en imports en lote.
+     */
+    private const SORT_OPTIONS = [
+        'recent' => [['created_at', 'desc'], ['id', 'desc']],
+        'oldest' => [['created_at', 'asc'], ['id', 'asc']],
+        'price_asc' => [['purchase_price', 'asc'], ['id', 'asc']],
+        'price_desc' => [['purchase_price', 'desc'], ['id', 'desc']],
+        'mileage_asc' => [['mileage', 'asc'], ['id', 'asc']],
+        'mileage_desc' => [['mileage', 'desc'], ['id', 'desc']],
+    ];
+
     /**
      * Resolves the public request-form URL for the marketplace CTA
      * ("Enviar solicitud"). Falls back to the first public org
@@ -31,10 +46,13 @@ class PublicMarketplaceController extends Controller
      */
     public function index(Request $request): Response
     {
-        // Criterio de visibilidad pública: scope único en el modelo
-        // (`Car::scopePublicMarketplace()`) — toggle del operador + org pública
-        // + coche no vendido/descartado. Antes exigía `status=Delivered`
-        // (coche YA entregado), así que la web nunca mostraba nada.
+        $sort = $request->input('sort', 'recent');
+        if (! array_key_exists($sort, self::SORT_OPTIONS)) {
+            $sort = 'recent';
+        }
+
+        $deal = filter_var($request->input('deal'), FILTER_VALIDATE_BOOLEAN);
+
         $cars = Car::query()
             ->publicMarketplace()
             ->when($request->input('search'), function ($q, $s) {
@@ -44,15 +62,23 @@ class PublicMarketplaceController extends Controller
                         ->orWhere('vin', 'like', "%$s%");
                 });
             })
+            ->when($request->input('brand'), fn ($q, $b) => $q->where('brand', $b))
             ->when($request->input('verdict'), fn ($q, $v) => $q->where('verdict', $v))
             ->when($request->input('traffic_light'), fn ($q, $tl) => $q->where('traffic_light', $tl))
             ->when($request->input('min_price'), fn ($q, $p) => $q->where('purchase_price', '>=', $p))
             ->when($request->input('max_price'), fn ($q, $p) => $q->where('purchase_price', '<=', $p))
+            ->when($request->input('mileage'), fn ($q, $m) => $q->where('mileage', '<=', $m))
+            ->when($request->input('fuel'), fn ($q, $f) => $q->where('fuel', $f))
+            ->when($request->input('transmission'), fn ($q, $tr) => $q->where('transmission', $tr))
+            ->when($request->input('doors') !== null && $request->input('doors') !== '', fn ($q, $d) => $q->where('doors', $request->input('doors')))
+            ->when($request->input('color'), fn ($q, $c) => $q->where('color', $c))
             ->when($request->input('year_min'), fn ($q, $y) => $q->whereRaw('SUBSTRING(year, -4) >= ?', [$y]))
             ->when($request->input('year_max'), fn ($q, $y) => $q->whereRaw('SUBSTRING(year, -4) <= ?', [$y]))
-            ->orderBy('created_at', 'desc')
-            ->paginate(12)
-            ->withQueryString();
+            ->when($deal, fn ($q) => $q->where('estimated_saving', '>', 0));
+        foreach (self::SORT_OPTIONS[$sort] as [$column, $direction]) {
+            $cars->orderBy($column, $direction);
+        }
+        $cars = $cars->paginate(12)->withQueryString();
 
         // Load photos and organization for each car
         $cars->load(['photos', 'organization']);
@@ -80,13 +106,37 @@ class PublicMarketplaceController extends Controller
             ];
         });
 
+        // Bounds para los inputs de precio/año (usados por el frontend en
+        // los atributos min/max de los <input type="number">).
+        $filterBounds = Cache::remember('marketplace.filter_bounds', 1800, function () {
+            $base = Car::query()->publicMarketplace();
+
+            return [
+                'price' => [
+                    'min' => (int) ($base->min('purchase_price') ?? 0),
+                    'max' => (int) ($base->max('purchase_price') ?? 9999999),
+                ],
+                'year' => [
+                    'min' => 1990,
+                    'max' => (int) date('Y') + 1,
+                ],
+            ];
+        });
+
         return Inertia::render('Public/MarketplaceIndex', [
-            'cars' => $cars,
+            'cars' => Inertia::defer(fn () => $cars),
             'verdicts' => $verdicts,
             'lights' => $lights,
             'filterOptions' => $filterOptions,
+            'filterBounds' => $filterBounds,
             'requestUrl' => $requestUrl,
-            'filters' => $request->only(['search', 'verdict', 'traffic_light', 'min_price', 'max_price', 'year_min', 'year_max']),
+            'sort' => $sort,
+            'sortOptions' => array_keys(self::SORT_OPTIONS),
+            'filters' => $request->only([
+                'search', 'verdict', 'traffic_light', 'min_price', 'max_price',
+                'year_min', 'year_max', 'brand', 'deal', 'mileage', 'fuel',
+                'transmission', 'doors', 'color',
+            ]),
         ]);
     }
 
@@ -110,9 +160,15 @@ class PublicMarketplaceController extends Controller
             ->with(['photos', 'organization'])
             ->get();
 
+        $firstCar = $cars->first();
+        $requestUrl = $this->publicRequestUrl(
+            $firstCar?->relationLoaded('organization') ? $firstCar->organization : null
+        );
+
         return Inertia::render('Public/MarketplaceCompare', [
             'cars' => $cars,
             'requestedIds' => $ids->all(),
+            'requestUrl' => $requestUrl,
         ]);
     }
 
@@ -142,6 +198,7 @@ class PublicMarketplaceController extends Controller
         return Inertia::render('Public/MarketplaceShow', [
             'car' => $car,
             'requestUrl' => $this->publicRequestUrl($car->organization),
+            'relatedCars' => $this->relatedCars($car),
             'derived' => [
                 'total_cost' => $car->calculateTotalCost(),
                 'iedmt' => $car->calculateIEDMT(),
@@ -149,5 +206,21 @@ class PublicMarketplaceController extends Controller
                 'comparables_stats' => $car->comparablesStats,
             ],
         ]);
+    }
+
+    /**
+     * Coches relacionados: misma marca, distinto id, mismo estado de visibilidad.
+     * Usado en la ficha para sugerir alternativas sin salir del marketplace.
+     */
+    private function relatedCars(Car $car): Collection
+    {
+        return Car::query()
+            ->publicMarketplace()
+            ->where('brand', $car->brand)
+            ->whereKeyNot($car->getKey())
+            ->orderBy('created_at', 'desc')
+            ->limit(4)
+            ->with('photos')
+            ->get();
     }
 }

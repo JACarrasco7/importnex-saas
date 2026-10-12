@@ -84,20 +84,27 @@ const expectedDate = computed(() =>
         <header class="border-b border-estoril-100/40 bg-white/80 backdrop-blur-md">
             <div class="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
                 <div class="flex items-center gap-3">
-                    <img
-                        :src="'/images/jj-import/logo-insignia.png'"
-                        :alt="'JJ Import Motors'"
-                        class="h-10 w-auto"
-                    />
-                    <span class="hidden text-sm font-medium text-asphalt-600 sm:inline">
-                        JJ Import Motors · Huelva
+                    <a href="/" class="flex items-center gap-3">
+                        <img
+                            :src="'/images/jj-import/logo-insignia.png'"
+                            :alt="'JJ Import Motors'"
+                            class="h-10 w-auto"
+                        />
+                        <span class="hidden text-sm font-medium text-asphalt-600 sm:inline">
+                            JJ Import Motors · Huelva
+                        </span>
+                    </a>
+                </div>
+                <div class="flex items-center gap-3">
+                    <a href="/marketplace" class="hidden text-xs font-semibold text-asphalt-600 hover:text-estoril-700 sm:inline">
+                        {{ t('marketplace.back_to_marketplace') }}
+                    </a>
+                    <span
+                        class="rounded-full bg-estoril-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-estoril-700"
+                    >
+                        {{ statusLabel }}
                     </span>
                 </div>
-                <span
-                    class="rounded-full bg-estoril-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-estoril-700"
-                >
-                    {{ statusLabel }}
-                </span>
             </div>
         </header>
 

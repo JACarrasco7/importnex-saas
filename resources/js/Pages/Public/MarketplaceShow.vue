@@ -14,24 +14,20 @@ import {
 } from '@heroicons/vue/24/outline';
 import MapaLeaflet from '@/Components/MapaLeaflet.vue';
 import Badge from '@/Components/Badge.vue';
+import MarketplaceLayout from '@/Layouts/MarketplaceLayout.vue';
 import { useFormat } from '@/Composables/useFormat';
 import { useTranslations } from '@/Composables/useTranslations';
+import { photoUrl } from '@/Composables/usePhotoUrl';
 
 const props = defineProps({
     car: Object,
     derived: Object,
     requestUrl: { type: String, default: null },
+    relatedCars: { type: Array, default: () => [] },
 });
 
 const { t } = useTranslations();
 const { currency, date, trafficLightVariant, verdictVariant, confidenceVariant } = useFormat();
-
-// Resuelve la URL pública de una foto (acepta string u objeto CarPhoto)
-const photoUrl = (photo) => {
-    const raw = typeof photo === 'string' ? photo : photo?.url;
-    if (!raw) return null;
-    return raw.startsWith('http') ? raw : `/storage/${raw}`;
-};
 
 // Galería: índice de la foto activa (empieza en 0)
 const activePhotoIndex = ref(0);
@@ -112,26 +108,28 @@ const marketPosition = computed(() => {
 <template>
     <Head :title="`${car.brand} ${car.model} - ${t('public.marketplace_title')}`" />
 
-    <div class="min-h-screen bg-gradient-to-br from-platinum-100 via-white to-estoril-50">
-        <!-- Public header -->
-        <header class="border-b border-gray-200 bg-white/80 backdrop-blur">
-            <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-                <Link :href="route('marketplace.index')" class="flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-gray-900">
-                    <ArrowLeftIcon class="h-4 w-4" />
-                    {{ t('marketplace_show.back_to_marketplace') }}
-                </Link>
-                <a :href="route('login')" class="text-sm font-semibold text-gray-700 hover:text-gray-900">{{ t('marketplace_show.sign_in') }}</a>
-            </div>
-        </header>
+    <MarketplaceLayout>
+        <div class="min-h-screen bg-gradient-to-br from-platinum-100 via-white to-estoril-50 dark:from-asphalt-900 dark:via-asphalt-900 dark:to-asphalt-800">
+            <div class="py-8">
+                <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
+                    <!-- Breadcrumbs -->
+                    <nav class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                        <Link :href="route('marketplace.index')" class="hover:text-estoril-700 dark:hover:text-estoril-300">
+                            {{ t('marketplace.breadcrumbs.home') }}
+                        </Link>
+                        <span>/</span>
+                        <Link :href="route('marketplace.index')" class="hover:text-estoril-700 dark:hover:text-estoril-300">
+                            {{ t('marketplace.breadcrumbs.catalog') }}
+                        </Link>
+                        <span>/</span>
+                        <span class="font-medium text-gray-900 dark:text-white">{{ car.brand }} {{ car.model }}</span>
+                    </nav>
 
-        <div class="py-8">
-            <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
-                <!-- Header -->
-                <div class="border-b border-gray-200 pb-4">
-                    <h1 class="text-3xl font-bold text-gray-900">{{ car.brand }} {{ car.model }}</h1>
-                    <p class="mt-1 text-sm text-gray-500">{{ t('marketplace_show.vin_label') }} {{ car.vin || t('marketplace.not_available') }}</p>
-                </div>
-
+                    <!-- Header -->
+                    <div class="border-b border-gray-200 pb-4 dark:border-asphalt-700">
+                        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ car.brand }} {{ car.model }}</h1>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ t('marketplace_show.vin_label') }} {{ car.vin || t('marketplace.not_available') }}</p>
+                    </div>
                 <!-- Status bar -->
                 <div class="flex flex-wrap items-center gap-3">
                     <Badge :variant="trafficLightVariant(car.traffic_light)" dot>{{ car.traffic_light }}</Badge>
@@ -424,19 +422,6 @@ const marketPosition = computed(() => {
                     </div>
                 </div>
 
-                <!-- Photos (read-only gallery) -->
-                <div v-if="car.photos?.length" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
-                    <div class="border-b border-gray-200 px-6 py-4">
-                        <h3 class="text-base font-semibold text-gray-900">{{ t('marketplace_show.section_photos') }}</h3>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3 p-6 md:grid-cols-4">
-                        <a v-for="photo in car.photos" :key="photo.id" :href="`/storage/${photo.url}`" target="_blank" rel="noopener" class="group relative overflow-hidden rounded-lg">
-                            <img :src="`/storage/${photo.url}`" :alt="photo.photo_type" class="h-32 w-full object-cover transition group-hover:scale-105" loading="lazy" />
-                            <span class="absolute bottom-2 left-2 rounded bg-black/70 px-2 py-0.5 text-xs text-white">{{ photo.photo_type }}</span>
-                        </a>
-                    </div>
-                </div>
-
                 <!-- Notes (read-only) -->
                 <div v-if="car.notes" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4">
@@ -446,13 +431,40 @@ const marketPosition = computed(() => {
                         <pre class="whitespace-pre-wrap font-sans text-sm text-gray-700">{{ car.notes }}</pre>
                     </div>
                 </div>
+
+                <!-- Coches relacionados (misma marca) -->
+                <div v-if="relatedCars.length > 0" class="mt-8">
+                    <h2 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+                        {{ t('marketplace.related_cars', { default: 'Otros coches similares' }) }}
+                    </h2>
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                        <Link
+                            v-for="rcar in relatedCars"
+                            :key="rcar.id"
+                            :href="route('marketplace.show', rcar.id)"
+                            class="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 transition hover:-translate-y-0.5 hover:shadow-md hover:ring-estoril-300 dark:bg-asphalt-800 dark:ring-asphalt-700">
+                            <div class="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-asphalt-200 to-gray-300">
+                                <img v-if="photoUrl(rcar.photos?.[0])" :src="photoUrl(rcar.photos?.[0])" :alt="`${rcar.brand} ${rcar.model}`" class="h-full w-full object-cover transition group-hover:scale-105" loading="lazy" />
+                                <div v-else class="flex h-full w-full flex-col items-center justify-center text-gray-400">
+                                    <span class="text-4xl">🚗</span>
+                                </div>
+                            </div>
+                            <div class="p-3">
+                                <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ rcar.brand }} {{ rcar.model }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ rcar.year }} · {{ rcar.mileage ? `${(rcar.mileage / 1000).toFixed(0)}k km` : '—' }}</p>
+                                <p class="mt-1 text-sm font-bold text-estoril-800 dark:text-estoril-300">{{ currency(rcar.purchase_price) }}</p>
+                            </div>
+                        </Link>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <footer class="mt-12 border-t border-gray-200 bg-white py-6">
+        <footer class="mt-12 border-t border-gray-200 bg-white py-6 dark:border-asphalt-700 dark:bg-asphalt-900">
             <div class="mx-auto max-w-7xl px-4 text-center text-sm text-gray-500 sm:px-6 lg:px-8">
                 &copy; {{ new Date().getFullYear() }} Importnex. {{ t('marketplace_show.footer_rights') }}
             </div>
         </footer>
-    </div>
+        </div>
+    </MarketplaceLayout>
 </template>

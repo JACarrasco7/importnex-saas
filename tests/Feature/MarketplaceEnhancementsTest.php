@@ -226,4 +226,158 @@ class MarketplaceEnhancementsTest extends TestCase
             ->where('car.photos.0.url', 'cars/'.$car->id.'/front.jpg')
         );
     }
+
+    public function test_marketplace_index_supports_sort(): void
+    {
+        $org = Organization::factory()->create(['is_public' => true, 'slug' => 't']);
+        $cheap = Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+            'purchase_price' => 5000,
+        ]);
+        $expensive = Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+            'purchase_price' => 50000,
+        ]);
+
+        $response = $this->get('/marketplace?sort=price_asc');
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('Public/MarketplaceIndex')
+            ->loadDeferredProps('default', fn ($prop) => $prop
+                ->where('cars.data.0.id', $cheap->id)
+                ->where('cars.data.1.id', $expensive->id)
+            )
+            ->where('sort', 'price_asc')
+        );
+    }
+
+    public function test_marketplace_index_filters_by_extended_criteria(): void
+    {
+        $org = Organization::factory()->create(['is_public' => true, 'slug' => 't']);
+        $bmw = Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+            'brand' => 'BMW',
+            'fuel' => 'Diesel',
+        ]);
+        Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+            'brand' => 'Audi',
+            'fuel' => 'Gasoline',
+        ]);
+
+        $response = $this->get('/marketplace?brand=BMW&fuel=Diesel');
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('Public/MarketplaceIndex')
+            ->loadDeferredProps('default', fn ($prop) => $prop
+                ->has('cars')
+                ->where('cars.total', 1)
+                ->where('cars.data.0.id', $bmw->id)
+            )
+            ->where('filters.brand', 'BMW')
+        );
+    }
+
+    public function test_marketplace_index_passes_filter_bounds(): void
+    {
+        $org = Organization::factory()->create(['is_public' => true, 'slug' => 't']);
+        Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+            'purchase_price' => 8000,
+        ]);
+        Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+            'purchase_price' => 25000,
+        ]);
+
+        $response = $this->get('/marketplace');
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('Public/MarketplaceIndex')
+            ->where('filterBounds.price.min', 8000)
+            ->where('filterBounds.price.max', 25000)
+        );
+    }
+
+    public function test_marketplace_show_passes_related_cars(): void
+    {
+        $org = Organization::factory()->create(['is_public' => true, 'slug' => 't']);
+        $bmw1 = Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+            'brand' => 'BMW',
+        ]);
+        $bmw2 = Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+            'brand' => 'BMW',
+        ]);
+        Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+            'brand' => 'Audi', // distinta marca, no debe aparecer
+        ]);
+
+        $response = $this->get("/marketplace/{$bmw1->id}");
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('Public/MarketplaceShow')
+            ->has('relatedCars', 1)
+            ->where('relatedCars.0.id', $bmw2->id)
+        );
+    }
+
+    public function test_marketplace_compare_passes_request_url(): void
+    {
+        $org = Organization::factory()->create(['is_public' => true, 'slug' => 't']);
+        $car1 = Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+        ]);
+        $car2 = Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+        ]);
+
+        $response = $this->get("/marketplace/compare?ids={$car1->id},{$car2->id}");
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('Public/MarketplaceCompare')
+            ->where('requestUrl', url('/request/t'))
+            ->has('cars', 2)
+        );
+    }
 }
