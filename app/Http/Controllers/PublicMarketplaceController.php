@@ -107,9 +107,8 @@ class PublicMarketplaceController extends Controller
         // CTA "Enviar solicitud" → apunta a la org del primer coche
         // (todas las fichas son de la misma org pública en la práctica).
         $firstCar = $cars->first();
-        $requestUrl = $this->publicRequestUrl(
-            $firstCar?->relationLoaded('organization') ? $firstCar->organization : null
-        );
+        $firstCarOrg = is_array($firstCar) ? ($firstCar['organization'] ?? null) : $firstCar?->organization;
+        $requestUrl = $this->publicRequestUrl($firstCarOrg);
 
         $verdicts = Car::VERDICTS;
         $lights = ['green', 'amber', 'red', 'neutral'];
@@ -237,7 +236,7 @@ class PublicMarketplaceController extends Controller
      * Coches relacionados: misma marca, distinto id, mismo estado de visibilidad.
      * Usado en la ficha para sugerir alternativas sin salir del marketplace.
      */
-    private function relatedCars(Car $car): Collection
+    private function relatedCars(Car $car): \Illuminate\Support\Collection
     {
         return Car::query()
             ->publicMarketplace()
