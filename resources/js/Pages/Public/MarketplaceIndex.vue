@@ -148,8 +148,6 @@ const brands = computed(() => {
 // Aquí sólo mostramos la página actual (sin re-filtrar en cliente, que
 // confundiría la paginación).
 const filteredCars = computed(() => props.cars.data || []);
-    return result;
-});
 
 // Trust signals
 const trustItems = computed(() => [
