@@ -19,8 +19,27 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class CarController extends Controller
 {
+    /**
+     * Opciones de ordenación permitidas para el listado de coches.
+     * Cada valor es [columna, dirección]; 'recent' usa created_at + id
+     * para tener un orden determinista en imports en lote.
+     */
+    private const SORT_OPTIONS = [
+        'recent' => [['created_at', 'desc'], ['id', 'desc']],
+        'oldest' => [['created_at', 'asc'], ['id', 'asc']],
+        'price_asc' => [['purchase_price', 'asc'], ['id', 'asc']],
+        'price_desc' => [['purchase_price', 'desc'], ['id', 'desc']],
+        'mileage_asc' => [['mileage', 'asc'], ['id', 'asc']],
+        'mileage_desc' => [['mileage', 'desc'], ['id', 'desc']],
+    ];
+
     public function index(Request $request): Response
     {
+        $sort = $request->input('sort', 'recent');
+        if (! array_key_exists($sort, self::SORT_OPTIONS)) {
+            $sort = 'recent';
+        }
+
         $cars = Car::query()
             ->with('photos')
             ->when($request->input('status'), fn ($q, $s) => $q->where('status', $s))
@@ -31,22 +50,29 @@ class CarController extends Controller
                         ->orWhere('model', 'like', "%$s%")
                         ->orWhere('vin', 'like', "%$s%");
                 });
-            })
-            // Orden secundario por id para que la paginación sea determinista
-            // cuando varios coches comparten `created_at` (imports en lote).
-            ->orderBy('created_at', 'desc')
-            ->orderBy('id', 'desc')
-            ->paginate(15)
-            ->withQueryString();
+            });
+        foreach (self::SORT_OPTIONS[$sort] as [$column, $direction]) {
+            $cars->orderBy($column, $direction);
+        }
+        $cars = $cars->paginate(15)->withQueryString();
 
-        // Conteo por status (sin filtros aplicados) para que las pestañas
-        // muestren el total real de coches en cada estado, no solo los
-        // de la página actual.
+        // Conteos por status y traffic_light (sin filtros aplicados) para
+        // que las pestañas y los stats cards muestren totales reales,
+        // no solo los de la página actual.
         $statusCounts = Car::query()
             ->selectRaw('status, COUNT(*) as count')
             ->groupBy('status')
             ->pluck('count', 'status')
             ->all();
+
+        $lightCounts = Car::query()
+            ->selectRaw('traffic_light, COUNT(*) as count')
+            ->groupBy('traffic_light')
+            ->pluck('count', 'traffic_light')
+            ->all();
+
+        // Valor total del inventario (sin filtros) para el stat card "Total value".
+        $totalInventoryValue = (float) Car::query()->sum('purchase_price');
 
         $statuses = Car::STATUSES;
         $lights = ['green', 'amber', 'red', 'neutral'];
@@ -56,6 +82,10 @@ class CarController extends Controller
             'statuses' => $statuses,
             'lights' => $lights,
             'statusCounts' => $statusCounts,
+            'lightCounts' => $lightCounts,
+            'totalInventoryValue' => $totalInventoryValue,
+            'sort' => $sort,
+            'sortOptions' => array_keys(self::SORT_OPTIONS),
             'filters' => $request->only(['status', 'traffic_light', 'search']),
         ]);
     }

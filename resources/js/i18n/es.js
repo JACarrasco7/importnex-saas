@@ -39,6 +39,7 @@ export default {
     cancel: 'Cancelar',
     edit: 'Editar',
     search: 'Buscar',
+    sort: 'Ordenar',
     inventory_count: { _one: ':count vehículo en su flota', _other: ':count vehículos en su flota' }
   },
   ai_chat: {
@@ -427,7 +428,17 @@ export default {
     },
     no_cars_found: 'No se encontraron vehículos',
     no_cars_found_desc: 'Ajusta tus filtros o añade tu primer vehículo al inventario.',
+    no_matches_title: 'Ningún vehículo coincide con los filtros',
+    no_matches_desc: 'Prueba a cambiar la búsqueda, el semáforo o la pestaña, o limpia los filtros.',
     add_first_car: 'Añadir tu primer vehículo',
+    sort: {
+      recent: 'Más recientes',
+      oldest: 'Más antiguos',
+      price_asc: 'Precio: de menor a mayor',
+      price_desc: 'Precio: de mayor a menor',
+      mileage_asc: 'Kilometraje: menor primero',
+      mileage_desc: 'Kilometraje: mayor primero',
+    },
     cars: 'vehículos',
     drop_cars_here: 'Suelta vehículos aquí',
     edit: 'Editar',
@@ -1143,6 +1154,7 @@ export default {
     no_results: 'Sin resultados',
     prev: 'Anterior',
     next: 'Siguiente',
+    reset_filters: 'Limpiar filtros',
     add: 'Añadir',
     clear: 'Limpiar',
     apply: 'Aplicar',

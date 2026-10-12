@@ -265,4 +265,112 @@ class CarCrudTest extends TestCase
             ->where('statusCounts.Valuing', 4)
         );
     }
+
+    public function test_index_returns_light_counts_and_inventory_value(): void
+    {
+        Car::factory()->count(3)->create([
+            'organization_id' => $this->user->organization_id,
+            'traffic_light' => 'green',
+        ]);
+        Car::factory()->count(2)->create([
+            'organization_id' => $this->user->organization_id,
+            'traffic_light' => 'amber',
+        ]);
+        Car::factory()->count(1)->create([
+            'organization_id' => $this->user->organization_id,
+            'traffic_light' => 'red',
+        ]);
+
+        $response = $this->get('/cars');
+
+        $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => $page
+            ->component('Cars/Index')
+            ->where('lightCounts.green', 3)
+            ->where('lightCounts.amber', 2)
+            ->where('lightCounts.red', 1)
+            ->has('totalInventoryValue')
+            ->where('sort', 'recent')
+            ->has('sortOptions', 6)
+        );
+    }
+
+    public function test_index_sorts_by_price_asc(): void
+    {
+        Car::factory()->create([
+            'organization_id' => $this->user->organization_id,
+            'brand' => 'Expensive',
+            'purchase_price' => 50000,
+        ]);
+        Car::factory()->create([
+            'organization_id' => $this->user->organization_id,
+            'brand' => 'Cheap',
+            'purchase_price' => 5000,
+        ]);
+        Car::factory()->create([
+            'organization_id' => $this->user->organization_id,
+            'brand' => 'Mid',
+            'purchase_price' => 20000,
+        ]);
+
+        $response = $this->get('/cars?sort=price_asc');
+
+        $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => $page
+            ->component('Cars/Index')
+            ->loadDeferredProps('default', fn ($prop) => $prop
+                ->where('cars.data.0.brand', 'Cheap')
+                ->where('cars.data.1.brand', 'Mid')
+                ->where('cars.data.2.brand', 'Expensive')
+            )
+            ->where('sort', 'price_asc')
+        );
+    }
+
+    public function test_index_invalid_sort_falls_back_to_recent(): void
+    {
+        Car::factory()->count(3)->create([
+            'organization_id' => $this->user->organization_id,
+        ]);
+
+        $response = $this->get('/cars?sort=not-a-real-sort');
+
+        $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => $page
+            ->component('Cars/Index')
+            ->where('sort', 'recent')
+        );
+    }
+
+    public function test_index_sort_combines_with_status_filter(): void
+    {
+        $cheap = Car::factory()->create([
+            'organization_id' => $this->user->organization_id,
+            'status' => 'Located',
+            'purchase_price' => 5000,
+        ]);
+        $expensive = Car::factory()->create([
+            'organization_id' => $this->user->organization_id,
+            'status' => 'Located',
+            'purchase_price' => 30000,
+        ]);
+        Car::factory()->create([
+            'organization_id' => $this->user->organization_id,
+            'status' => 'Valuing',
+            'purchase_price' => 10000, // debe excluirse por filtro de status
+        ]);
+
+        $response = $this->get('/cars?status=Located&sort=price_asc');
+
+        $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => $page
+            ->component('Cars/Index')
+            ->loadDeferredProps('default', fn ($prop) => $prop
+                ->where('cars.total', 2)
+                ->where('cars.data.0.id', $cheap->id)
+                ->where('cars.data.1.id', $expensive->id)
+            )
+            ->where('sort', 'price_asc')
+        );
+    }
 }

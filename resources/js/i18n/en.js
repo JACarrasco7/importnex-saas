@@ -43,6 +43,7 @@ export default {
     cancel: 'Cancel',
     edit: 'Edit',
     search: 'Search',
+    sort: 'Sort',
     inventory_count: { _one: ':count car in your fleet', _other: ':count cars in your fleet' }
   },
   auth: {
@@ -430,7 +431,17 @@ export default {
     },
     no_cars_found: 'No cars found',
     no_cars_found_desc: 'Adjust your filters or add your first vehicle to inventory.',
+    no_matches_title: 'No vehicles match your filters',
+    no_matches_desc: 'Try changing the search, traffic light or tab, or clear the filters.',
     add_first_car: 'Add your first car',
+    sort: {
+      recent: 'Newest first',
+      oldest: 'Oldest first',
+      price_asc: 'Price: low to high',
+      price_desc: 'Price: high to low',
+      mileage_asc: 'Mileage: lowest first',
+      mileage_desc: 'Mileage: highest first',
+    },
     cars: 'cars',
     drop_cars_here: 'Drop cars here',
     edit: 'Edit',
@@ -1126,6 +1137,7 @@ export default {
     no_results: 'No results',
     prev: 'Previous',
     next: 'Next',
+    reset_filters: 'Reset filters',
     add: 'Add',
     clear: 'Clear',
     apply: 'Apply',
