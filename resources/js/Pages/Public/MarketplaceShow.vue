@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import {
     ArrowLeftIcon,
@@ -8,6 +8,9 @@ import {
     XCircleIcon,
     MinusCircleIcon,
     LinkIcon,
+    EnvelopeIcon,
+    ChevronLeftIcon,
+    ChevronRightIcon,
 } from '@heroicons/vue/24/outline';
 import MapaLeaflet from '@/Components/MapaLeaflet.vue';
 import Badge from '@/Components/Badge.vue';
@@ -17,10 +20,34 @@ import { useTranslations } from '@/Composables/useTranslations';
 const props = defineProps({
     car: Object,
     derived: Object,
+    requestUrl: { type: String, default: null },
 });
 
 const { t } = useTranslations();
 const { currency, date, trafficLightVariant, verdictVariant, confidenceVariant } = useFormat();
+
+// Resuelve la URL pública de una foto (acepta string u objeto CarPhoto)
+const photoUrl = (photo) => {
+    const raw = typeof photo === 'string' ? photo : photo?.url;
+    if (!raw) return null;
+    return raw.startsWith('http') ? raw : `/storage/${raw}`;
+};
+
+// Galería: índice de la foto activa (empieza en 0)
+const activePhotoIndex = ref(0);
+const activePhoto = computed(() => {
+    const photos = props.car?.photos || [];
+    return photos[activePhotoIndex.value] || null;
+});
+const totalPhotos = computed(() => (props.car?.photos || []).length);
+const goPrev = () => {
+    if (totalPhotos.value === 0) return;
+    activePhotoIndex.value = (activePhotoIndex.value - 1 + totalPhotos.value) % totalPhotos.value;
+};
+const goNext = () => {
+    if (totalPhotos.value === 0) return;
+    activePhotoIndex.value = (activePhotoIndex.value + 1) % totalPhotos.value;
+};
 
 const costItems = [
     { key: 'purchase_price', label: t('marketplace_show.cost_purchase') },
@@ -110,6 +137,82 @@ const marketPosition = computed(() => {
                     <Badge :variant="trafficLightVariant(car.traffic_light)" dot>{{ car.traffic_light }}</Badge>
                     <Badge :variant="verdictVariant(car.verdict)">{{ car.verdict }}</Badge>
                     <span v-if="car.year" class="text-sm text-gray-500">{{ car.year }}</span>
+                </div>
+
+                <!-- Hero photo gallery (marketplace item: ficha sin foto destacada) -->
+                <div v-if="totalPhotos > 0" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
+                    <div class="relative aspect-[16/9] bg-gradient-to-br from-asphalt-200 to-gray-300">
+                        <img
+                            v-if="activePhoto"
+                            :src="photoUrl(activePhoto)"
+                            :alt="`${car.brand} ${car.model} - foto ${activePhotoIndex + 1}`"
+                            class="h-full w-full object-cover"
+                        />
+                        <div v-else class="flex h-full w-full flex-col items-center justify-center text-gray-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="mb-2 h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                            </svg>
+                            <span class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ car.brand }} {{ car.model }}</span>
+                        </div>
+                        <!-- Controles del carrusel -->
+                        <template v-if="totalPhotos > 1">
+                            <button
+                                type="button"
+                                @click="goPrev"
+                                class="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white shadow-sm transition hover:bg-black/70"
+                                :aria-label="t('marketplace_show.prev_photo', { default: 'Foto anterior' })">
+                                <ChevronLeftIcon class="h-5 w-5" />
+                            </button>
+                            <button
+                                type="button"
+                                @click="goNext"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white shadow-sm transition hover:bg-black/70"
+                                :aria-label="t('marketplace_show.next_photo', { default: 'Foto siguiente' })">
+                                <ChevronRightIcon class="h-5 w-5" />
+                            </button>
+                            <span class="absolute bottom-3 right-3 rounded-full bg-black/60 px-3 py-1 text-xs font-semibold text-white">
+                                {{ activePhotoIndex + 1 }} / {{ totalPhotos }}
+                            </span>
+                        </template>
+                    </div>
+                    <!-- Thumbnails -->
+                    <div v-if="totalPhotos > 1" class="flex gap-2 overflow-x-auto p-3">
+                        <button
+                            v-for="(photo, idx) in car.photos"
+                            :key="photo.id || idx"
+                            type="button"
+                            @click="activePhotoIndex = idx"
+                            :class="[
+                                'h-16 w-24 shrink-0 overflow-hidden rounded-md ring-2 transition',
+                                idx === activePhotoIndex ? 'ring-estoril-600' : 'ring-transparent hover:ring-gray-300'
+                            ]"
+                            :aria-label="`Foto ${idx + 1}`">
+                            <img :src="photoUrl(photo)" :alt="`${car.brand} ${car.model} miniatura ${idx + 1}`" class="h-full w-full object-cover" />
+                        </button>
+                    </div>
+                </div>
+                <div v-else class="flex aspect-[16/9] w-full flex-col items-center justify-center rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 text-gray-400 shadow-sm ring-1 ring-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="mb-2 h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                    </svg>
+                    <span class="text-sm font-semibold uppercase tracking-wider text-gray-500">{{ car.brand }} {{ car.model }}</span>
+                </div>
+
+                <!-- CTA: enviar solicitud / contactar -->
+                <div v-if="requestUrl" class="flex flex-col items-center justify-between gap-3 rounded-2xl bg-gradient-to-br from-estoril-700 to-estoril-900 p-5 text-white shadow-sm sm:flex-row">
+                    <div class="flex items-center gap-3">
+                        <EnvelopeIcon class="h-6 w-6 shrink-0 text-estoril-100" />
+                        <div>
+                            <p class="text-sm font-semibold sm:text-base">{{ t('marketplace_show.cta_request_title', { default: '¿Te interesa este coche?' }) }}</p>
+                            <p class="text-xs text-estoril-100 sm:text-sm">{{ t('marketplace_show.cta_request_desc', { default: 'Te enviamos más información y organizamos una visita sin compromiso.' }) }}</p>
+                        </div>
+                    </div>
+                    <a
+                        :href="requestUrl"
+                        class="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-estoril-800 shadow-sm transition hover:bg-estoril-50 sm:w-auto">
+                        <EnvelopeIcon class="h-4 w-4" />
+                        {{ t('marketplace_show.cta_request_form', { default: 'Enviar solicitud' }) }}
+                    </a>
                 </div>
 
                 <!-- IEDMT estimation warning (solo si hay importación; en unidades ES no se devenga) -->

@@ -1691,7 +1691,12 @@ export default {
     aspect_dgt_label: 'Etiqueta ambiental DGT',
     aspect_insurance_estimate: 'Estimación de seguro',
     aspect_parts_maintenance: 'Recambios y mantenimiento',
-    aspect_unit_specific: 'Específico de la unidad'
+    aspect_unit_specific: 'Específico de la unidad',
+    cta_request_title: '¿Te interesa este coche?',
+    cta_request_desc: 'Te enviamos más información y organizamos una visita sin compromiso.',
+    cta_request_form: 'Enviar solicitud',
+    prev_photo: 'Foto anterior',
+    next_photo: 'Foto siguiente',
   },
   car_request_success: {
     title: 'Solicitud enviada',

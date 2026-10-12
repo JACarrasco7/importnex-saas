@@ -97,6 +97,17 @@ const resetFilters = () => {
 
 const { currency, verdictVariant, trafficLightVariant } = useFormat();
 
+// Marketplace item: las fotos son objetos CarPhoto ({id, url, photo_type, ...}),
+// no strings. Esta helper acepta ambos formatos por compat.
+const photoUrl = (car) => {
+    if (!car.photos || car.photos.length === 0) return null;
+    const p = car.photos[0];
+    const raw = typeof p === 'string' ? p : p?.url;
+    if (!raw) return null;
+    if (raw.startsWith('http')) return raw;
+    return `/storage/${raw}`;
+};
+
 // Watchers para sincronizar URL en cada cambio
 import { watch } from 'vue';
 watch([search, brandFilter, dealFilter, minPrice, maxPrice, mileageFilter, fuelFilter, transmissionFilter, doorsFilter, colorFilter], () => {
@@ -457,13 +468,18 @@ onMounted(() => {
                         <!-- Photo (LazyImage for performance) -->
                         <div class="relative aspect-[16/10] overflow-hidden bg-linear-to-br from-asphalt-200 to-gray-300 dark:from-asphalt-700 dark:to-asphalt-600">
                             <LazyImage
-                                v-if="car.photos && car.photos.length > 0"
-                                :src="car.photos[0].startsWith('http') ? car.photos[0] : `/storage/${car.photos[0]}`"
+                                v-if="photoUrl(car)"
+                                :src="photoUrl(car)"
                                 :alt="t('cars.marketplace_brand_model', { brand: car.brand, model: car.model })"
                                 ratio="aspect-[16/10]"
                                 fit="object-cover group-hover:scale-110 transition duration-700"
                             />
-                            <div v-else class="flex h-full items-center justify-center text-6xl text-gray-400 dark:text-gray-500">🚗</div>
+                            <div v-else class="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 text-gray-400 dark:from-asphalt-700 dark:to-asphalt-600">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="mb-1 h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                                </svg>
+                                <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ car.brand }} {{ car.model }}</span>
+                            </div>
                             <div class="pointer-events-none absolute inset-0 bg-linear-to-t from-asphalt-900/60 via-transparent to-transparent opacity-50 transition group-hover:opacity-80"></div>
 
                             <!-- Badges -->

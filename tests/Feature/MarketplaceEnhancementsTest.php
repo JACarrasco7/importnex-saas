@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Car;
+use App\Models\CarPhoto;
 use App\Models\NewsletterSubscription;
 use App\Models\Organization;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -123,5 +124,106 @@ class MarketplaceEnhancementsTest extends TestCase
         ])->assertOk();
 
         $this->assertNotNull(NewsletterSubscription::first()->fresh()->unsubscribed_at);
+    }
+
+    public function test_marketplace_index_passes_request_url_for_public_org(): void
+    {
+        $org = Organization::factory()->create([
+            'is_public' => true,
+            'slug' => 'jj-import-motors',
+        ]);
+        Car::factory()->count(2)->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+        ]);
+
+        $response = $this->get('/marketplace');
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('Public/MarketplaceIndex')
+            ->where('requestUrl', url('/request/jj-import-motors'))
+        );
+    }
+
+    public function test_marketplace_index_request_url_null_when_no_public_org(): void
+    {
+        // Sin ninguna organización pública: la CTA no debe romperse
+        $this->get('/marketplace')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Public/MarketplaceIndex')
+                ->where('requestUrl', null)
+            );
+    }
+
+    public function test_marketplace_show_passes_request_url(): void
+    {
+        $org = Organization::factory()->create([
+            'is_public' => true,
+            'slug' => 'jj-import-motors',
+        ]);
+        $car = Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+        ]);
+
+        $response = $this->get("/marketplace/{$car->id}");
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('Public/MarketplaceShow')
+            ->where('requestUrl', url('/request/jj-import-motors'))
+        );
+    }
+
+    public function test_marketplace_show_request_url_null_when_org_not_public(): void
+    {
+        $org = Organization::factory()->create([
+            'is_public' => false,
+            'slug' => 'private-org',
+        ]);
+        $car = Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+        ]);
+
+        // El coche es público (toggle is_marketplace=true) PERO la org no.
+        // El scope publicMarketplace lo excluye: el controller debe 404
+        // antes de pasar requestUrl.
+        $this->get("/marketplace/{$car->id}")->assertStatus(404);
+    }
+
+    public function test_marketplace_show_serves_photos_as_objects(): void
+    {
+        $org = Organization::factory()->create(['is_public' => true, 'slug' => 't']);
+        $car = Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+        ]);
+        CarPhoto::create([
+            'car_id' => $car->id,
+            'organization_id' => $org->id,
+            'url' => 'cars/'.$car->id.'/front.jpg',
+            'photo_type' => 'front',
+            'sort_order' => 1,
+        ]);
+
+        $response = $this->get("/marketplace/{$car->id}");
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('Public/MarketplaceShow')
+            ->has('car.photos', 1)
+            ->where('car.photos.0.url', 'cars/'.$car->id.'/front.jpg')
+        );
     }
 }

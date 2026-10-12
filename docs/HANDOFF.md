@@ -30,6 +30,12 @@
 - ⚠️ PENDIENTE: nada — Forge debería estar re-desplegando ya. Verifica en 1-2 min en https://jjimportmotors.on-forge.com/cars que aparece paginación arriba y abajo + selector de orden + stats globales + botón Reset.
 - Commit: `a227972` en `origin/main`.
 
+## 2026-10-12 16:50 · Copilot-VSCode · marketplace: 3 bugs fixes (fotos rotas, sin galería en ficha, CTA rota)
+- Hice: (a) Backend `PublicMarketplaceController` ahora pasa `requestUrl` (URL a `/request/{org_slug}`) a `index` y `show`. Helper privado `publicRequestUrl()` usa el org del primer coche, o cae a la primera org pública. (b) `MarketplaceIndex.vue`: fotos se trataban como string (`.startsWith`) cuando son objetos CarPhoto — extraído `photoUrl(car)` helper, fix de `src` y fallback con SVG+gradiente+marcamodelo. (c) `MarketplaceShow.vue`: añadí hero gallery con carrusel + thumbnails en la parte de arriba (la ficha no tenía foto destacada), CTA "Enviar solicitud" con gradiente que va a `requestUrl`. (d) i18n ES+EN con claves nuevas. (e) 5 tests nuevos: `requestUrl` en index, fallback cuando no hay org pública, `requestUrl` en show, 404 cuando org no pública, fotos como objetos. 24/24 OK. Pint OK.
+- Toqué: `PublicMarketplaceController`, `Pages/Public/MarketplaceIndex.vue`, `Pages/Public/MarketplaceShow.vue`, `i18n/{es,en}.js`, `MarketplaceEnhancementsTest`.
+- ⚠️ PENDIENTE: nada. Pendiente: commit + push a master + rebuild Vite en Forge.
+- Commit: pendiente.
+
 ## 2026-10-12 16:15 · Copilot-VSCode · /cars CORRECCIÓN push a master (rama real de Forge)
 - Hice: descubrí que Forge despliega desde `master` (no `main`) según [docs/deploy/README.md](docs/deploy/README.md) verificado por SSH 25-sep-2026. Hice `git checkout master` (en 361bf03), `git merge --ff-only skill-v4` (361bf03..eb2510d), `git push origin master`. Forge ya tenía git pull hecho (HEAD=eb2510d) pero `node_modules/.vite` cacheó la build sin `Pagination.vue`. Borré el cache y re-ejecuté `npm run build` por SSH; verifiqué que `Index-DtOfyhdu.js` contiene los nuevos symbols (Pagination, lightCounts, totalInventoryValue, resetFilters, no_matches, sort_options). También `php artisan optimize:clear` y `opcache_reset`.
 - Toqué: solo servidor Forge vía SSH (build/manifest + caches).

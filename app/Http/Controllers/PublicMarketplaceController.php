@@ -12,6 +12,19 @@ use Inertia\Response;
 class PublicMarketplaceController extends Controller
 {
     /**
+     * Resolves the public request-form URL for the marketplace CTA
+     * ("Enviar solicitud"). Falls back to the first public org
+     * when no car organization can be determined.
+     */
+    private function publicRequestUrl(?Organization $organization = null): ?string
+    {
+        $org = $organization
+            ?? Organization::query()->where('is_public', true)->orderBy('id')->first();
+
+        return $org?->public_url;
+    }
+
+    /**
      * Show a paginated list of publicly available cars.
      *
      * GET /marketplace
@@ -44,6 +57,13 @@ class PublicMarketplaceController extends Controller
         // Load photos and organization for each car
         $cars->load(['photos', 'organization']);
 
+        // CTA "Enviar solicitud" → apunta a la org del primer coche
+        // (todas las fichas son de la misma org pública en la práctica).
+        $firstCar = $cars->first();
+        $requestUrl = $this->publicRequestUrl(
+            $firstCar?->relationLoaded('organization') ? $firstCar->organization : null
+        );
+
         $verdicts = Car::VERDICTS;
         $lights = ['green', 'amber', 'red', 'neutral'];
 
@@ -65,6 +85,7 @@ class PublicMarketplaceController extends Controller
             'verdicts' => $verdicts,
             'lights' => $lights,
             'filterOptions' => $filterOptions,
+            'requestUrl' => $requestUrl,
             'filters' => $request->only(['search', 'verdict', 'traffic_light', 'min_price', 'max_price', 'year_min', 'year_max']),
         ]);
     }
@@ -120,6 +141,7 @@ class PublicMarketplaceController extends Controller
 
         return Inertia::render('Public/MarketplaceShow', [
             'car' => $car,
+            'requestUrl' => $this->publicRequestUrl($car->organization),
             'derived' => [
                 'total_cost' => $car->calculateTotalCost(),
                 'iedmt' => $car->calculateIEDMT(),

@@ -1675,7 +1675,12 @@ export default {
     aspect_dgt_label: 'DGT environmental label',
     aspect_insurance_estimate: 'Insurance estimate',
     aspect_parts_maintenance: 'Parts & maintenance',
-    aspect_unit_specific: 'Unit-specific'
+    aspect_unit_specific: 'Unit-specific',
+    cta_request_title: 'Interested in this car?',
+    cta_request_desc: 'We will send you more info and arrange a no-obligation visit.',
+    cta_request_form: 'Send request',
+    prev_photo: 'Previous photo',
+    next_photo: 'Next photo',
   },
   car_request_success: {
     title: 'Request sent',
