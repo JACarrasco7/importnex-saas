@@ -42,6 +42,7 @@ const props = defineProps({
     sortOptions: { type: Array, default: () => ['recent', 'oldest', 'price_asc', 'price_desc', 'mileage_asc', 'mileage_desc'] },
     filterBounds: { type: Object, default: () => ({ price: { min: 0, max: 9999999 }, year: { min: 1900, max: new Date().getFullYear() + 1 } }) },
     filterOptions: { type: Object, default: () => ({ fuels: [], transmissions: [], doors: [], colors: [] }) },
+    visitsCount: { type: Number, default: 0 },
 });
 
 const { t, locale } = useTranslations();
@@ -93,7 +94,7 @@ const resetFilters = () => {
     applyFilters();
 };
 
-const { currency, verdictVariant, trafficLightVariant } = useFormat();
+const { currency } = useFormat();
 
 // Marketplace item: las fotos son objetos CarPhoto ({id, url, photo_type, ...}),
 // no strings. Helper compartido en @/Composables/usePhotoUrl.
@@ -335,7 +336,17 @@ onMounted(() => {
             <div class="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8">
                 <div class="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end">
                     <div>
-                        <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">{{ t('marketplace.section_catalog') }}</h2>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">{{ t('marketplace.section_catalog') }}</h2>
+                            <span
+                                v-if="visitsCount > 0"
+                                :title="t('marketplace.visits_count_tooltip')"
+                                class="inline-flex items-center gap-1.5 rounded-full bg-estoril-50 px-3 py-1 text-xs font-semibold text-estoril-700 ring-1 ring-estoril-200 transition-colors duration-300 dark:bg-estoril-900/30 dark:text-estoril-300 dark:ring-estoril-800"
+                            >
+                                <EyeIcon class="h-3.5 w-3.5" />
+                                {{ t('marketplace.visits_count').replace(':count', new Intl.NumberFormat(locale === 'en' ? 'en-US' : 'es-ES').format(visitsCount)) }}
+                            </span>
+                        </div>
                         <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">{{ t('marketplace.catalog_desc').replace(':count', safeCars.total) }}</p>
                     </div>
                     <a :href="requestHref" class="inline-flex items-center justify-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200">
@@ -490,13 +501,9 @@ onMounted(() => {
                             </div>
                             <div class="pointer-events-none absolute inset-0 bg-linear-to-t from-asphalt-900/60 via-transparent to-transparent opacity-50 transition group-hover:opacity-80"></div>
 
-                            <!-- Badges -->
-                            <div class="absolute left-3 top-3">
-                                <Badge :variant="verdictVariant(car.verdict)" size="sm">{{ car.verdict }}</Badge>
-                            </div>
-                            <div class="absolute right-3 top-3">
-                                <Badge :variant="trafficLightVariant(car.traffic_light)" dot>{{ car.traffic_light }}</Badge>
-                            </div>
+                            <!-- Badges internos (verdict, traffic light): solo admins.
+                                 Las vistas admin (Cars/Index, Dashboard) sí los muestran. -->
+                            <!-- (ocultos en marketplace público por privacidad) -->
 
                             <!-- Savings + location -->
                             <div v-if="car.estimated_saving > 0" class="absolute bottom-3 left-3">

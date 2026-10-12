@@ -6,6 +6,7 @@ use App\Models\Car;
 use App\Models\CarPublicLink;
 use App\Models\MarketplaceVisit;
 use App\Models\Organization;
+use App\Support\CostBreakdown;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -209,7 +210,7 @@ class PublicMarketplaceController extends Controller
         $car->calculateTotalCost(); // touch method
 
         return Inertia::render('Public/MarketplaceShow', [
-            'car' => $car,
+            'car' => $this->publicCarPayload($car),
             'requestUrl' => $this->publicRequestUrl($car->organization),
             'publicProfileUrl' => $car->public_profile_url,
             'relatedCars' => $this->relatedCars($car),
@@ -220,6 +221,7 @@ class PublicMarketplaceController extends Controller
                 'research_gaps' => $car->researchGaps,
                 'comparables_stats' => $car->comparablesStats,
             ],
+            'costBreakdown' => CostBreakdown::forCar($car, (float) $car->calculateIEDMT()),
         ]);
     }
 
@@ -286,7 +288,7 @@ class PublicMarketplaceController extends Controller
         $car->calculateTotalCost(); // touch method
 
         return Inertia::render('Public/MarketplaceShow', [
-            'car' => $car,
+            'car' => $this->publicCarPayload($car),
             'publicProfileUrl' => $link->publicProfileUrl(),
             'requestUrl' => $this->publicRequestUrl($car->organization),
             'relatedCars' => $this->relatedCars($car),
@@ -297,6 +299,7 @@ class PublicMarketplaceController extends Controller
                 'research_gaps' => $car->researchGaps,
                 'comparables_stats' => $car->comparablesStats,
             ],
+            'costBreakdown' => CostBreakdown::forCar($car, (float) $car->calculateIEDMT()),
         ]);
     }
 
@@ -311,5 +314,48 @@ class PublicMarketplaceController extends Controller
         }
 
         return (bool) preg_match('/bot|crawl|spider|slurp|curl|wget|python-requests|headless/i', $ua);
+    }
+
+    /**
+     * Filtra el Car para excluir campos internos que NO deben llegar al
+     * cliente (decision 12-oct-2026):
+     *  - verdict_reasoning / verdict_changes: valoracion interna del equipo
+     *  - cons: contras, el cliente solo ve lo bueno
+     *  - notes: notas internas del operador
+     *  - red_flags, research, tips, valuation internals
+     *  - busquedas_realizadas, ai_analysis_json, etc.
+     *
+     * Devuelve un array asociativo (no el modelo) para que Inertia no incluya
+     * accidentalmente campos que se hayan añadido al fillable en el futuro.
+     *
+     * @return array<string, mixed>
+     */
+    private function publicCarPayload(Car $car): array
+    {
+        // Campos que SÍ pueden llegar al cliente final. El verdict y el
+        // traffic_light son texto admin-interno ("Comprar con confianza
+        // baja (cobertura parcial 2/7)", "Dudoso: kilometraje muy alto
+        // para un R de 2024", etc.) y NO deben filtrarse a la web
+        // pública: las vistas admin (Cars/Index, Dashboard) los siguen
+        // viendo directamente sobre el modelo. (ver #2)
+        $attrs = $car->only([
+            'id', 'brand', 'model', 'version', 'year', 'mileage', 'fuel',
+            'transmission', 'drivetrain', 'cv', 'displacement', 'co2',
+            'consumption', 'owners', 'doors', 'seats', 'euro_norm', 'color',
+            'itv_date', 'pais_origen', 'purchase_price', 'new_price',
+            'transport', 'itv_fee', 'coc_fee', 'dgt_fees', 'professional_fees',
+            'deposit', 'vin', 'seller', 'city', 'lat', 'lng', 'status',
+            'description', 'equipment', 'pros', 'is_marketplace',
+            'marketplace_views',
+            'market_avg', 'market_min', 'market_max', 'estimated_saving',
+            'comparables_list', 'expected_delivery_date', 'tracking_token',
+            'tracking_shared_at', 'schema_version',
+        ]);
+
+        // Fotos y org se cargan aparte.
+        $attrs['photos'] = $car->photos;
+        $attrs['organization'] = $car->organization;
+
+        return $attrs;
     }
 }

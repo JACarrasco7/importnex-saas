@@ -25,7 +25,7 @@ class AlertController extends Controller
         $orgScope = $org?->isOwner() ? null : $org?->id;
 
         // N8: Filtrar por preferencias del org (null prefs = todo activo)
-        $allTypes = ['car_request', 'car_stale', 'client_no_contact', 'verification_failed', 'verification_completed'];
+        $allTypes = ['car_request', 'car_stale', 'client_no_contact', 'verification_failed', 'verification_completed', 'car_listing_unavailable'];
         $disabledTypes = [];
         if ($org) {
             $disabledTypes = array_values(array_filter($allTypes, fn ($t) => ! $org->isAlertTypeEnabled($t)));

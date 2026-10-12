@@ -9,6 +9,14 @@ use Illuminate\Support\Facades\Schedule;
 // Generate automatic alerts daily at 9 AM
 Schedule::command('alerts:generate')->dailyAt('09:00');
 
+// Marketplace: revisa el anuncio original de cada coche publicado y
+// desactiva los que ya no estan disponibles. Diario 04:00 (antes del
+// pico de trafico del dia).
+Schedule::command('marketplace:check-listings')
+    ->dailyAt('04:00')
+    ->withoutOverlapping()
+    ->onOneServer();
+
 // Weekly alert digest — Monday at 9 AM (in each org's TZ approx)
 Schedule::command('alerts:send-weekly-digest')->weeklyOn(1, '09:00')->withoutOverlapping();
 

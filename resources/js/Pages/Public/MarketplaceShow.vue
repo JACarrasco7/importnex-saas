@@ -14,7 +14,6 @@ import {
     ShareIcon,
     ClipboardDocumentIcon,
 } from '@heroicons/vue/24/outline';
-import MapaLeaflet from '@/Components/MapaLeaflet.vue';
 import Badge from '@/Components/Badge.vue';
 import MarketplaceLayout from '@/Layouts/MarketplaceLayout.vue';
 import { useFormat } from '@/Composables/useFormat';
@@ -28,10 +27,11 @@ const props = defineProps({
     relatedCars: { type: Array, default: () => [] },
     publicProfileUrl: { type: String, default: null },
     isSharedProfile: { type: Boolean, default: false },
+    costBreakdown: { type: Object, default: () => ({ car_price: 0, transport: 0, processing: 0, iedmt: 0, honorarios: 1000, total: 0, has_data: false }) },
 });
 
 const { t } = useTranslations();
-const { currency, date, trafficLightVariant, verdictVariant, confidenceVariant } = useFormat();
+const { currency, date } = useFormat();
 
 // Compartir: copia la URL pública al portapapeles y muestra confirmación.
 const shareCopied = ref(false);
@@ -138,6 +138,10 @@ const marketPosition = computed(() => {
     if (ratio <= 1.05) return { label: t('marketplace_show.market_at'), variant: 'warning', ratio };
     return { label: t('marketplace_show.market_above'), variant: 'danger', ratio };
 });
+
+// El desglose "aproximado" con honorarios JJ Import se calcula en PHP
+// (App\Support\CostBreakdown) y llega como prop `costBreakdown`.
+// Reglas: 1.000 EUR por defecto; 1.500 EUR si el coche >= 30.000 EUR (12-oct-2026).
 </script>
 
 <template>
@@ -194,10 +198,9 @@ const marketPosition = computed(() => {
                         </div>
                         <p v-if="shareError" class="mt-2 text-xs text-rose-600">{{ shareError }}</p>
                     </div>
-                <!-- Status bar -->
+                <!-- Status bar (badges internos ocultos para cliente final;
+                     las vistas admin los siguen mostrando en Cars/Index.) -->
                 <div class="flex flex-wrap items-center gap-3">
-                    <Badge :variant="trafficLightVariant(car.traffic_light)" dot>{{ car.traffic_light }}</Badge>
-                    <Badge :variant="verdictVariant(car.verdict)">{{ car.verdict }}</Badge>
                     <span v-if="car.year" class="text-sm text-gray-500">{{ car.year }}</span>
                 </div>
 
@@ -288,15 +291,8 @@ const marketPosition = computed(() => {
                     </div>
                 </div>
 
-                <!-- Location -->
-                <div v-if="car.lat && car.lng" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
-                    <div class="border-b border-gray-200 px-6 py-4">
-                        <h3 class="text-base font-semibold text-gray-900">{{ t('marketplace_show.section_location') }}</h3>
-                    </div>
-                    <div class="p-6">
-                        <MapaLeaflet :lat="car.lat" :lng="car.lng" :marker-text="`${car.brand} ${car.model} - ${car.city || ''}`" height="300px" />
-                    </div>
-                </div>
+                <!-- Location: el mapa Leaflet se quitó de la ficha publica
+                     (decision 12-oct-2026: solo se muestra en /tracking). -->
 
                 <!-- Technical specs -->
                 <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
@@ -311,108 +307,86 @@ const marketPosition = computed(() => {
                     </div>
                 </div>
 
-                <!-- Costs -->
-                <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
+                <!-- Costs: desglose APROXIMADO con honorarios JJ Import
+                     (decision 12-oct-2026: 1k base, 1.5k si el coche >= 30k).
+                     Todos los importes son aproximados, NO costes finales. -->
+                <div v-if="costBreakdown?.has_data" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
                         <h3 class="text-base font-semibold text-gray-900">{{ t('marketplace_show.section_costs') }}</h3>
-                        <span class="text-sm text-gray-500">{{ t('marketplace_show.total_all_in') }}: <span class="font-mono font-semibold text-gray-900">{{ currency(derived?.total_cost) }}</span></span>
+                        <span class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-amber-700 ring-1 ring-amber-200">
+                            {{ t('marketplace_show.cost_approximate', { default: 'Aproximado' }) }}
+                        </span>
                     </div>
-                    <div class="grid grid-cols-2 gap-x-6 gap-y-4 p-6 md:grid-cols-4">
-                        <div v-for="cost in costItems" :key="cost.key">
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ cost.label }}</dt>
-                            <dd class="mt-1 text-sm font-semibold text-gray-900">{{ currency(car[cost.key]) }}</dd>
+                    <div class="space-y-3 p-6">
+                        <!-- Coche -->
+                        <div class="flex items-baseline justify-between gap-4 border-b border-dashed border-gray-200 pb-2">
+                            <span class="text-sm text-gray-700">{{ t('marketplace_show.cost_purchase') }}</span>
+                            <span class="font-mono text-sm font-semibold text-gray-900">{{ currency(costBreakdown.car_price) }}</span>
                         </div>
+                        <!-- Gastos (transporte, ITV, COC, DGT, IEDMT) — todos con ~ -->
+                        <div v-if="costBreakdown.transport > 0" class="flex items-baseline justify-between gap-4 border-b border-dashed border-gray-200 pb-2">
+                            <span class="text-sm text-gray-700">{{ t('marketplace_show.cost_transport') }}</span>
+                            <span class="font-mono text-sm text-gray-600">~ {{ currency(costBreakdown.transport) }}</span>
+                        </div>
+                        <div v-if="costBreakdown.processing > 0" class="flex items-baseline justify-between gap-4 border-b border-dashed border-gray-200 pb-2">
+                            <span class="text-sm text-gray-700">{{ t('marketplace_show.cost_processing_grouped', { default: 'ITV + COC + DGT' }) }}</span>
+                            <span class="font-mono text-sm text-gray-600">~ {{ currency(costBreakdown.processing) }}</span>
+                        </div>
+                        <div v-if="costBreakdown.iedmt > 0" class="flex items-baseline justify-between gap-4 border-b border-dashed border-gray-200 pb-2">
+                            <span class="text-sm text-gray-700">{{ t('marketplace_show.cost_iedmt', { default: 'IEDMT (estimado)' }) }}</span>
+                            <span class="font-mono text-sm text-gray-600">~ {{ currency(costBreakdown.iedmt) }}</span>
+                        </div>
+                        <!-- Honorarios JJ Import — 1k base, 1.5k si coche >= 30k -->
+                        <div class="flex items-baseline justify-between gap-4 border-b border-dashed border-gray-200 pb-2">
+                            <div>
+                                <span class="text-sm text-gray-700">{{ t('marketplace_show.cost_honorarios_label', { default: 'Honorarios JJ Import' }) }}</span>
+                                <p class="text-[11px] text-gray-500">{{ t('marketplace_show.cost_honorarios_note', { default: '1.000 \u20AC (1.500 \u20AC si el coche es >= 30.000 \u20AC)' }) }}</p>
+                            </div>
+                            <span class="font-mono text-sm font-semibold text-estoril-800">{{ currency(costBreakdown.honorarios) }}</span>
+                        </div>
+                        <!-- Total aproximado -->
+                        <div class="flex items-baseline justify-between gap-4 pt-2">
+                            <span class="text-sm font-bold text-gray-900">{{ t('marketplace_show.cost_total_approx', { default: 'Total aproximado' }) }}</span>
+                            <span class="font-mono text-lg font-extrabold text-estoril-800">~ {{ currency(costBreakdown.total) }}</span>
+                        </div>
+                        <!-- Disclaimer -->
+                        <p class="mt-3 rounded-lg bg-gray-50 px-3 py-2 text-[11px] leading-relaxed text-gray-600">
+                            {{ t('marketplace_show.cost_disclaimer', { default: 'Valoracion aproximada. NO son costes finales: los gastos reales pueden variar segun el vehiculo, el transporte y las tasas vigentes. Confirmamos por escrito antes de la reserva.' }) }}
+                        </p>
                     </div>
                 </div>
 
-                <!-- Investigation -->
-                <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
-                    <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-                        <h3 class="text-base font-semibold text-gray-900">{{ t('marketplace_show.section_investigation') }}</h3>
-                        <span v-if="derived?.research_gaps?.length" class="text-xs font-medium text-amber-700">
-                            {{ derived.research_gaps.length === 1 ? t('marketplace_show.aspects_pending', { count: derived.research_gaps.length }) : t('marketplace_show.aspects_pending_plural', { count: derived.research_gaps.length }) }}
-                        </span>
+                <!-- Puntos a favor (decision 12-oct-2026: la valoracion,
+                     contras y 9 research aspects NO se muestran al cliente) -->
+                <div v-if="car.pros?.length" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
+                    <div class="border-b border-gray-200 px-6 py-4">
+                        <h3 class="text-base font-semibold text-gray-900">{{ t('marketplace_show.section_pros_title', { default: 'Puntos a favor' }) }}</h3>
                     </div>
 
-                    <!-- Verdict -->
-                    <div v-if="car.verdict" class="border-b border-gray-200 bg-gray-50 px-6 py-4">
-                        <div class="flex flex-wrap items-center gap-3">
-                            <Badge :variant="verdictVariant(car.verdict)" dot size="lg">{{ car.verdict }}</Badge>
-                            <Badge v-if="car.verdict_confidence" :variant="confidenceVariant(car.verdict_confidence)">
-                                {{ t('marketplace_show.confidence') }}: {{ car.verdict_confidence }}
-                            </Badge>
-                            <span v-if="car.verdict_at" class="text-xs text-gray-500">
-                                {{ date(car.verdict_at) }}
-                            </span>
-                        </div>
-                        <p v-if="car.verdict_reasoning" class="mt-3 text-sm text-gray-700">{{ car.verdict_reasoning }}</p>
-                        <p v-if="car.verdict_changes" class="mt-2 text-xs italic text-gray-600">
-                            <span class="font-semibold not-italic text-gray-700">{{ t('marketplace_show.what_would_change') }}</span>
-                            {{ car.verdict_changes }}
-                        </p>
+                    <!-- Verdict: la valoracion textual NO se muestra al cliente
+                         (decision 12-oct-2026). El badge Buy/Discard es interno
+                         del equipo; el texto de valoracion tambien. El cliente
+                         solo ve lo que aparece en las secciones externas. -->
+                    <div v-if="derived?.research_gaps?.length" class="px-6 py-4 text-sm text-amber-700">
+                        {{ derived.research_gaps.length === 1
+                            ? t('marketplace_show.aspects_pending', { count: derived.research_gaps.length })
+                            : t('marketplace_show.aspects_pending_plural', { count: derived.research_gaps.length }) }}
                     </div>
 
-                    <div v-if="!car.verdict && !derived?.research_gaps?.length" class="px-6 py-8 text-center text-sm text-gray-500">
-                        {{ t('marketplace_show.no_valuation') }}
-                    </div>
-
-                    <!-- Balance pros / cons -->
-                    <div v-if="(car.pros?.length || car.cons?.length)" class="grid grid-cols-1 gap-6 p-6 md:grid-cols-2">
-                        <div>
-                            <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-estoril-800">{{ t('marketplace_show.in_favor', { count: car.pros?.length || 0 }) }}</h4>
-                            <ul v-if="car.pros?.length" class="space-y-2">
-                                <li v-for="(pro, i) in car.pros" :key="i" class="flex items-start gap-2 rounded-lg border border-estoril-200 bg-estoril-50 p-3">
-                                    <CheckCircleIcon class="mt-0.5 h-4 w-4 flex-shrink-0 text-estoril-700" />
-                                    <div class="flex-1">
-                                        <p class="text-sm text-gray-900">{{ pro.text }}</p>
-                                        <span class="mt-1 inline-block text-xs font-medium uppercase text-estoril-800">{{ pro.weight }}</span>
-                                    </div>
-                                </li>
-                            </ul>
-                            <p v-else class="text-sm italic text-gray-500">{{ t('marketplace_show.no_points_in_favor') }}</p>
-                        </div>
-                        <div>
-                            <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-red-700">{{ t('marketplace_show.against', { count: car.cons?.length || 0 }) }}</h4>
-                            <ul v-if="car.cons?.length" class="space-y-2">
-                                <li v-for="(con, i) in car.cons" :key="i" class="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3">
-                                    <XCircleIcon class="mt-0.5 h-4 w-4 flex-shrink-0 text-red-600" />
-                                    <div class="flex-1">
-                                        <p class="text-sm text-gray-900">{{ con.text }}</p>
-                                        <span class="mt-1 inline-block text-xs font-medium uppercase text-red-700">{{ con.weight }}</span>
-                                    </div>
-                                </li>
-                            </ul>
-                            <p v-else class="text-sm italic text-gray-500">{{ t('marketplace_show.no_points_against') }}</p>
-                        </div>
-                    </div>
-
-                    <!-- 9 research aspects -->
-                    <div class="border-t border-gray-200 px-6 py-4">
-                        <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('marketplace_show.nine_research_aspects') }}</h4>
-                        <ul class="grid grid-cols-1 gap-3 md:grid-cols-2">
-                            <li v-for="aspect in aspects" :key="aspect.key" class="rounded-lg border p-3"
-                                :class="aspect.missing ? 'border-dashed border-gray-300 bg-gray-50' : 'border-gray-200 bg-white'">
-                                <div class="flex items-start justify-between gap-2">
-                                    <p class="text-sm font-medium text-gray-900">{{ aspect.label }}</p>
-                                    <component v-if="!aspect.missing" :is="ratingIcon(aspect.rating)" class="h-4 w-4 flex-shrink-0"
-                                        :class="{
-                                            'text-estoril-700': aspect.rating === 'favorable',
-                                            'text-red-600': aspect.rating === 'unfavorable',
-                                            'text-gray-500': aspect.rating === 'neutral' || !aspect.rating,
-                                        }" />
+                    <!-- Solo pros (decision 12-oct-2026: al cliente solo lo bueno) -->
+                    <div v-if="car.pros?.length" class="p-6">
+                        <h4 class="mb-3 text-xs font-semibold uppercase tracking-wider text-estoril-800">{{ t('marketplace_show.in_favor', { count: car.pros?.length || 0 }) }}</h4>
+                        <ul class="space-y-2">
+                            <li v-for="(pro, i) in car.pros" :key="i" class="flex items-start gap-2 rounded-lg border border-estoril-200 bg-estoril-50 p-3">
+                                <CheckCircleIcon class="mt-0.5 h-4 w-4 flex-shrink-0 text-estoril-700" />
+                                <div class="flex-1">
+                                    <p class="text-sm text-gray-900">{{ pro.text }}</p>
+                                    <span class="mt-1 inline-block text-xs font-medium uppercase text-estoril-800">{{ pro.weight }}</span>
                                 </div>
-                                <p v-if="aspect.missing" class="mt-2 text-xs italic text-gray-500">{{ t('marketplace_show.not_yet_investigated') }}</p>
-                                <template v-else>
-                                    <p v-if="aspect.finding" class="mt-2 text-sm text-gray-700">{{ aspect.finding }}</p>
-                                    <a v-if="aspect.source" :href="aspect.source" target="_blank" rel="noopener" class="mt-2 inline-flex items-center gap-1 text-xs text-estoril-600 hover:text-estoril-500">
-                                        <LinkIcon class="h-3 w-3" />
-                                        {{ t('marketplace_show.source') }}
-                                    </a>
-                                    <span v-if="aspect.date" class="ml-2 text-xs text-gray-400">{{ aspect.date }}</span>
-                                </template>
                             </li>
                         </ul>
                     </div>
+                    <p v-else-if="!car.pros?.length" class="p-6 text-sm italic text-gray-500">{{ t('marketplace_show.no_points_in_favor') }}</p>
                 </div>
 
                 <!-- Market comparables -->
@@ -464,37 +438,8 @@ const marketPosition = computed(() => {
                     </div>
                 </div>
 
-                <!-- Import progress (read-only) -->
-                <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
-                    <div class="border-b border-gray-200 px-6 py-4">
-                        <h3 class="text-base font-semibold text-gray-900">{{ t('marketplace_show.section_import_progress') }}</h3>
-                    </div>
-                    <div class="bg-gray-50 px-6 py-4">
-                        <div class="mb-2 flex items-center justify-between">
-                            <h4 class="text-xs font-semibold uppercase tracking-wider text-gray-700">{{ t('marketplace_show.milestones') }}</h4>
-                            <span class="text-sm font-mono font-semibold text-gray-900">
-                                {{ derived?.milestones_progress?.completed || 0 }} / {{ derived?.milestones_progress?.total || 0 }}
-                            </span>
-                        </div>
-                        <div class="h-2 w-full overflow-hidden rounded-full bg-gray-200">
-                            <div class="h-full bg-estoril-600 transition-all"
-                                :style="{ width: derived?.milestones_progress?.total ? ((derived.milestones_progress.completed / derived.milestones_progress.total) * 100) + '%' : '0%' }" />
-                        </div>
-                        <p class="mt-3 text-sm text-gray-600">
-                            {{ t('marketplace_show.inspections', { done: derived?.inspections_progress?.completed || 0, total: derived?.inspections_progress?.total || 0 }) }}
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Notes (read-only) -->
-                <div v-if="car.notes" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
-                    <div class="border-b border-gray-200 px-6 py-4">
-                        <h3 class="text-base font-semibold text-gray-900">{{ t('marketplace_show.section_notes') }}</h3>
-                    </div>
-                    <div class="p-6">
-                        <pre class="whitespace-pre-wrap font-sans text-sm text-gray-700">{{ car.notes }}</pre>
-                    </div>
-                </div>
+                <!-- Import progress y notes: secciones internas (admin), no se
+                     muestran al cliente (decision 12-oct-2026). -->
 
                 <!-- Coches relacionados (misma marca) -->
                 <div v-if="relatedCars.length > 0" class="mt-8">
