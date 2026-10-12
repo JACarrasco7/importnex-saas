@@ -24,6 +24,12 @@
 
 ---
 
+## 2026-10-12 16:10 · Copilot-VSCode · /cars merge a main + push a prod (Forge)
+- Hice: stash de los cambios no relacionados del worktree, `git checkout main`, `git merge --no-ff skill-v4` (commit `a227972`), `git push origin main` (982e0e3..a227972), vuelta a skill-v4, stash pop. Forge auto-desplegará desde main.
+- Toqué: solo el árbol git, sin código.
+- ⚠️ PENDIENTE: nada — Forge debería estar re-desplegando ya. Verifica en 1-2 min en https://jjimportmotors.on-forge.com/cars que aparece paginación arriba y abajo + selector de orden + stats globales + botón Reset.
+- Commit: `a227972` en `origin/main`.
+
 ## 2026-10-12 16:00 · Copilot-VSCode · /cars — auditoría UX + 2 commits pusheados a skill-v4
 - Hice: (1) commit `f5b0d92` paginación (arriba+abajo, sort determinista, statusCounts en tabs); (2) commit `9aeb789` auditoría UX — stats cards ahora globales (lightCounts + totalInventoryValue desde server, no de la página), selector de orden (?sort= con whitelist recent/oldest/price_asc|desc/mileage_asc|desc), botón "Limpiar filtros" condicional, empty state diferenciado (no hay coches vs no matches con filtro), placeholder de foto con SVG + marca/modelo sobre degradado. i18n ES+EN nuevas claves. Tests 16/16 OK.
 - Toqué: `CarController`, `Pages/Cars/Index.vue`, `Components/Pagination.vue` (nuevo), `i18n/{es,en}.js`, `CarCrudTest`.
