@@ -30,6 +30,12 @@
 - ⚠️ PENDIENTE: nada — Forge debería estar re-desplegando ya. Verifica en 1-2 min en https://jjimportmotors.on-forge.com/cars que aparece paginación arriba y abajo + selector de orden + stats globales + botón Reset.
 - Commit: `a227972` en `origin/main`.
 
+## 2026-10-12 16:15 · Copilot-VSCode · /cars CORRECCIÓN push a master (rama real de Forge)
+- Hice: descubrí que Forge despliega desde `master` (no `main`) según [docs/deploy/README.md](docs/deploy/README.md) verificado por SSH 25-sep-2026. Hice `git checkout master` (en 361bf03), `git merge --ff-only skill-v4` (361bf03..eb2510d), `git push origin master`. Forge ya tenía git pull hecho (HEAD=eb2510d) pero `node_modules/.vite` cacheó la build sin `Pagination.vue`. Borré el cache y re-ejecuté `npm run build` por SSH; verifiqué que `Index-DtOfyhdu.js` contiene los nuevos symbols (Pagination, lightCounts, totalInventoryValue, resetFilters, no_matches, sort_options). También `php artisan optimize:clear` y `opcache_reset`.
+- Toqué: solo servidor Forge vía SSH (build/manifest + caches).
+- ⚠️ PENDIENTE: **el usuario debe hacer hard-refresh en el navegador (Ctrl+Shift+R)** porque el manifest.json cambió y Cloudflare sirve la versión nueva pero su browser puede tener cacheado el manifest viejo apuntando a Index-OLDHASH.js. Tras hard-refresh ya debería ver paginación arriba+abajo, selector de orden, botón Reset, stats globales, nuevo placeholder de foto y empty state diferenciado.
+- Commit: `eb2510d` en `origin/master` (361bf03..eb2510d, fast-forward).
+
 ## 2026-10-12 16:00 · Copilot-VSCode · /cars — auditoría UX + 2 commits pusheados a skill-v4
 - Hice: (1) commit `f5b0d92` paginación (arriba+abajo, sort determinista, statusCounts en tabs); (2) commit `9aeb789` auditoría UX — stats cards ahora globales (lightCounts + totalInventoryValue desde server, no de la página), selector de orden (?sort= con whitelist recent/oldest/price_asc|desc/mileage_asc|desc), botón "Limpiar filtros" condicional, empty state diferenciado (no hay coches vs no matches con filtro), placeholder de foto con SVG + marca/modelo sobre degradado. i18n ES+EN nuevas claves. Tests 16/16 OK.
 - Toqué: `CarController`, `Pages/Cars/Index.vue`, `Components/Pagination.vue` (nuevo), `i18n/{es,en}.js`, `CarCrudTest`.
