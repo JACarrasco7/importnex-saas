@@ -7,7 +7,6 @@ use App\Models\CarPublicLink;
 use App\Models\MarketplaceVisit;
 use App\Models\Organization;
 use App\Support\CostBreakdown;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
@@ -345,27 +344,32 @@ class PublicMarketplaceController extends Controller
      */
     private function publicCarPayload(Car $car): array
     {
-        // Campos que SÍ pueden llegar al cliente final. El verdict y el
-        // traffic_light son texto admin-interno ("Comprar con confianza
-        // baja (cobertura parcial 2/7)", "Dudoso: kilometraje muy alto
-        // para un R de 2024", etc.) y NO deben filtrarse a la web
-        // pública: las vistas admin (Cars/Index, Dashboard) los siguen
-        // viendo directamente sobre el modelo. (ver #2)
+        // Campos que SÍ pueden llegar al cliente final. Se filtran los
+        // sensibles (decision 12-oct-2026):
+        //  - verdict, verdict_at, verdict_confidence: texto admin-interno
+        //    ("Comprar con confianza baja (cobertura parcial 2/7)", etc.)
+        //  - verdict_reasoning, verdict_changes: valoracion interna
+        //  - traffic_light: semaforo admin
+        //  - cons, notes, red_flags, research, tips: info admin
+        //  - vin, lat, lng: el VIN NO debe ser publico, las coords son
+        //    para el admin y la ficha de tracking (privada)
+        //  - busquedas_realizadas, ai_analysis_json: debug
+        // Las vistas admin (Cars/Index, Dashboard, Tracking) acceden
+        // al modelo completo directamente y siguen viendo todo.
         $attrs = $car->only([
             'id', 'brand', 'model', 'version', 'year', 'mileage', 'fuel',
-            'transmission', 'drivetrain', 'cv', 'displacement', 'co2',
-            'consumption', 'owners', 'doors', 'seats', 'euro_norm', 'color',
+            'transmission', 'drivetrain', 'cv', 'displacement',
+            'consumption', 'owners', 'euro_norm',
             'itv_date', 'pais_origen', 'purchase_price', 'new_price',
             'transport', 'itv_fee', 'coc_fee', 'dgt_fees', 'professional_fees',
-            'deposit', 'vin', 'seller', 'city', 'lat', 'lng', 'status',
+            'deposit', 'city', 'status',
             'description', 'equipment', 'pros', 'is_marketplace',
-            'marketplace_views',
+            'marketplace_views', 'marketplace_checked_at', 'marketplace_unavailable_reason',
             'market_avg', 'market_min', 'market_max', 'estimated_saving',
-            'comparables_list', 'expected_delivery_date', 'tracking_token',
-            'tracking_shared_at', 'schema_version',
+            'expected_delivery_date',
         ]);
 
-        // Fotos y org se cargan aparte.
+        // Fotos y org se cargan aparte (necesarios para el render).
         $attrs['photos'] = $car->photos;
         $attrs['organization'] = $car->organization;
 

@@ -190,293 +190,374 @@ const whatsappUrl = computed(() => {
     return 'https://wa.me/34675701439?text=' + encodeURIComponent(text);
 });
 
-// Especificaciones tecnicas (grid limpio).
+// Especificaciones tecnicas (mismo orden que el dossier car-dossier.blade.php).
+// Sin VIN, sin CO2, sin puertas â€” solo lo que el dossier muestra: Marca, Modelo,
+// Version, Ano, Kilometros, Combustible, Cambio, Traccion.
+const drivetrainLabel = computed(() => {
+    const d = String(props.car?.drivetrain || '').toUpperCase();
+    if (d === 'FWD') return t('dossier.drivetrain_fwd', { default: 'Delantera' });
+    if (d === 'RWD') return t('dossier.drivetrain_rwd', { default: 'Trasera' });
+    if (d === 'AWD' || d === '4WD') return t('dossier.drivetrain_awd', { default: 'Total (4x4)' });
+    return null;
+});
+
 const specItems = computed(() => [
     { key: 'brand', label: t('marketplace_show.brand'), value: props.car?.brand },
     { key: 'model', label: t('marketplace_show.model'), value: props.car?.model },
-    { key: 'version', label: t('dossier.version', { default: 'Version' }), value: props.car?.version },
-    { key: 'year', label: t('marketplace_show.year'), value: props.car?.year },
-    { key: 'mileage', label: t('marketplace_show.mileage'), value: props.car?.mileage ? fmtNumber(props.car.mileage) + ' km' : null },
-    { key: 'fuel', label: t('marketplace_show.fuel'), value: props.car?.fuel },
-    { key: 'transmission', label: t('marketplace_show.transmission'), value: props.car?.transmission },
-    { key: 'cv', label: t('marketplace_show.power'), value: props.car?.cv ? props.car.cv + ' CV' : null },
-    { key: 'color', label: t('marketplace_show.color'), value: props.car?.color },
-    { key: 'doors', label: t('dossier.doors', { default: 'Puertas' }), value: props.car?.doors },
-    { key: 'vin', label: t('marketplace_show.vin'), value: props.car?.vin, mono: true },
-]);
-</script>
 
 <template>
     <Head :title="`${car.brand} ${car.model} - ${t('public.marketplace_title')}`" />
 
     <MarketplaceLayout>
         <div class="min-h-screen bg-gradient-to-br from-platinum-100 via-white to-estoril-50 dark:from-asphalt-900 dark:via-asphalt-900 dark:to-asphalt-800">
-            <div class="py-8">
-                <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
-                    <!-- Breadcrumbs -->
-                    <nav class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                        <Link :href="route('marketplace.index')" class="hover:text-estoril-700 dark:hover:text-estoril-300">
-                            {{ t('marketplace.breadcrumbs.home') }}
-                        </Link>
-                        <span>/</span>
-                        <Link :href="route('marketplace.index')" class="hover:text-estoril-700 dark:hover:text-estoril-300">
-                            {{ t('marketplace.breadcrumbs.catalog') }}
-                        </Link>
-                        <span>/</span>
-                        <span class="font-medium text-gray-900 dark:text-white">{{ car.brand }} {{ car.model }}</span>
-                    </nav>
 
-                    <!-- Banner si el visitante llega por link de share /p/{token} -->
-                    <div v-if="isSharedProfile" class="flex items-start gap-3 rounded-2xl border border-estoril-200 bg-estoril-50 p-4 dark:border-estoril-800 dark:bg-estoril-900/30">
-                        <ShareIcon class="h-5 w-5 shrink-0 text-estoril-700 dark:text-estoril-300" />
-                        <div>
-                            <p class="text-sm font-semibold text-estoril-900 dark:text-estoril-100">
-                                {{ t('marketplace.shared_profile_badge', { default: 'Perfil público' }) }}
-                            </p>
-                            <p class="mt-1 text-sm text-estoril-800 dark:text-estoril-200">
-                                {{ t('marketplace.shared_profile_desc', { default: 'Estás viendo el perfil público de este coche, compartido por JJ Import Motors.' }) }}
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Header -->
-                    <div class="border-b border-gray-200 pb-4 dark:border-asphalt-700">
-                        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                            <div class="min-w-0 flex-1">
-                                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ car.brand }} {{ car.model }}</h1>
-                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ t('marketplace_show.vin_label') }} {{ car.vin || t('marketplace.not_available') }}</p>
-                            </div>
-                            <!-- Botón Compartir: copia la URL pública /p/{token} al portapapeles -->
-                            <button
-                                v-if="publicProfileUrl"
-                                type="button"
-                                @click="copyShareUrl"
-                                class="inline-flex shrink-0 items-center gap-2 rounded-lg border border-estoril-200 bg-white px-4 py-2 text-sm font-semibold text-estoril-800 shadow-sm transition hover:bg-estoril-50 dark:border-asphalt-700 dark:bg-asphalt-800 dark:text-estoril-300 dark:hover:bg-asphalt-700"
-                                :aria-label="t('marketplace.share', { default: 'Compartir' })"
-                            >
-                                <component :is="shareCopied ? ClipboardDocumentIcon : ShareIcon" class="h-4 w-4" />
-                                <span>{{ shareCopied ? t('marketplace.copied', { default: 'Enlace copiado' }) : t('marketplace.share', { default: 'Compartir' }) }}</span>
-                            </button>
-                        </div>
-                        <p v-if="shareError" class="mt-2 text-xs text-rose-600">{{ shareError }}</p>
-                    </div>
-                <!-- Status bar (badges internos ocultos para cliente final;
-                     las vistas admin los siguen mostrando en Cars/Index.) -->
-                <div class="flex flex-wrap items-center gap-3">
-                    <span v-if="car.year" class="text-sm text-gray-500">{{ car.year }}</span>
-                </div>
-
-                <!-- Hero photo gallery (marketplace item: ficha sin foto destacada) -->
-                <div v-if="totalPhotos > 0" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
-                    <div class="relative aspect-[16/9] bg-gradient-to-br from-asphalt-200 to-gray-300">
-                        <img
-                            v-if="activePhoto"
-                            :src="photoUrl(activePhoto)"
-                            :alt="`${car.brand} ${car.model} - foto ${activePhotoIndex + 1}`"
-                            class="h-full w-full object-cover"
-                        />
-                        <div v-else class="flex h-full w-full flex-col items-center justify-center text-gray-400">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="mb-2 h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                            </svg>
-                            <span class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ car.brand }} {{ car.model }}</span>
-                        </div>
-                        <!-- Controles del carrusel -->
-                        <template v-if="totalPhotos > 1">
-                            <button
-                                type="button"
-                                @click="goPrev"
-                                class="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white shadow-sm transition hover:bg-black/70"
-                                :aria-label="t('marketplace_show.prev_photo', { default: 'Foto anterior' })">
-                                <ChevronLeftIcon class="h-5 w-5" />
-                            </button>
-                            <button
-                                type="button"
-                                @click="goNext"
-                                class="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white shadow-sm transition hover:bg-black/70"
-                                :aria-label="t('marketplace_show.next_photo', { default: 'Foto siguiente' })">
-                                <ChevronRightIcon class="h-5 w-5" />
-                            </button>
-                            <span class="absolute bottom-3 right-3 rounded-full bg-black/60 px-3 py-1 text-xs font-semibold text-white">
-                                {{ activePhotoIndex + 1 }} / {{ totalPhotos }}
-                            </span>
-                        </template>
-                    </div>
-                    <!-- Thumbnails -->
-                    <div v-if="totalPhotos > 1" class="flex gap-2 overflow-x-auto p-3">
-                        <button
-                            v-for="(photo, idx) in car.photos"
-                            :key="photo.id || idx"
-                            type="button"
-                            @click="activePhotoIndex = idx"
-                            :class="[
-                                'h-16 w-24 shrink-0 overflow-hidden rounded-md ring-2 transition',
-                                idx === activePhotoIndex ? 'ring-estoril-600' : 'ring-transparent hover:ring-gray-300'
-                            ]"
-                            :aria-label="`Foto ${idx + 1}`">
-                            <img :src="photoUrl(photo)" :alt="`${car.brand} ${car.model} miniatura ${idx + 1}`" class="h-full w-full object-cover" />
-                        </button>
-                    </div>
-                </div>
-                <div v-else class="flex aspect-[16/9] w-full flex-col items-center justify-center rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 text-gray-400 shadow-sm ring-1 ring-gray-200">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="mb-2 h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                    </svg>
-                    <span class="text-sm font-semibold uppercase tracking-wider text-gray-500">{{ car.brand }} {{ car.model }}</span>
-                </div>
-
-                <!-- CTA: enviar solicitud / contactar -->
-                <div v-if="requestUrl" class="flex flex-col items-center justify-between gap-3 rounded-2xl bg-gradient-to-br from-estoril-700 to-estoril-900 p-5 text-white shadow-sm sm:flex-row">
-                    <div class="flex items-center gap-3">
-                        <EnvelopeIcon class="h-6 w-6 shrink-0 text-estoril-100" />
-                        <div>
-                            <p class="text-sm font-semibold sm:text-base">{{ t('marketplace_show.cta_request_title', { default: '¿Te interesa este coche?' }) }}</p>
-                            <p class="text-xs text-estoril-100 sm:text-sm">{{ t('marketplace_show.cta_request_desc', { default: 'Te enviamos más información y organizamos una visita sin compromiso.' }) }}</p>
-                        </div>
-                    </div>
-                    <a
-                        :href="requestUrl"
-                        class="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-estoril-800 shadow-sm transition hover:bg-estoril-50 sm:w-auto">
-                        <EnvelopeIcon class="h-4 w-4" />
-                        {{ t('marketplace_show.cta_request_form', { default: 'Enviar solicitud' }) }}
-                    </a>
-                </div>
-
-                <!-- IEDMT estimation warning (solo si hay importación; en unidades ES no se devenga) -->
-                <div v-if="derived?.iedmt > 0" class="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
-                    <ExclamationTriangleIcon class="h-5 w-5 flex-shrink-0 text-amber-600" />
-                    <div class="text-sm text-amber-900">
-                        <p class="font-semibold">{{ t('marketplace_show.iedmt_warning_title') }}</p>
-                        <p class="mt-1 text-amber-800">
-                            {{ t('marketplace_show.iedmt_warning_desc', { amount: currency(derived?.iedmt), total: currency(derived?.total_cost) }) }}
+            <!-- Banner si el visitante llega por link de share /p/{token} -->
+            <div v-if="isSharedProfile" class="mx-auto mt-4 max-w-5xl px-4 sm:px-6 lg:px-8">
+                <div class="flex items-start gap-3 rounded-2xl border border-estoril-200 bg-estoril-50 p-4 dark:border-estoril-800 dark:bg-estoril-900/30">
+                    <ShareIcon class="h-5 w-5 shrink-0 text-estoril-700 dark:text-estoril-300" />
+                    <div>
+                        <p class="text-sm font-semibold text-estoril-900 dark:text-estoril-100">
+                            {{ t('marketplace.shared_profile_badge', { default: 'Perfil publico' }) }}
+                        </p>
+                        <p class="mt-1 text-sm text-estoril-800 dark:text-estoril-200">
+                            {{ t('marketplace.shared_profile_desc', { default: 'Estas viendo el perfil publico de este coche, compartido por JJ Import Motors.' }) }}
                         </p>
                     </div>
                 </div>
+            </div>
 
-                <!-- Location: el mapa Leaflet se quitó de la ficha publica
-                     (decision 12-oct-2026: solo se muestra en /tracking). -->
+            <div class="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
 
-                <!-- Technical specs -->
-                <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
-                    <div class="border-b border-gray-200 px-6 py-4">
-                        <h3 class="text-base font-semibold text-gray-900">{{ t('marketplace_show.section_tech_specs') }}</h3>
-                    </div>
-                    <div class="grid grid-cols-2 gap-x-6 gap-y-4 p-6 md:grid-cols-4">
-                        <div v-for="spec in specItems" :key="spec.key">
-                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ spec.label }}</dt>
-                            <dd class="mt-1 text-sm font-medium text-gray-900" :class="{ 'font-mono text-xs': spec.key === 'vin' }">{{ car[spec.key] || t('marketplace.not_available') }}{{ spec.suffix || '' }}</dd>
+                <!-- HERO -->
+                <section class="overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700">
+                    <div class="grid grid-cols-1 gap-6 p-6 md:grid-cols-5 md:p-8">
+                        <div class="md:col-span-2">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="inline-flex items-center gap-1 rounded-full bg-estoril-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-estoril-700 ring-1 ring-estoril-200 dark:bg-estoril-900/30 dark:text-estoril-300 dark:ring-estoril-800">
+                                    <ShieldCheckIcon class="h-3.5 w-3.5" />
+                                    {{ t('dossier.badge_verified', { default: 'Verificado' }) }}
+                                </span>
+                                <span class="inline-flex items-center rounded-full bg-amber-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-amber-700 ring-1 ring-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:ring-amber-800">
+                                    {{ stateLabel }}
+                                </span>
+                                <span v-if="car.marketplace_views > 0" :title="t('marketplace.visits_count_tooltip')" class="inline-flex items-center gap-1 rounded-full bg-gray-50 px-3 py-1 text-[11px] font-medium text-gray-600 ring-1 ring-gray-200 dark:bg-asphalt-700/50 dark:text-gray-300 dark:ring-asphalt-600">
+                                    <EyeIcon class="h-3.5 w-3.5" />
+                                    {{ fmtNumber(car.marketplace_views) }}
+                                </span>
+                            </div>
+                            <h1 class="mt-4 text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
+                                {{ car.brand }}
+                                <span class="block bg-gradient-to-br from-estoril-700 to-estoril-900 bg-clip-text text-transparent dark:from-estoril-300 dark:to-estoril-500">
+                                    {{ car.model }}
+                                </span>
+                            </h1>
+                            <p v-if="car.version" class="mt-1 text-sm font-medium text-gray-500 dark:text-gray-400">{{ car.version }}</p>
+                            <p v-if="heroData" class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ heroData }}</p>
+                            <div v-if="heroPrice" class="mt-5 inline-block rounded-2xl bg-gradient-to-br from-estoril-700 to-estoril-900 px-5 py-3 text-white shadow-lg">
+                                <p class="text-[10px] font-semibold uppercase tracking-widest text-estoril-100">
+                                    {{ t('dossier.price_estimated', { default: 'Puesto en Huelva - aprox.' }) }}
+                                </p>
+                                <p class="mt-1 text-2xl font-extrabold tracking-tight">{{ heroPrice }}</p>
+                            </div>
+                            <div class="mt-5 flex flex-wrap gap-2">
+                                <a :href="whatsappUrl" target="_blank" rel="noopener" class="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-600 sm:flex-none">
+                                    <ChatBubbleLeftRightIcon class="h-4 w-4" />
+                                    {{ t('dossier.cta_whatsapp', { default: 'Me interesa' }) }}
+                                </a>
+                                <a href="tel:+34675701439" class="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-gray-800 sm:flex-none dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200">
+                                    <PhoneIcon class="h-4 w-4" />
+                                    {{ t('dossier.cta_call', { default: 'Llamar' }) }}
+                                </a>
+                                <button v-if="publicProfileUrl" type="button" @click="copyShareUrl" class="inline-flex items-center justify-center gap-2 rounded-lg border border-estoril-200 bg-white px-4 py-2.5 text-sm font-semibold text-estoril-800 shadow-sm transition hover:bg-estoril-50 dark:border-asphalt-600 dark:bg-asphalt-800 dark:text-estoril-300 dark:hover:bg-asphalt-700" :aria-label="t('marketplace.share', { default: 'Compartir' })">
+                                    <component :is="shareCopied ? ClipboardDocumentIcon : ShareIcon" class="h-4 w-4" />
+                                    <span class="hidden sm:inline">{{ shareCopied ? t('marketplace.copied', { default: 'Copiado' }) : t('marketplace.share', { default: 'Compartir' }) }}</span>
+                                </button>
+                            </div>
+                            <p v-if="shareError" class="mt-2 text-xs text-rose-600">{{ shareError }}</p>
+                        </div>
+                        <div class="md:col-span-3">
+                            <div v-if="activePhoto" class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-asphalt-200 to-gray-300 shadow-md">
+                                <img :src="photoUrl(activePhoto)" :alt="`${car.brand} ${car.model}`" class="aspect-[4/3] w-full object-cover" />
+                                <template v-if="totalPhotos > 1">
+                                    <button type="button" @click="goPrev" class="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white shadow-sm transition hover:bg-black/70" :aria-label="t('marketplace_show.prev_photo', { default: 'Anterior' })">
+                                        <ChevronLeftIcon class="h-5 w-5" />
+                                    </button>
+                                    <button type="button" @click="goNext" class="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white shadow-sm transition hover:bg-black-70" :aria-label="t('marketplace_show.next_photo', { default: 'Siguiente' })">
+                                        <ChevronRightIcon class="h-5 w-5" />
+                                    </button>
+                                    <span class="absolute bottom-3 right-3 rounded-full bg-black/60 px-3 py-1 text-xs font-semibold text-white">
+                                        {{ activePhotoIndex + 1 }} / {{ totalPhotos }}
+                                    </span>
+                                </template>
+                            </div>
+                            <div v-else class="flex aspect-[4/3] w-full flex-col items-center justify-center rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 text-gray-400 shadow-md">
+                                <span class="text-sm font-semibold uppercase tracking-wider">{{ car.brand }} {{ car.model }}</span>
+                            </div>
+                            <div v-if="totalPhotos > 1" class="mt-3 flex gap-2 overflow-x-auto">
+                                <button v-for="(photo, idx) in car.photos" :key="photo.id || idx" type="button" @click="activePhotoIndex = idx" :class="['h-14 w-20 shrink-0 overflow-hidden rounded-md ring-2 transition', idx === activePhotoIndex ? 'ring-estoril-600' : 'ring-transparent hover:ring-gray-300']">
+                                    <img :src="photoUrl(photo)" :alt="`miniatura ${idx + 1}`" class="h-full w-full object-cover" />
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </section>
 
-                <!-- Costs: desglose APROXIMADO con honorarios JJ Import
-                     (decision 12-oct-2026: 1k base, 1.5k si el coche >= 30k).
-                     Todos los importes son aproximados, NO costes finales. -->
-                <div v-if="costBreakdown?.has_data" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
+                <!-- TRUST BAR -->
+                <section class="grid grid-cols-2 gap-3 rounded-2xl bg-white/60 p-4 ring-1 ring-gray-200 sm:grid-cols-4 dark:bg-asphalt-800/60 dark:ring-asphalt-700">
+                    <div class="flex items-start gap-2">
+                        <ShieldCheckIcon class="h-5 w-5 shrink-0 text-estoril-700 dark:text-estoril-300" />
+                        <div>
+                            <p class="text-xs font-semibold text-gray-900 dark:text-white">{{ originLabel }}</p>
+                            <p class="text-[11px] text-gray-600 dark:text-gray-400">{{ t('dossier.trust_history', { default: 'Historial verificado' }) }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <CheckBadgeIcon class="h-5 w-5 shrink-0 text-estoril-700 dark:text-estoril-300" />
+                        <div>
+                            <p class="text-xs font-semibold text-gray-900 dark:text-white">{{ t('dossier.trust_inspection', { default: 'Inspeccion 9 puntos' }) }}</p>
+                            <p class="text-[11px] text-gray-600 dark:text-gray-400">{{ t('dossier.trust_inspection_desc', { default: 'Comprobado por nuestro equipo' }) }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <TruckIcon class="h-5 w-5 shrink-0 text-estoril-700 dark:text-estoril-300" />
+                        <div>
+                            <p class="text-xs font-semibold text-gray-900 dark:text-white">{{ t('dossier.trust_process', { default: 'Tramitacion completa' }) }}</p>
+                            <p class="text-[11px] text-gray-600 dark:text-gray-400">{{ t('dossier.trust_process_desc', { default: 'ITV, COC, DGT y gestoria' }) }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <BanknotesIcon class="h-5 w-5 shrink-0 text-estoril-700 dark:text-estoril-300" />
+                        <div>
+                            <p class="text-xs font-semibold text-gray-900 dark:text-white">{{ t('dossier.trust_manage', { default: 'Gestion integral' }) }}</p>
+                            <p class="text-[11px] text-gray-600 dark:text-gray-400">{{ t('dossier.trust_manage_desc', { default: 'Compra, transporte y tramites' }) }}</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- PRECIO -->
+                <section v-if="costBreakdown && costBreakdown.has_data" class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700">
                     <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-                        <h3 class="text-base font-semibold text-gray-900">{{ t('marketplace_show.section_costs') }}</h3>
+                        <h3 class="text-base font-semibold text-gray-900">{{ t('dossier.section_price_title', { default: 'Cuanto te costaria, puesto en Huelva' }) }}</h3>
                         <span class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-amber-700 ring-1 ring-amber-200">
                             {{ t('marketplace_show.cost_approximate', { default: 'Aproximado' }) }}
                         </span>
                     </div>
                     <div class="space-y-3 p-6">
-                        <!-- Coche -->
                         <div class="flex items-baseline justify-between gap-4 border-b border-dashed border-gray-200 pb-2">
                             <span class="text-sm text-gray-700">{{ t('marketplace_show.cost_purchase') }}</span>
-                            <span class="font-mono text-sm font-semibold text-gray-900">{{ currency(costBreakdown.car_price) }}</span>
+                            <span class="font-mono text-sm font-semibold text-gray-900">{{ fmt(costBreakdown.car_price) }}</span>
                         </div>
-                        <!-- Gastos (transporte, ITV, COC, DGT, IEDMT) — todos con ~ -->
                         <div v-if="costBreakdown.transport > 0" class="flex items-baseline justify-between gap-4 border-b border-dashed border-gray-200 pb-2">
                             <span class="text-sm text-gray-700">{{ t('marketplace_show.cost_transport') }}</span>
-                            <span class="font-mono text-sm text-gray-600">~ {{ currency(costBreakdown.transport) }}</span>
+                            <span class="font-mono text-sm text-gray-600">~ {{ fmt(costBreakdown.transport) }}</span>
                         </div>
                         <div v-if="costBreakdown.processing > 0" class="flex items-baseline justify-between gap-4 border-b border-dashed border-gray-200 pb-2">
                             <span class="text-sm text-gray-700">{{ t('marketplace_show.cost_processing_grouped', { default: 'ITV + COC + DGT' }) }}</span>
-                            <span class="font-mono text-sm text-gray-600">~ {{ currency(costBreakdown.processing) }}</span>
+                            <span class="font-mono text-sm text-gray-600">~ {{ fmt(costBreakdown.processing) }}</span>
                         </div>
                         <div v-if="costBreakdown.iedmt > 0" class="flex items-baseline justify-between gap-4 border-b border-dashed border-gray-200 pb-2">
                             <span class="text-sm text-gray-700">{{ t('marketplace_show.cost_iedmt', { default: 'IEDMT (estimado)' }) }}</span>
-                            <span class="font-mono text-sm text-gray-600">~ {{ currency(costBreakdown.iedmt) }}</span>
+                            <span class="font-mono text-sm text-gray-600">~ {{ fmt(costBreakdown.iedmt) }}</span>
                         </div>
-                        <!-- Honorarios JJ Import — 1k base, 1.5k si coche >= 30k -->
                         <div class="flex items-baseline justify-between gap-4 border-b border-dashed border-gray-200 pb-2">
                             <div>
                                 <span class="text-sm text-gray-700">{{ t('marketplace_show.cost_honorarios_label', { default: 'Honorarios JJ Import' }) }}</span>
-                                <p class="text-[11px] text-gray-500">{{ t('marketplace_show.cost_honorarios_note', { default: '1.000 \u20AC (1.500 \u20AC si el coche es >= 30.000 \u20AC)' }) }}</p>
+                                <p class="text-[11px] text-gray-500">{{ t('marketplace_show.cost_honorarios_note', { default: '1.000 EUR (1.500 EUR si el coche es >= 30.000 EUR)' }) }}</p>
                             </div>
-                            <span class="font-mono text-sm font-semibold text-estoril-800">{{ currency(costBreakdown.honorarios) }}</span>
+                            <span class="font-mono text-sm font-semibold text-estoril-800">{{ fmt(costBreakdown.honorarios) }}</span>
                         </div>
-                        <!-- Total aproximado -->
                         <div class="flex items-baseline justify-between gap-4 pt-2">
                             <span class="text-sm font-bold text-gray-900">{{ t('marketplace_show.cost_total_approx', { default: 'Total aproximado' }) }}</span>
-                            <span class="font-mono text-lg font-extrabold text-estoril-800">~ {{ currency(costBreakdown.total) }}</span>
+                            <span class="font-mono text-lg font-extrabold text-estoril-800">~ {{ fmt(costBreakdown.total) }}</span>
                         </div>
-                        <!-- Disclaimer -->
                         <p class="mt-3 rounded-lg bg-gray-50 px-3 py-2 text-[11px] leading-relaxed text-gray-600">
                             {{ t('marketplace_show.cost_disclaimer', { default: 'Valoracion aproximada. NO son costes finales: los gastos reales pueden variar segun el vehiculo, el transporte y las tasas vigentes. Confirmamos por escrito antes de la reserva.' }) }}
                         </p>
                     </div>
-                </div>
+                </section>
 
-                <!-- Puntos a favor (decision 12-oct-2026: la valoracion,
-                     contras y 9 research aspects NO se muestran al cliente.
-                     Solo pros, sin "EN CONTRA", sin alertas internas.) -->
-                <div v-if="car.pros?.length" class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
-                    <div class="border-b border-gray-200 px-6 py-4">
-                        <h3 class="text-base font-semibold text-gray-900">{{ t('marketplace_show.section_pros_title', { default: 'Puntos a favor' }) }}</h3>
+                <!-- INCLUIDO / NO INCLUIDO -->
+                <section class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div class="rounded-2xl bg-gradient-to-br from-emerald-50 to-white p-6 ring-1 ring-emerald-200 dark:from-emerald-900/20 dark:to-asphalt-800 dark:ring-emerald-800">
+                        <h3 class="flex items-center gap-2 text-base font-bold text-emerald-700 dark:text-emerald-300">
+                            <CheckCircleIcon class="h-5 w-5" />
+                            {{ t('dossier.section_included', { default: 'Incluido en el precio' }) }}
+                        </h3>
+                        <ul class="mt-3 space-y-2">
+                            <li v-for="(item, i) in includeItems" :key="i" class="flex items-start gap-2 text-sm text-gray-800 dark:text-gray-200">
+                                <span class="mt-0.5 text-emerald-600 dark:text-emerald-400">&#10003;</span>
+                                <span>{{ item }}</span>
+                            </li>
+                        </ul>
                     </div>
-                    <ul class="space-y-2 p-6">
-                        <li v-for="(pro, i) in car.pros" :key="i" class="flex items-start gap-2 rounded-lg border border-estoril-200 bg-estoril-50 p-3">
-                            <CheckCircleIcon class="mt-0.5 h-5 w-5 shrink-0 text-estoril-700" />
-                            <p class="flex-1 text-sm text-gray-900">
+                    <div class="rounded-2xl bg-gradient-to-br from-gray-50 to-white p-6 ring-1 ring-gray-200 dark:from-asphalt-800/60 dark:to-asphalt-800 dark:ring-asphalt-700">
+                        <h3 class="flex items-center gap-2 text-base font-bold text-gray-700 dark:text-gray-300">
+                            <span class="text-lg">&#8722;</span>
+                            {{ t('dossier.section_not_included', { default: 'No incluido' }) }}
+                        </h3>
+                        <ul class="mt-3 space-y-2">
+                            <li v-for="(item, i) in noIncludeItems" :key="i" class="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400">
+                                <span class="mt-0.5 text-gray-400">&#8722;</span>
+                                <span>{{ item }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </section>
+
+                <!-- MERCADO -->
+                <section v-if="marketRange" class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700 sm:p-8">
+                    <p class="text-[11px] font-bold uppercase tracking-widest text-estoril-700 dark:text-estoril-300">
+                        {{ t('dossier.section_market_eyebrow', { default: 'El mercado espanol' }) }}
+                    </p>
+                    <h2 class="mt-2 text-2xl font-extrabold text-gray-900 dark:text-white sm:text-3xl">
+                        {{ t('dossier.section_market_title', { default: 'Como esta de precio' }) }}
+                    </h2>
+                    <div class="mt-6">
+                        <div class="relative h-2 rounded-full bg-gradient-to-r from-emerald-400 via-gray-300 to-amber-400">
+                            <div v-if="marketRange.pos !== null" class="absolute -top-2 h-6 w-1 rounded bg-gray-900 shadow-md dark:bg-white" :style="{ left: marketRange.pos + '%' }">
+                                <span class="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-estoril-700 px-2 py-0.5 text-[10px] font-bold text-white shadow">
+                                    {{ t('dossier.this_unit', { default: 'Esta unidad' }) }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="mt-2 flex justify-between text-xs text-gray-600 dark:text-gray-400">
+                            <div>
+                                <p class="font-bold text-gray-900 dark:text-white">{{ fmt(marketRange.min) }}</p>
+                                <p>{{ t('dossier.cheapest', { default: 'el mas barato' }) }}</p>
+                            </div>
+                            <div v-if="marketRange.avg" class="text-center">
+                                <p class="font-bold text-gray-900 dark:text-white">{{ fmt(marketRange.avg) }}</p>
+                                <p>{{ t('dossier.market_avg', { default: 'precio medio' }) }}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold text-gray-900 dark:text-white">{{ fmt(marketRange.max) }}</p>
+                                <p>{{ t('dossier.most_expensive', { default: 'el mas caro' }) }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- PUNTOS A FAVOR -->
+                <section v-if="car.pros && car.pros.length" class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700 sm:p-8">
+                    <p class="text-[11px] font-bold uppercase tracking-widest text-estoril-700 dark:text-estoril-300">
+                        {{ t('dossier.section_pros_eyebrow', { default: 'Puntos a favor' }) }}
+                    </p>
+                    <h2 class="mt-2 text-2xl font-extrabold text-gray-900 dark:text-white sm:text-3xl">
+                        {{ t('dossier.section_pros_title', { default: 'Lo mejor de esta unidad' }) }}
+                    </h2>
+                    <ul class="mt-4 space-y-2">
+                        <li v-for="(pro, i) in car.pros" :key="i" class="flex items-start gap-2 rounded-lg border border-estoril-200 bg-estoril-50 p-3 dark:border-estoril-800 dark:bg-asphalt-800">
+                            <CheckCircleIcon class="mt-0.5 h-5 w-5 shrink-0 text-estoril-700 dark:text-estoril-300" />
+                            <p class="flex-1 text-sm text-gray-900 dark:text-gray-200">
                                 {{ typeof pro === 'string' ? pro : pro.text }}
                             </p>
                         </li>
                     </ul>
-                </div>
+                </section>
 
-                <!-- Comparables de mercado: el listado interno (coches similares
-                     con km/pais/enlace) NO se muestra al cliente (decision
-                     12-oct-2026, mismo argumento que pros/cons: info interna).
-                     La barra de rango + posicion sigue en la seccion "mercado"
-                     mas abajo, que es lo que el dossier muestra. -->
+                <!-- FICHA TECNICA -->
+                <section v-if="specItems.some((s) => s.value)" id="detalles" class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700 sm:p-8">
+                    <p class="text-[11px] font-bold uppercase tracking-widest text-estoril-700 dark:text-estoril-300">
+                        {{ t('dossier.section_specs_eyebrow', { default: 'Ficha tecnica' }) }}
+                    </p>
+                    <h2 class="mt-2 text-2xl font-extrabold text-gray-900 dark:text-white sm:text-3xl">
+                        {{ t('dossier.section_specs_title', { default: 'Detalles del vehiculo' }) }}
+                    </h2>
+                    <dl class="mt-6 grid grid-cols-1 gap-x-8 sm:grid-cols-2">
+                        <div v-for="spec in specItems.filter((s) => s.value)" :key="spec.key" class="flex items-baseline justify-between gap-3 border-b border-dashed border-gray-200 py-2 dark:border-asphalt-700">
+                            <dt class="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ spec.label }}</dt>
+                            <dd class="text-sm font-semibold text-gray-900 dark:text-white">{{ spec.value }}</dd>
+                        </div>
+                    </dl>
+                </section>
 
-                <!-- Import progress y notes: secciones internas (admin), no se
-                     muestran al cliente (decision 12-oct-2026). -->
+                <!-- EQUIPAMIENTO -->
+                <section v-if="equipment.length > 0" class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700 sm:p-8">
+                    <p class="text-[11px] font-bold uppercase tracking-widest text-estoril-700 dark:text-estoril-300">
+                        {{ t('dossier.section_equipment_eyebrow', { default: 'Equipamiento' }) }}
+                    </p>
+                    <h2 class="mt-2 text-2xl font-extrabold text-gray-900 dark:text-white sm:text-3xl">
+                        {{ t('dossier.section_equipment_title', { default: 'Extras y equipamiento' }) }}
+                    </h2>
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        <span v-for="(item, i) in equipment" :key="i" class="inline-flex items-center rounded-full bg-estoril-50 px-3 py-1.5 text-xs font-medium text-estoril-800 ring-1 ring-estoril-200 dark:bg-estoril-900/30 dark:text-estoril-200 dark:ring-estoril-800">
+                            {{ item }}
+                        </span>
+                    </div>
+                </section>
 
-                <!-- Coches relacionados (misma marca) -->
-                <div v-if="relatedCars.length > 0" class="mt-8">
-                    <h2 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+                <!-- UBICACION -->
+                <section v-if="car.city" class="flex items-center gap-2 rounded-2xl bg-white px-6 py-4 shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700">
+                    <MapPinIcon class="h-5 w-5 text-estoril-700 dark:text-estoril-300" />
+                    <p class="text-sm text-gray-700 dark:text-gray-300">
+                        <span class="font-semibold">{{ t('dossier.location_label', { default: 'Localizado en' }) }}</span>
+                        {{ car.city }}
+                    </p>
+                </section>
+
+                <!-- COMO FUNCIONA -->
+                <section class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700 sm:p-8">
+                    <p class="text-[11px] font-bold uppercase tracking-widest text-estoril-700 dark:text-estoril-300">
+                        {{ t('dossier.section_process_eyebrow', { default: 'El proceso' }) }}
+                    </p>
+                    <h2 class="mt-2 text-2xl font-extrabold text-gray-900 dark:text-white sm:text-3xl">
+                        {{ t('dossier.section_process_title', { default: 'Como funciona' }) }}
+                    </h2>
+                    <ol class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                        <li v-for="(paso, i) in processSteps" :key="i" class="rounded-xl border-t-2 border-estoril-600 bg-gray-50 p-4 dark:bg-asphalt-700/40">
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-estoril-700 dark:text-estoril-300">{{ paso.when }}</p>
+                            <p class="mt-1 text-sm text-gray-800 dark:text-gray-200">{{ paso.what }}</p>
+                        </li>
+                    </ol>
+                </section>
+
+                <!-- COMO TRABAJAMOS -->
+                <section class="rounded-2xl border border-amber-200 bg-amber-50/50 p-6 dark:border-amber-800/50 dark:bg-amber-900/10 sm:p-8">
+                    <p class="text-[11px] font-bold uppercase tracking-widest text-amber-700 dark:text-amber-300">
+                        {{ t('dossier.section_legal_eyebrow', { default: 'Como trabajamos' }) }}
+                    </p>
+                    <h2 class="mt-2 text-xl font-extrabold text-gray-900 dark:text-white sm:text-2xl">
+                        {{ t('dossier.section_legal_title', { default: 'Somos gestores, no vendedores' }) }}
+                    </h2>
+                    <p class="mt-3 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+                        {{ t('dossier.legal_body', { default: 'JJ Import Motors no es el vendedor ni el propietario del vehiculo. Gestionamos la busqueda, la verificacion y la importacion, con honorarios acordados de antemano. No ofrecemos garantia sobre el vehiculo: cualquier garantia o responsabilidad corresponde al vendedor, segun la ley que le sea aplicable.' }) }}
+                    </p>
+                </section>
+
+                <!-- COCHES RELACIONADOS -->
+                <section v-if="relatedCars && relatedCars.length > 0">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
                         {{ t('marketplace.related_cars', { default: 'Otros coches similares' }) }}
                     </h2>
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                        <Link
-                            v-for="rcar in relatedCars"
-                            :key="rcar.id"
-                            :href="route('marketplace.show', rcar.id)"
-                            class="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 transition hover:-translate-y-0.5 hover:shadow-md hover:ring-estoril-300 dark:bg-asphalt-800 dark:ring-asphalt-700">
+                    <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                        <Link v-for="rcar in relatedCars" :key="rcar.id" :href="route('marketplace.show', rcar.id)" class="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 transition hover:-translate-y-0.5 hover:shadow-md hover:ring-estoril-300 dark:bg-asphalt-800 dark:ring-asphalt-700">
                             <div class="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-asphalt-200 to-gray-300">
-                                <img v-if="photoUrl(rcar.photos?.[0])" :src="photoUrl(rcar.photos?.[0])" :alt="`${rcar.brand} ${rcar.model}`" class="h-full w-full object-cover transition group-hover:scale-105" loading="lazy" />
-                                <div v-else class="flex h-full w-full flex-col items-center justify-center text-gray-400">
-                                    <span class="text-4xl">🚗</span>
+                                <img v-if="photoUrl(rcar.photos ? rcar.photos[0] : null)" :src="photoUrl(rcar.photos ? rcar.photos[0] : null)" :alt="`${rcar.brand} ${rcar.model}`" class="h-full w-full object-cover transition group-hover:scale-105" loading="lazy" />
+                                <div v-else class="flex h-full w-full items-center justify-center text-gray-400">
+                                    <span class="text-3xl">&#128663;</span>
                                 </div>
                             </div>
                             <div class="p-3">
-                                <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ rcar.brand }} {{ rcar.model }}</p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ rcar.year }} · {{ rcar.mileage ? `${(rcar.mileage / 1000).toFixed(0)}k km` : '—' }}</p>
-                                <p class="mt-1 text-sm font-bold text-estoril-800 dark:text-estoril-300">{{ currency(rcar.purchase_price) }}</p>
+                                <p class="truncate text-sm font-semibold text-gray-900 dark:text-white">{{ rcar.brand }} {{ rcar.model }}</p>
+                                <p class="mt-1 text-sm font-bold text-estoril-700 dark:text-estoril-300">{{ fmt(rcar.purchase_price) }}</p>
                             </div>
                         </Link>
                     </div>
-                </div>
-            </div>
-        </div>
+                </section>
 
-        <footer class="mt-12 border-t border-gray-200 bg-white py-6 dark:border-asphalt-700 dark:bg-asphalt-900">
-            <div class="mx-auto max-w-7xl px-4 text-center text-sm text-gray-500 sm:px-6 lg:px-8">
-                &copy; {{ new Date().getFullYear() }} Importnex. {{ t('marketplace_show.footer_rights') }}
             </div>
-        </footer>
+
+            <!-- BARRA CTA FIJA -->
+            <div v-if="scrollY > 400" class="fixed bottom-0 left-0 right-0 z-40 flex gap-2 border-t border-gray-200 bg-white/95 px-4 py-3 backdrop-blur shadow-lg dark:border-asphalt-700 dark:bg-asphalt-900/95">
+                <a :href="whatsappUrl" target="_blank" rel="noopener" class="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-600">
+                    <ChatBubbleLeftRightIcon class="h-4 w-4" />
+                    {{ t('dossier.cta_whatsapp_short', { default: 'WhatsApp' }) }}
+                </a>
+                <a href="tel:+34675701439" class="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-gray-800 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200">
+                    <PhoneIcon class="h-4 w-4" />
+                    {{ t('dossier.cta_call_short', { default: 'Llamar' }) }}
+                </a>
+            </div>
         </div>
     </MarketplaceLayout>
 </template>

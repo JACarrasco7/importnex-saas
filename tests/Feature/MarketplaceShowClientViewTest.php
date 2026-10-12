@@ -128,4 +128,27 @@ class MarketplaceShowClientViewTest extends TestCase
         $response->assertInertia(fn ($page) => $page
             ->where('costBreakdown.honorarios', 1500));
     }
+
+    public function test_dossier_like_spec_items_excludes_internal_fields(): void
+    {
+        // El dossier car-dossier.blade.php solo muestra: Marca, Modelo, Version,
+        // Ano, Kilometros, Combustible, Cambio, Traccion. NO VIN, no Puertas,
+        // no CO2, no color. Decision 12-oct-2026: solo lo bueno / relevante.
+        $car = $this->makeCar([
+            'vin' => 'WBA12345678901234',
+            'mileage' => 50000,
+            'co2' => 130,
+            'color' => 'Negro',
+        ]);
+        $response = $this->get('/marketplace/'.$car->id);
+        $response->assertOk();
+
+        // El HTML no debe contener el VIN.
+        $body = $response->getContent();
+        $this->assertStringNotContainsString(
+            'WBA12345678901234',
+            $body,
+            'La ficha publica NO debe exponer el VIN del coche (decision dossier-like)'
+        );
+    }
 }

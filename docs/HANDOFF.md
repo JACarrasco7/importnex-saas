@@ -32,6 +32,15 @@
 
 ---
 
+## 2026-10-12 22:45 · Copilot-VSCode · hide admin verdict/traffic + index payload filter
+- Hice: tras feedback del usuario (lo que veia en produccion eran los badges admin Buy/Discard + EN CONTRA + 9 ASPECTOS DE INVESTIGACION + "Que cambiaria esto" + "El anuncio no indica propietarios..."), aplique el filtro publicCarPayload() tambien a las cards del listado y a los relatedCars, no solo a la ficha. Antes solo show() y showPublicProfile() filtraban — el listado enviaba TODOS los modelos Eloquent serializados, incluyendo verdict (texto admin "Comprar con confianza baja (cobertura parcial 2/7)"), traffic_light, verdict_reasoning, cons, notes, red_flags, etc. aunque el template no los pintase, los datos estaban en el HTML/JSON de la respuesta.
+- 3 commits adicionales:
+  - `fix(public): apply publicCarPayload filter to index cards and relatedCars` (9573ba3)
+  - `fix(public): handle publicCarPayload array shape in index() firstCar` (4306ed7) — el primer coche del paginador ahora es un array, no un modelo, ajustar el acceso a organization.
+  - `fix(marketplace): quitar verdict/traffic_light/cons/9-aspectos de la ficha publica` (limpieza de imports y template con Badge/Variant no usados, residuo de la rama).
+- 6 tests nuevos en MarketplaceShowClientViewTest: verdict + verdict_confidence + verdict_at + traffic_light NO se exponen.
+- 42/42 tests marketplace+listing OK. Master ya en 4306ed7 (despues del merge de otro agente). No requiere accion del usuario.
+
 ## 2026-10-12 18:35 · Copilot-VSCode · tarea programada: revisar anuncios del marketplace
 - Hice: comando programado `marketplace:check-listings` que cada dia a las 04:00 revisa el anuncio original (campo `url_link`) de cada coche publicado en el marketplace. Si el anuncio ya no esta disponible, lo desactiva, marca el motivo en una columna nueva y crea una alerta `car_listing_unavailable` para que yo la vea en el panel de admin.
 - Servicio `App\Services\Marketplace\ListingAvailabilityChecker`: HTTP GET con User-Agent de navegador real + timeouts cortos (8s connect, 12s total). Detecta 4 casos:
