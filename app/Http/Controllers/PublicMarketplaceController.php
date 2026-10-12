@@ -96,6 +96,14 @@ class PublicMarketplaceController extends Controller
         // Load photos and organization for each car
         $cars->load(['photos', 'organization']);
 
+        // Filtrar campos admin (verdict, traffic_light, etc.) en cada
+        // coche antes de exponerlos vía Inertia. Sin esto, los modelos
+        // Eloquent serializan TODOS los $fillable (incluyendo verdict
+        // y verdict_changes) al cliente. (ver #2)
+        $cars->setCollection(
+            $cars->getCollection()->map(fn (Car $c) => $this->publicCarPayload($c))
+        );
+
         // CTA "Enviar solicitud" → apunta a la org del primer coche
         // (todas las fichas son de la misma org pública en la práctica).
         $firstCar = $cars->first();
@@ -238,7 +246,8 @@ class PublicMarketplaceController extends Controller
             ->orderBy('created_at', 'desc')
             ->limit(4)
             ->with('photos')
-            ->get();
+            ->get()
+            ->map(fn (Car $c) => $this->publicCarPayload($c));
     }
 
     /**
