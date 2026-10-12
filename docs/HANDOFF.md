@@ -24,6 +24,18 @@
 
 ---
 
+## 2026-10-12 15:50 · Copilot-VSCode · /cars paginación rota (15/page sin UI en Index.vue)
+- Hice: diagnóstico + fix. Backend: `CarController::index` añade `orderBy('id','desc')` para paginación determinista y devuelve `statusCounts` (count por estado, sin filtrar). Frontend: `Pages/Cars/Index.vue` quita el filtrado cliente redundante, hace que cambiar tab dispare `router.get` con `page=1`, importa nuevo `<Pagination>` (extraído a `Components/Pagination.vue`) y lo pinta arriba Y abajo del grid. Tests `CarCrudTest`: 5 nuevos (15/page, page=2, status filter, statusCounts, statusCounts independientes del filtro) — 12/12 OK. Pint OK.
+- Toqué: `app/Http/Controllers/CarController.php`, `resources/js/Pages/Cars/Index.vue`, `resources/js/Components/Pagination.vue` (nuevo), `tests/Feature/CarCrudTest.php`, este handoff.
+- ⚠️ PENDIENTE para el otro: **desplegar a Forge** (`git push` + deploy manual) para que el fix llegue a https://jjimportmotors.on-forge.com/cars — el usuario ya lo está mirando en producción. El cambio es backwards-compatible (sólo añade prop y UI).
+- Commit: pendiente (avísame y lo hago con el trailer de Copilot).
+
+## 2026-10-08 16:10 · Claude-Desktop · skills v4 (rama skill-v4): fase 0-3 preparadas
+- Hice: copia de seguridad en Desktop\JJImportMotors\_backup_skills_2026-10-08; skill fusionada `jj-import-motors` v4.0.0 PREPARADA en Desktop\JJImportMotors\_sync-skill\jj-import-motors (el puente no escribe en `.claude/`). Incluye costes.md/costes.py (honorarios 1.000 € fijos, IEDMT corregido 1.349/1.764), reglas R1-R15, stats/check_informe/render_informe/mapa (15 tests OK) y `empaquetar.py` valida ya anuncio-portales.txt.
+- Toqué: docs/planes/ (plan + auditorías), DOCS-INDEX, planes/README, esta entrada.
+- ⚠️ PENDIENTE para el otro: ejecutar `_sync-skill\instalar-skill.bat`, luego `scripts\build-skill-zips.ps1`, revisar `git status` y decidir commit. Falta: máster de datos_mercado.json (Drive 28-sep vs repo 13-sep), quitar las skills viejas tras el piloto (Fase 6).
+- Commit: ninguno (sin commit a petición)
+
 ## 2026-10-07 18:20 · Copilot-VSCode · plan transversal de sincronización con Google Drive (3 skills + Laravel)
 
 - Hice: el prompt de auditoría de 12:30 (que ahora es DRAFT) tenía 2 skills + 10 dim; lo he ampliado a **3 skills + Laravel + 11 dim** (D11 = sync Drive transversal). Y como contrato de esa D11, he creado [docs/SYNC-DRIVE-PLAN.md](docs/SYNC-DRIVE-PLAN.md): 5 fases (regla fundacional → skill A → skill C opcional → Laravel → doc+audit) + decisiones pendientes + riesgos + métricas. Regla [.ai/rules/drive.md](.ai/rules/drive.md) con reglas duras (carpetas 00/06/07/08/09, `base64Content`, lock de 30s, `enable_uploads=false` por defecto).

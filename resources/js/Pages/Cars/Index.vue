@@ -7,6 +7,7 @@ import Badge from '@/Components/Badge.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import EmptyState from '@/Components/EmptyState.vue';
 import ConfirmDialog from '@/Components/ConfirmDialog.vue';
+import Pagination from '@/Components/Pagination.vue';
 import { useFormat } from '@/Composables/useFormat';
 import { useTranslations } from '@/Composables/useTranslations';
 
@@ -14,6 +15,7 @@ const props = defineProps({
     cars: Object,
     statuses: Array,
     lights: Array,
+    statusCounts: Object,
     filters: Object,
 });
 
@@ -36,12 +38,12 @@ const tabs = computed(() => {
         ...ordered.map(status => ({
             id: status,
             label: t(`cars.status.${status}`),
-            count: props.cars?.data?.filter(c => c.status === status).length || 0
+            count: props.statusCounts?.[status] || 0
         })),
         ...remaining.map(status => ({
             id: status,
             label: t(`cars.status.${status}`),
-            count: props.cars?.data?.filter(c => c.status === status).length || 0
+            count: props.statusCounts?.[status] || 0
         }))
     ];
 });
@@ -56,24 +58,10 @@ const stats = computed(() => {
     };
 });
 
-const filteredCars = computed(() => {
-    let result = props.cars?.data || [];
-    if (currentTab.value !== 'all') {
-        result = result.filter(c => c.status === currentTab.value);
-    }
-    if (search.value) {
-        const term = search.value.toLowerCase();
-        result = result.filter(c =>
-            (c.brand && c.brand.toLowerCase().includes(term)) ||
-            (c.model && c.model.toLowerCase().includes(term)) ||
-            (c.vin && c.vin.toLowerCase().includes(term))
-        );
-    }
-    if (lightFilter.value) {
-        result = result.filter(c => c.traffic_light === lightFilter.value);
-    }
-    return result;
-});
+// El backend ya aplica status / traffic_light / search sobre la consulta
+// paginada. Aquí sólo mostramos la página actual sin re-filtrar en cliente
+// (antes había un filtrado redundante que confundía la paginación).
+const filteredCars = computed(() => props.cars?.data || []);
 
 // Foto activa por card (carrusel). Key = car.id.
 const activePhoto = ref({});
@@ -104,7 +92,7 @@ const nextPhoto = (car) => {
 
 // Debounce 300ms para no disparar una request por tecla (auditoría M3).
 let searchTimer = null;
-watch([search, lightFilter], () => {
+watch([search, lightFilter, currentTab], () => {
     clearTimeout(searchTimer);
     searchTimer = setTimeout(() => {
         router.get(
@@ -113,6 +101,7 @@ watch([search, lightFilter], () => {
             search: search.value || undefined,
             status: currentTab.value === 'all' ? undefined : currentTab.value,
             traffic_light: lightFilter.value || undefined,
+            page: 1,
         },
         { preserveState: true, preserveScroll: true }
     );
@@ -224,6 +213,9 @@ const confirmDelete = () => {
                     </nav>
                 </div>
 
+                <!-- Pagination (top) -->
+                <Pagination :pagination="cars" />
+
                 <!-- Cards Grid -->
                 <div v-if="filteredCars.length > 0" class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                     <div
@@ -311,6 +303,9 @@ const confirmDelete = () => {
                 </div>
 
                 <EmptyState v-else icon="🚗" :title="t('cars.no_cars_found')" :description="t('cars.no_cars_found_desc')" :action-text="t('cars.add_first_car')" :action-route="route('cars.create')" />
+
+                <!-- Pagination (bottom) -->
+                <Pagination :pagination="cars" />
             </div>
         </div>
 

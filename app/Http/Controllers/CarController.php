@@ -32,9 +32,21 @@ class CarController extends Controller
                         ->orWhere('vin', 'like', "%$s%");
                 });
             })
+            // Orden secundario por id para que la paginación sea determinista
+            // cuando varios coches comparten `created_at` (imports en lote).
             ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
             ->paginate(15)
             ->withQueryString();
+
+        // Conteo por status (sin filtros aplicados) para que las pestañas
+        // muestren el total real de coches en cada estado, no solo los
+        // de la página actual.
+        $statusCounts = Car::query()
+            ->selectRaw('status, COUNT(*) as count')
+            ->groupBy('status')
+            ->pluck('count', 'status')
+            ->all();
 
         $statuses = Car::STATUSES;
         $lights = ['green', 'amber', 'red', 'neutral'];
@@ -43,6 +55,7 @@ class CarController extends Controller
             'cars' => Inertia::defer(fn () => $cars),
             'statuses' => $statuses,
             'lights' => $lights,
+            'statusCounts' => $statusCounts,
             'filters' => $request->only(['status', 'traffic_light', 'search']),
         ]);
     }
