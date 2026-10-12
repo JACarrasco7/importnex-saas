@@ -158,7 +158,9 @@ class CarMarketplaceToggleTest extends TestCase
 
         $this->get(route('marketplace.index'))
             ->assertOk()
-            ->assertInertia(fn ($page) => $page->has('cars.data', 1));
+            ->assertInertia(fn ($page) => $page
+                ->loadDeferredProps('default', fn ($prop) => $prop->has('cars.data', 1))
+            );
     }
 
     public function test_un_coche_sin_marcar_no_aparece_en_la_web(): void
@@ -168,7 +170,9 @@ class CarMarketplaceToggleTest extends TestCase
 
         $this->get(route('marketplace.index'))
             ->assertOk()
-            ->assertInertia(fn ($page) => $page->has('cars.data', 0));
+            ->assertInertia(fn ($page) => $page
+                ->loadDeferredProps('default', fn ($prop) => $prop->has('cars.data', 0))
+            );
     }
 
     public function test_un_coche_entregado_no_aparece_aunque_este_marcado(): void
@@ -178,7 +182,9 @@ class CarMarketplaceToggleTest extends TestCase
 
         $this->get(route('marketplace.index'))
             ->assertOk()
-            ->assertInertia(fn ($page) => $page->has('cars.data', 0));
+            ->assertInertia(fn ($page) => $page
+                ->loadDeferredProps('default', fn ($prop) => $prop->has('cars.data', 0))
+            );
     }
 
     public function test_la_ficha_publica_del_coche_marcado_responde_200(): void

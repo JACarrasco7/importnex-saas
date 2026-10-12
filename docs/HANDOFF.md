@@ -24,6 +24,18 @@
 
 ---
 
+## 2026-10-12 19:10 · Copilot-VSCode · marketplace + form: auditoría final
+- Hice: auditoría completa marketplace + form. (a) JS errors en consola: faltaba `confidenceVariant` en `useFormat.js` y `safeCars` defensivo en MarketplaceIndex (los dos minificados como `h(mn)(...)` causaban el crash de `h(...) is not a function`). (b) MarketplaceIndex: `car.photos[0].startsWith(...)` trataba fotos como strings — nuevo `Composables/usePhotoUrl.js` con `photoUrl(photo)` que acepta objeto o string. (c) `/p/{token}` ruta de perfil público por coche (auto-generada en CarObserver cuando `is_marketplace=true`; backfill migration para los ya publicados; share button copia URL al portapapeles con feedback visual). (d) Form `/request/{slug}`: progress indicator (X/Y obligatorios), error summary en rojo arriba, char counter en `requirements` y `notes`, honeypot endurecido (`name="website"`, `autocomplete="new-password"`, `tabindex="-1"`), localStorage autosave/restore con banner "Borrador recuperado" y botón "Empezar de cero", botón enviar sticky. i18n es+en con todas las claves nuevas (paridad verificada con `node scripts/check-translations.cjs`).
+- Toqué: app/Http/Controllers/PublicMarketplaceController.php (filter bounds cached, relatedCars, showPublicProfile, Inertia::defer cars), app/Models/{Car,CarPublicLink}.php (activePublicLink, getPublicProfileUrlAttribute, publicProfileUrl), app/Observers/CarObserver.php (auto-gen CarPublicLink en created/updated), routes/web.php (GET /p/{token}), nueva migration 2026_10_12_170000_backfill_marketplace_public_links.php, resources/js/Composables/{useFormat,usePhotoUrl}.js, resources/js/Pages/Public/{MarketplaceIndex,MarketplaceShow,CarRequestForm}.vue, resources/js/Components/Pagination.vue, resources/js/i18n/{es,en}.js, tests/Feature/{MarketplaceEnhancementsTest,CarRequestFormUxTest}.php.
+- Commit: pendiente (siguiente paso: push skill-v4→master→Forge rebuild).
+
+---
+
+## 2026-10-12 17:50 · Copilot-VSCode · marketplace: contador global de visitas
+- Hice: contador persistente de visitas a GET /marketplace (home publica, no fichas). Tabla singleton `marketplace_visits` (id=1, visits_count, first_visited_at, last_visited_at) sembrada por la migracion. Modelo `MarketplaceVisit` con `current()` + `recordView()` atomico (DB::raw +1). Controller `PublicMarketplaceController@index` incrementa con bot-detection (mismo patron que `PublicTrackingController::looksLikeBot`) y expone `visitsCount` como prop Inertia. Frontend `MarketplaceIndex.vue` pinta chip "👁 X visitas" en el header del catalogo (formateado con Intl.NumberFormat segun locale). i18n es+en con `visits_count` y `visits_count_tooltip`. 7 tests nuevos en `MarketplaceVisitsTest`: counter+1 por vista, bots no inflan, singleton en id=1, contador con catalogo vacio, first_visited_at inmutable, deferred props OK con listings — 7/7 OK. 52/52 en marketplace enhancements + filter cache + compare + toggle. Pint OK.
+- Toque: nueva migration 2026_10_12_180000_create_marketplace_visits_table.php, nuevo app/Models/MarketplaceVisit.php, app/Http/Controllers/PublicMarketplaceController.php (import, index(), prop visitsCount, helper looksLikeBot), resources/js/Pages/Public/MarketplaceIndex.vue (prop visitsCount, chip en header), resources/js/i18n/{es,en}.js (visits_count, visits_count_tooltip), tests/Feature/MarketplaceVisitsTest.php, este handoff.
+- Commit: pendiente (avisame).
+
 ## 2026-10-12 17:30 · Copilot-VSCode · marketplace: fix errores JS + perfil público por token
 - Hice dos rondas de fixes tras el feedback del usuario en producción:
   - **Errores JS reportados en consola** (PWA / fichas de marketplace):

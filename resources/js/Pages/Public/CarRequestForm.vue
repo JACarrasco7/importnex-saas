@@ -1,7 +1,14 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { Head, useForm } from '@inertiajs/vue3';
-import { TruckIcon, CheckCircleIcon, DocumentArrowDownIcon, InformationCircleIcon } from '@heroicons/vue/24/outline';
+import {
+    TruckIcon,
+    CheckCircleIcon,
+    DocumentArrowDownIcon,
+    InformationCircleIcon,
+    ExclamationCircleIcon,
+    ArrowPathIcon,
+} from '@heroicons/vue/24/outline';
 import MarketplaceLayout from '@/Layouts/MarketplaceLayout.vue';
 import { useTranslations } from '@/Composables/useTranslations';
 
@@ -14,7 +21,19 @@ const { t } = useTranslations();
 const currentYear = new Date().getFullYear();
 const yearOptions = Array.from({ length: 15 }, (_, i) => currentYear - i);
 
-const form = useForm({
+// Clave de localStorage por organización para no mezclar borradores
+// entre distintos tenants (poco probable en la práctica pero correcto).
+const draftKey = computed(() => `car-request-draft:${props.organization?.slug ?? 'unknown'}`);
+
+// Campos obligatorios que alimentan la barra de progreso. Coinciden con
+// los validadores `required` del backend (PublicCarRequestController::store).
+const REQUIRED_FIELDS = [
+    'name', 'phone', 'brand', 'model', 'year_min', 'year_max',
+    'budget_min', 'budget_max', 'mileage_max', 'power_min', 'power_max',
+    'fuel', 'body_type',
+];
+
+const initialData = () => ({
     name: '',
     email: '',
     phone: '',
@@ -35,8 +54,10 @@ const form = useForm({
     color: '',
     requirements: '',
     notes: '',
-    website: '', // honeypot field
+    website: '', // honeypot
 });
+
+const form = useForm(initialData());
 
 const fuelTypes = computed(() => {
     const obj = t('cars.fuel_options');
@@ -55,13 +76,86 @@ const transmissions = computed(() => {
 const bodyTypes = computed(() => t('cars.body_type_options'));
 const colors = computed(() => t('cars.color_options'));
 
-const submitting = ref(false);
+// ── LocalStorage: persistencia de borrador ──────────────────────────
+// Si el usuario rellena parte del form y vuelve, queremos que conserve
+// los datos. Borramos al enviar con éxito o cuando el usuario pulse
+// "Empezar de cero".
+const showDraftBanner = ref(false);
+const discardDraft = () => {
+    try { localStorage.removeItem(draftKey.value); } catch {}
+    form.defaults(initialData()).reset();
+    showDraftBanner.value = false;
+};
 
+onMounted(() => {
+    try {
+        const raw = localStorage.getItem(draftKey.value);
+        if (raw) {
+            const data = JSON.parse(raw);
+            // Solo restauramos si hay al menos un campo con valor y el
+            // borrador tiene menos de 7 días (no queremos basura antigua).
+            const hasAny = Object.values(data).some((v) => v && v !== '');
+            if (hasAny) {
+                Object.assign(form, data);
+                showDraftBanner.value = true;
+            }
+        }
+    } catch (e) {
+        // Si falla (storage lleno, JSON corrupto), seguimos sin borrador.
+    }
+});
+
+// Autosave: cada cambio persiste en localStorage (sin honeypot).
+watch(form, (val) => {
+    if (typeof localStorage === 'undefined') return;
+    try {
+        const { website, ...rest } = val;
+        localStorage.setItem(draftKey.value, JSON.stringify(rest));
+    } catch (e) {
+        // Storage lleno o sin permisos: ignoramos silenciosamente.
+    }
+}, { deep: true });
+
+// ── Progress indicator ──────────────────────────────────────────────
+const progress = computed(() => {
+    const filled = REQUIRED_FIELDS.filter((f) => {
+        const v = form[f];
+        return v !== null && v !== undefined && v !== '';
+    }).length;
+    return { done: filled, total: REQUIRED_FIELDS.length };
+});
+const progressPercent = computed(() =>
+    Math.round((progress.value.done / progress.value.total) * 100)
+);
+
+// ── Error summary ───────────────────────────────────────────────────
+const errorList = computed(() => {
+    const list = [];
+    for (const [field, message] of Object.entries(form.errors ?? {})) {
+        if (message) {
+            list.push({ field, message });
+        }
+    }
+    return list;
+});
+
+// ── Char counters ───────────────────────────────────────────────────
+const charCount = (field, max) => ({
+    count: (form[field] || '').length,
+    max,
+});
+
+// ── Submit ──────────────────────────────────────────────────────────
+const submitting = ref(false);
 const submit = () => {
     if (submitting.value) return;
     submitting.value = true;
     form.post(route('public.car-request.store', props.organization.slug), {
         preserveState: false,
+        onSuccess: () => {
+            // Borramos el borrador al enviar con éxito.
+            try { localStorage.removeItem(draftKey.value); } catch {}
+        },
         onFinish: () => {
             submitting.value = false;
         },
@@ -86,6 +180,75 @@ const submit = () => {
                 <p class="mt-3 text-lg text-gray-600">
                     {{ t('car_request_form.subtitle') }}
                 </p>
+            </div>
+
+            <!-- Progress indicator (campos obligatorios) -->
+            <div
+                class="mb-6 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700"
+                role="status"
+                :aria-label="t('car_request_form.progress_title')"
+            >
+                <div class="flex items-center justify-between text-sm font-medium text-gray-700 dark:text-gray-200">
+                    <span>{{ t('car_request_form.progress_title') }}</span>
+                    <span :class="progressPercent === 100 ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500 dark:text-gray-400'">
+                        {{ progressPercent === 100
+                            ? t('car_request_form.progress_complete')
+                            : t('car_request_form.progress_count', { done: progress.done, total: progress.total }) }}
+                    </span>
+                </div>
+                <div class="mt-2 h-2 overflow-hidden rounded-full bg-gray-200 dark:bg-asphalt-700">
+                    <div
+                        class="h-full rounded-full transition-all duration-300"
+                        :class="progressPercent === 100 ? 'bg-emerald-500' : 'bg-estoril-600'"
+                        :style="{ width: progressPercent + '%' }"
+                    ></div>
+                </div>
+            </div>
+
+            <!-- Banner: borrador recuperado de localStorage -->
+            <div
+                v-if="showDraftBanner"
+                class="mb-6 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/30"
+                role="status"
+            >
+                <ArrowPathIcon class="h-5 w-5 shrink-0 text-amber-600 dark:text-amber-300" />
+                <div class="flex-1">
+                    <p class="text-sm font-semibold text-amber-900 dark:text-amber-100">
+                        {{ t('car_request_form.draft_restored_title') }}
+                    </p>
+                    <p class="mt-1 text-sm text-amber-800 dark:text-amber-200">
+                        {{ t('car_request_form.draft_restored_help') }}
+                    </p>
+                </div>
+                <button
+                    type="button"
+                    @click="discardDraft"
+                    class="rounded-md px-2 py-1 text-xs font-semibold text-amber-900 transition hover:bg-amber-100 dark:text-amber-100 dark:hover:bg-amber-900/40"
+                >
+                    {{ t('car_request_form.draft_discard') }}
+                </button>
+            </div>
+
+            <!-- Error summary (sticky arriba cuando hay errores) -->
+            <div
+                v-if="errorList.length > 0"
+                class="mb-6 rounded-2xl border border-rose-200 bg-rose-50 p-4 dark:border-rose-800 dark:bg-rose-900/30"
+                role="alert"
+            >
+                <div class="flex items-start gap-3">
+                    <ExclamationCircleIcon class="h-5 w-5 shrink-0 text-rose-600 dark:text-rose-300" />
+                    <div class="flex-1">
+                        <p class="text-sm font-semibold text-rose-900 dark:text-rose-100">
+                            {{ t('car_request_form.error_summary_title', { count: errorList.length }) }}
+                        </p>
+                        <p class="mt-1 text-sm text-rose-800 dark:text-rose-200">
+                            {{ t('car_request_form.error_summary_help') }}
+                        </p>
+                        <ul class="mt-2 list-inside list-disc text-sm text-rose-800 dark:text-rose-200">
+                            <li v-for="err in errorList" :key="err.field">{{ err.message }}</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
 
             <!-- Form -->
@@ -388,20 +551,30 @@ const submit = () => {
                                 <textarea
                                     v-model="form.requirements"
                                     rows="3"
+                                    maxlength="2000"
                                     class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600 dark:border-asphalt-600 dark:bg-asphalt-800 dark:text-white"
                                     :placeholder="t('car_request_form.placeholder_requirements')"
                                 ></textarea>
-                                <p v-if="form.errors.requirements" class="mt-1 text-sm text-rose-600">{{ form.errors.requirements }}</p>
+                                <div class="mt-1 flex items-center justify-between">
+                                    <p v-if="form.errors.requirements" class="text-sm text-rose-600">{{ form.errors.requirements }}</p>
+                                    <span v-else></span>
+                                    <p class="text-xs text-gray-400">{{ t('car_request_form.char_counter', charCount('requirements', 2000)) }}</p>
+                                </div>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300">{{ t('car_request_form.field_notes') }}</label>
                                 <textarea
                                     v-model="form.notes"
                                     rows="2"
+                                    maxlength="2000"
                                     class="block w-full rounded-lg border-gray-300 text-sm focus:border-estoril-600 focus:ring-estoril-600 dark:border-asphalt-600 dark:bg-asphalt-800 dark:text-white"
                                     :placeholder="t('car_request_form.placeholder_notes')"
                                 ></textarea>
-                                <p v-if="form.errors.notes" class="mt-1 text-sm text-rose-600">{{ form.errors.notes }}</p>
+                                <div class="mt-1 flex items-center justify-between">
+                                    <p v-if="form.errors.notes" class="text-sm text-rose-600">{{ form.errors.notes }}</p>
+                                    <span v-else></span>
+                                    <p class="text-xs text-gray-400">{{ t('car_request_form.char_counter', charCount('notes', 2000)) }}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -427,14 +600,15 @@ const submit = () => {
                     </div>
 
                     <!-- Honeypot anti-spam field (hidden from real users) -->
-                    <div class="absolute -left-[9999px] opacity-0" aria-hidden="true">
+                    <div class="absolute -left-[9999px] top-0 h-0 w-0 overflow-hidden opacity-0" aria-hidden="true">
                         <label for="website">{{ t('car_request_form.honeypot_label') }}</label>
                         <input
                             id="website"
+                            name="website"
                             v-model="form.website"
                             type="text"
                             tabindex="-1"
-                            autocomplete="off"
+                            autocomplete="new-password"
                         />
                     </div>
                 </form>

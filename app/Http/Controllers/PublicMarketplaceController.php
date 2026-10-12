@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Car;
 use App\Models\CarPublicLink;
+use App\Models\MarketplaceVisit;
 use App\Models\Organization;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
@@ -47,6 +48,16 @@ class PublicMarketplaceController extends Controller
      */
     public function index(Request $request): Response
     {
+        // Contador global de visitas (excluye bots para no inflar la metrica).
+        // Es 1 UPDATE por visita a la home publica, aceptable para el volumen
+        // esperado; si crece mucho se mueve a Cache::increment + flush periodico.
+        $visitsCount = 0;
+        if (! $this->looksLikeBot($request->userAgent())) {
+            $visitsCount = MarketplaceVisit::recordView();
+        } else {
+            $visitsCount = (int) MarketplaceVisit::current()->visits_count;
+        }
+
         $sort = $request->input('sort', 'recent');
         if (! array_key_exists($sort, self::SORT_OPTIONS)) {
             $sort = 'recent';
@@ -138,6 +149,7 @@ class PublicMarketplaceController extends Controller
                 'year_min', 'year_max', 'brand', 'deal', 'mileage', 'fuel',
                 'transmission', 'doors', 'color',
             ]),
+            'visitsCount' => $visitsCount,
         ]);
     }
 
@@ -286,5 +298,18 @@ class PublicMarketplaceController extends Controller
                 'comparables_stats' => $car->comparablesStats,
             ],
         ]);
+    }
+
+    /**
+     * Deteccion basica de bots para no inflar el contador del marketplace.
+     * Mismo patron que PublicTrackingController::looksLikeBot.
+     */
+    private function looksLikeBot(?string $ua): bool
+    {
+        if (! $ua) {
+            return false;
+        }
+
+        return (bool) preg_match('/bot|crawl|spider|slurp|curl|wget|python-requests|headless/i', $ua);
     }
 }
