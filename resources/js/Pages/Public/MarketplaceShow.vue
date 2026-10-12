@@ -207,6 +207,14 @@ const drivetrainLabel = computed(() => {
 const specItems = computed(() => [
     { key: 'brand', label: t('marketplace_show.brand'), value: props.car?.brand },
     { key: 'model', label: t('marketplace_show.model'), value: props.car?.model },
+    { key: 'version', label: t('marketplace_show.version'), value: props.car?.version },
+    { key: 'year', label: t('marketplace_show.year'), value: props.car?.year },
+    { key: 'mileage', label: t('marketplace_show.mileage'), value: props.car?.mileage ? fmtNumber(props.car.mileage) + ' km' : null },
+    { key: 'fuel', label: t('marketplace_show.fuel'), value: props.car?.fuel },
+    { key: 'transmission', label: t('marketplace_show.transmission'), value: props.car?.transmission },
+    { key: 'drivetrain', label: t('marketplace_show.drivetrain', { default: 'Tracción' }), value: drivetrainLabel.value },
+]);
+</script>
 
 <template>
     <Head :title="`${car.brand} ${car.model} - ${t('public.marketplace_title')}`" />
