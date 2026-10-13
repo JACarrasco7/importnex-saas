@@ -101,13 +101,20 @@ onUnmounted(() => { window.removeEventListener('scroll', onScroll); });
 const fuelLabel = computed(() => {
     const f = props.car?.fuel;
     if (!f) return null;
-    // Las claves cars.fuel_options vienen como mapa { value: label }.
-    return t('cars.fuel_options.' + f, { default: f });
+    // La BD guarda "Gasoline"/"Diesel"/"Hybrid" en mayusculas; las claves
+    // del i18n son minusculas ("gasoline"/"diesel"/"hybrid"). Si la
+    // clave exacta no existe, fallback al valor crudo.
+    const key = 'cars.fuel_options.' + f.toLowerCase();
+    return t(key, { default: f });
 });
 const transmissionLabel = computed(() => {
     const tr = props.car?.transmission;
     if (!tr) return null;
-    return t('cars.transmission_options.' + tr, { default: tr });
+    // Igual que con el fuel: si el valor coincide con una clave
+    // (manual/automatic) la traduce; si es un string descriptivo largo
+    // (ej. "Automático DSG de 7 marchas con levas"), lo devuelve tal cual.
+    const key = 'cars.transmission_options.' + tr.toLowerCase();
+    return t(key, { default: tr });
 });
 
 const heroData = computed(() => {
