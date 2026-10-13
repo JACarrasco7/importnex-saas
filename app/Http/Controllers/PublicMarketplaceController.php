@@ -16,6 +16,14 @@ use Inertia\Response;
 class PublicMarketplaceController extends Controller
 {
     /**
+     * Número de WhatsApp (solo dígitos, sin +) para CTAs públicos.
+     * Coincide con el que usan PublicTrackingController y las vistas
+     * del marketplace. Centralizado aquí para no duplicarlo en cada
+     * componente Vue.
+     */
+    private const WHATSAPP_NUMBER = '34675701439';
+
+    /**
      * Opciones de ordenación permitidas para el listado público.
      * Cada valor es [columna, dirección]; 'recent' usa created_at + id
      * para tener un orden determinista en imports en lote.
@@ -172,6 +180,7 @@ class PublicMarketplaceController extends Controller
                 'transmission', 'doors', 'color',
             ]),
             'visitsCount' => $visitsCount,
+            'whatsappNumber' => self::WHATSAPP_NUMBER,
         ]);
     }
 
@@ -206,6 +215,7 @@ class PublicMarketplaceController extends Controller
             'cars' => $cars,
             'requestedIds' => $ids->all(),
             'requestUrl' => $requestUrl,
+            'whatsappNumber' => self::WHATSAPP_NUMBER,
         ]);
     }
 

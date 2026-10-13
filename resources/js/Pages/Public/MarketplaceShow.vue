@@ -98,12 +98,24 @@ onMounted(() => { window.addEventListener('scroll', onScroll, { passive: true })
 onUnmounted(() => { window.removeEventListener('scroll', onScroll); });
 
 // Linea de datos clave para el hero.
+const fuelLabel = computed(() => {
+    const f = props.car?.fuel;
+    if (!f) return null;
+    // Las claves cars.fuel_options vienen como mapa { value: label }.
+    return t('cars.fuel_options.' + f, { default: f });
+});
+const transmissionLabel = computed(() => {
+    const tr = props.car?.transmission;
+    if (!tr) return null;
+    return t('cars.transmission_options.' + tr, { default: tr });
+});
+
 const heroData = computed(() => {
     const parts = [];
     if (props.car?.year) parts.push(String(props.car.year));
     if (props.car?.mileage) parts.push(fmtNumber(props.car.mileage) + ' km');
-    if (props.car?.fuel) parts.push(props.car.fuel);
-    if (props.car?.transmission) parts.push(props.car.transmission);
+    if (fuelLabel.value) parts.push(fuelLabel.value);
+    if (transmissionLabel.value) parts.push(transmissionLabel.value);
     return parts.join(' \u00b7 ');
 });
 
@@ -210,8 +222,8 @@ const specItems = computed(() => [
     { key: 'version', label: t('marketplace_show.version'), value: props.car?.version },
     { key: 'year', label: t('marketplace_show.year'), value: props.car?.year },
     { key: 'mileage', label: t('marketplace_show.mileage'), value: props.car?.mileage ? fmtNumber(props.car.mileage) + ' km' : null },
-    { key: 'fuel', label: t('marketplace_show.fuel'), value: props.car?.fuel },
-    { key: 'transmission', label: t('marketplace_show.transmission'), value: props.car?.transmission },
+    { key: 'fuel', label: t('marketplace_show.fuel'), value: fuelLabel.value },
+    { key: 'transmission', label: t('marketplace_show.transmission'), value: transmissionLabel.value },
     { key: 'drivetrain', label: t('marketplace_show.drivetrain', { default: 'Tracción' }), value: drivetrainLabel.value },
 ]);
 </script>
@@ -582,6 +594,8 @@ const specItems = computed(() => [
                             </div>
                             <div class="p-3">
                                 <p class="truncate text-sm font-semibold text-gray-900 dark:text-white">{{ rcar.brand }} {{ rcar.model }}</p>
+                                <p v-if="rcar.year" class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{{ rcar.year }} · {{ rcar.mileage ? fmtNumber(rcar.mileage) + ' km' : '—' }}</p>
+                                <p v-if="rcar.city" class="truncate text-[11px] text-gray-500 dark:text-gray-400">📍 {{ rcar.city }}</p>
                                 <p class="mt-1 text-sm font-bold text-estoril-700 dark:text-estoril-300">{{ fmt(rcar.purchase_price) }}</p>
                             </div>
                         </Link>

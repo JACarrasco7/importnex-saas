@@ -347,7 +347,10 @@ onMounted(() => {
                                 {{ t('marketplace.visits_count').replace(':count', new Intl.NumberFormat(locale === 'en' ? 'en-US' : 'es-ES').format(visitsCount)) }}
                             </span>
                         </div>
-                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">{{ t('marketplace.catalog_desc').replace(':count', safeCars.total) }}</p>
+                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                            <span v-if="safeCars.total === undefined" class="inline-block h-4 w-48 animate-pulse rounded bg-gray-200 dark:bg-asphalt-700"></span>
+                            <span v-else>{{ t('marketplace.catalog_desc').replace(':count', safeCars.total) }}</span>
+                        </p>
                     </div>
                     <a :href="requestHref" class="inline-flex items-center justify-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200">
                         <PhoneIcon class="h-4 w-4 shrink-0" />
