@@ -136,13 +136,27 @@ class PublicMarketplaceController extends Controller
         $lights = ['green', 'amber', 'red', 'neutral'];
 
         // Opciones de filtro cacheadas (invalidadas por CarObserver al cambiar marketplace)
-        $filterOptions = Cache::remember('marketplace.filter_options', 1800, function () {
+        $filterOptions = Cache::remember('marketplace.filter_options.v3', 1800, function () {
             $base = fn () => Car::query()->publicMarketplace();
 
             return [
                 'brands' => $base()->distinct()->orderBy('brand')->pluck('brand')->values(),
-                'fuels' => $base()->whereNotNull('fuel')->distinct()->orderBy('fuel')->pluck('fuel')->values(),
-                'transmissions' => $base()->whereNotNull('transmission')->distinct()->orderBy('transmission')->pluck('transmission')->values(),
+                'fuels' => $base()->whereNotNull('fuel')
+                    ->whereIn('fuel', ['Diesel', 'Gasoline', 'Hybrid', 'Electric', 'diesel', 'gasoline', 'hybrid', 'electric'])
+                    ->distinct()
+                    ->orderBy('fuel')
+                    ->pluck('fuel')
+                    ->values(),
+                // Solo los valores canonicos para el filtro. Los strings
+                // descriptivos largos (ej. "Automatico DSG de 7 marchas con
+                // levas") se ven en la ficha del coche, no como opcion de
+                // filtro — el cliente no busca por tipo de DSG.
+                'transmissions' => $base()->whereNotNull('transmission')
+                    ->whereIn('transmission', ['manual', 'automatic'])
+                    ->distinct()
+                    ->orderBy('transmission')
+                    ->pluck('transmission')
+                    ->values(),
                 'doors' => $base()->whereNotNull('doors')->distinct()->orderBy('doors')->pluck('doors')->values(),
                 'colors' => $base()->whereNotNull('color')->distinct()->orderBy('color')->pluck('color')->values(),
             ];

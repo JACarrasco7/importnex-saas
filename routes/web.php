@@ -36,6 +36,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicCarController;
 use App\Http\Controllers\PublicCarRequestController;
 use App\Http\Controllers\PublicContractController;
+use App\Http\Controllers\PublicLegalController;
 use App\Http\Controllers\PublicMarketplaceController;
 use App\Http\Controllers\PublicTrackingController;
 use App\Http\Controllers\PushSubscriptionController;
@@ -436,5 +437,11 @@ Route::get('/c/{token}/foto/{indice}', [PublicCarController::class, 'foto'])
     ->where('token', '[A-Za-z0-9_-]{20,80}')
     ->where('indice', '[0-9]{1,3}')
     ->name('public.car.photo');
+
+// Pagina publica unica con aviso legal + privacidad + terminos. Antes
+// los enlaces del footer apuntaban a /marketplace#legal (ancla que
+// no existia). Ahora apuntan aqui. (ver #5)
+Route::get('/legal', [PublicLegalController::class, 'show'])
+    ->name('public.legal');
 
 require __DIR__.'/auth.php';

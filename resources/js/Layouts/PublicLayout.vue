@@ -190,8 +190,8 @@ const close = () => { mobileOpen.value = false; };
                                 </Link>
                             </li>
                             <li>
-                                <a href="mailto:hola@jjimportmotors.com" class="text-gray-600 hover:text-estoril-700 dark:text-gray-400 dark:hover:text-estoril-300">
-                                    hola@jjimportmotors.com
+                                <a href="mailto:jjimportmotors@gmail.com" class="text-gray-600 hover:text-estoril-700 dark:text-gray-400 dark:hover:text-estoril-300">
+                                    jjimportmotors@gmail.com
                                 </a>
                             </li>
                             <li>
@@ -212,14 +212,14 @@ const close = () => { mobileOpen.value = false; };
                         </h3>
                         <ul class="mt-3 space-y-2 text-sm">
                             <li>
-                                <Link :href="route('marketplace.index') + '#legal'" class="text-gray-600 hover:text-estoril-700 dark:text-gray-400 dark:hover:text-estoril-300">
+                                <a :href="'/legal#privacidad'" class="text-gray-600 hover:text-estoril-700 dark:text-gray-400 dark:hover:text-estoril-300">
                                     {{ t('public.footer.privacy', 'Privacidad') }}
-                                </Link>
+                                </a>
                             </li>
                             <li>
-                                <Link :href="route('marketplace.index') + '#legal'" class="text-gray-600 hover:text-estoril-700 dark:text-gray-400 dark:hover:text-estoril-300">
+                                <a :href="'/legal#terminos'" class="text-gray-600 hover:text-estoril-700 dark:text-gray-400 dark:hover:text-estoril-300">
                                     {{ t('public.footer.terms', 'Términos') }}
-                                </Link>
+                                </a>
                             </li>
                         </ul>
                     </div>

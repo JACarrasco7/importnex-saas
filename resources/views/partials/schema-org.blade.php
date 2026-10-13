@@ -7,7 +7,7 @@
   "url": "{{ config('app.url') }}",
   "logo": "{{ config('app.url') }}/img/logo.png",
   "telephone": "+34 600 000 000",
-  "email": "hola@jjimportmotors.com",
+  "email": "jjimportmotors@gmail.com",
   "address": {
     "@@type": "PostalAddress",
     "streetAddress": "",
