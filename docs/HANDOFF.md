@@ -659,3 +659,25 @@
   DSG", "Tracción: Total (4x4)" — todo traducido, sin literales
   `marketplace_show.X`.
 
+
+
+## 2026-10-13 (Copilot) — Mostrar pros Y cons en ficha publica
+
+**Commit:** 7e55f6d feat(public): show cons (puntos en contra) in car detail page
+
+**Cambio de politica:** Antes la ficha publica solo mostraba pros (lo bueno). Ahora muestra pros Y cons (transparencia total: el cliente es adulto y decide con informacion completa). Los campos admin (verdict, red_flags, research, traffic_light, notes, etc.) SIGUEN filtrados — solo admins los ven en Cars/Index, Dashboard y Tracking.
+
+**Cambios:**
+- PublicMarketplaceController::publicCarPayload(): anade 'cons' al allowlist + docblock actualizado con nota de la politica.
+- MarketplaceShow.vue: nueva seccion 'Puntos en contra' (estilo rose, ExclamationTriangleIcon) despues de 'Puntos a favor' + import del icono.
+- i18n es+en: 3 claves nuevas (section_cons_eyebrow/title/desc). 1871/1871 paridad OK.
+- Test: `test_public_marketplace_shows_pros_and_cons_to_clients` verifica que /marketplace/{id} y /p/{token} exponen pros Y cons.
+
+**Tests:** 49/49 OK (MarketplaceEnhancements + CarMarketplaceToggle + PublicCarRequestCreatesClient + CarRequestFormUx).
+
+**Push:** skill-v4 y master ambos en 7e55f6d. Pendiente rebuild en Forge (este terminal no tiene clave SSH). El usuario debe ejecutar desde su terminal PowerShell con clave SSH configurada:
+
+```bash
+ssh forge@168.144.6.105 "cd ~/importnexcore && git pull origin master && rm -rf node_modules/.vite public/build && npm run build 2>&1 | tail -5 && php artisan optimize:clear"
+```
+
