@@ -4,6 +4,15 @@
 > Cualquier agente que vaya a tocar este repo DEBE leer primero la última entrada
 > y escribir la suya al terminar. Es el único sitio donde un agente le habla a otro.
 
+---
+
+## 2026-10-13 09:20 · Copilot-VSCode · comparador con cell highlighting + i18n fixes + UX polish
+- Hice: 7 frentes en 1 commit `df43fe6`. (a) **Comparador** `/marketplace/compare`: quité `verdict`/`traffic_light`/`doors`/`color` (admin-only o no relevantes) y añadí `market_avg`, `drivetrain`, `pais_origen`. **Cell highlighting**: mejor valor por fila en verde, peor en rojo, con `lowerIsBetter` (true para precio/km, false para año/potencia/ahorro). Tip amarillo arriba explica la leyenda, leyenda visible al pie. Action row con Ver ficha + WhatsApp por coche (pre-rellenado con `marketplace_show.whatsapp_text`). (b) **Index**: skeleton en `catalog_desc` mientras cargan deferred props (antes mostraba "0 vehículos" parpadeando, lo que el usuario leía como "no hay coches" cuando eran 29). (c) **Show**: fuel/transmission se traducen a label via `cars.fuel_options` / `cars.transmission_options` (antes salía "Gasoline" literal en ES). Related cars ahora muestran año/km/ciudad. (d) **Layout**: WhatsApp del footer pasa de placeholder 34600000000 al real 34675701439. (e) **Controller**: constante `WHATSAPP_NUMBER` y `whatsappNumber` en props de `index()` y `compare()`. (f) **i18n es+en (paridad OK)**: `marketplace.compare.{tip_title,tip_body,whatsapp,legend_best,legend_worst}` + `marketplace_show.{version,drivetrain,doors}`. (g) **request UX**: `cta_request_notify` y `cta_request_form` ya dicen "Pedir uno a medida" (no "pedir que te avisen") — el form es para un coche a medida, no consulta sobre los visualizados.
+- Toqué: `app/Http/Controllers/PublicMarketplaceController.php` (WHATSAPP_NUMBER + props), `resources/js/Pages/Public/MarketplaceCompare.vue` (rewrite, 113 líneas), `MarketplaceIndex.vue` (skeleton), `MarketplaceShow.vue` (fuel/transmission i18n + related cars), `Layouts/MarketplaceLayout.vue` (footer WhatsApp), `resources/js/i18n/{es,en}.js` (+8 keys c/u).
+- Tests: 100/100 marketplace passing. Pint clean. I18n parity check ✅ (solo warnings de keys que otros agentes usan).
+- ⚠️ PENDIENTE: nada para el otro agente. Worktree limpio en skill-v4. Master ya en df43fe6.
+- Commit: `df43fe6` → ff-mergeado a `master` y push a origin.
+
 **Reglas:**
 
 1. **Antes de trabajar:** lee las entradas marcadas ⚠️ PENDIENTE y la última del otro agente.
