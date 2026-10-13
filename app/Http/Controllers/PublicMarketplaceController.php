@@ -382,10 +382,16 @@ class PublicMarketplaceController extends Controller
      *    para un R de 2024", "Descartar por riesgo", etc.) — filtrar.
      *  - verdict_reasoning / verdict_changes: valoracion interna del equipo
      *  - traffic_light: señal admin ("neutral", "amber"...), no aporta al cliente
-     *  - cons: contras, el cliente solo ve lo bueno
      *  - notes: notas internas del operador
      *  - red_flags, research, tips, valuation internals
      *  - busquedas_realizadas, ai_analysis_json, etc.
+     *
+     * NOTA: `cons` (contras/puntos debiles del coche) SÍ se envia al
+     * cliente. La politica de "el cliente solo ve lo bueno" cambio:
+     * 13-oct-2026 el usuario decidio que la ficha publica debe mostrar
+     * lo bueno Y lo malo. El cliente es adulto y decide con informacion
+     * completa. Los admins siguen viendo TODO (verdict, red_flags, etc.)
+     * en Cars/Index. (ver #4)
      *
      * Devuelve un array asociativo (no el modelo) para que Inertia no incluya
      * accidentalmente campos que se hayan añadido al fillable en el futuro.
@@ -400,7 +406,7 @@ class PublicMarketplaceController extends Controller
         //    ("Comprar con confianza baja (cobertura parcial 2/7)", etc.)
         //  - verdict_reasoning, verdict_changes: valoracion interna
         //  - traffic_light: semaforo admin
-        //  - cons, notes, red_flags, research, tips: info admin
+        //  - notes, red_flags, research, tips: info admin
         //  - vin, lat, lng: el VIN NO debe ser publico, las coords son
         //    para el admin y la ficha de tracking (privada)
         //  - busquedas_realizadas, ai_analysis_json: debug
@@ -413,7 +419,7 @@ class PublicMarketplaceController extends Controller
             'itv_date', 'pais_origen', 'purchase_price', 'new_price',
             'transport', 'itv_fee', 'coc_fee', 'dgt_fees', 'professional_fees',
             'deposit', 'city', 'status',
-            'description', 'equipment', 'pros', 'is_marketplace',
+            'description', 'equipment', 'pros', 'cons', 'is_marketplace',
             'marketplace_views', 'marketplace_checked_at', 'marketplace_unavailable_reason',
             'market_avg', 'market_min', 'market_max', 'estimated_saving',
             'expected_delivery_date',

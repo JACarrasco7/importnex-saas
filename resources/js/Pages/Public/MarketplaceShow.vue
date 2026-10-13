@@ -17,6 +17,7 @@ import {
     BanknotesIcon,
     EnvelopeIcon,
     DocumentArrowDownIcon,
+    ExclamationTriangleIcon,
 } from '@heroicons/vue/24/outline';
 import MarketplaceLayout from '@/Layouts/MarketplaceLayout.vue';
 import { useTranslations } from '@/Composables/useTranslations';
@@ -520,6 +521,27 @@ const specItems = computed(() => [
                             <CheckCircleIcon class="mt-0.5 h-5 w-5 shrink-0 text-estoril-700 dark:text-estoril-300" />
                             <p class="flex-1 text-sm text-gray-900 dark:text-gray-200">
                                 {{ typeof pro === 'string' ? pro : pro.text }}
+                            </p>
+                        </li>
+                    </ul>
+                </section>
+
+                <!-- PUNTOS EN CONTRA (transparencia: el cliente decide con info completa) -->
+                <section v-if="car.cons && car.cons.length" class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700 sm:p-8">
+                    <p class="text-[11px] font-bold uppercase tracking-widest text-rose-600 dark:text-rose-400">
+                        {{ t('marketplace_show.section_cons_eyebrow', { default: 'Lo que debes saber' }) }}
+                    </p>
+                    <h2 class="mt-2 text-2xl font-extrabold text-gray-900 dark:text-white sm:text-3xl">
+                        {{ t('marketplace_show.section_cons_title', { default: 'Puntos en contra' }) }}
+                    </h2>
+                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                        {{ t('marketplace_show.section_cons_desc', { default: 'Cosas que debes tener en cuenta antes de decidir. La información completa te ayuda a elegir mejor.' }) }}
+                    </p>
+                    <ul class="mt-4 space-y-2">
+                        <li v-for="(con, i) in car.cons" :key="i" class="flex items-start gap-2 rounded-lg border border-rose-200 bg-rose-50 p-3 dark:border-rose-800/50 dark:bg-rose-900/20">
+                            <ExclamationTriangleIcon class="mt-0.5 h-5 w-5 shrink-0 text-rose-600 dark:text-rose-400" />
+                            <p class="flex-1 text-sm text-gray-900 dark:text-gray-200">
+                                {{ typeof con === 'string' ? con : con.text }}
                             </p>
                         </li>
                     </ul>
