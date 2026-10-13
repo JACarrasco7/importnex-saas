@@ -31,6 +31,7 @@ const props = defineProps({
     relatedCars: { type: Array, default: () => [] },
     publicProfileUrl: { type: String, default: null },
     dossierUrl: { type: String, default: null },
+    whatsappNumber: { type: String, default: '34675701439' },
     isSharedProfile: { type: Boolean, default: false },
     costBreakdown: { type: Object, default: () => ({ car_price: 0, transport: 0, processing: 0, iedmt: 0, honorarios: 1000, total: 0, has_data: false }) },
 });
@@ -98,24 +99,46 @@ const onScroll = () => { scrollY.value = window.scrollY; };
 onMounted(() => { window.addEventListener('scroll', onScroll, { passive: true }); });
 onUnmounted(() => { window.removeEventListener('scroll', onScroll); });
 
+// Link de WhatsApp pre-rellenado con un mensaje contextual sobre ESTE
+// coche concreto: el cliente pregunta por este vehiculo y adjunta el link
+// al perfil publico para que el comercial sepa de que coche hablan.
+const whatsappLink = computed(() => {
+    const phone = (props.whatsappNumber || '').replace(/\D/g, '');
+    if (!phone || !props.car) return null;
+    const brand = props.car.brand || '';
+    const model = props.car.model || '';
+    const version = props.car.version || '';
+    const ref = props.publicProfileUrl || props.dossierUrl || '';
+    const carLine = [brand, model, version].filter(Boolean).join(' ').trim();
+    const isEs = (locale.value || 'es').startsWith('es');
+    const text = isEs
+        ? `Hola, estoy interesado en el ${carLine || 'coche'} que he visto en su web. ¿Me pueden dar más información?\n\n${ref}`
+        : `Hi, I'm interested in the ${carLine || 'car'} I saw on your website. Could you give me more information?\n\n${ref}`;
+    return `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
+});
+
 // Linea de datos clave para el hero.
+// La BD guarda valores como "Gasoline"/"Diesel"/"Hybrid"/"Electric"/"Manual"/"Automatic"
+// (ingles, capital). Los mapeamos a las claves i18n ES/EN; si la clave
+// no existe (valor raro tipo "Hibrido enchufable"), devolvemos el valor crudo.
 const fuelLabel = computed(() => {
     const f = props.car?.fuel;
     if (!f) return null;
-    // La BD guarda "Gasoline"/"Diesel"/"Hybrid" en mayusculas; las claves
-    // del i18n son minusculas ("gasoline"/"diesel"/"hybrid"). Si la
-    // clave exacta no existe, fallback al valor crudo.
     const key = 'cars.fuel_options.' + f.toLowerCase();
-    return t(key, {}, f);
+    const translated = t(key, {}, null);
+    // Si la traduccion no existe (devuelve la propia key o null),
+    // pasamos el valor crudo como fallback.
+    return translated && translated !== key ? translated : f;
 });
 const transmissionLabel = computed(() => {
     const tr = props.car?.transmission;
     if (!tr) return null;
-    // Igual que con el fuel: si el valor coincide con una clave
-    // (manual/automatic) la traduce; si es un string descriptivo largo
-    // (ej. "Automático DSG de 7 marchas con levas"), lo devuelve tal cual.
+    // Para transmission, si el valor es largo/descriptivo
+    // (ej. "Automatico DSG de 7 marchas con levas"), no se traduce y se
+    // devuelve tal cual. Solo intentamos i18n si es una clave simple.
     const key = 'cars.transmission_options.' + tr.toLowerCase();
-    return t(key, {}, tr);
+    const translated = t(key, {}, null);
+    return translated && translated !== key ? translated : tr;
 });
 
 const heroData = computed(() => {
@@ -341,14 +364,14 @@ const specItems = computed(() => [
                     </div>
                 </section>
 
-                <!-- CTA contextual: enviar solicitud sobre este coche + ver ficha completa -->
+                <!-- CTA contextual: WhatsApp sobre este coche + ver ficha completa -->
                 <section class="flex flex-col items-start justify-between gap-3 rounded-2xl bg-gradient-to-br from-asphalt-900 to-estoril-900 p-5 text-white shadow-sm sm:flex-row sm:items-center">
                     <div>
                         <p class="text-base font-semibold">
                             {{ t('marketplace_show.cta_request_title', { default: '¿Te interesa este coche?' }) }}
                         </p>
                         <p class="mt-1 text-sm text-estoril-100">
-                            {{ t('marketplace_show.cta_request_desc', { default: 'Te enviamos más información y organizamos una visita sin compromiso.' }) }}
+                            {{ t('marketplace_show.cta_request_desc', { default: 'Escríbenos por WhatsApp y te contamos todo sobre esta unidad. Sin compromiso.' }) }}
                         </p>
                     </div>
                     <div class="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row">
@@ -363,12 +386,22 @@ const specItems = computed(() => [
                             {{ t('marketplace_show.cta_full_dossier', { default: 'Ver ficha completa' }) }}
                         </a>
                         <a
-                            v-if="requestUrl"
-                            :href="requestUrl"
+                            v-if="whatsappLink"
+                            :href="whatsappLink"
+                            target="_blank"
+                            rel="noopener"
                             class="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-estoril-800 shadow-sm transition hover:bg-estoril-50"
                         >
+                            <ChatBubbleLeftRightIcon class="h-4 w-4" />
+                            {{ t('marketplace_show.cta_whatsapp', { default: 'Hablar por WhatsApp' }) }}
+                        </a>
+                        <a
+                            v-if="requestUrl"
+                            :href="requestUrl"
+                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-white/30 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-white/20"
+                        >
                             <EnvelopeIcon class="h-4 w-4" />
-                            {{ t('marketplace_show.cta_request_form', { default: 'Enviar solicitud' }) }}
+                            {{ t('marketplace_show.cta_request_form', { default: 'Pedir busqueda similar' }) }}
                         </a>
                     </div>
                 </section>

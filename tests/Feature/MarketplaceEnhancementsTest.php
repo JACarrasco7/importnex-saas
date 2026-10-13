@@ -624,4 +624,35 @@ class MarketplaceEnhancementsTest extends TestCase
         $this->assertStringContainsString('"cons":', $profileBody);
         $this->assertStringContainsString('Llantas con peque', $profileBody);
     }
+
+    public function test_public_marketplace_exposes_whatsapp_number_for_contextual_cta(): void
+    {
+        // La ficha publica expone el numero de WhatsApp y el link al
+        // perfil publico para que el cliente pueda abrir WhatsApp con
+        // un mensaje pre-rellenado sobre ESTE coche concreto (no el
+        // formulario generico de busqueda de request).
+        $org = Organization::factory()->create(['is_public' => true, 'slug' => 't']);
+        $car = Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'brand' => 'Audi',
+            'model' => 'Q2',
+        ]);
+        $link = CarPublicLink::generateFor($car);
+
+        $response = $this->get("/marketplace/{$car->id}")->assertOk();
+        $body = $response->getContent();
+        $this->assertStringContainsString('"whatsappNumber":"34675701439"', $body);
+        // El link aparece en el body con backslashes de escape JSON.
+        $profileUrlEscaped = str_replace('/', '\\/', $link->publicProfileUrl());
+        $this->assertStringContainsString(
+            $profileUrlEscaped,
+            $body,
+            'La ficha publica expone el link al perfil publico del coche'
+        );
+
+        $profileResponse = $this->get("/p/{$link->token}")->assertOk();
+        $this->assertStringContainsString('"whatsappNumber":"34675701439"', $profileResponse->getContent());
+    }
 }

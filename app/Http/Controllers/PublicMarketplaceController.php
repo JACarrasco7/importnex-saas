@@ -249,6 +249,7 @@ class PublicMarketplaceController extends Controller
             'dossierUrl' => $car->dossier_url,
             'relatedCars' => $this->relatedCars($car),
             'isSharedProfile' => false,
+            'whatsappNumber' => self::WHATSAPP_NUMBER,
             'derived' => [
                 'total_cost' => $car->calculateTotalCost(),
                 'iedmt' => $car->calculateIEDMT(),
@@ -350,6 +351,7 @@ class PublicMarketplaceController extends Controller
             'requestUrl' => $this->publicRequestUrl($car->organization, ['car' => $car->id]),
             'relatedCars' => $this->relatedCars($car),
             'isSharedProfile' => true,
+            'whatsappNumber' => self::WHATSAPP_NUMBER,
             'derived' => [
                 'total_cost' => $car->calculateTotalCost(),
                 'iedmt' => $car->calculateIEDMT(),
