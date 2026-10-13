@@ -92,7 +92,7 @@ import { useTranslations } from '@/Composables/useTranslations';
 
 const props = defineProps({
     car: { type: Object, required: true },
-    whatsappNumber: { type: String, default: '34600000000' },
+    whatsappNumber: { type: String, default: '34675701439' },
 });
 
 const { t } = useTranslations();

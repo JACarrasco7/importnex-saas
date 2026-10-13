@@ -260,15 +260,36 @@ class PublicMarketplaceController extends Controller
     }
 
     /**
-     * Coches relacionados: misma marca, distinto id, mismo estado de visibilidad.
-     * Usado en la ficha para sugerir alternativas sin salir del marketplace.
+     * Coches relacionados: misma marca y modelo si hay >=2, si no fallback
+     * a misma marca con rango de precio +-40%. Antes filtraba solo por
+     * marca, lo que metia un Golf R 333 CV junto a un Golf 1.0 TSI basico
+     * — confunde al cliente.
      */
     private function relatedCars(Car $car): Collection
     {
+        $sameModel = Car::query()
+            ->publicMarketplace()
+            ->where('brand', $car->brand)
+            ->where('model', $car->model)
+            ->whereKeyNot($car->getKey())
+            ->get();
+
+        if ($sameModel->count() >= 2) {
+            return $sameModel
+                ->sortBy(fn (Car $c) => abs((float) $c->purchase_price - (float) $car->purchase_price))
+                ->take(4)
+                ->map(fn (Car $c) => $this->publicCarPayload($c))
+                ->values();
+        }
+
+        $minPrice = (float) $car->purchase_price * 0.6;
+        $maxPrice = (float) $car->purchase_price * 1.4;
+
         return Car::query()
             ->publicMarketplace()
             ->where('brand', $car->brand)
             ->whereKeyNot($car->getKey())
+            ->when((float) $car->purchase_price > 0, fn ($q) => $q->whereBetween('purchase_price', [$minPrice, $maxPrice]))
             ->orderBy('created_at', 'desc')
             ->limit(4)
             ->with('photos')

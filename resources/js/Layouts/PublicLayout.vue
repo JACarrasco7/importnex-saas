@@ -196,7 +196,7 @@ const close = () => { mobileOpen.value = false; };
                             </li>
                             <li>
                                 <a
-                                    href="https://wa.me/34600000000?text=Hola%20JJ%20Import%20Motors%2C%20me%20interesa%20m%C3%A1s%20informaci%C3%B3n"
+                                    href="https://wa.me/34675701439?text=Hola%20JJ%20Import%20Motors%2C%20me%20interesa%20m%C3%A1s%20informaci%C3%B3n"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     class="text-gray-600 hover:text-estoril-700 dark:text-gray-400 dark:hover:text-estoril-300"

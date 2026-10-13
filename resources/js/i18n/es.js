@@ -1805,7 +1805,7 @@ export default {
     step_week_1: 'Semana 1',
     step_weeks_2_3: 'Semanas 2-3',
     step_weeks_3_4: 'Semanas 3-4',
-    step_week_4: 'Semana 4',
+    step_week_4: 'Semana 4-5',
     step0: 'Reserva y bloqueo de la unidad con el vendedor',
     step1: 'Compra, documentación y preparación de la exportación',
     step2: 'Transporte hasta España',

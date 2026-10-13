@@ -1789,7 +1789,7 @@ export default {
     step_week_1: 'Week 1',
     step_weeks_2_3: 'Weeks 2-3',
     step_weeks_3_4: 'Weeks 3-4',
-    step_week_4: 'Week 4',
+    step_week_4: 'Week 4-5',
     step0: 'Reserve and lock the unit with the seller',
     step1: 'Purchase, paperwork and export preparation',
     step2: 'Transport to Spain',
