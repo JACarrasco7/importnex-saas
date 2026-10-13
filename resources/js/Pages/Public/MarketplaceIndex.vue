@@ -391,7 +391,7 @@ onMounted(() => {
                         <label class="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-300">{{ t('marketplace.filter_fuel', 'Combustible') }}</label>
                         <select v-model="fuelFilter" class="block w-full rounded-lg border-gray-200 text-sm focus:border-estoril-600 focus:ring-estoril-600 dark:border-asphalt-600 dark:bg-asphalt-800 dark:text-white">
                             <option value="">{{ t('marketplace.filter_all', 'Todos') }}</option>
-                            <option v-for="f in props.filterOptions.fuels" :key="f" :value="f">{{ t('cars.fuel_options.' + f.toLowerCase(), { default: f }) }}</option>
+                            <option v-for="f in props.filterOptions.fuels" :key="f" :value="f">{{ t('cars.fuel_options.' + f.toLowerCase(), {}, f) }}</option>
                         </select>
                     </div>
                     <div class="lg:col-span-1">

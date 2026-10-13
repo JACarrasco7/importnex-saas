@@ -105,7 +105,7 @@ const fuelLabel = computed(() => {
     // del i18n son minusculas ("gasoline"/"diesel"/"hybrid"). Si la
     // clave exacta no existe, fallback al valor crudo.
     const key = 'cars.fuel_options.' + f.toLowerCase();
-    return t(key, { default: f });
+    return t(key, {}, f);
 });
 const transmissionLabel = computed(() => {
     const tr = props.car?.transmission;
@@ -114,7 +114,7 @@ const transmissionLabel = computed(() => {
     // (manual/automatic) la traduce; si es un string descriptivo largo
     // (ej. "Automático DSG de 7 marchas con levas"), lo devuelve tal cual.
     const key = 'cars.transmission_options.' + tr.toLowerCase();
-    return t(key, { default: tr });
+    return t(key, {}, tr);
 });
 
 const heroData = computed(() => {
@@ -138,9 +138,13 @@ const originLabel = computed(() => {
     return t('dossier.origin_verified', { default: 'Origen verificado' });
 });
 
-// Precio titular: total estimado si existe, si no purchase_price.
+// Precio titular: total estimado segun la regla de negocio
+// (CostBreakdown::forCar). Antes usaba derived.total_cost que mezclaba
+// el campo professional_fees (legacy) — daba un total 500 EUR por debajo
+// del desglose visible. Ahora SIEMPRE usamos costBreakdown.total para
+// que hero y desglose cuadren.
 const heroPrice = computed(() => {
-    const total = props.derived?.total_cost;
+    const total = props.costBreakdown?.total;
     if (total && total > 0) return fmt(total);
     if (props.car?.purchase_price) return fmt(props.car.purchase_price);
     return null;
@@ -194,8 +198,12 @@ const noIncludeItems = computed(() => [
 ]);
 
 // Estado del semaforo (visible en la barra lateral del hero).
+// Solo el cliente lo ve asi; internamente el estado se llama "Located"
+// (encontrado/disponible para gestion). El resto de estados ya no se
+// muestran en la ficha publica (son admin-only), pero los dejamos
+// mapeados por si el flujo cambia.
 const stateLabels = {
-    Located: 'Localizado',
+    Located: 'Disponible',
     Valuing: 'En valoracion',
     Offered: 'Oferta enviada',
     Reserved: 'Reservado',
