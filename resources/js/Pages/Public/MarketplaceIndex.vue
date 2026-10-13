@@ -107,6 +107,11 @@ const safeCars = computed(() => props.cars || {
     data: [], from: 0, to: 0, total: 0, last_page: 1, links: [],
     current_page: 1, per_page: 12, path: '', first_page_url: null, last_page_url: null, next_page_url: null, prev_page_url: null,
 });
+// isCarsLoading: true mientras los deferred props aun no llegan
+// (props.cars es undefined). En ese caso, mostramos skeletons en
+// lugar de "0 vehiculos" / "No hay vehiculos disponibles" para
+// evitar el flash de estado vacio. (ver #3)
+const isCarsLoading = computed(() => props.cars === undefined);
 
 // Watchers para sincronizar URL en cada cambio
 // Server-side filter + sort: navega al backend con los filtros para que
@@ -348,7 +353,7 @@ onMounted(() => {
                             </span>
                         </div>
                         <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                            <span v-if="safeCars.total === undefined" class="inline-block h-4 w-48 animate-pulse rounded bg-gray-200 dark:bg-asphalt-700"></span>
+                            <span v-if="isCarsLoading" class="inline-block h-4 w-48 animate-pulse rounded bg-gray-200 dark:bg-asphalt-700"></span>
                             <span v-else>{{ t('marketplace.catalog_desc').replace(':count', safeCars.total) }}</span>
                         </p>
                     </div>
@@ -574,7 +579,17 @@ onMounted(() => {
                 </div>
 
                 <!-- Empty state: diferenciar "no hay coches" vs "no hay matches con los filtros" -->
-                <div v-if="hasActiveFilters" class="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 p-12 text-center dark:border-asphalt-700 dark:bg-asphalt-800">
+                <div v-if="isCarsLoading" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true" :aria-label="t('common.loading', 'Cargando...')">
+                    <div v-for="i in 6" :key="i" class="animate-pulse overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700">
+                        <div class="aspect-[16/10] bg-gray-200 dark:bg-asphalt-700"></div>
+                        <div class="space-y-2 p-5">
+                            <div class="h-5 w-3/4 rounded bg-gray-200 dark:bg-asphalt-700"></div>
+                            <div class="h-4 w-1/2 rounded bg-gray-200 dark:bg-asphalt-700"></div>
+                            <div class="h-6 w-1/3 rounded bg-gray-200 dark:bg-asphalt-700"></div>
+                        </div>
+                    </div>
+                </div>
+                <div v-else-if="hasActiveFilters" class="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 p-12 text-center dark:border-asphalt-700 dark:bg-asphalt-800">
                     <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/40">
                         <SparklesIcon class="h-8 w-8 text-amber-600 dark:text-amber-300" />
                     </div>
@@ -604,7 +619,7 @@ onMounted(() => {
                 </div>
 
                 <!-- Pagination (bottom) -->
-                <Pagination :pagination="cars" />
+                <Pagination :pagination="safeCars" />
             </div>
         </section>
 
