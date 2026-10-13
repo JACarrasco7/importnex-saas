@@ -11,6 +11,7 @@ import {
     MegaphoneIcon,
     LinkIcon,
     UserCircleIcon,
+    ChartBarIcon,
 } from '@heroicons/vue/24/outline';
 import PageHeader from '@/Components/PageHeader.vue';
 import Badge from '@/Components/Badge.vue';
@@ -87,6 +88,14 @@ const toggleMarketplace = () => {
                 <LinkIcon class="h-3.5 w-3.5" />
                 {{ t('cars.original_listing') }}
             </a>
+            <!-- Visitas al anuncio publico (solo si esta publicado o lo estuvo). -->
+            <span
+                class="inline-flex items-center gap-1.5 rounded-lg bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-800 ring-1 ring-amber-200"
+                :title="t('cars.marketplace_views_tooltip', { default: 'Visitas a la ficha publica (/marketplace/{id} o /p/{token})' })"
+            >
+                <ChartBarIcon class="h-3.5 w-3.5" />
+                {{ t('cars.marketplace_views_label', { count: car.marketplace_views || 0 }, car.marketplace_views || 0) }}
+            </span>
         </div>
 
         <!-- §marketplace — publicar en la web pública desde la ficha -->

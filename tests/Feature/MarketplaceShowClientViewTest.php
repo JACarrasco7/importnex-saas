@@ -11,7 +11,9 @@ use Tests\TestCase;
 /**
  * Tests de la ficha publica despues del refactor 12-oct-2026:
  *  - La valoracion (verdict_reasoning) NO se muestra al cliente.
- *  - Los contras (cons) tampoco.
+ *  - Los contras (cons) SI se muestran (decision 13-oct-2026: el cliente
+ *    es adulto y decide con informacion completa — solo filtramos lo
+ *    que es ruido de proceso interno, no lo que afecta a la compra).
  *  - Notas, import progress, 9 research aspects tampoco.
  *  - El costBreakdown llega como prop Inertia con los honorarios correctos.
  */
@@ -46,8 +48,12 @@ class MarketplaceShowClientViewTest extends TestCase
             ->missing('car.verdict_reasoning'));
     }
 
-    public function test_cons_are_no_t_exposed_in_inertia(): void
+    public function test_cons_are_exposed_in_inertia_so_client_decides_with_full_info(): void
     {
+        // 13-oct-2026: el cliente ve pros Y cons. Es lo que el usuario pidio
+        // explícitamente. El admin sigue viendo TODO (verdict, red_flags,
+        // notes, etc.) en Cars/Index, pero la ficha publica muestra lo que
+        // afecta a la decisión de compra.
         $car = $this->makeCar([
             'pros' => [['text' => 'Buen estado', 'weight' => 'high']],
             'cons' => [['text' => 'Pintura desgastada', 'weight' => 'medium']],
@@ -57,7 +63,8 @@ class MarketplaceShowClientViewTest extends TestCase
         $response->assertOk();
         $response->assertInertia(fn ($page) => $page
             ->component('Public/MarketplaceShow')
-            ->missing('car.cons'));
+            ->has('car.pros')
+            ->has('car.cons'));
     }
 
     public function test_verdict_and_traffic_light_no_t_exposed_in_inertia(): void

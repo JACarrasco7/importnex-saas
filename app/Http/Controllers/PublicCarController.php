@@ -47,6 +47,13 @@ class PublicCarController extends Controller
         // Registramos la vista (sin bloquear si falla).
         try {
             $link->recordView();
+            // Tambien contamos en el contador per-car del marketplace para
+            // que el admin vea el mismo numero en /cars/{id} sea cual sea
+            // la URL de entrada (/marketplace/{id} o /c/{token}). Excluimos
+            // bots igual que PublicMarketplaceController.
+            if (! preg_match('/bot|crawl|spider|slurp|curl|wget|python-requests|headless/i', (string) $request->userAgent())) {
+                $car->incrementQuietly('marketplace_views');
+            }
         } catch (\Throwable $e) {
             // No interrumpimos la carga por un fallo de tracking.
         }

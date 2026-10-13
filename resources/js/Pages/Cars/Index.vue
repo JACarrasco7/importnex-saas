@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { MagnifyingGlassIcon, PlusIcon, Squares2X2Icon, PencilIcon, EyeIcon, TrashIcon, SparklesIcon, XMarkIcon } from '@heroicons/vue/24/outline';
+import { MagnifyingGlassIcon, PlusIcon, Squares2X2Icon, PencilIcon, EyeIcon, TrashIcon, SparklesIcon, XMarkIcon, ChartBarIcon } from '@heroicons/vue/24/outline';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Badge from '@/Components/Badge.vue';
 import PageHeader from '@/Components/PageHeader.vue';
@@ -318,6 +318,10 @@ const confirmDelete = () => {
                                     <p class="text-base font-bold text-gray-900">{{ currency(car.purchase_price) }}</p>
                                 </div>
                                 <div class="flex flex-wrap items-center justify-end gap-1">
+                                    <span v-if="car.is_marketplace && car.marketplace_views > 0" class="inline-flex items-center gap-0.5 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700 ring-1 ring-amber-200" :title="t('cars.marketplace_views_tooltip', { default: 'Visitas al anuncio publico' })">
+                                        <ChartBarIcon class="h-3 w-3" />
+                                        {{ t('cars.marketplace_views_label', { count: car.marketplace_views }, car.marketplace_views) }}
+                                    </span>
                                     <Badge v-if="car.is_marketplace" variant="estoril" size="sm">🌐 Marketplace</Badge>
                                     <Badge :variant="statusVariant(car.status)" size="sm">{{ statusLabel(t, car.status) }}</Badge>
                                 </div>

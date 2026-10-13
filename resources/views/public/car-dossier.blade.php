@@ -258,6 +258,22 @@
             50% { opacity: 0.4; }
         }
 
+        /* ── VISITS COUNTER (admin-only) ────────────── */
+        .visits-counter {
+            display: inline-flex; align-items: center; gap: 8px;
+            margin-top: 16px;
+            padding: 8px 14px;
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid rgba(245, 158, 11, 0.35);
+            border-radius: 100px;
+            color: #fcd34d;
+            font-size: 12px; font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+        .visits-counter svg {
+            width: 14px; height: 14px;
+        }
+
         /* ── TRUST BAR ─────────────────────────────────── */
         .trust {
             background: rgba(255, 255, 255, 0.04);
@@ -1084,6 +1100,15 @@
                      teletienda. Sin nombre de cliente (decisión del usuario:
                      el enlace se reenvía por WhatsApp y debe ser neutro). --}}
                 <div class="hero-eyebrow">Informe de la unidad · {{ $fechaDatos }}</div>
+                {{-- Contador de visitas (per-car, mismo numero que el admin
+                     ve en /cars/{id}). Discreto: prueba social ligera, no
+                     distrae del precio ni de la propuesta de valor. --}}
+                @if(($car->marketplace_views ?? 0) > 0)
+                    <div class="visits-counter" title="Veces que se ha abierto esta ficha">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 12v5"/><path d="M12 8v9"/><path d="M17 4v13"/></svg>
+                        {{ number_format($car->marketplace_views, 0, ',', '.') }} {{ $car->marketplace_views == 1 ? 'visita' : 'visitas' }}
+                    </div>
+                @endif
                 <h1 class="h1">
                     {{ $car->brand }}<br>
                     <span class="accent">{{ $car->model }}</span>

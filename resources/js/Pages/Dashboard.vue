@@ -127,6 +127,30 @@ const copyMarketplaceUrl = async () => {
                     <StatCard :label="t('dashboard.kpi_alerts')" :value="stats.alerts_pending" :hint="t('dashboard.kpi_alerts_hint')" :icon="BellAlertIcon" color="rose" />
                 </div>
 
+                <!-- Marketplace visits (home + fichas) -->
+                <div class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2">
+                    <div class="flex items-center gap-4 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-200">
+                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-50 ring-1 ring-amber-200">
+                            <ChartBarIcon class="h-6 w-6 text-amber-600" />
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-[11px] font-semibold uppercase tracking-wider text-gray-500">{{ t('dashboard.kpi_marketplace_views_title', { default: 'Visitas a fichas publicadas' }) }}</p>
+                            <p class="mt-0.5 text-2xl font-bold text-gray-900">{{ new Intl.NumberFormat('es-ES').format(stats.marketplace_views_total || 0) }}</p>
+                            <p class="mt-0.5 text-xs text-gray-500">{{ t('dashboard.kpi_marketplace_views_hint', { default: 'Suma de las visitas a cada coche en /marketplace/{id} y /p/{token}' }) }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-200">
+                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-estoril-50 ring-1 ring-estoril-200">
+                            <Squares2X2Icon class="h-6 w-6 text-estoril-600" />
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-[11px] font-semibold uppercase tracking-wider text-gray-500">{{ t('dashboard.kpi_marketplace_home_title', { default: 'Visitas a la home del marketplace' }) }}</p>
+                            <p class="mt-0.5 text-2xl font-bold text-gray-900">{{ new Intl.NumberFormat('es-ES').format(stats.marketplace_home_visits || 0) }}</p>
+                            <p class="mt-0.5 text-xs text-gray-500">{{ t('dashboard.kpi_marketplace_home_hint', { default: 'Veces que alguien abrio /marketplace (listado completo)' }) }}</p>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Traffic Lights + Total Cost -->
                 <div class="grid grid-cols-1 gap-5 lg:grid-cols-3">
                     <div class="lg:col-span-2 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">

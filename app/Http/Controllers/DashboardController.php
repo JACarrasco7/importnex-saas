@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Alert;
 use App\Models\Car;
-use App\Models\Client;
 use App\Models\Contact;
+use App\Models\MarketplaceVisit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -24,14 +24,15 @@ class DashboardController extends Controller
             ->where('organization_id', $orgId)
             ->selectRaw("
                 COUNT(*) as total,
-                SUM(CASE WHEN status IN ('" . implode("','", Car::ACTIVE_STATUSES) . "') THEN 1 ELSE 0 END) as active,
+                SUM(CASE WHEN status IN ('".implode("','", Car::ACTIVE_STATUSES)."') THEN 1 ELSE 0 END) as active,
                 SUM(CASE WHEN status IN ('Located', 'Valuing', 'Offered', 'Reserved') THEN 1 ELSE 0 END) as for_sale,
                 SUM(CASE WHEN status = 'Purchased' THEN 1 ELSE 0 END) as purchased,
                 SUM(CASE WHEN traffic_light = 'green' THEN 1 ELSE 0 END) as green,
                 SUM(CASE WHEN traffic_light = 'amber' THEN 1 ELSE 0 END) as amber,
                 SUM(CASE WHEN traffic_light = 'red' THEN 1 ELSE 0 END) as red,
                 SUM(CASE WHEN traffic_light = 'neutral' THEN 1 ELSE 0 END) as neutral,
-                SUM(purchase_price) as total_cost
+                SUM(purchase_price) as total_cost,
+                SUM(CASE WHEN is_marketplace = 1 THEN marketplace_views ELSE 0 END) as marketplace_views_total
             ")
             ->first();
 
@@ -57,6 +58,10 @@ class DashboardController extends Controller
                 ->where('resolved', false)
                 ->count(),
             'total_cars_cost' => (float) $carStats->total_cost,
+            // Suma de visitas a TODAS las fichas publicadas en el marketplace.
+            // Diferente de marketplace_visits (singleton de la home publica).
+            'marketplace_views_total' => (int) ($carStats->marketplace_views_total ?? 0),
+            'marketplace_home_visits' => (int) (MarketplaceVisit::current()->visits_count ?? 0),
         ];
 
         $recentCars = Car::where('organization_id', $orgId)
