@@ -614,3 +614,48 @@
 - Commits: `e784abf` (feat CTA contextual + dossier) + `3a406b3` (fix </script>).
 - Prod verificado: /marketplace/71 → "Ver ficha completa" /c/{token} + "Enviar solicitud" /request/{slug}?car=71&brand=Volkswagen&model=Golf. Form muestra banner con marca/modelo/version/ano y pre-rellena los campos.
 
+
+## 2026-10-13 09:20 · Copilot-VSCode · audit final: i18n + 0 vehiculos + skeletons
+- Hice: tras auditar el marketplace en vivo, encontre 3 inconsistencias:
+
+  1. **Claves i18n faltantes en `marketplace_show`**: el namespace tenia
+     `marketplace_show.brand`/`model`/`fuel`/etc pero NO tenia
+     `version`, `drivetrain`, `doors` (estaban en `dossier`). Resultado:
+     el navegador mostraba `marketplace_show.version` literal en la
+     ficha tecnica. Anadidas en es+en.
+
+  2. **Valores de BD en bruto sin traducir**: la BD guarda fuel como
+     "Gasoline" (ingles) y transmission como "Automático DSG de 7
+     marchas con levas" (string largo). El componente los mostraba
+     crudos en la ficha y en los filtros. Ahora `fuelLabel` y
+     `transmissionLabel` (computed en MarketplaceShow.vue + filtro
+     en MarketplaceIndex.vue) buscan en `cars.fuel_options.<lowercase>`
+     con fallback al valor crudo si no hay clave. Ademas, el
+     placeholder del WhatsApp en el footer del layout decia
+     `34600000000` (placeholder de demo) en lugar de `34675701439`
+     (real). Corregido.
+
+  3. **"0 vehiculos disponibles" durante la carga**: el `Inertia::defer`
+     de la lista `cars` hacia que el primer render viera `safeCars.total
+     = 0` (del fallback) y mostrara "0 vehiculos" + empty state
+     "No hay vehiculos disponibles" durante ~500ms hasta que llegaban
+     los datos deferred. Anadido `isCarsLoading` computed y skeleton
+     animado con 6 placeholders + aria-busy.
+
+  Ademas el bug existente `t(key, { default: f })` usaba el 2o arg de
+  `t()` como fallback — pero el 2o arg es `replacements`. El fallback
+  es el 3er arg. Cambiado a `t(key, {}, f)` en 2 sitios.
+
+- Tests: 48/48 OK en marketplace + form + toggle.
+- Commits: `a40f9de` (a40f9de ya estaba con claves i18n), `95563f2`
+  (translation fuel+transmission), `5415956` (3rd arg fallback),
+  `c947a41` (skeleton durante carga).
+- Prod verificado: /marketplace lista 29 vehiculos despues de cargar
+  (skeleton "Cargando..." con 6 placeholders en lugar de "0
+  vehiculos"). Filtro de combustible muestra "Diésel" / "Gasolina" /
+  "Híbrido..." en lugar de "Diesel" / "Gasoline" / "Híbrido enchufable".
+  Ficha /71: "Combustible: Gasolina", "Transmisión: Automático DSG de 7
+  marchas con levas", "Versión: 2.0 TSI R Performance 333 CV 4Motion
+  DSG", "Tracción: Total (4x4)" — todo traducido, sin literales
+  `marketplace_show.X`.
+
