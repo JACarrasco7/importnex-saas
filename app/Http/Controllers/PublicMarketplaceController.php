@@ -32,6 +32,24 @@ class PublicMarketplaceController extends Controller
     private const DEAL_MIN_SAVING = 1500;
 
     /**
+     * Claves de cache del inventario publico del marketplace.
+     *
+     * Son constantes (y no literales sueltos) para que:
+     *  - los tests las referencien en vez de duplicar el string,
+     *  - al cambiar el CONTENIDO cacheado baste subir el sufijo de version
+     *    (`_V4` -> `_V5`) sin tener que esperar los 30 min de TTL ni tocar
+     *    los tests, y CarObserver invalide siempre la clave correcta.
+     */
+    public const CACHE_KEY_FILTER_OPTIONS = 'marketplace.filter_options.v4';
+
+    public const CACHE_KEY_FILTER_COUNTS = 'marketplace.filter_counts.v4';
+
+    public const CACHE_KEY_FILTER_BOUNDS = 'marketplace.filter_bounds.v4';
+
+    /** TTL de las caches de filtros (segundos). */
+    private const FILTER_CACHE_TTL = 1800;
+
+    /**
      * Opciones de ordenación permitidas para el listado público.
      * Cada valor es [columna, dirección]; 'recent' usa created_at + id
      * para tener un orden determinista en imports en lote.
@@ -151,7 +169,7 @@ class PublicMarketplaceController extends Controller
         $lights = ['green', 'amber', 'red', 'neutral'];
 
         // Opciones de filtro cacheadas (invalidadas por CarObserver al cambiar marketplace)
-        $filterOptions = Cache::remember('marketplace.filter_options', 1800, function () {
+        $filterOptions = Cache::remember(self::CACHE_KEY_FILTER_OPTIONS, self::FILTER_CACHE_TTL, function () {
             $base = fn () => Car::query()->publicMarketplace();
 
             return [
@@ -192,7 +210,7 @@ class PublicMarketplaceController extends Controller
         // cuantos entran en "Muy buen precio". Se muestran en los chips
         // para que el cliente vea de un vistazo donde hay stock (antes el
         // chip de marca no tenia numero y el boton de oferta parecia vacio).
-        $filterCounts = Cache::remember('marketplace.filter_counts', 1800, function () {
+        $filterCounts = Cache::remember(self::CACHE_KEY_FILTER_COUNTS, self::FILTER_CACHE_TTL, function () {
             $base = fn () => Car::query()->publicMarketplace();
 
             return [
@@ -209,7 +227,7 @@ class PublicMarketplaceController extends Controller
 
         // Bounds para los inputs de precio/año (usados por el frontend en
         // los atributos min/max de los <input type="number">).
-        $filterBounds = Cache::remember('marketplace.filter_bounds', 1800, function () {
+        $filterBounds = Cache::remember(self::CACHE_KEY_FILTER_BOUNDS, self::FILTER_CACHE_TTL, function () {
             $base = Car::query()->publicMarketplace();
 
             return [

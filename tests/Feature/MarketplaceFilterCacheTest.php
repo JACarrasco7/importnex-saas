@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Controllers\PublicMarketplaceController;
 use App\Models\Car;
 use App\Models\Organization;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -26,14 +27,14 @@ class MarketplaceFilterCacheTest extends TestCase
         ]);
 
         // Clear any existing cache
-        Cache::forget('marketplace.filter_options');
+        Cache::forget(PublicMarketplaceController::CACHE_KEY_FILTER_OPTIONS);
 
         // First request: cache miss, populates cache
         $this->get('/marketplace')->assertOk();
-        $this->assertTrue(Cache::has('marketplace.filter_options'), 'Cache should be populated after first request');
+        $this->assertTrue(Cache::has(PublicMarketplaceController::CACHE_KEY_FILTER_OPTIONS), 'Cache should be populated after first request');
 
         // Verify cache contains expected structure
-        $cached = Cache::get('marketplace.filter_options');
+        $cached = Cache::get(PublicMarketplaceController::CACHE_KEY_FILTER_OPTIONS);
         $this->assertArrayHasKey('brands', $cached);
         $this->assertArrayHasKey('fuels', $cached);
         $this->assertArrayHasKey('transmissions', $cached);
@@ -54,15 +55,15 @@ class MarketplaceFilterCacheTest extends TestCase
             'brand' => 'BMW',
         ]);
 
-        Cache::forget('marketplace.filter_options');
+        Cache::forget(PublicMarketplaceController::CACHE_KEY_FILTER_OPTIONS);
 
         // Trigger first request to populate cache
         $this->get('/marketplace')->assertOk();
-        $cached = Cache::get('marketplace.filter_options');
+        $cached = Cache::get(PublicMarketplaceController::CACHE_KEY_FILTER_OPTIONS);
 
         // Trigger second request (should use cache, data should be identical)
         $this->get('/marketplace')->assertOk();
-        $cachedAfter = Cache::get('marketplace.filter_options');
+        $cachedAfter = Cache::get(PublicMarketplaceController::CACHE_KEY_FILTER_OPTIONS);
 
         $this->assertSame($cached, $cachedAfter, 'Cache should return identical results');
         $this->assertContains('BMW', $cached['brands']);
@@ -70,7 +71,7 @@ class MarketplaceFilterCacheTest extends TestCase
 
     public function test_cache_flushes_when_car_is_created_with_is_marketplace(): void
     {
-        Cache::put('marketplace.filter_options', ['brands' => [], 'fuels' => [], 'transmissions' => [], 'doors' => [], 'colors' => []], 60);
+        Cache::put(PublicMarketplaceController::CACHE_KEY_FILTER_OPTIONS, ['brands' => [], 'fuels' => [], 'transmissions' => [], 'doors' => [], 'colors' => []], 60);
 
         $org = Organization::factory()->create(['is_public' => true]);
         Car::factory()->create([
@@ -81,14 +82,14 @@ class MarketplaceFilterCacheTest extends TestCase
         ]);
 
         $this->assertFalse(
-            Cache::has('marketplace.filter_options'),
+            Cache::has(PublicMarketplaceController::CACHE_KEY_FILTER_OPTIONS),
             'Cache should be flushed when new marketplace car is created'
         );
     }
 
     public function test_cache_flushes_when_is_marketplace_toggled(): void
     {
-        Cache::put('marketplace.filter_options', ['stale' => true], 60);
+        Cache::put(PublicMarketplaceController::CACHE_KEY_FILTER_OPTIONS, ['stale' => true], 60);
 
         $org = Organization::factory()->create(['is_public' => true]);
         $car = Car::factory()->create([
@@ -96,12 +97,12 @@ class MarketplaceFilterCacheTest extends TestCase
             'is_marketplace' => false,
         ]);
 
-        Cache::put('marketplace.filter_options', ['fresh' => true], 60);
+        Cache::put(PublicMarketplaceController::CACHE_KEY_FILTER_OPTIONS, ['fresh' => true], 60);
 
         $car->update(['is_marketplace' => true]);
 
         $this->assertFalse(
-            Cache::has('marketplace.filter_options'),
+            Cache::has(PublicMarketplaceController::CACHE_KEY_FILTER_OPTIONS),
             'Cache should flush when is_marketplace changes'
         );
     }
@@ -118,9 +119,9 @@ class MarketplaceFilterCacheTest extends TestCase
             'fuel' => 'Gasoline',
         ]);
 
-        Cache::forget('marketplace.filter_options');
+        Cache::forget(PublicMarketplaceController::CACHE_KEY_FILTER_OPTIONS);
         $this->get('/marketplace')->assertOk();
-        $options = Cache::get('marketplace.filter_options');
+        $options = Cache::get(PublicMarketplaceController::CACHE_KEY_FILTER_OPTIONS);
 
         $this->assertIsArray($options);
         $this->assertArrayHasKey('brands', $options);
@@ -153,9 +154,9 @@ class MarketplaceFilterCacheTest extends TestCase
             'transmission' => 'manual',
         ]);
 
-        Cache::forget('marketplace.filter_options');
+        Cache::forget(PublicMarketplaceController::CACHE_KEY_FILTER_OPTIONS);
         $this->get('/marketplace')->assertOk();
-        $options = Cache::get('marketplace.filter_options');
+        $options = Cache::get(PublicMarketplaceController::CACHE_KEY_FILTER_OPTIONS);
 
         $this->assertContains('manual', $options['transmissions']);
         $this->assertNotContains('Automatico DSG de 7 marchas con levas', $options['transmissions']);
@@ -183,9 +184,9 @@ class MarketplaceFilterCacheTest extends TestCase
             'estimated_saving' => 4000, // por encima del umbral: SI es oferta
         ]);
 
-        Cache::forget('marketplace.filter_counts');
+        Cache::forget(PublicMarketplaceController::CACHE_KEY_FILTER_COUNTS);
         $this->get('/marketplace')->assertOk();
-        $counts = Cache::get('marketplace.filter_counts');
+        $counts = Cache::get(PublicMarketplaceController::CACHE_KEY_FILTER_COUNTS);
 
         $this->assertIsArray($counts);
         $this->assertSame(2, $counts['brands']['Seat']);
@@ -273,9 +274,9 @@ class MarketplaceFilterCacheTest extends TestCase
             'color' => 'Negro Deep Black nacarado',
         ]);
 
-        Cache::forget('marketplace.filter_options');
+        Cache::forget(PublicMarketplaceController::CACHE_KEY_FILTER_OPTIONS);
         $this->get('/marketplace')->assertOk();
-        $options = Cache::get('marketplace.filter_options');
+        $options = Cache::get(PublicMarketplaceController::CACHE_KEY_FILTER_OPTIONS);
 
         // Dos variantes de azul -> una sola opcion "Azul".
         $this->assertSame(['Azul', 'Negro'], $options['colors']->all());

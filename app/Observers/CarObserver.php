@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Http\Controllers\PublicMarketplaceController;
 use App\Http\Controllers\SitemapController;
 use App\Models\Car;
 use App\Models\CarChecklist;
@@ -30,9 +31,9 @@ class CarObserver
     private function flushMarketplaceCaches(): void
     {
         SitemapController::flush();
-        Cache::forget('marketplace.filter_options');
-        Cache::forget('marketplace.filter_counts');
-        Cache::forget('marketplace.filter_bounds');
+        Cache::forget(PublicMarketplaceController::CACHE_KEY_FILTER_OPTIONS);
+        Cache::forget(PublicMarketplaceController::CACHE_KEY_FILTER_COUNTS);
+        Cache::forget(PublicMarketplaceController::CACHE_KEY_FILTER_BOUNDS);
     }
 
     public function saving(Car $car): void
