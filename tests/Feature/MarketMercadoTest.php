@@ -87,8 +87,19 @@ class MarketMercadoTest extends TestCase
 
         $coste = $model->costePuestoEnHuelva();
 
-        // 10000 + 900 + 114 + 115 + 500 + 1500 = 13129
-        $this->assertSame(13129.0, $coste['total']);
+        // 10000 (precio) + 900 (transporte) + 114 (ausfuhr) + 115 (ITV)
+        // + 500 (IEDMT) + 1000 (honorarios base, precio < 30k) = 12629
+        $this->assertSame(12629.0, $coste['total']);
+    }
+
+    public function test_coste_puesto_en_huelva_uses_premium_honorarios_for_big_car(): void
+    {
+        $model = $this->makeModel(['precio_desde_de' => 35000, 'iedmt_estimado' => 0]);
+
+        $coste = $model->costePuestoEnHuelva();
+
+        // 35000 + 900 + 114 + 115 + 0 + 1500 (honorarios premium, >= 30k) = 37629
+        $this->assertSame(37629.0, $coste['total']);
     }
 
     public function test_scopes_de_veredicto_y_caducidad(): void

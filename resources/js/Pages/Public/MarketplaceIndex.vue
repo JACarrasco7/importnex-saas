@@ -662,8 +662,12 @@ onMounted(() => {
             </div>
         </section>
 
-        <!-- Floating download button for JJ Import Motors folleto -->
-        <div class="fixed bottom-6 right-6 z-40">
+        <!-- Floating download button for JJ Import Motors folleto.
+             Posicionado a la izquierda del WhatsApp float (que esta en
+             bottom-6 right-6) para que ambos se vean lado a lado sin
+             solaparse. En pantallas pequenas, el texto se oculta y solo
+             se ve el icono. -->
+        <div class="fixed bottom-6 right-24 z-40">
             <a
                 href="/jj-import-folleto.pdf"
                 download="JJ_Import_Motors_Folleto.pdf"

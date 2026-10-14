@@ -136,7 +136,7 @@ class PublicMarketplaceController extends Controller
         $lights = ['green', 'amber', 'red', 'neutral'];
 
         // Opciones de filtro cacheadas (invalidadas por CarObserver al cambiar marketplace)
-        $filterOptions = Cache::remember('marketplace.filter_options.v3', 1800, function () {
+        $filterOptions = Cache::remember('marketplace.filter_options', 1800, function () {
             $base = fn () => Car::query()->publicMarketplace();
 
             return [
@@ -275,13 +275,20 @@ class PublicMarketplaceController extends Controller
     }
 
     /**
-     * Coches relacionados: misma marca y modelo si hay >=2, si no fallback
-     * a misma marca con rango de precio +-40%. Antes filtraba solo por
-     * marca, lo que metia un Golf R 333 CV junto a un Golf 1.0 TSI basico
-     * — confunde al cliente.
+     * Coches relacionados. Logica en cascada, de mas estricto a mas
+     * permisivo (para que el cliente siempre vea al menos UN coche similar
+     * cuando hay stock):
+     *
+     * 1. Misma marca + modelo (>=2): los "hermanos gemelos" — el caso ideal.
+     * 2. Misma marca, rango de precio +-40% (>=1): modelos similares en precio.
+     * 3. Misma marca sin filtro de precio: ultimo fallback. Antes este era
+     *    el unico caso y mezclaba Golf R 333 CV con Golf 1.0 TSI. Ahora
+     *    solo se usa si los pasos 1 y 2 no devolvieron nada (p. ej.
+     *    catalogo con un solo coche por modelo).
      */
     private function relatedCars(Car $car): Collection
     {
+        // 1) Misma marca + modelo
         $sameModel = Car::query()
             ->publicMarketplace()
             ->where('brand', $car->brand)
@@ -297,14 +304,28 @@ class PublicMarketplaceController extends Controller
                 ->values();
         }
 
+        // 2) Misma marca, rango de precio +-40%
         $minPrice = (float) $car->purchase_price * 0.6;
         $maxPrice = (float) $car->purchase_price * 1.4;
-
-        return Car::query()
+        $sameBrandAndPrice = Car::query()
             ->publicMarketplace()
             ->where('brand', $car->brand)
             ->whereKeyNot($car->getKey())
             ->when((float) $car->purchase_price > 0, fn ($q) => $q->whereBetween('purchase_price', [$minPrice, $maxPrice]))
+            ->orderBy('created_at', 'desc')
+            ->limit(4)
+            ->with('photos')
+            ->get();
+
+        if ($sameBrandAndPrice->count() >= 1) {
+            return $sameBrandAndPrice->map(fn (Car $c) => $this->publicCarPayload($c));
+        }
+
+        // 3) Misma marca sin filtro de precio (ultimo recurso)
+        return Car::query()
+            ->publicMarketplace()
+            ->where('brand', $car->brand)
+            ->whereKeyNot($car->getKey())
             ->orderBy('created_at', 'desc')
             ->limit(4)
             ->with('photos')

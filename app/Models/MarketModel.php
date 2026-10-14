@@ -146,7 +146,12 @@ class MarketModel extends Model
         $ausfuhr = 114;
         $itv = 115;
         $iedmt = (int) $this->iedmt_estimado;
-        $honorarios = 1500; // M2 por defecto
+        // Regla de negocio (decision 12-oct-2026, alineada con
+        // App\Support\CostBreakdown): honorarios base 1.000 EUR, 1.500 EUR
+        // si el coche es >= 30.000 EUR. Mismo umbral en toda la app para
+        // que el cliente vea el mismo numero en la ficha, el dossier y
+        // el calculo de mercado.
+        $honorarios = $precio >= 30000 ? 1500 : 1000;
 
         $total = $precio + $transporte + $ausfuhr + $itv + $iedmt + $honorarios;
 
