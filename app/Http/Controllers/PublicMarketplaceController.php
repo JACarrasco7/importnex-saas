@@ -114,7 +114,10 @@ class PublicMarketplaceController extends Controller
             ->when($request->input('fuel'), fn ($q, $f) => $q->where('fuel', $f))
             ->when($request->input('transmission'), fn ($q, $tr) => $q->where('transmission', $tr))
             ->when($request->input('doors') !== null && $request->input('doors') !== '', fn ($q, $d) => $q->where('doors', $request->input('doors')))
-            ->when($request->input('color'), fn ($q, $c) => $q->where('color', $c))
+            // El filtro de color recibe la paleta base ("Negro") y debe
+            // encontrar las variantes comerciales ("Negro Deep Black
+            // nacarado"), asi que matchea por prefijo, no por igualdad.
+            ->when($request->input('color'), fn ($q, $c) => $q->where('color', 'like', $c.'%'))
             ->when($request->input('year_min'), fn ($q, $y) => $q->whereRaw('SUBSTRING(year, -4) >= ?', [$y]))
             ->when($request->input('year_max'), fn ($q, $y) => $q->whereRaw('SUBSTRING(year, -4) <= ?', [$y]))
             // "Muy buen precio": antes bastaba con estimated_saving > 0, lo
@@ -170,7 +173,18 @@ class PublicMarketplaceController extends Controller
                     ->pluck('transmission')
                     ->values(),
                 'doors' => $base()->whereNotNull('doors')->distinct()->orderBy('doors')->pluck('doors')->values(),
-                'colors' => $base()->whereNotNull('color')->distinct()->orderBy('color')->pluck('color')->values(),
+                // Colores normalizados a la paleta base (Negro, Blanco,
+                // Azul...). La BD guarda el nombre comercial completo
+                // ("Azul Lapislazuli metalizado (Lapis-Blau)"), inservible
+                // como opcion de filtro.
+                'colors' => $base()
+                    ->whereNotNull('color')
+                    ->pluck('color')
+                    ->map(fn (string $c) => Car::baseColor($c))
+                    ->filter()
+                    ->unique()
+                    ->sort()
+                    ->values(),
             ];
         });
 

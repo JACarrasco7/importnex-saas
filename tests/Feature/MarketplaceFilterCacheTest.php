@@ -245,4 +245,76 @@ class MarketplaceFilterCacheTest extends TestCase
                 ->where('filterCounts.deal', 1)
                 ->where('filterCounts.total', 1));
     }
+
+    public function test_filter_options_normalize_colors_to_the_base_palette(): void
+    {
+        // La BD guarda el nombre comercial completo. Como opcion de filtro
+        // el cliente necesita "Azul", no "Azul Lapislazuli metalizado".
+        $org = Organization::factory()->create(['is_public' => true]);
+        Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+            'color' => 'Azul Lapislázuli metalizado (Lapis-Blau)',
+        ]);
+        Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+            'color' => 'Azul Metálico',
+        ]);
+        Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+            'color' => 'Negro Deep Black nacarado',
+        ]);
+
+        Cache::forget('marketplace.filter_options');
+        $this->get('/marketplace')->assertOk();
+        $options = Cache::get('marketplace.filter_options');
+
+        // Dos variantes de azul -> una sola opcion "Azul".
+        $this->assertSame(['Azul', 'Negro'], $options['colors']->all());
+    }
+
+    public function test_color_filter_matches_all_variants_of_the_base_color(): void
+    {
+        $org = Organization::factory()->create(['is_public' => true]);
+        $blue1 = Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+            'color' => 'Azul Lapislázuli metalizado (Lapis-Blau)',
+        ]);
+        $blue2 = Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+            'color' => 'Azul Metálico',
+        ]);
+        Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+            'color' => 'Negro',
+        ]);
+
+        // sort=oldest para que el orden sea determinista (por defecto es
+        // 'recent', created_at desc, y los factories crean blue2 despues).
+        $response = $this->get('/marketplace?color=Azul&sort=oldest')->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('Public/MarketplaceIndex')
+            ->loadDeferredProps('default', fn ($prop) => $prop
+                ->has('cars.data', 2)
+                ->where('cars.data.0.id', $blue1->id)
+                ->where('cars.data.1.id', $blue2->id))
+        );
+    }
 }

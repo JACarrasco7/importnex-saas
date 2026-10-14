@@ -258,6 +258,50 @@ class Car extends Model
     public const MARKETPLACE_EXCLUDED_STATUSES = ['Delivered', 'Discarded'];
 
     /**
+     * Paleta de colores base para el filtro publico del marketplace.
+     *
+     * La BD guarda el color tal cual lo publica el vendedor aleman, con todo
+     * el nombre comercial: "Azul Lapislazuli metalizado (Lapis-Blau)",
+     * "Negro Deep Black nacarado", "Blanco Oryx metalizado (ORYXWEISS)"...
+     * Mostrar esas 20 variantes como opciones de un <select> es inservible
+     * (nadie busca "Blanco Oryx metalizado"); el cliente busca "Blanco".
+     * El filtro ofrece SOLO estos valores base y la consulta matchea por
+     * prefijo, asi que "Blanco" encuentra las 6 variantes de blanco.
+     */
+    public const COLOR_PALETTE = [
+        'Amarillo', 'Azul', 'Beige', 'Blanco', 'Bronce', 'Dorado', 'Gris',
+        'Granate', 'Marrón', 'Morado', 'Naranja', 'Negro', 'Plata', 'Rojo',
+        'Rosa', 'Verde', 'Violeta',
+    ];
+
+    /**
+     * Normaliza un color libre a su valor base de la paleta.
+     *
+     * Devuelve null si el valor esta vacio o no encaja con ningun color
+     * conocido (asi un valor raro no ensucia el filtro).
+     */
+    public static function baseColor(?string $color): ?string
+    {
+        if (! $color) {
+            return null;
+        }
+
+        // Sin acentos ni mayusculas: "Marron" == "Marrón", "GRIS" == "Gris".
+        $normalized = Str::of($color)->ascii()->lower()->trim()->value();
+
+        foreach (self::COLOR_PALETTE as $base) {
+            $baseNormalized = Str::of($base)->ascii()->lower()->value();
+            // Prefijo (no substring): "Gris Montaña" -> Gris, pero "Negro"
+            // no debe capturar un hipotetico "Negruzco Azul".
+            if (str_starts_with($normalized, $baseNormalized)) {
+                return $base;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Scope: coches publicables en el marketplace público.
      *
      * FUENTE ÚNICA DE VERDAD de la visibilidad pública. La usan los 4 sitios
