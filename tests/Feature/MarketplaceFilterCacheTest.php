@@ -131,4 +131,118 @@ class MarketplaceFilterCacheTest extends TestCase
         $this->assertContains('Mercedes', $options['brands']);
         $this->assertContains('Gasoline', $options['fuels']);
     }
+
+    public function test_filter_options_only_expose_canonical_transmissions(): void
+    {
+        // La BD guarda strings descriptivos ("Automatico DSG de 7 marchas con
+        // levas") que no deben aparecer como opcion del filtro — el cliente
+        // busca "Automatico", no el nombre comercial del cambio.
+        $org = Organization::factory()->create(['is_public' => true]);
+        Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+            'transmission' => 'Automatico DSG de 7 marchas con levas',
+        ]);
+        Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+            'transmission' => 'manual',
+        ]);
+
+        Cache::forget('marketplace.filter_options');
+        $this->get('/marketplace')->assertOk();
+        $options = Cache::get('marketplace.filter_options');
+
+        $this->assertContains('manual', $options['transmissions']);
+        $this->assertNotContains('Automatico DSG de 7 marchas con levas', $options['transmissions']);
+    }
+
+    public function test_filter_counts_are_cached_with_brand_and_deal_totals(): void
+    {
+        // Los chips de marca y el boton "Muy buen precio" muestran cuantos
+        // coches hay en cada uno. Sin estos contadores la UI parece vacia.
+        $org = Organization::factory()->create(['is_public' => true]);
+        Car::factory()->count(2)->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+            'brand' => 'Seat',
+            'estimated_saving' => 200, // por debajo del umbral: NO es oferta
+        ]);
+        Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+            'brand' => 'Kia',
+            'estimated_saving' => 4000, // por encima del umbral: SI es oferta
+        ]);
+
+        Cache::forget('marketplace.filter_counts');
+        $this->get('/marketplace')->assertOk();
+        $counts = Cache::get('marketplace.filter_counts');
+
+        $this->assertIsArray($counts);
+        $this->assertSame(2, $counts['brands']['Seat']);
+        $this->assertSame(1, $counts['brands']['Kia']);
+        $this->assertSame(1, $counts['deal'], 'Solo el coche con ahorro >= 1500 EUR cuenta como oferta');
+        $this->assertSame(3, $counts['total']);
+    }
+
+    public function test_deal_filter_requires_meaningful_saving(): void
+    {
+        // Antes bastaba estimated_saving > 0 (un ahorro de 50 EUR colaba).
+        $org = Organization::factory()->create(['is_public' => true]);
+        $cheapDeal = Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+            'brand' => 'Audi',
+            'estimated_saving' => 100,
+        ]);
+        $realDeal = Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+            'brand' => 'BMW',
+            'estimated_saving' => 3000,
+        ]);
+
+        $response = $this->get('/marketplace?deal=1')->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('Public/MarketplaceIndex')
+            ->loadDeferredProps('default', fn ($prop) => $prop
+                ->has('cars.data', 1)
+                ->where('cars.data.0.id', $realDeal->id))
+        );
+
+        $this->assertDatabaseHas('cars', ['id' => $cheapDeal->id]);
+    }
+
+    public function test_index_passes_filter_counts_to_the_page(): void
+    {
+        $org = Organization::factory()->create(['is_public' => true]);
+        Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+            'brand' => 'Volvo',
+            'estimated_saving' => 2500,
+        ]);
+
+        $this->get('/marketplace')->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Public/MarketplaceIndex')
+                ->where('filterCounts.brands.Volvo', 1)
+                ->where('filterCounts.deal', 1)
+                ->where('filterCounts.total', 1));
+    }
 }

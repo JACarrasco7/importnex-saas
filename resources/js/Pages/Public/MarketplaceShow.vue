@@ -16,7 +16,6 @@ import {
     TruckIcon,
     BanknotesIcon,
     DocumentArrowDownIcon,
-    ExclamationTriangleIcon,
 } from '@heroicons/vue/24/outline';
 import MarketplaceLayout from '@/Layouts/MarketplaceLayout.vue';
 import { useTranslations } from '@/Composables/useTranslations';
@@ -530,26 +529,16 @@ const specItems = computed(() => [
                     </ul>
                 </section>
 
-                <!-- PUNTOS EN CONTRA (transparencia: el cliente decide con info completa) -->
-                <section v-if="car.cons && car.cons.length" class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700 sm:p-8">
-                    <p class="text-[11px] font-bold uppercase tracking-widest text-rose-600 dark:text-rose-400">
-                        {{ t('marketplace_show.section_cons_eyebrow', { default: 'Lo que debes saber' }) }}
-                    </p>
-                    <h2 class="mt-2 text-2xl font-extrabold text-gray-900 dark:text-white sm:text-3xl">
-                        {{ t('marketplace_show.section_cons_title', { default: 'Puntos en contra' }) }}
-                    </h2>
-                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                        {{ t('marketplace_show.section_cons_desc', { default: 'Cosas que debes tener en cuenta antes de decidir. La información completa te ayuda a elegir mejor.' }) }}
-                    </p>
-                    <ul class="mt-4 space-y-2">
-                        <li v-for="(con, i) in car.cons" :key="i" class="flex items-start gap-2 rounded-lg border border-rose-200 bg-rose-50 p-3 dark:border-rose-800/50 dark:bg-rose-900/20">
-                            <ExclamationTriangleIcon class="mt-0.5 h-5 w-5 shrink-0 text-rose-600 dark:text-rose-400" />
-                            <p class="flex-1 text-sm text-gray-900 dark:text-gray-200">
-                                {{ typeof con === 'string' ? con : con.text }}
-                            </p>
-                        </li>
-                    </ul>
-                </section>
+                <!-- PUNTOS EN CONTRA: NO se muestran al cliente (decision
+                     14-oct-2026). El bloque `cons` de la BD son notas de
+                     investigacion internas (VIN no publicado, condiciones
+                     de garantia, color menos vistoso en redes...) — al
+                     cliente no le aportan y ensucian la ficha publica.
+                     El admin sigue viendolos en Cars/Show. Si algun dia
+                     queremos mostrar contras reales al cliente, hay que
+                     crear un campo dedicado (p. ej. `cons_public`) con
+                     contenido escrito PARA el cliente, no reutilizar
+                     `cons`. -->
 
                 <!-- FICHA TECNICA -->
                 <section v-if="specItems.some((s) => s.value)" id="detalles" class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700 sm:p-8">

@@ -580,11 +580,13 @@ class MarketplaceEnhancementsTest extends TestCase
         }
     }
 
-    public function test_public_marketplace_shows_pros_and_cons_to_clients(): void
+    public function test_public_marketplace_shows_pros_but_not_cons_to_clients(): void
     {
-        // Política 13-oct-2026: la ficha pública muestra pros Y cons
-        // para que el cliente decida con información completa. Sólo los
-        // campos admin (verdict, red_flags, research...) se filtran.
+        // Politica 14-oct-2026: la ficha publica muestra SOLO los pros.
+        // Los cons son notas de investigacion internas ("Sin VIN publicado:
+        // recalls pendientes", "Condiciones de garantia solo como
+        // declaracion del anuncio") — al cliente no le aportan y ensucian
+        // la ficha. El admin sigue viendolos en Cars/Show.
         $org = Organization::factory()->create(['is_public' => true, 'slug' => 't']);
         $car = Car::factory()->create([
             'organization_id' => $org->id,
@@ -595,34 +597,34 @@ class MarketplaceEnhancementsTest extends TestCase
                 'Único propietario',
             ],
             'cons' => [
-                'Kilometraje alto para su año',
-                'Llantas con pequeños arañazos',
+                'Sin VIN publicado: recalls pendientes',
+                'Color negro menos vistoso en redes',
             ],
         ]);
 
-        // 1) La ficha /marketplace/{id} incluye pros y cons en el payload.
+        // 1) La ficha /marketplace/{id} incluye pros pero NO cons.
         $response = $this->get("/marketplace/{$car->id}")->assertOk();
         $body = $response->getContent();
         $this->assertStringContainsString('"pros":', $body);
-        $this->assertStringContainsString('"cons":', $body);
+        $this->assertStringNotContainsString('"cons":', $body);
         $this->assertStringContainsString(
             'Libro de mantenimiento completo',
             $body,
             'La ficha pública muestra los pros al cliente'
         );
-        $this->assertStringContainsString(
-            'Kilometraje alto para su',
+        $this->assertStringNotContainsString(
+            'Sin VIN publicado',
             $body,
-            'La ficha pública muestra los cons al cliente (transparencia)'
+            'La ficha pública NO debe mostrar los cons (notas internas)'
         );
 
-        // 2) El perfil público /p/{token} también los muestra.
+        // 2) El perfil público /p/{token} tampoco los muestra.
         $link = CarPublicLink::generateFor($car);
         $profileResponse = $this->get("/p/{$link->token}")->assertOk();
         $profileBody = $profileResponse->getContent();
         $this->assertStringContainsString('"pros":', $profileBody);
-        $this->assertStringContainsString('"cons":', $profileBody);
-        $this->assertStringContainsString('Llantas con peque', $profileBody);
+        $this->assertStringNotContainsString('"cons":', $profileBody);
+        $this->assertStringNotContainsString('Color negro menos vistoso', $profileBody);
     }
 
     public function test_public_marketplace_exposes_whatsapp_number_for_contextual_cta(): void

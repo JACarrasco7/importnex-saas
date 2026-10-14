@@ -22,6 +22,19 @@ class CarObserver
         'market_avg', 'co2', 'manual_tax_base', 'new_price', 'boe_confirmed',
     ];
 
+    /**
+     * Invalida las cachés que dependen del inventario publico del marketplace.
+     * Centralizado para que al anadir una clave nueva (p. ej. filter_counts)
+     * no haya que tocar los 4 sitios donde se publica/despublica un coche.
+     */
+    private function flushMarketplaceCaches(): void
+    {
+        SitemapController::flush();
+        Cache::forget('marketplace.filter_options');
+        Cache::forget('marketplace.filter_counts');
+        Cache::forget('marketplace.filter_bounds');
+    }
+
     public function saving(Car $car): void
     {
         if (! $this->shouldRecalculateTrafficLight($car)) {
@@ -47,11 +60,16 @@ class CarObserver
         // verdict (un coche que pasa a Delivered/Discarded debe desaparecer
         // del catalogo publico). Tambien se invalida el sitemap por la misma
         // razon.
-        $marketplaceRelevant = collect(['is_marketplace', 'status', 'verdict', 'purchase_price', 'sale_price'])
+        $marketplaceRelevant = collect([
+            'is_marketplace', 'status', 'verdict', 'purchase_price', 'sale_price',
+            // filter_counts depende de brand y estimated_saving (chips de
+            // marca + boton "Muy buen precio"); sin esto, los contadores
+            // se quedaban obsoletos hasta 30 min.
+            'brand', 'estimated_saving', 'market_avg',
+        ])
             ->contains(fn ($f) => $car->isDirty($f));
         if ($marketplaceRelevant) {
-            SitemapController::flush();
-            Cache::forget('marketplace.filter_options');
+            $this->flushMarketplaceCaches();
         }
     }
 
@@ -61,8 +79,7 @@ class CarObserver
         $this->seedDocuments($car);
 
         if ($car->is_marketplace) {
-            SitemapController::flush();
-            Cache::forget('marketplace.filter_options');
+            $this->flushMarketplaceCaches();
 
             // Generar link público automáticamente si el coche nace ya publicado.
             if ($car->activePublicLink() === null) {
@@ -74,8 +91,7 @@ class CarObserver
     public function updated(Car $car): void
     {
         if ($car->wasChanged('is_marketplace')) {
-            SitemapController::flush();
-            Cache::forget('marketplace.filter_options');
+            $this->flushMarketplaceCaches();
 
             // Cuando el coche se publica al marketplace por primera vez,
             // generamos automáticamente un link público (token) para que
@@ -90,8 +106,7 @@ class CarObserver
     public function deleted(Car $car): void
     {
         if ($car->is_marketplace) {
-            SitemapController::flush();
-            Cache::forget('marketplace.filter_options');
+            $this->flushMarketplaceCaches();
         }
     }
 

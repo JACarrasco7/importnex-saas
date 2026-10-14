@@ -24,6 +24,14 @@ class PublicMarketplaceController extends Controller
     private const WHATSAPP_NUMBER = '34675701439';
 
     /**
+     * Ahorro minimo (EUR) para que un coche cuente como "muy buen precio"
+     * en el filtro rapido del marketplace. Antes bastaba con ahorro > 0,
+     * que metia coches con 50 EUR de ahorro — el filtro no significaba
+     * nada. 1.500 EUR es un ahorro que el cliente percibe de verdad.
+     */
+    private const DEAL_MIN_SAVING = 1500;
+
+    /**
      * Opciones de ordenación permitidas para el listado público.
      * Cada valor es [columna, dirección]; 'recent' usa created_at + id
      * para tener un orden determinista en imports en lote.
@@ -109,7 +117,11 @@ class PublicMarketplaceController extends Controller
             ->when($request->input('color'), fn ($q, $c) => $q->where('color', $c))
             ->when($request->input('year_min'), fn ($q, $y) => $q->whereRaw('SUBSTRING(year, -4) >= ?', [$y]))
             ->when($request->input('year_max'), fn ($q, $y) => $q->whereRaw('SUBSTRING(year, -4) <= ?', [$y]))
-            ->when($deal, fn ($q) => $q->where('estimated_saving', '>', 0));
+            // "Muy buen precio": antes bastaba con estimated_saving > 0, lo
+            // que metia coches que ahorraban 50 EUR. Ahora exigimos un
+            // ahorro real (>= DEAL_MIN_SAVING) para que el filtro sea util
+            // y signifique algo.
+            ->when($deal, fn ($q) => $q->where('estimated_saving', '>=', self::DEAL_MIN_SAVING));
         foreach (self::SORT_OPTIONS[$sort] as [$column, $direction]) {
             $cars->orderBy($column, $direction);
         }
@@ -162,6 +174,25 @@ class PublicMarketplaceController extends Controller
             ];
         });
 
+        // Contadores para la UI de filtros: cuantos coches hay por marca y
+        // cuantos entran en "Muy buen precio". Se muestran en los chips
+        // para que el cliente vea de un vistazo donde hay stock (antes el
+        // chip de marca no tenia numero y el boton de oferta parecia vacio).
+        $filterCounts = Cache::remember('marketplace.filter_counts', 1800, function () {
+            $base = fn () => Car::query()->publicMarketplace();
+
+            return [
+                'brands' => $base()
+                    ->selectRaw('brand, COUNT(*) as total')
+                    ->groupBy('brand')
+                    ->orderByDesc('total')
+                    ->pluck('total', 'brand')
+                    ->all(),
+                'deal' => $base()->where('estimated_saving', '>=', self::DEAL_MIN_SAVING)->count(),
+                'total' => $base()->count(),
+            ];
+        });
+
         // Bounds para los inputs de precio/año (usados por el frontend en
         // los atributos min/max de los <input type="number">).
         $filterBounds = Cache::remember('marketplace.filter_bounds', 1800, function () {
@@ -185,6 +216,7 @@ class PublicMarketplaceController extends Controller
             'lights' => $lights,
             'filterOptions' => $filterOptions,
             'filterBounds' => $filterBounds,
+            'filterCounts' => $filterCounts,
             'requestUrl' => $requestUrl,
             'sort' => $sort,
             'sortOptions' => array_keys(self::SORT_OPTIONS),
@@ -422,13 +454,15 @@ class PublicMarketplaceController extends Controller
      *  - notes: notas internas del operador
      *  - red_flags, research, tips, valuation internals
      *  - busquedas_realizadas, ai_analysis_json, etc.
-     *
-     * NOTA: `cons` (contras/puntos debiles del coche) SÍ se envia al
-     * cliente. La politica de "el cliente solo ve lo bueno" cambio:
-     * 13-oct-2026 el usuario decidio que la ficha publica debe mostrar
-     * lo bueno Y lo malo. El cliente es adulto y decide con informacion
-     * completa. Los admins siguen viendo TODO (verdict, red_flags, etc.)
-     * en Cars/Index. (ver #4)
+     *  - cons: contras de investigacion interna. Se enviaron un momento
+     *    (13-oct-2026) por una decision de "transparencia total", pero
+     *    el contenido real es admin-only ("Sin VIN publicado: recalls
+     *    pendientes", "Condiciones de garantia solo como declaracion
+     *    del anuncio", "Color negro menos vistoso en redes") — al
+     *    cliente no le aporta y ensucia la ficha publica. Vuelto a
+     *    filtrar el 14-oct-2026 tras feedback del usuario. Si algun dia
+     *    hace falta mostrar contras al cliente, crear un campo nuevo
+     *    `cons_public` escrito PARA el cliente. (ver #6)
      *
      * Devuelve un array asociativo (no el modelo) para que Inertia no incluya
      * accidentalmente campos que se hayan añadido al fillable en el futuro.
@@ -443,7 +477,7 @@ class PublicMarketplaceController extends Controller
         //    ("Comprar con confianza baja (cobertura parcial 2/7)", etc.)
         //  - verdict_reasoning, verdict_changes: valoracion interna
         //  - traffic_light: semaforo admin
-        //  - notes, red_flags, research, tips: info admin
+        //  - notes, red_flags, research, tips, cons: info admin
         //  - vin, lat, lng: el VIN NO debe ser publico, las coords son
         //    para el admin y la ficha de tracking (privada)
         //  - busquedas_realizadas, ai_analysis_json: debug
@@ -456,7 +490,7 @@ class PublicMarketplaceController extends Controller
             'itv_date', 'pais_origen', 'purchase_price', 'new_price',
             'transport', 'itv_fee', 'coc_fee', 'dgt_fees', 'professional_fees',
             'deposit', 'city', 'status',
-            'description', 'equipment', 'pros', 'cons', 'is_marketplace',
+            'description', 'equipment', 'pros', 'is_marketplace',
             'marketplace_views', 'marketplace_checked_at', 'marketplace_unavailable_reason',
             'market_avg', 'market_min', 'market_max', 'estimated_saving',
             'expected_delivery_date',

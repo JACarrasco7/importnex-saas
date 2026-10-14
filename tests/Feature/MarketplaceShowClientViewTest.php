@@ -11,9 +11,9 @@ use Tests\TestCase;
 /**
  * Tests de la ficha publica despues del refactor 12-oct-2026:
  *  - La valoracion (verdict_reasoning) NO se muestra al cliente.
- *  - Los contras (cons) SI se muestran (decision 13-oct-2026: el cliente
- *    es adulto y decide con informacion completa — solo filtramos lo
- *    que es ruido de proceso interno, no lo que afecta a la compra).
+ *  - Los contras (cons) tampoco: son notas de investigacion internas
+ *    (decision 14-oct-2026; el 13-oct se mostraron un momento y se
+ *    revirtio tras feedback del usuario).
  *  - Notas, import progress, 9 research aspects tampoco.
  *  - El costBreakdown llega como prop Inertia con los honorarios correctos.
  */
@@ -48,15 +48,16 @@ class MarketplaceShowClientViewTest extends TestCase
             ->missing('car.verdict_reasoning'));
     }
 
-    public function test_cons_are_exposed_in_inertia_so_client_decides_with_full_info(): void
+    public function test_cons_are_not_exposed_in_inertia(): void
     {
-        // 13-oct-2026: el cliente ve pros Y cons. Es lo que el usuario pidio
-        // explícitamente. El admin sigue viendo TODO (verdict, red_flags,
-        // notes, etc.) en Cars/Index, pero la ficha publica muestra lo que
-        // afecta a la decisión de compra.
+        // 14-oct-2026: el bloque `cons` son notas de investigacion internas
+        // ("Sin VIN publicado: recalls pendientes", "Condiciones de garantia
+        // solo como declaracion del anuncio", "Color negro menos vistoso en
+        // redes"). Al cliente no le aportan y ensucian la ficha publica.
+        // El admin sigue viendolos en Cars/Show.
         $car = $this->makeCar([
             'pros' => [['text' => 'Buen estado', 'weight' => 'high']],
-            'cons' => [['text' => 'Pintura desgastada', 'weight' => 'medium']],
+            'cons' => [['text' => 'Sin VIN publicado: recalls pendientes', 'weight' => 'medium']],
         ]);
 
         $response = $this->get('/marketplace/'.$car->id);
@@ -64,7 +65,7 @@ class MarketplaceShowClientViewTest extends TestCase
         $response->assertInertia(fn ($page) => $page
             ->component('Public/MarketplaceShow')
             ->has('car.pros')
-            ->has('car.cons'));
+            ->missing('car.cons'));
     }
 
     public function test_verdict_and_traffic_light_no_t_exposed_in_inertia(): void

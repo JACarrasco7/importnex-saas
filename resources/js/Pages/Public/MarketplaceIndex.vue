@@ -42,6 +42,7 @@ const props = defineProps({
     sortOptions: { type: Array, default: () => ['recent', 'oldest', 'price_asc', 'price_desc', 'mileage_asc', 'mileage_desc'] },
     filterBounds: { type: Object, default: () => ({ price: { min: 0, max: 9999999 }, year: { min: 1900, max: new Date().getFullYear() + 1 } }) },
     filterOptions: { type: Object, default: () => ({ fuels: [], transmissions: [], doors: [], colors: [] }) },
+    filterCounts: { type: Object, default: () => ({ brands: {}, deal: 0, total: 0 }) },
     visitsCount: { type: Number, default: 0 },
 });
 
@@ -148,14 +149,45 @@ watch([search, brandFilter, dealFilter, minPrice, maxPrice, mileageFilter, fuelF
     filterTimer = setTimeout(applyFilters, 300);
 }, { flush: 'post' });
 
-// Marcas disponibles en el catálogo actual
+// Marcas disponibles en el catálogo. Usa filterOptions del servidor (TODAS
+// las marcas publicadas), no las del dataset actual: con el filtrado
+// server-side, derivarlas de safeCars.data hacia que al filtrar por una
+// marca desaparecieran los chips de las demás y no se pudiera cambiar de
+// marca sin recargar. Ordenadas por numero de coches (las que tienen stock
+// primero) usando filterCounts. (ver #5)
 const brands = computed(() => {
-    // Marcas disponibles en el catálogo (sin filtrar). El server ya filtra por
-    // brand, pero las queremos en el filtro chip de "todas las marcas" para
-    // que el usuario pueda cambiarlas sin perder selección.
-    const set = new Set();
-    safeCars.value.data.forEach(c => { if (c.brand) set.add(c.brand); });
-    return [...set].sort();
+    const counts = props.filterCounts?.brands || {};
+    const list = props.filterOptions?.brands || [];
+    return [...list].sort((a, b) => (counts[b] || 0) - (counts[a] || 0));
+});
+
+// Cuantos coches tiene cada marca / cuantos son "muy buen precio".
+const brandCount = (brand) => props.filterCounts?.brands?.[brand] ?? 0;
+const dealCount = computed(() => props.filterCounts?.deal ?? 0);
+const totalCount = computed(() => props.filterCounts?.total ?? safeCars.value.total ?? 0);
+
+// Resumen legible de los filtros activos (chips removibles encima del grid).
+// Ayuda al cliente a entender por que ve pocos coches y a limpiarlos de uno
+// en uno sin abrir el formulario completo.
+const activeFilterChips = computed(() => {
+    const chips = [];
+    if (search.value) chips.push({ key: 'search', label: `“${search.value}”`, clear: () => { search.value = ''; } });
+    if (brandFilter.value) chips.push({ key: 'brand', label: brandFilter.value, clear: () => { brandFilter.value = ''; } });
+    if (dealFilter.value) chips.push({ key: 'deal', label: t('marketplace.filter_good_deal'), clear: () => { dealFilter.value = false; } });
+    if (minPrice.value || maxPrice.value) {
+        const label = minPrice.value && maxPrice.value
+            ? `${currency(minPrice.value)} – ${currency(maxPrice.value)}`
+            : minPrice.value
+                ? `≥ ${currency(minPrice.value)}`
+                : `≤ ${currency(maxPrice.value)}`;
+        chips.push({ key: 'price', label, clear: () => { minPrice.value = ''; maxPrice.value = ''; } });
+    }
+    if (mileageFilter.value) chips.push({ key: 'mileage', label: `≤ ${Number(mileageFilter.value).toLocaleString('es-ES')} km`, clear: () => { mileageFilter.value = ''; } });
+    if (fuelFilter.value) chips.push({ key: 'fuel', label: t('cars.fuel_options.' + fuelFilter.value.toLowerCase(), {}, fuelFilter.value), clear: () => { fuelFilter.value = ''; } });
+    if (transmissionFilter.value) chips.push({ key: 'transmission', label: t('cars.transmission_options.' + transmissionFilter.value.toLowerCase(), {}, transmissionFilter.value), clear: () => { transmissionFilter.value = ''; } });
+    if (doorsFilter.value) chips.push({ key: 'doors', label: `${doorsFilter.value} ${t('marketplace.filter_doors_short', { default: 'puertas' })}`, clear: () => { doorsFilter.value = ''; } });
+    if (colorFilter.value) chips.push({ key: 'color', label: colorFilter.value, clear: () => { colorFilter.value = ''; } });
+    return chips;
 });
 
 // El backend ya aplica todos los filtros sobre la consulta paginada.
@@ -283,8 +315,22 @@ onMounted(() => {
                         </a>
                     </div>
 
-                    <!-- Stats strip -->
-                    <div class="mt-12 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    <!-- Stats strip: el primer dato es dinamico (coches
+                         disponibles ahora mismo) para que la home no parezca
+                         estatica y transmita stock real. -->
+                    <div class="mt-12 grid grid-cols-2 gap-3 lg:grid-cols-4">
+                        <div class="flex items-center gap-3 rounded-2xl bg-white/80 px-4 py-4 text-left shadow-sm ring-1 ring-estoril-200 backdrop-blur dark:bg-asphalt-800/80 dark:ring-asphalt-600">
+                            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-estoril-800 shadow-md shadow-estoril-800/30">
+                                <TruckIcon class="h-6 w-6 text-white" />
+                            </div>
+                            <div>
+                                <p class="text-2xl font-extrabold text-estoril-800 dark:text-estoril-300">
+                                    <span v-if="isCarsLoading" class="inline-block h-7 w-8 animate-pulse rounded bg-estoril-200/70 align-middle dark:bg-asphalt-700"></span>
+                                    <span v-else>{{ totalCount }}</span>
+                                </p>
+                                <p class="text-xs font-medium text-gray-600 dark:text-gray-400">{{ t('marketplace.stat_available', { default: 'vehículos disponibles' }) }}</p>
+                            </div>
+                        </div>
                         <div class="flex items-center gap-3 rounded-2xl bg-white/80 px-4 py-4 text-left shadow-sm ring-1 ring-estoril-200 backdrop-blur dark:bg-asphalt-800/80 dark:ring-asphalt-600">
                             <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-estoril-600 shadow-md shadow-estoril-600/30">
                                 <ShieldCheckIcon class="h-6 w-6 text-white" />
@@ -305,10 +351,9 @@ onMounted(() => {
                         </div>
                         <div class="flex items-center gap-3 rounded-2xl bg-white/80 px-4 py-4 text-left shadow-sm ring-1 ring-estoril-200 backdrop-blur dark:bg-asphalt-800/80 dark:ring-asphalt-600">
                             <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-asphalt-700 shadow-md shadow-asphalt-700/30">
-                                <TruckIcon class="h-6 w-6 text-white" />
+                                <span class="text-lg">🇪🇸</span>
                             </div>
                             <div>
-                                <p class="text-2xl font-extrabold text-estoril-800 dark:text-estoril-300">🇪🇸</p>
                                 <p class="text-xs font-medium text-gray-600 dark:text-gray-400">{{ t('marketplace.stat_import') }}</p>
                             </div>
                         </div>
@@ -408,7 +453,7 @@ onMounted(() => {
                         <label class="mb-1.5 block text-xs font-semibold text-gray-700 dark:text-gray-300">{{ t('marketplace.filter_transmission', 'Cambio') }}</label>
                         <select v-model="transmissionFilter" class="block w-full rounded-lg border-gray-200 text-sm focus:border-estoril-600 focus:ring-estoril-600 dark:border-asphalt-600 dark:bg-asphalt-800 dark:text-white">
                             <option value="">{{ t('marketplace.filter_all', 'Todos') }}</option>
-                            <option v-for="tr in props.filterOptions.transmissions" :key="tr" :value="tr">{{ tr }}</option>
+                            <option v-for="tr in props.filterOptions.transmissions" :key="tr" :value="tr">{{ t('cars.transmission_options.' + tr.toLowerCase(), {}, tr) }}</option>
                         </select>
                     </div>
                     <div class="lg:col-span-1">
@@ -445,17 +490,25 @@ onMounted(() => {
                         :key="b"
                         @click="brandFilter = brandFilter === b ? '' : b"
                         :class="[
-                            'rounded-full px-4 py-2 text-sm font-medium transition',
+                            'inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition',
                             brandFilter === b
                                 ? 'bg-estoril-700 text-white shadow-sm'
                                 : 'bg-white text-gray-700 ring-1 ring-gray-200 hover:bg-estoril-50 hover:text-estoril-700 dark:bg-asphalt-800 dark:text-gray-300 dark:ring-asphalt-600 dark:hover:bg-asphalt-700',
                         ]"
                     >
                         {{ b }}
+                        <span
+                            v-if="brandCount(b)"
+                            :class="[
+                                'rounded-full px-1.5 py-0.5 text-[10px] font-bold leading-none',
+                                brandFilter === b ? 'bg-white/25 text-white' : 'bg-gray-100 text-gray-500 dark:bg-asphalt-700 dark:text-gray-400',
+                            ]"
+                        >{{ brandCount(b) }}</span>
                     </button>
                     <span class="mx-1 hidden h-5 w-px bg-gray-300 dark:bg-asphalt-600 sm:block"></span>
                     <button
                         @click="dealFilter = !dealFilter"
+                        :title="t('marketplace.filter_good_deal_hint', { amount: currency(1500), default: 'Coches con al menos :amount de ahorro frente al mercado' })"
                         :class="[
                             'inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition',
                             dealFilter
@@ -465,6 +518,38 @@ onMounted(() => {
                     >
                         <SparklesIcon class="h-4 w-4" />
                         {{ t('marketplace.filter_good_deal') }}
+                        <span
+                            v-if="dealCount"
+                            :class="[
+                                'rounded-full px-1.5 py-0.5 text-[10px] font-bold leading-none',
+                                dealFilter ? 'bg-white/25 text-white' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300',
+                            ]"
+                        >{{ dealCount }}</span>
+                    </button>
+                </div>
+
+                <!-- Chips de filtros activos: resumen + quitar de uno en uno.
+                     Solo aparece si hay algun filtro, para no ensuciar la vista. -->
+                <div v-if="activeFilterChips.length" class="flex flex-wrap items-center gap-2">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                        {{ t('marketplace.active_filters', { default: 'Filtros activos' }) }}
+                    </span>
+                    <button
+                        v-for="chip in activeFilterChips"
+                        :key="chip.key"
+                        type="button"
+                        @click="chip.clear()"
+                        class="inline-flex items-center gap-1 rounded-full bg-estoril-50 px-3 py-1 text-xs font-semibold text-estoril-700 ring-1 ring-estoril-200 transition hover:bg-estoril-100 dark:bg-estoril-900/30 dark:text-estoril-300 dark:ring-estoril-800"
+                    >
+                        {{ chip.label }}
+                        <XMarkIcon class="h-3 w-3" />
+                    </button>
+                    <button
+                        type="button"
+                        @click="resetFilters"
+                        class="text-xs font-semibold text-gray-500 underline decoration-dotted underline-offset-2 hover:text-estoril-700 dark:text-gray-400 dark:hover:text-estoril-300"
+                    >
+                        {{ t('marketplace.clear_all', { default: 'Limpiar todo' }) }}
                     </button>
                 </div>
 
@@ -584,6 +669,13 @@ onMounted(() => {
                 </div>
 
                 <!-- Empty state: diferenciar "no hay coches" vs "no hay matches con los filtros" -->
+                <!-- Empty states. IMPORTANTE: estas ramas forman una cadena
+                     v-if/v-else-if que SOLO se evalua cuando NO hay coches
+                     que mostrar. Antes eran un v-if independiente del grid,
+                     asi que con 29 coches cargados + 0 filtros activos la
+                     rama v-else se pintaba igualmente debajo del listado
+                     ("No hay vehiculos disponibles ahora mismo" con 29
+                     coches en pantalla). -->
                 <div v-if="isCarsLoading" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true" :aria-label="t('common.loading', 'Cargando...')">
                     <div v-for="i in 6" :key="i" class="animate-pulse overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700">
                         <div class="aspect-[16/10] bg-gray-200 dark:bg-asphalt-700"></div>
@@ -594,7 +686,7 @@ onMounted(() => {
                         </div>
                     </div>
                 </div>
-                <div v-else-if="hasActiveFilters" class="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 p-12 text-center dark:border-asphalt-700 dark:bg-asphalt-800">
+                <div v-else-if="filteredCars.length === 0 && hasActiveFilters" class="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 p-12 text-center dark:border-asphalt-700 dark:bg-asphalt-800">
                     <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/40">
                         <SparklesIcon class="h-8 w-8 text-amber-600 dark:text-amber-300" />
                     </div>
@@ -609,7 +701,7 @@ onMounted(() => {
                         {{ t('common.reset_filters') }}
                     </button>
                 </div>
-                <div v-else class="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 p-12 text-center dark:border-asphalt-700 dark:bg-asphalt-800">
+                <div v-else-if="filteredCars.length === 0" class="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 p-12 text-center dark:border-asphalt-700 dark:bg-asphalt-800">
                     <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-estoril-100 dark:bg-estoril-900/40">
                         <SparklesIcon class="h-8 w-8 text-estoril-700 dark:text-estoril-300" />
                     </div>
