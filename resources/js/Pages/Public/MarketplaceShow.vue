@@ -15,7 +15,6 @@ import {
     CheckBadgeIcon,
     TruckIcon,
     BanknotesIcon,
-    EnvelopeIcon,
     DocumentArrowDownIcon,
     ExclamationTriangleIcon,
 } from '@heroicons/vue/24/outline';
@@ -214,12 +213,6 @@ const includeItems = computed(() => [
     t('dossier.include_history'),
     t('dossier.include_delivery'),
 ]);
-const noIncludeItems = computed(() => [
-    t('dossier.no_include_insurance'),
-    t('dossier.no_include_tax'),
-    t('dossier.no_include_maintenance'),
-    t('dossier.no_include_warranty'),
-]);
 
 // Estado del semaforo (visible en la barra lateral del hero).
 // Solo el cliente lo ve asi; internamente el estado se llama "Located"
@@ -395,14 +388,6 @@ const specItems = computed(() => [
                             <ChatBubbleLeftRightIcon class="h-4 w-4" />
                             {{ t('marketplace_show.cta_whatsapp', { default: 'Hablar por WhatsApp' }) }}
                         </a>
-                        <a
-                            v-if="requestUrl"
-                            :href="requestUrl"
-                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-white/30 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-white/20"
-                        >
-                            <EnvelopeIcon class="h-4 w-4" />
-                            {{ t('marketplace_show.cta_request_form', { default: 'Pedir busqueda similar' }) }}
-                        </a>
                     </div>
                 </section>
 
@@ -480,32 +465,18 @@ const specItems = computed(() => [
                     </div>
                 </section>
 
-                <!-- INCLUIDO / NO INCLUIDO -->
-                <section class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div class="rounded-2xl bg-gradient-to-br from-emerald-50 to-white p-6 ring-1 ring-emerald-200 dark:from-emerald-900/20 dark:to-asphalt-800 dark:ring-emerald-800">
-                        <h3 class="flex items-center gap-2 text-base font-bold text-emerald-700 dark:text-emerald-300">
-                            <CheckCircleIcon class="h-5 w-5" />
-                            {{ t('dossier.section_included', { default: 'Incluido en el precio' }) }}
-                        </h3>
-                        <ul class="mt-3 space-y-2">
-                            <li v-for="(item, i) in includeItems" :key="i" class="flex items-start gap-2 text-sm text-gray-800 dark:text-gray-200">
-                                <span class="mt-0.5 text-emerald-600 dark:text-emerald-400">&#10003;</span>
-                                <span>{{ item }}</span>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="rounded-2xl bg-gradient-to-br from-gray-50 to-white p-6 ring-1 ring-gray-200 dark:from-asphalt-800/60 dark:to-asphalt-800 dark:ring-asphalt-700">
-                        <h3 class="flex items-center gap-2 text-base font-bold text-gray-700 dark:text-gray-300">
-                            <span class="text-lg">&#8722;</span>
-                            {{ t('dossier.section_not_included', { default: 'No incluido' }) }}
-                        </h3>
-                        <ul class="mt-3 space-y-2">
-                            <li v-for="(item, i) in noIncludeItems" :key="i" class="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400">
-                                <span class="mt-0.5 text-gray-400">&#8722;</span>
-                                <span>{{ item }}</span>
-                            </li>
-                        </ul>
-                    </div>
+                <!-- INCLUIDO EN EL PRECIO (no mostramos lo NO incluido, ya se habla con el cliente) -->
+                <section v-if="includeItems && includeItems.length" class="rounded-2xl bg-gradient-to-br from-emerald-50 to-white p-6 ring-1 ring-emerald-200 dark:from-emerald-900/20 dark:to-asphalt-800 dark:ring-emerald-800">
+                    <h3 class="flex items-center gap-2 text-base font-bold text-emerald-700 dark:text-emerald-300">
+                        <CheckCircleIcon class="h-5 w-5" />
+                        {{ t('dossier.section_included', { default: 'Incluido en el precio' }) }}
+                    </h3>
+                    <ul class="mt-3 space-y-2">
+                        <li v-for="(item, i) in includeItems" :key="i" class="flex items-start gap-2 text-sm text-gray-800 dark:text-gray-200">
+                            <span class="mt-0.5 text-emerald-600 dark:text-emerald-400">&#10003;</span>
+                            <span>{{ item }}</span>
+                        </li>
+                    </ul>
                 </section>
 
                 <!-- MERCADO -->
