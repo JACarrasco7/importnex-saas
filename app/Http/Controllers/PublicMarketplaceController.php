@@ -40,11 +40,11 @@ class PublicMarketplaceController extends Controller
      *    (`_V4` -> `_V5`) sin tener que esperar los 30 min de TTL ni tocar
      *    los tests, y CarObserver invalide siempre la clave correcta.
      */
-    public const CACHE_KEY_FILTER_OPTIONS = 'marketplace.filter_options.v4';
+    public const CACHE_KEY_FILTER_OPTIONS = 'marketplace.filter_options.v5';
 
-    public const CACHE_KEY_FILTER_COUNTS = 'marketplace.filter_counts.v4';
+    public const CACHE_KEY_FILTER_COUNTS = 'marketplace.filter_counts.v5';
 
-    public const CACHE_KEY_FILTER_BOUNDS = 'marketplace.filter_bounds.v4';
+    public const CACHE_KEY_FILTER_BOUNDS = 'marketplace.filter_bounds.v5';
 
     /** TTL de las caches de filtros (segundos). */
     private const FILTER_CACHE_TTL = 1800;
@@ -138,11 +138,23 @@ class PublicMarketplaceController extends Controller
             ->when($request->input('color'), fn ($q, $c) => $q->where('color', 'like', $c.'%'))
             ->when($request->input('year_min'), fn ($q, $y) => $q->whereRaw('SUBSTRING(year, -4) >= ?', [$y]))
             ->when($request->input('year_max'), fn ($q, $y) => $q->whereRaw('SUBSTRING(year, -4) <= ?', [$y]))
-            // "Muy buen precio": antes bastaba con estimated_saving > 0, lo
-            // que metia coches que ahorraban 50 EUR. Ahora exigimos un
-            // ahorro real (>= DEAL_MIN_SAVING) para que el filtro sea util
-            // y signifique algo.
-            ->when($deal, fn ($q) => $q->where('estimated_saving', '>=', self::DEAL_MIN_SAVING));
+            // "Muy buen precio": el campo `estimated_saving` a veces esta
+            // en 0/null aunque la ficha del coche diga "Ahorra 5.000 EUR"
+            // (el ahorro nominal se calcula despues y se escribe en el
+            // bullet de pros, no en la columna). Para no dejar fuera esos
+            // coches, el filtro es la UNION de dos senales:
+            //  a) estimated_saving >= 1500 (campo estructurado)
+            //  b) purchase_price < market_avg - 1500 (al menos 1.500 EUR
+            //     POR DEBAJO del precio medio del mercado, con datos de
+            //     comparables)
+            // Asi el filtro es estable aunque el campo estructurado este
+            // vacio. (ver #7)
+            ->when($deal, function ($q) {
+                $q->where(function ($sub) {
+                    $sub->where('estimated_saving', '>=', self::DEAL_MIN_SAVING)
+                        ->orWhereRaw('(market_avg IS NOT NULL AND market_avg > 0 AND purchase_price <= (market_avg - ?))', [self::DEAL_MIN_SAVING]);
+                });
+            });
         foreach (self::SORT_OPTIONS[$sort] as [$column, $direction]) {
             $cars->orderBy($column, $direction);
         }
@@ -220,7 +232,13 @@ class PublicMarketplaceController extends Controller
                     ->orderByDesc('total')
                     ->pluck('total', 'brand')
                     ->all(),
-                'deal' => $base()->where('estimated_saving', '>=', self::DEAL_MIN_SAVING)->count(),
+                // Ver la nota de `index()` sobre los dos senales.
+                'deal' => $base()
+                    ->where(function ($q) {
+                        $q->where('estimated_saving', '>=', self::DEAL_MIN_SAVING)
+                            ->orWhereRaw('(market_avg IS NOT NULL AND market_avg > 0 AND purchase_price <= (market_avg - ?))', [self::DEAL_MIN_SAVING]);
+                    })
+                    ->count(),
                 'total' => $base()->count(),
             ];
         });

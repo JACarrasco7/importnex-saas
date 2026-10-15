@@ -174,6 +174,8 @@ class MarketplaceFilterCacheTest extends TestCase
             'verdict' => 'Buy',
             'brand' => 'Seat',
             'estimated_saving' => 200, // por debajo del umbral: NO es oferta
+            'market_avg' => 30000,
+            'purchase_price' => 29900, // 30k - 100 = 100 EUR por debajo, NO es oferta
         ]);
         Car::factory()->create([
             'organization_id' => $org->id,
@@ -182,6 +184,8 @@ class MarketplaceFilterCacheTest extends TestCase
             'verdict' => 'Buy',
             'brand' => 'Kia',
             'estimated_saving' => 4000, // por encima del umbral: SI es oferta
+            'market_avg' => 30000,
+            'purchase_price' => 26000,
         ]);
 
         Cache::forget(PublicMarketplaceController::CACHE_KEY_FILTER_COUNTS);
@@ -195,9 +199,46 @@ class MarketplaceFilterCacheTest extends TestCase
         $this->assertSame(3, $counts['total']);
     }
 
+    public function test_filter_counts_deal_includes_cars_priced_below_market(): void
+    {
+        // Caso produccion: el campo `estimated_saving` puede estar vacio
+        // aunque el coche este realmente por debajo de mercado. El
+        // contador "deal" debe contar ambos casos.
+        $org = Organization::factory()->create(['is_public' => true]);
+        Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+            'brand' => 'Kia',
+            'purchase_price' => 5000, // 10k - 5k = 5.000 EUR por debajo de mercado
+            'market_avg' => 10000,
+            'estimated_saving' => 0, // campo vacio
+        ]);
+        Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+            'brand' => 'Kia',
+            'purchase_price' => 15000, // 10k + 5k: NO es oferta
+            'market_avg' => 10000,
+            'estimated_saving' => 0,
+        ]);
+
+        Cache::forget(PublicMarketplaceController::CACHE_KEY_FILTER_COUNTS);
+        $this->get('/marketplace')->assertOk();
+        $counts = Cache::get(PublicMarketplaceController::CACHE_KEY_FILTER_COUNTS);
+
+        $this->assertSame(1, $counts['deal'], 'El coche 5k por debajo de mercado cuenta aunque estimated_saving sea 0');
+    }
+
     public function test_deal_filter_requires_meaningful_saving(): void
     {
         // Antes bastaba estimated_saving > 0 (un ahorro de 50 EUR colaba).
+        // Ahora el filtro exige >= 1.500 EUR de ahorro, ya sea por el
+        // campo estructurado o por estar al menos 1.500 EUR por debajo
+        // de market_avg.
         $org = Organization::factory()->create(['is_public' => true]);
         $cheapDeal = Car::factory()->create([
             'organization_id' => $org->id,
@@ -206,6 +247,8 @@ class MarketplaceFilterCacheTest extends TestCase
             'verdict' => 'Buy',
             'brand' => 'Audi',
             'estimated_saving' => 100,
+            'market_avg' => 50000,
+            'purchase_price' => 49800, // 50k - 200 = 200 EUR por debajo, NO es oferta
         ]);
         $realDeal = Car::factory()->create([
             'organization_id' => $org->id,
@@ -214,9 +257,11 @@ class MarketplaceFilterCacheTest extends TestCase
             'verdict' => 'Buy',
             'brand' => 'BMW',
             'estimated_saving' => 3000,
+            'market_avg' => 40000,
+            'purchase_price' => 35000,
         ]);
 
-        $response = $this->get('/marketplace?deal=1')->assertOk();
+        $response = $this->get('/marketplace?deal=1&sort=oldest')->assertOk();
         $response->assertInertia(fn ($page) => $page
             ->component('Public/MarketplaceIndex')
             ->loadDeferredProps('default', fn ($prop) => $prop
@@ -225,6 +270,51 @@ class MarketplaceFilterCacheTest extends TestCase
         );
 
         $this->assertDatabaseHas('cars', ['id' => $cheapDeal->id]);
+    }
+
+    public function test_deal_filter_includes_cars_priced_below_market_even_without_estimated_saving(): void
+    {
+        // Caso real visto en produccion: el coche tiene un ahorro nominal
+        // de 5.000 EUR escrito en el bullet de pros, pero el campo
+        // estructurado `estimated_saving` esta vacio/0. El filtro debe
+        // detectarlo igualmente comparando contra `market_avg`.
+        $org = Organization::factory()->create(['is_public' => true]);
+        $underpriced = Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+            'brand' => 'Volkswagen',
+            'purchase_price' => 33999, // 44.300 - 10.301 = 33.999
+            'market_avg' => 44300,
+            'estimated_saving' => 0, // el campo estructurado esta vacio
+        ]);
+        $fairPrice = Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+            'brand' => 'Audi',
+            'purchase_price' => 44000, // 44.300 - 300 = NO entra
+            'market_avg' => 44300,
+            'estimated_saving' => 0,
+        ]);
+        $expensive = Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+            'brand' => 'BMW',
+            'estimated_saving' => 100, // sin market_avg, solo estimated_saving
+        ]);
+
+        $response = $this->get('/marketplace?deal=1&sort=oldest')->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('Public/MarketplaceIndex')
+            ->loadDeferredProps('default', fn ($prop) => $prop
+                ->has('cars.data', 1)
+                ->where('cars.data.0.id', $underpriced->id))
+        );
     }
 
     public function test_index_passes_filter_counts_to_the_page(): void
