@@ -66,3 +66,57 @@ $cars = Car::query()
 
 - `tests/Feature/MarketplaceEnhancementsTest.php` (8 tests: view counter, newsletter, rate limit)
 - `php artisan test --filter="Marketplace"`
+
+## Politica de contenido en la ficha publica (15-oct-2026)
+
+El usuario confirmo la politica: **la ficha publica NO muestra
+informacion negativa del coche** (campo `cons` del modelo, ni
+cualquier bloque con tints rojos/naranjas sobre "lo que debes
+saber"). La transparencia se vende como valor de MARCA en la home
+(seccion "Transparencia total" con 4 pilares), no como dato por
+coche. Las contras se las dices al cliente por WhatsApp/llamada
+cuando te escribe, en contexto, no en la ficha fria.
+
+**Implementacion:**
+- `Car::publicCarPayload()` en `PublicMarketplaceController`: no
+  incluye `cons` en el allowlist. Defensa en profundidad: el dato ni
+  viaja al navegador.
+- `MarketplaceShow.vue` (Vue): el bloque "Puntos en contra" /
+  "Lo que debes saber" esta comentado. Renderiza solo "Puntos a
+  favor" y la ficha tecnica.
+- `car-dossier.blade.php`: solo renderiza "Puntos a favor" del
+  dossier. Hay clases CSS `.pc-col.cons` que son dead code (se
+  dejaron por si se reactiva la seccion).
+- El admin sigue viendo TODO en `Cars/Show` (verdict, red_flags,
+  research, cons, notes, etc.). Si algun dia hacen falta contras
+  publicas, hay que crear un campo nuevo `cons_public` escrito
+  PARA el cliente, no reutilizar `cons`.
+
+**Excepciones que SI se muestran en la ficha publica** (info
+objetiva, no opinion interna): `market_min`/`market_max` (rango de
+mercado en la barra), `purchase_price` (precio real), `mileage`
+(km reales), `year`, `status` como "Disponible" (no el estado
+interno `Located`).
+
+## Filtro "Muy buen precio" (15-oct-2026)
+
+El filtro es la UNION de 3 senales (cualquiera basta para entrar
+como oferta). NO usar solo `estimated_saving` porque ese campo
+esta vacio en muchos coches cuyo ahorro nominal se calcula despues
+y se escribe en el bullet de pros:
+
+  a) `estimated_saving >= DEAL_MIN_SAVING` (campo estructurado, 1500)
+  b) `purchase_price <= market_avg - DEAL_MIN_SAVING`
+  c) `purchase_price <= market_min - DEAL_MIN_SAVING`
+
+Constante `DEAL_MIN_SAVING = 1500` en `PublicMarketplaceController`.
+Las claves de cache son constantes (`CACHE_KEY_FILTER_*_V6`) para
+poder forzar recálculo subiendo el sufijo, sin esperar el TTL.
+
+## Filtro de color (15-oct-2026)
+
+`Car::COLOR_PALETTE` (17 colores base) + `Car::baseColor()` que
+normaliza sin acentos/minusculas y matchea por prefijo. El filtro
+muestra solo los colores base, la consulta usa `LIKE "Azul%"` para
+encontrar todas las variantes. Pin de paleta en
+`CarBaseColorTest::test_palette_has_no_duplicates`.

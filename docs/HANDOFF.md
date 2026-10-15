@@ -6,6 +6,29 @@
 
 ---
 
+## 2026-10-15 09:30 · Copilot-VSCode · seccion "Transparencia total" en la home
+- Hice: tras discutir con el usuario si dejar las contras en la ficha publica (transparencia), acordamos que NO. Las contras se las dices al cliente por WhatsApp/llamada cuando te escribe, en contexto, no en la ficha fria. Para justificar la decision, anadimos una seccion "Transparencia total" en la home con 4 pilares que venden la transparencia como valor de MARCA (no como dato por coche):
+  - 01: 9 puntos de verificacion (lo que SI verificamos)
+  - 02: Lo bueno y lo menos bueno (te lo cuento en WhatsApp/llamada)
+  - 03: Honorarios siempre claros (1k base, 1.5k si >= 30k)
+  - 04: No somos vendedores (somos gestores, la garantia es del vendedor)
+- Link "Transparencia" en la nav + CTA al final con WhatsApp pre-rellenado.
+- Diseno: grid 2x2 (mobile 1x4) con numeros grandes de fondo y bordes de color por pilar.
+- i18n es+en: 12 keys nuevas.
+- Tests: 851/851 pasan (3530 assertions). Pint limpio. i18n parity OK.
+- Commit: `5f0c40d` → ff-mergeado a `master` y push a origin.
+- Verificado en produccion: `hasTransparency: true`, `hasPillar1..4: true`, `hasCTA: true`, `navLink: true`, `hasCons: false` (las contras no se muestran en la ficha).
+
+## 2026-10-15 09:20 · Copilot-VSCode · filtro "Muy buen precio" detecta 12 coches, no 2
+- Hice: el usuario reporto que el filtro "Muy buen precio" no funcionaba bien: el Golf 70 (33.999 €, "Ahorra ~5.000 EUR") no aparecia aunque fuera claramente oferta. Investigando, vi que el filtro usaba `estimated_saving >= 1500` pero el Golf 70 tenia TODOS los campos estructurados vacios (`estimated_saving=null`, `market_avg=null`). Solo `market_min=42.900` estaba informado. Causa: el ahorro nominal se calcula despues y se escribe en el bullet de pros, no en las columnas.
+- Solucion en 2 commits: el filtro es la UNION de 3 senales (cualquiera basta para entrar como oferta):
+  - a) `estimated_saving >= 1500` (campo estructurado)
+  - b) `purchase_price <= market_avg - 1500` (al menos 1.500 EUR bajo la media)
+  - c) `purchase_price <= market_min - 1500` (al menos 1.500 EUR bajo el minimo — el caso del Golf 70)
+- Cache key bumped a v6 para forzar recálculo del contador "Muy buen precio (N)".
+- Tests: 850/850. Verificado en produccion: `?deal=1` muestra 12 coches (antes 2), Golf 70 incluido.
+- Commits: `d976c51` + `400ad75` → ff-mergeados a `master` y push a origin.
+
 ## 2026-10-14 16:45 · Copilot-VSCode · ficha publica: fuera "Puntos en contra" + fix empty state + filtros
 - Hice: (a) **CRITICO** — la seccion "Lo que debes saber / Puntos en contra" se mostraba al cliente. El contenido real del bloque `cons` son notas internas ("Sin VIN publicado: recalls pendientes", "Condiciones de garantia y recompra solo como declaracion del anuncio", "Color negro menos vistoso en redes que el naranja"). Quitada del template de `MarketplaceShow.vue` **Y** quitado `cons` del allowlist de `publicCarPayload()` (el dato ni viaja al navegador). Revierte la decision del 13-oct; el admin sigue viendolos en `Cars/Show`. Si algun dia hacen falta contras publicos, crear un campo nuevo `cons_public` escrito PARA el cliente. (b) **CRITICO** — "No hay vehiculos disponibles ahora mismo" aparecia DEBAJO del listado con 29 coches: las ramas de estado vacio eran una cadena `v-if` independiente del grid, asi que con coches + sin filtros caia en el `v-else` final. Ahora ambas ramas exigen `filteredCars.length === 0` y la ultima es `v-else-if`. (c) "Muy buen precio" usaba `estimated_saving > 0` (colaba un ahorro de 50 EUR) → nueva const `DEAL_MIN_SAVING = 1500`. (d) Los chips de marca se derivaban de la pagina actual (12 coches) → ahora de `filterOptions.brands`, ordenados por `filterCounts`. (e) Contadores en los chips de marca y en el boton de oferta. (f) Filtro de cambio traducido. (g) Chips de filtros activos removibles + "Limpiar todo". (h) Hero con dato dinamico (coches disponibles) en grid 2x2/4-col. (i) Filtro de color: la BD guarda 25 nombres comerciales ("Azul Lapislazuli metalizado (Lapis-Blau)") → `Car::COLOR_PALETTE` (17 bases) + `Car::baseColor()` que normaliza sin acentos y matchea por prefijo; el filtro usa `LIKE "Azul%"` para encontrar las variantes. (j) Claves de cache de filtros como **constantes versionadas** (`CACHE_KEY_*_V4`) para poder forzar recalc sin esperar el TTL de 30 min y sin tocar los tests.
 - Toqué: `PublicMarketplaceController` (deal threshold, filterCounts, colores, constantes), `Car` (COLOR_PALETTE + baseColor), `CarObserver` (helper `flushMarketplaceCaches()`), `MarketplaceIndex.vue`, `MarketplaceShow.vue`, `i18n/{es,en}.js`, 3 tests.
