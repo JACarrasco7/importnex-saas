@@ -22,6 +22,7 @@ import {
     BoltIcon,
     XMarkIcon,
     GiftIcon,
+    DocumentTextIcon,
 } from '@heroicons/vue/24/outline';
 import Badge from '@/Components/Badge.vue';
 import WishlistButton from '@/Components/WishlistButton.vue';
@@ -377,6 +378,98 @@ onMounted(() => {
                         <h3 class="mt-3 text-lg font-semibold text-gray-900 dark:text-white">{{ item.title }}</h3>
                         <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">{{ item.description }}</p>
                     </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TRANSPARENCY (seccion que vendemos como punto fuerte de marca) -->
+        <section :id="locale === 'es' ? 'transparencia' : 'transparency'" class="relative overflow-hidden bg-white py-16 transition-colors duration-300 dark:bg-asphalt-900">
+            <div class="pointer-events-none absolute inset-0 opacity-[0.04]" style="background-image: radial-gradient(circle, #1A306D 1px, transparent 1px); background-size: 22px 22px;"></div>
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto max-w-3xl text-center">
+                    <span class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-emerald-700 ring-1 ring-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:ring-emerald-800">
+                        <CheckBadgeIcon class="h-3.5 w-3.5" />
+                        {{ t('marketplace.section_transparency_eyebrow') }}
+                    </span>
+                    <h2 class="mt-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">
+                        {{ t('marketplace.section_transparency') }}
+                    </h2>
+                    <p class="mt-3 text-lg text-gray-600 dark:text-gray-400">
+                        {{ t('marketplace.section_transparency_lead') }}
+                    </p>
+                </div>
+
+                <div class="relative mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                    <div class="group relative overflow-hidden rounded-2xl border border-emerald-200/60 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl dark:border-emerald-800/40 dark:bg-asphalt-800">
+                        <div class="absolute right-4 top-4 text-5xl font-black text-emerald-100 transition group-hover:text-emerald-200 dark:text-emerald-900/30 dark:group-hover:text-emerald-900/50">01</div>
+                        <div class="relative">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-300 dark:ring-emerald-800">
+                                <ShieldCheckIcon class="h-6 w-6" />
+                            </div>
+                            <h3 class="mt-4 text-lg font-semibold text-gray-900 dark:text-white">
+                                {{ t('marketplace.transparency_pillar_1_title') }}
+                            </h3>
+                            <p class="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                                {{ t('marketplace.transparency_pillar_1_desc') }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="group relative overflow-hidden rounded-2xl border border-amber-200/60 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl dark:border-amber-800/40 dark:bg-asphalt-800">
+                        <div class="absolute right-4 top-4 text-5xl font-black text-amber-100 transition group-hover:text-amber-200 dark:text-amber-900/30 dark:group-hover:text-amber-900/50">02</div>
+                        <div class="relative">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100 text-amber-700 ring-1 ring-amber-200 dark:bg-amber-900/40 dark:text-amber-300 dark:ring-amber-800">
+                                <DocumentTextIcon class="h-6 w-6" />
+                            </div>
+                            <h3 class="mt-4 text-lg font-semibold text-gray-900 dark:text-white">
+                                {{ t('marketplace.transparency_pillar_2_title') }}
+                            </h3>
+                            <p class="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                                {{ t('marketplace.transparency_pillar_2_desc') }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="group relative overflow-hidden rounded-2xl border border-estoril-200/60 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl dark:border-estoril-800/40 dark:bg-asphalt-800">
+                        <div class="absolute right-4 top-4 text-5xl font-black text-estoril-100 transition group-hover:text-estoril-200 dark:text-estoril-900/30 dark:group-hover:text-estoril-900/50">03</div>
+                        <div class="relative">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-estoril-100 text-estoril-700 ring-1 ring-estoril-200 dark:bg-estoril-900/40 dark:text-estoril-300 dark:ring-estoril-800">
+                                <BanknotesIcon class="h-6 w-6" />
+                            </div>
+                            <h3 class="mt-4 text-lg font-semibold text-gray-900 dark:text-white">
+                                {{ t('marketplace.transparency_pillar_3_title') }}
+                            </h3>
+                            <p class="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                                {{ t('marketplace.transparency_pillar_3_desc') }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="group relative overflow-hidden rounded-2xl border border-platinum-300/60 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl dark:border-asphalt-600 dark:bg-asphalt-800">
+                        <div class="absolute right-4 top-4 text-5xl font-black text-gray-100 transition group-hover:text-gray-200 dark:text-asphalt-700 dark:group-hover:text-asphalt-600">04</div>
+                        <div class="relative">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100 text-gray-700 ring-1 ring-gray-200 dark:bg-asphalt-700 dark:text-gray-300 dark:ring-asphalt-600">
+                                <CheckBadgeIcon class="h-6 w-6" />
+                            </div>
+                            <h3 class="mt-4 text-lg font-semibold text-gray-900 dark:text-white">
+                                {{ t('marketplace.transparency_pillar_4_title') }}
+                            </h3>
+                            <p class="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                                {{ t('marketplace.transparency_pillar_4_desc') }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-10 text-center">
+                    <a
+                        :href="`https://wa.me/34675701439?text=${encodeURIComponent(t('marketplace.section_transparency_lead'))}`"
+                        target="_blank"
+                        rel="noopener"
+                        class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700"
+                    >
+                        {{ t('marketplace.transparency_cta') }}
+                    </a>
                 </div>
             </div>
         </section>

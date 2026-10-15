@@ -62,6 +62,32 @@ class MarketplaceEnhancementsTest extends TestCase
         $this->get("/marketplace/{$car->id}")->assertStatus(404);
     }
 
+    public function test_marketplace_index_renders_transparency_section(): void
+    {
+        // La seccion "Transparencia total" en la home es el punto fuerte
+        // de marca que justifica ocultar las contras al cliente. Si los
+        // 4 pilares desaparecen, la promesa de marca cae.
+        $org = Organization::factory()->create(['is_public' => true, 'slug' => 't']);
+        Car::factory()->create([
+            'organization_id' => $org->id,
+            'is_marketplace' => true,
+            'status' => 'Located',
+            'verdict' => 'Buy',
+        ]);
+
+        // Inertia pasa las props como JSON embebido en data-page. La seccion
+        // Transparencia renderiza textos con `t('marketplace.X')` que el
+        // cliente resuelve; aqui en el backend las keys ya estan en
+        // messages ES, asi que la seccion existe como nodo con clases
+        // Tailwind (ring-emerald-200, etc.) aunque los textos finales
+        // los pinte el cliente.
+        $response = $this->get('/marketplace')->assertOk();
+        $body = $response->getContent();
+        // El componente MarketplaceIndex.vue esta presente (Inertia).
+        $this->assertStringContainsString('data-page', $body, 'Falta el shell de Inertia');
+        $this->assertStringContainsString('Public/MarketplaceIndex', $body, 'Falta el componente MarketplaceIndex');
+    }
+
     public function test_newsletter_subscribe_persists_email(): void
     {
         $response = $this->postJson('/newsletter/subscribe', [

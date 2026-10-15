@@ -27,6 +27,7 @@ const requestHref = computed(
 const navLinks = computed(() => [
     { label: t('marketplace.nav_catalog', {}, 'Catálogo'), href: route('marketplace.index') },
     { label: t('marketplace.nav_how', {}, 'Cómo funciona'), href: route('marketplace.index') + '#how-it-works' },
+    { label: t('marketplace.nav_transparency', {}, 'Transparencia'), href: route('marketplace.index') + '#transparencia' },
     { label: t('marketplace.nav_contact', {}, 'Contacto'), href: route('marketplace.index') + '#contacto' },
 ]);
 
