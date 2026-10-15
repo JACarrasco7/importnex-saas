@@ -6,6 +6,19 @@
 
 ---
 
+## 2026-10-15 10:15 · Copilot-VSCode · ficha y dossier: quitar mensajes negativos para el cliente
+- Hice: el usuario pidio revisar que mas se podia quitar de ficha y dossier para que el cliente final no viera "cons" ni mensajes negativos. La politica ya estaba en `.ai/rules/marketplace.md` desde el 14-oct (no cons, no veredictos, no semaforo en la ficha publica), pero faltaba revisar el dossier Blade y el texto legal de la ficha Vue. **6 retoques**, todos verificados en produccion:
+  1. **Dossier badge del hero**: estado interno `Located` (que renderizaba como "Localizado") → "Disponible para gestion" en `$estadoLabels`. Antes sonaba a "encontrado por nuestro equipo" (proceso interno), no a una opcion real para el cliente.
+  2. **Dossier lista "No incluido"**: redactada en positivo. "Seguro del vehiculo (te ayudamos a contratarlo si quieres)", "Cobertura mecanica opcional, contratable con una compania especializada". Misma lista, mismo contenido, sin negativos.
+  3. **Dossier "Como trabajamos"**: ahora son 2 columnas con 5+3 items, **todos describen lo que SI hacemos**. Antes la columna derecha era una lista de "No"s ("No vendemos coches", "No respondemos de averias", "No hacemos mantenimiento"). El descargo de responsabilidad legal se mantiene en el footer como requiere LSSI-CE/RGPD.
+  4. **Dossier parrafo "Esta unidad queda por encima de la media"**: **eliminado**. Era un dato interno: si el cliente pregunta por el precio, lo justificamos en conversacion privada, no en la ficha fria. La barra de rango (min/avg/max) sigue ahi — eso SI es informacion util.
+  5. **Dossier FAQ "Lleva garantia?"**: ahora empieza con la parte positiva ("La garantia es la que ofrezca el vendedor...") en vez de "JJ Import Motors no ofrece garantia" como primera frase.
+  6. **Vue ficha `legal_body` (es+en)**: reescrito. La primera frase era "JJ Import Motors no es el vendedor ni el propietario del vehiculo" (doble negacion). Ahora: "JJ Import Motors no es el vendedor del vehiculo: lo compras directamente al vendedor y se matricula a tu nombre. Nosotros nos encargamos de..." (un unico "no" para fijar la regla, luego todo lo que SI hacemos).
+- Decisiones registradas: `.ai/rules/marketplace.md` anadio 3 secciones nuevas — "Politica de Como trabajamos en ficha y dossier", "Badge de estado en el hero del dossier", "EL MAS BARATO / EL MAS CARO en barra de mercado" (este se mantiene porque es dato de mercado objetivo, no veredicto).
+- Tests: 851/851 pasan (3530 assertions). Pint limpio. i18n parity OK (1896 keys es, 1896 en).
+- Commit: `0718e77` → ff-mergeado a `master` y push a origin. Forge auto-desplego.
+- Verificado en produccion: el dossier del Golf 71 (`/c/GVpQ78mdEHQGteGogEy4zF2GIsqfWMms`) muestra ahora "DISPONIBLE PARA GESTION" en el hero, "No incluido" con 4 items positivos, "Como trabajamos" sin "No"s, sin el parrafo "queda por encima de la media". La ficha Vue del Golf 70 muestra el nuevo `legal_body`.
+
 ## 2026-10-15 09:30 · Copilot-VSCode · seccion "Transparencia total" en la home
 - Hice: tras discutir con el usuario si dejar las contras en la ficha publica (transparencia), acordamos que NO. Las contras se las dices al cliente por WhatsApp/llamada cuando te escribe, en contexto, no en la ficha fria. Para justificar la decision, anadimos una seccion "Transparencia total" en la home con 4 pilares que venden la transparencia como valor de MARCA (no como dato por coche):
   - 01: 9 puntos de verificacion (lo que SI verificamos)

@@ -120,3 +120,45 @@ normaliza sin acentos/minusculas y matchea por prefijo. El filtro
 muestra solo los colores base, la consulta usa `LIKE "Azul%"` para
 encontrar todas las variantes. Pin de paleta en
 `CarBaseColorTest::test_palette_has_no_duplicates`.
+
+## Politica de "Como trabajamos" en ficha y dossier (15-oct-2026)
+
+La seccion "Como trabajamos / Somos gestores, no vendedores" debe
+listar **lo que SI hacemos**, no un enum de "no vendemos / no
+ofrecemos garantia / no hacemos mantenimiento". La primera frase
+del cuerpo legal NO puede empezar con un "No" (doble negacion que
+suena a descargo).
+
+- `MarketplaceShow.vue` (`legal_body` en `es.js` y `en.js`): empieza
+  con "JJ Import Motors no es el vendedor del vehiculo: lo compras
+  directamente al vendedor y se matricula a tu nombre." (un unico
+  "no" para fijar la regla, luego todo lo que SI hacemos).
+- `car-dossier.blade.php`: la seccion `Como trabajamos` tiene dos
+  columnas con 5 items cada una, todos en positivo. Sin "No"s.
+- El descargo de responsabilidad legal (LSSI-CE/RGPD: no somos
+  vendedores, sin garantia, precio sujeto a confirmacion) vive
+  SOLO en el footer, en letra pequena. Es obligatorio por ley, pero
+  no debe ser lo primero que el cliente lee sobre nosotros.
+
+Ademas, eliminar de la ficha publica cualquier parrafo del estilo
+"Esta unidad queda por encima de la media del mercado". Es un dato
+interno: si el cliente pregunta por el precio, lo justificamos en
+conversacion privada, no en la ficha.
+
+## Badge de estado en el hero del dossier (15-oct-2026)
+
+El estado interno `Located` se traduce como **"Disponible para
+gestion"**, no como "Localizado" (que suena a "encontrado por
+nuestro equipo" y no a una opcion real para el cliente). Mapeo
+completo en `car-dossier.blade.php` → `$estadoLabels`. El resto de
+la lista sigue igual (Valuing, Offered, Reserved, etc.) porque
+"Reservado para ti" / "En tramites" / "En transito" son
+informacion util para el cliente.
+
+## "EL MAS BARATO" / "EL MAS CARO" en barra de mercado (15-oct-2026)
+
+Se mantiene la etiqueta "EL MAS BARATO" en la tarjeta de la barra
+de mercado. NO es un veredicto sobre nuestro coche, es el minimo
+observado en nuestro barrido del mercado espanol a fecha de
+`$fechaDatos`. Lo que SI se elimino: el parrafo "Esta unidad queda
+por encima de la media del mercado" que era claramente negativo.
