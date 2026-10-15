@@ -1795,7 +1795,7 @@ export default {
     drivetrain_fwd: 'Front-wheel',
     drivetrain_rwd: 'Rear-wheel',
     drivetrain_awd: 'All-wheel (4x4)',
-    legal_body: 'JJ Import Motors is neither the seller nor the owner of the vehicle. We manage the search, verification and import, with fees agreed in advance. We do not offer a warranty on the vehicle: any warranty or liability belongs to the seller, under the law applicable to them.',
+    legal_body: 'JJ Import Motors is not the seller of the vehicle: you buy it directly from the seller and it is registered in your name. We handle locating the unit, verifying its history, negotiating the purchase, coordinating transport and managing the import inspection (ITV), taxes and registration — all with fees agreed in writing before you reserve anything. If you want mechanical cover, we can help you arrange it separately with a specialised provider.',
     this_unit: 'This unit',
     cheapest: 'cheapest',
     market_avg: 'average price',

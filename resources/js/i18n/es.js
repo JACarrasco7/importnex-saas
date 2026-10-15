@@ -1811,7 +1811,7 @@ export default {
     drivetrain_fwd: 'Delantera',
     drivetrain_rwd: 'Trasera',
     drivetrain_awd: 'Total (4x4)',
-    legal_body: 'JJ Import Motors no es el vendedor ni el propietario del vehículo. Gestionamos la búsqueda, la verificación y la importación, con honorarios acordados de antemano. No ofrecemos garantía sobre el vehículo: cualquier garantía o responsabilidad corresponde al vendedor, según la ley que le sea aplicable.',
+    legal_body: 'JJ Import Motors no es el vendedor del vehículo: lo compras directamente al vendedor y se matricula a tu nombre. Nosotros nos encargamos de localizar la unidad, verificar el historial, negociar la compra, coordinar el transporte y tramitar la ITV, los impuestos y la matriculación, con honorarios acordados por escrito antes de que reserves nada. Si quieres cobertura mecánica, podemos ayudarte a contratarla aparte con una compañía especializada.',
     this_unit: 'Esta unidad',
     cheapest: 'el más barato',
     market_avg: 'precio medio',

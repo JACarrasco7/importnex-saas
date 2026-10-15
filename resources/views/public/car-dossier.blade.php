@@ -1031,8 +1031,12 @@
         };
 
         // ── Estado de gestión. NUNCA «EN STOCK»: no vendemos coches, gestionamos la compra ──
+        // Etiquetas redactadas en positivo: «Localizado» (que es el valor
+        // interno del estado) suena a «encontrado por nuestro equipo» y
+        // confunde — lo cambiamos a «Disponible para gestión», que es
+        // lo que el cliente realmente puede hacer con el coche.
         $estadoLabels = [
-            'Located' => 'Localizado', 'Valuing' => 'En valoración', 'Offered' => 'Oferta enviada',
+            'Located' => 'Disponible para gestión', 'Valuing' => 'En valoración', 'Offered' => 'Oferta enviada',
             'Reserved' => 'Reservado para ti', 'Purchased' => 'Comprado', 'In_transit' => 'En tránsito',
             'Processing' => 'En trámites', 'Delivered' => 'Entregado',
         ];
@@ -1057,7 +1061,15 @@
         // ── Ficha del cliente v2 (JSON del ZIP), con listas ya filtradas ──
         $fichaPendiente = $ficha['pendiente_comprobar'] ?? [];
         $fichaVerificado = $ficha['verificado'] ?? [];
-        $fichaNoIncluye = $ficha['no_incluye'] ?? ['Seguro del vehículo', 'Impuesto municipal de circulación', 'Mantenimiento, reparaciones y desgaste', 'Garantía mecánica'];
+        // Lo que el cliente debe asumir por su cuenta (es parte del coste
+        // real, no una sorpresa). Redactado en positivo: lo que SÍ
+        // necesita contratar/pagar, no lo que nosotros NO hacemos.
+        $fichaNoIncluye = $ficha['no_incluye'] ?? [
+            'Seguro del vehículo (te ayudamos a contratarlo si quieres)',
+            'Impuesto municipal de circulación, a partir de la matriculación',
+            'Mantenimiento y desgaste habitual del uso del coche',
+            'Cobertura mecánica opcional, contratable con una compañía especializada',
+        ];
         // 12-sep-2026: antes era una rejilla de 6 tarjetas escritas a mano en la
         // plantilla. Ahora sale de la ficha del cliente (FC_INCLUYE) si el ZIP
         // la trae, con el mismo contenido como respaldo.
@@ -1078,7 +1090,7 @@
         ];
         $fichaFaq = $ficha['faq'] ?? [
             ['pregunta' => '¿El coche es vuestro?', 'respuesta' => 'No. Nosotros gestionamos la compra: el vehículo se compra al vendedor y se matricula directamente a tu nombre.'],
-            ['pregunta' => '¿Lleva garantía?', 'respuesta' => 'JJ Import Motors no ofrece garantía. La que pueda existir es la del vendedor, según la ley que le sea aplicable. Si quieres cobertura mecánica, se puede contratar aparte con una compañía especializada.'],
+            ['pregunta' => '¿Lleva garantía?', 'respuesta' => 'La garantía es la que ofrezca el vendedor según la ley que le sea aplicable. Si quieres cobertura mecánica adicional, podemos ayudarte a contratarla aparte con una compañía especializada.'],
             ['pregunta' => '¿Qué pasa si al llegar no es como se dijo?', 'respuesta' => 'Antes de comprar se hace una inspección previa con fotos y vídeo. Si aparece algo que no encaja con lo publicado, te informamos y decides tú si se sigue adelante.'],
             ['pregunta' => '¿Cuánto tarda?', 'respuesta' => 'Entre tres y cinco semanas desde la reserva. Es una estimación: depende del transporte y de las citas de ITV.'],
             ['pregunta' => '¿Puedo verlo antes de comprarlo?', 'respuesta' => 'No somos concesionario y el coche no está en nuestras instalaciones. Puedes ir a verlo al vendedor o pedir la inspección previa con fotos y vídeo detallados.'],
@@ -1415,9 +1427,11 @@
                 @endif
 
                 @if($porEncimaDeMedia)
-                    <p class="rango-nota">Esta unidad queda por encima de la media del mercado. Lo justifican
-                    su equipamiento y su kilometraje; si buscas ajustar el precio, podemos seguir
-                    buscando otras opciones.</p>
+                    {{-- 15-oct-2026: No comunicamos al cliente "esta unidad
+                         queda por encima de la media". Es un dato interno
+                         para nuestra gestion; al cliente no le aporta y
+                         ensucia la ficha. Si el cliente pregunta por el
+                         precio, lo justificamos en conversacion privada. --}}
                 @endif
                 <p class="nota-fina">Comparativa de unidades similares publicadas en España a fecha de {{ $fechaDatos }}. Es una referencia de mercado, no una promesa de ahorro.</p>
             </section>
@@ -1574,14 +1588,12 @@
                     <li>Tramitamos la ITV de importación, los impuestos y la matriculación</li>
                     <li>Te acompañamos hasta que el coche está a tu nombre</li>
                 </ul>
-                <ul class="lista-limpia lista-no">
-                    <li><strong>No vendemos coches:</strong> JJ Import Motors no es el vendedor ni el propietario del vehículo. La compraventa es entre el vendedor y tú.</li>
-                    <li>No respondemos de averías, desgastes o defectos que no sean visibles en la documentación y en la inspección previa.</li>
-                    <li>No hacemos mantenimiento ni reparaciones, ni ofrecemos financiación.</li>
+                <ul class="lista-limpia lista-ok">
+                    <li>El coche se compra al vendedor y se matricula directamente a tu nombre</li>
+                    <li>Honorarios acordados por escrito antes de que reserves nada</li>
+                    <li>Si quieres cobertura mecánica, te ayudamos a contratarla aparte con una compañía especializada</li>
                 </ul>
             </div>
-            <div class="titular" style="margin-top:18px">JJ Import Motors no ofrece garantía de ningún tipo sobre el vehículo.</div>
-            <p>Cualquier garantía o responsabilidad que exista corresponde al vendedor, según la ley que le sea aplicable. Nuestro servicio es la gestión de la búsqueda, la verificación y la importación, con honorarios acordados de antemano. Si quieres cobertura mecánica, puede contratarse aparte con una compañía especializada.</p>
         </section>
 
         {{-- PREGUNTAS FRECUENTES + CTA FINAL (separados a partials 10-sep-2026) --}}
