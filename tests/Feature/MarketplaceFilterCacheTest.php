@@ -274,10 +274,11 @@ class MarketplaceFilterCacheTest extends TestCase
 
     public function test_deal_filter_includes_cars_priced_below_market_even_without_estimated_saving(): void
     {
-        // Caso real visto en produccion: el coche tiene un ahorro nominal
-        // de 5.000 EUR escrito en el bullet de pros, pero el campo
-        // estructurado `estimated_saving` esta vacio/0. El filtro debe
-        // detectarlo igualmente comparando contra `market_avg`.
+        // Caso real visto en produccion (Golf 70): el coche tiene un ahorro
+        // nominal de 5.000 EUR escrito en el bullet de pros, pero
+        // `estimated_saving` Y `market_avg` estan vacios/null. Solo
+        // `market_min` esta informado (42.900 EUR). El filtro debe
+        // detectarlo igualmente comparando contra `market_min`.
         $org = Organization::factory()->create(['is_public' => true]);
         $underpriced = Car::factory()->create([
             'organization_id' => $org->id,
@@ -285,9 +286,10 @@ class MarketplaceFilterCacheTest extends TestCase
             'status' => 'Located',
             'verdict' => 'Buy',
             'brand' => 'Volkswagen',
-            'purchase_price' => 33999, // 44.300 - 10.301 = 33.999
-            'market_avg' => 44300,
-            'estimated_saving' => 0, // el campo estructurado esta vacio
+            'purchase_price' => 33999, // 42.900 - 8.901 = 33.999
+            'market_avg' => null,
+            'market_min' => 42900,
+            'estimated_saving' => null,
         ]);
         $fairPrice = Car::factory()->create([
             'organization_id' => $org->id,
@@ -297,7 +299,8 @@ class MarketplaceFilterCacheTest extends TestCase
             'brand' => 'Audi',
             'purchase_price' => 44000, // 44.300 - 300 = NO entra
             'market_avg' => 44300,
-            'estimated_saving' => 0,
+            'market_min' => 43000,
+            'estimated_saving' => null,
         ]);
         $expensive = Car::factory()->create([
             'organization_id' => $org->id,
@@ -305,7 +308,7 @@ class MarketplaceFilterCacheTest extends TestCase
             'status' => 'Located',
             'verdict' => 'Buy',
             'brand' => 'BMW',
-            'estimated_saving' => 100, // sin market_avg, solo estimated_saving
+            'estimated_saving' => 100, // sin market_avg/min, solo estimated_saving
         ]);
 
         $response = $this->get('/marketplace?deal=1&sort=oldest')->assertOk();
