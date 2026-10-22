@@ -82,7 +82,7 @@ const skipOnboarding = () => {
                             {{ t('onboarding.checklist_title', 'Completa tu configuración') }}
                         </h3>
                         <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                            {{ t('onboarding.checklist_subtitle', '4 pasos para empezar a usar JJ Import Motors') }}
+                            {{ t('onboarding.checklist_subtitle') }}
                         </p>
                     </div>
                 </div>

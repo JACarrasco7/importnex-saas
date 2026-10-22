@@ -8,13 +8,14 @@
     · AUDIENCIA        : PÚBLICO general. Describe el servicio (sin coches).
     ═══════════════════════════════════════════════════════════════════════ --}}
 @php
-    $precio_honorarios = '1.500 €';
-    $telefono_1 = '675 70 14 39';
-    $telefono_2 = '691 48 59 27';
-    $email = 'jjimportmotors@gmail.com';
-    $qr_url = route('public.car-request.index', ['slug' => 'jj-import-motors']);
+    $brand = $brand ?? \App\Support\Brand::platform();
+    $precio_honorarios = $precio_honorarios ?? $brand->get('fee_label', '1.500 €');
+    $telefono_1 = $telefono_1 ?? $brand->get('phone');
+    $telefono_2 = $telefono_2 ?? $brand->get('phone_2');
+    $email = $email ?? $brand->get('email');
+    $qr_url = $qr_url ?? url('/');
 
-    $qr_svg = null;
+    $qr_svg = $qr_svg ?? null;
     try {
         $qr_svg = \SimpleSoftwareIO\QrCode\Generator::class
             ? (new \SimpleSoftwareIO\QrCode\Generator())->format('svg')
@@ -34,7 +35,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>JJ Import Motors - Folleto</title>
+    <title>{{ $brand->name() }} - Folleto</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
@@ -705,7 +706,7 @@
     <div class="container">
 
         <div class="header">
-            <img src="{{ $logo_base64 }}" alt="JJ Import Motors" class="logo">
+            @if($logo_base64)<img src="{{ $logo_base64 }}" alt="{{ $brand->name() }}" class="logo">@else<span class="logo" style="color:#fff;font-weight:700;font-size:18px;">{{ $brand->name() }}</span>@endif
             <span class="badge-llave"><span class="dot"></span>SERVICIO LLAVE EN MANO</span>
         </div>
 

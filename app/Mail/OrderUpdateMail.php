@@ -32,14 +32,23 @@ class OrderUpdateMail extends Mailable
         public ?string $greeting = null,
         public bool $forClient = true,
         public array $files = [],
+        public array $brand = [],
     ) {}
 
     public function envelope(): Envelope
     {
         return new Envelope(
             subject: $this->subjectLine,
-            replyTo: [new Address((string) config('import_orders.contact_email'), 'JJ Import Motors')],
+            replyTo: $this->replyToAddresses(),
         );
+    }
+
+    /** @return list<Address> */
+    private function replyToAddresses(): array
+    {
+        $email = config('import_orders.contact_email') ?: ($this->brand['email'] ?? null);
+
+        return $email ? [new Address((string) $email, (string) ($this->brand['name'] ?? config('app.name')))] : [];
     }
 
     public function content(): Content

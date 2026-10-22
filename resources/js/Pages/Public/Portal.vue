@@ -28,6 +28,7 @@ const props = defineProps({
     gallery: { type: Array, default: () => [] },
     feed: { type: Array, default: () => [] },
     contact: { type: Object, required: true },
+    orgBrand: { type: Object, default: () => ({}) },
 });
 
 const { t } = useTranslations();
@@ -56,8 +57,8 @@ const showProgress = computed(() => props.order.is_tracking_visible && (props.mi
         <header class="sticky top-0 z-20 border-b border-asphalt-100 bg-white/90 backdrop-blur">
             <div class="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-3">
                 <a href="/" class="flex items-center gap-2">
-                    <img src="/images/jj-import/logo-insignia.png" alt="JJ Import Motors" class="h-9 w-auto" />
-                    <span class="hidden text-sm font-semibold text-asphalt-700 sm:inline">JJ Import Motors</span>
+                    <img v-if="orgBrand.logo_url" :src="orgBrand.logo_url" :alt="orgBrand.name" class="h-9 w-auto" />
+                    <span class="text-sm font-semibold text-asphalt-700" :class="{ 'hidden sm:inline': orgBrand.logo_url }">{{ orgBrand.name }}</span>
                 </a>
                 <span class="rounded-full bg-estoril-50 px-3 py-1 font-mono text-xs font-semibold text-estoril-700">{{ order.reference }}</span>
             </div>

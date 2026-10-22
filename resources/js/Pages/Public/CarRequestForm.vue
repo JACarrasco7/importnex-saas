@@ -695,11 +695,11 @@ const submit = () => {
             </div>
         </div>
 
-        <!-- Floating download button for JJ Import Motors folleto -->
-        <div class="fixed bottom-6 right-6 z-40">
+        <!-- Floating download button for the organization brochure -->
+        <div v-if="organization.has_brochure" class="fixed bottom-6 right-6 z-40">
             <a
                 href="/jj-import-folleto.pdf"
-                download="JJ_Import_Motors_Folleto.pdf"
+                :download="`${organization.name}.pdf`"
                 class="flex items-center gap-2 rounded-full bg-estoril-700 px-4 py-3 text-sm font-semibold text-white shadow-lg hover:bg-estoril-800 transition-colors"
             >
                 <DocumentArrowDownIcon class="h-5 w-5" />

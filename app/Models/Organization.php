@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Brand;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -13,7 +14,7 @@ class Organization extends Model
     use Billable, HasFactory;
 
     protected $fillable = [
-        'name', 'slug', 'logo', 'is_public', 'plan', 'is_owner', 'stripe_id', 'trial_ends_at', 'subscribed_at', 'payment_failed_at',
+        'name', 'slug', 'logo', 'company', 'currency', 'locale', 'is_public', 'plan', 'is_owner', 'stripe_id', 'trial_ends_at', 'subscribed_at', 'payment_failed_at',
         'ai_provider', 'ai_model', 'ai_api_key',
         'notification_webhook_url', 'notification_webhook_types', 'notification_preferences',
         'onesignal_app_id', 'onesignal_api_key',
@@ -25,6 +26,7 @@ class Organization extends Model
         'payment_failed_at' => 'datetime',
         'is_public' => 'boolean',
         'is_owner' => 'boolean',
+        'company' => 'array',
         'ai_api_key' => 'encrypted',
         'notification_webhook_url' => 'encrypted',
         'notification_webhook_types' => 'array',
@@ -32,7 +34,7 @@ class Organization extends Model
         'onesignal_api_key' => 'encrypted',
     ];
 
-    protected $hidden = ['ai_api_key', 'notification_webhook_url', 'onesignal_api_key'];
+    protected $hidden = ['api_token_hash', 'ai_api_key', 'notification_webhook_url', 'onesignal_api_key'];
 
     // Tipos de alerta que la organización quiere silenciar.
     // Configurado vía /organization/{org}/edit > Notification preferences.
@@ -59,6 +61,30 @@ class Organization extends Model
     }
 
     public const OWNER_UNLIMITED = PHP_INT_MAX;
+
+    /** Datos de marca y empresa (contrato, portal, emails, fichas públicas). */
+    public function brand(): Brand
+    {
+        return Brand::for($this);
+    }
+
+    /** Genera un token de API nuevo (se muestra una sola vez) e invalida el anterior. */
+    public function issueApiToken(): string
+    {
+        $token = 'inx_'.Str::random(48);
+        $this->forceFill(['api_token_hash' => hash('sha256', $token)])->save();
+
+        return $token;
+    }
+
+    public static function findByApiToken(?string $token): ?self
+    {
+        if (blank($token)) {
+            return null;
+        }
+
+        return static::query()->where('api_token_hash', hash('sha256', $token))->first();
+    }
 
     public function isOwner(): bool
     {
@@ -227,6 +253,7 @@ class Organization extends Model
             'cars' => $this->cars()->count(),
             'clients' => $this->clients()->count(),
             'contacts' => $this->contacts()->count(),
+            'users' => $this->users()->count(),
             default => 0,
         };
     }

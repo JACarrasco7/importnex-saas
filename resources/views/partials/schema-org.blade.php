@@ -1,51 +1,24 @@
-<script type="application/ld+json">
-{
-  "@@context": "https://schema.org",
-  "@@type": "AutoDealer",
-  "name": "JJ Import Motors",
-  "description": "Plataforma profesional de importación de vehículos con verificación AI. Ayudamos a dealers y particulares a importar coches de Alemania de forma segura.",
-  "url": "{{ config('app.url') }}",
-  "logo": "{{ config('app.url') }}/img/logo.png",
-  "telephone": "+34 600 000 000",
-  "email": "jjimportmotors@gmail.com",
-  "address": {
-    "@@type": "PostalAddress",
-    "streetAddress": "",
-    "addressLocality": "",
-    "addressRegion": "",
-    "postalCode": "",
-    "addressCountry": "ES"
-  },
-  "openingHoursSpecification": [
-    {
-      "@@type": "OpeningHoursSpecification",
-      "dayOfWeek": [
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday"
-      ],
-      "opens": "09:00",
-      "closes": "18:00"
-    }
-  ],
-  "priceRange": "€€€",
-  "sameAs": [
-    "https://www.linkedin.com/company/jj-import-motors",
-    "https://twitter.com/jjimportmotors"
-  ],
-  "potentialAction": {
-    "@@type": "SearchAction",
-    "target": {
-      "@@type": "EntryPoint",
-      "urlTemplate": "{{ config('app.url') }}/marketplace?q={search_term_string}"
-    },
-    "query-input": {
-      "@@type": "PropertyValueSpecification",
-      "valueRequired": true,
-      "valueName": "search_term_string"
-    }
-  }
-}
-</script>
+@php
+    $schemaBrand = \App\Support\Brand::platform();
+    $schema = array_filter([
+        '@context' => 'https://schema.org',
+        '@type' => 'AutoDealer',
+        'name' => $schemaBrand->name(),
+        'url' => config('app.url'),
+        'logo' => $schemaBrand->get('logo_url'),
+        'telephone' => $schemaBrand->get('phone'),
+        'email' => $schemaBrand->get('email'),
+        'address' => array_filter([
+            '@type' => 'PostalAddress',
+            'streetAddress' => $schemaBrand->get('address'),
+            'addressLocality' => $schemaBrand->get('city'),
+            'addressCountry' => 'ES',
+        ]),
+        'potentialAction' => [
+            '@type' => 'SearchAction',
+            'target' => ['@type' => 'EntryPoint', 'urlTemplate' => config('app.url').'/marketplace?q={search_term_string}'],
+            'query-input' => 'required name=search_term_string',
+        ],
+    ]);
+@endphp
+<script type="application/ld+json">{!! json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG) !!}</script>

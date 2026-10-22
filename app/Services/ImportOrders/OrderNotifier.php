@@ -41,6 +41,7 @@ class OrderNotifier
                 greeting: __('orders.mail.greeting', ['name' => $this->firstName($client->name)]),
                 forClient: true,
                 files: $files,
+                brand: $order->organization->brand()->toPublicArray(),
             ));
 
             $this->timeline->record($order, OrderEventType::NotificationSent, 'Email al cliente: '.$subject, [
@@ -75,6 +76,7 @@ class OrderNotifier
                 actionLabel: __('orders.mail.team_button'),
                 actionUrl: route('import-orders.show', $order->id),
                 forClient: false,
+                brand: $order->organization->brand()->toPublicArray(),
             ));
 
             return true;

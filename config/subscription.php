@@ -10,6 +10,7 @@ return [
             'cars_limit' => 10,
             'clients_limit' => 50,
             'contacts_limit' => 25,
+            'users_limit' => 3,
             'description' => 'Basic plan for small workshops',
             'features' => [
                 'email_support' => true,
@@ -33,6 +34,7 @@ return [
             'cars_limit' => 100,
             'clients_limit' => 500,
             'contacts_limit' => 250,
+            'users_limit' => 10,
             'description' => 'Professional plan for medium workshops',
             'features' => [
                 'email_support' => true,
@@ -56,6 +58,7 @@ return [
             'cars_limit' => 1000,
             'clients_limit' => 5000,
             'contacts_limit' => 2500,
+            'users_limit' => 50,
             'description' => 'Enterprise plan for large networks',
             'features' => [
                 'email_support' => true,
@@ -74,6 +77,10 @@ return [
     ],
 
     'trial_days' => 14,
+
+    // Bloquea la aplicación (salvo planes y facturación) cuando la prueba
+    // gratuita termina sin suscripción. false = instalación sin cobro.
+    'enforce' => env('SUBSCRIPTION_ENFORCE', true),
     'default_currency' => 'eur',
 
     // Proration behavior for plan swaps.

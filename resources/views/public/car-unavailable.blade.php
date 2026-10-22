@@ -1,9 +1,10 @@
+@php($brand = $brand ?? \App\Support\Brand::platform())
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enlace no disponible · JJ Import Motors</title>
+    <title>Enlace no disponible · {{ $brand->name() }}</title>
     <meta name="robots" content="noindex, nofollow">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -32,8 +33,12 @@
 <body>
     <div class="box">
         <h1>Enlace no disponible</h1>
-        <p>Este enlace ha expirado o ha sido desactivado por el equipo de JJ Import Motors. Si crees que es un error, contáctanos y te lo reenviamos.</p>
-        <a href="https://wa.me/34675701439">Contactar por WhatsApp</a>
+        <p>Este enlace ha expirado o ha sido desactivado por el equipo de {{ $brand->name() }}. Si crees que es un error, contáctanos y te lo reenviamos.</p>
+        @if($brand->whatsappUrl())
+            <a href="{{ $brand->whatsappUrl() }}">Contactar por WhatsApp</a>
+        @elseif($brand->get('email'))
+            <a href="mailto:{{ $brand->get('email') }}">Escríbenos</a>
+        @endif
     </div>
 </body>
 </html>

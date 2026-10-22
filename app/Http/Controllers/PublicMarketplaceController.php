@@ -6,6 +6,7 @@ use App\Models\Car;
 use App\Models\CarPublicLink;
 use App\Models\MarketplaceVisit;
 use App\Models\Organization;
+use App\Support\Brand;
 use App\Support\CostBreakdown;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -21,7 +22,13 @@ class PublicMarketplaceController extends Controller
      * del marketplace. Centralizado aquí para no duplicarlo en cada
      * componente Vue.
      */
-    private const WHATSAPP_NUMBER = '34675701439';
+    /** Número de WhatsApp (solo dígitos, con prefijo) de la marca dada. */
+    private static function whatsappDigits(Brand $brand): string
+    {
+        $digits = preg_replace('/\D/', '', (string) ($brand->get('whatsapp') ?: $brand->get('phone')));
+
+        return strlen($digits) === 9 ? '34'.$digits : $digits;
+    }
 
     /**
      * Ahorro minimo (EUR) para que un coche cuente como "muy buen precio"
@@ -282,7 +289,7 @@ class PublicMarketplaceController extends Controller
                 'transmission', 'doors', 'color',
             ]),
             'visitsCount' => $visitsCount,
-            'whatsappNumber' => self::WHATSAPP_NUMBER,
+            'whatsappNumber' => self::whatsappDigits(Brand::platform()),
         ]);
     }
 
@@ -317,7 +324,7 @@ class PublicMarketplaceController extends Controller
             'cars' => $cars,
             'requestedIds' => $ids->all(),
             'requestUrl' => $requestUrl,
-            'whatsappNumber' => self::WHATSAPP_NUMBER,
+            'whatsappNumber' => self::whatsappDigits(Brand::platform()),
         ]);
     }
 
@@ -351,7 +358,8 @@ class PublicMarketplaceController extends Controller
             'dossierUrl' => $car->dossier_url,
             'relatedCars' => $this->relatedCars($car),
             'isSharedProfile' => false,
-            'whatsappNumber' => self::WHATSAPP_NUMBER,
+            'whatsappNumber' => self::whatsappDigits($car->organization->brand()),
+            'orgBrand' => $car->organization->brand()->toPublicArray(),
             'derived' => [
                 'total_cost' => $car->calculateTotalCost(),
                 'iedmt' => $car->calculateIEDMT(),
@@ -474,7 +482,8 @@ class PublicMarketplaceController extends Controller
             'requestUrl' => $this->publicRequestUrl($car->organization, ['car' => $car->id]),
             'relatedCars' => $this->relatedCars($car),
             'isSharedProfile' => true,
-            'whatsappNumber' => self::WHATSAPP_NUMBER,
+            'whatsappNumber' => self::whatsappDigits($car->organization->brand()),
+            'orgBrand' => $car->organization->brand()->toPublicArray(),
             'derived' => [
                 'total_cost' => $car->calculateTotalCost(),
                 'iedmt' => $car->calculateIEDMT(),

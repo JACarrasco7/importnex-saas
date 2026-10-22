@@ -2,10 +2,11 @@
 
 namespace Database\Factories;
 
+use App\Models\Organization;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Organization>
+ * @extends Factory<Organization>
  */
 class OrganizationFactory extends Factory
 {
@@ -30,7 +31,17 @@ class OrganizationFactory extends Factory
         ];
     }
 
-    public function withAi(string $provider = 'mistral', string $model = null, string $key = 'test-key'): static
+    /** Prueba gratuita caducada y sin suscripción. */
+    public function trialExpired(): static
+    {
+        return $this->state(fn () => [
+            'trial_ends_at' => now()->subDay(),
+            'subscribed_at' => null,
+            'is_owner' => false,
+        ]);
+    }
+
+    public function withAi(string $provider = 'mistral', ?string $model = null, string $key = 'test-key'): static
     {
         return $this->state(fn () => [
             'ai_provider' => $provider,

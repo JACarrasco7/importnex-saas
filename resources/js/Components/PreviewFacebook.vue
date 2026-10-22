@@ -9,7 +9,7 @@
         <div class="flex items-center gap-2 mb-3">
             <div class="w-8 h-8 rounded-full bg-gray-200"></div>
             <div class="flex-1">
-                <div class="text-sm font-semibold text-gray-900">JJ Import Motors</div>
+                <div class="text-sm font-semibold text-gray-900">{{ brand.name }}</div>
                 <div class="text-xs text-gray-500">Hace 2 horas</div>
             </div>
         </div>
@@ -60,6 +60,9 @@ import {
     ChatBubbleBottomCenterIcon,
     ArrowTopRightOnSquareIcon,
 } from '@heroicons/vue/24/outline';
+import { useBrand } from '@/Composables/useBrand';
+
+const { brand } = useBrand();
 
 const props = defineProps({
     car: Object,

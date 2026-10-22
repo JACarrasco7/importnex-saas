@@ -21,14 +21,14 @@ class PlanLimitMiddleware
             return $next($request);
         }
 
-        $resourceName = rtrim($resource, 's');
+        $resourceName = ['cars' => 'coches', 'clients' => 'clientes', 'contacts' => 'contactos', 'users' => 'usuarios'][$resource] ?? $resource;
         $limit = $organization->limitFor($resource);
         $current = $organization->currentCount($resource);
         $planName = config('subscription.plans.'.$organization->plan.'.name', $organization->plan);
 
         if ($request->expectsJson() || $request->wantsJson()) {
             return response()->json([
-                'message' => "You have reached the limit of {$limit} {$resourceName}s on your {$planName} plan.",
+                'message' => "Has alcanzado el límite de {$limit} {$resourceName} de tu plan {$planName}.",
                 'error' => 'plan_limit_reached',
                 'resource' => $resource,
                 'current' => $current,
@@ -39,9 +39,9 @@ class PlanLimitMiddleware
         }
 
         return back()
-            ->with('error', "You've reached the limit of {$limit} {$resourceName}s on your {$planName} plan. Upgrade to add more.")
+            ->with('error', "Has alcanzado el límite de {$limit} {$resourceName} de tu plan {$planName}. Mejora tu plan para añadir más.")
             ->withErrors([
-                'plan_limit' => "Limit of {$limit} {$resourceName}s reached on {$planName} plan.",
+                'plan_limit' => "Límite de {$limit} {$resourceName} alcanzado en el plan {$planName}.",
             ]);
     }
 }

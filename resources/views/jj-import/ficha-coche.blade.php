@@ -11,10 +11,11 @@
       CTA, CONTACTO, QR, QR_TEXTO, LEGAL, FOTOS.
     ═══════════════════════════════════════════════════════════════════════ --}}
 @php
-    $telefono_1 = $telefono_1 ?? '675 70 14 39';
-    $telefono_2 = $telefono_2 ?? '691 48 59 27';
-    $email = $email ?? 'jjimportmotors@gmail.com';
-    $qr_url = $e->uno('QR') ?? route('public.car-request.index', ['slug' => 'jj-import-motors']);
+    $brand = $brand ?? \App\Support\Brand::platform();
+    $telefono_1 = $telefono_1 ?? $brand->get('phone');
+    $telefono_2 = $telefono_2 ?? $brand->get('phone_2');
+    $email = $email ?? $brand->get('email');
+    $qr_url = $e->uno('QR') ?? url('/');
 
     $qr_svg = $qr_svg ?? null;
     if (!$qr_svg) {
@@ -83,7 +84,7 @@ $ia_redfl  = \App\Support\IaList::normalizar($car->red_flags ?? null);
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>JJ Import Motors - {{ $e->uno('TITULO') }}</title>
+    <title>{{ $brand->name() }} - {{ $e->uno('TITULO') }}</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
         @page { size: A4; margin: 0; }
@@ -331,7 +332,7 @@ $ia_redfl  = \App\Support\IaList::normalizar($car->red_flags ?? null);
     <div class="container">
 
         <div class="header">
-            <img src="{{ $logo_base64 }}" alt="JJ Import Motors" class="logo">
+            @if($logo_base64)<img src="{{ $logo_base64 }}" alt="{{ $brand->name() }}" class="logo">@else<span class="logo" style="color:#fff;font-weight:700;font-size:18px;">{{ $brand->name() }}</span>@endif
             <span class="badge-llave">SERVICIO LLAVE EN MANO</span>
         </div>
 

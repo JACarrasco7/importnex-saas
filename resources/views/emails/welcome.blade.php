@@ -15,7 +15,7 @@
                     <!-- Header brand -->
                     <tr>
                         <td style="background:linear-gradient(135deg,#1A306D,#0f1d44);padding:32px 24px;text-align:center;">
-                            <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:700;letter-spacing:-0.5px;">JJ Import Motors</h1>
+                            <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:700;letter-spacing:-0.5px;">{{ config('app.name') }}</h1>
                         </td>
                     </tr>
                     <!-- Body -->
@@ -26,9 +26,9 @@
                             </p>
                             <p style="margin:0 0 16px;">
                                 @if($isEs)
-                                    Bienvenido a <strong>{{ $organizationName }}</strong> en JJ Import Motors. Estamos encantados de tenerte a bordo.
+                                    Bienvenido a <strong>{{ $organizationName }}</strong> en {{ config('app.name') }}. Estamos encantados de tenerte a bordo.
                                 @else
-                                    Welcome to <strong>{{ $organizationName }}</strong> on JJ Import Motors. We're thrilled to have you on board.
+                                    Welcome to <strong>{{ $organizationName }}</strong> on {{ config('app.name') }}. We're thrilled to have you on board.
                                 @endif
                             </p>
                             <p style="margin:0 0 16px;">
@@ -60,7 +60,7 @@
                     <!-- Footer -->
                     <tr>
                         <td style="background-color:#f9fafb;padding:24px;text-align:center;color:#9ca3af;font-size:12px;">
-                            © {{ date('Y') }} JJ Import Motors ·
+                            © {{ date('Y') }} {{ config('app.name') }} ·
                             <a href="{{ $appUrl }}" style="color:#9ca3af;text-decoration:underline;">{{ $appUrl }}</a>
                         </td>
                     </tr>

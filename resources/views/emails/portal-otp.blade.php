@@ -23,7 +23,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <td style="padding:16px 32px;background:#f3f4f7;font-size:12px;color:#7a8398;">JJ Import Motors · Huelva, España</td>
+                        <td style="padding:16px 32px;background:#f3f4f7;font-size:12px;color:#7a8398;">{{ $order->organization->brand()->footerLine() }}</td>
                     </tr>
                 </table>
             </td>

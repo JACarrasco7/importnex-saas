@@ -1,13 +1,16 @@
 <script setup>
 import { ChatBubbleBottomCenterIcon } from '@heroicons/vue/24/outline';
 import { useTranslations } from '@/Composables/useTranslations';
+import { useBrand } from '@/Composables/useBrand';
 
 const { t } = useTranslations();
+const { brand, waNumber, whatsappUrl } = useBrand();
 </script>
 
 <template>
     <a
-        href="https://wa.me/34675701439?text=Hola%20JJ%20Import%20Motors%2C%20me%20interesa%20m%C3%A1s%20informaci%C3%B3n"
+        v-if="waNumber"
+        :href="whatsappUrl(`Hola ${brand.name}, me interesa más información`)"
         target="_blank"
         rel="noopener noreferrer"
         class="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-green-600 text-white shadow-2xl transition-all hover:bg-green-700 hover:scale-110 hover:-translate-y-1"

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Organization;
+use App\Support\Brand;
 use Illuminate\Http\Request;
 
 /**
@@ -18,6 +20,14 @@ class PublicLegalController extends Controller
 {
     public function show(Request $request)
     {
-        return view('public.legal');
+        // ?org=<slug> muestra el aviso legal de esa organización; sin él, el
+        // de la organización que opera la web pública.
+        $organization = $request->filled('org')
+            ? Organization::query()->where('slug', (string) $request->query('org'))->where('is_public', true)->first()
+            : null;
+
+        return view('public.legal', [
+            'brand' => $organization ? Brand::for($organization) : Brand::platform(),
+        ]);
     }
 }

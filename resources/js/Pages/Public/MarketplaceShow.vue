@@ -19,6 +19,7 @@ import {
 } from '@heroicons/vue/24/outline';
 import MarketplaceLayout from '@/Layouts/MarketplaceLayout.vue';
 import { useTranslations } from '@/Composables/useTranslations';
+import { useBrand } from '@/Composables/useBrand';
 import { useFormat } from '@/Composables/useFormat';
 import { photoUrl } from '@/Composables/usePhotoUrl';
 
@@ -29,12 +30,13 @@ const props = defineProps({
     relatedCars: { type: Array, default: () => [] },
     publicProfileUrl: { type: String, default: null },
     dossierUrl: { type: String, default: null },
-    whatsappNumber: { type: String, default: '34675701439' },
+    whatsappNumber: { type: String, default: '' },
     isSharedProfile: { type: Boolean, default: false },
     costBreakdown: { type: Object, default: () => ({ car_price: 0, transport: 0, processing: 0, iedmt: 0, honorarios: 1000, total: 0, has_data: false }) },
 });
 
 const { t, locale } = useTranslations();
+const { telUrl } = useBrand();
 const { currency } = useFormat();
 
 const fmt = (n) => {
@@ -233,7 +235,7 @@ const stateLabel = computed(() => stateLabels[props.car?.status] || t('dossier.s
 // URL WhatsApp con texto predefinido.
 const whatsappUrl = computed(() => {
     const text = t('dossier.whatsapp_text', { brand: props.car?.brand || '', model: props.car?.model || '' });
-    return 'https://wa.me/34675701439?text=' + encodeURIComponent(text);
+    return `https://wa.me/${(props.whatsappNumber || '').replace(/\D/g, '')}?text=` + encodeURIComponent(text);
 });
 
 // Especificaciones tecnicas (mismo orden que el dossier car-dossier.blade.php).
@@ -274,7 +276,7 @@ const specItems = computed(() => [
                             {{ t('marketplace.shared_profile_badge', { default: 'Perfil publico' }) }}
                         </p>
                         <p class="mt-1 text-sm text-estoril-800 dark:text-estoril-200">
-                            {{ t('marketplace.shared_profile_desc', { default: 'Estas viendo el perfil publico de este coche, compartido por JJ Import Motors.' }) }}
+                            {{ t('marketplace.shared_profile_desc', { default: 'Estas viendo el perfil publico de este coche, compartido por :company.' }) }}
                         </p>
                     </div>
                 </div>
@@ -309,7 +311,7 @@ const specItems = computed(() => [
                             <p v-if="heroData" class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ heroData }}</p>
                             <div v-if="heroPrice" class="mt-5 inline-block rounded-2xl bg-gradient-to-br from-estoril-700 to-estoril-900 px-5 py-3 text-white shadow-lg">
                                 <p class="text-[10px] font-semibold uppercase tracking-widest text-estoril-100">
-                                    {{ t('dossier.price_estimated', { default: 'Puesto en Huelva - aprox.' }) }}
+                                    {{ t('dossier.price_estimated', { default: 'Puesto en :city - aprox.' }) }}
                                 </p>
                                 <p class="mt-1 text-2xl font-extrabold tracking-tight">{{ heroPrice }}</p>
                             </div>
@@ -318,7 +320,7 @@ const specItems = computed(() => [
                                     <ChatBubbleLeftRightIcon class="h-4 w-4" />
                                     {{ t('dossier.cta_whatsapp', { default: 'Me interesa' }) }}
                                 </a>
-                                <a href="tel:+34675701439" class="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-gray-800 sm:flex-none dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200">
+                                <a v-if="telUrl" :href="telUrl" class="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-gray-800 sm:flex-none dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200">
                                     <PhoneIcon class="h-4 w-4" />
                                     {{ t('dossier.cta_call', { default: 'Llamar' }) }}
                                 </a>
@@ -425,7 +427,7 @@ const specItems = computed(() => [
                 <!-- PRECIO -->
                 <section v-if="costBreakdown && costBreakdown.has_data" class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700">
                     <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-                        <h3 class="text-base font-semibold text-gray-900">{{ t('dossier.section_price_title', { default: 'Cuanto te costaria, puesto en Huelva' }) }}</h3>
+                        <h3 class="text-base font-semibold text-gray-900">{{ t('dossier.section_price_title', { default: 'Cuanto te costaria, puesto en :city' }) }}</h3>
                         <span class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-amber-700 ring-1 ring-amber-200">
                             {{ t('marketplace_show.cost_approximate', { default: 'Aproximado' }) }}
                         </span>
@@ -449,7 +451,7 @@ const specItems = computed(() => [
                         </div>
                         <div class="flex items-baseline justify-between gap-4 border-b border-dashed border-gray-200 pb-2">
                             <div>
-                                <span class="text-sm text-gray-700">{{ t('marketplace_show.cost_honorarios_label', { default: 'Honorarios JJ Import' }) }}</span>
+                                <span class="text-sm text-gray-700">{{ t('marketplace_show.cost_honorarios_label', { default: 'Honorarios :company' }) }}</span>
                                 <p class="text-[11px] text-gray-500">{{ t('marketplace_show.cost_honorarios_note', { default: '1.000 EUR (1.500 EUR si el coche es >= 30.000 EUR)' }) }}</p>
                             </div>
                             <span class="font-mono text-sm font-semibold text-estoril-800">{{ fmt(costBreakdown.honorarios) }}</span>
@@ -605,7 +607,7 @@ const specItems = computed(() => [
                         {{ t('dossier.section_legal_title', { default: 'Somos gestores, no vendedores' }) }}
                     </h2>
                     <p class="mt-3 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
-                        {{ t('dossier.legal_body', { default: 'JJ Import Motors no es el vendedor ni el propietario del vehiculo. Gestionamos la busqueda, la verificacion y la importacion, con honorarios acordados de antemano. No ofrecemos garantia sobre el vehiculo: cualquier garantia o responsabilidad corresponde al vendedor, segun la ley que le sea aplicable.' }) }}
+                        {{ t('dossier.legal_body', { default: ':company no es el vendedor ni el propietario del vehiculo. Gestionamos la busqueda, la verificacion y la importacion, con honorarios acordados de antemano. No ofrecemos garantia sobre el vehiculo: cualquier garantia o responsabilidad corresponde al vendedor, segun la ley que le sea aplicable.' }) }}
                     </p>
                 </section>
 
@@ -640,7 +642,7 @@ const specItems = computed(() => [
                     <ChatBubbleLeftRightIcon class="h-4 w-4" />
                     {{ t('dossier.cta_whatsapp_short', { default: 'WhatsApp' }) }}
                 </a>
-                <a href="tel:+34675701439" class="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-gray-800 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200">
+                <a v-if="telUrl" :href="telUrl" class="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-gray-800 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200">
                     <PhoneIcon class="h-4 w-4" />
                     {{ t('dossier.cta_call_short', { default: 'Llamar' }) }}
                 </a>

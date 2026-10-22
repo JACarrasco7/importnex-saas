@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Información legal · JJ Import Motors</title>
-    <meta name="description" content="Aviso legal, política de privacidad y términos de uso de JJ Import Motors.">
+    <title>Información legal · {{ $brand->name() }}</title>
+    <meta name="description" content="Aviso legal, política de privacidad y términos de uso de {{ $brand->name() }}.">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="{{ url('/legal') }}">
     <style>
@@ -46,7 +46,7 @@
         <a href="{{ url('/') }}">← Volver al marketplace</a>
     </div>
     <header>
-        <span class="pill">JJ Import Motors</span>
+        <span class="pill">{{ $brand->name() }}</span>
         <h1 style="margin-top: 12px;">Información legal</h1>
         <p class="lead">Aviso legal, política de privacidad y términos de uso del marketplace público.</p>
         <p class="meta">Última actualización: {{ now()->format('d/m/Y') }}</p>
@@ -54,15 +54,17 @@
 
     <section id="aviso-legal">
         <h2>1. Aviso legal</h2>
-        <p>En cumplimiento del artículo 10 de la Ley 34/2002, de 11 de julio, de Servicios de la Sociedad de la Información y de Comercio Electrónico (LSSI-CE), se informa al usuario que el sitio web <strong>jjimportmotors.com</strong> es titularidad de:</p>
+        <p>En cumplimiento del artículo 10 de la Ley 34/2002, de 11 de julio, de Servicios de la Sociedad de la Información y de Comercio Electrónico (LSSI-CE), se informa al usuario que el sitio web <strong>{{ $brand->get('website') ?: request()->getHost() }}</strong> es titularidad de:</p>
         <ul>
-            <li><strong>Titular:</strong> JJ Import Motors</li>
-            <li><strong>Correo de contacto:</strong> <a href="mailto:jjimportmotors@gmail.com">jjimportmotors@gmail.com</a></li>
-            <li><strong>Teléfono / WhatsApp:</strong> <a href="tel:+34675701439">+34 675 70 14 39</a></li>
+            <li><strong>Titular:</strong> {{ $brand->get('legal_name') }}</li>
+            @if($brand->get('tax_id'))<li><strong>NIF/CIF:</strong> {{ $brand->get('tax_id') }}</li>@endif
+            @if($brand->get('address'))<li><strong>Domicilio:</strong> {{ $brand->get('address') }}</li>@endif
+            @if($brand->get('email'))<li><strong>Correo de contacto:</strong> <a href="mailto:{{ $brand->get('email') }}">{{ $brand->get('email') }}</a></li>@endif
+            @if($brand->telHref())<li><strong>Teléfono / WhatsApp:</strong> <a href="{{ $brand->telHref() }}">{{ $brand->get('phone') }}</a></li>@endif
             <li><strong>Actividad:</strong> Servicio de búsqueda, verificación e importación de vehículos desde Alemania.</li>
         </ul>
         <h3>Naturaleza del servicio</h3>
-        <p>JJ Import Motors actúa como <strong>gestor e intermediario</strong> en la búsqueda, verificación e importación de vehículos. <strong>No somos el vendedor ni el propietario</strong> de los vehículos publicados en el marketplace. Cualquier garantía o responsabilidad sobre el vehículo corresponde al vendedor, según la ley que le sea aplicable. Los honorarios del servicio (1.000 € para vehículos de menos de 30.000 € y 1.500 € para vehículos de 30.000 € o más) se acuerdan por escrito antes de la reserva y son independientes del precio del vehículo.</p>
+        <p>{{ $brand->name() }} actúa como <strong>gestor e intermediario</strong> en la búsqueda, verificación e importación de vehículos. <strong>No somos el vendedor ni el propietario</strong> de los vehículos publicados en el marketplace. Cualquier garantía o responsabilidad sobre el vehículo corresponde al vendedor, según la ley que le sea aplicable. Los honorarios del servicio se acuerdan por escrito antes de la reserva y son independientes del precio del vehículo.</p>
     </section>
 
     <section id="privacidad">
@@ -79,23 +81,23 @@
         <h3>Conservación</h3>
         <p>Los datos se conservan mientras se mantenga la relación comercial y, posteriormente, durante el plazo legal aplicable (6 años para documentación contable y fiscal).</p>
         <h3>Derechos</h3>
-        <p>Puede ejercer en cualquier momento sus derechos de acceso, rectificación, supresión, oposición, limitación y portabilidad escribiendo a <a href="mailto:jjimportmotors@gmail.com">jjimportmotors@gmail.com</a>.</p>
+        <p>Puede ejercer en cualquier momento sus derechos de acceso, rectificación, supresión, oposición, limitación y portabilidad escribiendo a <a href="mailto:{{ $brand->get('email') }}">{{ $brand->get('email') }}</a>.</p>
     </section>
 
     <section id="terminos">
         <h2>3. Términos de uso</h2>
         <h3>Información mostrada</h3>
-        <p>Los precios, especificaciones, fotografías y otra información de los vehículos son facilitados por terceros (vendedores, portales de origen) y se muestran con la mayor exactitud posible. JJ Import Motors verifica cada unidad antes de su publicación, pero no garantiza la exactitud absoluta de los datos. Antes de formalizar cualquier reserva se confirma toda la información por escrito.</p>
+        <p>Los precios, especificaciones, fotografías y otra información de los vehículos son facilitados por terceros (vendedores, portales de origen) y se muestran con la mayor exactitud posible. {{ $brand->name() }} verifica cada unidad antes de su publicación, pero no garantiza la exactitud absoluta de los datos. Antes de formalizar cualquier reserva se confirma toda la información por escrito.</p>
         <h3>Costes y honorarios</h3>
         <p>Los importes mostrados en el desglose de cada ficha son <strong>aproximados</strong> y pueden variar según las tasas vigentes, el transporte real y el vehículo. El precio final se confirma por escrito antes de la reserva.</p>
         <h3>Limitación de responsabilidad</h3>
-        <p>JJ Import Motors no se responsabiliza de los daños o perjuicios derivados del uso indebido del sitio web, de la imposibilidad de acceso o de la presencia de virus u otros elementos lesivos. Nos reservamos el derecho a modificar el contenido del sitio en cualquier momento sin previo aviso.</p>
+        <p>{{ $brand->name() }} no se responsabiliza de los daños o perjuicios derivados del uso indebido del sitio web, de la imposibilidad de acceso o de la presencia de virus u otros elementos lesivos. Nos reservamos el derecho a modificar el contenido del sitio en cualquier momento sin previo aviso.</p>
         <h3>Legislación aplicable</h3>
-        <p>Las presentes condiciones se rigen por la legislación española y europea aplicable. Para cualquier controversia, las partes se someten a los Juzgados y Tribunales de Huelva.</p>
+        <p>Las presentes condiciones se rigen por la legislación española y europea aplicable. Para cualquier controversia, las partes se someten a los Juzgados y Tribunales de {{ $brand->get('city') ?: 'su domicilio' }}.</p>
     </section>
 
     <footer>
-        © {{ date('Y') }} JJ Import Motors · Servicio de búsqueda e importación de vehículos desde Alemania.
+        © {{ date('Y') }} {{ $brand->name() }} · Servicio de búsqueda e importación de vehículos desde Alemania.
     </footer>
 </div>
 </body>

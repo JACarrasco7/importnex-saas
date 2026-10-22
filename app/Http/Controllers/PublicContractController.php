@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\ContractStatus;
 use App\Models\ContractAcceptance;
+use App\Support\Brand;
 use App\Support\ChromePath;
 use App\Support\ContractDocument;
 use Illuminate\Http\JsonResponse;
@@ -50,7 +51,8 @@ class PublicContractController extends Controller
             'contractTextHtml' => ContractDocument::toHtml($text),
             'contractHash' => $hash,
             'ui' => config('contracts.ui'),
-            'prestador' => config('contracts.prestador'),
+            'prestador' => $contract->snapshot['_prestador'] ?? config('contracts.prestador'),
+            'brand' => Brand::for($contract->organization),
             'accepted' => $contract->accepted_at !== null,
             'accepted_at' => $contract->accepted_at?->format('d/m/Y H:i:s'),
         ]);
@@ -161,7 +163,7 @@ class PublicContractController extends Controller
             'contract' => $contract,
             'contractTextHtml' => ContractDocument::toHtml($text),
             'hash' => $hash,
-            'prestador' => config('contracts.prestador'),
+            'prestador' => $contract->snapshot['_prestador'] ?? config('contracts.prestador'),
             'trackingUrl' => $contract->car?->tracking_url,
             'acceptedAt' => $contract->accepted_at->format('d/m/Y H:i:s'),
             'ip' => $contract->accepted_ip,
@@ -190,7 +192,7 @@ class PublicContractController extends Controller
                 ->setChromePath($chrome)
                 ->format('A4')
                 ->showBrowserHeaderAndFooter()
-                ->headerHtml('<div style="font-size:9px;color:#6b7280;width:100%;padding:0 14mm;">JJ Import Motors · Contrato #'.$contract->id.'</div>')
+                ->headerHtml('<div style="font-size:9px;color:#6b7280;width:100%;padding:0 14mm;">'.e((string) ($contract->snapshot['_prestador']['nombre'] ?? $contract->snapshot['_prestador']['razon_social'] ?? config('app.name'))).' · Contrato #'.$contract->id.'</div>')
                 ->footerHtml('<div style="font-size:8px;color:#9ca3af;width:100%;padding:0 14mm;text-align:center;">SHA256 '.substr($hash, 0, 32).'… · Firmado el '.$contract->accepted_at->format('d/m/Y H:i').' · IP '.$contract->accepted_ip.'</div>')
                 ->save($tmpPdf);
         } catch (\Throwable $e) {

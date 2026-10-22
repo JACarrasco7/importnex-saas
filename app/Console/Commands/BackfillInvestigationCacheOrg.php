@@ -28,8 +28,11 @@ class BackfillInvestigationCacheOrg extends Command
 
     public function handle(): int
     {
-        $orgName = $this->option('org') ?: 'JJ Import Motors';
-        $org = Organization::where('name', $orgName)->first();
+        $orgName = $this->option('org');
+        $org = $orgName
+            ? Organization::where('name', $orgName)->first()
+            : Organization::where('is_owner', true)->orderBy('id')->first();
+        $orgName ??= '(organización propietaria)';
 
         if (! $org) {
             $this->error("Organización no encontrada: {$orgName}");

@@ -186,6 +186,7 @@ class PublicTrackingController extends Controller
             ->all();
 
         return Inertia::render('Public/Tracking', [
+            'orgBrand' => $car->organization?->brand()->toPublicArray(),
             'car' => [
                 'brand' => $car->brand,
                 'model' => $car->model,
@@ -208,8 +209,8 @@ class PublicTrackingController extends Controller
             ],
             'manager' => $managerData,
             'contact' => [
-                'phone' => '+34 675 70 14 39',
-                'email' => 'jjimportmotors@gmail.com',
+                'phone' => $car->organization?->brand()->get('phone'),
+                'email' => $car->organization?->brand()->get('email'),
             ],
         ]);
     }

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex,nofollow">
-    <title>{{ $ui['titulo'] }} · JJ Import Motors</title>
+    <title>{{ $ui['titulo'] }} · {{ $brand->name() }}</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -32,9 +32,9 @@
 <header class="border-b border-estoril-100/40 bg-white/80 backdrop-blur">
     <div class="mx-auto flex max-w-4xl items-center justify-between px-6 py-4">
         <div class="flex items-center gap-3">
-            <img src="/images/jj-import/logo-insignia.png" alt="JJ Import Motors" class="h-10 w-auto">
+            @if ($brand->get('logo_url'))<img src="{{ $brand->get('logo_url') }}" alt="{{ $brand->name() }}" class="h-10 w-auto">@endif
         </div>
-        <span class="text-xs uppercase tracking-widest text-estoril-700">Contrato · JJ Import Motors</span>
+        <span class="text-xs uppercase tracking-widest text-estoril-700">Contrato · {{ $brand->name() }}</span>
     </div>
 </header>
 

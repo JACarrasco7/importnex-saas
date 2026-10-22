@@ -32,6 +32,7 @@ import Pagination from '@/Components/Pagination.vue';
 import MarketplaceLayout from '@/Layouts/MarketplaceLayout.vue';
 import { useFormat } from '@/Composables/useFormat';
 import { useTranslations } from '@/Composables/useTranslations';
+import { useBrand } from '@/Composables/useBrand';
 import { photoUrl } from '@/Composables/usePhotoUrl';
 
 const props = defineProps({
@@ -48,6 +49,8 @@ const props = defineProps({
 });
 
 const { t, locale } = useTranslations();
+const { whatsappUrl, telUrl, mailUrl } = useBrand();
+const customCarText = 'Hola, estoy buscando un coche a medida. ¿Me pueden ayudar?';
 
 // Bounds para validación HTML5 (vienen del backend, item 1)
 const priceMin = computed(() => props.filterBounds?.price?.min ?? 0);
@@ -463,7 +466,7 @@ onMounted(() => {
 
                 <div class="mt-10 text-center">
                     <a
-                        :href="`https://wa.me/34675701439?text=${encodeURIComponent(t('marketplace.section_transparency_lead'))}`"
+                        :href="whatsappUrl(t('marketplace.section_transparency_lead'))"
                         target="_blank"
                         rel="noopener"
                         class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700"
@@ -496,7 +499,7 @@ onMounted(() => {
                         </p>
                     </div>
                     <a
-                        href="https://wa.me/34675701439?text=Hola%2C%20estoy%20buscando%20un%20coche%20a%20medida.%20%C2%BFMe%20pueden%20ayudar%3F"
+                        :href="whatsappUrl(customCarText)"
                         target="_blank"
                         rel="noopener"
                         class="inline-flex items-center justify-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200"
@@ -803,7 +806,7 @@ onMounted(() => {
                         {{ t('marketplace.no_cars_desc') }}
                     </p>
                     <a
-                        href="https://wa.me/34675701439?text=Hola%2C%20estoy%20buscando%20un%20coche%20a%20medida.%20%C2%BFMe%20pueden%20ayudar%3F"
+                        :href="whatsappUrl(customCarText)"
                         target="_blank"
                         rel="noopener"
                         class="mt-6 inline-flex items-center justify-center gap-2 rounded-lg bg-estoril-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-estoril-800"
@@ -828,15 +831,15 @@ onMounted(() => {
                     {{ t('marketplace.section_contact_desc') }}
                 </p>
                 <div class="mt-8 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-4">
-                    <a href="https://wa.me/34675701439?text=Hola%2C%20estoy%20buscando%20un%20coche%20a%20medida.%20%C2%BFMe%20pueden%20ayudar%3F" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 rounded-lg bg-estoril-600 px-6 py-3 text-base font-semibold text-white shadow-lg hover:bg-estoril-500">
+                    <a :href="whatsappUrl(customCarText)" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 rounded-lg bg-estoril-600 px-6 py-3 text-base font-semibold text-white shadow-lg hover:bg-estoril-500">
                         <PhoneIcon class="h-5 w-5 shrink-0" />
                         <span class="text-center">{{ t('marketplace.cta_whatsapp') }}</span>
                     </a>
-                    <a href="tel:+34675701439" class="inline-flex items-center justify-center gap-2 rounded-lg bg-white/10 px-6 py-3 text-base font-semibold text-white ring-1 ring-white/20 hover:bg-white/20">
+                    <a v-if="telUrl" :href="telUrl" class="inline-flex items-center justify-center gap-2 rounded-lg bg-white/10 px-6 py-3 text-base font-semibold text-white ring-1 ring-white/20 hover:bg-white/20">
                         <PhoneIcon class="h-5 w-5 shrink-0" />
                         <span class="text-center">{{ t('marketplace.cta_call') }}</span>
                     </a>
-                    <a href="mailto:jjimportmotors@gmail.com" class="inline-flex items-center justify-center gap-2 rounded-lg bg-white/10 px-6 py-3 text-base font-semibold text-white ring-1 ring-white/20 hover:bg-white/20">
+                    <a v-if="mailUrl" :href="mailUrl" class="inline-flex items-center justify-center gap-2 rounded-lg bg-white/10 px-6 py-3 text-base font-semibold text-white ring-1 ring-white/20 hover:bg-white/20">
                         <EnvelopeIcon class="h-5 w-5 shrink-0" />
                         <span class="text-center">{{ t('marketplace.cta_email') }}</span>
                     </a>
@@ -847,7 +850,7 @@ onMounted(() => {
             </div>
         </section>
 
-        <!-- Floating download button for JJ Import Motors folleto.
+        <!-- Floating download button for the organization brochure.
              Posicionado a la izquierda del WhatsApp float (que esta en
              bottom-6 right-6) para que ambos se vean lado a lado sin
              solaparse. En pantallas pequenas, el texto se oculta y solo
@@ -855,7 +858,7 @@ onMounted(() => {
         <div class="fixed bottom-6 right-24 z-40">
             <a
                 href="/jj-import-folleto.pdf"
-                download="JJ_Import_Motors_Folleto.pdf"
+                download="folleto.pdf"
                 class="flex items-center gap-2 rounded-full bg-estoril-700 px-4 py-3 text-sm font-semibold text-white shadow-lg hover:bg-estoril-800 transition-colors"
             >
                 <DocumentArrowDownIcon class="h-5 w-5" />

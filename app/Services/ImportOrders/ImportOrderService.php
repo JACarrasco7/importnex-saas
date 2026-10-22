@@ -64,7 +64,7 @@ class ImportOrderService
             ]);
             $order->save();
 
-            $order->forceFill(['reference' => sprintf('JJIM-%s-%04d', now()->format('Y'), $order->id)]);
+            $order->forceFill(['reference' => sprintf('%s-%s-%04d', config('import_orders.reference_prefix'), now()->format('Y'), $order->id)]);
             $this->assignNewPortalToken($order);
             $order->save();
 

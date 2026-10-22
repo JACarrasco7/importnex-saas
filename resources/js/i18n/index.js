@@ -25,6 +25,22 @@ const messages = ref({});
 const ready = ref(false);
 const currentLocale = ref('es');
 
+/**
+ * Sustituciones por defecto con la marca de la organización en contexto
+ * (prop compartido `brand`): :company, :city, :brand_phone, :app_name.
+ * Así ningún texto lleva escrito el nombre de una empresa concreta.
+ */
+const brandDefaults = ref({ company: '', city: '', brand_phone: '', app_name: '' });
+
+export function setBrandDefaults(brand = {}, appName = '') {
+    brandDefaults.value = {
+        company: brand?.name || appName || '',
+        city: brand?.city || (currentLocale.value === 'en' ? 'Spain' : 'España'),
+        brand_phone: brand?.phone || '',
+        app_name: appName || brand?.name || '',
+    };
+}
+
 function normalize(input) {
     if (!input) return {};
     const firstKey = Object.keys(input)[0];
@@ -145,8 +161,10 @@ function tFn(key, replacements = {}, fallback = null) {
         value = parts[idx] || parts[0];
     }
 
+    const all = { ...brandDefaults.value, ...replacements };
+
     return value.replace(/:(\w+)/g, (m, name) =>
-        name in replacements ? replacements[name] : m
+        name in all ? all[name] : m
     );
 }
 
@@ -169,6 +187,7 @@ export const i18nPlugin = {
                 const page = usePage();
                 watch(() => page.props.locale, () => syncFromBackend());
                 watch(() => page.props.translations, () => syncFromBackend());
+                watch(() => page.props.orgBrand, (brand) => setBrandDefaults(brand, page.props.appName), { immediate: true });
             } catch (e) {
                 // usePage no disponible; sin watch reactivo.
             }

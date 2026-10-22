@@ -5,7 +5,7 @@
     · DESDE QUÉ ARCHIVO: contenido/informe-interno.txt  (esqueleto [MARCADOR])
     · RUTA             : GET /cars/{car}/informe-interno (solo owner/operator)
     · CONTROLADOR      : PaqueteValoracionController@interno
-    · AUDIENCIA        : JJ Import Motors (EQUIPO). NUNCA al cliente:
+    · AUDIENCIA        : equipo interno de la organización (EQUIPO). NUNCA al cliente:
                          margen, honorarios desglosados, URLs de comparables.
     · Bloques que renderiza: SCORE_GLOBAL, RECOMENDACION, COBERTURA, SCORE_DIM,
       CAND_*, MARGEN, VENDIBILIDAD_FACTOR, VENTA, RIESGO, BANDERA_ROJA/AMARILLA,
@@ -14,9 +14,10 @@
     ═══════════════════════════════════════════════════════════════════════ --}}
 @php
     // DOCUMENTO INTERNO. No debe servirse por ninguna ruta pública.
-    $telefono_1 = $telefono_1 ?? '675 70 14 39';
-    $telefono_2 = $telefono_2 ?? '691 48 59 27';
-    $email = $email ?? 'jjimportmotors@gmail.com';
+    $brand = $brand ?? \App\Support\Brand::platform();
+    $telefono_1 = $telefono_1 ?? $brand->get('phone');
+    $telefono_2 = $telefono_2 ?? $brand->get('phone_2');
+    $email = $email ?? $brand->get('email');
 
     $semaforo = strtolower($e->uno('SEMAFORO') ?? ($car->traffic_light ?? 'gris'));
     $semaforo_color = match ($semaforo) {
@@ -362,7 +363,7 @@
     <div class="container">
 
         <div class="header">
-            <img src="{{ $logo_base64 }}" alt="JJ Import Motors" class="logo">
+            @if($logo_base64)<img src="{{ $logo_base64 }}" alt="{{ $brand->name() }}" class="logo">@else<span class="logo" style="color:#fff;font-weight:700;font-size:18px;">{{ $brand->name() }}</span>@endif
             <span class="confidencial">@if($e->uno('CONFIDENCIAL')){{ $e->uno('CONFIDENCIAL') }}@else CONFIDENCIAL — USO INTERNO @endif</span>
         </div>
 

@@ -6,42 +6,44 @@ use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
+/**
+ * Instalación limpia: crea la organización operadora de la plataforma y su
+ * usuario administrador a partir de .env (SEED_ADMIN_*). Nunca contiene
+ * credenciales reales. Datos de demo: `php artisan db:seed --class=DemoDataSeeder`.
+ */
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Solo crear la organización JJ Import Motors y los 2 usuarios específicos.
-        // NO se siembran datos demo automáticamente.
-
-        $jjImport = Organization::firstOrCreate(
-            ['name' => 'JJ Import Motors'],
-            [
-                'plan' => 'pro',
-                'trial_ends_at' => now()->addDays(30),
-            ]
+        $organization = Organization::firstOrCreate(
+            ['name' => env('SEED_ORGANIZATION_NAME', config('app.name'))],
+            ['plan' => 'enterprise', 'is_owner' => true, 'is_public' => true],
         );
 
-        User::updateOrCreate(
-            ['email' => 'jacarrasco@jjimportmotors.com'],
+        $email = env('SEED_ADMIN_EMAIL');
+        if (blank($email)) {
+            $this->command?->warn('SEED_ADMIN_EMAIL vacío: no se crea usuario administrador.');
+
+            return;
+        }
+
+        $password = env('SEED_ADMIN_PASSWORD') ?: Str::password(16);
+
+        User::firstOrCreate(
+            ['email' => $email],
             [
-                'name' => 'JACarrasco',
-                'password' => Hash::make('joselete7'),
-                'organization_id' => $jjImport->id,
+                'name' => env('SEED_ADMIN_NAME', 'Admin'),
+                'password' => Hash::make($password),
+                'organization_id' => $organization->id,
                 'role' => 'owner',
                 'email_verified_at' => now(),
-            ]
+            ],
         );
 
-        User::updateOrCreate(
-            ['email' => 'jmpo@jjimportmotors.com'],
-            [
-                'name' => 'JoseMPO',
-                'password' => Hash::make('admin1234.'),
-                'organization_id' => $jjImport->id,
-                'role' => 'owner',
-                'email_verified_at' => now(),
-            ]
-        );
+        if (blank(env('SEED_ADMIN_PASSWORD'))) {
+            $this->command?->info("Usuario {$email} creado con contraseña temporal: {$password}");
+        }
     }
 }

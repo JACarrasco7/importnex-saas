@@ -26,9 +26,9 @@ class MarketingController extends Controller
         $stats = [
             'total_cars' => Car::count(),
             'with_content' => Car::has('marketingContents')->count(),
-            'published' => CarMarketingContent::where('status', 'published')->count(),
-            'drafts' => CarMarketingContent::where('status', 'draft')->count(),
-            'from_zip' => CarMarketingContent::where('source', 'zip')->count(),
+            'published' => CarMarketingContent::whereHas('car')->where('status', 'published')->count(),
+            'drafts' => CarMarketingContent::whereHas('car')->where('status', 'draft')->count(),
+            'from_zip' => CarMarketingContent::whereHas('car')->where('source', 'zip')->count(),
         ];
 
         return Inertia::render('Marketing/Index', [

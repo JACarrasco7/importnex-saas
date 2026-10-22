@@ -6,6 +6,7 @@ import { useTranslations } from '@/Composables/useTranslations';
 const { t } = useTranslations();
 const page = usePage();
 const flash = computed(() => page.props.flash || {});
+const brand = computed(() => page.props.orgBrand || {});
 
 const form = useForm({ email: '' });
 const submit = () => form.post(route('portal.recover'), { preserveScroll: true, onSuccess: () => form.reset() });
@@ -16,7 +17,8 @@ const submit = () => form.post(route('portal.recover'), { preserveScroll: true, 
 
     <div class="flex min-h-screen items-center justify-center bg-asphalt-50 px-4 py-12">
         <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-sm ring-1 ring-asphalt-100 sm:p-8">
-            <img src="/images/jj-import/logo-insignia.png" alt="JJ Import Motors" class="mx-auto h-12 w-auto" />
+            <img v-if="brand.logo_url" :src="brand.logo_url" :alt="brand.name" class="mx-auto h-12 w-auto" />
+            <p v-else class="text-center text-lg font-bold text-asphalt-900">{{ brand.name }}</p>
             <h1 class="mt-5 text-center text-xl font-bold text-asphalt-900">{{ t('portal.recover.title') }}</h1>
             <p class="mt-2 text-center text-sm text-asphalt-600">{{ t('portal.recover.subtitle') }}</p>
 

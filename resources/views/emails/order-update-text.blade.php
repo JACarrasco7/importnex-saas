@@ -13,7 +13,7 @@
 
 @endif
 @if ($forClient)
-{{ __('orders.mail.signature') }}
+{{ __('orders.mail.signature', ['company' => $brand['name'] ?? config('app.name')]) }}
 
 {{ __('orders.mail.footer') }}
 @endif

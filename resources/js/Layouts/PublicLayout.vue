@@ -12,8 +12,10 @@ import DarkModeToggle from '@/Components/DarkModeToggle.vue';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import WhatsAppFloat from '@/Components/WhatsAppFloat.vue';
 import { useTranslations } from '@/Composables/useTranslations';
+import { useBrand } from '@/Composables/useBrand';
 
 const { t } = useTranslations();
+const { brand, appName, whatsappUrl, waNumber } = useBrand();
 const page = usePage();
 
 const mobileOpen = ref(false);
@@ -38,7 +40,7 @@ const close = () => { mobileOpen.value = false; };
                     <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-estoril-600 to-estoril-800 shadow-sm">
                         <TruckIcon class="h-5 w-5 text-white" />
                     </div>
-                    <span class="text-lg font-bold tracking-tight text-gray-900 dark:text-white">JJ Import Motors</span>
+                    <span class="text-lg font-bold tracking-tight text-gray-900 dark:text-white">{{ appName }}</span>
                 </Link>
 
                 <!-- Desktop nav -->
@@ -151,7 +153,7 @@ const close = () => { mobileOpen.value = false; };
                             <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-estoril-600 to-estoril-800">
                                 <TruckIcon class="h-5 w-5 text-white" />
                             </div>
-                            <span class="text-lg font-bold text-gray-900 dark:text-white">JJ Import Motors</span>
+                            <span class="text-lg font-bold text-gray-900 dark:text-white">{{ appName }}</span>
                         </div>
                         <p class="mt-3 text-sm text-gray-600 dark:text-gray-400">
                             {{ t('welcome.ai_powered') }}
@@ -189,14 +191,14 @@ const close = () => { mobileOpen.value = false; };
                                     {{ t('public.footer.about', 'Sobre nosotros') }}
                                 </Link>
                             </li>
-                            <li>
-                                <a href="mailto:jjimportmotors@gmail.com" class="text-gray-600 hover:text-estoril-700 dark:text-gray-400 dark:hover:text-estoril-300">
-                                    jjimportmotors@gmail.com
+                            <li v-if="brand.email">
+                                <a :href="`mailto:${brand.email}`" class="text-gray-600 hover:text-estoril-700 dark:text-gray-400 dark:hover:text-estoril-300">
+                                    {{ brand.email }}
                                 </a>
                             </li>
-                            <li>
+                            <li v-if="waNumber">
                                 <a
-                                    href="https://wa.me/34675701439?text=Hola%20JJ%20Import%20Motors%2C%20me%20interesa%20m%C3%A1s%20informaci%C3%B3n"
+                                    :href="whatsappUrl(`Hola ${appName}, me interesa más información`)"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     class="text-gray-600 hover:text-estoril-700 dark:text-gray-400 dark:hover:text-estoril-300"
@@ -225,7 +227,7 @@ const close = () => { mobileOpen.value = false; };
                     </div>
                 </div>
                 <div class="mt-10 border-t border-gray-200 pt-6 text-xs text-gray-500 dark:border-asphalt-700 dark:text-gray-400">
-                    © {{ new Date().getFullYear() }} JJ Import Motors. {{ t('public.footer.rights', 'Todos los derechos reservados.') }}
+                    © {{ new Date().getFullYear() }} {{ appName }}. {{ t('public.footer.rights', 'Todos los derechos reservados.') }}
                 </div>
             </div>
         </footer>

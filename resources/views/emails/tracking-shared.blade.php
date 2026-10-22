@@ -40,7 +40,7 @@
                     <!-- Footer -->
                     <tr>
                         <td style="padding:16px 32px;background:#f3f4f7;font-size:12px;color:#7a8398;">
-                            JJ Import Motors · Huelva, España · {{ config('app.name') }}
+                            {{ $car->organization?->brand()->footerLine() ?? config('app.name') }}
                         </td>
                     </tr>
                 </table>

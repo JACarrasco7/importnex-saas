@@ -66,7 +66,8 @@ class ValuationImportController extends Controller
             'file.*' => ['file', 'mimes:zip,json', 'max:204800'],
         ]);
 
-        $org = Organization::where('name', 'JJ Import Motors')->first() ?? auth()->user()->organization;
+        // SaaS: el paquete se importa SIEMPRE en la organización del usuario.
+        $org = $request->user()->organization;
 
         try {
             $mode = $request->input('mode');

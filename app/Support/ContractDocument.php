@@ -106,7 +106,7 @@ class ContractDocument
                 ->setChromePath($chrome)
                 ->format('A4')
                 ->showBrowserHeaderAndFooter()
-                ->headerHtml('<div style="font-size:9px;color:#6b7280;width:100%;padding:0 14mm;">JJ Import Motors · Contrato #'.$contract->id.'</div>')
+                ->headerHtml('<div style="font-size:9px;color:#6b7280;width:100%;padding:0 14mm;">'.e((string) (($contract->snapshot['_prestador']['nombre'] ?? null) ?: ($contract->snapshot['_prestador']['razon_social'] ?? config('app.name')))).' · Contrato #'.$contract->id.'</div>')
                 ->footerHtml('<div style="font-size:8px;color:#9ca3af;width:100%;padding:0 14mm;text-align:center;">SHA256 '.substr((string) $contract->contract_hash, 0, 32).'… · Firmado el '.$contract->accepted_at?->format('d/m/Y H:i').' · IP '.$contract->accepted_ip.'</div>')
                 ->save($tmpPdf);
 

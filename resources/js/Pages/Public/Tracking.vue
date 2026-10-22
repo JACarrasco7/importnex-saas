@@ -14,6 +14,7 @@ import {
     ChartBarIcon,
 } from '@heroicons/vue/24/outline';
 import { useTranslations } from '@/Composables/useTranslations';
+import { useBrand } from '@/Composables/useBrand';
 import { useFormat } from '@/Composables/useFormat';
 
 const props = defineProps({
@@ -23,6 +24,7 @@ const props = defineProps({
 });
 
 const { t } = useTranslations();
+const { brand: orgBrand } = useBrand();
 const { date } = useFormat();
 
 const heroPhoto = computed(() => {
@@ -86,12 +88,13 @@ const expectedDate = computed(() =>
                 <div class="flex items-center gap-3">
                     <a href="/" class="flex items-center gap-3">
                         <img
-                            :src="'/images/jj-import/logo-insignia.png'"
-                            :alt="'JJ Import Motors'"
+                            v-if="orgBrand.logo_url"
+                            :src="orgBrand.logo_url"
+                            :alt="orgBrand.name"
                             class="h-10 w-auto"
                         />
-                        <span class="hidden text-sm font-medium text-asphalt-600 sm:inline">
-                            JJ Import Motors · Huelva
+                        <span class="text-sm font-medium text-asphalt-600" :class="{ 'hidden sm:inline': orgBrand.logo_url }">
+                            {{ [orgBrand.name, orgBrand.city].filter(Boolean).join(' · ') }}
                         </span>
                     </a>
                 </div>

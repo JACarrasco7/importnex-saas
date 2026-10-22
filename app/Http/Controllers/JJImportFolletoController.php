@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Organization;
+use App\Support\Brand;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
@@ -26,7 +28,7 @@ class JJImportFolletoController extends Controller
 
         // Serve static PDF directly (PDF is generated locally and uploaded via SCP)
         if (file_exists($publicPath) && filesize($publicPath) > 100000) {
-            return response()->download($publicPath, 'JJ_Import_Motors_Folleto.pdf');
+            return response()->download($publicPath, 'folleto.pdf');
         }
 
         // Fallback: try to generate on the fly (requires Chrome/Chromium on server)
@@ -36,7 +38,11 @@ class JJImportFolletoController extends Controller
             $logoPath = public_path('images/jj-import/logo-horizontal-blanco.png');
             $logoBase64 = 'data:image/png;base64,'.base64_encode(file_get_contents($logoPath));
 
-            $qrUrl = route('public.car-request.index', ['slug' => 'jj-import-motors']);
+            $organization = Organization::query()->where('is_owner', true)->orderBy('id')->first();
+            $brand = Brand::for($organization);
+            $qrUrl = $organization?->slug
+                ? route('public.car-request.index', ['slug' => $organization->slug])
+                : url('/');
             $qrSvg = QrCode::format('svg')
                 ->size(280)
                 ->margin(1)
@@ -49,10 +55,11 @@ class JJImportFolletoController extends Controller
                 'logo_base64' => $logoBase64,
                 'qr_svg' => $qrSvg,
                 'qr_url' => $qrUrl,
-                'precio_honorarios' => config('company.precio_honorarios', '1.500 €'),
-                'telefono_1' => config('company.telefono_1'),
-                'telefono_2' => config('company.telefono_2'),
-                'email' => config('company.email'),
+                'precio_honorarios' => $brand->get('fee_label', '1.500 €'),
+                'telefono_1' => $brand->get('phone'),
+                'telefono_2' => $brand->get('phone_2'),
+                'email' => $brand->get('email'),
+                'brand' => $brand,
             ])->render();
 
             Browsershot::html($html)
@@ -69,10 +76,10 @@ class JJImportFolletoController extends Controller
             if (file_exists($cachePath)) {
                 copy($cachePath, $publicPath);
 
-                return response()->download($cachePath, 'JJ_Import_Motors_Folleto.pdf');
+                return response()->download($cachePath, 'folleto.pdf');
             }
         } catch (\Exception $e) {
-            Log::error('Error generando PDF JJ Import Motors: '.$e->getMessage());
+            Log::error('Error generando el folleto PDF: '.$e->getMessage());
         }
 
         return response()->json([

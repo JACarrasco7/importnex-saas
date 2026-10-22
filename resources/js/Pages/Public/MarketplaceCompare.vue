@@ -18,7 +18,7 @@ const props = defineProps({
     cars: { type: Array, default: () => [] },
     requestedIds: { type: Array, default: () => [] },
     requestUrl: { type: String, default: null },
-    whatsappNumber: { type: String, default: '34675701439' },
+    whatsappNumber: { type: String, default: '' },
 });
 
 const { currency: formatCurrency } = useFormat();
@@ -187,7 +187,7 @@ const whatsappHref = (car) => {
                 <!-- CTA: pedir uno a medida via WhatsApp (NO es consulta sobre los coches visualizados) -->
                 <div class="mt-8 flex flex-col items-center justify-between gap-3 rounded-2xl bg-gradient-to-br from-estoril-700 to-estoril-900 p-5 text-white shadow-sm sm:flex-row">
                     <p class="text-sm font-semibold sm:text-base">{{ t('marketplace.compare.contact_cta') }}</p>
-                    <a href="https://wa.me/34675701439?text=Hola%2C%20estoy%20buscando%20un%20coche%20a%20medida.%20%C2%BFMe%20pueden%20ayudar%3F" target="_blank" rel="noopener" class="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-estoril-800 shadow-sm transition hover:bg-estoril-50 sm:w-auto">
+                    <a :href="`https://wa.me/${whatsappNumber}?text=${encodeURIComponent('Hola, estoy buscando un coche a medida. ¿Me pueden ayudar?')}`" target="_blank" rel="noopener" class="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-estoril-800 shadow-sm transition hover:bg-estoril-50 sm:w-auto">
                         <PhoneIcon class="h-4 w-4" />
                         {{ t('marketplace.cta_whatsapp', { default: 'WhatsApp' }) }}
                     </a>

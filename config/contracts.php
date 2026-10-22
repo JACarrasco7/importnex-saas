@@ -24,16 +24,18 @@
 
 return [
 
-    'version' => '2026-10-18.0',
+    'version' => '2026-10-22.0',
 
+    // Fallback: cada organización congela sus propios datos (App\Support\Brand)
+    // en el snapshot del contrato al emitirlo.
     'prestador' => [
-        'razon_social' => env('CONTRACT_PRESTADOR_RAZON_SOCIAL', 'JJ Import Motors'),
-        // Configurable por .env (CONTRACT_PRESTADOR_CIF) para no tocar código.
-        'cif' => env('CONTRACT_PRESTADOR_CIF', '— pendiente de asignar —'),
-        'direccion' => env('CONTRACT_PRESTADOR_DIRECCION', 'Huelva, España'),
-        'email' => 'jjimportmotors@gmail.com',
-        'telefono' => '+34 675 70 14 39',
-        'registro_mercantil' => '— pendiente —',
+        'razon_social' => env('CONTRACT_PRESTADOR_RAZON_SOCIAL', env('APP_NAME', 'Importnex')),
+        'nombre' => env('APP_NAME', 'Importnex'),
+        'cif' => env('CONTRACT_PRESTADOR_CIF', '— pendiente —'),
+        'direccion' => env('CONTRACT_PRESTADOR_DIRECCION', '— pendiente —'),
+        'ciudad' => env('CONTRACT_PRESTADOR_CIUDAD', '—'),
+        'email' => env('COMPANY_EMAIL', '—'),
+        'telefono' => env('COMPANY_PHONE', '—'),
     ],
 
     /*
@@ -53,7 +55,7 @@ return [
             'titulo' => 'Objeto del contrato',
             'requiere_checkbox' => true,
             'cuerpo' => <<<'TXT'
-JJ Import Motors (en adelante, "el Prestador") prestará al CLIENTE
+:prestador_nombre (en adelante, "el Prestador") prestará al CLIENTE
 (:cliente_nombre, :cliente_dni) el servicio de búsqueda, gestión de compra,
 transporte, homologación y matriculación en España del vehículo marca
 :vehiculo_marca modelo :vehiculo_modelo (año :vehiculo_anio), en adelante
@@ -69,7 +71,7 @@ Los honorarios del Prestador ascienden a :honorarios €, IVA incluido, pagadero
 en dos plazos: 50% a la firma del presente contrato y 50% a la entrega del
 Vehículo en territorio español. El precio de compra del Vehículo
 (:precio_compra €) será satisfecho directamente por el CLIENTE al vendedor
-en Alemania o al Prestador según se acuerde; en ningún caso JJ Import Motors
+en Alemania o al Prestador según se acuerde; en ningún caso :prestador_nombre
 será propietario del Vehículo.
 TXT,
         ],
@@ -136,7 +138,7 @@ TXT,
             'titulo' => 'Protección de datos',
             'requiere_checkbox' => true,
             'cuerpo' => <<<'TXT'
-Los datos personales facilitados serán tratados por JJ Import Motors con la
+Los datos personales facilitados serán tratados por :prestador_nombre con la
 finalidad de gestionar el presente contrato y las comunicaciones derivadas.
 El CLIENTE puede ejercer sus derechos RGPD (acceso, rectificación, supresión,
 oposición, portabilidad, limitación) escribiendo a :email. Conservación:
@@ -150,7 +152,7 @@ TXT,
             'requiere_checkbox' => false,
             'cuerpo' => <<<'TXT'
 El presente contrato se rige por la legislación española. Para cualquier
-controversia, las partes se someten a los Juzgados y Tribunales de Huelva,
+controversia, las partes se someten a los Juzgados y Tribunales de :prestador_ciudad,
 salvo normas imperativas de protección al consumidor.
 TXT,
         ],
@@ -179,7 +181,7 @@ TXT,
     */
     'pagos' => [
         'iban' => env('CONTRACT_IBAN'),
-        'titular' => env('CONTRACT_IBAN_HOLDER', env('CONTRACT_PRESTADOR_RAZON_SOCIAL', 'JJ Import Motors')),
+        'titular' => env('CONTRACT_IBAN_HOLDER'),
         'banco' => env('CONTRACT_BANK_NAME'),
     ],
 

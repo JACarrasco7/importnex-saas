@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureActiveSubscription;
 use App\Http\Middleware\EnsureHasOrganization;
 use App\Http\Middleware\EnsureOrganization;
 use App\Http\Middleware\ForceBaseUrl;
@@ -33,6 +34,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'organization' => EnsureOrganization::class,
             'has.organization' => EnsureHasOrganization::class,
             'plan.limit' => PlanLimitMiddleware::class,
+            'subscribed' => EnsureActiveSubscription::class,
             'import-token' => ImportToken::class,
         ]);
     })

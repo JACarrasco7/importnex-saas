@@ -25,7 +25,7 @@ class SendWelcomeEmail implements ShouldQueue
         try {
             Mail::to($user->email)->send(new WelcomeMail(
                 userName: $user->name,
-                organizationName: $user->organization?->name ?? config('app.name', 'JJ Import Motors'),
+                organizationName: $user->organization?->name ?? config('app.name'),
                 appUrl: config('app.url'),
                 locale: $user->locale ?? 'es',
             ));

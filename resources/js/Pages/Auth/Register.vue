@@ -1,13 +1,13 @@
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { UserIcon, EnvelopeIcon, LockClosedIcon, ArrowRightIcon } from '@heroicons/vue/24/outline';
+import { UserIcon, EnvelopeIcon, LockClosedIcon, ArrowRightIcon, BuildingOfficeIcon } from '@heroicons/vue/24/outline';
 import GuestLayout from '@/Layouts/GuestLayout.vue';
 import FormField from '@/Components/FormField.vue';
 import { useTranslations } from '@/Composables/useTranslations';
 
 const { t } = useTranslations();
 
-const form = useForm({ name: '', email: '', password: '', password_confirmation: '' });
+const form = useForm({ company: '', name: '', email: '', password: '', password_confirmation: '' });
 
 const submit = () => form.post(route('register'), { onFinish: () => form.reset('password', 'password_confirmation') });
 
@@ -24,10 +24,17 @@ const inputClass = 'block w-full rounded-lg border-gray-300 pl-10 text-sm text-g
         </div>
 
         <form @submit.prevent="submit" class="space-y-5">
+            <FormField :label="t('auth.company')" :error="form.errors.company">
+                <div class="relative">
+                    <BuildingOfficeIcon class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                    <input v-model="form.company" type="text" required autofocus autocomplete="organization" :class="inputClass" />
+                </div>
+            </FormField>
+
             <FormField :label="t('auth.name')" :error="form.errors.name">
                 <div class="relative">
                     <UserIcon class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                    <input v-model="form.name" type="text" required autofocus autocomplete="name" :class="inputClass" />
+                    <input v-model="form.name" type="text" required autocomplete="name" :class="inputClass" />
                 </div>
             </FormField>
 

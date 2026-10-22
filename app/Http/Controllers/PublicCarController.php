@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CarPublicLink;
+use App\Support\Brand;
 use App\Support\Esqueleto;
 use App\Support\FiltroPublico;
 use App\Support\PrecioClienteCalculator;
@@ -36,12 +37,12 @@ class PublicCarController extends Controller
         $link = CarPublicLink::where('token', $token)->first();
 
         if (! $link || ! $link->isActive()) {
-            return response()->view('public.car-unavailable');
+            return response()->view('public.car-unavailable', ['brand' => Brand::for($link?->car?->organization)]);
         }
 
-        $car = $link->car()->with(['photos', 'client'])->first();
+        $car = $link->car()->with(['photos', 'client', 'organization'])->first();
         if (! $car) {
-            return response()->view('public.car-unavailable');
+            return response()->view('public.car-unavailable', ['brand' => Brand::platform()]);
         }
 
         // Registramos la vista (sin bloquear si falla).
@@ -93,7 +94,8 @@ class PublicCarController extends Controller
             'ficha' => $ficha,
             'argumentosPublicos' => $this->argumentosPublicos($ficha, $esqueleto),
             'precioCliente' => $precioCliente,
-            'logoBase64' => $this->logo(),
+            'logoBase64' => $car->organization?->brand()->logoDataUri(onDark: true),
+            'brand' => Brand::for($car->organization),
             'fotos' => $fotos,
             'fotoPortada' => $fotos[0] ?? null,
             'clienteNombre' => $car->client?->name,
@@ -254,16 +256,6 @@ class PublicCarController extends Controller
         }
 
         return Storage::disk('local')->get($path);
-    }
-
-    private function logo(): ?string
-    {
-        $path = public_path('images/jj-import/logo-horizontal-blanco.png');
-        if (! file_exists($path)) {
-            return null;
-        }
-
-        return 'data:image/png;base64,'.base64_encode(file_get_contents($path));
     }
 
     /**

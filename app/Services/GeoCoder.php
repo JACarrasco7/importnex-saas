@@ -40,7 +40,7 @@ class GeoCoder
         $cached = Cache::rememberForever($key, function () use ($city) {
             try {
                 $response = Http::timeout(8)
-                    ->withHeaders(['User-Agent' => 'JJImportMotors-Importnex/1.0 (jjimportmotors@gmail.com)'])
+                    ->withHeaders(['User-Agent' => config('app.name').'/1.0 ('.(config('mail.from.address') ?: config('app.url')).')'])
                     ->get('https://nominatim.openstreetmap.org/search', [
                         'q' => $city,
                         'format' => 'json',

@@ -7,6 +7,7 @@ use App\Models\CarRequest;
 use App\Models\Organization;
 use App\Models\UserOnboardingProgress;
 use App\Services\Ai\AiProviderRegistry;
+use App\Support\Brand;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Middleware;
@@ -42,6 +43,7 @@ class HandleInertiaRequests extends Middleware
         $locale = 'es';
         $aiSettings = null;
         $onboardingShare = null;
+        $organization = null;
 
         if ($user = $request->user()) {
             // Auditoria 2026-09-06 (B7): 3 queries por cada request autenticado
@@ -130,7 +132,7 @@ class HandleInertiaRequests extends Middleware
                 $org = Organization::where('is_public', true)->first();
 
                 return [
-                    'orgName' => $org?->name ?? 'JJ Import Motors',
+                    'orgName' => $org?->name ?? config('app.name'),
                     'orgSlug' => $org?->slug,
                     'requestUrl' => $org?->slug
                         ? route('public.car-request.index', ['slug' => $org->slug])
@@ -145,6 +147,7 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             'csrfToken' => csrf_token(),
+            'appName' => config('app.name'),
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
@@ -169,6 +172,12 @@ class HandleInertiaRequests extends Middleware
             'payment_failed_at' => $billingDunning['payment_failed_at'] ?? null,
             // Web publica de coches (marketplace) — separada del SaaS.
             'marketplace' => $marketplaceContext,
+            // Marca de la organización en contexto (la del usuario o la que
+            // opera la web pública). Las páginas de una organización concreta
+            // (portal, dossier) la sobrescriben con su propio prop `brand`.
+            'orgBrand' => fn () => $organization
+                ? $organization->brand()->toPublicArray()
+                : Brand::platform()->toPublicArray(),
         ];
     }
 

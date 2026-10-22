@@ -3,6 +3,7 @@
 namespace App\Services\ImportOrders;
 
 use App\Enums\ApprovalKind;
+use App\Enums\ClientPhase;
 use App\Enums\ImportOrderState;
 use App\Enums\PaymentMethod;
 use App\Enums\UnitDecision;
@@ -153,7 +154,7 @@ class OrderPanelPresenter
             'key' => $phase->value,
             'label' => $phase->label(),
             'status' => $state === ImportOrderState::Delivered || $phase->position() < $current ? 'done' : ($phase->position() === $current ? 'current' : 'upcoming'),
-        ], \App\Enums\ClientPhase::cases());
+        ], ClientPhase::cases());
     }
 
     /**
@@ -338,11 +339,12 @@ class OrderPanelPresenter
         if (! $order->client?->phone) {
             $warnings[] = ['key' => 'client_phone', 'message' => 'El cliente no tiene teléfono: los botones de WhatsApp abrirán el selector de chat.'];
         }
-        if (str_contains((string) config('contracts.prestador.cif'), 'pendiente')) {
-            $warnings[] = ['key' => 'cif', 'message' => 'El contrato sale con el CIF «pendiente de asignar». Configura CONTRACT_PRESTADOR_CIF en el .env del servidor.'];
+        $brand = $order->organization->brand();
+        if ($missing = $brand->missingForContracts()) {
+            $warnings[] = ['key' => 'company', 'message' => 'Faltan datos de tu empresa para el contrato ('.implode(', ', $missing).'). Complétalos en Ajustes → Datos de empresa.'];
         }
-        if (! config('contracts.pagos.iban')) {
-            $warnings[] = ['key' => 'iban', 'message' => 'No hay IBAN configurado: el cliente no verá los datos de transferencia. Configura CONTRACT_IBAN en el .env.'];
+        if (! $brand->get('iban')) {
+            $warnings[] = ['key' => 'iban', 'message' => 'No hay IBAN: el cliente no verá los datos de transferencia. Añádelo en Ajustes → Datos de empresa.'];
         }
 
         return $warnings;

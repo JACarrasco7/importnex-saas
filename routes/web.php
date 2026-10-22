@@ -37,6 +37,7 @@ use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\OpenApiController;
 use App\Http\Controllers\OrganizationController;
+use App\Http\Controllers\OrganizationTeamController;
 use App\Http\Controllers\PaqueteValoracionController;
 use App\Http\Controllers\Portal\PortalApprovalController;
 use App\Http\Controllers\Portal\PortalContractController;
@@ -55,8 +56,6 @@ use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\TripPlannerController;
 use App\Http\Controllers\ValuationImportController;
-use App\Models\Organization;
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -67,20 +66,17 @@ Route::get('/', function () {
     if (Auth::check()) {
         return redirect('/dashboard');
     }
-    $org = Organization::orderBy('id')->first();
 
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-        'organizationName' => $org?->name,
     ]);
 })->name('home');
 
 // Public pricing page (SEO + lead capture, no auth required)
 Route::get('/pricing', function () {
     return Inertia::render('Public/PricingPublic', [
+        'salesEmail' => config('company.ventas_email'),
         'plans' => config('subscription.plans'),
         'currency' => config('subscription.default_currency', 'eur'),
     ]);
@@ -160,7 +156,7 @@ Route::get('/api/public/market', [PublicMarketController::class, 'index'])
     ->name('mercado.public-api');
 Route::get('/api/public/market/stats', [PublicMarketController::class, 'stats'])
     ->name('mercado.public-api.stats');
-Route::middleware(['auth', 'verified', 'organization'])->group(function () {
+Route::middleware(['auth', 'verified', 'organization', 'subscribed'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, '__invoke'])
         ->name('dashboard');
 
@@ -195,13 +191,21 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/organization/{organization}', [OrganizationController::class, 'show'])
-        ->name('organization.show');
+        ->where('organization', '[0-9]+')->name('organization.show');
     Route::get('/organization/{organization}/edit', [OrganizationController::class, 'edit'])
-        ->name('organization.edit');
+        ->where('organization', '[0-9]+')->name('organization.edit');
     Route::patch('/organization/{organization}', [OrganizationController::class, 'update'])
-        ->name('organization.update');
+        ->where('organization', '[0-9]+')->name('organization.update');
     Route::post('/organization/{organization}/ai-models', [OrganizationController::class, 'aiModels'])
-        ->name('organization.ai-models');
+        ->where('organization', '[0-9]+')->name('organization.ai-models');
+    Route::post('/organization/{organization}/members', [OrganizationTeamController::class, 'storeMember'])
+        ->where('organization', '[0-9]+')->name('organization.members.store');
+    Route::delete('/organization/{organization}/members/{user}', [OrganizationTeamController::class, 'destroyMember'])
+        ->where(['organization' => '[0-9]+', 'user' => '[0-9]+'])->name('organization.members.destroy');
+    Route::post('/organization/{organization}/api-token', [OrganizationTeamController::class, 'issueApiToken'])
+        ->where('organization', '[0-9]+')->name('organization.api-token.issue');
+    Route::delete('/organization/{organization}/api-token', [OrganizationTeamController::class, 'revokeApiToken'])
+        ->where('organization', '[0-9]+')->name('organization.api-token.revoke');
 
     // Cars CRUD
     Route::get('/cars', [CarController::class, 'index'])->name('cars.index');
@@ -433,6 +437,13 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
 // Locale update (available for all users, including guests)
 Route::put('/locale', [LocaleController::class, 'update'])->name('locale.update');
 
+// Usuarios sin organización (p. ej. altas antiguas): crean la suya aquí.
+// Fuera del grupo 'organization' para no entrar en bucle de redirecciones.
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/organization/create', [OrganizationController::class, 'create'])->name('organization.create');
+    Route::post('/organization', [OrganizationController::class, 'store'])->name('organization.store');
+});
+
 // N6: Push subscriptions (Web Push API). Requiere auth.
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/push/subscribe', [PushSubscriptionController::class, 'store'])->name('push.subscribe');
@@ -440,7 +451,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/push/vapid-public-key', [PushSubscriptionController::class, 'vapidKey'])->name('push.vapid-key');
 });
 
-// JJ Import Motors folleto PDF
+// Folleto PDF de la organización operadora
 Route::get('/jj-import/folleto', [JJImportFolletoController::class, 'download'])->name('jj-import.folleto');
 
 // Portal del cliente: un único enlace privado por encargo (contrato, pagos,

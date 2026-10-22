@@ -109,7 +109,7 @@ class OnboardingController extends Controller
 
         return match ($step) {
             1 => [
-                'title' => 'Bienvenido a JJ Import Motors',
+                'title' => 'Bienvenido a '.config('app.name'),
                 'subtitle' => 'Configura tu organización en 4 simples pasos',
                 'icon' => 'building',
             ],
@@ -138,7 +138,7 @@ class OnboardingController extends Controller
             ],
             default => [
                 'title' => 'Onboarding completado',
-                'subtitle' => 'Ya estás listo para usar JJ Import Motors',
+                'subtitle' => 'Ya estás listo para usar '.config('app.name'),
                 'icon' => 'check-circle',
             ],
         };

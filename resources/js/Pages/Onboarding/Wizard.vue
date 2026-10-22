@@ -92,7 +92,7 @@ const goToCarsIndex = () => {
 </script>
 
 <template>
-    <Head :title="t('onboarding.title', 'Bienvenido a JJ Import Motors')" />
+    <Head :title="t('onboarding.title')" />
 
     <AuthenticatedLayout>
         <div class="min-h-screen bg-linear-to-br from-estoril-50 via-white to-platinum-100 dark:from-asphalt-900 dark:via-asphalt-900 dark:to-asphalt-800 py-12">

@@ -14,6 +14,7 @@ use App\Models\ContractAcceptance;
 use App\Models\ImportOrder;
 use App\Models\PortalOtp;
 use App\Models\User;
+use App\Support\Brand;
 use App\Support\ContractDocument;
 use App\Support\SpanishId;
 use Illuminate\Support\Facades\DB;
@@ -66,7 +67,7 @@ class OrderContractService
                 'fecha_firma' => now()->format('d/m/Y H:i'),
                 'contrato_id' => $order->reference.'-'.strtoupper(substr(bin2hex(random_bytes(3)), 0, 6)),
                 '_clausulas' => config('contracts.clausulas'),
-                '_prestador' => config('contracts.prestador'),
+                '_prestador' => Brand::for($order->organization)->prestador(),
             ];
 
             $contract = ContractAcceptance::create([

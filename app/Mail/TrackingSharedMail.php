@@ -26,7 +26,9 @@ class TrackingSharedMail extends Mailable
                 'brand' => $brand,
                 'model' => $model,
             ]),
-            replyTo: [new Address('jjimportmotors@gmail.com', 'JJ Import Motors')],
+            replyTo: ($email = $this->car->organization?->brand()->get('email'))
+                ? [new Address($email, $this->car->organization->brand()->name())]
+                : [],
         );
     }
 

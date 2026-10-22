@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Car;
+use App\Support\Brand;
 use App\Support\ChromePath;
 use App\Support\Esqueleto;
 use Illuminate\Support\Facades\Log;
@@ -34,20 +35,18 @@ class PaqueteValoracionController extends Controller
         }
 
         $e = Esqueleto::desde($contenido);
-        $qrUrl = $e->uno('QR') ?? route('public.car-request.index', ['slug' => 'jj-import-motors']);
+        $qrUrl = $e->uno('QR') ?? $this->qrPorDefecto($car);
 
         return $this->wrapper('Ficha', $car, 'ficha', 'jj-import.ficha-coche', [
             'e' => $e,
             'car' => $car,
-            'logo_base64' => $this->logo(),
+            'logo_base64' => $this->logo($car),
             'fotos' => $this->fotos($car),
             'qr_svg' => QrCode::format('svg')
                 ->size(220)->margin(1)->errorCorrection('H')
                 ->backgroundColor(255, 255, 255)->color(6, 16, 31)
                 ->generate($qrUrl),
-            'telefono_1' => '675 70 14 39',
-            'telefono_2' => '691 48 59 27',
-            'email' => 'jjimportmotors@gmail.com',
+            ...$this->contacto($car),
         ]);
     }
 
@@ -59,20 +58,18 @@ class PaqueteValoracionController extends Controller
         }
 
         $e = Esqueleto::desde($contenido);
-        $qrUrl = $e->uno('QR') ?? route('public.car-request.index', ['slug' => 'jj-import-motors']);
+        $qrUrl = $e->uno('QR') ?? $this->qrPorDefecto($car);
 
         return $this->pdf('jj-import.ficha-coche', [
             'e' => $e,
             'car' => $car,
-            'logo_base64' => $this->logo(),
+            'logo_base64' => $this->logo($car),
             'fotos' => $this->fotos($car),
             'qr_svg' => QrCode::format('svg')
                 ->size(220)->margin(1)->errorCorrection('H')
                 ->backgroundColor(255, 255, 255)->color(6, 16, 31)
                 ->generate($qrUrl),
-            'telefono_1' => '675 70 14 39',
-            'telefono_2' => '691 48 59 27',
-            'email' => 'jjimportmotors@gmail.com',
+            ...$this->contacto($car),
         ], 'Ficha_'.$this->slug($car));
     }
 
@@ -117,10 +114,8 @@ class PaqueteValoracionController extends Controller
         return [
             'e' => $e,
             'car' => $car,
-            'logo_base64' => $this->logo(),
-            'telefono_1' => '675 70 14 39',
-            'telefono_2' => '691 48 59 27',
-            'email' => 'jjimportmotors@gmail.com',
+            'logo_base64' => $this->logo($car),
+            ...$this->contacto($car),
         ];
     }
 
@@ -244,13 +239,34 @@ class PaqueteValoracionController extends Controller
         return null;
     }
 
-    private function logo(): ?string
+    private function logo(Car $car): ?string
     {
-        $path = public_path('images/jj-import/logo-horizontal-blanco.png');
+        return $car->organization?->brand()->logoDataUri(onDark: true);
+    }
 
-        return file_exists($path)
-            ? 'data:image/png;base64,'.base64_encode(file_get_contents($path))
-            : null;
+    /**
+     * Contacto de la organización del coche para fichas y folletos.
+     *
+     * @return array{telefono_1: ?string, telefono_2: ?string, email: ?string, brand: Brand}
+     */
+    private function contacto(Car $car): array
+    {
+        $brand = Brand::for($car->organization);
+
+        return [
+            'telefono_1' => $brand->get('phone'),
+            'telefono_2' => $brand->get('phone_2'),
+            'email' => $brand->get('email'),
+            'brand' => $brand,
+        ];
+    }
+
+    /** Enlace del QR cuando el paquete no trae uno: formulario de solicitud de la organización. */
+    private function qrPorDefecto(Car $car): string
+    {
+        $slug = $car->organization?->slug;
+
+        return $slug ? route('public.car-request.index', ['slug' => $slug]) : url('/');
     }
 
     /** @return array<int, string> URLs base64 de las fotos del coche. */
@@ -297,6 +313,7 @@ class PaqueteValoracionController extends Controller
         }
 
         return response()->view('jj-import.pdf-viewer', [
+            'brand' => Brand::for($car->organization),
             'titulo' => $titulo.' · '.$car->brand.' '.$car->model,
             'pdfBase64' => base64_encode($bytes),
             'filename' => $titulo.'_'.$this->slug($car).'.pdf',

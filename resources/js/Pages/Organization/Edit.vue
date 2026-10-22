@@ -15,8 +15,28 @@ const props = defineProps({
     aiProviders: { type: Array, default: () => [] },
 });
 
+const companyFields = [
+    { key: 'legal_name', label: 'Razón social', help: 'Nombre legal que aparece en contratos y aviso legal.' },
+    { key: 'tax_id', label: 'CIF / NIF' },
+    { key: 'address', label: 'Dirección fiscal' },
+    { key: 'city', label: 'Ciudad', help: 'Se usa en «Puesto en …» y en la jurisdicción del contrato.' },
+    { key: 'phone', label: 'Teléfono' },
+    { key: 'phone_2', label: 'Teléfono 2' },
+    { key: 'whatsapp', label: 'WhatsApp', help: 'Si lo dejas vacío se usa el teléfono principal.' },
+    { key: 'email', label: 'Email de contacto', type: 'email' },
+    { key: 'website', label: 'Web' },
+    { key: 'fee_label', label: 'Honorarios (texto)', help: 'Ej.: «1.500 €». Aparece en el folleto.' },
+    { key: 'iban', label: 'IBAN para transferencias' },
+    { key: 'iban_holder', label: 'Titular de la cuenta' },
+    { key: 'iban_bank', label: 'Banco' },
+];
+
+const company = props.organization.company || {};
+
 const form = useForm({
     name: props.organization.name,
+    company: Object.fromEntries(companyFields.map((f) => [f.key, company[f.key] || ''])),
+    logo: null,
     ai_provider: props.organization.ai_provider || '',
     ai_model: props.organization.ai_model || '',
     ai_api_key: '',
@@ -26,9 +46,12 @@ const detecting = ref(false);
 const detectedModels = ref([]);
 const detectError = ref('');
 
-const submit = () => form.patch(route('organization.update', props.organization.id), {
-    preserveScroll: true,
-});
+const submit = () => form
+    .transform((data) => ({ ...data, _method: 'patch', logo: data.logo || undefined }))
+    .post(route('organization.update', props.organization.id), {
+        preserveScroll: true,
+        forceFormData: true,
+    });
 
 const inputClass = 'block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-estoril-500 focus:ring-estoril-500';
 
@@ -89,27 +112,41 @@ async function detectModels() {
                     <template #actions>
                         <Link :href="route('organization.show', organization.id)" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                             <ArrowLeftIcon class="h-4 w-4" />
-                            Back
+                            {{ t('common.back', {}, 'Volver') }}
                         </Link>
                     </template>
                 </PageHeader>
 
                 <form @submit.prevent="submit" class="space-y-6">
                     <FormSection title="General">
-                        <FormField label="Organization name" required>
+                        <FormField label="Nombre comercial" required>
                             <input v-model="form.name" type="text" required :class="inputClass" />
                             <p v-if="form.errors.name" class="mt-1 text-sm text-red-600">{{ form.errors.name }}</p>
                         </FormField>
                     </FormSection>
 
-                    <FormSection title="Artificial Intelligence"
-                                 subtitle="Each organization picks the AI provider it wants to use for car verification, URL scraping and any future AI features.">
+                    <FormSection title="Datos de empresa"
+                                 subtitle="Aparecen en contratos, portal del cliente, emails, fichas públicas y aviso legal. Sin CIF y dirección el contrato sale incompleto.">
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <FormField v-for="field in companyFields" :key="field.key" :label="field.label" :help="field.help">
+                                <input v-model="form.company[field.key]" :type="field.type || 'text'" :class="inputClass" />
+                                <p v-if="form.errors[`company.${field.key}`]" class="mt-1 text-sm text-red-600">{{ form.errors[`company.${field.key}`] }}</p>
+                            </FormField>
+                            <FormField label="Logo" help="PNG, JPG, WEBP o SVG. Máx. 2 MB.">
+                                <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" class="block w-full text-sm" @input="form.logo = $event.target.files[0]" />
+                                <p v-if="form.errors.logo" class="mt-1 text-sm text-red-600">{{ form.errors.logo }}</p>
+                            </FormField>
+                        </div>
+                    </FormSection>
+
+                    <FormSection title="Inteligencia artificial"
+                                 subtitle="Proveedor de IA que usa tu empresa para verificar coches y leer anuncios.">
                         <div class="space-y-4">
                             <FormField
-                                label="AI provider"
-                                help="Choose which vendor will run AI tasks for this organization. Defaults to Anthropic Claude.">
+                                label="Proveedor de IA"
+                                help="Qué proveedor ejecuta las tareas de IA de tu empresa.">
                                 <select v-model="form.ai_provider" @change="onProviderChange" :class="inputClass">
-                                    <option value="">— Disabled —</option>
+                                    <option value="">— Desactivado —</option>
                                     <option v-for="p in aiProviders" :key="p.key" :value="p.key">
                                         {{ p.label }} ({{ p.default_model }})
                                     </option>
@@ -117,7 +154,7 @@ async function detectModels() {
                                 <p v-if="form.errors.ai_provider" class="mt-1 text-sm text-red-600">{{ form.errors.ai_provider }}</p>
                             </FormField>
 
-                            <FormField label="API key" help="Stored encrypted at rest. Leave blank to keep the existing one.">
+                            <FormField label="Clave de API" help="Se guarda cifrada. Déjala vacía para mantener la actual.">
                                 <div class="flex items-center gap-2">
                                     <div class="relative flex-1">
                                         <KeyIcon class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
@@ -135,25 +172,25 @@ async function detectModels() {
                                         :disabled="detecting || !form.ai_provider"
                                         class="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50">
                                         <MagnifyingGlassIcon class="h-4 w-4" />
-                                        {{ detecting ? 'Detecting…' : 'Detect models' }}
+                                        {{ detecting ? 'Detectando…' : 'Detectar modelos' }}
                                     </button>
                                 </div>
                                 <p v-if="detectError" class="mt-1 text-sm text-red-600">{{ detectError }}</p>
                                 <p v-if="form.errors.ai_api_key" class="mt-1 text-sm text-red-600">{{ form.errors.ai_api_key }}</p>
                             </FormField>
 
-                            <FormField label="Model (optional)" help="Leave empty to use the provider's default model.">
+                            <FormField label="Modelo (opcional)" help="Vacío = modelo por defecto del proveedor.">
                                 <div class="relative">
                                     <CpuChipIcon class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                                     <select v-if="detectedModels.length" v-model="form.ai_model" :class="[inputClass, 'pl-10']">
-                                        <option value="">— Provider default —</option>
+                                        <option value="">— Por defecto del proveedor —</option>
                                         <option v-for="m in detectedModels" :key="m" :value="m">{{ m }}</option>
                                     </select>
                                     <input
                                         v-else
                                         v-model="form.ai_model"
                                         type="text"
-                                        placeholder="e.g. gpt-4o-mini, claude-3-5-sonnet-latest, gemini-1.5-flash, deepseek-chat…"
+                                        placeholder="p. ej. gpt-4o-mini, claude-3-5-sonnet-latest, gemini-1.5-flash, deepseek-chat…"
                                         :class="[inputClass, 'pl-10']" />
                                 </div>
                                 <p v-if="detectedModels.length" class="mt-1 text-xs text-emerald-700">
@@ -163,10 +200,10 @@ async function detectModels() {
                             </FormField>
 
                             <div v-if="organization.ai_provider" class="rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-800 ring-1 ring-emerald-200">
-                                Currently configured:
+                                Configurado:
                                 <strong>{{ organization.ai_provider }}</strong>
                                 <span v-if="organization.ai_model"> · {{ organization.ai_model }}</span>
-                                <span v-else> · default model</span>
+                                <span v-else> · modelo por defecto</span>
                                 <span v-if="!organization.ai_api_key" class="ml-2 inline-flex items-center rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">{{ t('organization.no_key_yet') }}</span>
                             </div>
                         </div>
@@ -176,7 +213,7 @@ async function detectModels() {
                         <Link :href="route('organization.show', organization.id)" class="text-sm font-semibold text-gray-700 hover:text-gray-900">{{ t('common.cancel') }}</Link>
                         <button type="submit" :disabled="form.processing" class="inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-estoril-500 disabled:opacity-50">
                             <CheckIcon class="h-4 w-4" />
-                            {{ form.processing ? 'Saving...' : 'Save changes' }}
+                            {{ form.processing ? 'Guardando…' : 'Guardar cambios' }}
                         </button>
                     </div>
                 </form>

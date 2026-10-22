@@ -3,7 +3,7 @@
 return [
     'mail' => [
         'greeting' => 'Hola :name,',
-        'signature' => 'Un saludo,'."\n".'El equipo de JJ Import Motors',
+        'signature' => 'Un saludo,'."\n".'El equipo de :company',
         'footer' => 'Este es tu enlace privado: no lo compartas. Si tienes dudas, responde a este correo o escríbenos por WhatsApp.',
         'button_portal' => 'Abrir mi encargo',
 
@@ -54,7 +54,7 @@ return [
         'otp_purpose_approve' => 'confirmar tu respuesta',
         'otp_purpose_cancel' => 'confirmar la cancelación',
 
-        'recover_subject' => 'Tu enlace de seguimiento de JJ Import Motors',
+        'recover_subject' => 'Tu enlace de seguimiento de :company',
         'recover_heading' => 'Aquí tienes tu enlace',
         'recover_line1' => 'Has pedido recuperar el acceso a tu encargo :reference (:vehicle).',
 

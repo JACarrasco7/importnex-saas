@@ -1,26 +1,22 @@
 <?php
 
 /*
- * Datos de contacto de JJ Import Motors, centralizados para reutilizar en
- * cualquier sitio que necesite mostrar el mismo pie de contacto (marketing,
- * folletos, contratos). Fuente única de verdad: cambiar aquí actualiza
- * automáticamente el pie de anuncio común (CarMarketingController@show).
- *
- * Nota: los demás sitios (folletos, contrato) siguen con sus propios valores
- * hardcodeados por ahora — no se han tocado para no introducir cambios fuera
- * del alcance pedido. Candidato a consolidar en el futuro.
+ * Datos de la empresa que opera la plataforma (fallback). Cada organización
+ * tiene los suyos en Ajustes → «Datos de empresa» (ver App\Support\Brand);
+ * estos valores solo se usan cuando no hay organización en contexto.
  */
 
 return [
 
-    'nombre' => 'JJ Import Motors',
+    'nombre' => env('COMPANY_NAME', env('APP_NAME', 'Importnex')),
 
-    'telefono_1' => '675 70 14 39',
-    'telefono_2' => '691 48 59 27',
-    'email' => 'jjimportmotors@gmail.com',
-    'web' => 'jjimportmotors.com',
+    'telefono_1' => env('COMPANY_PHONE'),
+    'telefono_2' => env('COMPANY_PHONE_2'),
+    'email' => env('COMPANY_EMAIL'),
+    'web' => env('COMPANY_WEB'),
+    'ventas_email' => env('COMPANY_SALES_EMAIL', env('MAIL_FROM_ADDRESS')),
 
-    // Honorarios fijos del servicio de importacion (visible en el folleto).
-    'precio_honorarios' => '1.500 €',
+    // Honorarios fijos del servicio por defecto (visible en el folleto).
+    'precio_honorarios' => env('COMPANY_FEE_LABEL', '1.500 €'),
 
 ];

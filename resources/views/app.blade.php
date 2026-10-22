@@ -7,7 +7,7 @@
         @php
             // APP_NAME=Laravel (valor por defecto) llegaba a la vista previa de
             // WhatsApp: se sustituye por la marca si no está configurado.
-            $siteName = (config('app.name') && config('app.name') !== 'Laravel') ? config('app.name') : 'JJ Import Motors';
+            $siteName = (config('app.name') && config('app.name') !== 'Laravel') ? config('app.name') : 'Importnex';
             $og = $ogMeta ?? null;
         @endphp
         <title inertia>{{ $og['title'] ?? $siteName }}</title>
@@ -32,9 +32,9 @@
         </style>
 
         <!-- SEO Meta Tags -->
-        <meta name="description" content="JJ Import Motors — Plataforma profesional de importación de vehículos con verificación AI. Ahorra tiempo y evita fraudes en la importación de coches de Alemania.">
+        <meta name="description" content="{{ $siteName }} — Plataforma profesional de importación de vehículos con verificación AI. Ahorra tiempo y evita fraudes en la importación de coches de Alemania.">
         <meta name="keywords" content="importar coches, importación vehículos, coches de Alemania, verificación AI, dealer importador, marketplace vehículos">
-        <meta name="author" content="JJ Import Motors">
+        <meta name="author" content="{{ $siteName }}">
 
         <!-- Open Graph / Facebook -->
         <meta property="og:type" content="website">
@@ -62,7 +62,7 @@
         <meta name="mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-        <meta name="apple-mobile-web-app-title" content="JJ Imports">
+        <meta name="apple-mobile-web-app-title" content="{{ $siteName }}">
         <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
 
         <!-- DNS prefetch para recursos externos (reduce latencia DNS) -->

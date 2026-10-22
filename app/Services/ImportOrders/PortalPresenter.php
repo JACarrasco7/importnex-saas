@@ -17,6 +17,7 @@ use App\Models\User;
 use App\Support\CarChecklistDefinitions;
 use App\Support\ContractDocument;
 use App\Support\WhatsAppLink;
+use Illuminate\Support\Collection;
 
 /**
  * Construye las props del portal del cliente con una LISTA BLANCA explícita:
@@ -54,11 +55,10 @@ class PortalPresenter
             'contract' => $contract ? $this->contract($order, $contract, $token) : null,
             'payments' => $this->payments($order),
             'bank' => [
-                'iban' => config('contracts.pagos.iban'),
-                'holder' => config('contracts.pagos.titular'),
-                'bank' => config('contracts.pagos.banco'),
+                ...$order->organization->brand()->bank(),
                 'concept' => 'Encargo '.$order->reference,
             ],
+            'orgBrand' => $order->organization->brand()->toPublicArray(),
             'approvals' => $this->approvals($order, $token),
             'milestones' => $state->isTrackingVisible() ? $this->milestones($order) : [],
             'inspection' => $state->isTrackingVisible() ? $this->inspection($order) : null,
@@ -75,7 +75,7 @@ class PortalPresenter
         $cover = $this->carPhotos($order)->first();
 
         return [
-            'title' => "Tu {$vehicle} · JJ Import Motors",
+            'title' => "Tu {$vehicle} · ".$order->organization->brand()->name(),
             'description' => $order->state->clientLabel().' · Encargo '.$order->reference,
             'url' => route('portal.show', $token),
             'image' => $cover ? route('portal.car-photo', ['token' => $token, 'photo' => $cover->id]) : null,
@@ -135,7 +135,7 @@ class PortalPresenter
         ];
     }
 
-    /** @return \Illuminate\Support\Collection<int, CarPhoto> */
+    /** @return Collection<int, CarPhoto> */
     private function carPhotos(ImportOrder $order)
     {
         if (! $order->car_id) {
@@ -319,7 +319,7 @@ class PortalPresenter
                 'title' => null,
                 'body' => $message->body,
                 'author' => $message->author_type === OrderMessage::AUTHOR_CLIENT ? 'client' : 'team',
-                'author_name' => $message->author_type === OrderMessage::AUTHOR_TEAM ? ($message->user?->name ?? 'JJ Import Motors') : null,
+                'author_name' => $message->author_type === OrderMessage::AUTHOR_TEAM ? ($message->user?->name ?? $order->organization->brand()->name()) : null,
                 'at' => $message->created_at?->toIso8601String(),
             ]);
 
@@ -339,14 +339,16 @@ class PortalPresenter
             ->orderBy('id')
             ->first();
 
-        $phone = (string) config('import_orders.contact_phone');
+        $brand = $order->organization->brand();
+        $phone = (string) (config('import_orders.contact_phone') ?: $brand->get('whatsapp'));
         $clientName = explode(' ', trim((string) $order->client?->name))[0] ?? '';
         $text = trim("Hola, soy {$clientName}. Te escribo por mi encargo {$order->reference} ({$order->vehicleLabel()}).");
 
         return [
             'manager_name' => $manager?->name,
+            'company_name' => $brand->name(),
             'phone' => $phone,
-            'email' => config('import_orders.contact_email'),
+            'email' => config('import_orders.contact_email') ?: $brand->get('email'),
             'schedule' => config('import_orders.contact_schedule'),
             'whatsapp_url' => WhatsAppLink::to($phone, $text),
         ];

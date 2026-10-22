@@ -39,11 +39,11 @@ class OpenApiController extends Controller
         return [
             'openapi' => '3.0.3',
             'info' => [
-                'title' => config('app.name', 'JJ Import Motors API'),
+                'title' => config('app.name').' API',
                 'version' => '1.0.0',
                 'description' => 'Public API for marketplace browsing, newsletter, and chat-report import.',
                 'contact' => [
-                    'name' => 'JJ Import Motors',
+                    'name' => config('app.name'),
                     'url' => config('app.url'),
                 ],
                 'license' => [

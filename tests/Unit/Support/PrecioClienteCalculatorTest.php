@@ -129,7 +129,7 @@ class PrecioClienteCalculatorTest extends TestCase
 
         $this->assertArrayNotHasKey('Impuesto de matriculación (IEDMT)', $r['desglose']);
         $this->assertArrayNotHasKey('Transporte hasta España', $r['desglose']);
-        $this->assertArrayHasKey('Traslado hasta Huelva', $r['desglose']);
+        $this->assertArrayHasKey('Traslado hasta destino', $r['desglose']);
     }
 
     public function test_banda_motivo_difiere_segun_co2_confirmado(): void

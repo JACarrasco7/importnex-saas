@@ -3,7 +3,7 @@
 return [
     'mail' => [
         'greeting' => 'Hi :name,',
-        'signature' => 'Best regards,'."\n".'The JJ Import Motors team',
+        'signature' => 'Best regards,'."\n".'The :company team',
         'footer' => 'This is your private link: do not share it. If you have questions, reply to this email or message us on WhatsApp.',
         'button_portal' => 'Open my order',
 
@@ -54,7 +54,7 @@ return [
         'otp_purpose_approve' => 'confirm your answer',
         'otp_purpose_cancel' => 'confirm the cancellation',
 
-        'recover_subject' => 'Your JJ Import Motors tracking link',
+        'recover_subject' => 'Your :company tracking link',
         'recover_heading' => 'Here is your link',
         'recover_line1' => 'You asked to recover access to your order :reference (:vehicle).',
 

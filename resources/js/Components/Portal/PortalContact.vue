@@ -31,7 +31,7 @@ const requestCancellation = () => {
             <UserCircleIcon class="h-10 w-10 text-platinum-400" aria-hidden="true" />
             <div>
                 <p class="text-xs uppercase tracking-wide text-platinum-400">{{ t('portal.contact.your_manager') }}</p>
-                <p class="text-base font-semibold">{{ contact.manager_name || 'JJ Import Motors' }}</p>
+                <p class="text-base font-semibold">{{ contact.manager_name || contact.company_name }}</p>
                 <p class="text-xs text-platinum-400">{{ contact.schedule }}</p>
             </div>
         </div>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Organization;
 use App\Services\Ai\AiProviderRegistry;
 use App\Services\Ai\ListsModelsInterface;
+use App\Support\Brand;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,13 +15,21 @@ use Inertia\Response;
 
 class OrganizationController extends Controller
 {
-    public function create(): Response
+    public function create(): Response|RedirectResponse
     {
+        if (auth()->user()->organization_id) {
+            return redirect()->route('dashboard');
+        }
+
         return Inertia::render('Organization/Create');
     }
 
     public function store(Request $request): RedirectResponse
     {
+        if ($request->user()->organization_id) {
+            return redirect()->route('dashboard');
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
         ]);
@@ -37,15 +46,23 @@ class OrganizationController extends Controller
             'role' => 'owner',
         ]);
 
-        return redirect()->route('dashboard');
+        return redirect()->route('onboarding.index');
     }
 
     public function show(Organization $organization): Response
     {
         $this->authorizeAccess($organization);
 
+        $brand = $organization->brand();
+
         return Inertia::render('Organization/Show', [
-            'organization' => $organization->load('users'),
+            'organization' => $organization,
+            'members' => $organization->users()->orderBy('name')->get(['id', 'name', 'email', 'role', 'created_at']),
+            'canManage' => auth()->user()->isOwner(),
+            'usersLimit' => $organization->isOwner() ? null : $organization->limitFor('users'),
+            'apiTokenActive' => filled($organization->api_token_hash),
+            'newApiToken' => session('api_token'),
+            'companyMissing' => $brand->missingForContracts(),
         ]);
     }
 
@@ -85,12 +102,29 @@ class OrganizationController extends Controller
             // N8: preferencias por tipo (map alert_type => bool)
             'notification_preferences' => ['nullable', 'array'],
             'notification_preferences.*' => ['boolean'],
+            // Datos de empresa (contrato, portal, emails, fichas públicas).
+            'company' => ['nullable', 'array'],
+            'company.legal_name' => ['nullable', 'string', 'max:255'],
+            'company.tax_id' => ['nullable', 'string', 'max:32'],
+            'company.address' => ['nullable', 'string', 'max:255'],
+            'company.city' => ['nullable', 'string', 'max:120'],
+            'company.phone' => ['nullable', 'string', 'max:32'],
+            'company.phone_2' => ['nullable', 'string', 'max:32'],
+            'company.whatsapp' => ['nullable', 'string', 'max:32'],
+            'company.email' => ['nullable', 'email', 'max:255'],
+            'company.website' => ['nullable', 'string', 'max:255'],
+            'company.iban' => ['nullable', 'string', 'max:42'],
+            'company.iban_holder' => ['nullable', 'string', 'max:255'],
+            'company.iban_bank' => ['nullable', 'string', 'max:120'],
+            'company.fee_label' => ['nullable', 'string', 'max:60'],
+            'company.tagline' => ['nullable', 'string', 'max:160'],
+            'logo' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp,svg', 'max:2048'],
         ]);
 
         $orgData = [
             'name' => $request->name,
-            'currency' => $request->input('currency', 'EUR'),
-            'locale' => $request->input('locale', 'es'),
+            'currency' => $request->input('currency', $organization->currency ?? 'EUR'),
+            'locale' => $request->input('locale', $organization->locale ?? 'es'),
         ];
 
         // OneSignal — save empty string as null
@@ -131,10 +165,20 @@ class OrganizationController extends Controller
             $orgData['ai_provider'] = null;
         }
 
+        if ($request->has('company')) {
+            $orgData['company'] = array_filter(
+                array_map(fn ($v) => is_string($v) ? trim($v) : $v, array_intersect_key((array) $request->input('company'), array_flip(Brand::FIELDS))),
+                fn ($v) => filled($v),
+            );
+        }
+        if ($request->hasFile('logo')) {
+            $orgData['logo'] = $request->file('logo')->store('logos', 'public');
+        }
+
         $organization->update($orgData);
 
         return redirect()->route('organization.show', $organization)
-            ->with('success', 'Settings saved.');
+            ->with('success', 'Cambios guardados.');
     }
 
     /**

@@ -159,6 +159,8 @@ class ContractAcceptance extends Model
             'fecha_firma' => now()->format('d/m/Y H:i'),
             'contrato_id' => '—',
             'email' => $prestador['email'] ?? '—',
+            'prestador_nombre' => $prestador['nombre'] ?? $prestador['razon_social'] ?? config('app.name'),
+            'prestador_ciudad' => $prestador['ciudad'] ?? '—',
         ], $values);
 
         $body = [];
@@ -168,7 +170,7 @@ class ContractAcceptance extends Model
         $body[] = '**Identificador:** '.$defaults['contrato_id'];
         $body[] = '**Fecha:** '.$defaults['fecha_firma'];
         $body[] = '';
-        $body[] = '**PRESTADOR:** '.($prestador['razon_social'] ?? 'JJ Import Motors').' · CIF '.$prestador['cif'].' · '.$prestador['direccion'];
+        $body[] = '**PRESTADOR:** '.($prestador['razon_social'] ?? config('app.name')).' · CIF '.$prestador['cif'].' · '.$prestador['direccion'];
         $body[] = '**CLIENTE:** '.$defaults['cliente_nombre'].' · DNI/NIE '.$defaults['cliente_dni'].' · '.$defaults['cliente_email'];
         $body[] = '**VEHÍCULO:** '.$defaults['vehiculo_marca'].' '.$defaults['vehiculo_modelo'].' ('.$defaults['vehiculo_anio'].')';
         $body[] = '**HONORARIOS:** '.$defaults['honorarios'].' €';

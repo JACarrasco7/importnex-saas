@@ -111,7 +111,7 @@ class ImportOrderFlowTest extends TestCase
         $order = $this->createOrder($car2 = $this->carWithClient());
 
         $this->assertSame(ImportOrderState::Draft, $order->state);
-        $this->assertMatchesRegularExpression('/^JJIM-\d{4}-\d{4}$/', $order->reference);
+        $this->assertMatchesRegularExpression('/^ENC-\d{4}-\d{4}$/', $order->reference);
         $this->assertSame(1500.0, (float) $order->fee_amount);
         $this->assertNotNull($order->portalUrl());
         $this->assertSame('Reserved', $car2->fresh()->status);

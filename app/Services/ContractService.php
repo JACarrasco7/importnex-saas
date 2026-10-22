@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Car;
 use App\Models\ContractAcceptance;
+use App\Support\Brand;
 
 /**
  * Crea el contrato de un coche con todos los datos del cliente + vehículo
@@ -56,11 +57,11 @@ class ContractService
             'precio_total' => number_format($car->calculateTotalCost(), 0, ',', '.'),
             'honorarios' => number_format($honorarios, 0, ',', '.'),
             'fecha_firma' => now()->format('d/m/Y H:i'),
-            'contrato_id' => 'JJIM-'.$car->id.'-'.strtoupper(substr(md5(uniqid('', true)), 0, 6)),
+            'contrato_id' => config('import_orders.reference_prefix').'-'.$car->id.'-'.strtoupper(substr(md5(uniqid('', true)), 0, 6)),
             // Congelar cláusulas + prestador en el snapshot: un contrato pendiente
             // nunca cambia de texto aunque se edite config/contracts.php después.
             '_clausulas' => config('contracts.clausulas'),
-            '_prestador' => config('contracts.prestador'),
+            '_prestador' => Brand::for($car->organization)->prestador(),
         ];
 
         return ContractAcceptance::create([

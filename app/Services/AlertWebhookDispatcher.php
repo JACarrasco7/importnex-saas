@@ -32,7 +32,7 @@ class AlertWebhookDispatcher
         $text = self::formatMessage($alert);
 
         $payload = str_contains($url, 'discord.com')
-            ? ['content' => $text, 'username' => 'JJ Import Motors Alerts']
+            ? ['content' => $text, 'username' => config('app.name').' Alerts']
             : ['text' => $text];
 
         // Adjuntar metadata para integraciones genericas (webhook.site, n8n, Make)

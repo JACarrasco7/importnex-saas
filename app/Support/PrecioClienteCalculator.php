@@ -370,7 +370,7 @@ class PrecioClienteCalculator
     {
         if (self::esOrigenEspana($car)) {
             return [
-                'Traslado hasta Huelva' => round((float) config('importacion.traslado_es_eur', 250.0), 2),
+                'Traslado hasta destino' => round((float) config('importacion.traslado_es_eur', 250.0), 2),
                 'Gestión, transferencia y matriculación' => round(
                     (float) config('importacion.gestoria_es_eur', 150.0)
                     + (float) config('importacion.tarifa_gestion_es_eur', 500.0), 2),

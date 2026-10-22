@@ -23,8 +23,8 @@ class WelcomeMail extends Mailable
     {
         return new Envelope(
             subject: $this->locale === 'es'
-                ? 'Bienvenido a JJ Import Motors'
-                : 'Welcome to JJ Import Motors',
+                ? 'Bienvenido a '.config('app.name')
+                : 'Welcome to '.config('app.name'),
         );
     }
 

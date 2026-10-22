@@ -27,7 +27,11 @@ class PublicCarRequestController extends Controller
                 'name' => $organization->name,
                 'slug' => $organization->slug,
                 'logo' => $organization->logo,
+                // El folleto PDF estático (public/jj-import-folleto.pdf) es de la
+                // organización operadora; el resto de organizaciones no lo muestran.
+                'has_brochure' => $organization->isOwner() && file_exists(public_path('jj-import-folleto.pdf')),
             ],
+            'orgBrand' => $organization->brand()->toPublicArray(),
             'translations' => ['car_request_form' => $translations],
         ]);
     }

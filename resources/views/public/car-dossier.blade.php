@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $car->brand }} {{ $car->model }} · JJ Import Motors</title>
+    <title>{{ $car->brand }} {{ $car->model }} · {{ $brand->name() }}</title>
     <meta name="robots" content="noindex, nofollow">
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="JJ Import Motors">
+    <meta property="og:site_name" content="{{ $brand->name() }}">
     <meta property="og:url" content="{{ url()->current() }}">
-    <meta property="og:title" content="{{ $car->brand }} {{ $car->model }} · JJ Import Motors">
+    <meta property="og:title" content="{{ $car->brand }} {{ $car->model }} · {{ $brand->name() }}">
     <meta property="og:description" content="{{ number_format(($car->sale_price ?? $car->purchase_price ?? 0), 0, ',', '.') }} € + gastos de gestión · Gestionamos la compra por ti">
     {{-- og:image debe ser URL absoluta (1200x630, <600 KB). WhatsApp NO lee data: URIs. --}}
     @if($fotoPortada)
@@ -959,7 +959,9 @@
         <div class="nav-inner">
             <div class="nav-brand">
                 @if($logoBase64)
-                    <img src="{{ $logoBase64 }}" alt="JJ Import Motors" class="nav-logo">
+                    <img src="{{ $logoBase64 }}" alt="{{ $brand->name() }}" class="nav-logo">
+                @else
+                    <span class="brand-text">{{ $brand->name() }}</span>
                 @endif
             </div>
             <div class="nav-links">
@@ -967,9 +969,11 @@
                 <a href="#veredicto" class="nav-link">Veredicto</a>
                 <a href="#detalles" class="nav-link">Detalles</a>
             </div>
-            <a href="tel:+34675701439" class="nav-cta">
-                📞 <span class="long">675 70 14 39</span>
+            @if($brand->telHref())
+            <a href="{{ $brand->telHref() }}" class="nav-cta">
+                📞 <span class="long">{{ $brand->get('phone') }}</span>
             </a>
+            @endif
         </div>
     </nav>
 
@@ -1079,7 +1083,7 @@
             'Transporte hasta España',
             'ITV de importación, impuestos y matriculación',
             'Historial y kilometraje comprobados',
-            'Entrega en Huelva y provincia',
+            'Entrega en '.($brand->get('city') ?: 'España'),
         ];
         $fichaPasos = $ficha['pasos'] ?? [
             ['cuando' => 'Semana 0', 'que' => 'Reserva y bloqueo de la unidad con el vendedor'],
@@ -1139,20 +1143,24 @@
 
                 @if($precioTitular)
                     <div class="price-card">
-                        <div class="price-label">Puesto en Huelva · aprox.</div>
+                        <div class="price-label">Puesto en {{ $brand->get('city') ?: 'España' }} · aprox.</div>
                         <div class="price-value">{{ $precioTitular }}</div>
                         <div class="price-caption">Coche, transporte, impuestos y gestión — desglose más abajo</div>
                     </div>
                 @endif
 
                 <div class="hero-actions">
-                    <a href="https://wa.me/34675701439?text={{ urlencode('Hola, me interesa el '.$car->brand.' '.$car->model.' que habéis compartido conmigo.') }}"
+                    @if($brand->whatsappUrl())
+                    <a href="{{ $brand->whatsappUrl('Hola, me interesa el '.$car->brand.' '.$car->model.' que habéis compartido conmigo.') }}"
                        target="_blank" rel="noopener" class="btn primary">
                         💬 Me interesa, ¿hablamos?
                     </a>
-                    <a href="tel:+34675701439" class="btn ghost">
+                    @endif
+                    @if($brand->telHref())
+                    <a href="{{ $brand->telHref() }}" class="btn ghost">
                         📞 Llamar ahora
                     </a>
+                    @endif
                 </div>
             </div>
 
@@ -1291,7 +1299,7 @@
             @endphp
             <section class="precio-cliente">
                 <div class="section-title">El precio</div>
-                <h2 class="section-h">Cuánto te costaría, puesto en Huelva</h2>
+                <h2 class="section-h">Cuánto te costaría, puesto en {{ $brand->get('city') ?: 'España' }}</h2>
 
                 <div class="precio-horquilla">
                     <div class="etq">{{ $hayHorquilla ? 'Horquilla estimada' : 'Estimación' }}</div>
@@ -1606,27 +1614,29 @@
     <footer>
         <div class="brand">
             @if($logoBase64)
-                <img src="{{ $logoBase64 }}" alt="JJ Import Motors" style="height:32px;">
+                <img src="{{ $logoBase64 }}" alt="{{ $brand->name() }}" style="height:32px;">
             @endif
-            <span class="brand-text">JJ Import Motors</span>
+            <span class="brand-text">{{ $brand->name() }}</span>
         </div>
         <div class="slogan">Gestión de compra e importación de vehículos · España y Alemania</div>
         <div class="links">
-            <a href="mailto:jjimportmotors@gmail.com">jjimportmotors@gmail.com</a>
-            <span style="opacity: 0.4;">·</span>
-            <a href="tel:+34675701439">+34 675 70 14 39</a>
-            <span style="opacity: 0.4;">·</span>
-            <a href="tel:+34691485927">+34 691 48 59 27</a>
-            <span style="opacity: 0.4;">·</span>
-            <span>Huelva, España</span>
+            @php
+                $footerLinks = array_filter([
+                    $brand->get('email') ? '<a href="mailto:'.e($brand->get('email')).'">'.e($brand->get('email')).'</a>' : null,
+                    $brand->telHref() ? '<a href="'.e($brand->telHref()).'">'.e($brand->get('phone')).'</a>' : null,
+                    $brand->telHref('phone_2') ? '<a href="'.e($brand->telHref('phone_2')).'">'.e($brand->get('phone_2')).'</a>' : null,
+                    $brand->get('city') ? '<span>'.e($brand->get('city')).'</span>' : null,
+                ]);
+            @endphp
+            {!! implode('<span style="opacity: 0.4;"> · </span>', $footerLinks) !!}
         </div>
         <div class="copy">
-            JJ Import Motors (Huelva) presta un servicio de gestión de búsqueda, compra e importación de vehículos.
+            {{ $brand->name() }} presta un servicio de gestión de búsqueda, compra e importación de vehículos.
             No es vendedora ni propietaria del vehículo y no ofrece garantía sobre él.
             El precio indicado es el del vehículo; a él se suman los gastos de gestión de compra.
             Disponibilidad y precio sujetos a confirmación en el momento de la reserva.
             <br><br>
-            © {{ date('Y') }} JJ Import Motors · Datos del vehículo comprobados el {{ $fechaDatos }}
+            © {{ date('Y') }} {{ $brand->name() }} · Datos del vehículo comprobados el {{ $fechaDatos }}
         </div>
     </footer>
 
@@ -1655,11 +1665,15 @@
          mitad de página, no tenía dónde pulsar. Es el MISMO CTA (regla §3.7 del
          spec: un solo CTA), solo que siempre accesible. --}}
     <div class="cta-fijo" id="cta-fijo">
-        <a href="https://wa.me/34675701439?text={{ urlencode('Hola, me interesa el '.$car->brand.' '.$car->model.' que habéis compartido conmigo.') }}"
+        @if($brand->whatsappUrl())
+        <a href="{{ $brand->whatsappUrl('Hola, me interesa el '.$car->brand.' '.$car->model.' que habéis compartido conmigo.') }}"
            target="_blank" rel="noopener" class="btn primary">
             💬 Hablar por WhatsApp
         </a>
-        <a href="tel:+34675701439" class="btn ghost tel" aria-label="Llamar a JJ Import Motors">📞</a>
+        @endif
+        @if($brand->telHref())
+        <a href="{{ $brand->telHref() }}" class="btn ghost tel" aria-label="Llamar a {{ $brand->name() }}">📞</a>
+        @endif
     </div>
     <script>
     (function () {

@@ -13,6 +13,18 @@ import PublicLayout from '@/Layouts/PublicLayout.vue';
 import { useTranslations } from '@/Composables/useTranslations';
 
 const { t } = useTranslations();
+const props = defineProps({
+    salesEmail: { type: String, default: '' },
+    plans: { type: Object, default: () => ({}) },
+});
+
+// Precios desde config/subscription.php (los mismos que cobra Stripe).
+const priceOf = (key, fallback) => Number(props.plans?.[key]?.price ?? fallback);
+const limitText = (key, field, label, fallback) => {
+    const n = props.plans?.[key]?.[field];
+    return n ? `${new Intl.NumberFormat('es-ES').format(n)} ${label}` : fallback;
+};
+const salesEmail = computed(() => props.salesEmail || '');
 
 const billingPeriod = ref('monthly');
 
@@ -20,11 +32,11 @@ const plans = computed(() => [
     {
         name: t('pricing_public.basic_plan'),
         description: t('pricing_public.basic_desc'),
-        price: 29,
-        yearlyPrice: 290,
+        price: priceOf('starter', 29),
+        yearlyPrice: priceOf('starter', 29) * 10,
         features: [
-            t('pricing_public.basic_feature_1'),
-            t('pricing_public.basic_feature_2'),
+            limitText('starter', 'cars_limit', t('pricing_public.vehicles', {}, 'vehículos'), t('pricing_public.basic_feature_1')),
+            limitText('starter', 'clients_limit', t('pricing_public.clients', {}, 'clientes'), t('pricing_public.basic_feature_2')),
             t('pricing_public.basic_feature_3'),
             t('pricing_public.basic_feature_4'),
             t('pricing_public.basic_feature_5'),
@@ -35,11 +47,11 @@ const plans = computed(() => [
     {
         name: t('pricing_public.pro_plan'),
         description: t('pricing_public.pro_desc'),
-        price: 79,
-        yearlyPrice: 790,
+        price: priceOf('pro', 79),
+        yearlyPrice: priceOf('pro', 79) * 10,
         features: [
-            t('pricing_public.pro_feature_1'),
-            t('pricing_public.pro_feature_2'),
+            limitText('pro', 'cars_limit', t('pricing_public.vehicles', {}, 'vehículos'), t('pricing_public.pro_feature_1')),
+            limitText('pro', 'clients_limit', t('pricing_public.clients', {}, 'clientes'), t('pricing_public.pro_feature_2')),
             t('pricing_public.pro_feature_3'),
             t('pricing_public.pro_feature_4'),
             t('pricing_public.pro_feature_5'),
@@ -52,11 +64,11 @@ const plans = computed(() => [
     {
         name: t('pricing_public.enterprise_plan'),
         description: t('pricing_public.enterprise_desc'),
-        price: 199,
-        yearlyPrice: 1990,
+        price: priceOf('enterprise', 199),
+        yearlyPrice: priceOf('enterprise', 199) * 10,
         features: [
-            t('pricing_public.enterprise_feature_1'),
-            t('pricing_public.enterprise_feature_2'),
+            limitText('enterprise', 'cars_limit', t('pricing_public.vehicles', {}, 'vehículos'), t('pricing_public.enterprise_feature_1')),
+            limitText('enterprise', 'clients_limit', t('pricing_public.clients', {}, 'clientes'), t('pricing_public.enterprise_feature_2')),
             t('pricing_public.enterprise_feature_3'),
             t('pricing_public.enterprise_feature_4'),
             t('pricing_public.enterprise_feature_5'),
@@ -229,7 +241,7 @@ function featureValueDisplay(value) {
 
                         <!-- CTA -->
                         <Link
-                            :href="plan.name === t('pricing_public.enterprise_plan') ? 'mailto:ventas@jjimportmotors.com' : route('register')"
+                            :href="plan.name === t('pricing_public.enterprise_plan') ? `mailto:${salesEmail}` : route('register')"
                             class="mt-auto block w-full rounded-xl px-4 py-3 text-center text-sm font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-estoril-500 focus:ring-offset-2"
                             :class="plan.popular
                                 ? 'bg-estoril-600 text-white hover:bg-estoril-700'
@@ -367,7 +379,7 @@ function featureValueDisplay(value) {
                             <ArrowRightIcon class="h-4 w-4" />
                         </Link>
                         <a
-                            href="mailto:ventas@jjimportmotors.com"
+                            :href="`mailto:${salesEmail}`"
                             class="inline-flex items-center gap-2 rounded-xl bg-estoril-700 px-8 py-3.5 text-base font-semibold text-white ring-1 ring-white/20 transition hover:bg-estoril-800"
                         >
                             <TruckIcon class="h-5 w-5" />

@@ -135,12 +135,13 @@ class PortalController extends Controller
                 }
                 try {
                     Mail::to($client->email)->send(new OrderUpdateMail(
-                        subjectLine: __('orders.mail.recover_subject'),
+                        subjectLine: __('orders.mail.recover_subject', ['company' => $order->organization->brand()->name()]),
                         heading: __('orders.mail.recover_heading'),
                         lines: [__('orders.mail.recover_line1', ['reference' => $order->reference, 'vehicle' => $order->vehicleLabel()])],
                         actionLabel: __('orders.mail.button_portal'),
                         actionUrl: $url,
                         greeting: __('orders.mail.greeting', ['name' => explode(' ', (string) $client->name)[0]]),
+                        brand: $order->organization->brand()->toPublicArray(),
                     ));
                 } catch (\Throwable $e) {
                     Log::warning('portal.recover_mail_failed', ['order_id' => $order->id, 'message' => $e->getMessage()]);

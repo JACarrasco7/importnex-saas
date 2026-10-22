@@ -119,7 +119,7 @@
                     <tr>
                         <td style="padding:24px 32px;background-color:#f9fafb;font-size:12px;color:#9ca3af;text-align:center;border-top:1px solid #e5e7eb;">
                             <p style="margin:0;">
-                                {{ $isEs ? 'Recibes este email porque tienes alertas activas en JJ Import Motors.' : 'You receive this email because you have active alerts on JJ Import Motors.' }}
+                                {{ $isEs ? 'Recibes este email porque tienes alertas activas en '.config('app.name').'.' : 'You receive this email because you have active alerts on '.config('app.name').'.' }}
                             </p>
                             <p style="margin:8px 0 0;">
                                 <a href="{{ $appUrl }}/organization/{{ $organization->id }}/edit" style="color:#6b7280;text-decoration:underline;">

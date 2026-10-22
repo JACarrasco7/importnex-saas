@@ -7,6 +7,9 @@
 
 return [
 
+    // Prefijo de las referencias de encargo y contrato (p. ej. ENC-2026-0001).
+    'reference_prefix' => env('ORDERS_REFERENCE_PREFIX', 'ENC'),
+
     // Días que un contrato enviado sigue siendo firmable.
     'contract_valid_days' => (int) env('ORDERS_CONTRACT_VALID_DAYS', 7),
 
@@ -28,8 +31,8 @@ return [
     'portal_days_after_close' => (int) env('ORDERS_PORTAL_DAYS_AFTER_CLOSE', 90),
 
     // Contacto que ve el cliente en el portal (WhatsApp y teléfono).
-    'contact_phone' => env('ORDERS_CONTACT_PHONE', '+34 675 70 14 39'),
-    'contact_email' => env('ORDERS_CONTACT_EMAIL', 'jjimportmotors@gmail.com'),
+    'contact_phone' => env('ORDERS_CONTACT_PHONE'),
+    'contact_email' => env('ORDERS_CONTACT_EMAIL'),
     'contact_schedule' => env('ORDERS_CONTACT_SCHEDULE', 'Lun-Vie 9:00–19:00 · Sáb 10:00–13:00'),
 
     // Email del equipo para avisos (firma, mensajes, aprobaciones). Si está

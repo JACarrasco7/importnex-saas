@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="utf-8">
-    <title>Contrato firmado · JJ Import Motors</title>
+    <title>Contrato firmado · {{ $prestador['nombre'] ?? $prestador['razon_social'] ?? config('app.name') }}</title>
     <style>
         @page { size: A4; margin: 18mm 14mm 22mm; }
         body { font-family: 'Helvetica', 'Arial', sans-serif; color: #1f2937; font-size: 11px; line-height: 1.55; }

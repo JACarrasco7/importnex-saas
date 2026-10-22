@@ -11,8 +11,8 @@ class EnsureOrganization
     public function handle(Request $request, Closure $next): Response
     {
         if (auth()->check() && ! auth()->user()->organization_id) {
-            // Usuario sin organización → redirigir a onboarding
-            return redirect()->route('onboarding.index');
+            // Usuario sin organización → crearla (el onboarding la necesita).
+            return redirect()->route('organization.create');
         }
 
         return $next($request);

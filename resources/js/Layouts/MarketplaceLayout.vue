@@ -11,15 +11,17 @@ import LocaleSelector from '@/Components/LocaleSelector.vue';
 import DarkModeToggle from '@/Components/DarkModeToggle.vue';
 import WhatsAppFloat from '@/Components/WhatsAppFloat.vue';
 import { useTranslations } from '@/Composables/useTranslations';
+import { useBrand } from '@/Composables/useBrand';
 
 const { t } = useTranslations();
+const { brand, whatsappUrl, waNumber } = useBrand();
 const page = usePage();
 
 const mobileOpen = ref(false);
 
 // Contexto del marketplace publico (compartido desde HandleInertiaRequests).
 const marketplace = computed(() => page.props.marketplace ?? {});
-const orgName = computed(() => marketplace.value.orgName || 'JJ Import Motors');
+const orgName = computed(() => marketplace.value.orgName || brand.value.name);
 const requestHref = computed(
     () => marketplace.value.requestUrl || route('marketplace.index') + '#contacto',
 );
@@ -169,14 +171,14 @@ const close = () => { mobileOpen.value = false; };
                             {{ t('marketplace.footer_contact', {}, 'Contacto') }}
                         </h3>
                         <ul class="mt-3 space-y-2 text-sm">
-                            <li>
-                                <a href="mailto:jjimportmotors@gmail.com" class="text-gray-600 hover:text-estoril-700 dark:text-gray-400 dark:hover:text-estoril-300">
-                                    {{ t('public.footer.email_label', {}, 'jjimportmotors@gmail.com') }}
+                            <li v-if="brand.email">
+                                <a :href="`mailto:${brand.email}`" class="text-gray-600 hover:text-estoril-700 dark:text-gray-400 dark:hover:text-estoril-300">
+                                    {{ brand.email }}
                                 </a>
                             </li>
-                            <li>
+                            <li v-if="waNumber">
                                 <a
-                                    :href="t('public.footer.whatsapp_url', {}, 'https://wa.me/34675701439?text=Hola%20JJ%20Import%20Motors%2C%20me%20interesa%20m%C3%A1s%20informaci%C3%B3n')"
+                                    :href="whatsappUrl(`Hola ${orgName}, me interesa más información`)"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     class="text-gray-600 hover:text-estoril-700 dark:text-gray-400 dark:hover:text-estoril-300"

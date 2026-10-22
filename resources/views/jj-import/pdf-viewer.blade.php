@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $titulo }} · JJ Import Motors</title>
+    <title>{{ $titulo }} · {{ ($brand ?? \App\Support\Brand::platform())->name() }}</title>
     <link rel="icon" type="image/png" href="/images/jj-import/logo-icon.png">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -89,15 +89,13 @@
     <div class="toolbar">
         <div class="brand">
             @php
-                $logoPath = public_path('images/jj-import/logo-horizontal-blanco.png');
-                $logoSrc = file_exists($logoPath)
-                    ? 'data:image/png;base64,'.base64_encode(file_get_contents($logoPath))
-                    : null;
+                $brand = $brand ?? \App\Support\Brand::platform();
+                $logoSrc = $brand->logoDataUri(onDark: true);
             @endphp
             @if($logoSrc)
-                <img src="{{ $logoSrc }}" alt="JJ Import Motors" class="brand-logo">
+                <img src="{{ $logoSrc }}" alt="{{ $brand->name() }}" class="brand-logo">
             @else
-                <span class="brand-text">JJ Import Motors</span>
+                <span class="brand-text">{{ $brand->name() }}</span>
             @endif
         </div>
         <div class="title">{{ $titulo }}</div>
