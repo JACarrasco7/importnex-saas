@@ -8,9 +8,11 @@ use App\Models\Car;
 use App\Models\CarChecklist;
 use App\Models\CarDocument;
 use App\Models\CarPublicLink;
+use App\Services\ImportOrders\OrderContractService;
 use App\Support\CarChecklistDefinitions;
 use App\Support\CarDocumentDefinitions;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class CarObserver
 {
@@ -87,6 +89,16 @@ class CarObserver
                 CarPublicLink::generateFor($car);
             }
         }
+
+        // Contrato pendiente con cifras que ya no son las del coche: se anula
+        // y se avisa al equipo para reemitirlo (auditoría 18-oct-2026, H2).
+        if ($car->wasChanged(['purchase_price', 'professional_fees'])) {
+            try {
+                app(OrderContractService::class)->handleCarFiguresChanged($car);
+            } catch (\Throwable $e) {
+                Log::warning('car_observer.contract_void_failed', ['car_id' => $car->id, 'message' => $e->getMessage()]);
+            }
+        }
     }
 
     public function updated(Car $car): void
@@ -100,6 +112,16 @@ class CarObserver
             // funcione. Si ya hay uno activo, lo respetamos.
             if ($car->is_marketplace && $car->activePublicLink() === null) {
                 CarPublicLink::generateFor($car);
+            }
+        }
+
+        // Contrato pendiente con cifras que ya no son las del coche: se anula
+        // y se avisa al equipo para reemitirlo (auditoría 18-oct-2026, H2).
+        if ($car->wasChanged(['purchase_price', 'professional_fees'])) {
+            try {
+                app(OrderContractService::class)->handleCarFiguresChanged($car);
+            } catch (\Throwable $e) {
+                Log::warning('car_observer.contract_void_failed', ['car_id' => $car->id, 'message' => $e->getMessage()]);
             }
         }
     }

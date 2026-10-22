@@ -21,6 +21,12 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\GuideController;
 use App\Http\Controllers\HealthController;
+use App\Http\Controllers\ImportOrders\ImportOrderApprovalController;
+use App\Http\Controllers\ImportOrders\ImportOrderContractController;
+use App\Http\Controllers\ImportOrders\ImportOrderController;
+use App\Http\Controllers\ImportOrders\ImportOrderMediaController;
+use App\Http\Controllers\ImportOrders\ImportOrderMessageController;
+use App\Http\Controllers\ImportOrders\ImportOrderPaymentController;
 use App\Http\Controllers\JJImportFolletoController;
 use App\Http\Controllers\KpiController;
 use App\Http\Controllers\LocaleController;
@@ -32,6 +38,10 @@ use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\OpenApiController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\PaqueteValoracionController;
+use App\Http\Controllers\Portal\PortalApprovalController;
+use App\Http\Controllers\Portal\PortalContractController;
+use App\Http\Controllers\Portal\PortalController;
+use App\Http\Controllers\Portal\PortalMessageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicCarController;
 use App\Http\Controllers\PublicCarRequestController;
@@ -300,6 +310,40 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
         ->where('car', '[0-9]+')
         ->name('cars.contract.create');
 
+    // ── Encargos de importación (auditoría 18-oct-2026) ─────────────────────
+    // Estáticas antes que wildcards; ids numéricos con where().
+    Route::get('/import-orders', [ImportOrderController::class, 'index'])->name('import-orders.index');
+    Route::post('/import-orders', [ImportOrderController::class, 'store'])->name('import-orders.store');
+    Route::prefix('/import-orders/{importOrder}')->where(['importOrder' => '[0-9]+'])->name('import-orders.')->group(function () {
+        Route::get('/', [ImportOrderController::class, 'show'])->name('show');
+        Route::patch('/', [ImportOrderController::class, 'update'])->name('update');
+        Route::post('/transition', [ImportOrderController::class, 'transition'])->name('transition');
+        Route::post('/replace-vehicle', [ImportOrderController::class, 'replaceVehicle'])->name('replace-vehicle');
+        Route::post('/portal/rotate', [ImportOrderController::class, 'rotatePortal'])->name('portal.rotate');
+        Route::post('/share-log', [ImportOrderController::class, 'logShare'])->name('share-log');
+
+        Route::post('/contract', [ImportOrderContractController::class, 'issue'])->name('contracts.issue');
+        Route::post('/contract/void', [ImportOrderContractController::class, 'void'])->name('contracts.void');
+        Route::get('/contracts/{contract}/download', [ImportOrderContractController::class, 'download'])
+            ->where('contract', '[0-9]+')->name('contracts.download');
+
+        Route::post('/payments', [ImportOrderPaymentController::class, 'store'])->name('payments.store');
+        Route::patch('/payments/{payment}', [ImportOrderPaymentController::class, 'update'])->where('payment', '[0-9]+')->name('payments.update');
+        Route::post('/payments/{payment}/paid', [ImportOrderPaymentController::class, 'markPaid'])->where('payment', '[0-9]+')->name('payments.paid');
+        Route::post('/payments/{payment}/pending', [ImportOrderPaymentController::class, 'markPending'])->where('payment', '[0-9]+')->name('payments.pending');
+        Route::post('/payments/{payment}/cancel', [ImportOrderPaymentController::class, 'cancel'])->where('payment', '[0-9]+')->name('payments.cancel');
+
+        Route::post('/approvals', [ImportOrderApprovalController::class, 'store'])->name('approvals.store');
+        Route::post('/approvals/{approval}/withdraw', [ImportOrderApprovalController::class, 'withdraw'])->where('approval', '[0-9]+')->name('approvals.withdraw');
+
+        Route::post('/messages', [ImportOrderMessageController::class, 'store'])->name('messages.store');
+
+        Route::post('/media', [ImportOrderMediaController::class, 'store'])->name('media.store');
+        Route::get('/media/{media}', [ImportOrderMediaController::class, 'show'])->where('media', '[0-9]+')->name('media.show');
+        Route::patch('/media/{media}', [ImportOrderMediaController::class, 'update'])->where('media', '[0-9]+')->name('media.update');
+        Route::delete('/media/{media}', [ImportOrderMediaController::class, 'destroy'])->where('media', '[0-9]+')->name('media.destroy');
+    });
+
     // Marketing overview
     Route::get('/marketing', [MarketingController::class, 'index'])->name('marketing.index');
 
@@ -398,6 +442,30 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 // JJ Import Motors folleto PDF
 Route::get('/jj-import/folleto', [JJImportFolletoController::class, 'download'])->name('jj-import.folleto');
+
+// Portal del cliente: un único enlace privado por encargo (contrato, pagos,
+// aprobaciones, mensajes y seguimiento). Sin login: el token da acceso.
+Route::get('/mi-encargo', [PortalController::class, 'recoverForm'])
+    ->middleware('throttle:portal')->name('portal.recover.form');
+Route::post('/mi-encargo/recuperar', [PortalController::class, 'recover'])
+    ->middleware('throttle:public-form')->name('portal.recover');
+Route::prefix('mi-encargo/{token}')->where(['token' => '[A-Za-z0-9]{40,64}'])->name('portal.')->group(function () {
+    Route::middleware('throttle:portal')->group(function () {
+        Route::get('/', [PortalController::class, 'show'])->name('show');
+        Route::get('/contrato.pdf', [PortalContractController::class, 'pdf'])->name('contract.pdf');
+        Route::get('/fotos/{photo}', [PortalController::class, 'carPhoto'])->where('photo', '[0-9]+')->name('car-photo');
+        Route::get('/archivos/{media}', [PortalController::class, 'media'])->where('media', '[0-9]+')->name('media');
+    });
+    Route::middleware('throttle:portal-actions')->group(function () {
+        Route::post('/contrato/codigo', [PortalContractController::class, 'sendCode'])->name('contract.code');
+        Route::post('/contrato/firmar', [PortalContractController::class, 'sign'])->name('contract.sign');
+        Route::post('/contrato/dudas', [PortalContractController::class, 'reject'])->name('contract.reject');
+        Route::post('/aprobaciones/{approval}/codigo', [PortalApprovalController::class, 'sendCode'])->where('approval', '[0-9]+')->name('approvals.code');
+        Route::post('/aprobaciones/{approval}', [PortalApprovalController::class, 'resolve'])->where('approval', '[0-9]+')->name('approvals.resolve');
+        Route::post('/mensajes', [PortalMessageController::class, 'store'])->name('messages.store');
+        Route::post('/cancelacion', [PortalController::class, 'requestCancellation'])->name('cancellation');
+    });
+});
 
 // Tracking público del proceso de importación (sin auth).
 Route::get('/tracking/{token}', [PublicTrackingController::class, 'show'])

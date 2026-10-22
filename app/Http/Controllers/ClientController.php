@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Client;
+use App\Support\SpanishId;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -49,6 +50,15 @@ class ClientController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'contact_info' => 'nullable|string|max:255',
+            'email' => 'nullable|email|max:191',
+            'phone' => 'nullable|string|max:50',
+            'dni' => ['nullable', 'string', 'max:20', function (string $attribute, mixed $value, \Closure $fail): void {
+                if (! SpanishId::isValid((string) $value)) {
+                    $fail('El DNI/NIE no es válido (revisa la letra).');
+                }
+            }],
+            'address' => 'nullable|string|max:255',
+            'preferred_channel' => ['nullable', Rule::in(['email', 'whatsapp', 'phone'])],
             'looking_for' => 'nullable|string|max:255',
             'budget_min' => 'nullable|numeric|min:0',
             'budget_max' => 'nullable|numeric|min:0|gte:budget_min',
@@ -59,7 +69,7 @@ class ClientController extends Controller
         ]);
 
         Client::create([
-            ...$request->only(['name', 'contact_info', 'looking_for', 'budget_min', 'budget_max', 'status', 'notes']),
+            ...$this->clientAttributes($request),
             'organization_id' => auth()->user()->organization_id,
         ]);
 
@@ -79,8 +89,32 @@ class ClientController extends Controller
     public function edit(Client $client): Response
     {
         return Inertia::render('Clients/Edit', [
-            'client' => $client,
+            'client' => $client->makeVisible('dni'),
         ]);
+    }
+
+    /**
+     * Campos editables del cliente. Email en minúsculas y DNI normalizado
+     * (sin espacios ni guiones) para que coincidan con lo que firma.
+     *
+     * @return array<string, mixed>
+     */
+    private function clientAttributes(Request $request): array
+    {
+        $data = $request->only([
+            'name', 'contact_info', 'email', 'phone', 'dni', 'address', 'preferred_channel',
+            'looking_for', 'budget_min', 'budget_max', 'status', 'notes',
+        ]);
+
+        if (! empty($data['email'])) {
+            $data['email'] = strtolower(trim($data['email']));
+        }
+        if (array_key_exists('dni', $data)) {
+            $data['dni'] = $data['dni'] ? SpanishId::normalize($data['dni']) : null;
+        }
+        $data['preferred_channel'] = $data['preferred_channel'] ?? 'email';
+
+        return $data;
     }
 
     public function update(Request $request, Client $client): RedirectResponse
@@ -88,6 +122,15 @@ class ClientController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'contact_info' => 'nullable|string|max:255',
+            'email' => 'nullable|email|max:191',
+            'phone' => 'nullable|string|max:50',
+            'dni' => ['nullable', 'string', 'max:20', function (string $attribute, mixed $value, \Closure $fail): void {
+                if (! SpanishId::isValid((string) $value)) {
+                    $fail('El DNI/NIE no es válido (revisa la letra).');
+                }
+            }],
+            'address' => 'nullable|string|max:255',
+            'preferred_channel' => ['nullable', Rule::in(['email', 'whatsapp', 'phone'])],
             'looking_for' => 'nullable|string|max:255',
             'budget_min' => 'nullable|numeric|min:0',
             'budget_max' => 'nullable|numeric|min:0|gte:budget_min',
@@ -95,7 +138,7 @@ class ClientController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $client->update($request->only(['name', 'contact_info', 'looking_for', 'budget_min', 'budget_max', 'status', 'notes']));
+        $client->update($this->clientAttributes($request));
 
         return redirect()->route('clients.index')
             ->with('success', 'Client updated successfully.');

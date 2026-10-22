@@ -149,6 +149,17 @@ class Car extends Model
         return $this->hasMany(CarMarketingContent::class);
     }
 
+    public function importOrders()
+    {
+        return $this->hasMany(ImportOrder::class);
+    }
+
+    /** Encargo activo (no entregado ni cancelado) de este coche, si lo hay. */
+    public function activeImportOrder(): ?ImportOrder
+    {
+        return $this->importOrders()->active()->latest('id')->first();
+    }
+
     public function contractAcceptances()
     {
         return $this->hasMany(ContractAcceptance::class);

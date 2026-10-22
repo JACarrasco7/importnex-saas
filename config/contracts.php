@@ -24,12 +24,13 @@
 
 return [
 
-    'version' => '2026-08-21.0',
+    'version' => '2026-10-18.0',
 
     'prestador' => [
-        'razon_social' => 'JJ Import Motors',
-        'cif' => '— pendiente de asignar —',
-        'direccion' => 'Huelva, España',
+        'razon_social' => env('CONTRACT_PRESTADOR_RAZON_SOCIAL', 'JJ Import Motors'),
+        // Configurable por .env (CONTRACT_PRESTADOR_CIF) para no tocar código.
+        'cif' => env('CONTRACT_PRESTADOR_CIF', '— pendiente de asignar —'),
+        'direccion' => env('CONTRACT_PRESTADOR_DIRECCION', 'Huelva, España'),
         'email' => 'jjimportmotors@gmail.com',
         'telefono' => '+34 675 70 14 39',
         'registro_mercantil' => '— pendiente —',
@@ -67,7 +68,7 @@ TXT,
 Los honorarios del Prestador ascienden a :honorarios €, IVA incluido, pagaderos
 en dos plazos: 50% a la firma del presente contrato y 50% a la entrega del
 Vehículo en territorio español. El precio de compra del Vehículo
-(:precio_total €) será satisfecho directamente por el CLIENTE al vendedor
+(:precio_compra €) será satisfecho directamente por el CLIENTE al vendedor
 en Alemania o al Prestador según se acuerde; en ningún caso JJ Import Motors
 será propietario del Vehículo.
 TXT,
@@ -159,11 +160,27 @@ TXT,
             'requiere_checkbox' => true,
             'cuerpo' => <<<'TXT'
 El CLIENTE declara haber leído, comprendido y aceptado todas las cláusulas
-anteriores. La firma se realiza mediante click en el botón "Aceptar y firmar"
-de la página web del Prestador, con registro de fecha, hora, dirección IP y
-navegador, conforme al art. 9 de la LSSI-CE y art. 25 del Reglamento eIDAS.
+anteriores. La firma se realiza en la página web del Prestador introduciendo
+el código de verificación de un solo uso enviado al correo electrónico del
+CLIENTE y pulsando el botón "Firmar contrato", con registro de fecha, hora,
+dirección IP, navegador y huella SHA-256 del texto firmado, conforme al art. 9
+de la LSSI-CE y al art. 25 del Reglamento eIDAS. El CLIENTE recibirá una copia
+del contrato firmado en su correo electrónico.
 TXT,
         ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Datos de pago que ve el cliente en su portal
+    |--------------------------------------------------------------------------
+    | Configurables por .env. Si no hay IBAN, el portal pide contactar con el
+    | gestor para recibir los datos de pago.
+    */
+    'pagos' => [
+        'iban' => env('CONTRACT_IBAN'),
+        'titular' => env('CONTRACT_IBAN_HOLDER', env('CONTRACT_PRESTADOR_RAZON_SOCIAL', 'JJ Import Motors')),
+        'banco' => env('CONTRACT_BANK_NAME'),
     ],
 
     /*
@@ -180,7 +197,9 @@ TXT,
         'gracias_titulo' => 'Contrato firmado correctamente',
         'gracias_texto' => 'Hemos registrado tu aceptación. Puedes descargar el PDF firmado a continuación.',
         'descargar_pdf' => 'Descargar contrato firmado (PDF)',
+        // Se muestra SOLO una vez firmado (antes confundía al cliente).
         'legal_notice' => 'Documento firmado electrónicamente. Conforme a LSSI-CE art. 9 y eIDAS art. 25.',
+        'legal_notice_pending' => 'Al firmar quedará registrada la fecha, la hora, tu IP y la huella digital del texto.',
         'errores' => [
             'token_invalido' => 'Este enlace de contrato no es válido o ha caducado.',
             'ya_firmado' => 'Este contrato ya ha sido firmado.',

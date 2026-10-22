@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ImportOrderState;
 use App\Models\Car;
 use App\Models\User;
 use App\Support\CarChecklistDefinitions;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\RateLimiter;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -54,7 +56,7 @@ class PublicTrackingController extends Controller
         ],
     ];
 
-    public function show(string $token): Response
+    public function show(string $token): Response|RedirectResponse
     {
         // Rate limit por IP para evitar enumeration si los tokens no son perfectos.
         $key = 'tracking:'.request()->ip().':'.substr($token, 0, 8);
@@ -69,6 +71,17 @@ class PublicTrackingController extends Controller
             ->publicTracking()
             ->where('tracking_token', $token)
             ->firstOrFail();
+
+        // Si el coche ya tiene encargo con portal, el seguimiento vive allí
+        // (un solo enlace para el cliente). Los enlaces antiguos redirigen.
+        $order = $car->importOrders()
+            ->whereNotNull('portal_token_hash')
+            ->whereNotIn('state', [ImportOrderState::Cancelled->value])
+            ->latest('id')
+            ->first();
+        if ($order?->portalUrl()) {
+            return redirect()->away($order->portalUrl());
+        }
 
         // No inflar views con bots (M4).
         $isBot = $this->looksLikeBot(request()->userAgent());

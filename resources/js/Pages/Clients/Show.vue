@@ -43,9 +43,16 @@ const { currency, date, statusVariant } = useFormat();
                 <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200">
                     <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
                         <h3 class="text-base font-semibold text-gray-900">{{ t('clients.profile') }}</h3>
-                        <Badge :variant="statusVariant(client.status)">{{ client.status }}</Badge>
+                        <Badge :variant="statusVariant(client.status)">{{ t('clients.status.' + client.status) }}</Badge>
                     </div>
                     <div class="grid grid-cols-1 gap-x-6 gap-y-4 p-6 sm:grid-cols-2 lg:grid-cols-4">
+                        <div v-if="client.email || client.phone">
+                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('clients.field_email') }} / {{ t('clients.field_phone') }}</dt>
+                            <dd class="mt-1 space-y-0.5 text-sm text-gray-900">
+                                <a v-if="client.email" :href="`mailto:${client.email}`" class="block hover:underline">{{ client.email }}</a>
+                                <a v-if="client.phone" :href="`tel:${client.phone}`" class="block hover:underline">{{ client.phone }}</a>
+                            </dd>
+                        </div>
                         <div v-if="client.contact_info">
                             <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('clients.section_contact') }}</dt>
                             <dd class="mt-1 inline-flex items-center gap-1.5 text-sm text-gray-900">

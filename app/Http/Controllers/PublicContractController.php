@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ContractStatus;
 use App\Models\ContractAcceptance;
 use App\Support\ChromePath;
+use App\Support\ContractDocument;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Support\Facades\DB;
@@ -26,9 +29,14 @@ use Spatie\Browsershot\Browsershot;
  */
 class PublicContractController extends Controller
 {
-    public function show(string $token): HttpResponse
+    public function show(string $token): HttpResponse|RedirectResponse
     {
         $contract = $this->findContract($token);
+
+        // Contratos de un encargo: se firman en el portal del cliente (OTP).
+        if ($contract->import_order_id && $contract->importOrder?->portalUrl()) {
+            return redirect()->away($contract->importOrder->portalUrl());
+        }
         $car = $contract->car;
 
         $this->rateLimit('show:'.request()->ip().':'.substr($token, 0, 8));
@@ -39,7 +47,7 @@ class PublicContractController extends Controller
         return response()->view('contracts.show', [
             'contract' => $contract,
             'car' => $car,
-            'contractTextHtml' => $this->markdownToHtml($text),
+            'contractTextHtml' => ContractDocument::toHtml($text),
             'contractHash' => $hash,
             'ui' => config('contracts.ui'),
             'prestador' => config('contracts.prestador'),
@@ -57,6 +65,17 @@ class PublicContractController extends Controller
             'client_name' => ['nullable', 'string', 'max:191'],
             'client_dni' => ['nullable', 'string', 'max:32'],
         ]);
+
+        // Los contratos de un encargo exigen código de verificación: solo se
+        // firman desde el portal del cliente.
+        $orderContract = $this->findContract($token);
+        if ($orderContract->import_order_id) {
+            return response()->json([
+                'ok' => false,
+                'error' => 'firma_en_portal',
+                'redirect' => $orderContract->importOrder?->portalUrl(),
+            ], 409);
+        }
 
         try {
             // Transacción con lock: evita doble firma por requests concurrentes (M5).
@@ -91,6 +110,7 @@ class PublicContractController extends Controller
                 $contract->accepted_ip = $request->ip();
                 $contract->user_agent = substr((string) $request->userAgent(), 0, 191);
                 $contract->locale = substr(app()->getLocale(), 0, 8);
+                $contract->status = ContractStatus::Signed;
                 $contract->save();
 
                 return $contract;
@@ -139,7 +159,7 @@ class PublicContractController extends Controller
 
         $html = View::make('contracts.pdf', [
             'contract' => $contract,
-            'contractTextHtml' => $this->markdownToHtml($text),
+            'contractTextHtml' => ContractDocument::toHtml($text),
             'hash' => $hash,
             'prestador' => config('contracts.prestador'),
             'trackingUrl' => $contract->car?->tracking_url,
@@ -213,71 +233,5 @@ class PublicContractController extends Controller
             abort(429);
         }
         RateLimiter::hit($key, $decay);
-    }
-
-    /**
-     * Conversión muy básica de Markdown a HTML para el contrato.
-     *
-     * ⚠️ Seguridad: TODO contenido (incluidas cabeceras) se escapa con e().
-     * Nunca se emite contenido del CRM como HTML crudo (A5/XSS).
-     */
-    /**
-     * Convierte el texto del contrato a HTML procesando LÍNEA A LÍNEA, de modo
-     * que los títulos (##) y separadores (---) sean bloques propios y nunca se
-     * confundan con párrafos (antes quedaban como texto visible dentro de <p>).
-     */
-    private function markdownToHtml(string $md): string
-    {
-        $lines = preg_split('/\r?\n/', $md);
-        $html = [];
-        $para = [];
-
-        $flush = function () use (&$html, &$para) {
-            if (! $para) {
-                return;
-            }
-            $text = trim(implode("\n", $para));
-            if ($text === '') {
-                return;
-            }
-            $escaped = e($text);
-            $escaped = preg_replace('/\*\*(.+?)\*\*/', '<strong>$1</strong>', $escaped);
-            $html[] = '<p class="text-sm leading-relaxed text-asphalt-700">'.nl2br($escaped).'</p>';
-            $para = [];
-        };
-
-        foreach ($lines as $line) {
-            $line = rtrim($line);
-
-            if ($line === '') {
-                $flush();
-
-                continue;
-            }
-
-            if (preg_match('/^# (.+)$/', $line, $m)) {
-                $flush();
-                $html[] = '<h2 class="mt-6 text-xl font-bold text-asphalt-900">'.e($m[1]).'</h2>';
-
-                continue;
-            }
-            if (preg_match('/^## (.+)$/', $line, $m)) {
-                $flush();
-                $html[] = '<h3 class="mt-4 text-base font-semibold text-asphalt-900">'.e($m[1]).'</h3>';
-
-                continue;
-            }
-            if (preg_match('/^-{3,}$/', $line)) {
-                $flush();
-                $html[] = '<hr class="my-4 border-asphalt-200" />';
-
-                continue;
-            }
-
-            $para[] = $line;
-        }
-        $flush();
-
-        return implode("\n", $html);
     }
 }

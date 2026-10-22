@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Events\CarImported;
+use App\Listeners\ImportOrderNotificationSubscriber;
 use App\Listeners\NotifyImportWebhook;
 use App\Models\Alert;
 use App\Models\Car;
@@ -50,6 +51,9 @@ class AppServiceProvider extends ServiceProvider
             CarImported::class,
             NotifyImportWebhook::class,
         );
+
+        // Avisos del flujo de encargos (cliente y equipo). Síncrono + try/catch.
+        Event::subscribe(ImportOrderNotificationSubscriber::class);
     }
 
     /**
@@ -104,6 +108,14 @@ class AppServiceProvider extends ServiceProvider
         // Stripe valida HMAC de cada payload, asi que un atacante puede
         // forzar verificacion criptografica con spam de eventos invalidos.
         // 60/min cubre de sobra los reintentos reales de Stripe.
+        // Portal del cliente (/mi-encargo/{token}): lectura y acciones.
+        RateLimiter::for('portal', function (Request $request) {
+            return Limit::perMinute(60)->by($request->ip());
+        });
+        RateLimiter::for('portal-actions', function (Request $request) {
+            return Limit::perMinute(10)->by($request->ip().'|'.substr((string) $request->route('token'), 0, 12));
+        });
+
         RateLimiter::for('stripe-webhook', function (Request $request) {
             return Limit::perMinute(60)->by($request->ip());
         });

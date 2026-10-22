@@ -57,3 +57,6 @@ Schedule::command('subscription:downgrade-expired-grace')
 // la tabla `failed_jobs` crece sin limite con miles de webhooks de
 // Stripe fallando o timeouts de VerifyCarWithAI.
 Schedule::command('queue:prune-failed --hours=72')->daily();
+
+// Encargos: caducar contratos, recordatorios de firma y aprobaciones vencidas.
+Schedule::command('orders:maintenance')->hourly()->withoutOverlapping();

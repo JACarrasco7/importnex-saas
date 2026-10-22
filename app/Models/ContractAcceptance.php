@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ContractStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
@@ -22,6 +23,7 @@ class ContractAcceptance extends Model
     protected $fillable = [
         'organization_id',
         'car_id',
+        'import_order_id',
         'public_token',
         'contract_version',
         'contract_hash',
@@ -33,14 +35,63 @@ class ContractAcceptance extends Model
         'accepted_ip',
         'user_agent',
         'locale',
+        'status',
+        'expires_at',
+        'viewed_at',
+        'voided_at',
+        'void_reason',
+        'rejected_at',
+        'rejection_reason',
+        'otp_verified_at',
+        'otp_sent_to',
+        'pdf_path',
+        'pdf_hash',
+        'signer_corrections',
+        'reminders_sent',
+        'last_reminder_at',
     ];
+
+    protected $hidden = ['client_dni'];
 
     protected function casts(): array
     {
         return [
             'snapshot' => 'array',
             'accepted_at' => 'datetime',
+            'status' => ContractStatus::class,
+            'expires_at' => 'datetime',
+            'viewed_at' => 'datetime',
+            'voided_at' => 'datetime',
+            'rejected_at' => 'datetime',
+            'otp_verified_at' => 'datetime',
+            'signer_corrections' => 'array',
+            'last_reminder_at' => 'datetime',
         ];
+    }
+
+    public function importOrder(): BelongsTo
+    {
+        return $this->belongsTo(ImportOrder::class);
+    }
+
+    /**
+     * Estado efectivo: un contrato abierto con fecha de caducidad pasada se
+     * considera caducado aunque el comando programado aún no lo haya marcado.
+     */
+    public function effectiveStatus(): ContractStatus
+    {
+        $status = $this->status ?? ($this->accepted_at ? ContractStatus::Signed : ContractStatus::Sent);
+
+        if ($status->isOpen() && $this->expires_at && $this->expires_at->isPast()) {
+            return ContractStatus::Expired;
+        }
+
+        return $status;
+    }
+
+    public function isSignable(): bool
+    {
+        return $this->accepted_at === null && $this->effectiveStatus()->isOpen();
     }
 
     public function organization(): BelongsTo
@@ -103,6 +154,7 @@ class ContractAcceptance extends Model
             'vehiculo_anio' => '—',
             'vehiculo_vin' => '—',
             'precio_total' => '—',
+            'precio_compra' => $values['precio_total'] ?? '—',
             'honorarios' => '—',
             'fecha_firma' => now()->format('d/m/Y H:i'),
             'contrato_id' => '—',

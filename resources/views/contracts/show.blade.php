@@ -117,7 +117,7 @@
                     </span>
                 </label>
 
-                <p class="text-[11px] text-asphalt-500">{{ $ui['legal_notice'] }}</p>
+                <p class="text-[11px] text-asphalt-500">{{ $ui['legal_notice_pending'] ?? '' }}</p>
 
                 <button id="submit-btn" type="submit" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-estoril-600 px-6 py-3 text-base font-semibold text-white shadow-sm hover:bg-estoril-500 disabled:cursor-not-allowed disabled:opacity-50">
                     {{ $ui['boton_aceptar'] }}

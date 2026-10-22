@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ImportOrderState;
 use App\Http\Requests\StoreCarRequest;
 use App\Http\Requests\UpdateCarRequest;
 use App\Models\Car;
@@ -220,6 +221,7 @@ class CarController extends Controller
                 'linked_request' => $this->linkedRequest($car),
                 'laravel_pdfs' => $this->laravelPdfs($car),
                 'contract' => $this->contractSummary($car),
+                'import_order' => $this->importOrderSummary($car),
                 'public_link' => $this->publicLinkSummary($car),
                 'tracking' => [
                     'is_shared' => $car->is_tracking_shared,
@@ -260,6 +262,39 @@ class CarController extends Controller
                 'route' => route('cars.informe-interno', $car->id),
                 'available' => true,
             ],
+        ];
+    }
+
+    /**
+     * Encargo del coche (activo o el último no cancelado) para la tarjeta
+     * «Cliente asignado». Si no hay y el coche tiene cliente, la UI ofrece
+     * «Crear encargo».
+     *
+     * @return array<string, mixed>|null
+     */
+    private function importOrderSummary(Car $car): ?array
+    {
+        $order = $car->importOrders()
+            ->where('state', '!=', ImportOrderState::Cancelled->value)
+            ->latest('id')
+            ->first();
+        if (! $order) {
+            return null;
+        }
+
+        return [
+            'id' => $order->id,
+            'reference' => $order->reference,
+            'state' => $order->state->value,
+            'state_label' => $order->state->label(),
+            'state_variant' => $order->state->badgeVariant(),
+            'phase_label' => $order->state->clientPhase()->label(),
+            'fee_amount' => (float) $order->fee_amount,
+            'portal_url' => $order->portalUrl(),
+            'portal_views' => (int) $order->portal_views,
+            'url' => route('import-orders.show', $order->id),
+            'unread_messages' => $order->messages()->where('author_type', 'client')->whereNull('read_by_team_at')->count(),
+            'pending_approvals' => $order->pendingApprovalsCount(),
         ];
     }
 

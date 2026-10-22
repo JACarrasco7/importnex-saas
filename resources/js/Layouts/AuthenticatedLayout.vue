@@ -21,6 +21,7 @@ import {
     CreditCardIcon,
     HomeIcon,
     ClipboardDocumentListIcon,
+    ClipboardDocumentCheckIcon,
     SparklesIcon,
     BookOpenIcon,
     MegaphoneIcon,
@@ -106,6 +107,7 @@ const navGroups = computed(() => [
         title: t('nav.crm'),
         icon: UsersIcon,
         items: [
+            { name: t('nav.import_orders'), route: 'import-orders.index', icon: ClipboardDocumentCheckIcon },
             { name: t('nav.clients'), route: 'clients.index', icon: UsersIcon },
             { name: t('nav.contacts'), route: 'contacts.index', icon: PhoneIcon },
             {

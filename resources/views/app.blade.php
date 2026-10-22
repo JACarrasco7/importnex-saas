@@ -4,7 +4,17 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title inertia>{{ config('app.name', 'Laravel') }}</title>
+        @php
+            // APP_NAME=Laravel (valor por defecto) llegaba a la vista previa de
+            // WhatsApp: se sustituye por la marca si no está configurado.
+            $siteName = (config('app.name') && config('app.name') !== 'Laravel') ? config('app.name') : 'JJ Import Motors';
+            $og = $ogMeta ?? null;
+        @endphp
+        <title inertia>{{ $og['title'] ?? $siteName }}</title>
+        @if ($og)
+            <meta name="robots" content="noindex,nofollow">
+            <meta name="referrer" content="no-referrer">
+        @endif
 
         <!-- Critical CSS inline (above-the-fold styles) — improves FCP/LCP.
              Envuelto en @layer base para que las utilidades de Tailwind v4
@@ -28,16 +38,17 @@
 
         <!-- Open Graph / Facebook -->
         <meta property="og:type" content="website">
-        <meta property="og:url" content="{{ config('app.url') }}">
-        <meta property="og:title" content="{{ config('app.name', 'JJ Import Motors') }}">
-        <meta property="og:description" content="Plataforma profesional de importación de vehículos con verificación AI. Ahorra tiempo y evita fraudes.">
-        <meta property="og:image" content="{{ config('app.url') }}/img/og-image.jpg">
+        <meta property="og:url" content="{{ $og['url'] ?? config('app.url') }}">
+        <meta property="og:site_name" content="{{ $siteName }}">
+        <meta property="og:title" content="{{ $og['title'] ?? $siteName }}">
+        <meta property="og:description" content="{{ $og['description'] ?? 'Plataforma profesional de importación de vehículos con verificación AI. Ahorra tiempo y evita fraudes.' }}">
+        <meta property="og:image" content="{{ $og['image'] ?? config('app.url').'/img/og-image.jpg' }}">
         <meta property="og:locale" content="{{ str_replace('_', '-', app()->getLocale()) }}">
 
         <!-- Twitter -->
         <meta property="twitter:card" content="summary_large_image">
         <meta property="twitter:url" content="{{ config('app.url') }}">
-        <meta property="twitter:title" content="{{ config('app.name', 'JJ Import Motors') }}">
+        <meta property="twitter:title" content="{{ $og['title'] ?? $siteName }}">
         <meta property="twitter:description" content="Plataforma profesional de importación de vehículos con verificación AI.">
         <meta property="twitter:image" content="{{ config('app.url') }}/img/og-image.jpg">
 

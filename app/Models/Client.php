@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\WhatsAppLink;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -11,9 +12,19 @@ class Client extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'name', 'contact_info', 'looking_for', 'budget_min', 'budget_max',
-        'status', 'notes', 'organization_id',
+        'name', 'contact_info', 'email', 'phone', 'dni', 'address', 'preferred_channel',
+        'looking_for', 'budget_min', 'budget_max', 'status', 'notes', 'organization_id',
     ];
+
+    /** El DNI no viaja al frontend salvo que se pida explícitamente (makeVisible). */
+    protected $hidden = ['dni'];
+
+    protected function casts(): array
+    {
+        return [
+            'dni' => 'encrypted',
+        ];
+    }
 
     protected static function booted()
     {
@@ -32,6 +43,27 @@ class Client extends Model
     public function cars()
     {
         return $this->hasMany(Car::class);
+    }
+
+    public function importOrders()
+    {
+        return $this->hasMany(ImportOrder::class);
+    }
+
+    /** DNI/NIE enmascarado para mostrar sin exponerlo entero (12345678Z → ****678Z). */
+    public function maskedDni(): ?string
+    {
+        if (! $this->dni) {
+            return null;
+        }
+
+        return str_repeat('*', max(0, strlen($this->dni) - 4)).substr($this->dni, -4);
+    }
+
+    /** Teléfono en formato internacional sin símbolos, para wa.me (España por defecto). */
+    public function whatsappNumber(): ?string
+    {
+        return WhatsAppLink::normalizePhone($this->phone);
     }
 
     public function contacts()
@@ -53,9 +85,9 @@ class Client extends Model
     {
         return $query->where(function ($q) use ($term) {
             $q->where('name', 'like', "%{$term}%")
-              ->orWhere('contact_info', 'like', "%{$term}%")
-              ->orWhere('looking_for', 'like', "%{$term}%")
-              ->orWhere('notes', 'like', "%{$term}%");
+                ->orWhere('contact_info', 'like', "%{$term}%")
+                ->orWhere('looking_for', 'like', "%{$term}%")
+                ->orWhere('notes', 'like', "%{$term}%");
         });
     }
 

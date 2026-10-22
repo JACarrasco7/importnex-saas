@@ -16,6 +16,11 @@ const props = defineProps({
 const form = useForm({
     name: props.client.name,
     contact_info: props.client.contact_info,
+    email: props.client.email || '',
+    phone: props.client.phone || '',
+    dni: props.client.dni || '',
+    address: props.client.address || '',
+    preferred_channel: props.client.preferred_channel || 'email',
     looking_for: props.client.looking_for,
     budget_min: props.client.budget_min,
     budget_max: props.client.budget_max,
@@ -51,8 +56,20 @@ const inputClass = 'block w-full rounded-lg border-gray-300 text-sm shadow-sm fo
                     <FormSection :title="t('clients.section_contact')">
                         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <FormField :label="t('clients.field_name')" required><input v-model="form.name" type="text" required :class="inputClass" /></FormField>
-                            <FormField :label="t('clients.field_contact_info')"><input v-model="form.contact_info" type="text" :class="inputClass" placeholder="+34 600 123 456" /></FormField>
+                            <FormField :label="t('clients.field_email')"><input v-model="form.email" type="email" autocomplete="off" :class="inputClass" placeholder="cliente@email.com" /><p v-if="form.errors.email" class="mt-1 text-xs text-rose-600">{{ form.errors.email }}</p></FormField>
+                            <FormField :label="t('clients.field_phone')"><input v-model="form.phone" type="tel" :class="inputClass" placeholder="+34 600 123 456" /></FormField>
+                            <FormField :label="t('clients.field_dni')"><input v-model="form.dni" type="text" autocomplete="off" :class="[inputClass, 'uppercase']" placeholder="12345678Z" /><p v-if="form.errors.dni" class="mt-1 text-xs text-rose-600">{{ form.errors.dni }}</p></FormField>
+                            <FormField :label="t('clients.field_address')"><input v-model="form.address" type="text" :class="inputClass" /></FormField>
+                            <FormField :label="t('clients.field_preferred_channel')">
+                                <select v-model="form.preferred_channel" :class="inputClass">
+                                    <option value="email">{{ t('clients.channel.email') }}</option>
+                                    <option value="whatsapp">{{ t('clients.channel.whatsapp') }}</option>
+                                    <option value="phone">{{ t('clients.channel.phone') }}</option>
+                                </select>
+                            </FormField>
+                            <FormField :label="t('clients.field_contact_info')" class="md:col-span-2"><input v-model="form.contact_info" type="text" :class="inputClass" :placeholder="t('clients.field_contact_info_help')" /></FormField>
                         </div>
+                        <p class="mt-3 text-xs text-gray-500">{{ t('clients.contact_fields_help') }}</p>
                     </FormSection>
 
                     <FormSection :title="t('clients.section_purchase_intent')">

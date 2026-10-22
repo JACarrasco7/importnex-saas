@@ -17,6 +17,7 @@ import {
     ClipboardDocumentIcon,
     ArrowPathIcon,
     DocumentCheckIcon,
+    UserCircleIcon,
 } from '@heroicons/vue/24/outline';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Badge from '@/Components/Badge.vue';
@@ -31,6 +32,7 @@ import NotesPanel from '@/Pages/Cars/Partials/NotesPanel.vue';
 import ExpensesPanel from '@/Pages/Cars/Partials/ExpensesPanel.vue';
 import PhotosPanel from '@/Pages/Cars/Partials/PhotosPanel.vue';
 import ShareTrackingModal from '@/Pages/Cars/Modals/ShareTrackingModal.vue';
+import ImportOrderCard from '@/Components/Cars/ImportOrderCard.vue';
 import { useFormat } from '@/Composables/useFormat';
 import { useTranslations } from '@/Composables/useTranslations';
 
@@ -183,7 +185,7 @@ const activeSection = ref('resumen');
 const photoForm = useForm({ photo_type: 'exterior', photos: [] });
 const docForm = useForm({ doc_type: 'invoice', doc_key: '', name: '', documents: [] });
 
-const { currency, date, statusLabel, statusVariant, trafficLightVariant } = useFormat();
+const { currency, date, statusLabel, statusVariant, trafficLightVariant, initials } = useFormat();
 
 // El formulario público guarda contact_info como JSON {email, phone};
 // los clientes creados a mano usan texto libre. Mostramos formateado.
@@ -512,21 +514,21 @@ const onDocKeyChange = () => {
                     <div class="grid grid-cols-1 gap-5 p-6 md:grid-cols-2">
                         <div class="space-y-4">
                             <div class="flex items-center gap-3">
-                                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white shadow-sm ring-2 ring-blue-200">
-                                    <UserCircleIcon class="h-6 w-6 text-blue-600" />
+                                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-estoril-700 text-sm font-bold text-white shadow-sm ring-2 ring-blue-200" aria-hidden="true">
+                                    {{ initials(car.client.name) }}
                                 </div>
                                 <div class="min-w-0">
                                     <p class="truncate text-base font-bold text-gray-900">{{ car.client.name }}</p>
                                     <div class="flex items-center gap-2">
                                         <span class="text-xs text-gray-500">{{ t('cars.client_id') }} #{{ car.client.id }}</span>
-                                        <Badge :variant="statusVariant(car.client.status)">{{ statusLabel(t, car.client.status) }}</Badge>
+                                        <Badge :variant="statusVariant(car.client.status)">{{ t('clients.status.' + car.client.status) }}</Badge>
                                     </div>
                                 </div>
                             </div>
                             <dl class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                 <div>
                                     <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.client_contact') }}</dt>
-                                    <dd class="mt-1 text-sm text-gray-800">{{ clientContactDisplay }}</dd>
+                                    <dd class="mt-1 text-sm text-gray-800">{{ [car.client.email, car.client.phone].filter(Boolean).join(' · ') || clientContactDisplay }}</dd>
                                 </div>
                                 <div>
                                     <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ t('cars.client_looking_for') }}</dt>
@@ -592,159 +594,168 @@ const onDocKeyChange = () => {
                             </div>
                         </div>
 
-                        <!-- Compartir seguimiento con el cliente -->
-                        <div class="rounded-xl bg-gradient-to-br from-estoril-50 to-white p-5 shadow-sm ring-1 ring-estoril-100">
-                            <div class="mb-3 flex items-center justify-between">
-                                <h4 class="flex items-center gap-2 text-sm font-semibold text-gray-900">
-                                    <ShareIcon class="h-4 w-4 text-estoril-600" />
-                                    {{ t('cars.tracking.title') }}
-                                </h4>
-                                <Badge v-if="derived?.tracking?.is_shared" variant="success" size="sm">{{ t('cars.tracking.shared') }}</Badge>
-                                <Badge v-else size="sm">{{ t('cars.tracking.not_shared') }}</Badge>
-                            </div>
-                            <p class="text-xs text-gray-600">{{ t('cars.tracking.help') }}</p>
+                        <!-- Encargo: un único enlace para el cliente (contrato + pagos + seguimiento) -->
+                        <ImportOrderCard class="md:col-span-2" :car="car" :order="derived?.import_order" :linked-request="derived?.linked_request" />
 
-                            <div v-if="derived?.tracking?.is_shared && derived?.tracking?.url" class="mt-3 space-y-2">
-                                <div class="flex items-center gap-2">
-                                    <input
-                                        :value="derived.tracking.url"
-                                        readonly
-                                        class="flex-1 truncate rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-700"
-                                        @focus="$event.target.select()"
-                                    />
-                                    <button
-                                        type="button"
-                                        @click="copyTrackingUrl"
-                                        class="inline-flex shrink-0 items-center gap-1 rounded-lg bg-estoril-600 px-3 py-2 text-xs font-semibold text-white hover:bg-estoril-500"
-                                    >
-                                        <ClipboardDocumentIcon class="h-3 w-3" />
-                                        {{ t('common.copy') }}
-                                    </button>
-                                </div>
-                                <div class="flex items-center justify-between text-[10px] text-gray-500">
-                                    <span>{{ t('cars.tracking.views', { n: derived.tracking.views || 0 }) }}</span>
-                                    <span v-if="derived.tracking.shared_at">
-                                        {{ t('cars.tracking.shared_since') }} {{ date(derived.tracking.shared_at) }}
-                                    </span>
-                                </div>
-                                <div class="flex flex-wrap gap-2 pt-1">
-                                    <a
-                                        :href="derived.tracking.url"
-                                        target="_blank"
-                                        class="inline-flex items-center gap-1 rounded-lg bg-estoril-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-estoril-500"
-                                    >
-                                        <GlobeEuropeAfricaIcon class="h-3 w-3" />
-                                        {{ t('cars.tracking.open') }}
-                                    </a>
-                                    <button
-                                        type="button"
-                                        @click="openTrackingModal"
-                                        class="inline-flex items-center gap-1 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-estoril-700 shadow-sm ring-1 ring-estoril-200 hover:bg-estoril-50"
-                                    >
-                                        {{ t('cars.tracking.edit_email') }}
-                                    </button>
-                                    <button
-                                        type="button"
-                                        @click="regenerateTracking"
-                                        class="inline-flex items-center gap-1 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm ring-1 ring-gray-200 hover:bg-gray-50"
-                                    >
-                                        <ArrowPathIcon class="h-3 w-3" />
-                                        {{ t('cars.tracking.regenerate') }}
-                                    </button>
-                                    <button
-                                        type="button"
-                                        @click="revokeTracking"
-                                        class="inline-flex items-center gap-1 rounded-lg bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100"
-                                    >
-                                        <XCircleIcon class="h-3 w-3" />
-                                        {{ t('cars.tracking.revoke') }}
-                                    </button>
-                                </div>
-                            </div>
+                        <!-- Enlaces anteriores al sistema de encargos (solo si ya se usaron) -->
+                        <details v-if="!derived?.import_order && (derived?.tracking?.is_shared || derived?.contract)" class="md:col-span-2 rounded-xl bg-white/60 p-4 ring-1 ring-gray-200">
+                            <summary class="cursor-pointer text-xs font-semibold text-gray-600">{{ t('orders.car_card.legacy_links') }}</summary>
+                            <div class="mt-4 grid grid-cols-1 gap-5 md:grid-cols-2">
+                                <!-- Compartir seguimiento con el cliente -->
+                                <div class="rounded-xl bg-gradient-to-br from-estoril-50 to-white p-5 shadow-sm ring-1 ring-estoril-100">
+                                    <div class="mb-3 flex items-center justify-between">
+                                        <h4 class="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                                            <ShareIcon class="h-4 w-4 text-estoril-600" />
+                                            {{ t('cars.tracking.title') }}
+                                        </h4>
+                                        <Badge v-if="derived?.tracking?.is_shared" variant="success" size="sm">{{ t('cars.tracking.shared') }}</Badge>
+                                        <Badge v-else size="sm">{{ t('cars.tracking.not_shared') }}</Badge>
+                                    </div>
+                                    <p class="text-xs text-gray-600">{{ t('cars.tracking.help') }}</p>
 
-                            <div v-else class="mt-3">
-                                <button
-                                    type="button"
-                                    @click="openTrackingModal"
-                                    class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white hover:bg-estoril-500"
-                                >
-                                    <ShareIcon class="h-4 w-4" />
-                                    {{ t('cars.tracking.share_with_client') }}
-                                </button>
-                            </div>
-                        </div>
+                                    <div v-if="derived?.tracking?.is_shared && derived?.tracking?.url" class="mt-3 space-y-2">
+                                        <div class="flex items-center gap-2">
+                                            <input
+                                                :value="derived.tracking.url"
+                                                readonly
+                                                class="flex-1 truncate rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-700"
+                                                @focus="$event.target.select()"
+                                            />
+                                            <button
+                                                type="button"
+                                                @click="copyTrackingUrl"
+                                                class="inline-flex shrink-0 items-center gap-1 rounded-lg bg-estoril-600 px-3 py-2 text-xs font-semibold text-white hover:bg-estoril-500"
+                                            >
+                                                <ClipboardDocumentIcon class="h-3 w-3" />
+                                                {{ t('common.copy') }}
+                                            </button>
+                                        </div>
+                                        <div class="flex items-center justify-between text-[10px] text-gray-500">
+                                            <span>{{ t('cars.tracking.views', { n: derived.tracking.views || 0 }) }}</span>
+                                            <span v-if="derived.tracking.shared_at">
+                                                {{ t('cars.tracking.shared_since') }} {{ date(derived.tracking.shared_at) }}
+                                            </span>
+                                        </div>
+                                        <div class="flex flex-wrap gap-2 pt-1">
+                                            <a
+                                                :href="derived.tracking.url"
+                                                target="_blank"
+                                                class="inline-flex items-center gap-1 rounded-lg bg-estoril-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-estoril-500"
+                                            >
+                                                <GlobeEuropeAfricaIcon class="h-3 w-3" />
+                                                {{ t('cars.tracking.open') }}
+                                            </a>
+                                            <button
+                                                type="button"
+                                                @click="openTrackingModal"
+                                                class="inline-flex items-center gap-1 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-estoril-700 shadow-sm ring-1 ring-estoril-200 hover:bg-estoril-50"
+                                            >
+                                                {{ t('cars.tracking.edit_email') }}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                @click="regenerateTracking"
+                                                class="inline-flex items-center gap-1 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm ring-1 ring-gray-200 hover:bg-gray-50"
+                                            >
+                                                <ArrowPathIcon class="h-3 w-3" />
+                                                {{ t('cars.tracking.regenerate') }}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                @click="revokeTracking"
+                                                class="inline-flex items-center gap-1 rounded-lg bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100"
+                                            >
+                                                <XCircleIcon class="h-3 w-3" />
+                                                {{ t('cars.tracking.revoke') }}
+                                            </button>
+                                        </div>
+                                    </div>
 
-                        <!-- Contrato de prestación de servicios -->
-                        <div class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-asphalt-100">
-                            <div class="mb-3 flex items-center justify-between">
-                                <h4 class="flex items-center gap-2 text-sm font-semibold text-gray-900">
-                                    <DocumentCheckIcon class="h-4 w-4 text-estoril-600" />
-                                    {{ t('cars.contract.title') }}
-                                </h4>
-                                <Badge v-if="derived?.contract?.accepted_at" variant="success" size="sm">{{ t('cars.contract.signed') }}</Badge>
-                                <Badge v-else-if="derived?.contract?.public_url" size="sm">{{ t('cars.contract.pending') }}</Badge>
-                                <Badge v-else size="sm">{{ t('cars.contract.none') }}</Badge>
-                            </div>
-                            <p class="text-xs text-gray-600">{{ t('cars.contract.help') }}</p>
+                                    <div v-else class="mt-3">
+                                        <button
+                                            type="button"
+                                            @click="openTrackingModal"
+                                            class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white hover:bg-estoril-500"
+                                        >
+                                            <ShareIcon class="h-4 w-4" />
+                                            {{ t('cars.tracking.share_with_client') }}
+                                        </button>
+                                    </div>
+                                </div>
 
-                            <div v-if="derived?.contract?.public_url" class="mt-3 space-y-2">
-                                <div class="flex items-center gap-2">
-                                    <input
-                                        :value="derived.contract.public_url"
-                                        readonly
-                                        class="flex-1 truncate rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-700"
-                                        @focus="$event.target.select()"
-                                    />
-                                    <button
-                                        type="button"
-                                        @click="copyContractUrl"
-                                        class="inline-flex shrink-0 items-center gap-1 rounded-lg bg-asphalt-700 px-3 py-2 text-xs font-semibold text-white hover:bg-asphalt-600"
-                                    >
-                                        <ClipboardDocumentIcon class="h-3 w-3" />
-                                        {{ t('common.copy') }}
-                                    </button>
-                                </div>
-                                <p v-if="derived.contract.accepted_at" class="text-[10px] text-emerald-700">
-                                    {{ t('cars.contract.signed_at', { when: date(derived.contract.accepted_at) }) }}
-                                </p>
-                                <div class="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50/60 p-3">
-                                    <img
-                                        v-if="derived.contract.qr_svg"
-                                        :src="derived.contract.qr_svg"
-                                        alt="QR contrato"
-                                        class="h-24 w-24 shrink-0 rounded bg-white p-1 shadow-sm"
-                                    />
-                                    <p class="text-[11px] leading-relaxed text-gray-600">
-                                        {{ t('cars.contract.scan_qr') }}
-                                    </p>
-                                </div>
-                                <div class="flex flex-wrap gap-2 pt-1">
-                                    <a :href="derived.contract.public_url" target="_blank" class="inline-flex items-center gap-1 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-estoril-700 shadow-sm ring-1 ring-estoril-200 hover:bg-estoril-50">
-                                        {{ t('cars.contract.open') }}
-                                    </a>
-                                    <a v-if="derived.contract.accepted_at" :href="derived.contract.pdf_url" target="_blank" class="inline-flex items-center gap-1 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm ring-1 ring-gray-200 hover:bg-gray-50">
-                                        <ArrowDownTrayIcon class="h-3 w-3" />
-                                        {{ t('cars.contract.download_pdf') }}
-                                    </a>
-                                </div>
-                            </div>
+                                <!-- Contrato de prestación de servicios -->
+                                <div class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-asphalt-100">
+                                    <div class="mb-3 flex items-center justify-between">
+                                        <h4 class="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                                            <DocumentCheckIcon class="h-4 w-4 text-estoril-600" />
+                                            {{ t('cars.contract.title') }}
+                                        </h4>
+                                        <Badge v-if="derived?.contract?.accepted_at" variant="success" size="sm">{{ t('cars.contract.signed') }}</Badge>
+                                        <Badge v-else-if="derived?.contract?.public_url" size="sm">{{ t('cars.contract.pending') }}</Badge>
+                                        <Badge v-else size="sm">{{ t('cars.contract.none') }}</Badge>
+                                    </div>
+                                    <p class="text-xs text-gray-600">{{ t('cars.contract.help') }}</p>
 
-                            <div v-else class="mt-3">
-                                <button
-                                    type="button"
-                                    @click="createContract"
-                                    :disabled="!car.client"
-                                    class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-asphalt-700 px-4 py-2 text-sm font-semibold text-white hover:bg-asphalt-600 disabled:cursor-not-allowed disabled:opacity-50"
-                                    :title="!car.client ? t('cars.contract.need_client') : ''"
-                                >
-                                    <DocumentCheckIcon class="h-4 w-4" />
-                                    {{ t('cars.contract.generate') }}
-                                </button>
-                                <p v-if="!car.client" class="mt-2 text-[10px] text-amber-700">
-                                    {{ t('cars.contract.need_client') }}
-                                </p>
+                                    <div v-if="derived?.contract?.public_url" class="mt-3 space-y-2">
+                                        <div class="flex items-center gap-2">
+                                            <input
+                                                :value="derived.contract.public_url"
+                                                readonly
+                                                class="flex-1 truncate rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-700"
+                                                @focus="$event.target.select()"
+                                            />
+                                            <button
+                                                type="button"
+                                                @click="copyContractUrl"
+                                                class="inline-flex shrink-0 items-center gap-1 rounded-lg bg-asphalt-700 px-3 py-2 text-xs font-semibold text-white hover:bg-asphalt-600"
+                                            >
+                                                <ClipboardDocumentIcon class="h-3 w-3" />
+                                                {{ t('common.copy') }}
+                                            </button>
+                                        </div>
+                                        <p v-if="derived.contract.accepted_at" class="text-[10px] text-emerald-700">
+                                            {{ t('cars.contract.signed_at', { when: date(derived.contract.accepted_at) }) }}
+                                        </p>
+                                        <div class="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50/60 p-3">
+                                            <img
+                                                v-if="derived.contract.qr_svg"
+                                                :src="derived.contract.qr_svg"
+                                                alt="QR contrato"
+                                                class="h-24 w-24 shrink-0 rounded bg-white p-1 shadow-sm"
+                                            />
+                                            <p class="text-[11px] leading-relaxed text-gray-600">
+                                                {{ t('cars.contract.scan_qr') }}
+                                            </p>
+                                        </div>
+                                        <div class="flex flex-wrap gap-2 pt-1">
+                                            <a :href="derived.contract.public_url" target="_blank" class="inline-flex items-center gap-1 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-estoril-700 shadow-sm ring-1 ring-estoril-200 hover:bg-estoril-50">
+                                                {{ t('cars.contract.open') }}
+                                            </a>
+                                            <a v-if="derived.contract.accepted_at" :href="derived.contract.pdf_url" target="_blank" class="inline-flex items-center gap-1 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm ring-1 ring-gray-200 hover:bg-gray-50">
+                                                <ArrowDownTrayIcon class="h-3 w-3" />
+                                                {{ t('cars.contract.download_pdf') }}
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    <div v-else class="mt-3">
+                                        <button
+                                            type="button"
+                                            @click="createContract"
+                                            :disabled="!car.client"
+                                            class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-asphalt-700 px-4 py-2 text-sm font-semibold text-white hover:bg-asphalt-600 disabled:cursor-not-allowed disabled:opacity-50"
+                                            :title="!car.client ? t('cars.contract.need_client') : ''"
+                                        >
+                                            <DocumentCheckIcon class="h-4 w-4" />
+                                            {{ t('cars.contract.generate') }}
+                                        </button>
+                                        <p v-if="!car.client" class="mt-2 text-[10px] text-amber-700">
+                                            {{ t('cars.contract.need_client') }}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
+                        </details>
                     </div>
                 </div>
 
