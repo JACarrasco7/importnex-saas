@@ -64,19 +64,17 @@ class StripeWebhookController extends CashierWebhookController
     }
 
     /**
-     * Handle customer subscription updated (plan swap, cancel at period end, etc).
+     * Plan swap, cancel at period end, past_due… Cashier sincroniza primero la
+     * fila local de `subscriptions` (estado, fechas); luego se ajusta el plan.
      */
-    protected function handleCustomerSubscriptionUpdated(array $payload): void
+    protected function handleCustomerSubscriptionUpdated(array $payload): Response
     {
-        $subscription = $payload['data']['object'];
-        $user = $this->getUserByStripeId($subscription['customer'] ?? null);
-        if (! $user) {
-            return;
-        }
+        $response = parent::handleCustomerSubscriptionUpdated($payload) ?? $this->successMethod();
 
-        $org = $user->organization;
+        $subscription = $payload['data']['object'];
+        $org = $this->organizationFor($subscription['customer'] ?? null);
         if (! $org) {
-            return;
+            return $response;
         }
 
         $plan = $this->extractPlanFromSubscription($subscription);
@@ -85,84 +83,67 @@ class StripeWebhookController extends CashierWebhookController
         }
 
         Log::info('Subscription updated', ['organization_id' => $org->id, 'plan' => $plan, 'status' => $subscription['status'] ?? null]);
+
+        return $response;
     }
 
-    /**
-     * Handle customer subscription deleted.
-     */
-    protected function handleCustomerSubscriptionDeleted(array $payload): void
+    protected function handleCustomerSubscriptionDeleted(array $payload): Response
     {
-        $user = $this->getUserByStripeId($payload['data']['object']['customer'] ?? null);
-        if (! $user) {
-            return;
-        }
+        $response = parent::handleCustomerSubscriptionDeleted($payload) ?? $this->successMethod();
 
-        $org = $user->organization;
+        $org = $this->organizationFor($payload['data']['object']['customer'] ?? null);
         if (! $org) {
-            return;
+            return $response;
         }
 
-        // Owner organizations keep their plan even if subscription is deleted.
+        // La organización propietaria conserva su plan aunque se borre la suscripción.
         if ($org->isOwner()) {
             Log::info('Subscription deleted but org is owner, plan kept', ['organization_id' => $org->id]);
 
-            return;
+            return $response;
         }
 
         $org->update(['plan' => 'starter']);
 
         Log::info('Subscription deleted', ['organization_id' => $org->id]);
+
+        return $response;
     }
 
     /**
-     * Handle invoice payment failed. Marca payment_failed_at sin degradar:
-     * el downgrade real lo hace el comando programado
-     * `subscription:downgrade-expire` tras SUBSCRIPTION_GRACE_DAYS días.
-     * Esto da margen al cliente para corregir el método de pago (p.ej.
-     * tarjeta caducada) sin perder sus features inmediatamente.
+     * Pago fallido: marca payment_failed_at sin degradar. El comando
+     * `subscription:downgrade-expired-grace` degrada tras SUBSCRIPTION_GRACE_DAYS.
      */
-    protected function handleInvoicePaymentFailed(array $payload): void
+    protected function handleInvoicePaymentFailed(array $payload): Response
     {
         $invoice = $payload['data']['object'] ?? [];
-        $customerId = $invoice['customer'] ?? null;
-        $user = $this->getUserByStripeId($customerId);
-        if (! $user) {
-            return;
+        $org = $this->organizationFor($invoice['customer'] ?? null);
+
+        if ($org && ! $org->isOwner()) {
+            Log::warning('Invoice payment failed', [
+                'organization_id' => $org->id,
+                'invoice_id' => $invoice['id'] ?? null,
+                'attempt_count' => $invoice['attempt_count'] ?? null,
+            ]);
+
+            $org->update(['payment_failed_at' => $org->payment_failed_at ?? now()]);
+            Cache::forget("billing.dashboard.{$org->id}.1");
         }
 
-        $org = $user->organization;
-        if (! $org || $org->isOwner()) {
-            return;
-        }
-
-        Log::warning('Invoice payment failed', [
-            'organization_id' => $org->id,
-            'invoice_id' => $invoice['id'] ?? null,
-            'attempt_count' => $invoice['attempt_count'] ?? null,
-        ]);
-
-        $org->update([
-            // Solo marcar el timestamp. El comando artisan
-            // `subscription:downgrade-expire` degrada a starter tras
-            // SUBSCRIPTION_GRACE_DAYS si llega el caso.
-            'payment_failed_at' => $org->payment_failed_at ?? now(),
-        ]);
-        Cache::forget("billing.dashboard.{$org->id}.1");
+        return $this->successMethod();
     }
 
     /**
-     * Clear payment_failed_at when a new subscription is created.
+     * Suscripción creada (también desde el panel de Stripe): Cashier crea la
+     * fila local; aquí se fija el plan y se limpia el aviso de pago fallido.
      */
-    protected function handleCustomerSubscriptionCreated(array $payload): void
+    protected function handleCustomerSubscriptionCreated(array $payload): Response
     {
-        $user = $this->getUserByStripeId($payload['data']['object']['customer'] ?? null);
-        if (! $user) {
-            return;
-        }
+        $response = parent::handleCustomerSubscriptionCreated($payload) ?? $this->successMethod();
 
-        $org = $user->organization;
+        $org = $this->organizationFor($payload['data']['object']['customer'] ?? null);
         if (! $org) {
-            return;
+            return $response;
         }
 
         $plan = $this->extractPlanFromSubscription($payload['data']['object']);
@@ -176,46 +157,42 @@ class StripeWebhookController extends CashierWebhookController
         }
 
         Log::info('Subscription created', ['organization_id' => $org->id, 'plan' => $plan]);
+
+        return $response;
     }
 
-    /**
-     * Notify the org that trial is ending in 3 days.
-     * Hook for sending email / showing in-app banner.
-     */
-    protected function handleCustomerSubscriptionTrialWillEnd(array $payload): void
+    protected function handleCustomerSubscriptionTrialWillEnd(array $payload): Response
     {
         $subscription = $payload['data']['object'] ?? [];
-        $user = $this->getUserByStripeId($subscription['customer'] ?? null);
-        if (! $user) {
-            return;
+        $org = $this->organizationFor($subscription['customer'] ?? null);
+
+        if ($org) {
+            Log::info('Trial will end', [
+                'organization_id' => $org->id,
+                'trial_ends_at' => $subscription['trial_end'] ?? null,
+            ]);
         }
 
-        $org = $user->organization;
-        if (! $org) {
-            return;
-        }
+        return $this->successMethod();
+    }
 
-        Log::info('Trial will end', [
-            'organization_id' => $org->id,
-            'trial_ends_at' => $subscription['trial_end'] ?? null,
-        ]);
+    /** Suscripciones creadas desde el panel de Stripe usan el mismo tipo que la app. */
+    protected function newSubscriptionType(array $payload): string
+    {
+        return Organization::SUBSCRIPTION_TYPE;
     }
 
     /**
-     * Get organization from Stripe customer ID.
+     * El cliente de Stripe es la organización (Cashier::useCustomerModel en
+     * AppServiceProvider), no el usuario.
      */
-    protected function getUserByStripeId($stripeCustomerId)
+    private function organizationFor(?string $stripeCustomerId): ?Organization
     {
         if (! $stripeCustomerId) {
             return null;
         }
 
-        $org = Organization::where('stripe_id', $stripeCustomerId)->first();
-        if (! $org) {
-            return null;
-        }
-
-        return $org->users()->first();
+        return Organization::where('stripe_id', $stripeCustomerId)->first();
     }
 
     /**

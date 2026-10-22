@@ -11,7 +11,7 @@ return [
             'clients_limit' => 50,
             'contacts_limit' => 25,
             'users_limit' => 3,
-            'description' => 'Basic plan for small workshops',
+            'description' => 'Para importadores que empiezan',
             'features' => [
                 'email_support' => true,
                 'marketplace_access' => true,
@@ -35,7 +35,7 @@ return [
             'clients_limit' => 500,
             'contacts_limit' => 250,
             'users_limit' => 10,
-            'description' => 'Professional plan for medium workshops',
+            'description' => 'Para importadores con equipo y volumen',
             'features' => [
                 'email_support' => true,
                 'marketplace_access' => true,
@@ -59,7 +59,7 @@ return [
             'clients_limit' => 5000,
             'contacts_limit' => 2500,
             'users_limit' => 50,
-            'description' => 'Enterprise plan for large networks',
+            'description' => 'Para redes de importación y grandes volúmenes',
             'features' => [
                 'email_support' => true,
                 'marketplace_access' => true,

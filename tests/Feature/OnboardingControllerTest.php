@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Organization;
 use App\Models\User;
 use App\Models\UserOnboardingProgress;
+use App\Support\Brand;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -39,7 +40,7 @@ class OnboardingControllerTest extends TestCase
             ->component('Onboarding/Wizard')
             ->has('progress')
             ->has('stepData')
-            ->where('stepData.title', 'Bienvenido a JJ Import Motors')
+            ->where('stepData.title', 'Bienvenido a '.Brand::productName())
         );
 
         $this->assertDatabaseHas('user_onboarding_progress', [

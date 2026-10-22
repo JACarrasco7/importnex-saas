@@ -60,11 +60,15 @@ class CarKanbanController extends Controller
     public function move(Request $request, Car $car): RedirectResponse
     {
         $request->validate([
-            'status' => ['required', 'in:' . implode(',', array_keys(self::COLUMNS))],
+            'status' => ['required', 'in:'.implode(',', array_keys(self::COLUMNS))],
         ]);
+
+        if ($request->input('status') !== $car->status && ($order = $car->activeImportOrder())) {
+            return back()->with('error', "Este coche tiene el encargo {$order->reference} en curso: su estado se cambia desde el encargo.");
+        }
 
         $car->update(['status' => $request->input('status')]);
 
-        return back()->with('success', "Car moved to {$request->input('status')}");
+        return back()->with('success', 'Coche movido.');
     }
 }

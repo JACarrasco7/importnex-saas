@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\Organization;
+use Illuminate\Database\QueryException;
 
 /**
  * Datos de marca y empresa de una organización (SaaS multi-empresa).
@@ -57,13 +58,29 @@ final class Brand
         return new self($data);
     }
 
+    /** Nombre del producto (APP_NAME); nunca «Laravel», que es el valor por defecto. */
+    public static function productName(): string
+    {
+        $name = (string) config('app.name');
+
+        return $name === '' || $name === 'Laravel' ? 'Importnex' : $name;
+    }
+
     /** Organización «de la casa»: la que opera la web pública del dominio. */
     public static function platform(): self
     {
-        return once(fn () => self::for(
-            Organization::query()->where('is_owner', true)->orderBy('id')->first()
-                ?? Organization::query()->where('is_public', true)->orderBy('id')->first()
-        ));
+        return once(function (): self {
+            try {
+                return self::for(
+                    Organization::query()->where('is_owner', true)->orderBy('id')->first()
+                        ?? Organization::query()->where('is_public', true)->orderBy('id')->first()
+                );
+            } catch (QueryException) {
+                // Sin base de datos (instalación a medias, vistas renderizadas en
+                // tests unitarios): se usan los valores de config/company.php.
+                return self::for(null);
+            }
+        });
     }
 
     public function get(string $key, ?string $default = null): ?string

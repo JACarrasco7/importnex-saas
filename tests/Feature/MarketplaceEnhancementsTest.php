@@ -85,7 +85,7 @@ class MarketplaceEnhancementsTest extends TestCase
         $body = $response->getContent();
         // El componente MarketplaceIndex.vue esta presente (Inertia).
         $this->assertStringContainsString('data-page', $body, 'Falta el shell de Inertia');
-        $this->assertStringContainsString('Public/MarketplaceIndex', $body, 'Falta el componente MarketplaceIndex');
+        $this->assertMatchesRegularExpression('#Public\\\\?/MarketplaceIndex#', $body, 'Falta el componente MarketplaceIndex');
     }
 
     public function test_newsletter_subscribe_persists_email(): void
@@ -658,8 +658,9 @@ class MarketplaceEnhancementsTest extends TestCase
         // La ficha publica expone el numero de WhatsApp y el link al
         // perfil publico para que el cliente pueda abrir WhatsApp con
         // un mensaje pre-rellenado sobre ESTE coche concreto (no el
-        // formulario generico de busqueda de request).
-        $org = Organization::factory()->create(['is_public' => true, 'slug' => 't']);
+        // formulario generico de busqueda de request). El numero sale del
+        // perfil de empresa de la organizacion del coche.
+        $org = Organization::factory()->create(['is_public' => true, 'slug' => 't', 'company' => ['phone' => '675 70 14 39']]);
         $car = Car::factory()->create([
             'organization_id' => $org->id,
             'is_marketplace' => true,

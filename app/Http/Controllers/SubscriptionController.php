@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Organization;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -16,7 +17,7 @@ class SubscriptionController extends Controller
     {
         $plans = config('subscription.plans');
         $org = auth()->user()->organization;
-        $subscription = $org->subscription('main');
+        $subscription = $org->subscription(Organization::SUBSCRIPTION_TYPE);
 
         // payment_failed_at is set by the webhook and rendered as a banner.
         // It's cleared on resume/create so the banner disappears once fixed.
@@ -31,8 +32,8 @@ class SubscriptionController extends Controller
                 'ends_at' => $subscription->ends_at?->format('Y-m-d'),
                 'trial_ends_at' => $subscription->trial_ends_at?->format('Y-m-d'),
             ] : null,
-            'on_trial' => $org->onTrial('main'),
-            'trial_ends_at' => $org->trialEndsAt('main')?->format('Y-m-d'),
+            'on_trial' => $org->onTrial(Organization::SUBSCRIPTION_TYPE),
+            'trial_ends_at' => $org->trialEndsAt(Organization::SUBSCRIPTION_TYPE)?->format('Y-m-d'),
             'paymentFailed' => $paymentFailed,
         ]);
     }
@@ -57,7 +58,7 @@ class SubscriptionController extends Controller
         $plans = config('subscription.plans');
 
         if (! isset($plans[$plan])) {
-            return back()->with('error', 'Plan not found');
+            return back()->with('error', 'Plan no encontrado.');
         }
 
         $org = $request->user()->organization;
@@ -66,7 +67,7 @@ class SubscriptionController extends Controller
             return back()->with('error', 'Tu cuenta tiene acceso ilimitado vitalicio.');
         }
 
-        $existing = $org->subscription('main');
+        $existing = $org->subscription(Organization::SUBSCRIPTION_TYPE);
         if ($existing && $existing->active() && $org->plan === $plan) {
             return redirect()->route('subscriptions.index')
                 ->with('success', 'Ya tienes este plan activo.');
@@ -94,9 +95,15 @@ class SubscriptionController extends Controller
         }
 
         try {
-            $org->newSubscription('main', $priceId)
-                ->trialDays(config('subscription.trial_days'))
-                ->create($paymentMethodId);
+            // La prueba gratuita empieza al registrarse: al suscribirse solo se
+            // respetan los días que le queden (antes se regalaban 14 más).
+            $builder = $org->newSubscription(Organization::SUBSCRIPTION_TYPE, $priceId);
+            if ($org->trial_ends_at?->isFuture()) {
+                $builder->trialUntil($org->trial_ends_at);
+            } else {
+                $builder->skipTrial();
+            }
+            $builder->create($paymentMethodId);
 
             $org->update([
                 'plan' => $plan,
@@ -127,7 +134,7 @@ class SubscriptionController extends Controller
         $plans = config('subscription.plans');
 
         if (! isset($plans[$newPlan])) {
-            return back()->with('error', 'Plan not found');
+            return back()->with('error', 'Plan no encontrado.');
         }
 
         $org = $request->user()->organization;
@@ -136,7 +143,7 @@ class SubscriptionController extends Controller
             return back()->with('error', 'Tu cuenta tiene acceso ilimitado vitalicio.');
         }
 
-        $subscription = $org->subscription('main');
+        $subscription = $org->subscription(Organization::SUBSCRIPTION_TYPE);
 
         if (! $subscription) {
             return redirect()->route('subscriptions.create', $newPlan);
@@ -184,7 +191,7 @@ class SubscriptionController extends Controller
         $org = $request->user()->organization;
 
         return Inertia::render('Subscriptions/Cancel', [
-            'subscription' => $org ? $org->subscription('main') : null,
+            'subscription' => $org ? $org->subscription(Organization::SUBSCRIPTION_TYPE) : null,
         ]);
     }
 
@@ -196,7 +203,7 @@ class SubscriptionController extends Controller
             return back()->with('error', 'No tienes ninguna suscripción que cancelar.');
         }
 
-        $subscription = $org->subscription('main');
+        $subscription = $org->subscription(Organization::SUBSCRIPTION_TYPE);
 
         if (! $subscription) {
             return back()->with('error', 'No tienes una suscripción activa.');
@@ -225,7 +232,7 @@ class SubscriptionController extends Controller
             return back()->with('error', 'No tienes ninguna suscripción para reactivar.');
         }
 
-        $subscription = $org->subscription('main');
+        $subscription = $org->subscription(Organization::SUBSCRIPTION_TYPE);
 
         if (! $subscription) {
             return back()->with('error', 'No tienes una suscripción para reactivar.');

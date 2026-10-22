@@ -38,6 +38,7 @@ class OrganizationTeamController extends Controller
             'email' => $data['email'],
             'role' => $data['role'],
             'organization_id' => $organization->id,
+            'locale' => $request->user()->locale ?? config('app.locale', 'es'),
             'password' => Hash::make(Str::password(32)),
             'email_verified_at' => now(),
         ]);

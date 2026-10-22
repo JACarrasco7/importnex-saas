@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Car;
 use App\Models\CarPhoto;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class CarPhotoController extends Controller
@@ -45,7 +45,7 @@ class CarPhotoController extends Controller
             }
         }
 
-        return back()->with('success', 'Photos uploaded successfully');
+        return back()->with('success', 'Fotos subidas.');
     }
 
     public function destroy(Car $car, CarPhoto $photo): RedirectResponse
@@ -57,7 +57,7 @@ class CarPhotoController extends Controller
         Storage::disk('public')->delete($photo->url);
         $photo->delete();
 
-        return back()->with('success', 'Photo deleted');
+        return back()->with('success', 'Foto eliminada.');
     }
 
     public function reorder(Request $request, Car $car)

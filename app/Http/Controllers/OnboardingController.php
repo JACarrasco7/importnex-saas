@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Organization;
 use App\Models\User;
 use App\Models\UserOnboardingProgress;
+use App\Support\Brand;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -109,7 +110,7 @@ class OnboardingController extends Controller
 
         return match ($step) {
             1 => [
-                'title' => 'Bienvenido a '.config('app.name'),
+                'title' => 'Bienvenido a '.Brand::productName(),
                 'subtitle' => 'Configura tu organización en 4 simples pasos',
                 'icon' => 'building',
             ],
@@ -138,7 +139,7 @@ class OnboardingController extends Controller
             ],
             default => [
                 'title' => 'Onboarding completado',
-                'subtitle' => 'Ya estás listo para usar '.config('app.name'),
+                'subtitle' => 'Ya estás listo para usar '.Brand::productName(),
                 'icon' => 'check-circle',
             ],
         };

@@ -38,6 +38,7 @@ class DatabaseSeeder extends Seeder
                 'password' => Hash::make($password),
                 'organization_id' => $organization->id,
                 'role' => 'owner',
+                'locale' => config('app.locale', 'es'),
                 'email_verified_at' => now(),
             ],
         );

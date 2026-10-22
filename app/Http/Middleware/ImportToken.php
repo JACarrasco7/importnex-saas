@@ -30,8 +30,11 @@ class ImportToken
     public function handle(Request $request, Closure $next): Response
     {
         $given = (string) $request->header('X-Import-Token');
+        $expected = (string) config('services.importnex_chat.token');
         if ($given === '') {
-            return response()->json(['error' => 'Invalid or missing X-Import-Token.'], 401);
+            return $expected === ''
+                ? response()->json(['error' => 'Import bridge not configured on this server.'], 503)
+                : response()->json(['error' => 'Invalid or missing X-Import-Token.'], 401);
         }
 
         // 1) Token propio de una organización (Ajustes → API): solo ve y
@@ -42,7 +45,6 @@ class ImportToken
         //    interno del operador. Elige organización con ?org=<slug|nombre>;
         //    por defecto, la organización propietaria.
         if (! $org) {
-            $expected = (string) config('services.importnex_chat.token');
             if ($expected === '') {
                 return response()->json(['error' => 'Import bridge not configured on this server.'], 503);
             }

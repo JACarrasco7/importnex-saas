@@ -62,6 +62,9 @@ class Organization extends Model
 
     public const OWNER_UNLIMITED = PHP_INT_MAX;
 
+    /** Tipo (nombre) de la suscripción de Cashier que usa toda la app. */
+    public const SUBSCRIPTION_TYPE = 'main';
+
     /** Datos de marca y empresa (contrato, portal, emails, fichas públicas). */
     public function brand(): Brand
     {
@@ -172,7 +175,7 @@ class Organization extends Model
 
     public function hasActiveSubscription(): bool
     {
-        return $this->subscribed() || ($this->trial_ends_at && $this->trial_ends_at->isFuture());
+        return $this->subscribed(self::SUBSCRIPTION_TYPE) || ($this->trial_ends_at && $this->trial_ends_at->isFuture());
     }
 
     public function scopeActive($query)

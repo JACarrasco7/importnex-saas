@@ -147,7 +147,8 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             'csrfToken' => csrf_token(),
-            'appName' => config('app.name'),
+            // «Laravel» es el valor por defecto de APP_NAME: nunca se enseña al usuario.
+            'appName' => Brand::productName(),
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
@@ -193,7 +194,7 @@ class HandleInertiaRequests extends Middleware
             return null;
         }
 
-        $subscription = $organization->subscription();
+        $subscription = $organization->subscription(Organization::SUBSCRIPTION_TYPE);
         if (! $subscription) {
             return null;
         }

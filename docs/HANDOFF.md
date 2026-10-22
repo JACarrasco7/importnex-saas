@@ -6,6 +6,13 @@
 
 ---
 
+## 2026-10-22 16:00 · Claude (Cowork) · auditoría de venta SaaS (ramas feat/encargos-portal + audit/venta)
+- Hice: módulo de encargos y portal del cliente (`feat/encargos-portal`) y auditoría para vender como SaaS (`audit/venta`). Plan completo por módulo en `docs/auditoria-venta-2026-10/00-INDICE.md`.
+- P0 resueltos: alta en bucle, prueba sin bloqueo (`EnsureActiveSubscription`), token de API por empresa, importación en empresa ajena, marca de JJ fija (ahora `App\Support\Brand` + Ajustes → Datos de empresa), credenciales en seeder, **Cashier con el modelo equivocado** (`Cashier::useCustomerModel(Organization)`, tipo `Organization::SUBSCRIPTION_TYPE = 'main'`), webhooks que no sincronizaban, contacto con cliente de otra empresa, testimonios inventados.
+- Trampas: (1) `config/inertia.php` fija `js/Pages`; sin él 69 tests fallan en Linux. (2) `phpunit.xml` pone `SUBSCRIPTION_ENFORCE=false`; los tests del bloqueo lo activan a mano. (3) Con encargo activo, el estado del coche solo se cambia desde el encargo.
+- ⚠️ PENDIENTE para el otro: decisiones D1–D5 del índice (web pública por empresa, textos de portada, dependencias sin uso, material interno, IA). Nada desplegado: ramas sin push ni merge.
+---
+
 ## 2026-10-15 10:15 · Copilot-VSCode · ficha y dossier: quitar mensajes negativos para el cliente
 - Hice: el usuario pidio revisar que mas se podia quitar de ficha y dossier para que el cliente final no viera "cons" ni mensajes negativos. La politica ya estaba en `.ai/rules/marketplace.md` desde el 14-oct (no cons, no veredictos, no semaforo en la ficha publica), pero faltaba revisar el dossier Blade y el texto legal de la ficha Vue. **6 retoques**, todos verificados en produccion:
   1. **Dossier badge del hero**: estado interno `Located` (que renderizaba como "Localizado") → "Disponible para gestion" en `$estadoLabels`. Antes sonaba a "encontrado por nuestro equipo" (proceso interno), no a una opcion real para el cliente.

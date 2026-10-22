@@ -52,24 +52,24 @@ const planKeys = ['starter', 'pro', 'enterprise'];
                 <div class="grid gap-6 md:grid-cols-3">
                     <div v-for="key in planKeys" :key="key" :class="['overflow-hidden rounded-2xl bg-white shadow-sm ring-1', currentPlan === key ? 'ring-2 ring-estoril-500' : 'ring-gray-200']">
                         <div v-if="currentPlan === key" class="bg-gradient-to-r from-estoril-600 to-estoril-800 px-6 py-3 text-center text-sm font-semibold text-white">
-                            Current Plan
+                            Tu plan actual
                         </div>
                         <div class="p-6">
                             <div class="flex items-center gap-2">
                                 <CreditCardIcon class="h-5 w-5 text-gray-400" />
                                 <h3 class="text-lg font-bold text-gray-900">{{ plans[key].name }}</h3>
                             </div>
-                            <p class="mt-2 text-3xl font-bold text-gray-900">{{ currency(plans[key].price) }}<span class="text-sm font-normal text-gray-500">/month</span></p>
+                            <p class="mt-2 text-3xl font-bold text-gray-900">{{ currency(plans[key].price) }}<span class="text-sm font-normal text-gray-500">/mes</span></p>
                             <p class="mt-2 text-sm text-gray-500">{{ plans[key].description }}</p>
 
                             <ul class="mt-6 space-y-2">
                                 <li class="flex items-center gap-2 text-sm">
                                     <CheckIcon class="h-4 w-4 text-emerald-500" />
-                                    <span class="text-gray-700">{{ plans[key].cars_limit }} cars</span>
+                                    <span class="text-gray-700">{{ plans[key].cars_limit }} vehículos</span>
                                 </li>
                                 <li class="flex items-center gap-2 text-sm">
                                     <CheckIcon class="h-4 w-4 text-emerald-500" />
-                                    <span class="text-gray-700">{{ plans[key].clients_limit }} clients</span>
+                                    <span class="text-gray-700">{{ plans[key].clients_limit }} clientes</span>
                                 </li>
                             </ul>
 
@@ -80,7 +80,7 @@ const planKeys = ['starter', 'pro', 'enterprise'];
                                 <form v-else-if="on_trial || !subscription" method="POST" :action="route('subscriptions.create', key)">
                                     <input type="hidden" name="_token" :value="$page.props.csrfToken" />
                                     <button type="submit" class="block w-full rounded-lg bg-estoril-600 py-3 text-center text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
-                                        {{ on_trial ? 'Activate' : 'Subscribe' }}
+                                        {{ on_trial ? 'Activar' : 'Suscribirme' }}
                                     </button>
                                 </form>
                                 <form v-else method="POST" :action="route('subscriptions.swap', key)">

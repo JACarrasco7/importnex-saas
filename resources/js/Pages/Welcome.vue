@@ -37,27 +37,6 @@ const trustSources = [
     'kleinanzeigen',
 ];
 
-const testimonials = [
-    {
-        initials: 'CM',
-        name: 'Carlos M.',
-        role: 'Dealer · Madrid',
-        quote: 'Tengo 200 coches en mi catálogo y por fin todo en un sitio. Importnex me cambió los Excel y las hojas de cálculo.',
-    },
-    {
-        initials: 'LG',
-        name: 'Laura G.',
-        role: 'Corredor · Barcelona',
-        quote: 'La verificación IA me ahorra 3 horas por vehículo. Vale cada céntimo del plan Professional.',
-    },
-    {
-        initials: 'RS',
-        name: 'Roberto S.',
-        role: 'Dealer · Valencia',
-        quote: 'Las alertas automáticas me han salvado operaciones que se me habrían escapado. Integración con Stripe, además, es top.',
-    },
-];
-
 const howWorksSteps = [
     { icon: UsersIcon, title: 'welcome.how_works_step1_title', desc: 'welcome.how_works_step1_desc' },
     { icon: TruckIcon, title: 'welcome.how_works_step2_title', desc: 'welcome.how_works_step2_desc' },
@@ -697,23 +676,8 @@ const faqItems = [
             </div>
         </section>
 
-        <!-- ============== TESTIMONIOS SaaS ============== -->
-        <section class="py-16">
-            <div class="mx-auto max-w-7xl px-6">
-                <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-                    <div v-for="tt in testimonials" :key="tt.role" class="rounded-2xl border border-asphalt-200 bg-white p-6 shadow-sm dark:border-asphalt-700 dark:bg-asphalt-800/60">
-                        <p class="text-sm leading-relaxed text-asphalt-700 dark:text-asphalt-200">"{{ tt.quote }}"</p>
-                        <div class="mt-4 flex items-center gap-3">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-estoril-600 to-estoril-800 text-sm font-bold text-white">{{ tt.initials }}</div>
-                            <div>
-                                <p class="text-sm font-semibold text-asphalt-900 dark:text-white">{{ tt.name }}</p>
-                                <p class="text-xs text-asphalt-500 dark:text-asphalt-400">{{ tt.role }}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+        <!-- Testimonios retirados (auditoría oct-2026): eran inventados. Publicar
+             solo opiniones reales de clientes con su permiso. -->
 
         <!-- ============== CTA FINAL ============== -->
         <section class="py-20">

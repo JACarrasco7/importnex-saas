@@ -74,7 +74,7 @@ class ClientController extends Controller
         ]);
 
         return redirect()->route('clients.index')
-            ->with('success', 'Client created successfully.');
+            ->with('success', 'Cliente creado.');
     }
 
     public function show(Client $client): Response
@@ -141,7 +141,7 @@ class ClientController extends Controller
         $client->update($this->clientAttributes($request));
 
         return redirect()->route('clients.index')
-            ->with('success', 'Client updated successfully.');
+            ->with('success', 'Cliente actualizado.');
     }
 
     public function destroy(Client $client): RedirectResponse
@@ -149,6 +149,6 @@ class ClientController extends Controller
         $client->delete();
 
         return redirect()->route('clients.index')
-            ->with('success', 'Client deleted successfully.');
+            ->with('success', 'Cliente eliminado.');
     }
 }

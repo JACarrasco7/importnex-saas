@@ -8,6 +8,7 @@ use App\Listeners\NotifyImportWebhook;
 use App\Models\Alert;
 use App\Models\Car;
 use App\Models\CarDocument;
+use App\Models\Organization;
 use App\Observers\AlertObserver;
 use App\Observers\CarDocumentObserver;
 use App\Observers\CarObserver;
@@ -17,6 +18,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Cashier\Cashier;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -33,6 +35,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // El cliente de Stripe es la organización (no el usuario): sin esto
+        // Cashier busca suscripciones y dueños en `users` y fallan cancelar,
+        // cambiar de plan y los webhooks.
+        Cashier::useCustomerModel(Organization::class);
+
         $this->configureRateLimiters();
         $this->registerObservers();
         $this->registerEventListeners();

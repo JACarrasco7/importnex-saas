@@ -133,7 +133,7 @@ class CarController extends Controller
         ]);
 
         return redirect()->route('cars.index')
-            ->with('success', 'Car created successfully.');
+            ->with('success', 'Coche creado.');
     }
 
     public function show(Car $car): Response
@@ -672,10 +672,18 @@ class CarController extends Controller
 
     public function update(UpdateCarRequest $request, Car $car): RedirectResponse
     {
-        $car->update($request->validated());
+        $data = $request->validated();
+
+        // Con un encargo en curso, el estado del coche lo marca el encargo
+        // (si no, coche y encargo acaban contando cosas distintas al cliente).
+        if (($data['status'] ?? $car->status) !== $car->status && ($order = $car->activeImportOrder())) {
+            return back()->withErrors(['status' => "Este coche tiene el encargo {$order->reference} en curso: cambia el estado desde el encargo."]);
+        }
+
+        $car->update($data);
 
         return redirect()->route('cars.index')
-            ->with('success', 'Car updated successfully.');
+            ->with('success', 'Coche actualizado.');
     }
 
     /**
@@ -722,6 +730,6 @@ class CarController extends Controller
         $car->delete();
 
         return redirect()->route('cars.index')
-            ->with('success', 'Car deleted successfully.');
+            ->with('success', 'Coche eliminado.');
     }
 }

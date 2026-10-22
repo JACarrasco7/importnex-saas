@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Organization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -33,7 +34,7 @@ class BillingController extends Controller
         $payload = Cache::remember($cacheKey, $cacheTtl, function () use ($organization, $hasStripeId, $stripeConfigured, &$invoices, &$subscription, &$paymentMethod, &$upcomingInvoice) {
             if ($hasStripeId && $stripeConfigured) {
                 try {
-                    $subscription = $organization->subscription();
+                    $subscription = $organization->subscription(Organization::SUBSCRIPTION_TYPE);
                 } catch (\Throwable $e) {
                     Log::warning('Billing: subscription load failed', ['err' => $e->getMessage()]);
                 }

@@ -55,6 +55,8 @@ class RegisteredUserController extends Controller
                 'password' => Hash::make($request->password),
                 'role' => 'owner',
                 'organization_id' => $organization->id,
+                // La columna tiene 'en' por defecto; el producto es en español.
+                'locale' => config('app.locale', 'es'),
             ]);
         });
 

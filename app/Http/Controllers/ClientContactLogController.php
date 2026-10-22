@@ -41,7 +41,7 @@ class ClientContactLogController extends Controller
             'organization_id' => $client->organization_id,
         ]);
 
-        return back()->with('success', 'Contact logged.');
+        return back()->with('success', 'Contacto registrado.');
     }
 
     public function destroy(Client $client, ClientContactLog $log): RedirectResponse
@@ -52,6 +52,6 @@ class ClientContactLogController extends Controller
 
         $log->delete();
 
-        return back()->with('success', 'Log deleted.');
+        return back()->with('success', 'Registro eliminado.');
     }
 }

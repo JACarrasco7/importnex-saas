@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Contact;
 use App\Models\Client;
+use App\Models\Contact;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -14,8 +15,8 @@ class ContactController extends Controller
     public function index(Request $request): Response
     {
         $contacts = Contact::query()
-            ->when($request->input('search'), function($q, $s) {
-                $q->where(function($sub) use ($s) {
+            ->when($request->input('search'), function ($q, $s) {
+                $q->where(function ($sub) use ($s) {
                     $sub->where('name', 'like', "%$s%")
                         ->orWhere('email', 'like', "%$s%")
                         ->orWhere('phone', 'like', "%$s%");
@@ -34,6 +35,7 @@ class ContactController extends Controller
     public function create(): Response
     {
         $clients = Client::select('id', 'name')->get();
+
         return Inertia::render('Contacts/Create', [
             'clients' => $clients,
         ]);
@@ -46,7 +48,7 @@ class ContactController extends Controller
             'phone' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255',
             'city' => 'nullable|string|max:255',
-            'client_id' => 'nullable|exists:clients,id',
+            'client_id' => ['nullable', Rule::exists('clients', 'id')->where('organization_id', $request->user()->organization_id)],
             'notes' => 'nullable|string',
             'tags' => 'nullable',
         ]);
@@ -63,7 +65,7 @@ class ContactController extends Controller
         ]);
 
         return redirect()->route('contacts.index')
-            ->with('success', 'Contact created successfully.');
+            ->with('success', 'Contacto creado.');
     }
 
     public function show(Contact $contact): Response
@@ -76,6 +78,7 @@ class ContactController extends Controller
     public function edit(Contact $contact): Response
     {
         $clients = Client::select('id', 'name')->get();
+
         return Inertia::render('Contacts/Edit', [
             'contact' => $contact,
             'clients' => $clients,
@@ -89,7 +92,7 @@ class ContactController extends Controller
             'phone' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255',
             'city' => 'nullable|string|max:255',
-            'client_id' => 'nullable|exists:clients,id',
+            'client_id' => ['nullable', Rule::exists('clients', 'id')->where('organization_id', $request->user()->organization_id)],
             'notes' => 'nullable|string',
             'tags' => 'nullable',
         ]);
@@ -105,13 +108,14 @@ class ContactController extends Controller
         ]);
 
         return redirect()->route('contacts.index')
-            ->with('success', 'Contact updated successfully.');
+            ->with('success', 'Contacto actualizado.');
     }
 
     public function destroy(Contact $contact): RedirectResponse
     {
         $contact->delete();
+
         return redirect()->route('contacts.index')
-            ->with('success', 'Contact deleted successfully.');
+            ->with('success', 'Contacto eliminado.');
     }
 }

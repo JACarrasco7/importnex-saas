@@ -68,7 +68,7 @@ class PortalTest extends TestCase
         $this->assertStringNotContainsString('MARGEN SECRETO', $response->getContent());
         $this->assertStringNotContainsString('Nota interna privada', $response->getContent());
         $this->assertSame(1, $order->fresh()->portal_views);
-        $this->assertStringContainsString('JJ Import Motors', $response->getContent());
+        $this->assertStringContainsString(e($this->org->name), $response->getContent());
     }
 
     public function test_client_signs_the_contract_from_the_portal_with_a_code(): void

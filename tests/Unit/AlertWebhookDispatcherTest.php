@@ -76,7 +76,7 @@ class AlertWebhookDispatcherTest extends TestCase
             return isset($payload['content'])
                 && str_contains($payload['content'], '⚠️')
                 && str_contains($payload['content'], 'verification failed')
-                && $payload['username'] === 'JJ Import Motors Alerts';
+                && $payload['username'] === config('app.name').' Alerts';
         });
     }
 

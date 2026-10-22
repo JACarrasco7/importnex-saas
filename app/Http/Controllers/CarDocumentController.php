@@ -66,7 +66,7 @@ class CarDocumentController extends Controller
             }
         }
 
-        return back()->with('success', 'Documents uploaded successfully');
+        return back()->with('success', 'Documentos subidos.');
     }
 
     public function show(Car $car, CarDocument $document): StreamedResponse|BinaryFileResponse
@@ -100,6 +100,6 @@ class CarDocumentController extends Controller
         Storage::disk('public')->delete($document->url);
         $document->delete();
 
-        return back()->with('success', 'Document deleted');
+        return back()->with('success', 'Documento eliminado.');
     }
 }

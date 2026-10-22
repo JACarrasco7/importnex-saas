@@ -31,7 +31,8 @@ class BackfillInvestigationCacheOrg extends Command
         $orgName = $this->option('org');
         $org = $orgName
             ? Organization::where('name', $orgName)->first()
-            : Organization::where('is_owner', true)->orderBy('id')->first();
+            : (Organization::where('is_owner', true)->orderBy('id')->first()
+                ?? Organization::orderBy('id')->first());
         $orgName ??= '(organización propietaria)';
 
         if (! $org) {
