@@ -9,7 +9,8 @@ use App\Models\Car;
  * publica del marketplace (/marketplace/{id} y /p/{token}).
  *
  * Reglas de negocio (decision 12-oct-2026):
- *  - Honorarios JJ Import: 1.000 EUR por defecto, 1.500 EUR si el coche >= 30.000 EUR.
+ *  - Honorarios de la empresa del coche (Ajustes → Datos de empresa). Por
+ *    defecto 1.000 EUR, 1.500 EUR si el coche >= 30.000 EUR.
  *    Son fijos, no un porcentaje. No se muestran al cliente como coste separado
  *    de la BD (professional_fees) sino como linea propia del desglose.
  *  - Todos los importes son APROXIMADOS. El cliente ve disclaimer explicito.
@@ -35,7 +36,9 @@ class CostBreakdown
         $dgt = (float) ($car->dgt_fees ?? 0);
         $iedmtValue = (float) ($iedmt ?? 0);
         $processing = $itv + $coc + $dgt;
-        $honorarios = self::honorariosFor($carPrice);
+        // Las fichas públicas cargan la organización; sin ella, escala por defecto.
+        $fees = $car->relationLoaded('organization') ? $car->organization?->brand()->fees() : null;
+        $honorarios = self::honorariosFor($carPrice, $fees);
 
         return [
             'car_price' => $carPrice,
@@ -48,10 +51,13 @@ class CostBreakdown
         ];
     }
 
-    public static function honorariosFor(float $carPrice): int
+    /**
+     * @param  array{base: int, premium: int, threshold: int}|null  $fees
+     */
+    public static function honorariosFor(float $carPrice, ?array $fees = null): int
     {
-        return $carPrice >= self::HONORARIOS_THRESHOLD
-            ? self::HONORARIOS_PREMIUM
-            : self::HONORARIOS_BASE;
+        $fees ??= ['base' => self::HONORARIOS_BASE, 'premium' => self::HONORARIOS_PREMIUM, 'threshold' => self::HONORARIOS_THRESHOLD];
+
+        return $carPrice >= $fees['threshold'] ? $fees['premium'] : $fees['base'];
     }
 }

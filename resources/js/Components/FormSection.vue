@@ -4,8 +4,8 @@
             <h3 class="text-base font-semibold text-gray-900">
                 <slot name="title">{{ title }}</slot>
             </h3>
-            <p v-if="description || $slots.description" class="mt-1 text-sm text-gray-500">
-                <slot name="description">{{ description }}</slot>
+            <p v-if="description || subtitle || $slots.description" class="mt-1 text-sm text-gray-500">
+                <slot name="description">{{ description || subtitle }}</slot>
             </p>
         </div>
         <div class="p-6">
@@ -18,5 +18,7 @@
 defineProps({
     title: { type: String, default: '' },
     description: { type: String, default: '' },
+    // Alias: muchas páginas pasan `subtitle` (antes se ignoraba en silencio).
+    subtitle: { type: String, default: '' },
 });
 </script>

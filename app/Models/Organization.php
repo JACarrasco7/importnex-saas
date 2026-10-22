@@ -94,6 +94,27 @@ class Organization extends Model
         return (bool) $this->is_owner;
     }
 
+    /**
+     * Función incluida en el plan (`subscription.plans.*.features`). La
+     * organización operadora las tiene todas.
+     */
+    public function hasFeature(string $feature): bool
+    {
+        if ($this->isOwner()) {
+            return true;
+        }
+
+        return (bool) config("subscription.plans.{$this->plan}.features.{$feature}", false);
+    }
+
+    /** Suma una visita a la portada de la web pública de la empresa. */
+    public function recordWebVisit(): int
+    {
+        static::query()->whereKey($this->getKey())->increment('web_visits');
+
+        return (int) static::query()->whereKey($this->getKey())->value('web_visits');
+    }
+
     protected static function booted(): void
     {
         static::creating(function ($organization) {

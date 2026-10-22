@@ -6,6 +6,7 @@ use App\Enums\ImportOrderState;
 use App\Models\Car;
 use App\Models\User;
 use App\Support\CarChecklistDefinitions;
+use App\Support\PublicSite;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\RateLimiter;
 use Inertia\Inertia;
@@ -187,6 +188,7 @@ class PublicTrackingController extends Controller
 
         return Inertia::render('Public/Tracking', [
             'orgBrand' => $car->organization?->brand()->toPublicArray(),
+            'siteUrl' => PublicSite::urlFor($car->organization),
             'car' => [
                 'brand' => $car->brand,
                 'model' => $car->model,

@@ -8,6 +8,7 @@ use App\Models\Organization;
 use App\Models\UserOnboardingProgress;
 use App\Services\Ai\AiProviderRegistry;
 use App\Support\Brand;
+use App\Support\PublicSite;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Middleware;
@@ -128,17 +129,7 @@ class HandleInertiaRequests extends Middleware
         // la separacion con el SaaS (landing, pricing, auth).
         $marketplaceContext = null;
         if (! $user) {
-            $marketplaceContext = Cache::remember('marketplace.context', 300, function () {
-                $org = Organization::where('is_public', true)->first();
-
-                return [
-                    'orgName' => $org?->name ?? config('app.name'),
-                    'orgSlug' => $org?->slug,
-                    'requestUrl' => $org?->slug
-                        ? route('public.car-request.index', ['slug' => $org->slug])
-                        : null,
-                ];
-            });
+            $marketplaceContext = Cache::remember('marketplace.context.v2', 300, fn () => PublicSite::platform()->context());
         }
 
         return [
@@ -171,14 +162,34 @@ class HandleInertiaRequests extends Middleware
             // Flat props for layouts that read $page.props.payment_failed directly.
             'payment_failed' => $billingDunning['payment_failed'] ?? false,
             'payment_failed_at' => $billingDunning['payment_failed_at'] ?? null,
-            // Web publica de coches (marketplace) — separada del SaaS.
+            // Web publica de coches (marketplace) — separada del SaaS. Las
+            // webs de cada empresa la sobrescriben con su propio contexto.
             'marketplace' => $marketplaceContext,
+            // Web pública de la empresa del usuario (enlaces del panel).
+            'publicSite' => fn () => $organization ? $this->publicSiteContext($organization) : null,
             // Marca de la organización en contexto (la del usuario o la que
             // opera la web pública). Las páginas de una organización concreta
             // (portal, dossier) la sobrescriben con su propio prop `brand`.
             'orgBrand' => fn () => $organization
                 ? $organization->brand()->toPublicArray()
                 : Brand::platform()->toPublicArray(),
+        ];
+    }
+
+    /**
+     * Web pública de la empresa del usuario, para los enlaces del panel.
+     *
+     * @return array{enabled: bool, url: ?string, carUrlBase: ?string, requestUrl: ?string}
+     */
+    private function publicSiteContext(Organization $organization): array
+    {
+        $url = PublicSite::urlFor($organization);
+
+        return [
+            'enabled' => (bool) $organization->is_public,
+            'url' => $url,
+            'carUrlBase' => $url ? PublicSite::forOrganization($organization)->context()['carUrlBase'] : null,
+            'requestUrl' => $url ? $organization->public_url : null,
         ];
     }
 

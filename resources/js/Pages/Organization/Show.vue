@@ -17,6 +17,8 @@ const props = defineProps({
     apiTokenActive: { type: Boolean, default: false },
     newApiToken: { type: String, default: null },
     companyMissing: { type: Array, default: () => [] },
+    siteUrl: { type: String, default: null },
+    requestFormUrl: { type: String, default: null },
 });
 
 const memberForm = useForm({ name: '', email: '', role: 'operator' });
@@ -99,6 +101,23 @@ const { date } = useFormat();
                             </div>
                         </div>
                     </div>
+                </FormSection>
+
+                <FormSection title="Web pública" subtitle="Comparte estos enlaces con tus clientes. Tu catálogo solo muestra los coches que publiques.">
+                    <dl v-if="siteUrl" class="space-y-3 text-sm">
+                        <div>
+                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Tu web</dt>
+                            <dd><a :href="siteUrl" target="_blank" rel="noopener" class="break-all font-medium text-estoril-700 hover:text-estoril-900">{{ siteUrl }}</a></dd>
+                        </div>
+                        <div v-if="requestFormUrl">
+                            <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Formulario de solicitud</dt>
+                            <dd><a :href="requestFormUrl" target="_blank" rel="noopener" class="break-all font-medium text-estoril-700 hover:text-estoril-900">{{ requestFormUrl }}</a></dd>
+                        </div>
+                    </dl>
+                    <p v-else class="text-sm text-gray-600">
+                        Tu web está desactivada.
+                        <Link v-if="canManage" :href="route('organization.edit', organization.id) + '#web-publica'" class="font-semibold text-estoril-700 underline">Activarla</Link>
+                    </p>
                 </FormSection>
 
                 <FormSection title="Equipo" :subtitle="usersLimit ? `${members.length} de ${usersLimit} usuarios de tu plan` : null">

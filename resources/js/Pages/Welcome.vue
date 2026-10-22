@@ -1,4 +1,5 @@
 ﻿<script setup>
+import { computed } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import {
     TruckIcon,
@@ -17,16 +18,32 @@ import { useTranslations } from '@/Composables/useTranslations';
 
 const { t } = useTranslations();
 
-defineProps({
+const props = defineProps({
     canLogin: Boolean,
     canRegister: Boolean,
+    plans: { type: Array, default: () => [] },
+    trialDays: { type: Number, default: 14 },
+    exampleUrl: { type: String, default: null },
 });
 
+// Datos del producto, no métricas de clientes: nada que no se pueda demostrar.
 const stats = [
-    { value: '9', label: t('welcome.stat_modules') },
-    { value: '1', label: t('welcome.stat_marketplace') },
-    { value: 'EUR', label: t('welcome.stat_stripe') },
+    { value: String(props.trialDays), label: t('welcome.stat_trial') },
+    { value: '1', label: t('welcome.stat_website') },
+    { value: '0 €', label: t('welcome.stat_setup') },
 ];
+
+const formatNumber = (n) => new Intl.NumberFormat('es-ES').format(n);
+const limitLabel = (key) => t(`welcome.limit_${key}`);
+// Planes desde config/subscription.php (los que cobra Stripe y aplica la app).
+const pricingPlans = computed(() => props.plans.map((plan) => ({
+    ...plan,
+    popular: plan.key === 'pro',
+    bullets: [
+        ...['cars', 'clients', 'users'].map((key) => `${t('welcome.limit_up_to')} ${formatNumber(plan.limits[key])} ${limitLabel(key)}`),
+        plan.features.custom_branding ? t('subscription.features.custom_branding') : t('subscription.features.public_website'),
+    ],
+})));
 
 const trustSources = [
     'mobile.de',
@@ -41,25 +58,6 @@ const howWorksSteps = [
     { icon: UsersIcon, title: 'welcome.how_works_step1_title', desc: 'welcome.how_works_step1_desc' },
     { icon: TruckIcon, title: 'welcome.how_works_step2_title', desc: 'welcome.how_works_step2_desc' },
     { icon: ChartBarIcon, title: 'welcome.how_works_step3_title', desc: 'welcome.how_works_step3_desc' },
-];
-
-const pricingStarter = [
-    'welcome.pricing_starter_f1',
-    'welcome.pricing_starter_f2',
-    'welcome.pricing_starter_f3',
-];
-
-const pricingPro = [
-    'welcome.pricing_pro_f1',
-    'welcome.pricing_pro_f2',
-    'welcome.pricing_pro_f3',
-    'welcome.pricing_pro_f4',
-];
-
-const pricingEnt = [
-    'welcome.pricing_ent_f1',
-    'welcome.pricing_ent_f2',
-    'welcome.pricing_ent_f3',
 ];
 
 const faqItems = [
@@ -158,7 +156,8 @@ const faqItems = [
                             <ArrowRightIcon class="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5" />
                         </Link>
                         <Link
-                            :href="route('marketplace.index')"
+                            v-if="exampleUrl"
+                            :href="exampleUrl"
                             class="inline-flex items-center justify-center gap-2 rounded-lg bg-white/80 px-6 py-3 text-base font-semibold text-asphalt-800 shadow-sm ring-1 ring-asphalt-200 backdrop-blur-sm hover:bg-white hover:ring-estoril-300 dark:bg-asphalt-800/60 dark:text-white dark:ring-asphalt-700 dark:hover:bg-asphalt-800/80"
                         >
                             <BoltIcon class="h-4 w-4 text-estoril-600 dark:text-estoril-400" />
@@ -598,52 +597,32 @@ const faqItems = [
                 </div>
 
                 <div class="mt-14 grid grid-cols-1 gap-6 md:grid-cols-3">
-                    <!-- Starter -->
-                    <div class="relative flex flex-col rounded-2xl bg-white p-6 shadow-sm ring-1 ring-asphalt-200 dark:bg-asphalt-800/60 dark:ring-asphalt-700">
-                        <h3 class="text-lg font-semibold text-asphalt-900 dark:text-white">Starter</h3>
-                        <p class="mt-1 text-xs text-asphalt-500 dark:text-asphalt-400">{{ t('welcome.pricing_starter_desc') }}</p>
+                    <div
+                        v-for="plan in pricingPlans"
+                        :key="plan.key"
+                        :class="plan.popular
+                            ? 'relative flex flex-col rounded-2xl bg-gradient-to-br from-estoril-700 to-estoril-900 p-6 shadow-lg shadow-estoril-900/20 ring-2 ring-estoril-500 dark:shadow-estoril-950/50'
+                            : 'relative flex flex-col rounded-2xl bg-white p-6 shadow-sm ring-1 ring-asphalt-200 dark:bg-asphalt-800/60 dark:ring-asphalt-700'"
+                    >
+                        <span v-if="plan.popular" class="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-amber-400 px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-950">{{ t('welcome.pricing_popular') }}</span>
+                        <h3 :class="['text-lg font-semibold', plan.popular ? 'text-white' : 'text-asphalt-900 dark:text-white']">{{ plan.name }}</h3>
+                        <p :class="['mt-1 text-xs', plan.popular ? 'text-estoril-200' : 'text-asphalt-500 dark:text-asphalt-400']">{{ plan.description }}</p>
                         <p class="mt-4 flex items-baseline gap-1">
-                            <span class="text-4xl font-bold text-asphalt-900 dark:text-white">29€</span>
-                            <span class="text-sm text-asphalt-500 dark:text-asphalt-400">/{{ t('welcome.pricing_month') }}</span>
+                            <span :class="['text-4xl font-bold', plan.popular ? 'text-white' : 'text-asphalt-900 dark:text-white']">{{ formatNumber(plan.price) }} €</span>
+                            <span :class="['text-sm', plan.popular ? 'text-estoril-200' : 'text-asphalt-500 dark:text-asphalt-400']">/{{ t('welcome.pricing_month') }}</span>
                         </p>
-                        <ul class="mt-6 flex-1 space-y-2 text-sm text-asphalt-700 dark:text-asphalt-300">
-                            <li v-for="f in pricingStarter" :key="f" class="flex items-center gap-2"><CheckIcon class="h-4 w-4 shrink-0 text-estoril-600 dark:text-estoril-400" />{{ t(f) }}</li>
+                        <ul :class="['mt-6 flex-1 space-y-2 text-sm', plan.popular ? 'text-estoril-100' : 'text-asphalt-700 dark:text-asphalt-300']">
+                            <li v-for="f in plan.bullets" :key="f" class="flex items-center gap-2">
+                                <CheckIcon :class="['h-4 w-4 shrink-0', plan.popular ? 'text-estoril-300' : 'text-estoril-600 dark:text-estoril-400']" />{{ f }}
+                            </li>
                         </ul>
-                        <Link :href="route('register')" class="mt-6 inline-flex items-center justify-center rounded-lg border border-estoril-300 px-4 py-2 text-sm font-semibold text-estoril-700 hover:bg-estoril-50 dark:border-estoril-700 dark:text-estoril-300 dark:hover:bg-estoril-900/30">
+                        <Link
+                            :href="route('register')"
+                            :class="plan.popular
+                                ? 'mt-6 inline-flex items-center justify-center rounded-lg bg-white px-4 py-2 text-sm font-semibold text-estoril-700 shadow hover:bg-estoril-50'
+                                : 'mt-6 inline-flex items-center justify-center rounded-lg border border-estoril-300 px-4 py-2 text-sm font-semibold text-estoril-700 hover:bg-estoril-50 dark:border-estoril-700 dark:text-estoril-300 dark:hover:bg-estoril-900/30'"
+                        >
                             {{ t('welcome.pricing_cta_start') }}
-                        </Link>
-                    </div>
-
-                    <!-- Professional (destacado) -->
-                    <div class="relative flex flex-col rounded-2xl bg-gradient-to-br from-estoril-700 to-estoril-900 p-6 shadow-lg shadow-estoril-900/20 ring-2 ring-estoril-500 dark:shadow-estoril-950/50">
-                        <span class="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-amber-400 px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-950">{{ t('welcome.pricing_popular') }}</span>
-                        <h3 class="text-lg font-semibold text-white">Professional</h3>
-                        <p class="mt-1 text-xs text-estoril-200">{{ t('welcome.pricing_pro_desc') }}</p>
-                        <p class="mt-4 flex items-baseline gap-1">
-                            <span class="text-4xl font-bold text-white">99€</span>
-                            <span class="text-sm text-estoril-200">/{{ t('welcome.pricing_month') }}</span>
-                        </p>
-                        <ul class="mt-6 flex-1 space-y-2 text-sm text-estoril-100">
-                            <li v-for="f in pricingPro" :key="f" class="flex items-center gap-2"><CheckIcon class="h-4 w-4 shrink-0 text-estoril-300" />{{ t(f) }}</li>
-                        </ul>
-                        <Link :href="route('register')" class="mt-6 inline-flex items-center justify-center rounded-lg bg-white px-4 py-2 text-sm font-semibold text-estoril-700 shadow hover:bg-estoril-50">
-                            {{ t('welcome.pricing_cta_start') }}
-                        </Link>
-                    </div>
-
-                    <!-- Enterprise -->
-                    <div class="relative flex flex-col rounded-2xl bg-white p-6 shadow-sm ring-1 ring-asphalt-200 dark:bg-asphalt-800/60 dark:ring-asphalt-700">
-                        <h3 class="text-lg font-semibold text-asphalt-900 dark:text-white">Enterprise</h3>
-                        <p class="mt-1 text-xs text-asphalt-500 dark:text-asphalt-400">{{ t('welcome.pricing_ent_desc') }}</p>
-                        <p class="mt-4 flex items-baseline gap-1">
-                            <span class="text-4xl font-bold text-asphalt-900 dark:text-white">299€</span>
-                            <span class="text-sm text-asphalt-500 dark:text-asphalt-400">/{{ t('welcome.pricing_month') }}</span>
-                        </p>
-                        <ul class="mt-6 flex-1 space-y-2 text-sm text-asphalt-700 dark:text-asphalt-300">
-                            <li v-for="f in pricingEnt" :key="f" class="flex items-center gap-2"><CheckIcon class="h-4 w-4 shrink-0 text-estoril-600 dark:text-estoril-400" />{{ t(f) }}</li>
-                        </ul>
-                        <Link :href="route('register')" class="mt-6 inline-flex items-center justify-center rounded-lg border border-estoril-300 px-4 py-2 text-sm font-semibold text-estoril-700 hover:bg-estoril-50 dark:border-estoril-700 dark:text-estoril-300 dark:hover:bg-estoril-900/30">
-                            {{ t('welcome.pricing_cta_contact') }}
                         </Link>
                     </div>
                 </div>
@@ -704,16 +683,16 @@ const faqItems = [
                         </div>
                         <div class="grid grid-cols-3 gap-4 text-white">
                             <div class="rounded-xl bg-white/5 p-4 ring-1 ring-white/10 backdrop-blur-sm">
-                                <p class="text-3xl font-bold">142</p>
-                                <p class="mt-1 text-xs text-estoril-200">{{ t('welcome.cta_metric_vehicles') }}</p>
+                                <p class="text-2xl font-bold">{{ t('welcome.cta_fact_web') }}</p>
+                                <p class="mt-1 text-xs text-estoril-200">{{ t('welcome.cta_fact_web_desc') }}</p>
                             </div>
                             <div class="rounded-xl bg-white/5 p-4 ring-1 ring-white/10 backdrop-blur-sm">
-                                <p class="text-3xl font-bold">38</p>
-                                <p class="mt-1 text-xs text-estoril-200">{{ t('welcome.cta_metric_leads') }}</p>
+                                <p class="text-2xl font-bold">{{ t('welcome.cta_fact_contract') }}</p>
+                                <p class="mt-1 text-xs text-estoril-200">{{ t('welcome.cta_fact_contract_desc') }}</p>
                             </div>
                             <div class="rounded-xl bg-white/5 p-4 ring-1 ring-white/10 backdrop-blur-sm">
-                                <p class="text-3xl font-bold">€18k</p>
-                                <p class="mt-1 text-xs text-estoril-200">{{ t('welcome.cta_metric_margin') }}</p>
+                                <p class="text-2xl font-bold">{{ t('welcome.cta_fact_portal') }}</p>
+                                <p class="mt-1 text-xs text-estoril-200">{{ t('welcome.cta_fact_portal_desc') }}</p>
                             </div>
                         </div>
                     </div>

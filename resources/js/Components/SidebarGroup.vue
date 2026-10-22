@@ -44,8 +44,8 @@ const hasActiveChild = computed(() => {
         <div v-show="open" class="mt-1 space-y-0.5 pl-3">
             <a
                 v-for="item in items.filter((i) => i.external)"
-                :key="'ext-' + item.route"
-                :href="route(item.route)"
+                :key="'ext-' + (item.href || item.route)"
+                :href="item.href || route(item.route)"
                 target="_blank"
                 rel="noopener"
                 class="flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm font-semibold text-estoril-700 transition hover:bg-estoril-50"

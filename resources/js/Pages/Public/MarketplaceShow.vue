@@ -19,6 +19,7 @@ import {
 } from '@heroicons/vue/24/outline';
 import MarketplaceLayout from '@/Layouts/MarketplaceLayout.vue';
 import { useTranslations } from '@/Composables/useTranslations';
+import { useSite } from '@/Composables/useSite';
 import { useBrand } from '@/Composables/useBrand';
 import { useFormat } from '@/Composables/useFormat';
 import { photoUrl } from '@/Composables/usePhotoUrl';
@@ -36,6 +37,16 @@ const props = defineProps({
 });
 
 const { t, locale } = useTranslations();
+const { carUrl } = useSite();
+const { brand: siteBrand } = useBrand();
+const euros = (n) => new Intl.NumberFormat('es-ES').format(n) + ' €';
+// Honorarios de la empresa de esta web (Ajustes → Datos de empresa).
+const feeNote = computed(() => {
+    const fees = siteBrand.value.fees || { base: 1000, premium: 1500, threshold: 30000 };
+    return fees.premium === fees.base
+        ? euros(fees.base)
+        : t('marketplace_show.cost_honorarios_note', { base: euros(fees.base), premium: euros(fees.premium), threshold: euros(fees.threshold) });
+});
 const { telUrl } = useBrand();
 const { currency } = useFormat();
 
@@ -452,7 +463,7 @@ const specItems = computed(() => [
                         <div class="flex items-baseline justify-between gap-4 border-b border-dashed border-gray-200 pb-2">
                             <div>
                                 <span class="text-sm text-gray-700">{{ t('marketplace_show.cost_honorarios_label', { default: 'Honorarios :company' }) }}</span>
-                                <p class="text-[11px] text-gray-500">{{ t('marketplace_show.cost_honorarios_note', { default: '1.000 EUR (1.500 EUR si el coche es >= 30.000 EUR)' }) }}</p>
+                                <p class="text-[11px] text-gray-500">{{ feeNote }}</p>
                             </div>
                             <span class="font-mono text-sm font-semibold text-estoril-800">{{ fmt(costBreakdown.honorarios) }}</span>
                         </div>
@@ -617,7 +628,7 @@ const specItems = computed(() => [
                         {{ t('marketplace.related_cars', { default: 'Otros coches similares' }) }}
                     </h2>
                     <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                        <Link v-for="rcar in relatedCars" :key="rcar.id" :href="route('marketplace.show', rcar.id)" class="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 transition hover:-translate-y-0.5 hover:shadow-md hover:ring-estoril-300 dark:bg-asphalt-800 dark:ring-asphalt-700">
+                        <Link v-for="rcar in relatedCars" :key="rcar.id" :href="carUrl(rcar.id)" class="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 transition hover:-translate-y-0.5 hover:shadow-md hover:ring-estoril-300 dark:bg-asphalt-800 dark:ring-asphalt-700">
                             <div class="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-asphalt-200 to-gray-300">
                                 <img v-if="photoUrl(rcar.photos ? rcar.photos[0] : null)" :src="photoUrl(rcar.photos ? rcar.photos[0] : null)" :alt="`${rcar.brand} ${rcar.model}`" class="h-full w-full object-cover transition group-hover:scale-105" loading="lazy" />
                                 <div v-else class="flex h-full w-full items-center justify-center text-gray-400">

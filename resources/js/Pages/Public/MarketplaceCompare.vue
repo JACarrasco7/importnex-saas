@@ -12,6 +12,7 @@ import MarketplaceLayout from '@/Layouts/MarketplaceLayout.vue';
 import LazyImage from '@/Components/LazyImage.vue';
 import { useFormat } from '@/Composables/useFormat';
 import { useTranslations } from '@/Composables/useTranslations';
+import { useSite } from '@/Composables/useSite';
 import { photoUrl } from '@/Composables/usePhotoUrl';
 
 const props = defineProps({
@@ -23,6 +24,7 @@ const props = defineProps({
 
 const { currency: formatCurrency } = useFormat();
 const { t } = useTranslations();
+const { homeUrl, carUrl } = useSite();
 
 // Filas comparadas. IMPORTANTE: solo campos PUBLICOS (verdict y
 // traffic_light son admin-only y publicCarPayload() los filtra antes
@@ -116,7 +118,7 @@ const whatsappHref = (car) => {
                     <p class="text-gray-600 dark:text-gray-400">
                         {{ t('marketplace.compare.empty') }}
                     </p>
-                    <Link :href="route('marketplace.index')" class="mt-4 inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white hover:bg-estoril-500">
+                    <Link :href="homeUrl" class="mt-4 inline-flex items-center gap-2 rounded-lg bg-estoril-600 px-4 py-2 text-sm font-semibold text-white hover:bg-estoril-500">
                         {{ t('marketplace.compare.go_back') }}
                         <ArrowRightIcon class="h-4 w-4" />
                     </Link>
@@ -131,7 +133,7 @@ const whatsappHref = (car) => {
                                     {{ t('marketplace.compare.features') }}
                                 </th>
                                 <th v-for="car in cars" :key="car.id" class="px-4 py-4 text-center">
-                                    <Link :href="route('marketplace.show', car.id)" class="block">
+                                    <Link :href="carUrl(car.id)" class="block">
                                         <div class="aspect-video overflow-hidden rounded-lg bg-gray-100 dark:bg-asphalt-700">
                                             <LazyImage v-if="photoUrl(car.photos?.[0])" :src="photoUrl(car.photos?.[0])" :alt="car.brand + ' ' + car.model" ratio="aspect-video" fit="object-cover" />
                                             <div v-else class="flex h-full items-center justify-center">
@@ -157,7 +159,7 @@ const whatsappHref = (car) => {
                                 <td class="sticky left-0 z-10 bg-gray-50 px-4 py-4 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:bg-asphalt-800 dark:text-gray-400"></td>
                                 <td v-for="car in cars" :key="car.id" class="px-2 py-4">
                                     <div class="flex flex-col items-center justify-center gap-2">
-                                        <Link :href="route('marketplace.show', car.id)" class="inline-flex w-full items-center justify-center gap-1 rounded-lg bg-estoril-600 px-3 py-2 text-xs font-semibold text-white hover:bg-estoril-500">
+                                        <Link :href="carUrl(car.id)" class="inline-flex w-full items-center justify-center gap-1 rounded-lg bg-estoril-600 px-3 py-2 text-xs font-semibold text-white hover:bg-estoril-500">
                                             {{ t('marketplace.compare.view', { default: 'Ver ficha' }) }}
                                             <ArrowRightIcon class="h-3.5 w-3.5" />
                                         </Link>

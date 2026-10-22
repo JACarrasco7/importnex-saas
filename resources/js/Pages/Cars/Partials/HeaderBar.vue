@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import {
     ArrowLeftIcon,
     ArrowTopRightOnSquareIcon,
@@ -38,6 +38,12 @@ const props = defineProps({
 const toggling = ref(false);
 
 const marketplaceVisible = computed(() => props.derived?.marketplace_status?.visible === true);
+// Ficha del coche en la web pública de la empresa.
+const page = usePage();
+const publicCarUrl = computed(() => {
+    const base = page.props.publicSite?.carUrlBase;
+    return base ? `${base}/${props.car.id}` : null;
+});
 
 const pendingChecks = computed(() =>
     (props.derived?.marketplace_status?.checks ?? []).filter((c) => !c.ok)
@@ -159,8 +165,8 @@ const toggleMarketplace = () => {
                 </li>
             </ul>
 
-            <a v-if="marketplaceVisible"
-               :href="route('marketplace.show', car.id)"
+            <a v-if="marketplaceVisible && publicCarUrl"
+               :href="publicCarUrl"
                target="_blank"
                rel="noopener noreferrer"
                class="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-estoril-700 hover:text-estoril-900"

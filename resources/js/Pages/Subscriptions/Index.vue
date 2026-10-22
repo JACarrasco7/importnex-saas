@@ -44,7 +44,7 @@ const planKeys = ['starter', 'pro', 'enterprise'];
                         <CheckIcon class="h-5 w-5 text-emerald-600" />
                         <p class="text-sm text-emerald-700">
                             <strong>{{ t('subscription.subscription_active') }}:</strong> {{ subscription.status }}
-                            <span v-if="subscription.ends_at"> — ends {{ date(subscription.ends_at) }}</span>
+                            <span v-if="subscription.ends_at"> — termina el {{ date(subscription.ends_at) }}</span>
                         </p>
                     </div>
                 </div>
@@ -71,6 +71,14 @@ const planKeys = ['starter', 'pro', 'enterprise'];
                                     <CheckIcon class="h-4 w-4 text-emerald-500" />
                                     <span class="text-gray-700">{{ plans[key].clients_limit }} clientes</span>
                                 </li>
+                                <li class="flex items-center gap-2 text-sm">
+                                    <CheckIcon class="h-4 w-4 text-emerald-500" />
+                                    <span class="text-gray-700">{{ plans[key].users_limit }} usuarios</span>
+                                </li>
+                                <li v-if="plans[key].features?.custom_branding" class="flex items-center gap-2 text-sm">
+                                    <CheckIcon class="h-4 w-4 text-emerald-500" />
+                                    <span class="text-gray-700">{{ t('subscription.features.custom_branding') }}</span>
+                                </li>
                             </ul>
 
                             <div class="mt-8">
@@ -86,7 +94,7 @@ const planKeys = ['starter', 'pro', 'enterprise'];
                                 <form v-else method="POST" :action="route('subscriptions.swap', key)">
                                     <input type="hidden" name="_token" :value="$page.props.csrfToken" />
                                     <button type="submit" class="block w-full rounded-lg bg-estoril-600 py-3 text-center text-sm font-semibold text-white shadow-sm hover:bg-estoril-500">
-                                        Switch to {{ plans[key].name }}
+                                        Cambiar a {{ plans[key].name }}
                                     </button>
                                 </form>
                             </div>

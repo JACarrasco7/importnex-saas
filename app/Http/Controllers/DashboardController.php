@@ -6,6 +6,7 @@ use App\Models\Alert;
 use App\Models\Car;
 use App\Models\Contact;
 use App\Models\MarketplaceVisit;
+use App\Support\PublicSite;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -61,7 +62,11 @@ class DashboardController extends Controller
             // Suma de visitas a TODAS las fichas publicadas en el marketplace.
             // Diferente de marketplace_visits (singleton de la home publica).
             'marketplace_views_total' => (int) ($carStats->marketplace_views_total ?? 0),
-            'marketplace_home_visits' => (int) (MarketplaceVisit::current()->visits_count ?? 0),
+            // Visitas a la portada de SU web: la operadora usa el contador de
+            // /marketplace; el resto, el de su /web/{slug}.
+            'marketplace_home_visits' => $user->organization && PublicSite::forOrganization($user->organization)->isPlatform
+                ? (int) (MarketplaceVisit::current()->visits_count ?? 0)
+                : (int) ($user->organization?->web_visits ?? 0),
         ];
 
         $recentCars = Car::where('organization_id', $orgId)

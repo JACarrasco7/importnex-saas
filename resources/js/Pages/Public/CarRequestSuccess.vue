@@ -3,12 +3,14 @@ import { Head, Link } from '@inertiajs/vue3';
 import { CheckCircleIcon, TruckIcon, PhoneIcon, EnvelopeIcon } from '@heroicons/vue/24/outline';
 import MarketplaceLayout from '@/Layouts/MarketplaceLayout.vue';
 import { useTranslations } from '@/Composables/useTranslations';
+import { useSite } from '@/Composables/useSite';
 
 const props = defineProps({
     organization: Object,
 });
 
 const { t } = useTranslations();
+const { homeUrl } = useSite();
 </script>
 
 <template>
@@ -81,7 +83,7 @@ const { t } = useTranslations();
                             {{ t('car_request_success.send_another') }}
                         </Link>
                         <Link
-                            :href="route('marketplace.index')"
+                            :href="homeUrl"
                             class="inline-flex items-center gap-2 rounded-lg bg-white px-6 py-2 text-sm font-semibold text-gray-700 shadow-sm ring-1 ring-gray-300 hover:bg-gray-50"
                         >
                             {{ t('marketplace.back_to_marketplace') }}

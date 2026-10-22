@@ -217,7 +217,7 @@ const confirmDelete = () => {
                         :title="t('cars.no_clients_found')"
                         :description="t('cars.no_clients_found_desc')"
                         :primary-action="{ text: t('cars.add_first_client'), route: route('clients.create') }"
-                        :secondary-action="{ text: t('cars.view_marketplace', 'Ver Marketplace'), route: route('marketplace.index') }"
+                        :secondary-action="$page.props.publicSite?.url ? { text: t('cars.view_marketplace', 'Ver mi web'), route: $page.props.publicSite.url } : null"
                     />
                 </WhenVisible>
             </div>

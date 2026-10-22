@@ -10,12 +10,12 @@ Laravel 13 · PHP 8.5 · Inertia v3 + Vue 3 · Tailwind v4 · Cashier (Stripe).
 
 | Módulo | Qué hace |
 | --- | --- |
-| Cuentas y planes | Alta con prueba gratuita, planes Starter/Pro/Enterprise (Stripe), límites por plan, equipo |
+| Cuentas y planes | Alta con prueba gratuita, planes Starter/Pro/Enterprise (Stripe) con límites de vehículos, clientes, contactos y usuarios; Enterprise sin la marca de la plataforma en la web; equipo |
 | Coches | Ficha, kanban, mapa, fotos, documentos, gastos, checklist, valoración |
 | Clientes y solicitudes | CRM ligero, formulario público de solicitud por empresa (`/request/{slug}`) |
 | Encargos | Flujo cliente → contrato (firma con código por email) → pagos → seguimiento |
 | Portal del cliente | Enlace privado `/mi-encargo/{token}`: fases, contrato, pagos, aprobaciones, mensajes |
-| Marketplace y dossier | Web pública de coches y dossier compartible `/c/{token}` |
+| Web pública por empresa | Catálogo, fichas, comparador y formulario con la marca de cada empresa en `/web/{slug}` (se activa en Ajustes → Web pública); la organización operadora usa `/marketplace`. Dossier compartible `/c/{token}` |
 | Mercado y valoraciones | Importación de informes (ZIP/JSON) y API para herramientas externas |
 | Marketing | Contenidos por canal y PDF de ficha/folleto |
 
@@ -49,7 +49,11 @@ Desarrollo: `composer run dev` · Tests: `php artisan test --compact`.
 | `COMPANY_*` | Datos de respaldo de la organización operadora |
 | `ORDERS_*` | Prefijo de referencias, email del equipo |
 
-Los datos de **cada empresa** (razón social, CIF, dirección, teléfono, IBAN, logo)
+La **IA** usa la clave de cada empresa (Ajustes → Inteligencia artificial;
+recomendado Claude). Cada comprador recibe además la skill de importación para Claude.
+
+Los datos de **cada empresa** (razón social, CIF, dirección, teléfono, IBAN, logo,
+honorarios)
 se rellenan en **Ajustes → Datos de empresa** y salen en contratos, portal,
 emails, fichas públicas y aviso legal. Cada empresa genera su propio **token de
 API** en Ajustes (cabecera `X-Import-Token`).

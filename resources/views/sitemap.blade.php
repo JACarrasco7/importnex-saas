@@ -40,11 +40,20 @@
         <priority>0.5</priority>
     </url>
 
+    <!-- Webs de cada empresa -->
+    @foreach($sites as $siteUrl)
+        <url>
+            <loc>{{ $siteUrl }}</loc>
+            <changefreq>daily</changefreq>
+            <priority>0.8</priority>
+        </url>
+    @endforeach
+
     <!-- Cars -->
     @foreach($cars as $car)
         <url>
-            <loc>{{ route('marketplace.show', $car) }}</loc>
-            <lastmod>{{ $car->updated_at->format('Y-m-d') }}</lastmod>
+            <loc>{{ $car['loc'] }}</loc>
+            <lastmod>{{ $car['lastmod']->format('Y-m-d') }}</lastmod>
             <changefreq>weekly</changefreq>
             <priority>0.7</priority>
         </url>

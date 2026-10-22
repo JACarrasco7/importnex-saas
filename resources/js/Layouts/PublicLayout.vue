@@ -187,7 +187,7 @@ const close = () => { mobileOpen.value = false; };
                         </h3>
                         <ul class="mt-3 space-y-2 text-sm">
                             <li>
-                                <Link :href="route('marketplace.index') + '#about'" class="text-gray-600 hover:text-estoril-700 dark:text-gray-400 dark:hover:text-estoril-300">
+                                <Link :href="route('home')" class="text-gray-600 hover:text-estoril-700 dark:text-gray-400 dark:hover:text-estoril-300">
                                     {{ t('public.footer.about', 'Sobre nosotros') }}
                                 </Link>
                             </li>

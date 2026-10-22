@@ -8,6 +8,9 @@ use App\Models\MarketplaceVisit;
 use App\Models\Organization;
 use App\Support\Brand;
 use App\Support\CostBreakdown;
+use App\Support\PublicSite;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -16,12 +19,6 @@ use Inertia\Response;
 
 class PublicMarketplaceController extends Controller
 {
-    /**
-     * Número de WhatsApp (solo dígitos, sin +) para CTAs públicos.
-     * Coincide con el que usan PublicTrackingController y las vistas
-     * del marketplace. Centralizado aquí para no duplicarlo en cada
-     * componente Vue.
-     */
     /** Número de WhatsApp (solo dígitos, con prefijo) de la marca dada. */
     private static function whatsappDigits(Brand $brand): string
     {
@@ -71,47 +68,87 @@ class PublicMarketplaceController extends Controller
     ];
 
     /**
-     * Resolves the public request-form URL for the marketplace CTA
-     * ("Enviar solicitud"). Falls back to the first public org
-     * when no car organization can be determined.
-     *
-     * Si se pasa `$query` con un car_id, lo añade como `?car=ID` para que
-     * el formulario sepa que viene de una ficha concreta y pueda
-     * pre-rellenar la marca/modelo. (ver #3)
-     *
-     * @param  array<string,mixed>  $query
+     * Clave de caché de filtros de una web: la de la plataforma conserva la
+     * clave histórica; cada empresa tiene la suya.
      */
-    private function publicRequestUrl(?Organization $organization = null, array $query = []): ?string
+    public static function filterCacheKey(string $key, ?int $organizationId, bool $isPlatform = false): string
     {
-        $org = $organization
-            ?? Organization::query()->where('is_public', true)->orderBy('id')->first();
+        return $isPlatform || $organizationId === null ? $key : $key.'.org'.$organizationId;
+    }
 
-        $url = $org?->public_url;
-        if (! $url) {
-            return null;
+    /** Olvida las cachés de filtros de la web de una empresa y la de la plataforma. */
+    public static function forgetFilterCaches(?int $organizationId): void
+    {
+        foreach ([self::CACHE_KEY_FILTER_OPTIONS, self::CACHE_KEY_FILTER_COUNTS, self::CACHE_KEY_FILTER_BOUNDS] as $key) {
+            Cache::forget($key);
+            if ($organizationId !== null) {
+                Cache::forget(self::filterCacheKey($key, $organizationId));
+            }
         }
-        if ($query !== []) {
-            $url .= (str_contains($url, '?') ? '&' : '?').http_build_query($query);
-        }
+    }
 
-        return $url;
+    /** Coches publicados en la web de una empresa (solo los suyos). */
+    private function siteCars(PublicSite $site): Builder
+    {
+        return Car::query()
+            ->publicMarketplace()
+            ->where('cars.organization_id', $site->organizationId());
+    }
+
+    private function resolveSite(string $slug): PublicSite
+    {
+        $site = PublicSite::forSlug($slug);
+        abort_if($site === null, 404);
+
+        return $site;
+    }
+
+    /**
+     * Props comunes de la web: marca, contacto y URLs de la empresa.
+     *
+     * @return array<string, mixed>
+     */
+    private function siteProps(PublicSite $site): array
+    {
+        $brand = $site->brand();
+
+        return [
+            'marketplace' => $site->context(),
+            'orgBrand' => $brand->toPublicArray(),
+            'whatsappNumber' => self::whatsappDigits($brand),
+        ];
     }
 
     /**
      * Show a paginated list of publicly available cars.
      *
-     * GET /marketplace
+     * GET /marketplace (web de la plataforma) · GET /web/{slug} (web de una empresa)
      */
     public function index(Request $request): Response
+    {
+        return $this->renderIndex($request, PublicSite::platform());
+    }
+
+    public function siteIndex(Request $request, string $site): Response|RedirectResponse
+    {
+        $resolved = $this->resolveSite($site);
+        if ($resolved->isPlatform) {
+            return redirect()->route('marketplace.index', $request->query(), 301);
+        }
+
+        return $this->renderIndex($request, $resolved);
+    }
+
+    private function renderIndex(Request $request, PublicSite $site): Response
     {
         // Contador global de visitas (excluye bots para no inflar la metrica).
         // Es 1 UPDATE por visita a la home publica, aceptable para el volumen
         // esperado; si crece mucho se mueve a Cache::increment + flush periodico.
-        $visitsCount = 0;
-        if (! $this->looksLikeBot($request->userAgent())) {
-            $visitsCount = MarketplaceVisit::recordView();
+        $isBot = $this->looksLikeBot($request->userAgent());
+        if ($site->isPlatform || ! $site->organization) {
+            $visitsCount = $isBot ? (int) MarketplaceVisit::current()->visits_count : MarketplaceVisit::recordView();
         } else {
-            $visitsCount = (int) MarketplaceVisit::current()->visits_count;
+            $visitsCount = $isBot ? (int) $site->organization->web_visits : $site->organization->recordWebVisit();
         }
 
         $sort = $request->input('sort', 'recent');
@@ -121,8 +158,7 @@ class PublicMarketplaceController extends Controller
 
         $deal = filter_var($request->input('deal'), FILTER_VALIDATE_BOOLEAN);
 
-        $cars = Car::query()
-            ->publicMarketplace()
+        $cars = $this->siteCars($site)
             ->when($request->input('search'), function ($q, $s) {
                 $q->where(function ($sub) use ($s) {
                     $sub->where('brand', 'like', "%$s%")
@@ -183,18 +219,15 @@ class PublicMarketplaceController extends Controller
             $cars->getCollection()->map(fn (Car $c) => $this->publicCarPayload($c))
         );
 
-        // CTA "Enviar solicitud" → apunta a la org del primer coche
-        // (todas las fichas son de la misma org pública en la práctica).
-        $firstCar = $cars->first();
-        $firstCarOrg = is_array($firstCar) ? ($firstCar['organization'] ?? null) : $firstCar?->organization;
-        $requestUrl = $this->publicRequestUrl($firstCarOrg);
+        $requestUrl = $site->requestUrl();
+        $orgId = $site->organizationId();
 
         $verdicts = Car::VERDICTS;
         $lights = ['green', 'amber', 'red', 'neutral'];
 
         // Opciones de filtro cacheadas (invalidadas por CarObserver al cambiar marketplace)
-        $filterOptions = Cache::remember(self::CACHE_KEY_FILTER_OPTIONS, self::FILTER_CACHE_TTL, function () {
-            $base = fn () => Car::query()->publicMarketplace();
+        $filterOptions = Cache::remember(self::filterCacheKey(self::CACHE_KEY_FILTER_OPTIONS, $orgId, $site->isPlatform), self::FILTER_CACHE_TTL, function () use ($site) {
+            $base = fn () => $this->siteCars($site);
 
             return [
                 'brands' => $base()->distinct()->orderBy('brand')->pluck('brand')->values(),
@@ -234,8 +267,8 @@ class PublicMarketplaceController extends Controller
         // cuantos entran en "Muy buen precio". Se muestran en los chips
         // para que el cliente vea de un vistazo donde hay stock (antes el
         // chip de marca no tenia numero y el boton de oferta parecia vacio).
-        $filterCounts = Cache::remember(self::CACHE_KEY_FILTER_COUNTS, self::FILTER_CACHE_TTL, function () {
-            $base = fn () => Car::query()->publicMarketplace();
+        $filterCounts = Cache::remember(self::filterCacheKey(self::CACHE_KEY_FILTER_COUNTS, $orgId, $site->isPlatform), self::FILTER_CACHE_TTL, function () use ($site) {
+            $base = fn () => $this->siteCars($site);
 
             return [
                 'brands' => $base()
@@ -258,8 +291,8 @@ class PublicMarketplaceController extends Controller
 
         // Bounds para los inputs de precio/año (usados por el frontend en
         // los atributos min/max de los <input type="number">).
-        $filterBounds = Cache::remember(self::CACHE_KEY_FILTER_BOUNDS, self::FILTER_CACHE_TTL, function () {
-            $base = Car::query()->publicMarketplace();
+        $filterBounds = Cache::remember(self::filterCacheKey(self::CACHE_KEY_FILTER_BOUNDS, $orgId, $site->isPlatform), self::FILTER_CACHE_TTL, function () use ($site) {
+            $base = $this->siteCars($site);
 
             return [
                 'price' => [
@@ -289,7 +322,7 @@ class PublicMarketplaceController extends Controller
                 'transmission', 'doors', 'color',
             ]),
             'visitsCount' => $visitsCount,
-            'whatsappNumber' => self::whatsappDigits(Brand::platform()),
+            ...$this->siteProps($site),
         ]);
     }
 
@@ -300,6 +333,21 @@ class PublicMarketplaceController extends Controller
      */
     public function compare(Request $request): Response
     {
+        return $this->renderCompare($request, PublicSite::platform());
+    }
+
+    public function siteCompare(Request $request, string $site): Response|RedirectResponse
+    {
+        $resolved = $this->resolveSite($site);
+        if ($resolved->isPlatform) {
+            return redirect()->route('marketplace.compare', $request->query(), 301);
+        }
+
+        return $this->renderCompare($request, $resolved);
+    }
+
+    private function renderCompare(Request $request, PublicSite $site): Response
+    {
         $ids = collect(explode(',', (string) $request->query('ids', '')))
             ->map(fn (string $id) => (int) trim($id))
             ->filter()
@@ -307,24 +355,17 @@ class PublicMarketplaceController extends Controller
             ->take(4)
             ->values();
 
-        $cars = Car::query()
-            ->publicMarketplace()
+        $cars = $this->siteCars($site)
             ->whereIn('id', $ids->all())
             ->with(['photos', 'organization'])
             ->get()
             ->map(fn (Car $c) => $this->publicCarPayload($c));
 
-        // El primer coche ya viene como array (publicCarPayload), pero la
-        // org esta en su clave 'organization' (modelo serializado).
-        $firstCar = $cars->first();
-        $firstCarOrg = is_array($firstCar) ? ($firstCar['organization'] ?? null) : $firstCar?->organization;
-        $requestUrl = $this->publicRequestUrl($firstCarOrg);
-
         return Inertia::render('Public/MarketplaceCompare', [
             'cars' => $cars,
             'requestedIds' => $ids->all(),
-            'requestUrl' => $requestUrl,
-            'whatsappNumber' => self::whatsappDigits(Brand::platform()),
+            'requestUrl' => $site->requestUrl(),
+            ...$this->siteProps($site),
         ]);
     }
 
@@ -333,11 +374,38 @@ class PublicMarketplaceController extends Controller
      *
      * GET /marketplace/{car}
      */
-    public function show(Car $car): Response
+    public function show(Car $car): Response|RedirectResponse
+    {
+        $site = PublicSite::platform();
+
+        // Las fichas de otras empresas viven en su propia web: los enlaces
+        // antiguos a /marketplace/{id} se redirigen allí.
+        if ((int) $car->organization_id !== (int) $site->organizationId()) {
+            $owner = $car->organization;
+            abort_unless($owner && PublicSite::isAvailable($owner), 404);
+
+            return redirect()->to(PublicSite::forOrganization($owner)->carUrl($car), 301);
+        }
+
+        return $this->renderShow($car, $site);
+    }
+
+    public function siteShow(string $site, Car $car): Response|RedirectResponse
+    {
+        $resolved = $this->resolveSite($site);
+        abort_unless((int) $car->organization_id === (int) $resolved->organizationId(), 404);
+        if ($resolved->isPlatform) {
+            return redirect()->route('marketplace.show', ['car' => $car->getKey()], 301);
+        }
+
+        return $this->renderShow($car, $resolved);
+    }
+
+    private function renderShow(Car $car, PublicSite $site): Response
     {
         // Verificar visibilidad pública con el MISMO criterio que el listado
         // (scope único en Car — antes estaba copiado aquí y se desincronizó).
-        $visible = Car::query()->publicMarketplace()->whereKey($car->getKey())->exists();
+        $visible = $this->siteCars($site)->whereKey($car->getKey())->exists();
         if (! $visible) {
             abort(404);
         }
@@ -353,13 +421,12 @@ class PublicMarketplaceController extends Controller
 
         return Inertia::render('Public/MarketplaceShow', [
             'car' => $this->publicCarPayload($car),
-            'requestUrl' => $this->publicRequestUrl($car->organization, ['car' => $car->id]),
+            'requestUrl' => $site->requestUrl(['car' => $car->id]),
             'publicProfileUrl' => $car->public_profile_url,
             'dossierUrl' => $car->dossier_url,
-            'relatedCars' => $this->relatedCars($car),
+            'relatedCars' => $this->relatedCars($car, $site),
             'isSharedProfile' => false,
-            'whatsappNumber' => self::whatsappDigits($car->organization->brand()),
-            'orgBrand' => $car->organization->brand()->toPublicArray(),
+            ...$this->siteProps($site),
             'derived' => [
                 'total_cost' => $car->calculateTotalCost(),
                 'iedmt' => $car->calculateIEDMT(),
@@ -382,11 +449,10 @@ class PublicMarketplaceController extends Controller
      *    solo se usa si los pasos 1 y 2 no devolvieron nada (p. ej.
      *    catalogo con un solo coche por modelo).
      */
-    private function relatedCars(Car $car): Collection
+    private function relatedCars(Car $car, PublicSite $site): Collection
     {
         // 1) Misma marca + modelo
-        $sameModel = Car::query()
-            ->publicMarketplace()
+        $sameModel = $this->siteCars($site)
             ->where('brand', $car->brand)
             ->where('model', $car->model)
             ->whereKeyNot($car->getKey())
@@ -403,8 +469,7 @@ class PublicMarketplaceController extends Controller
         // 2) Misma marca, rango de precio +-40%
         $minPrice = (float) $car->purchase_price * 0.6;
         $maxPrice = (float) $car->purchase_price * 1.4;
-        $sameBrandAndPrice = Car::query()
-            ->publicMarketplace()
+        $sameBrandAndPrice = $this->siteCars($site)
             ->where('brand', $car->brand)
             ->whereKeyNot($car->getKey())
             ->when((float) $car->purchase_price > 0, fn ($q) => $q->whereBetween('purchase_price', [$minPrice, $maxPrice]))
@@ -418,8 +483,7 @@ class PublicMarketplaceController extends Controller
         }
 
         // 3) Misma marca sin filtro de precio (ultimo recurso)
-        return Car::query()
-            ->publicMarketplace()
+        return $this->siteCars($site)
             ->where('brand', $car->brand)
             ->whereKeyNot($car->getKey())
             ->orderBy('created_at', 'desc')
@@ -457,7 +521,8 @@ class PublicMarketplaceController extends Controller
 
         // Reutilizamos la misma verificación de visibilidad que show()
         // (scope único en el modelo, ya documentado).
-        $visible = Car::query()->publicMarketplace()->whereKey($car->getKey())->exists();
+        $visible = Car::query()->publicMarketplace()->whereKey($car->getKey())->exists()
+            && $car->organization && PublicSite::isAvailable($car->organization);
         if (! $visible) {
             abort(404);
         }
@@ -470,6 +535,7 @@ class PublicMarketplaceController extends Controller
         }
 
         $car->load(['photos', 'organization']);
+        $site = PublicSite::forOrganization($car->organization);
 
         $car->researchGaps;       // touch accessor
         $car->comparablesStats;    // touch accessor
@@ -479,11 +545,10 @@ class PublicMarketplaceController extends Controller
             'car' => $this->publicCarPayload($car),
             'publicProfileUrl' => $link->publicProfileUrl(),
             'dossierUrl' => $link->publicUrl(),
-            'requestUrl' => $this->publicRequestUrl($car->organization, ['car' => $car->id]),
-            'relatedCars' => $this->relatedCars($car),
+            'requestUrl' => $site->requestUrl(['car' => $car->id]),
+            'relatedCars' => $this->relatedCars($car, $site),
             'isSharedProfile' => true,
-            'whatsappNumber' => self::whatsappDigits($car->organization->brand()),
-            'orgBrand' => $car->organization->brand()->toPublicArray(),
+            ...$this->siteProps($site),
             'derived' => [
                 'total_cost' => $car->calculateTotalCost(),
                 'iedmt' => $car->calculateIEDMT(),

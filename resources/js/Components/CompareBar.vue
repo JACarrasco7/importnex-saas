@@ -3,8 +3,10 @@ import { ref, computed } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { XMarkIcon, ScaleIcon, ArrowRightIcon } from '@heroicons/vue/24/outline';
 import { useWishlist } from '@/Composables/useWishlist';
+import { useSite } from '@/Composables/useSite';
 
 const wishlist = useWishlist();
+const { compareUrl } = useSite();
 const isOpen = ref(false);
 
 const items = computed(() => wishlist.items.value);
@@ -22,7 +24,7 @@ const clear = () => {
 const goCompare = () => {
     if (count.value < 2) return;
     const ids = items.value.map(i => i.id).join(',');
-    router.visit(`/marketplace/compare?ids=${ids}`);
+    router.visit(compareUrl(ids));
 };
 
 const features = [

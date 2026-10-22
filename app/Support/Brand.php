@@ -19,6 +19,7 @@ final class Brand
     public const FIELDS = [
         'legal_name', 'tax_id', 'address', 'city', 'phone', 'phone_2', 'whatsapp',
         'email', 'website', 'iban', 'iban_holder', 'iban_bank', 'fee_label', 'tagline',
+        'fee_base', 'fee_premium', 'fee_threshold',
     ];
 
     /** @param  array<string, string|null>  $data */
@@ -47,6 +48,9 @@ final class Brand
             'iban_bank' => $profile['iban_bank'] ?? null,
             'fee_label' => $profile['fee_label'] ?? ($fallback['precio_honorarios'] ?? null),
             'tagline' => $profile['tagline'] ?? null,
+            'fee_base' => isset($profile['fee_base']) ? (string) $profile['fee_base'] : null,
+            'fee_premium' => isset($profile['fee_premium']) ? (string) $profile['fee_premium'] : null,
+            'fee_threshold' => isset($profile['fee_threshold']) ? (string) $profile['fee_threshold'] : null,
             'logo_url' => self::logoUrl($organization),
         ];
 
@@ -172,7 +176,39 @@ final class Brand
     /** Datos públicos (sin IBAN) para compartir con el frontend. */
     public function toPublicArray(): array
     {
-        return array_diff_key($this->data, array_flip(['iban', 'iban_holder', 'iban_bank']));
+        return [
+            ...array_diff_key($this->data, array_flip(['iban', 'iban_holder', 'iban_bank'])),
+            'fees' => $this->fees(),
+        ];
+    }
+
+    /**
+     * Honorarios de la empresa para el desglose orientativo de la web: importe
+     * base y, desde el umbral de precio, el importe superior. Sin datos, la
+     * escala por defecto (1.000 € / 1.500 € desde 30.000 €).
+     *
+     * @return array{base: int, premium: int, threshold: int}
+     */
+    public function fees(): array
+    {
+        $customBase = self::amount($this->data['fee_base'] ?? null);
+        $base = $customBase ?? CostBreakdown::HONORARIOS_BASE;
+        // Con un importe base propio y sin importe superior, se cobra siempre lo mismo.
+        $premium = self::amount($this->data['fee_premium'] ?? null)
+            ?? ($customBase !== null ? $base : CostBreakdown::HONORARIOS_PREMIUM);
+
+        return [
+            'base' => $base,
+            'premium' => $premium,
+            'threshold' => self::amount($this->data['fee_threshold'] ?? null) ?? CostBreakdown::HONORARIOS_THRESHOLD,
+        ];
+    }
+
+    private static function amount(?string $value): ?int
+    {
+        $digits = preg_replace('/[^\d]/', '', (string) $value);
+
+        return $digits === '' ? null : (int) $digits;
     }
 
     /**

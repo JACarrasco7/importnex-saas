@@ -11,7 +11,6 @@ use App\Models\CarPublicLink;
 use App\Services\ImportOrders\OrderContractService;
 use App\Support\CarChecklistDefinitions;
 use App\Support\CarDocumentDefinitions;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class CarObserver
@@ -30,12 +29,10 @@ class CarObserver
      * Centralizado para que al anadir una clave nueva (p. ej. filter_counts)
      * no haya que tocar los 4 sitios donde se publica/despublica un coche.
      */
-    private function flushMarketplaceCaches(): void
+    private function flushMarketplaceCaches(?Car $car = null): void
     {
         SitemapController::flush();
-        Cache::forget(PublicMarketplaceController::CACHE_KEY_FILTER_OPTIONS);
-        Cache::forget(PublicMarketplaceController::CACHE_KEY_FILTER_COUNTS);
-        Cache::forget(PublicMarketplaceController::CACHE_KEY_FILTER_BOUNDS);
+        PublicMarketplaceController::forgetFilterCaches($car?->organization_id);
     }
 
     public function saving(Car $car): void
@@ -72,7 +69,7 @@ class CarObserver
         ])
             ->contains(fn ($f) => $car->isDirty($f));
         if ($marketplaceRelevant) {
-            $this->flushMarketplaceCaches();
+            $this->flushMarketplaceCaches($car);
         }
     }
 
@@ -82,7 +79,7 @@ class CarObserver
         $this->seedDocuments($car);
 
         if ($car->is_marketplace) {
-            $this->flushMarketplaceCaches();
+            $this->flushMarketplaceCaches($car);
 
             // Generar link público automáticamente si el coche nace ya publicado.
             if ($car->activePublicLink() === null) {
@@ -104,7 +101,7 @@ class CarObserver
     public function updated(Car $car): void
     {
         if ($car->wasChanged('is_marketplace')) {
-            $this->flushMarketplaceCaches();
+            $this->flushMarketplaceCaches($car);
 
             // Cuando el coche se publica al marketplace por primera vez,
             // generamos automáticamente un link público (token) para que
@@ -129,7 +126,7 @@ class CarObserver
     public function deleted(Car $car): void
     {
         if ($car->is_marketplace) {
-            $this->flushMarketplaceCaches();
+            $this->flushMarketplaceCaches($car);
         }
     }
 

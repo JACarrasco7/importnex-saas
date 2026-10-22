@@ -32,6 +32,7 @@ import Pagination from '@/Components/Pagination.vue';
 import MarketplaceLayout from '@/Layouts/MarketplaceLayout.vue';
 import { useFormat } from '@/Composables/useFormat';
 import { useTranslations } from '@/Composables/useTranslations';
+import { useSite } from '@/Composables/useSite';
 import { useBrand } from '@/Composables/useBrand';
 import { photoUrl } from '@/Composables/usePhotoUrl';
 
@@ -49,6 +50,16 @@ const props = defineProps({
 });
 
 const { t, locale } = useTranslations();
+const { site, homeUrl, carUrl } = useSite();
+const { brand: siteBrand } = useBrand();
+const euros = (n) => new Intl.NumberFormat('es-ES').format(n) + ' €';
+// Honorarios de la empresa de esta web (Ajustes → Datos de empresa).
+const feePillar = computed(() => {
+    const fees = siteBrand.value.fees || { base: 1000, premium: 1500, threshold: 30000 };
+    return fees.premium === fees.base
+        ? t('marketplace.transparency_pillar_3_flat', { base: euros(fees.base) })
+        : t('marketplace.transparency_pillar_3_desc', { base: euros(fees.base), premium: euros(fees.premium), threshold: euros(fees.threshold) });
+});
 const { whatsappUrl, telUrl, mailUrl } = useBrand();
 const customCarText = 'Hola, estoy buscando un coche a medida. ¿Me pueden ayudar?';
 
@@ -143,7 +154,7 @@ const buildFilterParams = () => {
 
 let filterTimer = null;
 const applyFilters = () => {
-    router.get(route('marketplace.index'), buildFilterParams(), {
+    router.get(homeUrl.value, buildFilterParams(), {
         preserveState: true,
         preserveScroll: true,
     });
@@ -443,7 +454,7 @@ onMounted(() => {
                                 {{ t('marketplace.transparency_pillar_3_title') }}
                             </h3>
                             <p class="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
-                                {{ t('marketplace.transparency_pillar_3_desc') }}
+                                {{ feePillar }}
                             </p>
                         </div>
                     </div>
@@ -677,7 +688,7 @@ onMounted(() => {
                         :key="car.id"
                         class="group relative flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:ring-estoril-300 dark:bg-asphalt-800 dark:ring-asphalt-700"
                     >
-                        <Link :href="route('marketplace.show', car.id)" class="flex flex-1 flex-col">
+                        <Link :href="carUrl(car.id)" class="flex flex-1 flex-col">
                         <!-- Photo (LazyImage for performance) -->
                         <div class="relative aspect-[16/10] overflow-hidden bg-linear-to-br from-asphalt-200 to-gray-300 dark:from-asphalt-700 dark:to-asphalt-600">
                             <LazyImage
@@ -855,9 +866,9 @@ onMounted(() => {
              bottom-6 right-6) para que ambos se vean lado a lado sin
              solaparse. En pantallas pequenas, el texto se oculta y solo
              se ve el icono. -->
-        <div class="fixed bottom-6 right-24 z-40">
+        <div v-if="site.brochureUrl" class="fixed bottom-6 right-24 z-40">
             <a
-                href="/jj-import-folleto.pdf"
+                :href="site.brochureUrl"
                 download="folleto.pdf"
                 class="flex items-center gap-2 rounded-full bg-estoril-700 px-4 py-3 text-sm font-semibold text-white shadow-lg hover:bg-estoril-800 transition-colors"
             >

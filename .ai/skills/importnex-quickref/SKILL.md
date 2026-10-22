@@ -20,7 +20,6 @@ description: Cheatsheet 1-página de ImportnexCore. Resumen ejecutivo de todas l
 | Tailwind | 4.3.3 (CSS-first) | latest |
 | Cashier | 16.6.0 | latest |
 | Spatie Perm | 8.3.0 | latest |
-| Sanctum | 4.3.3 | latest |
 | PHPUnit | 13.2.6 | latest |
 | Boost | 2.5.0 | latest |
 

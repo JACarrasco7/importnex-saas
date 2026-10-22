@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, usePage } from '@inertiajs/vue3';
 import {
     TruckIcon,
     UsersIcon,
@@ -49,15 +49,20 @@ const quickLinks = [
     { label: t('nav.alerts'), description: t('nav.crm'), route: 'alerts.index', icon: BellAlertIcon, color: 'red' },
 ];
 
+const page = usePage();
+// Web pública de la empresa del usuario (null si no la tiene activada).
+const siteUrl = computed(() => page.props.publicSite?.url || null);
+const organizationId = computed(() => page.props.auth?.user?.organization_id);
+
 const copyLabel = ref(t('dashboard.cta_marketplace_copy'));
 const copyMarketplaceUrl = async () => {
-    const url = route('marketplace.index');
+    const url = siteUrl.value;
     try {
-        await navigator.clipboard.writeText(window.location.origin + url);
+        await navigator.clipboard.writeText(url);
         copyLabel.value = t('dashboard.cta_marketplace_copied');
         setTimeout(() => (copyLabel.value = t('dashboard.cta_marketplace_copy')), 2000);
     } catch (e) {
-        window.prompt(t('dashboard.cta_marketplace_copy_prompt'), window.location.origin + url);
+        window.prompt(t('dashboard.cta_marketplace_copy_prompt'), url);
     }
 };
 </script>
@@ -102,12 +107,16 @@ const copyMarketplaceUrl = async () => {
                                     </span>
                                 </div>
                                 <p class="mt-1 text-sm text-emerald-50">
-                                    {{ t('dashboard.cta_marketplace_desc') }}
+                                    {{ siteUrl ? t('dashboard.cta_marketplace_desc') : t('dashboard.cta_marketplace_inactive') }}
                                 </p>
                             </div>
                         </div>
-                        <div class="flex flex-col gap-2 sm:flex-row">
-                            <a :href="route('marketplace.index')" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-50">
+                        <Link v-if="!siteUrl && organizationId" :href="route('organization.edit', organizationId) + '#web-publica'" class="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-50">
+                            <ArrowRightIcon class="h-4 w-4" />
+                            {{ t('dashboard.cta_marketplace_activate') }}
+                        </Link>
+                        <div v-else-if="siteUrl" class="flex flex-col gap-2 sm:flex-row">
+                            <a :href="siteUrl" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-50">
                                 <ArrowTopRightOnSquareIcon class="h-4 w-4" />
                                 {{ t('dashboard.cta_marketplace_open') }}
                             </a>

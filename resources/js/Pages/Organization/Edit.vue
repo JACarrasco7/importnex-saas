@@ -13,6 +13,10 @@ const { t } = useTranslations();
 const props = defineProps({
     organization: Object,
     aiProviders: { type: Array, default: () => [] },
+    aiKeyConfigured: { type: Boolean, default: false },
+    webBaseUrl: { type: String, default: '' },
+    siteUrl: { type: String, default: null },
+    siteBlocked: { type: Boolean, default: false },
 });
 
 const companyFields = [
@@ -26,6 +30,9 @@ const companyFields = [
     { key: 'email', label: 'Email de contacto', type: 'email' },
     { key: 'website', label: 'Web' },
     { key: 'fee_label', label: 'Honorarios (texto)', help: 'Ej.: «1.500 €». Aparece en el folleto.' },
+    { key: 'fee_base', label: 'Honorarios base (€)', type: 'number', help: 'Lo que cobras por encargo. Sale en el desglose orientativo de tu web. Vacío = 1.000 €.' },
+    { key: 'fee_premium', label: 'Honorarios coches caros (€)', type: 'number', help: 'Desde el precio de abajo. Vacío = igual que el base (o 1.500 € si tampoco hay base).' },
+    { key: 'fee_threshold', label: 'Desde qué precio (€)', type: 'number', help: 'Vacío = 30.000 €.' },
     { key: 'iban', label: 'IBAN para transferencias' },
     { key: 'iban_holder', label: 'Titular de la cuenta' },
     { key: 'iban_bank', label: 'Banco' },
@@ -35,6 +42,8 @@ const company = props.organization.company || {};
 
 const form = useForm({
     name: props.organization.name,
+    is_public: !!props.organization.is_public,
+    slug: props.organization.slug || '',
     company: Object.fromEntries(companyFields.map((f) => [f.key, company[f.key] || ''])),
     logo: null,
     ai_provider: props.organization.ai_provider || '',
@@ -47,7 +56,7 @@ const detectedModels = ref([]);
 const detectError = ref('');
 
 const submit = () => form
-    .transform((data) => ({ ...data, _method: 'patch', logo: data.logo || undefined }))
+    .transform((data) => ({ ...data, _method: 'patch', is_public: data.is_public ? 1 : 0, logo: data.logo || undefined }))
     .post(route('organization.update', props.organization.id), {
         preserveScroll: true,
         forceFormData: true,
@@ -139,8 +148,34 @@ async function detectModels() {
                         </div>
                     </FormSection>
 
+                    <FormSection id="web-publica" title="Web pública"
+                                 subtitle="Tu web de coches con tu marca: catálogo, fichas, comparador y formulario de solicitud. Solo salen los coches que marques como publicados.">
+                        <div class="space-y-4">
+                            <label class="flex items-start gap-3">
+                                <input v-model="form.is_public" type="checkbox" class="mt-0.5 h-4 w-4 rounded border-gray-300 text-estoril-600 focus:ring-estoril-500" />
+                                <span class="text-sm text-gray-700">
+                                    <span class="font-semibold text-gray-900">Publicar mi web</span><br />
+                                    Si la desactivas, tu catálogo y tu formulario dejan de verse.
+                                </span>
+                            </label>
+                            <FormField label="Dirección de tu web" help="Minúsculas, números y guiones. Si la cambias, los enlaces antiguos dejan de funcionar.">
+                                <div class="flex items-center rounded-lg shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-estoril-500">
+                                    <span class="select-none whitespace-nowrap pl-3 text-sm text-gray-500">{{ webBaseUrl }}/</span>
+                                    <input v-model="form.slug" type="text" maxlength="60" autocomplete="off" spellcheck="false" class="block w-full border-0 bg-transparent py-2 pl-0.5 text-sm focus:ring-0" />
+                                </div>
+                                <p v-if="form.errors.slug" class="mt-1 text-sm text-red-600">{{ form.errors.slug }}</p>
+                            </FormField>
+                            <p v-if="siteBlocked" class="rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200">
+                                Tu web está activada pero no se ve porque la prueba ha terminado. Elige un plan para volver a publicarla.
+                            </p>
+                            <a v-else-if="siteUrl" :href="siteUrl" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 text-sm font-semibold text-estoril-700 hover:text-estoril-900">
+                                Ver mi web →
+                            </a>
+                        </div>
+                    </FormSection>
+
                     <FormSection title="Inteligencia artificial"
-                                 subtitle="Proveedor de IA que usa tu empresa para verificar coches y leer anuncios.">
+                                 subtitle="Cada empresa usa su propia clave de IA y paga el consumo directamente al proveedor. Recomendamos Claude (Anthropic).">
                         <div class="space-y-4">
                             <FormField
                                 label="Proveedor de IA"
@@ -148,7 +183,7 @@ async function detectModels() {
                                 <select v-model="form.ai_provider" @change="onProviderChange" :class="inputClass">
                                     <option value="">— Desactivado —</option>
                                     <option v-for="p in aiProviders" :key="p.key" :value="p.key">
-                                        {{ p.label }} ({{ p.default_model }})
+                                        {{ p.label }} ({{ p.default_model }}){{ p.key === 'anthropic' ? ' · recomendado' : '' }}
                                     </option>
                                 </select>
                                 <p v-if="form.errors.ai_provider" class="mt-1 text-sm text-red-600">{{ form.errors.ai_provider }}</p>
@@ -204,7 +239,7 @@ async function detectModels() {
                                 <strong>{{ organization.ai_provider }}</strong>
                                 <span v-if="organization.ai_model"> · {{ organization.ai_model }}</span>
                                 <span v-else> · modelo por defecto</span>
-                                <span v-if="!organization.ai_api_key" class="ml-2 inline-flex items-center rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">{{ t('organization.no_key_yet') }}</span>
+                                <span v-if="!aiKeyConfigured" class="ml-2 inline-flex items-center rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">{{ t('organization.no_key_yet') }}</span>
                             </div>
                         </div>
                     </FormSection>

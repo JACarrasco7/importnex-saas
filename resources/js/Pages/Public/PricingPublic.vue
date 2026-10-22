@@ -1,12 +1,11 @@
 <script setup>
 import { ref, computed } from 'vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import {
     CheckIcon,
     XMarkIcon,
     SparklesIcon,
     ArrowRightIcon,
-    UsersIcon,
     TruckIcon,
 } from '@heroicons/vue/24/outline';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
@@ -15,116 +14,68 @@ import { useTranslations } from '@/Composables/useTranslations';
 const { t } = useTranslations();
 const props = defineProps({
     salesEmail: { type: String, default: '' },
-    plans: { type: Object, default: () => ({}) },
+    plans: { type: Array, default: () => [] },
+    trialDays: { type: Number, default: 14 },
 });
 
-// Precios desde config/subscription.php (los mismos que cobra Stripe).
-const priceOf = (key, fallback) => Number(props.plans?.[key]?.price ?? fallback);
-const limitText = (key, field, label, fallback) => {
-    const n = props.plans?.[key]?.[field];
-    return n ? `${new Intl.NumberFormat('es-ES').format(n)} ${label}` : fallback;
-};
+// Planes desde config/subscription.php (PlanCatalog): los mismos precios que
+// cobra Stripe y los mismos límites que aplica la app.
+const formatNumber = (n) => new Intl.NumberFormat('es-ES').format(n);
 const salesEmail = computed(() => props.salesEmail || '');
+const trialDays = computed(() => props.trialDays || 14);
 
 const billingPeriod = ref('monthly');
 
-const plans = computed(() => [
-    {
-        name: t('pricing_public.basic_plan'),
-        description: t('pricing_public.basic_desc'),
-        price: priceOf('starter', 29),
-        yearlyPrice: priceOf('starter', 29) * 10,
-        features: [
-            limitText('starter', 'cars_limit', t('pricing_public.vehicles', {}, 'vehículos'), t('pricing_public.basic_feature_1')),
-            limitText('starter', 'clients_limit', t('pricing_public.clients', {}, 'clientes'), t('pricing_public.basic_feature_2')),
-            t('pricing_public.basic_feature_3'),
-            t('pricing_public.basic_feature_4'),
-            t('pricing_public.basic_feature_5'),
-        ],
-        cta: t('pricing_public.start_basic'),
-        popular: false,
-    },
-    {
-        name: t('pricing_public.pro_plan'),
-        description: t('pricing_public.pro_desc'),
-        price: priceOf('pro', 79),
-        yearlyPrice: priceOf('pro', 79) * 10,
-        features: [
-            limitText('pro', 'cars_limit', t('pricing_public.vehicles', {}, 'vehículos'), t('pricing_public.pro_feature_1')),
-            limitText('pro', 'clients_limit', t('pricing_public.clients', {}, 'clientes'), t('pricing_public.pro_feature_2')),
-            t('pricing_public.pro_feature_3'),
-            t('pricing_public.pro_feature_4'),
-            t('pricing_public.pro_feature_5'),
-            t('pricing_public.pro_feature_6'),
-            t('pricing_public.pro_feature_7'),
-        ],
-        cta: t('pricing_public.start_pro'),
-        popular: true,
-    },
-    {
-        name: t('pricing_public.enterprise_plan'),
-        description: t('pricing_public.enterprise_desc'),
-        price: priceOf('enterprise', 199),
-        yearlyPrice: priceOf('enterprise', 199) * 10,
-        features: [
-            limitText('enterprise', 'cars_limit', t('pricing_public.vehicles', {}, 'vehículos'), t('pricing_public.enterprise_feature_1')),
-            limitText('enterprise', 'clients_limit', t('pricing_public.clients', {}, 'clientes'), t('pricing_public.enterprise_feature_2')),
-            t('pricing_public.enterprise_feature_3'),
-            t('pricing_public.enterprise_feature_4'),
-            t('pricing_public.enterprise_feature_5'),
-            t('pricing_public.enterprise_feature_6'),
-            t('pricing_public.enterprise_feature_7'),
-            t('pricing_public.enterprise_feature_8'),
-        ],
-        cta: t('pricing_public.contact_sales'),
-        popular: false,
-    },
-]);
+// El plan anual cuesta 10 meses: se ahorran 2 de 12.
+const ANNUAL_MONTHS = 10;
+const savings = Math.round((1 - ANNUAL_MONTHS / 12) * 100);
 
-const savings = computed(() => {
-    const baseTotal = plans.value.reduce((sum, p) => sum + p.price * 12, 0);
-    const yearlyTotal = plans.value.reduce((sum, p) => sum + p.yearlyPrice, 0);
-    return baseTotal - yearlyTotal;
+const limitLabels = computed(() => ({
+    cars: t('pricing_public.vehicles', {}, 'vehículos'),
+    clients: t('pricing_public.clients', {}, 'clientes'),
+    contacts: t('pricing_public.contacts', {}, 'contactos'),
+    users: t('pricing_public.users', {}, 'usuarios'),
+}));
+
+const featureLabel = (key) => t(`subscription.features.${key}`);
+
+const plans = computed(() => (props.plans || []).map((plan) => ({
+    ...plan,
+    yearlyPrice: plan.price * ANNUAL_MONTHS,
+    popular: plan.key === 'pro',
+    bullets: [
+        ...Object.entries(plan.limits).map(([key, n]) => `${t('pricing_public.up_to', {}, 'Hasta')} ${formatNumber(n)} ${limitLabels.value[key]}`),
+        ...(plan.features.custom_branding ? [featureLabel('custom_branding')] : []),
+    ],
+    cta: plan.key === 'enterprise' && salesEmail.value ? t('pricing_public.contact_sales') : t('pricing_public.start_free_trial', { days: trialDays.value }),
+    href: plan.key === 'enterprise' && salesEmail.value ? `mailto:${salesEmail.value}` : route('register'),
+})));
+
+// Tabla comparativa: límites y funciones de cada plan, tal cual se aplican.
+const comparisonFeatures = computed(() => {
+    const first = (props.plans || [])[0];
+    if (!first) return [];
+    const valuesFor = (pick) => Object.fromEntries((props.plans || []).map((p) => [p.key, pick(p)]));
+
+    return [
+        {
+            group: t('pricing_compare.group_limits', {}, 'Límites'),
+            items: Object.keys(first.limits).map((key) => ({
+                key,
+                label: limitLabels.value[key].charAt(0).toUpperCase() + limitLabels.value[key].slice(1),
+                values: valuesFor((p) => formatNumber(p.limits[key])),
+            })),
+        },
+        {
+            group: t('pricing_compare.group_features', {}, 'Funciones'),
+            items: Object.keys(first.features).map((key) => ({
+                key,
+                label: featureLabel(key),
+                values: valuesFor((p) => p.features[key] === true),
+            })),
+        },
+    ];
 });
-
-const comparisonFeatures = computed(() => [
-    {
-        group: t('pricing_compare.group_inventory', {}, 'Inventario'),
-        items: [
-            { key: 'cars', label: t('pricing_compare.feat.cars', {}, 'Vehículos en catálogo'), values: { basic: '50', pro: '500', enterprise: t('pricing_compare.unlimited', {}, 'Ilimitado') } },
-            { key: 'photos', label: t('pricing_compare.feat.photos', {}, 'Fotos por vehículo'), values: { basic: '5', pro: '20', enterprise: t('pricing_compare.unlimited', {}, 'Ilimitado') } },
-            { key: 'valuation', label: t('pricing_compare.feat.valuation', {}, 'Paquete de valoración PDF'), values: { basic: false, pro: true, enterprise: true } },
-            { key: 'kanban', label: t('pricing_compare.feat.kanban', {}, 'Vista Kanban'), values: { basic: true, pro: true, enterprise: true } },
-        ],
-    },
-    {
-        group: t('pricing_compare.group_crm', {}, 'CRM y clientes'),
-        items: [
-            { key: 'clients', label: t('pricing_compare.feat.clients', {}, 'Clientes en CRM'), values: { basic: '50', pro: '500', enterprise: t('pricing_compare.unlimited', {}, 'Ilimitado') } },
-            { key: 'contacts', label: t('pricing_compare.feat.contacts', {}, 'Contactos'), values: { basic: '100', pro: '1000', enterprise: t('pricing_compare.unlimited', {}, 'Ilimitado') } },
-            { key: 'marketplace', label: t('pricing_compare.feat.marketplace', {}, 'Marketplace público'), values: { basic: true, pro: true, enterprise: true } },
-            { key: 'whatsapp', label: t('pricing_compare.feat.whatsapp', {}, 'Integración WhatsApp'), values: { basic: false, pro: true, enterprise: true } },
-        ],
-    },
-    {
-        group: t('pricing_compare.group_advanced', {}, 'Funciones avanzadas'),
-        items: [
-            { key: 'ai', label: t('pricing_compare.feat.ai_verification', {}, 'Verificación con IA'), values: { basic: false, pro: true, enterprise: true } },
-            { key: 'map', label: t('pricing_compare.feat.map', {}, 'Mapa interactivo'), values: { basic: false, pro: true, enterprise: true } },
-            { key: 'finance', label: t('pricing_compare.feat.finance', {}, 'Módulo Finanzas'), values: { basic: false, pro: false, enterprise: true } },
-            { key: 'trips', label: t('pricing_compare.feat.trips', {}, 'Módulo Viajes'), values: { basic: false, pro: true, enterprise: true } },
-            { key: 'webhooks', label: t('pricing_compare.feat.webhooks', {}, 'Webhooks salientes'), values: { basic: false, pro: false, enterprise: true } },
-        ],
-    },
-    {
-        group: t('pricing_compare.group_support', {}, 'Soporte y formación'),
-        items: [
-            { key: 'support', label: t('pricing_compare.feat.support', {}, 'Soporte'), values: { basic: t('pricing_compare.support_email', {}, 'Email'), pro: t('pricing_compare.support_priority', {}, 'Email prioritario'), enterprise: t('pricing_compare.support_dedicated', {}, 'Soporte dedicado 24/7') } },
-            { key: 'sla', label: t('pricing_compare.feat.sla', {}, 'SLA garantizado (24h)'), values: { basic: false, pro: false, enterprise: true } },
-            { key: 'training', label: t('pricing_compare.feat.training', {}, 'Formación personalizada'), values: { basic: false, pro: false, enterprise: true } },
-        ],
-    },
-]);
 
 function featureValueDisplay(value) {
     if (value === true) return { type: 'check' };
@@ -181,7 +132,7 @@ function featureValueDisplay(value) {
                             {{ t('pricing_public.yearly') }}
                         </span>
                         <span v-if="billingPeriod === 'yearly'" class="ml-2 rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-800 dark:bg-green-900/30 dark:text-green-300">
-                            {{ t('pricing_public.save_amount', { amount: savings }) }}%
+                            {{ t('pricing_public.save_amount', { amount: savings }) }}
                         </span>
                     </div>
                 </div>
@@ -194,7 +145,7 @@ function featureValueDisplay(value) {
                 <div class="mx-auto grid max-w-lg gap-8 lg:max-w-none lg:grid-cols-3">
                     <div
                         v-for="plan in plans"
-                        :key="plan.name"
+                        :key="plan.key"
                         class="relative flex flex-col rounded-2xl border border-gray-200 bg-white p-8 shadow-sm transition-all hover:shadow-lg dark:border-asphalt-700 dark:bg-asphalt-800"
                         :class="plan.popular ? 'ring-2 ring-estoril-600 scale-105' : ''"
                     >
@@ -218,7 +169,7 @@ function featureValueDisplay(value) {
                         <!-- Price -->
                         <div class="mb-6">
                             <span class="text-4xl font-extrabold text-gray-900 dark:text-white">
-                                €{{ billingPeriod === 'yearly' ? plan.yearlyPrice : plan.price }}
+                                {{ formatNumber(billingPeriod === 'yearly' ? plan.yearlyPrice : plan.price) }} €
                             </span>
                             <span class="text-sm text-gray-500 dark:text-gray-400">
                                 /{{ billingPeriod === 'yearly' ? t('pricing_public.yearly_short') : t('pricing_public.monthly_short') }}
@@ -228,7 +179,7 @@ function featureValueDisplay(value) {
                         <!-- Features -->
                         <ul class="mb-8 flex-1 space-y-4">
                             <li
-                                v-for="feature in plan.features"
+                                v-for="feature in plan.bullets"
                                 :key="feature"
                                 class="flex items-start gap-3"
                             >
@@ -240,8 +191,8 @@ function featureValueDisplay(value) {
                         </ul>
 
                         <!-- CTA -->
-                        <Link
-                            :href="plan.name === t('pricing_public.enterprise_plan') ? `mailto:${salesEmail}` : route('register')"
+                        <a
+                            :href="plan.href"
                             class="mt-auto block w-full rounded-xl px-4 py-3 text-center text-sm font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-estoril-500 focus:ring-offset-2"
                             :class="plan.popular
                                 ? 'bg-estoril-600 text-white hover:bg-estoril-700'
@@ -249,7 +200,7 @@ function featureValueDisplay(value) {
                         >
                             {{ plan.cta }}
                             <ArrowRightIcon v-if="plan.popular" class="ml-2 inline-block h-4 w-4" />
-                        </Link>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -333,7 +284,7 @@ function featureValueDisplay(value) {
                             <XMarkIcon class="h-5 w-5 transition group-open:rotate-45 dark:text-gray-400" />
                         </summary>
                         <p class="mt-4 text-gray-600 dark:text-gray-400">
-                            {{ t('pricing_public.faq_a1') }}
+                            {{ t('pricing_public.faq_a1', { days: trialDays }) }}
                         </p>
                     </details>
 
@@ -375,10 +326,11 @@ function featureValueDisplay(value) {
                             :href="route('register')"
                             class="inline-flex items-center gap-2 rounded-xl bg-white px-8 py-3.5 text-base font-semibold text-estoril-700 shadow-sm transition hover:bg-estoril-50"
                         >
-                            {{ t('pricing_public.start_free_trial') }}
+                            {{ t('pricing_public.start_free_trial', { days: trialDays }) }}
                             <ArrowRightIcon class="h-4 w-4" />
                         </Link>
                         <a
+                            v-if="salesEmail"
                             :href="`mailto:${salesEmail}`"
                             class="inline-flex items-center gap-2 rounded-xl bg-estoril-700 px-8 py-3.5 text-base font-semibold text-white ring-1 ring-white/20 transition hover:bg-estoril-800"
                         >

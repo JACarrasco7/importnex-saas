@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-10-22 23:30 · Claude (Cowork) · auditoría de venta ronda 3: decisiones D1–D5 (rama audit/venta)
+- Hice: **web pública por empresa** (`/web/{slug}`, `App\Support\PublicSite`, prop `marketplace` en las páginas públicas y `publicSite` en el panel); honorarios por empresa (`Brand::fees()`, `CostBreakdown`); textos honestos en portada/precios/registro con planes desde `App\Support\PlanCatalog`; quitadas `spatie/laravel-permission`, `laravel/sanctum`, `maatwebsite/excel`; limpieza tanda 1 del repo (material de JJ movido a `Desktop\JJImportMotors\_sacado-del-repo-2026-10-22\`). Plan actualizado en `docs/auditoria-venta-2026-10/00-INDICE.md`.
+- Trampas: (1) En páginas públicas **nunca** `route('marketplace.*')`: usar `useSite()` (`homeUrl`, `carUrl`, `compareUrl`). (2) Cachés de filtros por empresa: `PublicMarketplaceController::forgetFilterCaches($orgId)`. (3) `FormSection` ignoraba `subtitle` (solo leía `description`): ahora acepta los dos. (4) `PublicSite::isAvailable()` exige web activa + cuenta al día (la operadora no paga).
+- ⚠️ PENDIENTE para el otro: el repo de GitHub es **público** (P0-14, lo cambia el usuario); tanda 2 de limpieza (`.claude/`, `.ai/memory`, `docs/memoria-desktop`, `docs/claude-desktop`, scripts personales) cuando el usuario cierre sus cambios a medias en esos ficheros; skill genérica para compradores (8.15). Nada desplegado.
+---
+
 ## 2026-10-22 16:00 · Claude (Cowork) · auditoría de venta SaaS (ramas feat/encargos-portal + audit/venta)
 - Hice: módulo de encargos y portal del cliente (`feat/encargos-portal`) y auditoría para vender como SaaS (`audit/venta`). Plan completo por módulo en `docs/auditoria-venta-2026-10/00-INDICE.md`.
 - P0 resueltos: alta en bucle, prueba sin bloqueo (`EnsureActiveSubscription`), token de API por empresa, importación en empresa ajena, marca de JJ fija (ahora `App\Support\Brand` + Ajustes → Datos de empresa), credenciales en seeder, **Cashier con el modelo equivocado** (`Cashier::useCustomerModel(Organization)`, tipo `Organization::SUBSCRIPTION_TYPE = 'main'`), webhooks que no sincronizaban, contacto con cliente de otra empresa, testimonios inventados.

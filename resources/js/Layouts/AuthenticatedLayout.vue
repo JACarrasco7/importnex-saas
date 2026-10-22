@@ -100,7 +100,9 @@ const navGroups = computed(() => [
             { name: t('nav.finance'), route: 'finance.index', icon: BanknotesIcon },
             { name: t('nav.trips'), route: 'trips.index', icon: CalendarDaysIcon },
             { name: t('nav.kpis'), route: 'kpis.index', icon: ChartBarIcon },
-            { name: t('nav.marketplace'), route: 'marketplace.index', icon: ShoppingBagIcon, external: true },
+            ...(page.props.publicSite?.url
+                ? [{ name: t('nav.marketplace'), href: page.props.publicSite.url, icon: ShoppingBagIcon, external: true }]
+                : []),
         ],
     },
     {

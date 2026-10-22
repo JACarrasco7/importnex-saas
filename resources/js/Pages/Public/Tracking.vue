@@ -21,6 +21,7 @@ const props = defineProps({
     car: { type: Object, required: true },
     manager: { type: Object, default: null },
     contact: { type: Object, default: () => ({}) },
+    siteUrl: { type: String, default: null },
 });
 
 const { t } = useTranslations();
@@ -86,7 +87,7 @@ const expectedDate = computed(() =>
         <header class="border-b border-estoril-100/40 bg-white/80 backdrop-blur-md">
             <div class="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
                 <div class="flex items-center gap-3">
-                    <a href="/" class="flex items-center gap-3">
+                    <a :href="siteUrl || '#'" class="flex items-center gap-3">
                         <img
                             v-if="orgBrand.logo_url"
                             :src="orgBrand.logo_url"
@@ -99,7 +100,7 @@ const expectedDate = computed(() =>
                     </a>
                 </div>
                 <div class="flex items-center gap-3">
-                    <a href="/marketplace" class="hidden text-xs font-semibold text-asphalt-600 hover:text-estoril-700 sm:inline">
+                    <a v-if="siteUrl" :href="siteUrl" class="hidden text-xs font-semibold text-asphalt-600 hover:text-estoril-700 sm:inline">
                         {{ t('marketplace.back_to_marketplace') }}
                     </a>
                     <span

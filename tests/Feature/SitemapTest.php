@@ -41,7 +41,7 @@ class SitemapTest extends TestCase
 
     public function test_sitemap_includes_only_marketplace_cars(): void
     {
-        $org = Organization::factory()->create();
+        $org = Organization::factory()->create(['is_public' => true]);
         $publicCar = Car::factory()->create([
             'organization_id' => $org->id,
             'is_marketplace' => true,
@@ -80,7 +80,7 @@ class SitemapTest extends TestCase
 
     public function test_sitemap_cache_is_cleared_when_car_marketplace_status_changes(): void
     {
-        $org = Organization::factory()->create();
+        $org = Organization::factory()->create(['is_public' => true]);
         $car = Car::factory()->create([
             'organization_id' => $org->id,
             'is_marketplace' => false,
@@ -89,20 +89,20 @@ class SitemapTest extends TestCase
         // Prime cache
         SitemapController::flush();
         $this->get('/sitemap.xml')->assertOk();
-        $this->assertTrue(cache()->has('sitemap.cars'));
+        $this->assertTrue(cache()->has(SitemapController::CACHE_KEY));
 
         // Toggle to public should flush
         $car->update(['is_marketplace' => true]);
 
         $this->assertFalse(
-            cache()->has('sitemap.cars'),
+            cache()->has(SitemapController::CACHE_KEY),
             'Cache should be flushed when is_marketplace changes to true'
         );
     }
 
     public function test_sitemap_includes_at_most_500_cars(): void
     {
-        $org = Organization::factory()->create();
+        $org = Organization::factory()->create(['is_public' => true]);
         Car::factory()
             ->count(10)
             ->create(['organization_id' => $org->id, 'is_marketplace' => true]);
@@ -112,5 +112,20 @@ class SitemapTest extends TestCase
 
         $count = substr_count($content, '<url>');
         $this->assertGreaterThanOrEqual(10, $count, 'Should include all 10 marketplace cars');
+    }
+
+    public function test_sitemap_lists_each_company_site_and_skips_companies_without_web(): void
+    {
+        Organization::factory()->create(['is_public' => true, 'is_owner' => true]);
+        $company = Organization::factory()->create(['is_public' => true, 'slug' => 'importaciones-sur']);
+        $hidden = Organization::factory()->create(['is_public' => false]);
+        $companyCar = Car::factory()->create(['organization_id' => $company->id, 'is_marketplace' => true, 'status' => 'Located']);
+        $hiddenCar = Car::factory()->create(['organization_id' => $hidden->id, 'is_marketplace' => true, 'status' => 'Located']);
+
+        $content = $this->get('/sitemap.xml')->assertOk()->getContent();
+
+        $this->assertStringContainsString(route('site.index', ['site' => 'importaciones-sur']), $content);
+        $this->assertStringContainsString(route('site.show', ['site' => 'importaciones-sur', 'car' => $companyCar->id]), $content);
+        $this->assertStringNotContainsString('/marketplace/'.$hiddenCar->id.'<', $content);
     }
 }

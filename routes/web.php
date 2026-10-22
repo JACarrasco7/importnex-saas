@@ -56,6 +56,8 @@ use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\TripPlannerController;
 use App\Http\Controllers\ValuationImportController;
+use App\Support\PlanCatalog;
+use App\Support\PublicSite;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -70,6 +72,10 @@ Route::get('/', function () {
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
+        'plans' => PlanCatalog::all(),
+        'trialDays' => (int) config('subscription.trial_days'),
+        // Web de ejemplo: la de la organización operadora, si está publicada.
+        'exampleUrl' => PublicSite::platform()->organization ? route('marketplace.index') : null,
     ]);
 })->name('home');
 
@@ -77,7 +83,8 @@ Route::get('/', function () {
 Route::get('/pricing', function () {
     return Inertia::render('Public/PricingPublic', [
         'salesEmail' => config('company.ventas_email'),
-        'plans' => config('subscription.plans'),
+        'plans' => PlanCatalog::all(),
+        'trialDays' => (int) config('subscription.trial_days'),
         'currency' => config('subscription.default_currency', 'eur'),
     ]);
 })->name('pricing');
@@ -135,7 +142,15 @@ Route::prefix('request/{slug}')->name('public.car-request.')->group(function () 
 Route::prefix('marketplace')->name('marketplace.')->group(function () {
     Route::get('/', [PublicMarketplaceController::class, 'index'])->name('index');
     Route::get('/compare', [PublicMarketplaceController::class, 'compare'])->name('compare');
-    Route::get('/{car}', [PublicMarketplaceController::class, 'show'])->name('show');
+    Route::get('/{car}', [PublicMarketplaceController::class, 'show'])->whereNumber('car')->name('show');
+});
+
+// Web pública de cada empresa: su catálogo, fichas y comparador, con su marca.
+// URL: /web/{slug} — se activa en Ajustes → Web pública.
+Route::prefix('web/{site}')->where(['site' => '[a-z0-9][a-z0-9-]*'])->name('site.')->group(function () {
+    Route::get('/', [PublicMarketplaceController::class, 'siteIndex'])->name('index');
+    Route::get('/comparar', [PublicMarketplaceController::class, 'siteCompare'])->name('compare');
+    Route::get('/coche/{car}', [PublicMarketplaceController::class, 'siteShow'])->whereNumber('car')->name('show');
 });
 
 // Public catalog "bajo pedido" from the market map (skill estudio-mercado)

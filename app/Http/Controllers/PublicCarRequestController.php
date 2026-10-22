@@ -6,6 +6,7 @@ use App\Models\Alert;
 use App\Models\CarRequest;
 use App\Models\Client;
 use App\Models\Organization;
+use App\Support\PublicSite;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -14,9 +15,7 @@ class PublicCarRequestController extends Controller
 {
     public function index(string $slug)
     {
-        $organization = Organization::where('slug', $slug)
-            ->where('is_public', true)
-            ->firstOrFail();
+        $organization = $this->organizationFor($slug);
 
         $locale = app()->getLocale();
         $translations = trans('car_request_form', [], $locale);
@@ -32,15 +31,14 @@ class PublicCarRequestController extends Controller
                 'has_brochure' => $organization->isOwner() && file_exists(public_path('jj-import-folleto.pdf')),
             ],
             'orgBrand' => $organization->brand()->toPublicArray(),
+            'marketplace' => PublicSite::forOrganization($organization)->context(),
             'translations' => ['car_request_form' => $translations],
         ]);
     }
 
     public function store(Request $request, string $slug)
     {
-        $organization = Organization::where('slug', $slug)
-            ->where('is_public', true)
-            ->firstOrFail();
+        $organization = $this->organizationFor($slug);
 
         // Honeypot anti-spam: if the hidden field is filled, it's a bot
         if ($request->filled('website')) {
@@ -168,9 +166,7 @@ class PublicCarRequestController extends Controller
 
     public function success(string $slug)
     {
-        $organization = Organization::where('slug', $slug)
-            ->where('is_public', true)
-            ->firstOrFail();
+        $organization = $this->organizationFor($slug);
 
         return inertia('Public/CarRequestSuccess', [
             'organization' => [
@@ -179,6 +175,17 @@ class PublicCarRequestController extends Controller
                 'slug' => $organization->slug,
                 'logo' => $organization->logo,
             ],
+            'orgBrand' => $organization->brand()->toPublicArray(),
+            'marketplace' => PublicSite::forOrganization($organization)->context(),
         ]);
+    }
+
+    /** Empresa con la web pública activa y la cuenta al día; si no, 404. */
+    private function organizationFor(string $slug): Organization
+    {
+        $organization = Organization::query()->where('slug', $slug)->firstOrFail();
+        abort_unless(PublicSite::isAvailable($organization), 404);
+
+        return $organization;
     }
 }

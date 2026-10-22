@@ -3,8 +3,17 @@ import { Link } from '@inertiajs/vue3';
 import { TruckIcon } from '@heroicons/vue/24/outline';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import { useTranslations } from '@/Composables/useTranslations';
+import { useBrand } from '@/Composables/useBrand';
 
 const { t } = useTranslations();
+const { appName } = useBrand();
+
+// Datos del producto (no métricas de clientes que no podemos demostrar).
+const facts = [
+    { value: '14', label: 'guest.stat_trial' },
+    { value: '1', label: 'guest.stat_web' },
+    { value: '0 €', label: 'guest.stat_setup' },
+];
 </script>
 
 <template>
@@ -15,29 +24,21 @@ const { t } = useTranslations();
                 <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 backdrop-blur">
                     <TruckIcon class="h-5 w-5 text-white" />
                 </div>
-                <span class="text-xl font-bold">Importnex</span>
+                <span class="text-xl font-bold">{{ appName }}</span>
             </Link>
 
             <div>
                 <h2 class="text-4xl font-bold leading-tight">{{ t('guest.tagline') }}</h2>
                 <p class="mt-4 text-lg text-estoril-100">{{ t('guest.tagline_desc') }}</p>
                 <div class="mt-8 grid grid-cols-3 gap-6">
-                    <div>
-                        <p class="text-3xl font-bold">80%</p>
-                        <p class="mt-1 text-sm text-estoril-100">{{ t('guest.stat_spreadsheets') }}</p>
-                    </div>
-                    <div>
-                        <p class="text-3xl font-bold">3x</p>
-                        <p class="mt-1 text-sm text-estoril-100">{{ t('guest.stat_turnover') }}</p>
-                    </div>
-                    <div>
-                        <p class="text-3xl font-bold">24/7</p>
-                        <p class="mt-1 text-sm text-estoril-100">{{ t('guest.stat_ai') }}</p>
+                    <div v-for="fact in facts" :key="fact.label">
+                        <p class="text-3xl font-bold">{{ fact.value }}</p>
+                        <p class="mt-1 text-sm text-estoril-100">{{ t(fact.label) }}</p>
                     </div>
                 </div>
             </div>
 
-            <p class="text-sm text-estoril-100">© {{ new Date().getFullYear() }} Importnex</p>
+            <p class="text-sm text-estoril-100">© {{ new Date().getFullYear() }} {{ appName }}</p>
         </div>
 
         <!-- Right side: form -->
@@ -47,7 +48,7 @@ const { t } = useTranslations();
                     <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-estoril-600">
                         <TruckIcon class="h-5 w-5 text-white" />
                     </div>
-                    <span class="text-xl font-bold text-gray-900 dark:text-white">Importnex</span>
+                    <span class="text-xl font-bold text-gray-900 dark:text-white">{{ appName }}</span>
                 </Link>
                 <div class="rounded-2xl bg-white px-8 py-10 shadow-xl ring-1 ring-gray-200 transition-colors duration-300 dark:bg-asphalt-800 dark:ring-asphalt-700">
                     <slot />

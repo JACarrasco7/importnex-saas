@@ -25,7 +25,7 @@ description: Patrón multi-tenant por organization_id en ImportnexCore. Aplica c
 | Middleware requerir org activa | `app/Http/Middleware/EnsureHasOrganization.php` (alias `has.organization`) |
 | Modelo organización | `app/Models/Organization.php` (trait `HasSubscriptions`, relación con User) |
 | User → Organization | `app/Models/User.php` → `belongsTo(Organization::class)` |
-| Roles y permisos | Spatie `spatie/laravel-permission` v8, scoped por organization |
+| Roles y permisos | Columna `users.role` (`owner` / `operator`); Spatie desinstalado el 22-oct-2026 |
 
 ## Patrón de query scope
 

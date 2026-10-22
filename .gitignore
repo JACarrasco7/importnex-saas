@@ -55,3 +55,14 @@ __pycache__/
 .env.local
 .importnex-token
 *IMPORTNEX_TOKEN*
+
+# Auditoría de venta (D4, 22-oct-2026): material de JJ Import Motors y borradores
+# fuera del producto. Viven en Desktop\JJImportMotors\.
+/JJ Import Motors/
+/untitled/
+/reports/
+/docs/informes/
+/docs/contexto-jj-import-motors/
+/docs/marketing/
+scripts/i18n-report.txt
+storage/log/

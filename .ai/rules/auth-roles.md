@@ -1,6 +1,6 @@
 # Auth & Roles — convenciones de ImportnexCore
 
-> **Auditoría ronda 4 (sep-2026):** `spatie/laravel-permission` está declarado en `composer.json:19` pero **NO se usa en ningún sitio** del código. 0 usos de `Role::`, `assignRole()`, `hasRole()`, `givePermissionTo()`, ni `Gate::define`. El sistema real usa columna `users.role` con magic strings: `'owner'`, `'operator'`, `'Super Admin'` (ver `app/Models/User.php`, `app/Http/Middleware/TelescopeAccess.php`).
+> **Decidido 22-oct-2026 (auditoría de venta, D3):** `spatie/laravel-permission` se ha **desinstalado** (junto con `laravel/sanctum` y `maatwebsite/excel`, que tampoco se usaban). El sistema real usa la columna `users.role` con magic strings: `'owner'`, `'operator'`, `'Super Admin'` (ver `app/Models/User.php`, `app/Http/Middleware/TelescopeAccess.php`). Si algún día hacen falta permisos finos, ver `docs/planes/PLAN_SPATIE_PERMISOS.md` y pedir aprobación para instalarlo.
 
 ## Estado actual (medido 13-sep-2026)
 
@@ -10,12 +10,6 @@
 - ⚠️ **`$user->isSuperAdmin()` NO EXISTE** (esta regla lo citaba por error hasta el 13-sep-2026; `grep` no lo encuentra en `app/`). El valor `'Super Admin'` sí se usa, pero como string suelto.
 - ⚠️ **Cuidado con los DOS `isOwner()`**: `User::isOwner()` es rol (`role === 'owner'`), pero `Organization::isOwner()` lee la **columna** `organizations.is_owner` ("esta organización ES la plataforma") y **NO es un rol**. Se llama en ~12 sitios (billing, límites de plan, alertas). **NO migrar esos a `hasRole()`.**
 
-## Decisión pendiente
+## Decisión tomada (22-oct-2026)
 
-**Plan completo y detallado: [`docs/planes/PLAN_SPATIE_PERMISOS.md`](../../docs/planes/PLAN_SPATIE_PERMISOS.md)**
-
-- **(a) Implementar Spatie de verdad** (config + migraciones + seeder de migración de datos + wrappers de compatibilidad) — coste 2-3 días, riesgo alto de regresiones en permisos.
-- **(b) Desinstalar la dependencia**: `composer remove spatie/laravel-permission`. No hay nada que limpiar. Riesgo casi nulo. **Recomendada** mientras no haya necesidad concreta.
-
-> **Esta regla NO está aprobada por el usuario todavía.** Decisión **APARCADA** el 13-sep-2026 ("déjalo para más adelante"). Esperar decisión antes de actuar.
-> Mientras tanto: **NO usar la API de Spatie** en código nuevo. Usar los magic strings de `users.role`.
+Opción (b) del plan [`docs/planes/PLAN_SPATIE_PERMISOS.md`](../../docs/planes/PLAN_SPATIE_PERMISOS.md): dependencia desinstalada. **No usar la API de Spatie**: usar los magic strings de `users.role`.

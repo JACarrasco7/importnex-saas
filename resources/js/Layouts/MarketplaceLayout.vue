@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
-import { Link, usePage } from '@inertiajs/vue3';
+import { Link } from '@inertiajs/vue3';
 import {
     Bars3Icon,
     XMarkIcon,
@@ -12,25 +12,26 @@ import DarkModeToggle from '@/Components/DarkModeToggle.vue';
 import WhatsAppFloat from '@/Components/WhatsAppFloat.vue';
 import { useTranslations } from '@/Composables/useTranslations';
 import { useBrand } from '@/Composables/useBrand';
+import { useSite } from '@/Composables/useSite';
 
 const { t } = useTranslations();
 const { brand, whatsappUrl, waNumber } = useBrand();
-const page = usePage();
+const { site: marketplace, homeUrl, legalUrl } = useSite();
 
 const mobileOpen = ref(false);
 
-// Contexto del marketplace publico (compartido desde HandleInertiaRequests).
-const marketplace = computed(() => page.props.marketplace ?? {});
+// Web de la empresa en contexto (cada empresa tiene la suya).
 const orgName = computed(() => marketplace.value.orgName || brand.value.name);
+const logoUrl = computed(() => marketplace.value.logoUrl || brand.value.logo_url || null);
 const requestHref = computed(
-    () => marketplace.value.requestUrl || route('marketplace.index') + '#contacto',
+    () => marketplace.value.requestUrl || homeUrl.value + '#contacto',
 );
 
 const navLinks = computed(() => [
-    { label: t('marketplace.nav_catalog', {}, 'Catálogo'), href: route('marketplace.index') },
-    { label: t('marketplace.nav_how', {}, 'Cómo funciona'), href: route('marketplace.index') + '#how-it-works' },
-    { label: t('marketplace.nav_transparency', {}, 'Transparencia'), href: route('marketplace.index') + '#transparencia' },
-    { label: t('marketplace.nav_contact', {}, 'Contacto'), href: route('marketplace.index') + '#contacto' },
+    { label: t('marketplace.nav_catalog', {}, 'Catálogo'), href: homeUrl.value },
+    { label: t('marketplace.nav_how', {}, 'Cómo funciona'), href: homeUrl.value + '#how-it-works' },
+    { label: t('marketplace.nav_transparency', {}, 'Transparencia'), href: homeUrl.value + '#transparencia' },
+    { label: t('marketplace.nav_contact', {}, 'Contacto'), href: homeUrl.value + '#contacto' },
 ]);
 
 const close = () => { mobileOpen.value = false; };
@@ -41,8 +42,9 @@ const close = () => { mobileOpen.value = false; };
         <!-- Header sticky -->
         <header class="sticky top-0 z-30 border-b border-gray-200/70 bg-white/80 backdrop-blur-md dark:border-asphalt-700/60 dark:bg-asphalt-900/80">
             <nav class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-                <Link :href="route('marketplace.index')" class="flex items-center gap-2.5" @click="close">
-                    <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-estoril-600 to-estoril-800 shadow-sm">
+                <Link :href="homeUrl" class="flex items-center gap-2.5" @click="close">
+                    <img v-if="logoUrl" :src="logoUrl" :alt="orgName" class="h-9 w-auto max-w-[140px] object-contain" />
+                    <div v-else class="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-estoril-600 to-estoril-800 shadow-sm">
                         <TruckIcon class="h-5 w-5 text-white" />
                     </div>
                     <span class="text-lg font-bold tracking-tight text-gray-900 dark:text-white">{{ orgName }}</span>
@@ -150,17 +152,17 @@ const close = () => { mobileOpen.value = false; };
                         </h3>
                         <ul class="mt-3 space-y-2 text-sm">
                             <li>
-                                <Link :href="route('marketplace.index')" class="text-gray-600 hover:text-estoril-700 dark:text-gray-400 dark:hover:text-estoril-300">
+                                <Link :href="homeUrl" class="text-gray-600 hover:text-estoril-700 dark:text-gray-400 dark:hover:text-estoril-300">
                                     {{ t('marketplace.nav_catalog', {}, 'Catálogo') }}
                                 </Link>
                             </li>
                             <li>
-                                <Link :href="route('marketplace.index') + '#how-it-works'" class="text-gray-600 hover:text-estoril-700 dark:text-gray-400 dark:hover:text-estoril-300">
+                                <Link :href="homeUrl + '#how-it-works'" class="text-gray-600 hover:text-estoril-700 dark:text-gray-400 dark:hover:text-estoril-300">
                                     {{ t('marketplace.nav_how', {}, 'Cómo funciona') }}
                                 </Link>
                             </li>
                             <li>
-                                <Link :href="route('marketplace.index') + '#contacto'" class="text-gray-600 hover:text-estoril-700 dark:text-gray-400 dark:hover:text-estoril-300">
+                                <Link :href="homeUrl + '#contacto'" class="text-gray-600 hover:text-estoril-700 dark:text-gray-400 dark:hover:text-estoril-300">
                                     {{ t('marketplace.nav_contact', {}, 'Contacto') }}
                                 </Link>
                             </li>
@@ -194,12 +196,12 @@ const close = () => { mobileOpen.value = false; };
                         </h3>
                         <ul class="mt-3 space-y-2 text-sm">
                             <li>
-                                <a :href="'/legal#privacidad'" class="text-gray-600 hover:text-estoril-700 dark:text-gray-400 dark:hover:text-estoril-300">
+                                <a :href="legalUrl + '#privacidad'" class="text-gray-600 hover:text-estoril-700 dark:text-gray-400 dark:hover:text-estoril-300">
                                     {{ t('public.footer.privacy', 'Privacidad') }}
                                 </a>
                             </li>
                             <li>
-                                <a :href="'/legal#terminos'" class="text-gray-600 hover:text-estoril-700 dark:text-gray-400 dark:hover:text-estoril-300">
+                                <a :href="legalUrl + '#terminos'" class="text-gray-600 hover:text-estoril-700 dark:text-gray-400 dark:hover:text-estoril-300">
                                     {{ t('public.footer.terms', 'Términos') }}
                                 </a>
                             </li>
@@ -210,7 +212,7 @@ const close = () => { mobileOpen.value = false; };
                     <p>
                         © {{ new Date().getFullYear() }} {{ orgName }}. {{ t('public.footer.rights', 'Todos los derechos reservados.') }}
                     </p>
-                    <Link :href="route('pricing')" class="hover:text-estoril-700 dark:hover:text-estoril-300">
+                    <Link v-if="marketplace.platformCredit !== false" :href="route('pricing')" class="hover:text-estoril-700 dark:hover:text-estoril-300">
                         {{ t('marketplace.footer_saas', {}, '¿Eres importador? Conoce la plataforma') }}
                     </Link>
                 </div>

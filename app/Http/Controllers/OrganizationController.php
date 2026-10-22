@@ -6,9 +6,11 @@ use App\Models\Organization;
 use App\Services\Ai\AiProviderRegistry;
 use App\Services\Ai\ListsModelsInterface;
 use App\Support\Brand;
+use App\Support\PublicSite;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -63,6 +65,8 @@ class OrganizationController extends Controller
             'apiTokenActive' => filled($organization->api_token_hash),
             'newApiToken' => session('api_token'),
             'companyMissing' => $brand->missingForContracts(),
+            'siteUrl' => PublicSite::urlFor($organization),
+            'requestFormUrl' => PublicSite::urlFor($organization) ? $organization->public_url : null,
         ]);
     }
 
@@ -73,6 +77,10 @@ class OrganizationController extends Controller
         return Inertia::render('Organization/Edit', [
             'organization' => $organization,
             'aiProviders' => $registry->options(),
+            'aiKeyConfigured' => filled($organization->ai_api_key),
+            'webBaseUrl' => url('/web'),
+            'siteUrl' => PublicSite::urlFor($organization),
+            'siteBlocked' => $organization->is_public && ! PublicSite::isAvailable($organization),
         ]);
     }
 
@@ -87,6 +95,10 @@ class OrganizationController extends Controller
 
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            // Web pública por empresa (/web/{slug}).
+            'is_public' => ['sometimes', 'boolean'],
+            'slug' => ['sometimes', 'required', 'string', 'min:3', 'max:60', 'regex:/^[a-z0-9][a-z0-9-]*$/',
+                Rule::unique('organizations', 'slug')->ignore($organization->id), Rule::notIn(PublicSite::RESERVED_SLUGS)],
             'currency' => ['nullable', Rule::in(['EUR', 'USD', 'GBP'])],
             'locale' => ['nullable', Rule::in(['es', 'en'])],
             'ai_provider' => ['nullable', Rule::in(array_merge([''], array_column($registry->options(), 'key')))],
@@ -118,11 +130,21 @@ class OrganizationController extends Controller
             'company.iban_bank' => ['nullable', 'string', 'max:120'],
             'company.fee_label' => ['nullable', 'string', 'max:60'],
             'company.tagline' => ['nullable', 'string', 'max:160'],
+            'company.fee_base' => ['nullable', 'integer', 'min:0', 'max:100000'],
+            'company.fee_premium' => ['nullable', 'integer', 'min:0', 'max:100000'],
+            'company.fee_threshold' => ['nullable', 'integer', 'min:0', 'max:10000000'],
             'logo' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp,svg', 'max:2048'],
+        ], [
+            'slug.regex' => 'Usa solo minúsculas, números y guiones (sin espacios ni acentos).',
+            'slug.unique' => 'Esa dirección ya la usa otra empresa.',
+            'slug.not_in' => 'Esa dirección está reservada. Elige otra.',
+            'slug.min' => 'La dirección debe tener al menos 3 caracteres.',
         ]);
 
         $orgData = [
             'name' => $request->name,
+            ...($request->has('is_public') ? ['is_public' => $request->boolean('is_public')] : []),
+            ...($request->filled('slug') ? ['slug' => $request->input('slug')] : []),
             'currency' => $request->input('currency', $organization->currency ?? 'EUR'),
             'locale' => $request->input('locale', $organization->locale ?? 'es'),
         ];
@@ -176,6 +198,10 @@ class OrganizationController extends Controller
         }
 
         $organization->update($orgData);
+
+        // La web pública cachea la marca y los filtros de la empresa.
+        Cache::forget('marketplace.context.v2');
+        PublicMarketplaceController::forgetFilterCaches($organization->id);
 
         return redirect()->route('organization.show', $organization)
             ->with('success', 'Cambios guardados.');
