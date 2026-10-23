@@ -37,8 +37,8 @@ Tests: `tests/Feature/Audit/CompanySiteTest.php` (15).
 | 6.4 | P1 | Afirmaciones sin respaldo en portada, precios y registro: «80 %», «3x», «IA 24/7», «90 % de accuracy», «soporte por chat», «SLA 99,9 %», «account manager», «vehículos ilimitados», cifras de clientes (142 vehículos, 18k de margen), FAQ que prometía verificar el VIN y exportar a CSV, comparativa de planes inventada | `i18n/*.js`, `Welcome.vue`, `GuestLayout.vue`, `PricingPublic.vue` | ✅ retiradas; planes y límites salen de `config/subscription.php` (`PlanCatalog`). Test `HonestMarketingTest` |
 | 6.5 | P1 | «Compatible con tus fuentes favoritas: mobile.de, autoscout24…» podía leerse como integración oficial | `Welcome.vue` | ✅ «La skill para Claude investiga anuncios en…» |
 | 6.6 | P1 | La portada hablaba de «concesionario» y «talleres» | `welcome.*` | ✅ |
-| 6.2 | P1 | Folleto PDF estático de JJ (`public/jj-import-folleto.pdf`); solo se muestra en la web de la operadora | `PublicSite::context()['brochureUrl']` | Pendiente (M): folleto por empresa |
-| 6.7 | P1 | La regla de honorarios «1.000 € / 1.500 € si ≥ 30.000 €» está fija en el código (`CostBreakdown`, `MarketModel::costePuestoEnHuelva`) y en la sección «Transparencia» | `app/Support/CostBreakdown.php` | Pendiente (M): honorarios por empresa |
+| 6.2 | P1 | Folleto PDF propio de cada empresa | `BrochureRenderer`, `CompanyBrochureController` | ✅ `/web/{slug}/folleto`: marca, contacto, honorarios y QR de la empresa; se guarda en disco privado y se regenera al cambiar sus datos. Necesita Chrome/Chromium en el servidor |
+| 6.7 | P1 | La regla de honorarios «1.000 € / 1.500 € si ≥ 30.000 €» está fija en el código (`CostBreakdown`, `MarketModel::costePuestoEnHuelva`) y en la sección «Transparencia» | `app/Support/CostBreakdown.php` | Pendiente (M): honorarios por empresa | ✅ Contrato y encargo (`Car::defaultProfessionalFee`) y etiqueta de honorarios del folleto usan ya la escala de cada empresa. Queda solo `MarketModel::costePuestoEnHuelva` (estudio de mercado de la operadora)
 | 6.3 | P2 | schema.org solo de la operadora | ✅ sale de su perfil | — |
 
 ## Pendiente (P2)

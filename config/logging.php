@@ -21,6 +21,11 @@ return [
     'default' => env('LOG_CHANNEL', 'stack'),
 
     /*
+    | Email que recibe un aviso cuando hay un error 500 (vacío = sin avisos).
+    */
+    'error_alert_email' => env('ERROR_ALERT_EMAIL'),
+
+    /*
     |--------------------------------------------------------------------------
     | Deprecations Log Channel
     |--------------------------------------------------------------------------

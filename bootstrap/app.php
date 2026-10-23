@@ -8,6 +8,7 @@ use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\ImportToken;
 use App\Http\Middleware\PlanLimitMiddleware;
 use App\Http\Middleware\SecurityHeaders;
+use App\Support\ErrorAlert;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -39,5 +40,8 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        // Aviso por email de los errores 500 (ERROR_ALERT_EMAIL); ver App\Support\ErrorAlert.
+        $exceptions->report(function (Throwable $e) {
+            ErrorAlert::notify($e);
+        });
     })->create();

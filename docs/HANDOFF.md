@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-10-23 10:30 · Claude (Cowork) · auditoría de venta ronda 5 (rama audit/venta)
+- Hice: folleto PDF propio de cada empresa (`/web/{slug}/folleto`, `App\Services\BrochureRenderer`, cache en disco privado por huella de datos); `Brand::feeLabel()` (ya no hereda los 1.500 € de la operadora); `Car::defaultProfessionalFee()` para contrato y encargo; aviso por email de errores 500 (`App\Support\ErrorAlert`, `ERROR_ALERT_EMAIL`); migración `2026_10_23_110000` (borra `testimonials` y columnas de Stripe de `users`; `User` sin `Billable`); borrados Railway/Docker (solo Forge).
+- Trampas: (1) Contrato y encargo para un coche sin honorarios propios usan ahora la escala de la empresa (1.000 € / 1.500 € desde 30.000 € por defecto), antes 1.500 € fijos. (2) El folleto necesita Chrome/Chromium en el servidor (Browsershot). (3) La tabla de IEDMT de la skill genérica hay que verificarla con la normativa vigente.
+- ⚠️ PENDIENTE para el otro: copias de seguridad en Forge y prueba de restauración (8.10); tanda 2 de limpieza NO hecha a propósito: `docs/memoria-desktop` y `docs/claude-desktop` son los másters del flujo de sincronización (`doc-sync.md`), sacarlos rompe ese flujo; decidir con el usuario. Nada desplegado.
+---
+
 ## 2026-10-23 09:30 · Claude (Cowork) · auditoría de venta ronda 4 (rama audit/venta)
 - Hice: documentos del coche en disco privado (`CarDocument::DISK = 'local'`, `storageDisk()` para los antiguos, migración `2026_10_23_100100` que los mueve); «Eliminar empresa» en Ajustes (`App\Services\OrganizationDeletion`: cancela Stripe antes, borra tablas por columna en orden de claves foráneas y ficheros) y bloqueo al último propietario en Perfil; webhook de Stripe idempotente 24 h; `DemoDataSeeder` con empresa ficticia; fuera `TestimonialController`.
 - Trampas: (1) En SQLite `withoutForeignKeyConstraints` no funciona dentro de una transacción: por eso el borrado ordena las tablas de hijas a padres. (2) Nunca enlazar documentos con `/storage/...`: usar `route('cars.documents.show')`.
