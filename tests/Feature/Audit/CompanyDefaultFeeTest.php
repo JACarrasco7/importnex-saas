@@ -4,6 +4,7 @@ namespace Tests\Feature\Audit;
 
 use App\Models\Car;
 use App\Models\Organization;
+use App\Support\PrecioClienteCalculator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -32,5 +33,18 @@ class CompanyDefaultFeeTest extends TestCase
 
         $this->assertSame(1000.0, Car::factory()->create(['organization_id' => $org->id, 'purchase_price' => 15000, 'professional_fees' => 0])->defaultProfessionalFee());
         $this->assertSame(1500.0, Car::factory()->create(['organization_id' => $org->id, 'purchase_price' => 40000, 'professional_fees' => 0])->defaultProfessionalFee());
+    }
+
+    public function test_client_price_estimate_uses_the_company_fee(): void
+    {
+        $org = Organization::factory()->create(['company' => ['fee_base' => '900']]);
+        $own = Car::factory()->create(['organization_id' => $org->id, 'purchase_price' => 12000, 'professional_fees' => 0, 'co2' => 100]);
+        $withFee = Car::factory()->create(['organization_id' => $org->id, 'purchase_price' => 12000, 'professional_fees' => 700, 'co2' => 100]);
+
+        $partidas = fn (Car $car) => (new \ReflectionMethod(PrecioClienteCalculator::class, 'partidasEstimadas'))
+            ->invoke(null, 12000.0, $car)['Gestión y matriculación'];
+
+        $this->assertSame(220.0 + 900.0, $partidas($own));
+        $this->assertSame(220.0 + 700.0, $partidas($withFee));
     }
 }

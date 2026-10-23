@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use App\Models\Car;
+
 /**
  * C3 auditoría 09-sep-2026: precio que ve el cliente en /c/{token}.
  *
@@ -389,7 +391,7 @@ class PrecioClienteCalculator
             'Impuesto de matriculación (IEDMT)' => round(self::iedmtEstimado($origen, $car), 2),
             'Gestión y matriculación' => round(
                 (float) config('importacion.gestoria_eur', 220.0)
-                + (float) config('importacion.honorarios_eur', 1500.0), 2),
+                + self::honorariosEstimados($car), 2),
         ];
     }
 
@@ -416,6 +418,22 @@ class PrecioClienteCalculator
         };
 
         return $origen * $tipo;
+    }
+
+    /**
+     * Honorarios del fallback: los del coche; si no los trae, la escala de su
+     * empresa; y solo para datos sin empresa, el importe fijo de configuración.
+     */
+    private static function honorariosEstimados($car): float
+    {
+        $propios = (float) ($car->professional_fees ?? 0);
+        if ($propios > 0) {
+            return $propios;
+        }
+
+        return $car instanceof Car
+            ? $car->defaultProfessionalFee()
+            : (float) config('importacion.honorarios_eur', 1500.0);
     }
 
     private static function esOrigenEspana($car): bool

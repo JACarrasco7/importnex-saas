@@ -3,7 +3,9 @@
 **Ronda 1:** 22-oct-2026 (aislamiento, alta, marca) · **Ronda 2:** 22-oct-2026 (base de
 datos, cobro, flujos, pantallas, RGPD, operación) · **Ronda 3:** 22-oct-2026 (decisiones
 D1–D5: web por empresa, textos honestos, dependencias, limpieza del repo, IA) · **Ronda 4:**
-23-oct-2026 (documentos privados, eliminar empresa, webhooks, seeder de demo).
+23-oct-2026 (documentos privados, eliminar empresa, webhooks, seeder de demo) · **Ronda 5:**
+23-oct-2026 (folleto PDF por empresa, honorarios por empresa en contrato y encargo, avisos de
+error, limpieza de tablas sin uso, despliegue solo en Forge).
 
 Objetivo: dejar el producto **vendible como SaaS** (cada empresa con su cuenta y su
 suscripción) tocando solo lo necesario. Lo que no bloquea la venta queda como P2.
@@ -73,7 +75,7 @@ comprador o un cliente lo nota · **P2** mejora futura. Esfuerzo: S (< 2 h) · M
 | Alta de una empresa nueva de principio a fin | ✅ test + recorrido con navegador |
 | Cobro: prueba, alta, cambio de plan, cancelación, webhooks | ✅ código; ⏳ configurar precios en Stripe y probar con tarjetas de prueba |
 | Datos aislados entre empresas | ✅ revisado modelo a modelo |
-| Sin datos de JJ en el producto | ✅ salvo el folleto PDF estático (solo en la web de la operadora) y la skill, que sigue escrita para JJ (8.15) |
+| Sin datos de JJ en el producto | ✅ cada empresa tiene su folleto PDF y su escala de honorarios. Queda la skill de JJ (la genérica está propuesta) y `MarketModel::costePuestoEnHuelva` (estudio de mercado de la operadora) |
 | Web pública de cada empresa | ✅ |
 | Portada y precios sin afirmaciones sin respaldo | ✅ `HonestMarketingTest` |
 | Código privado | ⏳ P0-14 |
@@ -83,7 +85,8 @@ comprador o un cliente lo nota · **P2** mejora futura. Esfuerzo: S (< 2 h) · M
 | Build sin errores | ✅ |
 | Documentos personales sin URL pública | ✅ ronda 4 |
 | Baja de una empresa y borrado de sus datos | ✅ ronda 4 |
-| Monitorización de errores y copias de seguridad | ⏳ P1 (ver 08) |
+| Monitorización de errores | ✅ ronda 5: aviso por email (`ERROR_ALERT_EMAIL`) |
+| Copias de seguridad | ⏳ activarlas en Forge y probar una restauración (8.10) |
 
 ## Orden de trabajo propuesto
 
@@ -95,8 +98,8 @@ comprador o un cliente lo nota · **P2** mejora futura. Esfuerzo: S (< 2 h) · M
 | 4 | Documentos legales + página «Condiciones» y aceptación en el alta | M | abogado |
 | 5 | Stripe: precios, webhook y prueba de punta a punta con tarjetas de prueba | S | tú |
 | 6 | ~~Documentos del coche a disco privado; eliminar empresa y sus datos (RGPD)~~ ✅ ronda 4 | M | — |
-| 7 | Skill genérica para compradores (8.15) y tanda 2 de limpieza del repo | M | — |
-| 8 | Monitorización de errores y copias de seguridad probadas | S | elegir servicio |
+| 7 | ~~Skill genérica para compradores (8.15)~~ propuesta lista para guardar. Tanda 2 de limpieza del repo: aplazada (los másters de sincronización con Desktop viven ahí) | M | decisión tuya |
+| 8 | ~~Monitorización de errores~~ ✅ ronda 5. Copias de seguridad en Forge + restauración de prueba | S | tú |
 
 ## Lo que tienes que hacer tú
 
