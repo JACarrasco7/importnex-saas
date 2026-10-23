@@ -44,7 +44,7 @@ class StripeWebhookController extends CashierWebhookController
             }
 
             Log::info('Stripe webhook received', ['event_id' => $eventId, 'type' => $request->input('type')]);
-            parent::handleWebhook($request);
+            $response = parent::handleWebhook($request);
         } catch (\Throwable $e) {
             Log::error('Stripe webhook failed', [
                 'event_id' => $eventId,
@@ -58,9 +58,10 @@ class StripeWebhookController extends CashierWebhookController
             throw $e;
         }
 
-        $lock->release();
-
-        return response('OK', 200);
+        // El bloqueo NO se libera al terminar bien: dura 24 h y así un
+        // reintento de Stripe del mismo evento se ignora (antes se liberaba y
+        // solo evitaba duplicados simultáneos).
+        return $response;
     }
 
     /**

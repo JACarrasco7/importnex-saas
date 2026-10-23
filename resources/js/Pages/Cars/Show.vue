@@ -474,7 +474,7 @@ const onDocKeyChange = () => {
                                     </div>
                                     <div class="flex items-center gap-2">
                                         <Badge :variant="docStatusVariant(doc.status)" size="sm">{{ statusLabel(t, doc.status) }}</Badge>
-                                        <a v-if="doc.url" :href="`/storage/${doc.url}`" target="_blank" class="inline-flex items-center gap-1 rounded-md bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100">
+                                        <a v-if="doc.url" :href="route('cars.documents.show', [car.id, doc.id])" target="_blank" class="inline-flex items-center gap-1 rounded-md bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100">
                                             <EyeIcon class="h-3 w-3" />
                                             {{ t('common.view') }}
                                         </a>

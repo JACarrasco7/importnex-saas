@@ -33,7 +33,7 @@ php artisan storage:link
 npm run build
 ```
 
-Datos de demostración (nunca en producción): `php artisan db:seed --class=DemoDataSeeder`.
+Datos de demostración (nunca en producción): `php artisan db:seed --class=DemoDataSeeder` crea la empresa ficticia «Importaciones Demo» con su web en `/web/demo`.
 
 Desarrollo: `composer run dev` · Tests: `php artisan test --compact`.
 

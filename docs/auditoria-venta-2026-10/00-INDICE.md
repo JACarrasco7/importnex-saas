@@ -2,7 +2,8 @@
 
 **Ronda 1:** 22-oct-2026 (aislamiento, alta, marca) · **Ronda 2:** 22-oct-2026 (base de
 datos, cobro, flujos, pantallas, RGPD, operación) · **Ronda 3:** 22-oct-2026 (decisiones
-D1–D5: web por empresa, textos honestos, dependencias, limpieza del repo, IA).
+D1–D5: web por empresa, textos honestos, dependencias, limpieza del repo, IA) · **Ronda 4:**
+23-oct-2026 (documentos privados, eliminar empresa, webhooks, seeder de demo).
 
 Objetivo: dejar el producto **vendible como SaaS** (cada empresa con su cuenta y su
 suscripción) tocando solo lo necesario. Lo que no bloquea la venta queda como P2.
@@ -80,6 +81,8 @@ comprador o un cliente lo nota · **P2** mejora futura. Esfuerzo: S (< 2 h) · M
 | Instalación desde cero (`README.md`, `.env.example`, seeder) | ✅ |
 | Tests en verde en Linux | ✅ 118 de 129 ficheros sin fallos (5 con tests omitidos a propósito porque necesitan Chrome). 10 no se pueden ejecutar en mi entorno (comandos de consola y envío de contraseñas) y 1 lee un fichero de `.claude/` que no está en git: **pásalos en tu equipo** con `php artisan test --compact` |
 | Build sin errores | ✅ |
+| Documentos personales sin URL pública | ✅ ronda 4 |
+| Baja de una empresa y borrado de sus datos | ✅ ronda 4 |
 | Monitorización de errores y copias de seguridad | ⏳ P1 (ver 08) |
 
 ## Orden de trabajo propuesto
@@ -91,7 +94,7 @@ comprador o un cliente lo nota · **P2** mejora futura. Esfuerzo: S (< 2 h) · M
 | 3 | Rellenar Ajustes → Datos de empresa de JJ (incluidos honorarios) y rotar las contraseñas del seeder | S | tú |
 | 4 | Documentos legales + página «Condiciones» y aceptación en el alta | M | abogado |
 | 5 | Stripe: precios, webhook y prueba de punta a punta con tarjetas de prueba | S | tú |
-| 6 | Documentos del coche a disco privado; eliminar empresa y sus datos (RGPD) | M | — |
+| 6 | ~~Documentos del coche a disco privado; eliminar empresa y sus datos (RGPD)~~ ✅ ronda 4 | M | — |
 | 7 | Skill genérica para compradores (8.15) y tanda 2 de limpieza del repo | M | — |
 | 8 | Monitorización de errores y copias de seguridad probadas | S | elegir servicio |
 

@@ -14,6 +14,7 @@ use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class DemoDataSeeder extends Seeder
 {
@@ -36,39 +37,48 @@ class DemoDataSeeder extends Seeder
             return;
         }
 
+        // Empresa ficticia propia: nunca se mezcla con una empresa real (antes
+        // reutilizaba «JJ Import Motors» por nombre y metía coches de demo en ella).
         $org = Organization::firstOrCreate(
-            ['name' => 'JJ Import Motors'],
+            ['slug' => 'demo'],
             [
+                'name' => 'Importaciones Demo',
                 'plan' => 'pro',
+                'is_public' => true,
                 'trial_ends_at' => now()->addDays(30),
+                'company' => ['city' => 'Sevilla', 'phone' => '600 000 000', 'email' => 'demo@example.com'],
             ]
         );
 
-        // Owners
+        // Contraseña desde .env (SEED_DEMO_PASSWORD) o una aleatoria que se muestra al final.
+        $password = (string) (env('SEED_DEMO_PASSWORD') ?: Str::password(14, symbols: false));
+
         User::updateOrCreate(
-            ['email' => 'owner@jjimportmotors.com'],
+            ['email' => 'demo-owner@example.com'],
             [
-                'name' => 'José Antonio (Owner)',
-                'password' => Hash::make('Importnex2026!'),
+                'name' => 'Demo (propietario)',
+                'password' => Hash::make($password),
                 'organization_id' => $org->id,
                 'role' => 'owner',
+                'locale' => config('app.locale', 'es'),
                 'email_verified_at' => now(),
             ]
         );
 
         User::updateOrCreate(
-            ['email' => 'staff@jjimportmotors.com'],
+            ['email' => 'demo-staff@example.com'],
             [
-                'name' => 'María (Staff)',
-                'password' => Hash::make('Importnex2026!'),
+                'name' => 'Demo (operador)',
+                'password' => Hash::make($password),
                 'organization_id' => $org->id,
-                'role' => 'staff',
+                'role' => 'operator',
+                'locale' => config('app.locale', 'es'),
                 'email_verified_at' => now(),
             ]
         );
 
         // Cars (6)
-        $statuses = ['Located', 'Offered', 'Reserved', 'Sold', 'Located', 'Offered'];
+        $statuses = ['Located', 'Offered', 'Reserved', 'Delivered', 'Located', 'Offered'];
         $cars = [];
         for ($i = 0; $i < 6; $i++) {
             $cars[] = Car::factory()->create([
@@ -79,6 +89,8 @@ class DemoDataSeeder extends Seeder
                 'year' => 2019 + ($i % 4),
                 'mileage' => 30000 + ($i * 12000),
                 'new_price' => 18000 + ($i * 4500),
+                // Los no vendidos salen en la web de demo (/web/demo).
+                'is_marketplace' => $statuses[$i] !== 'Delivered',
             ]);
         }
 
@@ -117,6 +129,7 @@ class DemoDataSeeder extends Seeder
 
         $this->command->info('✅ Demo data seeded for '.$org->name);
         $this->command->info('   - 6 cars, 8 clients, 12 contacts, 16 contact logs');
-        $this->command->info('   - Login: owner@jjimportmotors.com / Importnex2026!');
+        $this->command->info('   - Login: demo-owner@example.com / '.$password);
+        $this->command->info('   - Web pública: '.url('/web/demo'));
     }
 }

@@ -211,6 +211,8 @@ Route::middleware(['auth', 'verified', 'organization', 'subscribed'])->group(fun
         ->where('organization', '[0-9]+')->name('organization.edit');
     Route::patch('/organization/{organization}', [OrganizationController::class, 'update'])
         ->where('organization', '[0-9]+')->name('organization.update');
+    Route::delete('/organization/{organization}', [OrganizationController::class, 'destroy'])
+        ->where('organization', '[0-9]+')->name('organization.destroy');
     Route::post('/organization/{organization}/ai-models', [OrganizationController::class, 'aiModels'])
         ->where('organization', '[0-9]+')->name('organization.ai-models');
     Route::post('/organization/{organization}/members', [OrganizationTeamController::class, 'storeMember'])

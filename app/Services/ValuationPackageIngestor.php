@@ -1509,7 +1509,8 @@ class ValuationPackageIngestor
                 $filename = $this->safeFilename(basename($doc['path']));
                 $target = sprintf('cars/%d/documents/%s', $car->id, $filename);
 
-                Storage::disk('public')->put($target, File::get($doc['path']));
+                // Informes internos (margen, valoración): disco privado.
+                Storage::disk(CarDocument::DISK)->put($target, File::get($doc['path']));
 
                 // Un informe por nombre: reimportar sustituye, no acumula copias.
                 $existing = $car->documents()
@@ -1529,8 +1530,10 @@ class ValuationPackageIngestor
 
                 if ($existing) {
                     if ($existing->url !== $target) {
-                        Storage::disk('public')->delete($existing->url);
+                        Storage::disk($existing->storageDisk())->delete($existing->url);
                     }
+                    // Copia antigua en el disco público (antes de 23-oct-2026).
+                    Storage::disk('public')->delete($target);
                     $existing->update($attributes);
                 } else {
                     $car->documents()->create($attributes);

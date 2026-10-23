@@ -28,7 +28,7 @@ class CarDocumentController extends Controller
         }
 
         $request->validate([
-            'documents.*' => 'required|file|mimes:pdf,doc,docx,xls,xlsx|max:10240',
+            'documents.*' => 'required|file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png,webp|max:10240',
             'doc_key' => 'required|string',
             'name' => 'nullable|string|max:255',
         ]);
@@ -46,9 +46,10 @@ class CarDocumentController extends Controller
 
         if ($request->hasFile('documents')) {
             foreach ($request->file('documents') as $document) {
+                // Disco privado: DNI, contratos y facturas no deben tener URL pública.
                 $path = $document->store(
                     "cars/{$car->id}/documents",
-                    'public'
+                    CarDocument::DISK
                 );
 
                 $name = $customName ?: $document->getClientOriginalName();
@@ -75,9 +76,9 @@ class CarDocumentController extends Controller
             abort(403);
         }
 
-        $disk = Storage::disk('public');
+        $disk = Storage::disk($document->storageDisk());
 
-        if (! $disk->exists($document->url)) {
+        if (! $document->url || ! $disk->exists($document->url)) {
             abort(404);
         }
 
@@ -97,7 +98,9 @@ class CarDocumentController extends Controller
             abort(403);
         }
 
-        Storage::disk('public')->delete($document->url);
+        if ($document->url) {
+            Storage::disk($document->storageDisk())->delete($document->url);
+        }
         $document->delete();
 
         return back()->with('success', 'Documento eliminado.');

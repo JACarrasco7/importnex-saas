@@ -86,4 +86,25 @@ class BillingIntegrityTest extends TestCase
 
         $this->assertSame(0, Contact::withoutGlobalScopes()->where('client_id', $foreignClient->id)->count());
     }
+
+    public function test_a_retried_stripe_event_is_processed_only_once(): void
+    {
+        config(['cashier.webhook.secret' => null]);
+        $org = Organization::factory()->create(['stripe_id' => 'cus_4', 'plan' => 'pro']);
+        $subscription = $this->subscribe($org);
+        $event = [
+            'id' => 'evt_retry',
+            'type' => 'customer.subscription.deleted',
+            'data' => ['object' => ['id' => $subscription->stripe_id, 'customer' => 'cus_4', 'status' => 'canceled', 'items' => ['data' => []]]],
+        ];
+
+        $this->postJson('/stripe/webhook', $event)->assertOk();
+        $this->assertSame('starter', $org->fresh()->plan);
+
+        // Entre medias la empresa vuelve a Pro; el reintento del evento viejo no debe bajarla.
+        $org->fresh()->forceFill(['plan' => 'pro'])->save();
+        $this->postJson('/stripe/webhook', $event)->assertOk();
+
+        $this->assertSame('pro', $org->fresh()->plan);
+    }
 }

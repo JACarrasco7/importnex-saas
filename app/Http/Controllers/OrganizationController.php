@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Organization;
 use App\Services\Ai\AiProviderRegistry;
 use App\Services\Ai\ListsModelsInterface;
+use App\Services\OrganizationDeletion;
 use App\Support\Brand;
 use App\Support\PublicSite;
 use Illuminate\Http\JsonResponse;
@@ -233,6 +234,43 @@ class OrganizationController extends Controller
         $result = $provider->listModels($apiKey);
 
         return response()->json($result, $result['success'] ? 200 : 422);
+    }
+
+    /**
+     * Elimina la empresa y todos sus datos (baja del SaaS / supresión RGPD).
+     * Solo un propietario, con su contraseña y escribiendo el nombre de la
+     * empresa. La suscripción de Stripe se cancela antes de borrar nada.
+     */
+    public function destroy(Request $request, Organization $organization, OrganizationDeletion $deletion): RedirectResponse
+    {
+        $this->authorizeAccess($organization);
+        abort_unless($request->user()->isOwner(), 403);
+
+        $request->validate([
+            'password' => ['required', 'current_password'],
+            'confirm_name' => ['required', 'string', Rule::in([$organization->name])],
+        ], [
+            'confirm_name.in' => 'Escribe el nombre de la empresa exactamente como aparece.',
+            'password.current_password' => 'La contraseña no es correcta.',
+        ]);
+
+        if ($organization->isOwner()) {
+            return back()->withErrors(['confirm_name' => 'La organización que opera la plataforma no se puede eliminar.']);
+        }
+
+        try {
+            $deletion->delete($organization);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return back()->withErrors(['confirm_name' => 'No se ha podido cancelar la suscripción en Stripe, así que no se ha borrado nada. Inténtalo de nuevo o escríbenos.']);
+        }
+
+        auth()->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect('/')->with('success', 'Tu empresa y todos sus datos se han eliminado.');
     }
 
     protected function authorizeAccess(Organization $organization): void

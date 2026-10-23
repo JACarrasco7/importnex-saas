@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-10-23 09:30 · Claude (Cowork) · auditoría de venta ronda 4 (rama audit/venta)
+- Hice: documentos del coche en disco privado (`CarDocument::DISK = 'local'`, `storageDisk()` para los antiguos, migración `2026_10_23_100100` que los mueve); «Eliminar empresa» en Ajustes (`App\Services\OrganizationDeletion`: cancela Stripe antes, borra tablas por columna en orden de claves foráneas y ficheros) y bloqueo al último propietario en Perfil; webhook de Stripe idempotente 24 h; `DemoDataSeeder` con empresa ficticia; fuera `TestimonialController`.
+- Trampas: (1) En SQLite `withoutForeignKeyConstraints` no funciona dentro de una transacción: por eso el borrado ordena las tablas de hijas a padres. (2) Nunca enlazar documentos con `/storage/...`: usar `route('cars.documents.show')`.
+- ⚠️ PENDIENTE para el otro: lo de la ronda 3 (repo público, tanda 2, skill genérica). Nada desplegado.
+---
+
 ## 2026-10-22 23:30 · Claude (Cowork) · auditoría de venta ronda 3: decisiones D1–D5 (rama audit/venta)
 - Hice: **web pública por empresa** (`/web/{slug}`, `App\Support\PublicSite`, prop `marketplace` en las páginas públicas y `publicSite` en el panel); honorarios por empresa (`Brand::fees()`, `CostBreakdown`); textos honestos en portada/precios/registro con planes desde `App\Support\PlanCatalog`; quitadas `spatie/laravel-permission`, `laravel/sanctum`, `maatwebsite/excel`; limpieza tanda 1 del repo (material de JJ movido a `Desktop\JJImportMotors\_sacado-del-repo-2026-10-22\`). Plan actualizado en `docs/auditoria-venta-2026-10/00-INDICE.md`.
 - Trampas: (1) En páginas públicas **nunca** `route('marketplace.*')`: usar `useSite()` (`homeUrl`, `carUrl`, `compareUrl`). (2) Cachés de filtros por empresa: `PublicMarketplaceController::forgetFilterCaches($orgId)`. (3) `FormSection` ignoraba `subtitle` (solo leía `description`): ahora acepta los dos. (4) `PublicSite::isAvailable()` exige web activa + cuenta al día (la operadora no paga).

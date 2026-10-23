@@ -51,6 +51,16 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
+        // El último propietario no puede irse sin más: la empresa quedaría sin
+        // nadie que la gestione y Stripe seguiría cobrando. Que nombre a otro
+        // propietario o elimine la empresa desde Ajustes.
+        if ($user->isOwner() && $user->organization_id
+            && ! $user->organization?->users()->where('role', 'owner')->whereKeyNot($user->getKey())->exists()) {
+            return back()->withErrors([
+                'password' => 'Eres el único propietario de tu empresa. Nombra a otro propietario en Ajustes → Equipo, o elimina la empresa desde Ajustes.',
+            ]);
+        }
+
         Auth::logout();
 
         $user->delete();

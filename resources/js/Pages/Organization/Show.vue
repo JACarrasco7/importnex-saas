@@ -38,6 +38,12 @@ const revokeToken = () => {
     if (!window.confirm('¿Revocar el token de API?')) return;
     router.delete(route('organization.api-token.revoke', props.organization.id), { preserveScroll: true });
 };
+// Eliminar la empresa: nombre + contraseña, y la suscripción se cancela antes de borrar.
+const deleteForm = useForm({ confirm_name: '', password: '' });
+const deleteOrganization = () => {
+    if (!window.confirm('Se borrarán la empresa, sus usuarios, coches, clientes, encargos y ficheros, y se cancelará la suscripción. No se puede deshacer. ¿Continuar?')) return;
+    deleteForm.delete(route('organization.destroy', props.organization.id), { preserveScroll: true, onFinish: () => deleteForm.reset('password') });
+};
 const inputClass = 'block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-estoril-500 focus:ring-estoril-500';
 const roleLabel = (role) => (role === 'owner' ? 'Propietario' : 'Operador');
 
@@ -169,6 +175,24 @@ const { date } = useFormat();
                         <button v-if="apiTokenActive" type="button" class="text-sm font-semibold text-rose-600 hover:text-rose-700" @click="revokeToken">Revocar</button>
                     </div>
                     <p class="mt-2 text-xs text-gray-500">Envíalo en la cabecera <code>X-Import-Token</code>.</p>
+                </FormSection>
+
+                <FormSection v-if="canManage && !organization.is_owner" title="Eliminar empresa"
+                             subtitle="Borra la empresa y todos sus datos (usuarios, coches, clientes, encargos, contratos y ficheros) y cancela la suscripción. No se puede deshacer.">
+                    <form class="grid grid-cols-1 gap-3 sm:grid-cols-3" @submit.prevent="deleteOrganization">
+                        <div>
+                            <input v-model="deleteForm.confirm_name" type="text" required :placeholder="`Escribe «${organization.name}»`" :class="inputClass" />
+                            <p v-if="deleteForm.errors.confirm_name" class="mt-1 text-xs text-red-600">{{ deleteForm.errors.confirm_name }}</p>
+                        </div>
+                        <div>
+                            <input v-model="deleteForm.password" type="password" required autocomplete="current-password" placeholder="Tu contraseña" :class="inputClass" />
+                            <p v-if="deleteForm.errors.password" class="mt-1 text-xs text-red-600">{{ deleteForm.errors.password }}</p>
+                        </div>
+                        <button type="submit" :disabled="deleteForm.processing || deleteForm.confirm_name !== organization.name" class="inline-flex items-center justify-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-rose-500 disabled:opacity-50">
+                            <TrashIcon class="h-4 w-4" />
+                            Eliminar empresa
+                        </button>
+                    </form>
                 </FormSection>
             </div>
         </div>
