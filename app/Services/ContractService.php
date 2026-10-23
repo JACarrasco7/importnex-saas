@@ -42,8 +42,7 @@ class ContractService
 
         // Honorarios reales del servicio (professional_fees del coche), no un
         // default fijo que pueda no coincidir con lo facturado.
-        $honorarios = (float) ($car->professional_fees
-            ?: config('contracts.honorarios_default', 1500));
+        $honorarios = (float) ($car->professional_fees ?: $car->defaultProfessionalFee());
 
         $snapshot = [
             'cliente_nombre' => $clientName ?: '—',

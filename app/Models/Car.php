@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\CostBreakdown;
 use App\Support\PortalSearchUrls;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -384,6 +385,17 @@ class Car extends Model
         $taxBase = $this->boe_confirmed ? $this->new_price : $this->manual_tax_base;
 
         return $taxBase * $coefficient * $co2Pct;
+    }
+
+    /**
+     * Honorarios del servicio cuando el coche no trae los suyos: la escala de
+     * su empresa según el precio de compra (no un importe fijo de otra).
+     */
+    public function defaultProfessionalFee(): float
+    {
+        $fees = $this->organization?->brand()->fees();
+
+        return (float) CostBreakdown::honorariosFor((float) ($this->purchase_price ?? 0), $fees);
     }
 
     public function calculateTotalCost()

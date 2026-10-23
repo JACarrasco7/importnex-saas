@@ -48,7 +48,7 @@ class ImportOrderService
         }
 
         return DB::transaction(function () use ($car, $user, $carRequest) {
-            $fee = (float) ($car->professional_fees ?: config('contracts.honorarios_default', 1500));
+            $fee = (float) ($car->professional_fees ?: $car->defaultProfessionalFee());
 
             $order = new ImportOrder([
                 'organization_id' => $car->organization_id,
