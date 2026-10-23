@@ -46,7 +46,7 @@ final class Brand
             'iban' => $profile['iban'] ?? null,
             'iban_holder' => $profile['iban_holder'] ?? null,
             'iban_bank' => $profile['iban_bank'] ?? null,
-            'fee_label' => $profile['fee_label'] ?? ($fallback['precio_honorarios'] ?? null),
+            'fee_label' => $profile['fee_label'] ?? ($organization ? null : ($fallback['precio_honorarios'] ?? null)),
             'tagline' => $profile['tagline'] ?? null,
             'fee_base' => isset($profile['fee_base']) ? (string) $profile['fee_base'] : null,
             'fee_premium' => isset($profile['fee_premium']) ? (string) $profile['fee_premium'] : null,
@@ -202,6 +202,22 @@ final class Brand
             'premium' => $premium,
             'threshold' => self::amount($this->data['fee_threshold'] ?? null) ?? CostBreakdown::HONORARIOS_THRESHOLD,
         ];
+    }
+
+    /**
+     * Texto de honorarios para el folleto: el escrito por la empresa o, si no
+     * lo ha escrito, el calculado con su escala («900 €» o «desde 900 €»).
+     */
+    public function feeLabel(): string
+    {
+        if ($this->data['fee_label'] ?? null) {
+            return (string) $this->data['fee_label'];
+        }
+
+        $fees = $this->fees();
+        $base = number_format($fees['base'], 0, ',', '.').' €';
+
+        return $fees['base'] === $fees['premium'] ? $base : 'desde '.$base;
     }
 
     private static function amount(?string $value): ?int

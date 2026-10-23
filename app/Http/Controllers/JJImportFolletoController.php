@@ -55,7 +55,7 @@ class JJImportFolletoController extends Controller
                 'logo_base64' => $logoBase64,
                 'qr_svg' => $qrSvg,
                 'qr_url' => $qrUrl,
-                'precio_honorarios' => $brand->get('fee_label', '1.500 €'),
+                'precio_honorarios' => $brand->feeLabel(),
                 'telefono_1' => $brand->get('phone'),
                 'telefono_2' => $brand->get('phone_2'),
                 'email' => $brand->get('email'),

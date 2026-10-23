@@ -162,11 +162,23 @@ final class PublicSite
             'legalUrl' => $this->legalUrl(),
             'logoUrl' => $brand->toPublicArray()['logo_url'] ?? null,
             'platformCredit' => $this->showsPlatformCredit(),
-            // El folleto PDF estático es de la organización operadora.
-            'brochureUrl' => $this->organization?->isOwner() && file_exists(public_path('jj-import-folleto.pdf'))
-                ? '/jj-import-folleto.pdf'
-                : null,
+            'brochureUrl' => $this->brochureUrl(),
         ];
+    }
+
+    /** Folleto PDF: el estático de la operadora si existe; el de cada empresa, generado. */
+    private function brochureUrl(): ?string
+    {
+        if ($this->organization === null) {
+            return null;
+        }
+        if ($this->isPlatform && file_exists(public_path('jj-import-folleto.pdf'))) {
+            return '/jj-import-folleto.pdf';
+        }
+
+        return $this->organization->slug
+            ? route('site.brochure', ['site' => $this->organization->slug])
+            : null;
     }
 
     private static function platformOrganization(): ?Organization

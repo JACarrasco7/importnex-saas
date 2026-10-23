@@ -16,6 +16,7 @@ use App\Http\Controllers\CarSharingController;
 use App\Http\Controllers\CarVerificationController;
 use App\Http\Controllers\ClientContactLogController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\CompanyBrochureController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FinanceController;
@@ -150,6 +151,7 @@ Route::prefix('marketplace')->name('marketplace.')->group(function () {
 Route::prefix('web/{site}')->where(['site' => '[a-z0-9][a-z0-9-]*'])->name('site.')->group(function () {
     Route::get('/', [PublicMarketplaceController::class, 'siteIndex'])->name('index');
     Route::get('/comparar', [PublicMarketplaceController::class, 'siteCompare'])->name('compare');
+    Route::get('/folleto', [CompanyBrochureController::class, 'show'])->name('brochure');
     Route::get('/coche/{car}', [PublicMarketplaceController::class, 'siteShow'])->whereNumber('car')->name('show');
 });
 

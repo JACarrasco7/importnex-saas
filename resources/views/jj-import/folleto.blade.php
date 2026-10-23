@@ -1,15 +1,15 @@
 {{-- ═══════════════════════════════════════════════════════════════════════
-    FOLLETO JJ IMPORT MOTORS (PDF) — TIPO: marketing institucional
+    FOLLETO DE LA EMPRESA (PDF) — TIPO: marketing institucional
     ─────────────────────────────────────────────────────────────────────────
     · QUIÉN LO GENERA  : Laravel (Blade + Browsershot, o PDF estático subido)
     · DESDE QUÉ ARCHIVO: estático (no usa esqueletos del ZIP)
-    · RUTA             : GET /jj-import/folleto  (pública)
-    · CONTROLADOR      : JJImportFolletoController@download
+    · RUTA             : GET /web/{slug}/folleto  y  GET /jj-import/folleto  (públicas)
+    · SERVICIO         : App\Services\BrochureRenderer (una vez por empresa)
     · AUDIENCIA        : PÚBLICO general. Describe el servicio (sin coches).
     ═══════════════════════════════════════════════════════════════════════ --}}
 @php
     $brand = $brand ?? \App\Support\Brand::platform();
-    $precio_honorarios = $precio_honorarios ?? $brand->get('fee_label', '1.500 €');
+    $precio_honorarios = $precio_honorarios ?? $brand->feeLabel();
     $telefono_1 = $telefono_1 ?? $brand->get('phone');
     $telefono_2 = $telefono_2 ?? $brand->get('phone_2');
     $email = $email ?? $brand->get('email');
