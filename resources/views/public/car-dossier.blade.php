@@ -9,7 +9,17 @@
     <meta property="og:site_name" content="JJ Import Motors">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:title" content="{{ $car->brand }} {{ $car->model }} · JJ Import Motors">
-    <meta property="og:description" content="{{ number_format(($car->sale_price ?? $car->purchase_price ?? 0), 0, ',', '.') }} € + gastos de gestión · Gestionamos la compra por ti">
+    {{-- 20-nov-2026: la previsualización de WhatsApp dice lo mismo que la
+         ficha (total aproximado puesto en Huelva), no el precio alemán suelto. --}}
+    @php
+        $ogTotal = $precioCliente['total_estimado'] ?? null;
+        $ogDatos = array_filter([$car->version, $car->year, $car->mileage ? number_format($car->mileage, 0, ',', '.').' km' : null]);
+        $ogDescripcion = ($ogTotal ? '~ '.number_format((float) $ogTotal, 0, ',', '.').' € puesto en Huelva (aprox.) · ' : '')
+            .(count($ogDatos) ? implode(' · ', $ogDatos).' · ' : '')
+            .'Gestionamos la compra por ti';
+    @endphp
+    <meta property="og:description" content="{{ $ogDescripcion }}">
+    <meta property="og:locale" content="es_ES">
     {{-- og:image debe ser URL absoluta (1200x630, <600 KB). WhatsApp NO lee data: URIs. --}}
     @if($fotoPortada)
         <meta property="og:image" content="{{ $fotoPortada }}">
@@ -1045,8 +1055,10 @@
 
         // ── Contenido enriquecido: esqueleto (ficha-publicitaria.txt) con fallback a los datos de la IA del coche ──
         // A22b: el enlace es público. Todo lo que venga del ZIP o de la BD pasa por el filtro.
-        $porqueTexto = \App\Support\FiltroPublico::texto($esqueleto?->uno('POR_QUE') ?: ($car->recommendation ?? ''));
-        $valoracionTexto = \App\Support\FiltroPublico::texto($esqueleto?->uno('VALORACION') ?: ($car->valuation ?? ''));
+        // 20-nov-2026: frase a frase (FiltroPublico::frases): una nota interna
+        // como «Pendientes: ver facturas…» ya no se cuela en la valoración.
+        $porqueTexto = \App\Support\FiltroPublico::frases($esqueleto?->uno('POR_QUE') ?: ($car->recommendation ?? ''));
+        $valoracionTexto = \App\Support\FiltroPublico::frases($esqueleto?->uno('VALORACION') ?: ($car->valuation ?? ''));
 
         // El veredicto del semáforo es INTERNO (A22): al cliente solo le llega
         // nuestra valoración escrita, sin etiqueta ni nota.
@@ -1075,7 +1087,7 @@
         // plantilla. Ahora sale de la ficha del cliente (FC_INCLUYE) si el ZIP
         // la trae, con el mismo contenido como respaldo.
         $fichaIncluye = $ficha['incluye'] ?? [
-            'Búsqueda y verificación de la unidad',
+            'Búsqueda y revisión de la unidad',
             'Negociación y gestión de la compra',
             'Transporte hasta España',
             'ITV de importación, impuestos y matriculación',
@@ -1099,6 +1111,11 @@
         ];
         $fechaDatos = $ficha['fecha_datos'] ?? now()->format('d/m/Y');
 
+        // WhatsApp con el coche concreto y el enlace: quien contesta sabe de
+        // qué unidad le hablan sin tener que preguntar (20-nov-2026).
+        $whatsappTexto = 'Hola, me interesa el '.trim($car->brand.' '.$car->model.' '.($car->version ?? ''))
+            .' que habéis compartido conmigo.'."\n\n".url()->current();
+
         // ── Comparativa de mercado ──
         $fmtEur = fn ($n) => $n !== null ? number_format((float) $n, 0, ',', '.').' €' : null;
         $marketMin = $fmtEur($car->market_min ?? null);
@@ -1113,15 +1130,9 @@
                      teletienda. Sin nombre de cliente (decisión del usuario:
                      el enlace se reenvía por WhatsApp y debe ser neutro). --}}
                 <div class="hero-eyebrow">Informe de la unidad · {{ $fechaDatos }}</div>
-                {{-- Contador de visitas (per-car, mismo numero que el admin
-                     ve en /cars/{id}). Discreto: prueba social ligera, no
-                     distrae del precio ni de la propuesta de valor. --}}
-                @if(($car->marketplace_views ?? 0) > 0)
-                    <div class="visits-counter" title="Veces que se ha abierto esta ficha">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 12v5"/><path d="M12 8v9"/><path d="M17 4v13"/></svg>
-                        {{ number_format($car->marketplace_views, 0, ',', '.') }} {{ $car->marketplace_views == 1 ? 'visita' : 'visitas' }}
-                    </div>
-                @endif
+                {{-- Contador de visitas retirado de la ficha pública (20-nov-2026):
+                     con pocas visitas restaba en vez de sumar. El equipo lo sigue
+                     viendo en /cars/{id}. --}}
                 <h1 class="h1">
                     {{ $car->brand }}<br>
                     <span class="accent">{{ $car->model }}</span>
@@ -1147,7 +1158,7 @@
                 @endif
 
                 <div class="hero-actions">
-                    <a href="https://wa.me/34675701439?text={{ urlencode('Hola, me interesa el '.$car->brand.' '.$car->model.' que habéis compartido conmigo.') }}"
+                    <a href="https://wa.me/34675701439?text={{ urlencode($whatsappTexto) }}"
                        target="_blank" rel="noopener" class="btn primary">
                         💬 Me interesa, ¿hablamos?
                     </a>
@@ -1261,7 +1272,7 @@
                 @endif
                 <div class="verdict-footer">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
-                    Datos del vehículo comprobados el {{ $fechaDatos }}
+                    Datos del anuncio a {{ $fechaDatos }}
                 </div>
             </section>
         @endif
@@ -1353,7 +1364,7 @@
         <section class="incluye">
             <div class="dos-listas">
                 <div class="si">
-                    <h3>Incluido en el precio</h3>
+                    <h3>Incluido en el total</h3>
                     <ul>
                         @foreach($fichaIncluye as $item)
                             <li>{{ is_string($item) ? $item : '' }}</li>
@@ -1373,7 +1384,7 @@
         </section>
 
 {{-- COMPARATIVA DE MERCADO --}}
-        @if($hayMercado)
+        @if($hayMercado && ($mostrarMercado ?? true))
             @php
                 // 12-sep-2026: eran tres tarjetas apiladas (una por fila en
                 // móvil) que no decían nada por sí solas. Una barra de rango
@@ -1402,7 +1413,7 @@
                     <div class="rango">
                         <div class="rango-barra">
                             <div class="rango-marca" style="left: {{ round($posPct, 1) }}%">
-                                <span>Esta unidad</span>
+                                <span>Esta unidad · ~ {{ $fmtEur($nuestro) }}</span>
                             </div>
                         </div>
                         <div class="rango-topes">
@@ -1448,7 +1459,7 @@
                         <h3>Lo que hace fuerte a esta unidad</h3>
                         <ul>
                             @foreach($prosLista as $item)
-                                <li>{{ $item }}</li>
+                                <li>{!! \App\Support\Esqueleto::negrita($item) !!}</li>
                             @endforeach
                         </ul>
                     </div>
@@ -1512,18 +1523,8 @@
              (776 px en móvil). Como chips y dentro de un plegable ocupa una
              línea hasta que el cliente decide abrirlo, que es exactamente lo
              que proponía el mockup v3. --}}
-        @if($esqueleto || !empty($ficha['equipamiento']))
-            @php
-                $equipamiento = $ficha['equipamiento'] ?? [];
-                if (empty($equipamiento) && $esqueleto) {
-                    $equipamiento = $esqueleto->lista('EQUIPAMIENTO');
-                }
-                $equipamiento = array_values(array_filter(
-                    (array) $equipamiento,
-                    fn ($v) => is_string($v) && trim($v) !== ''
-                ));
-            @endphp
-            @if(count($equipamiento) > 0)
+        @if(count($equipamiento ?? []) > 0)
+            {{-- La lista la elige el controlador: la más completa (20-nov-2026). --}}
                 <details class="plegable">
                     <summary>Equipamiento y extras ({{ count($equipamiento) }})</summary>
                     <div class="plegable-cuerpo">
@@ -1535,7 +1536,6 @@
                     </div>
                 </details>
             @endif
-        @endif
 
 
         {{-- ESTADO: VERIFICADO Y PENDIENTE (la honestidad sostiene la ficha) --}}
@@ -1627,7 +1627,7 @@
             El precio indicado es el del vehículo; a él se suman los gastos de gestión de compra.
             Disponibilidad y precio sujetos a confirmación en el momento de la reserva.
             <br><br>
-            © {{ date('Y') }} JJ Import Motors · Datos del vehículo comprobados el {{ $fechaDatos }}
+            © {{ date('Y') }} JJ Import Motors · Datos del anuncio a {{ $fechaDatos }}
         </div>
     </footer>
 
@@ -1656,7 +1656,7 @@
          mitad de página, no tenía dónde pulsar. Es el MISMO CTA (regla §3.7 del
          spec: un solo CTA), solo que siempre accesible. --}}
     <div class="cta-fijo" id="cta-fijo">
-        <a href="https://wa.me/34675701439?text={{ urlencode('Hola, me interesa el '.$car->brand.' '.$car->model.' que habéis compartido conmigo.') }}"
+        <a href="https://wa.me/34675701439?text={{ urlencode($whatsappTexto) }}"
            target="_blank" rel="noopener" class="btn primary">
             💬 Hablar por WhatsApp
         </a>

@@ -127,6 +127,37 @@ El usuario reviso dos fichas reales y fijo estas reglas:
   del vendedor, ahorros frente a Espana ni cifras internas ahi; y las fotos
   van con matriculas difuminadas antes del ZIP.
 
+## Dos fichas, un solo coche (20-nov-2026, segunda revision)
+
+La ficha del marketplace (`/marketplace/{id}`, `/p/{token}`) y el dossier
+(`/c/{token}`) se mandan juntas al cliente. Tienen que decir lo mismo:
+
+- **Mismo total**: si el coche tiene `purchase_price`, el dossier usa
+  `PrecioClienteCalculator::desdeDesglose(CostBreakdown::forCar(...))`. Los
+  bloques `[GASTO]` del ZIP solo valen para coches sin costes en BD. Antes el
+  Mazda 81 salia a 10.035 € en una y 10.364 € en la otra.
+- **Misma regla de mercado**: el dossier tambien oculta "Como esta de precio"
+  si `CostBreakdown::marketComparisonFavoursClient()` es false.
+- **Misma investigacion**: `App\Support\FichaPublica` lee el ZIP
+  (`[VALORACION]`, `[POR_QUE]`, `ficha-cliente.json`) para las dos fichas.
+  La del marketplace pinta "Nuestra valoracion" y "Que esta comprobado y que
+  se comprueba antes de reservar". Nunca `car.valuation`/`recommendation`
+  (notas del panel) en la ficha del marketplace.
+- **Filtro frase a frase**: `FiltroPublico::frases()` para parrafos; quita
+  "Pendientes: ...", ahorros frente a Espana escritos como argumento y la
+  valoracion del concesionario. `car.pros` tambien pasa por `FiltroPublico`.
+- **Previsualizacion de WhatsApp**: el controlador pasa `meta` con
+  `withViewData` y `app.blade.php` pinta og:title/description/image del coche.
+  Los robots no ejecutan JS: sin esto el enlace salia como "Laravel" con el
+  texto de la plataforma SaaS y una imagen 404.
+- **Payload minimo**: nada de `derived` (llevaba `comparables_stats` con un
+  minimo distinto al publicado), ni la org completa (solo name/slug/logo), ni
+  `description` del anuncio, ni costes sueltos (van sumados en `costBreakdown`).
+- **Sin contador de visitas** en las fichas publicas (el dato sigue en el
+  payload y en `/cars/{id}` para el equipo).
+- WhatsApp desde cualquier boton: coche concreto + enlace.
+- Tests: `tests/Feature/PublicFichasCoherenciaTest.php`.
+
 ## Filtro "Muy buen precio" (15-oct-2026)
 
 El filtro es la UNION de 3 senales (cualquiera basta para entrar

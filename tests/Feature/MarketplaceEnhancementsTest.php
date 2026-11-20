@@ -85,7 +85,9 @@ class MarketplaceEnhancementsTest extends TestCase
         $body = $response->getContent();
         // El componente MarketplaceIndex.vue esta presente (Inertia).
         $this->assertStringContainsString('data-page', $body, 'Falta el shell de Inertia');
-        $this->assertStringContainsString('Public/MarketplaceIndex', $body, 'Falta el componente MarketplaceIndex');
+        // Inertia v2 embebe la pagina como JSON en un <script>, con la barra
+        // escapada ("Public\/MarketplaceIndex").
+        $this->assertStringContainsString('Public/MarketplaceIndex', str_replace('\/', '/', $body), 'Falta el componente MarketplaceIndex');
     }
 
     public function test_newsletter_subscribe_persists_email(): void

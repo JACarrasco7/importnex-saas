@@ -3,11 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\CarPublicLink;
+use App\Support\CostBreakdown;
 use App\Support\Esqueleto;
+use App\Support\FichaPublica;
 use App\Support\FiltroPublico;
 use App\Support\PrecioClienteCalculator;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -58,34 +59,27 @@ class PublicCarController extends Controller
             // No interrumpimos la carga por un fallo de tracking.
         }
 
-        $contenido = $this->leerContenido($car, 'ficha-publicitaria.txt');
-        $esqueleto = $contenido ? Esqueleto::desde($contenido) : null;
-        // Caché trivial por car_id: fichaCliente() hace 2 exists() + 1 get()
-        // sobre Storage::local; lo cacheamos 5 min para evitar syscalls repetidos
-        // en visitas consecutivas al mismo /c/{token} (auditoría 09-sep-2026 H8).
-        $ficha = Cache::remember(
-            "public.ficha-cliente.{$car->id}",
-            now()->addMinutes(5),
-            fn () => $this->fichaCliente($car)
-        );
+        $esqueleto = FichaPublica::esqueleto($car);
+        $ficha = FichaPublica::fichaCliente($car);
 
         // A3 auditoría 09-sep-2026 (fix 10-sep-2026): con el FiltroPublico
         // endurecido (A1+A2), ya no ocultamos el dossier cuando la
         // recomendación interna es "No importar". El operador ha generado el
         // enlace a propósito y la ficha del cliente usa exclusivamente bloques
-        // escritos para él (ficha-cliente.json o PUBLICIDAD_ARGUMENTO). El
-        // operador sigue viendo el semáforo interno en /cars/{id}; el cliente
-        // ve un dossier neutro con lo que la IA escribió para él.
-        //
-        // Si el operador quiere ocultar un dossier concreto, puede revocar el
-        // enlace desde el panel (Cars/Show → Revocar enlace). El método
-        // esRecomendableParaCliente() sigue disponible por si queremos volver
-        // al modo estricto en el futuro.
+        // escritos para él. Si quiere ocultarlo, revoca el enlace desde el panel.
 
         $fotos = $this->fotos($car, $token);
 
-        // C3: precio origen (del anuncio) + gastos de compra estimados.
-        $precioCliente = PrecioClienteCalculator::desde($car, $esqueleto, $ficha);
+        // Mismo total que la ficha del marketplace (revisión 20-nov-2026): si
+        // el coche tiene costes en BD manda CostBreakdown; si no, el desglose
+        // del ZIP (C3, coches antiguos).
+        $costBreakdown = CostBreakdown::forCar($car, (float) $car->calculateIEDMT());
+        $precioCliente = $costBreakdown['has_data']
+            ? PrecioClienteCalculator::desdeDesglose($car, $costBreakdown)
+            : PrecioClienteCalculator::desde($car, $esqueleto, $ficha);
+        $mostrarMercado = $costBreakdown['has_data']
+            ? CostBreakdown::marketComparisonFavoursClient($car, (float) $costBreakdown['total'])
+            : true;
 
         return view('public.car-dossier', [
             'car' => $car,
@@ -93,6 +87,8 @@ class PublicCarController extends Controller
             'ficha' => $ficha,
             'argumentosPublicos' => $this->argumentosPublicos($ficha, $esqueleto),
             'precioCliente' => $precioCliente,
+            'mostrarMercado' => $mostrarMercado,
+            'equipamiento' => $this->equipamiento($car, $ficha, $esqueleto),
             'logoBase64' => $this->logo(),
             'fotos' => $fotos,
             'fotoPortada' => $fotos[0] ?? null,
@@ -181,79 +177,30 @@ class PublicCarController extends Controller
     }
 
     /**
-     * Ficha del cliente v2 en JSON (`contenido/json/ficha-cliente.json`).
+     * Equipamiento del dossier: la lista más completa de las que haya.
      *
-     * Es lo que genera la skill con `esqueleto_a_json.py`; si el coche todavía
-     * no lo trae, la vista sigue funcionando con el esqueleto antiguo.
+     * Revisión 20-nov-2026: el dossier del Mazda enseñaba 8 extras (los de
+     * la ficha del ZIP) y la ficha del marketplace 25 (los del coche en BD).
+     * Mismo coche, dos fichas: se enseña la lista más larga.
      *
-     * @return array<string, mixed>|null
+     * @param  array<string, mixed>|null  $ficha
+     * @return array<int, string>
      */
-    private function fichaCliente($car): ?array
+    private function equipamiento($car, ?array $ficha, ?Esqueleto $esqueleto): array
     {
-        // El ingestor aplana los nombres al guardar, así que puede estar en
-        // contenido/json/ (tal cual viene del ZIP) o suelto en contenido/.
-        $candidatos = [
-            "cars/{$car->id}/contenido/json/ficha-cliente.json",
-            "cars/{$car->id}/contenido/ficha-cliente.json",
+        $limpia = fn ($lista) => array_values(array_filter(
+            is_array($lista) ? $lista : [],
+            fn ($item) => is_string($item) && trim($item) !== ''
+        ));
+
+        $candidatas = [
+            $limpia($ficha['equipamiento'] ?? []),
+            $limpia($esqueleto?->lista('EQUIPAMIENTO') ?? []),
+            $limpia($car->equipment ?? []),
         ];
+        usort($candidatas, fn (array $a, array $b) => count($b) <=> count($a));
 
-        $path = null;
-        foreach ($candidatos as $candidato) {
-            if (Storage::disk('local')->exists($candidato)) {
-                $path = $candidato;
-                break;
-            }
-        }
-
-        if (! $path) {
-            return null;
-        }
-
-        $datos = json_decode((string) Storage::disk('local')->get($path), true);
-        if (! is_array($datos) || ! isset($datos['ficha']) || ! is_array($datos['ficha'])) {
-            return null;
-        }
-
-        return $this->limpiarFicha($datos['ficha']);
-    }
-
-    /**
-     * Aplica el filtro público a todo lo que venga del ZIP (A22b).
-     *
-     * @param  array<string, mixed>  $ficha
-     * @return array<string, mixed>
-     */
-    private function limpiarFicha(array $ficha): array
-    {
-        foreach ($ficha as $clave => $valor) {
-            if (is_string($valor)) {
-                $ficha[$clave] = FiltroPublico::texto($valor);
-            } elseif (is_array($valor)) {
-                $ficha[$clave] = array_values(array_filter($valor, function ($item) {
-                    if (is_string($item)) {
-                        return FiltroPublico::permitida($item);
-                    }
-
-                    if (is_array($item)) {
-                        return FiltroPublico::permitida(implode(' ', array_filter($item, 'is_string')));
-                    }
-
-                    return true;
-                }));
-            }
-        }
-
-        return array_filter($ficha, fn ($v) => $v !== null && $v !== []);
-    }
-
-    private function leerContenido($car, string $filename): ?string
-    {
-        $path = "cars/{$car->id}/contenido/{$filename}";
-        if (! Storage::disk('local')->exists($path)) {
-            return null;
-        }
-
-        return Storage::disk('local')->get($path);
+        return FiltroPublico::lista($candidatas[0]);
     }
 
     private function logo(): ?string

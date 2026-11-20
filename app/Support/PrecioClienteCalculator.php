@@ -141,6 +141,63 @@ class PrecioClienteCalculator
     }
 
     /**
+     * Precio del dossier a partir del MISMO desglose que la ficha del
+     * marketplace (`CostBreakdown::forCar`), con los costes del coche en BD.
+     *
+     * Revisión 20-nov-2026: el dossier y la ficha del marketplace calculaban
+     * cada uno su total (bloques [GASTO] del ZIP frente a columnas del coche)
+     * y el cliente veía 10.035 € en un enlace y 10.364 € en el otro para el
+     * mismo Mazda. Ahora, si el coche tiene precio en BD, manda la BD (es lo
+     * que se edita en el panel) y las dos fichas dicen lo mismo. Los bloques
+     * [GASTO] del ZIP quedan solo para coches sin costes en BD.
+     *
+     * @param  array{car_price: float, transport: float, processing: float, paperwork: float, iedmt: float, honorarios: int|float, total: float, has_data: bool}  $desglose
+     * @return array<string, mixed>
+     */
+    public static function desdeDesglose($car, array $desglose): array
+    {
+        $esEspana = self::esOrigenEspana($car);
+        $partidas = array_filter([
+            $esEspana ? 'Traslado hasta Huelva' : 'Transporte hasta España' => (float) $desglose['transport'],
+            'ITV, COC y DGT' => (float) $desglose['processing'],
+            'Gestoría, placas y seguro del traslado' => (float) $desglose['paperwork'],
+            'Impuesto de matriculación (IEDMT)' => (float) $desglose['iedmt'],
+        ], fn (float $importe) => $importe > 0);
+        $partidas['Honorarios JJ Import Motors'] = (float) $desglose['honorarios'];
+
+        $origen = (float) $desglose['car_price'];
+        $total = (float) $desglose['total'];
+
+        $bandaIedmt = self::co2Confirmado($car)
+            ? self::BANDA_IEDMT_CO2_CONFIRMADO
+            : self::BANDA_IEDMT_CO2_SIN_CONFIRMAR;
+        $margen = (float) $desglose['transport'] * self::BANDA_TRANSPORTE
+            + (float) $desglose['iedmt'] * $bandaIedmt
+            + ((float) $desglose['processing'] + (float) $desglose['paperwork']) * self::BANDA_GESTORIA;
+
+        $min = floor(($total - $margen) / 100) * 100;
+        $max = ceil(($total + $margen) / 100) * 100;
+        if ($min < $origen) {
+            $min = floor($origen / 100) * 100;
+        }
+
+        return [
+            'origen' => $origen,
+            'gastos' => round($total - $origen, 2),
+            'total_estimado' => $total,
+            'total_min' => (float) max(0, $min),
+            'total_max' => (float) $max,
+            'banda_motivo' => $esEspana
+                ? 'La horquilla recoge la variación del traslado y de los trámites de transferencia.'
+                : 'La horquilla recoge la variación del transporte y de las tasas de matriculación.',
+            'desglose' => ['Precio del coche' => round($origen, 2)] + array_map(fn (float $v) => round($v, 2), $partidas),
+            'moneda' => 'EUR',
+            'fuente' => 'costes del coche',
+            'aviso_precio_final' => 'La cifra se cierra por escrito antes de que reserves nada.',
+        ];
+    }
+
+    /**
      * Desglose de gastos tal y como lo escribió la skill en el ZIP.
      *
      * Fuente preferente: bloques `[GASTO] concepto | importe` de

@@ -2,7 +2,6 @@
 import { computed, ref, onMounted, onUnmounted } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import {
-    EyeIcon,
     CheckCircleIcon,
     ChevronLeftIcon,
     ChevronRightIcon,
@@ -23,7 +22,10 @@ import { photoUrl } from '@/Composables/usePhotoUrl';
 
 const props = defineProps({
     car: Object,
-    derived: Object,
+    // Investigacion de la unidad escrita para el cliente (FichaPublica):
+    // los mismos textos que el dossier /c/{token}.
+    valuation: { type: Array, default: () => [] },
+    checks: { type: Object, default: () => ({ verificado: [], pendiente: [] }) },
     requestUrl: { type: String, default: null },
     relatedCars: { type: Array, default: () => [] },
     publicProfileUrl: { type: String, default: null },
@@ -52,6 +54,17 @@ const fmtNumber = (n) => {
     const loc = locale.value === 'en' ? 'en-US' : 'es-ES';
     return new Intl.NumberFormat(loc).format(num);
 };
+
+// Negritas **asi** de los textos del ZIP, escapando antes el HTML.
+const escapeHtml = (text) => String(text ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+const withBold = (text) => escapeHtml(text).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+
+const checksDone = computed(() => (Array.isArray(props.checks?.verificado) ? props.checks.verificado : []));
+const checksPending = computed(() => (Array.isArray(props.checks?.pendiente) ? props.checks.pendiente : []));
 
 // Compartir: copia la URL publica al portapapeles.
 const shareCopied = ref(false);
@@ -112,8 +125,8 @@ const whatsappLink = computed(() => {
     const carLine = [brand, model, version].filter(Boolean).join(' ').trim();
     const isEs = (locale.value || 'es').startsWith('es');
     const text = isEs
-        ? `Hola, estoy interesado en el ${carLine || 'coche'} que he visto en su web. ¿Me pueden dar más información?\n\n${ref}`
-        : `Hi, I'm interested in the ${carLine || 'car'} I saw on your website. Could you give me more information?\n\n${ref}`;
+        ? `Hola, me interesa el ${carLine || 'coche'}. ¿Me contáis más?\n\n${ref}`
+        : `Hi, I'm interested in the ${carLine || 'car'}. Could you tell me more?\n\n${ref}`;
     return `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
 });
 
@@ -233,11 +246,6 @@ const stateLabels = {
 };
 const stateLabel = computed(() => stateLabels[props.car?.status] || t('dossier.state_default', { default: 'Disponible para gestion' }));
 
-// URL WhatsApp con texto predefinido.
-const whatsappUrl = computed(() => {
-    const text = t('dossier.whatsapp_text', { brand: props.car?.brand || '', model: props.car?.model || '' });
-    return 'https://wa.me/34675701439?text=' + encodeURIComponent(text);
-});
 
 // Especificaciones tecnicas (mismo orden que el dossier car-dossier.blade.php).
 // Sin VIN, sin CO2, sin puertas â€” solo lo que el dossier muestra: Marca, Modelo,
@@ -268,20 +276,8 @@ const specItems = computed(() => [
     <MarketplaceLayout>
         <div class="min-h-screen bg-gradient-to-br from-platinum-100 via-white to-estoril-50 dark:from-asphalt-900 dark:via-asphalt-900 dark:to-asphalt-800">
 
-            <!-- Banner si el visitante llega por link de share /p/{token} -->
-            <div v-if="isSharedProfile" class="mx-auto mt-4 max-w-5xl px-4 sm:px-6 lg:px-8">
-                <div class="flex items-start gap-3 rounded-2xl border border-estoril-200 bg-estoril-50 p-4 dark:border-estoril-800 dark:bg-estoril-900/30">
-                    <ShareIcon class="h-5 w-5 shrink-0 text-estoril-700 dark:text-estoril-300" />
-                    <div>
-                        <p class="text-sm font-semibold text-estoril-900 dark:text-estoril-100">
-                            {{ t('marketplace.shared_profile_badge', { default: 'Perfil publico' }) }}
-                        </p>
-                        <p class="mt-1 text-sm text-estoril-800 dark:text-estoril-200">
-                            {{ t('marketplace.shared_profile_desc', { default: 'Estas viendo el perfil publico de este coche, compartido por JJ Import Motors.' }) }}
-                        </p>
-                    </div>
-                </div>
-            </div>
+            <!-- Banner "Perfil publico" de /p/{token} retirado (20-nov-2026):
+                 al cliente no le aporta nada saber como se llama el enlace. -->
 
             <div class="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
 
@@ -293,14 +289,12 @@ const specItems = computed(() => [
                                 <span class="inline-flex items-center rounded-full bg-amber-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-amber-700 ring-1 ring-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:ring-amber-800">
                                     {{ stateLabel }}
                                 </span>
-                                <span v-if="car.marketplace_views > 0" :title="t('marketplace.visits_count_tooltip')" class="inline-flex items-center gap-1 rounded-full bg-gray-50 px-3 py-1 text-[11px] font-medium text-gray-600 ring-1 ring-gray-200 dark:bg-asphalt-700/50 dark:text-gray-300 dark:ring-asphalt-600">
-                                    <EyeIcon class="h-3.5 w-3.5" />
-                                    {{ fmtNumber(car.marketplace_views) }}
-                                </span>
+                                <!-- Contador de visitas retirado de la ficha publica (20-nov-2026):
+                                     con pocas visitas resta en vez de sumar. El equipo lo ve en /cars/{id}. -->
                             </div>
                             <h1 class="mt-4 text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
                                 {{ car.brand }}
-                                <span class="block bg-gradient-to-br from-estoril-700 to-estoril-900 bg-clip-text text-transparent dark:from-estoril-300 dark:to-estoril-500">
+                                <span class="bg-gradient-to-br from-estoril-700 to-estoril-900 bg-clip-text text-transparent dark:from-estoril-300 dark:to-estoril-500">
                                     {{ car.model }}
                                 </span>
                             </h1>
@@ -313,7 +307,7 @@ const specItems = computed(() => [
                                 <p class="mt-1 text-2xl font-extrabold tracking-tight">{{ heroPrice }}</p>
                             </div>
                             <div class="mt-5 flex flex-wrap gap-2">
-                                <a :href="whatsappUrl" target="_blank" rel="noopener" class="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-600 sm:flex-none">
+                                <a :href="whatsappLink" target="_blank" rel="noopener" class="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-600 sm:flex-none">
                                     <ChatBubbleLeftRightIcon class="h-4 w-4" />
                                     {{ t('dossier.cta_whatsapp', { default: 'Me interesa' }) }}
                                 </a>
@@ -328,7 +322,7 @@ const specItems = computed(() => [
                             </div>
                             <p v-if="shareError" class="mt-2 text-xs text-rose-600">{{ shareError }}</p>
                         </div>
-                        <div class="md:col-span-3">
+                        <div class="order-first md:order-none md:col-span-3">
                             <div v-if="activePhoto" class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-asphalt-200 to-gray-300 shadow-md">
                                 <img :src="photoUrl(activePhoto)" :alt="`${car.brand} ${car.model}`" class="aspect-[4/3] w-full object-cover" />
                                 <template v-if="totalPhotos > 1">
@@ -352,40 +346,6 @@ const specItems = computed(() => [
                                 </button>
                             </div>
                         </div>
-                    </div>
-                </section>
-
-                <!-- CTA contextual: WhatsApp sobre este coche + ver ficha completa -->
-                <section class="flex flex-col items-start justify-between gap-3 rounded-2xl bg-gradient-to-br from-asphalt-900 to-estoril-900 p-5 text-white shadow-sm sm:flex-row sm:items-center">
-                    <div>
-                        <p class="text-base font-semibold">
-                            {{ t('marketplace_show.cta_request_title', { default: '¿Te interesa este coche?' }) }}
-                        </p>
-                        <p class="mt-1 text-sm text-estoril-100">
-                            {{ t('marketplace_show.cta_request_desc', { default: 'Escríbenos por WhatsApp y te contamos todo sobre esta unidad. Sin compromiso.' }) }}
-                        </p>
-                    </div>
-                    <div class="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row">
-                        <a
-                            v-if="dossierUrl"
-                            :href="dossierUrl"
-                            target="_blank"
-                            rel="noopener"
-                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-white/30 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-white/20"
-                        >
-                            <DocumentArrowDownIcon class="h-4 w-4" />
-                            {{ t('marketplace_show.cta_full_dossier', { default: 'Ver ficha completa' }) }}
-                        </a>
-                        <a
-                            v-if="whatsappLink"
-                            :href="whatsappLink"
-                            target="_blank"
-                            rel="noopener"
-                            class="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-estoril-800 shadow-sm transition hover:bg-estoril-50"
-                        >
-                            <ChatBubbleLeftRightIcon class="h-4 w-4" />
-                            {{ t('marketplace_show.cta_whatsapp', { default: 'Hablar por WhatsApp' }) }}
-                        </a>
                     </div>
                 </section>
 
@@ -421,47 +381,74 @@ const specItems = computed(() => [
                     </div>
                 </section>
 
+                <!-- NUESTRA VALORACION: la investigacion de la unidad, escrita
+                     para el cliente (FichaPublica, mismo texto que el dossier). -->
+                <section v-if="valuation.length > 0" class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700 sm:p-8">
+                    <p class="text-[11px] font-bold uppercase tracking-widest text-estoril-700 dark:text-estoril-300">
+                        {{ t('marketplace_show.valuation_eyebrow', { default: 'Nuestra valoración' }) }}
+                    </p>
+                    <h2 class="mt-2 text-2xl font-extrabold text-gray-900 dark:text-white sm:text-3xl">
+                        {{ t('marketplace_show.valuation_title', { default: 'Qué nos parece esta unidad' }) }}
+                    </h2>
+                    <!-- eslint-disable-next-line vue/no-v-html -->
+                    <p v-for="(paragraph, i) in valuation" :key="i" class="mt-3 text-sm leading-relaxed text-gray-700 dark:text-gray-300" v-html="withBold(paragraph)"></p>
+                </section>
+
+                <!-- PUNTOS A FAVOR -->
+                <section v-if="car.pros && car.pros.length" class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700 sm:p-8">
+                    <p class="text-[11px] font-bold uppercase tracking-widest text-estoril-700 dark:text-estoril-300">
+                        {{ t('dossier.section_pros_eyebrow', { default: 'Puntos a favor' }) }}
+                    </p>
+                    <h2 class="mt-2 text-2xl font-extrabold text-gray-900 dark:text-white sm:text-3xl">
+                        {{ t('dossier.section_pros_title', { default: 'Lo mejor de esta unidad' }) }}
+                    </h2>
+                    <ul class="mt-4 space-y-2">
+                        <li v-for="(pro, i) in car.pros" :key="i" class="flex items-start gap-2 rounded-lg border border-estoril-200 bg-estoril-50 p-3 dark:border-estoril-800 dark:bg-asphalt-800">
+                            <CheckCircleIcon class="mt-0.5 h-5 w-5 shrink-0 text-estoril-700 dark:text-estoril-300" />
+                            <!-- eslint-disable-next-line vue/no-v-html -->
+                            <p class="flex-1 text-sm text-gray-900 dark:text-gray-200" v-html="withBold(typeof pro === 'string' ? pro : pro.text)"></p>
+                        </li>
+                    </ul>
+                </section>
+
                 <!-- PRECIO -->
                 <section v-if="costBreakdown && costBreakdown.has_data" class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700">
-                    <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-                        <h3 class="text-base font-semibold text-gray-900">{{ t('dossier.section_price_title', { default: 'Cuanto te costaria, puesto en Huelva' }) }}</h3>
-                        <span class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-amber-700 ring-1 ring-amber-200">
+                    <div class="flex items-center justify-between gap-3 border-b border-gray-200 px-6 py-4 dark:border-asphalt-700">
+                        <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ t('dossier.section_price_title', { default: 'Cuanto te costaria, puesto en Huelva' }) }}</h3>
+                        <span class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-amber-700 ring-1 ring-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:ring-amber-800">
                             {{ t('marketplace_show.cost_approximate', { default: 'Aproximado' }) }}
                         </span>
                     </div>
                     <div class="space-y-3 p-6">
-                        <div class="flex items-baseline justify-between gap-4 border-b border-dashed border-gray-200 pb-2">
-                            <span class="text-sm text-gray-700">{{ t('marketplace_show.cost_purchase') }}</span>
-                            <span class="font-mono text-sm font-semibold text-gray-900">{{ fmt(costBreakdown.car_price) }}</span>
+                        <div class="flex items-baseline justify-between gap-4 border-b border-dashed border-gray-200 pb-2 dark:border-asphalt-700">
+                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ t('marketplace_show.cost_purchase') }}</span>
+                            <span class="font-mono text-sm font-semibold text-gray-900 dark:text-white">{{ fmt(costBreakdown.car_price) }}</span>
                         </div>
-                        <div v-if="costBreakdown.transport > 0" class="flex items-baseline justify-between gap-4 border-b border-dashed border-gray-200 pb-2">
-                            <span class="text-sm text-gray-700">{{ t('marketplace_show.cost_transport') }}</span>
-                            <span class="font-mono text-sm text-gray-600">~ {{ fmt(costBreakdown.transport) }}</span>
+                        <div v-if="costBreakdown.transport > 0" class="flex items-baseline justify-between gap-4 border-b border-dashed border-gray-200 pb-2 dark:border-asphalt-700">
+                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ t('marketplace_show.cost_transport') }}</span>
+                            <span class="font-mono text-sm text-gray-600 dark:text-gray-300">~ {{ fmt(costBreakdown.transport) }}</span>
                         </div>
-                        <div v-if="costBreakdown.processing > 0" class="flex items-baseline justify-between gap-4 border-b border-dashed border-gray-200 pb-2">
-                            <span class="text-sm text-gray-700">{{ t('marketplace_show.cost_processing_grouped', { default: 'ITV + COC + DGT' }) }}</span>
-                            <span class="font-mono text-sm text-gray-600">~ {{ fmt(costBreakdown.processing) }}</span>
+                        <div v-if="costBreakdown.processing > 0" class="flex items-baseline justify-between gap-4 border-b border-dashed border-gray-200 pb-2 dark:border-asphalt-700">
+                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ t('marketplace_show.cost_processing_grouped', { default: 'ITV + COC + DGT' }) }}</span>
+                            <span class="font-mono text-sm text-gray-600 dark:text-gray-300">~ {{ fmt(costBreakdown.processing) }}</span>
                         </div>
-                        <div v-if="costBreakdown.paperwork > 0" class="flex items-baseline justify-between gap-4 border-b border-dashed border-gray-200 pb-2">
-                            <span class="text-sm text-gray-700">{{ t('marketplace_show.cost_paperwork', { default: 'Gestoria, placas y seguro del traslado' }) }}</span>
-                            <span class="font-mono text-sm text-gray-600">~ {{ fmt(costBreakdown.paperwork) }}</span>
+                        <div v-if="costBreakdown.paperwork > 0" class="flex items-baseline justify-between gap-4 border-b border-dashed border-gray-200 pb-2 dark:border-asphalt-700">
+                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ t('marketplace_show.cost_paperwork', { default: 'Gestoria, placas y seguro del traslado' }) }}</span>
+                            <span class="font-mono text-sm text-gray-600 dark:text-gray-300">~ {{ fmt(costBreakdown.paperwork) }}</span>
                         </div>
-                        <div v-if="costBreakdown.iedmt > 0" class="flex items-baseline justify-between gap-4 border-b border-dashed border-gray-200 pb-2">
-                            <span class="text-sm text-gray-700">{{ t('marketplace_show.cost_iedmt', { default: 'IEDMT (estimado)' }) }}</span>
-                            <span class="font-mono text-sm text-gray-600">~ {{ fmt(costBreakdown.iedmt) }}</span>
+                        <div v-if="costBreakdown.iedmt > 0" class="flex items-baseline justify-between gap-4 border-b border-dashed border-gray-200 pb-2 dark:border-asphalt-700">
+                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ t('marketplace_show.cost_iedmt', { default: 'IEDMT (estimado)' }) }}</span>
+                            <span class="font-mono text-sm text-gray-600 dark:text-gray-300">~ {{ fmt(costBreakdown.iedmt) }}</span>
                         </div>
-                        <div class="flex items-baseline justify-between gap-4 border-b border-dashed border-gray-200 pb-2">
-                            <div>
-                                <span class="text-sm text-gray-700">{{ t('marketplace_show.cost_honorarios_label', { default: 'Honorarios JJ Import' }) }}</span>
-                                <p class="text-[11px] text-gray-500">{{ t('marketplace_show.cost_honorarios_note', { default: '1.000 EUR (1.500 EUR si el coche es >= 30.000 EUR)' }) }}</p>
-                            </div>
-                            <span class="font-mono text-sm font-semibold text-estoril-800">{{ fmt(costBreakdown.honorarios) }}</span>
+                        <div class="flex items-baseline justify-between gap-4 border-b border-dashed border-gray-200 pb-2 dark:border-asphalt-700">
+                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ t('marketplace_show.cost_honorarios_label', { default: 'Honorarios JJ Import' }) }}</span>
+                            <span class="font-mono text-sm font-semibold text-estoril-800 dark:text-estoril-300">{{ fmt(costBreakdown.honorarios) }}</span>
                         </div>
                         <div class="flex items-baseline justify-between gap-4 pt-2">
-                            <span class="text-sm font-bold text-gray-900">{{ t('marketplace_show.cost_total_approx', { default: 'Total aproximado' }) }}</span>
-                            <span class="font-mono text-lg font-extrabold text-estoril-800">~ {{ fmt(costBreakdown.total) }}</span>
+                            <span class="text-sm font-bold text-gray-900 dark:text-white">{{ t('marketplace_show.cost_total_approx', { default: 'Total aproximado' }) }}</span>
+                            <span class="font-mono text-lg font-extrabold text-estoril-800 dark:text-estoril-300">~ {{ fmt(costBreakdown.total) }}</span>
                         </div>
-                        <p class="mt-3 rounded-lg bg-gray-50 px-3 py-2 text-[11px] leading-relaxed text-gray-600">
+                        <p class="mt-3 rounded-lg bg-gray-50 px-3 py-2 text-[11px] leading-relaxed text-gray-600 dark:bg-asphalt-700/50 dark:text-gray-400">
                             {{ t('marketplace_show.cost_disclaimer', { default: 'Valoracion aproximada. NO son costes finales: los gastos reales pueden variar segun el vehiculo, el transporte y las tasas vigentes. Confirmamos por escrito antes de la reserva.' }) }}
                         </p>
                     </div>
@@ -492,6 +479,36 @@ const specItems = computed(() => [
                     </ul>
                 </section>
 
+                <!-- QUE ESTA COMPROBADO Y QUE SE COMPRUEBA ANTES DE RESERVAR -->
+                <section v-if="checksDone.length > 0 || checksPending.length > 0" class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700 sm:p-8">
+                    <p class="text-[11px] font-bold uppercase tracking-widest text-estoril-700 dark:text-estoril-300">
+                        {{ t('marketplace_show.checks_eyebrow', { default: 'La revisión' }) }}
+                    </p>
+                    <h2 class="mt-2 text-2xl font-extrabold text-gray-900 dark:text-white sm:text-3xl">
+                        {{ t('marketplace_show.checks_title', { default: 'Qué está comprobado y qué se comprueba antes de reservar' }) }}
+                    </h2>
+                    <div class="mt-5 grid grid-cols-1 gap-6 sm:grid-cols-2">
+                        <div v-if="checksDone.length > 0">
+                            <h3 class="text-sm font-semibold text-gray-900 dark:text-white">{{ t('marketplace_show.checks_done', { default: 'Ya comprobado' }) }}</h3>
+                            <ul class="mt-2 space-y-2">
+                                <li v-for="(item, i) in checksDone" :key="'d' + i" class="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
+                                    <CheckCircleIcon class="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                                    <span>{{ item }}</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div v-if="checksPending.length > 0">
+                            <h3 class="text-sm font-semibold text-gray-900 dark:text-white">{{ t('marketplace_show.checks_pending', { default: 'Se comprueba antes de la reserva' }) }}</h3>
+                            <ul class="mt-2 space-y-2">
+                                <li v-for="(item, i) in checksPending" :key="'p' + i" class="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
+                                    <span class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-estoril-500"></span>
+                                    <span>{{ item }}</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
                 <!-- MERCADO -->
                 <section v-if="marketRange" class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700 sm:p-8">
                     <p class="text-[11px] font-bold uppercase tracking-widest text-estoril-700 dark:text-estoril-300">
@@ -503,12 +520,12 @@ const specItems = computed(() => [
                     <div class="mt-6">
                         <div class="relative h-2 rounded-full bg-gradient-to-r from-emerald-400 via-gray-300 to-amber-400">
                             <div v-if="marketRange.pos !== null" class="absolute -top-2 h-6 w-1 rounded bg-gray-900 shadow-md dark:bg-white" :style="{ left: marketRange.pos + '%' }">
-                                <span class="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-estoril-700 px-2 py-0.5 text-[10px] font-bold text-white shadow">
-                                    {{ t('dossier.this_unit', { default: 'Esta unidad' }) }}
+                                <span :class="['absolute top-7 whitespace-nowrap rounded-full bg-estoril-700 px-2 py-0.5 text-[10px] font-bold text-white shadow', marketRange.pos < 20 ? 'left-0' : marketRange.pos > 80 ? 'right-0' : 'left-1/2 -translate-x-1/2']">
+                                    {{ t('dossier.this_unit', { default: 'Esta unidad' }) }} · ~ {{ fmt(costBreakdown.total) }}
                                 </span>
                             </div>
                         </div>
-                        <div class="mt-2 flex justify-between text-xs text-gray-600 dark:text-gray-400">
+                        <div class="mt-12 flex justify-between text-xs text-gray-600 dark:text-gray-400">
                             <div>
                                 <p class="font-bold text-gray-900 dark:text-white">{{ fmt(marketRange.min) }}</p>
                                 <p>{{ t('dossier.cheapest', { default: 'el mas barato' }) }}</p>
@@ -523,24 +540,43 @@ const specItems = computed(() => [
                             </div>
                         </div>
                     </div>
+                    <p class="mt-4 text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
+                        {{ t('marketplace_show.market_note', { default: 'Comparativa con unidades parecidas publicadas en España. Es una referencia de mercado, no una promesa de ahorro.' }) }}
+                    </p>
                 </section>
 
-                <!-- PUNTOS A FAVOR -->
-                <section v-if="car.pros && car.pros.length" class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700 sm:p-8">
-                    <p class="text-[11px] font-bold uppercase tracking-widest text-estoril-700 dark:text-estoril-300">
-                        {{ t('dossier.section_pros_eyebrow', { default: 'Puntos a favor' }) }}
-                    </p>
-                    <h2 class="mt-2 text-2xl font-extrabold text-gray-900 dark:text-white sm:text-3xl">
-                        {{ t('dossier.section_pros_title', { default: 'Lo mejor de esta unidad' }) }}
-                    </h2>
-                    <ul class="mt-4 space-y-2">
-                        <li v-for="(pro, i) in car.pros" :key="i" class="flex items-start gap-2 rounded-lg border border-estoril-200 bg-estoril-50 p-3 dark:border-estoril-800 dark:bg-asphalt-800">
-                            <CheckCircleIcon class="mt-0.5 h-5 w-5 shrink-0 text-estoril-700 dark:text-estoril-300" />
-                            <p class="flex-1 text-sm text-gray-900 dark:text-gray-200">
-                                {{ typeof pro === 'string' ? pro : pro.text }}
-                            </p>
-                        </li>
-                    </ul>
+                <!-- CTA contextual: WhatsApp sobre este coche + ver ficha completa -->
+                <section class="flex flex-col items-start justify-between gap-3 rounded-2xl bg-gradient-to-br from-asphalt-900 to-estoril-900 p-5 text-white shadow-sm sm:flex-row sm:items-center">
+                    <div>
+                        <p class="text-base font-semibold">
+                            {{ t('marketplace_show.cta_request_title', { default: '¿Te interesa este coche?' }) }}
+                        </p>
+                        <p class="mt-1 text-sm text-estoril-100">
+                            {{ t('marketplace_show.cta_request_desc', { default: 'Escríbenos por WhatsApp y te contamos todo sobre esta unidad. Sin compromiso.' }) }}
+                        </p>
+                    </div>
+                    <div class="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row">
+                        <a
+                            v-if="dossierUrl"
+                            :href="dossierUrl"
+                            target="_blank"
+                            rel="noopener"
+                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-white/30 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-white/20"
+                        >
+                            <DocumentArrowDownIcon class="h-4 w-4" />
+                            {{ t('marketplace_show.cta_full_dossier', { default: 'Ver ficha completa' }) }}
+                        </a>
+                        <a
+                            v-if="whatsappLink"
+                            :href="whatsappLink"
+                            target="_blank"
+                            rel="noopener"
+                            class="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-estoril-800 shadow-sm transition hover:bg-estoril-50"
+                        >
+                            <ChatBubbleLeftRightIcon class="h-4 w-4" />
+                            {{ t('marketplace_show.cta_whatsapp', { default: 'Hablar por WhatsApp' }) }}
+                        </a>
+                    </div>
                 </section>
 
                 <!-- PUNTOS EN CONTRA: NO se muestran al cliente (decision
@@ -644,7 +680,7 @@ const specItems = computed(() => [
 
             <!-- BARRA CTA FIJA -->
             <div v-if="scrollY > 400" class="fixed bottom-0 left-0 right-0 z-40 flex gap-2 border-t border-gray-200 bg-white/95 px-4 py-3 backdrop-blur shadow-lg dark:border-asphalt-700 dark:bg-asphalt-900/95">
-                <a :href="whatsappUrl" target="_blank" rel="noopener" class="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-600">
+                <a :href="whatsappLink" target="_blank" rel="noopener" class="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-600">
                     <ChatBubbleLeftRightIcon class="h-4 w-4" />
                     {{ t('dossier.cta_whatsapp_short', { default: 'WhatsApp' }) }}
                 </a>

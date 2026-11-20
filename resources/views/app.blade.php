@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title inertia>{{ config('app.name', 'Laravel') }}</title>
+        <title inertia>{{ $meta['title'] ?? config('app.name', 'Laravel') }}</title>
 
         <!-- Critical CSS inline (above-the-fold styles) — improves FCP/LCP.
              Envuelto en @layer base para que las utilidades de Tailwind v4
@@ -21,6 +21,26 @@
             }
         </style>
 
+        {{-- Fichas públicas de coche (/marketplace/{id}, /p/{token}): la
+             previsualización del enlace en WhatsApp sale del HTML del servidor,
+             así que el controlador pasa `meta` con el coche (20-nov-2026). --}}
+        @php($shareMeta = $meta ?? null)
+        @if($shareMeta)
+        <meta name="description" content="{{ $shareMeta['description'] }}">
+        <meta property="og:type" content="website">
+        <meta property="og:site_name" content="JJ Import Motors">
+        <meta property="og:url" content="{{ $shareMeta['url'] }}">
+        <meta property="og:title" content="{{ $shareMeta['title'] }}">
+        <meta property="og:description" content="{{ $shareMeta['description'] }}">
+        @if(!empty($shareMeta['image']))
+        <meta property="og:image" content="{{ $shareMeta['image'] }}">
+        <meta property="twitter:image" content="{{ $shareMeta['image'] }}">
+        @endif
+        <meta property="og:locale" content="es_ES">
+        <meta property="twitter:card" content="summary_large_image">
+        <meta property="twitter:title" content="{{ $shareMeta['title'] }}">
+        <meta property="twitter:description" content="{{ $shareMeta['description'] }}">
+        @else
         <!-- SEO Meta Tags -->
         <meta name="description" content="JJ Import Motors — Plataforma profesional de importación de vehículos con verificación AI. Ahorra tiempo y evita fraudes en la importación de coches de Alemania.">
         <meta name="keywords" content="importar coches, importación vehículos, coches de Alemania, verificación AI, dealer importador, marketplace vehículos">
@@ -40,6 +60,8 @@
         <meta property="twitter:title" content="{{ config('app.name', 'JJ Import Motors') }}">
         <meta property="twitter:description" content="Plataforma profesional de importación de vehículos con verificación AI.">
         <meta property="twitter:image" content="{{ config('app.url') }}/img/og-image.jpg">
+
+        @endif
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>

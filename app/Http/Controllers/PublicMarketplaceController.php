@@ -7,6 +7,8 @@ use App\Models\CarPublicLink;
 use App\Models\MarketplaceVisit;
 use App\Models\Organization;
 use App\Support\CostBreakdown;
+use App\Support\FichaPublica;
+use App\Support\FiltroPublico;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -172,14 +174,15 @@ class PublicMarketplaceController extends Controller
         // coche antes de exponerlos vía Inertia. Sin esto, los modelos
         // Eloquent serializan TODOS los $fillable (incluyendo verdict
         // y verdict_changes) al cliente. (ver #2)
+        // CTA "Enviar solicitud" → apunta a la org del primer coche
+        // (todas las fichas son de la misma org pública en la práctica).
+        // Se toma del modelo ANTES de filtrar: el payload público solo lleva
+        // nombre/slug/logo de la org, no el modelo.
+        $firstCarOrg = $cars->getCollection()->first()?->organization;
+
         $cars->setCollection(
             $cars->getCollection()->map(fn (Car $c) => $this->publicCarPayload($c))
         );
-
-        // CTA "Enviar solicitud" → apunta a la org del primer coche
-        // (todas las fichas son de la misma org pública en la práctica).
-        $firstCar = $cars->first();
-        $firstCarOrg = is_array($firstCar) ? ($firstCar['organization'] ?? null) : $firstCar?->organization;
         $requestUrl = $this->publicRequestUrl($firstCarOrg);
 
         $verdicts = Car::VERDICTS;
@@ -304,13 +307,12 @@ class PublicMarketplaceController extends Controller
             ->publicMarketplace()
             ->whereIn('id', $ids->all())
             ->with(['photos', 'organization'])
-            ->get()
-            ->map(fn (Car $c) => $this->publicCarPayload($c));
+            ->get();
 
-        // El primer coche ya viene como array (publicCarPayload), pero la
-        // org esta en su clave 'organization' (modelo serializado).
-        $firstCar = $cars->first();
-        $firstCarOrg = is_array($firstCar) ? ($firstCar['organization'] ?? null) : $firstCar?->organization;
+        // La org se toma del modelo antes de filtrar (el payload público solo
+        // lleva nombre/slug/logo).
+        $firstCarOrg = $cars->first()?->organization;
+        $cars = $cars->map(fn (Car $c) => $this->publicCarPayload($c));
         $requestUrl = $this->publicRequestUrl($firstCarOrg);
 
         return Inertia::render('Public/MarketplaceCompare', [
@@ -339,11 +341,6 @@ class PublicMarketplaceController extends Controller
 
         $car->load(['photos', 'organization']);
 
-        // Pre-compute derived data for the enriched valuation UI
-        $car->researchGaps;       // touch accessor
-        $car->comparablesStats;    // touch accessor
-        $car->calculateTotalCost(); // touch method
-
         $costBreakdown = CostBreakdown::forCar($car, (float) $car->calculateIEDMT());
 
         return Inertia::render('Public/MarketplaceShow', [
@@ -354,15 +351,10 @@ class PublicMarketplaceController extends Controller
             'relatedCars' => $this->relatedCars($car),
             'isSharedProfile' => false,
             'whatsappNumber' => self::WHATSAPP_NUMBER,
-            'derived' => [
-                'total_cost' => $car->calculateTotalCost(),
-                'iedmt' => $car->calculateIEDMT(),
-                'research_gaps' => $car->researchGaps,
-                'comparables_stats' => $car->comparablesStats,
-            ],
+            ...$this->researchPayload($car),
             'costBreakdown' => $costBreakdown,
             'showMarketComparison' => CostBreakdown::marketComparisonFavoursClient($car, (float) $costBreakdown['total']),
-        ]);
+        ])->withViewData(['meta' => $this->shareMeta($car, $costBreakdown, route('marketplace.show', $car))]);
     }
 
     /**
@@ -482,10 +474,6 @@ class PublicMarketplaceController extends Controller
 
         $car->load(['photos', 'organization']);
 
-        $car->researchGaps;       // touch accessor
-        $car->comparablesStats;    // touch accessor
-        $car->calculateTotalCost(); // touch method
-
         $costBreakdown = CostBreakdown::forCar($car, (float) $car->calculateIEDMT());
 
         return Inertia::render('Public/MarketplaceShow', [
@@ -496,15 +484,10 @@ class PublicMarketplaceController extends Controller
             'relatedCars' => $this->relatedCars($car),
             'isSharedProfile' => true,
             'whatsappNumber' => self::WHATSAPP_NUMBER,
-            'derived' => [
-                'total_cost' => $car->calculateTotalCost(),
-                'iedmt' => $car->calculateIEDMT(),
-                'research_gaps' => $car->researchGaps,
-                'comparables_stats' => $car->comparablesStats,
-            ],
+            ...$this->researchPayload($car),
             'costBreakdown' => $costBreakdown,
             'showMarketComparison' => CostBreakdown::marketComparisonFavoursClient($car, (float) $costBreakdown['total']),
-        ]);
+        ])->withViewData(['meta' => $this->shareMeta($car, $costBreakdown, $link->publicProfileUrl())]);
     }
 
     /**
@@ -518,6 +501,59 @@ class PublicMarketplaceController extends Controller
         }
 
         return (bool) preg_match('/bot|crawl|spider|slurp|curl|wget|python-requests|headless/i', $ua);
+    }
+
+    /**
+     * Lo que la ficha publica cuenta de la investigacion de la unidad: la
+     * valoracion escrita para el cliente y que se comprueba antes de la
+     * reserva (mismo contenido que el dossier, via FichaPublica).
+     *
+     * @return array{valuation: array<int, string>, checks: array{verificado: array<int, string>, pendiente: array<int, string>}}
+     */
+    private function researchPayload(Car $car): array
+    {
+        return [
+            'valuation' => FichaPublica::valoracion(FichaPublica::esqueleto($car)),
+            'checks' => FichaPublica::comprobaciones(FichaPublica::fichaCliente($car)),
+        ];
+    }
+
+    /**
+     * Meta etiquetas para la previsualizacion del enlace (WhatsApp, Telegram,
+     * Instagram...). Van en el HTML del servidor porque esos robots no
+     * ejecutan JavaScript: antes el enlace salia como "Laravel" con el texto
+     * generico de la plataforma y sin foto (revision 20-nov-2026).
+     *
+     * @param  array{total: float}  $costBreakdown
+     * @return array{title: string, description: string, image: string|null, url: string}
+     */
+    private function shareMeta(Car $car, array $costBreakdown, string $url): array
+    {
+        $titulo = trim(implode(' ', array_filter([$car->brand, $car->model, $car->version])));
+        $datos = array_filter([
+            $car->year,
+            $car->mileage ? number_format((int) $car->mileage, 0, ',', '.').' km' : null,
+        ]);
+        $total = (float) ($costBreakdown['total'] ?? 0);
+
+        $descripcion = ($total > 0 ? '~ '.number_format($total, 0, ',', '.').' € puesto en Huelva (aprox.) · ' : '')
+            .($datos ? implode(' · ', $datos).' · ' : '')
+            .'Gestionamos la compra por ti';
+
+        $foto = $car->photos->sortBy('sort_order')->first();
+        $imagen = null;
+        if ($foto && $foto->url) {
+            $imagen = str_starts_with((string) $foto->url, 'http')
+                ? (string) $foto->url
+                : url('storage/'.ltrim(preg_replace('#^/?storage/#', '', (string) $foto->url), '/'));
+        }
+
+        return [
+            'title' => $titulo.' · JJ Import Motors',
+            'description' => $descripcion,
+            'image' => $imagen,
+            'url' => $url,
+        ];
     }
 
     /**
@@ -567,14 +603,21 @@ class PublicMarketplaceController extends Controller
             'id', 'brand', 'model', 'version', 'year', 'mileage', 'fuel',
             'transmission', 'drivetrain', 'cv', 'displacement',
             'consumption', 'owners', 'euro_norm',
-            'itv_date', 'pais_origen', 'purchase_price', 'new_price',
-            'transport', 'itv_fee', 'coc_fee', 'dgt_fees', 'professional_fees',
-            'other_fees', 'deposit', 'status',
-            'description', 'equipment', 'pros', 'is_marketplace',
-            'marketplace_views', 'marketplace_checked_at', 'marketplace_unavailable_reason',
+            'itv_date', 'pais_origen', 'purchase_price', 'status',
+            'equipment', 'pros', 'is_marketplace', 'marketplace_views',
             'market_avg', 'market_min', 'market_max', 'estimated_saving',
-            'expected_delivery_date',
         ]);
+
+        // 20-nov-2026: los costes sueltos (transporte, tasas, honorarios,
+        // fianza, precio nuevo) viajan ya sumados en `costBreakdown`; la
+        // descripcion del anuncio de origen puede llevar el nombre y el
+        // telefono del vendedor. Ninguno de los dos llega al navegador.
+
+        // "Lo mejor de esta unidad" pasa por el mismo filtro que el dossier.
+        $attrs['pros'] = FiltroPublico::lista(array_values(array_map(
+            fn ($pro) => is_array($pro) ? (string) ($pro['text'] ?? '') : (string) $pro,
+            is_array($car->pros) ? $car->pros : []
+        )));
 
         // Solo el tipo de vendedor (para avisar de que un particular no da
         // garantia y de que puede haber ITP), nunca su nombre ni su ciudad.
@@ -582,7 +625,9 @@ class PublicMarketplaceController extends Controller
 
         // Fotos y org se cargan aparte (necesarios para el render).
         $attrs['photos'] = $car->photos;
-        $attrs['organization'] = $car->organization;
+        // Solo lo que pinta la ficha: el modelo completo llevaba el plan,
+        // el proveedor de IA, el periodo de prueba y el id de Stripe.
+        $attrs['organization'] = $car->organization?->only(['name', 'slug', 'logo']);
 
         return $attrs;
     }

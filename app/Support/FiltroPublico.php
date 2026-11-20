@@ -64,6 +64,18 @@ class FiltroPublico
         '/vimos\s+en\s+(mobile\.de|autoscout|kleinanzeigen)/iu',
         '/anuncio\s+(original|de\s+origen)\s+en\s+(mobile\.de|autoscout|kleinanzeigen)/iu',
         '/honorarios?\D{0,15}\d/iu',
+        // Revision ficha 20-nov-2026 (Mazda 3 MPS): frases internas que se
+        // colaron en "Lo mejor de esta unidad" y en la valoracion.
+        //  - Lista de tareas del equipo ("Pendientes: ver facturas, VIN...").
+        //    Lo que queda por comprobar ya tiene su bloque propio.
+        //  - Ahorro frente a Espana escrito como argumento: si la comparativa
+        //    no favorece al cliente el bloque se oculta, y una frase suelta
+        //    lo contradeciria.
+        //  - Lo que opina el vendedor o el concesionario de origen.
+        '/^\s*pendientes?\s*:/iu',
+        '/por\s+debajo\s+del?\s.{0,60}(m(á|a)s\s+barato|mercado|espa(ñ|n)a)/iu',
+        '/m(á|a)s\s+barato\b.{0,50}\bque\s+(los|las)\s+de\s+(aqu(í|i)|espa(ñ|n)a)/iu',
+        '/valoraci(ó|o)n\s+del\s+(concesionario|vendedor)/iu',
     ];
 
     /** Lenguaje de vendedor o de garantía: prohibido (A31). */
@@ -122,6 +134,25 @@ class FiltroPublico
     public static function texto(?string $texto): ?string
     {
         return self::permitida($texto) ? trim((string) $texto) : null;
+    }
+
+    /**
+     * Como texto(), pero frase a frase: quita solo las frases no publicables
+     * y conserva el resto. Para parrafos largos (la valoracion de la unidad),
+     * donde una sola frase interna no debe tirar el parrafo entero.
+     */
+    public static function frases(?string $texto): ?string
+    {
+        $texto = trim((string) $texto);
+        if ($texto === '') {
+            return null;
+        }
+
+        $frases = preg_split('/(?<=[.!?])\s+/u', $texto) ?: [$texto];
+        $publicables = array_filter($frases, fn (string $frase) => self::permitida($frase));
+        $resultado = trim(implode(' ', $publicables));
+
+        return $resultado === '' ? null : $resultado;
     }
 
     /**
