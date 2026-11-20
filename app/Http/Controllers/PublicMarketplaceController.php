@@ -344,6 +344,8 @@ class PublicMarketplaceController extends Controller
         $car->comparablesStats;    // touch accessor
         $car->calculateTotalCost(); // touch method
 
+        $costBreakdown = CostBreakdown::forCar($car, (float) $car->calculateIEDMT());
+
         return Inertia::render('Public/MarketplaceShow', [
             'car' => $this->publicCarPayload($car),
             'requestUrl' => $this->publicRequestUrl($car->organization, ['car' => $car->id]),
@@ -358,7 +360,8 @@ class PublicMarketplaceController extends Controller
                 'research_gaps' => $car->researchGaps,
                 'comparables_stats' => $car->comparablesStats,
             ],
-            'costBreakdown' => CostBreakdown::forCar($car, (float) $car->calculateIEDMT()),
+            'costBreakdown' => $costBreakdown,
+            'showMarketComparison' => CostBreakdown::marketComparisonFavoursClient($car, (float) $costBreakdown['total']),
         ]);
     }
 
@@ -388,7 +391,7 @@ class PublicMarketplaceController extends Controller
             return $sameModel
                 ->sortBy(fn (Car $c) => abs((float) $c->purchase_price - (float) $car->purchase_price))
                 ->take(4)
-                ->map(fn (Car $c) => $this->publicCarPayload($c))
+                ->map(fn (Car $c) => $this->relatedCarPayload($c))
                 ->values();
         }
 
@@ -406,7 +409,7 @@ class PublicMarketplaceController extends Controller
             ->get();
 
         if ($sameBrandAndPrice->count() >= 1) {
-            return $sameBrandAndPrice->map(fn (Car $c) => $this->publicCarPayload($c));
+            return $sameBrandAndPrice->map(fn (Car $c) => $this->relatedCarPayload($c));
         }
 
         // 3) Misma marca sin filtro de precio (ultimo recurso)
@@ -418,7 +421,23 @@ class PublicMarketplaceController extends Controller
             ->limit(4)
             ->with('photos')
             ->get()
-            ->map(fn (Car $c) => $this->publicCarPayload($c));
+            ->map(fn (Car $c) => $this->relatedCarPayload($c));
+    }
+
+    /**
+     * Tarjeta de "Otros coches similares": el mismo allowlist publico, pero
+     * con el total aproximado puesto en destino en vez del precio del
+     * anuncio de origen (decision 20-nov-2026: el cliente no debe ver el
+     * precio aleman suelto al lado de una ficha que muestra el total).
+     *
+     * @return array<string, mixed>
+     */
+    private function relatedCarPayload(Car $car): array
+    {
+        $payload = $this->publicCarPayload($car);
+        $payload['estimated_total'] = CostBreakdown::forCar($car, (float) $car->calculateIEDMT())['total'];
+
+        return $payload;
     }
 
     /**
@@ -467,6 +486,8 @@ class PublicMarketplaceController extends Controller
         $car->comparablesStats;    // touch accessor
         $car->calculateTotalCost(); // touch method
 
+        $costBreakdown = CostBreakdown::forCar($car, (float) $car->calculateIEDMT());
+
         return Inertia::render('Public/MarketplaceShow', [
             'car' => $this->publicCarPayload($car),
             'publicProfileUrl' => $link->publicProfileUrl(),
@@ -481,7 +502,8 @@ class PublicMarketplaceController extends Controller
                 'research_gaps' => $car->researchGaps,
                 'comparables_stats' => $car->comparablesStats,
             ],
-            'costBreakdown' => CostBreakdown::forCar($car, (float) $car->calculateIEDMT()),
+            'costBreakdown' => $costBreakdown,
+            'showMarketComparison' => CostBreakdown::marketComparisonFavoursClient($car, (float) $costBreakdown['total']),
         ]);
     }
 
@@ -536,6 +558,8 @@ class PublicMarketplaceController extends Controller
         //  - notes, red_flags, research, tips, cons: info admin
         //  - vin, lat, lng: el VIN NO debe ser publico, las coords son
         //    para el admin y la ficha de tracking (privada)
+        //  - city, seller: la ciudad y el nombre del vendedor de origen
+        //    identifican al vendedor (decision 20-nov-2026)
         //  - busquedas_realizadas, ai_analysis_json: debug
         // Las vistas admin (Cars/Index, Dashboard, Tracking) acceden
         // al modelo completo directamente y siguen viendo todo.
@@ -545,12 +569,16 @@ class PublicMarketplaceController extends Controller
             'consumption', 'owners', 'euro_norm',
             'itv_date', 'pais_origen', 'purchase_price', 'new_price',
             'transport', 'itv_fee', 'coc_fee', 'dgt_fees', 'professional_fees',
-            'deposit', 'city', 'status',
+            'other_fees', 'deposit', 'status',
             'description', 'equipment', 'pros', 'is_marketplace',
             'marketplace_views', 'marketplace_checked_at', 'marketplace_unavailable_reason',
             'market_avg', 'market_min', 'market_max', 'estimated_saving',
             'expected_delivery_date',
         ]);
+
+        // Solo el tipo de vendedor (para avisar de que un particular no da
+        // garantia y de que puede haber ITP), nunca su nombre ni su ciudad.
+        $attrs['seller_is_private'] = $car->isFromPrivateSeller();
 
         // Fotos y org se cargan aparte (necesarios para el render).
         $attrs['photos'] = $car->photos;

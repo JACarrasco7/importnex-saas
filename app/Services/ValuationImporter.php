@@ -391,8 +391,10 @@ class ValuationImporter
                 'seats' => $v['plazas'] ?? null,
                 'owners' => $v['propietarios'] ?? null,
 
-                // year: JSON may be "2019" or "MM/YYYY" — normalize
-                'year' => $this->normalizeYear($v['anio'] ?? null),
+                // year: la primera matriculación MM/AAAA manda; si no viene,
+                // `anio` ("2019" o "MM/YYYY") normalizado. Antes "2011" se
+                // publicaba como 01/2011 aunque el coche fuera de 12/2011.
+                'year' => $this->resolveRegistrationDate($v),
 
                 // Listing
                 'url_link' => $a['url'] ?? null,
@@ -409,10 +411,13 @@ class ValuationImporter
                 'itv_fee' => $c['itv_matriculacion'] ?? null,
                 'dgt_fees' => $c['tasa_dgt'] ?? null,
 
-                // Honorarios de JJ + gestoria van a la misma columna: son lo que
-                // cobramos por encima del coste. Antes solo se leia 'gestoria'
-                // (casi siempre 0) y los honorarios se perdian.
-                'professional_fees' => $this->sumProfessionalFees($c),
+                // Honorarios de JJ solos. La gestoria y `otros` (placas de
+                // exportacion + seguro del traslado, placas espanolas) van a
+                // other_fees para que la ficha publica los sume al total
+                // (decision 20-nov-2026; antes la gestoria se mezclaba aqui y
+                // la ficha, que pinta los honorarios aparte, la perdia).
+                'professional_fees' => isset($c['honorarios']) ? (float) $c['honorarios'] : null,
+                'other_fees' => $this->sumOtherFees($c),
 
                 // Base del IEDMT. La app NO guarda el importe del impuesto: lo
                 // recalcula con Car::calculateIEDMT() a partir de esta base, la
@@ -692,19 +697,37 @@ class ValuationImporter
     }
 
     /**
-     * Honorarios de JJ + gestoria. Devuelve null si no viene ninguno de los dos,
-     * para que array_filter lo descarte y no pise un valor ya guardado.
+     * Gestoria + otros gastos de tramitacion (placas, seguro del traslado).
+     * Devuelve null si no viene ninguno, para que array_filter lo descarte y
+     * no pise un valor ya guardado.
+     *
+     * @param  array<string, mixed>  $costes
      */
-    private function sumProfessionalFees(array $costes): ?float
+    private function sumOtherFees(array $costes): ?float
     {
-        $honorarios = $costes['honorarios'] ?? null;
         $gestoria = $costes['gestoria'] ?? null;
+        $otros = $costes['otros'] ?? null;
 
-        if ($honorarios === null && $gestoria === null) {
+        if (! is_numeric($gestoria) && ! is_numeric($otros)) {
             return null;
         }
 
-        return (float) $honorarios + (float) $gestoria;
+        return (float) $gestoria + (float) $otros;
+    }
+
+    /**
+     * Fecha de primera matriculación "MM/AAAA" del vehículo.
+     *
+     * @param  array<string, mixed>  $vehiculo
+     */
+    private function resolveRegistrationDate(array $vehiculo): ?string
+    {
+        $firstRegistration = trim((string) ($vehiculo['primera_matriculacion'] ?? ''));
+        if (preg_match('#^(0[1-9]|1[0-2])/(\d{4})$#', $firstRegistration) === 1) {
+            return $firstRegistration;
+        }
+
+        return $this->normalizeYear($vehiculo['anio'] ?? null);
     }
 
     private function translate(?string $value, array $map): ?string

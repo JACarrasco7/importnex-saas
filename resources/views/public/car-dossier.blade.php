@@ -1007,8 +1007,9 @@
         $paisOrigen = strtolower((string) ($car->pais_origen ?? ''));
         $esAlemania = str_contains($paisOrigen, 'alem') || $paisOrigen === 'de';
         $esEspana = str_contains($paisOrigen, 'espa') || $paisOrigen === 'es';
-        $origenLabel = $esAlemania ? 'Importado desde Alemania' : ($esEspana ? 'Localizado en España' : 'Origen verificado');
-        $origenSub = $esAlemania ? 'Historial completo y verificado' : 'Historial verificado';
+        $origenLabel = $esAlemania ? 'Importado desde Alemania' : ($esEspana ? 'Localizado en España' : 'Origen confirmado antes de la reserva');
+        // 20-nov-2026: nada de «verificado» hasta que se haya comprobado de verdad.
+        $origenSub = 'Historial: se comprueba antes de la reserva';
 
         // ── Combustible: la BD lo trae del scraping en inglés (gasoline/diesel).
         //    Al cliente siempre en español. ──
@@ -1078,7 +1079,7 @@
             'Negociación y gestión de la compra',
             'Transporte hasta España',
             'ITV de importación, impuestos y matriculación',
-            'Historial y kilometraje comprobados',
+            'Comprobación de historial y kilometraje antes de la reserva',
             'Entrega en Huelva y provincia',
         ];
         $fichaPasos = $ficha['pasos'] ?? [
@@ -1134,7 +1135,7 @@
                 @if(count($heroDatos) > 0)
                     <p class="claim">{{ implode(' · ', $heroDatos) }}</p>
                 @else
-                    <p class="claim">Verificado por nuestro equipo</p>
+                    <p class="claim">Revisión antes de la reserva</p>
                 @endif
 
                 @if($precioTitular)
@@ -1182,8 +1183,8 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
                 <div class="trust-text">
-                    <strong>Historial verificado</strong>
-                    Origen y kilometraje confirmados
+                    <strong>Revisión antes de comprar</strong>
+                    Historial y kilometraje, antes de la reserva
                 </div>
             </div>
             <div class="trust-item">

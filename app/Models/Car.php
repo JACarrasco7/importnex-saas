@@ -24,7 +24,7 @@ class Car extends Model
         'seats', 'euro_norm', 'color', 'itv_date',
         'pais_origen', 'co2_confirmado',
         'purchase_price', 'new_price', 'manual_tax_base', 'boe_confirmed',
-        'transport', 'itv_fee', 'coc_fee', 'dgt_fees', 'professional_fees', 'deposit',
+        'transport', 'itv_fee', 'coc_fee', 'dgt_fees', 'professional_fees', 'other_fees', 'deposit',
         'vin', 'vat_scenario', 'seller', 'city', 'lat', 'lng',
         'status', 'url_link', 'traffic_light', 'valuation', 'recommendation',
         'description', 'original_description', 'equipment', 'tips', 'red_flags',
@@ -61,7 +61,7 @@ class Car extends Model
         'purchase_price' => 'decimal:2', 'new_price' => 'decimal:2',
         'manual_tax_base' => 'decimal:2', 'transport' => 'decimal:2',
         'itv_fee' => 'decimal:2', 'coc_fee' => 'decimal:2', 'dgt_fees' => 'decimal:2',
-        'professional_fees' => 'decimal:2', 'deposit' => 'decimal:2',
+        'professional_fees' => 'decimal:2', 'other_fees' => 'decimal:2', 'deposit' => 'decimal:2',
         'market_avg' => 'decimal:2', 'market_min' => 'decimal:2',
         'market_max' => 'decimal:2', 'estimated_saving' => 'decimal:2',
         'schema_version' => 'integer',
@@ -383,7 +383,20 @@ class Car extends Model
             + $this->coc_fee
             + $this->dgt_fees
             + $this->professional_fees
+            + $this->other_fees
             + $this->calculateIEDMT();
+    }
+
+    /**
+     * El vendedor de origen es un particular (no un concesionario).
+     *
+     * El importador guarda `seller` como "Nombre (Tipo)" con el tipo del ZIP
+     * (`Particular` / `Profesional`); mobile.de en alemán dice `Privat`.
+     * Al cliente solo le llega este booleano, nunca el nombre del vendedor.
+     */
+    public function isFromPrivateSeller(): bool
+    {
+        return (bool) preg_match('/\b(particular|privat|private)/iu', (string) $this->seller);
     }
 
     /**

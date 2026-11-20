@@ -64,7 +64,7 @@ interno y, si el ZIP lo trae, en los bloques `[COSTE]` del informe cliente.
 - ✅ `Gestionamos la compra` / `Te ayudamos a comprar`
 - ✅ `Compra, transporte y trámites incluidos` (gestión integral)
 - ✅ `Localizado en España` / `Importado desde Alemania` (origen verificado)
-- ✅ `Historial verificado` / `Origen verificado`
+- ✅ `Historial: se comprueba antes de la reserva` / `Revisión antes de comprar`. **`Verificado`, `Historial verificado`, `Inspección 9 puntos`, `Comprobado por nuestro equipo` NO** mientras no se haya comprobado de verdad esa unidad (decisión 20-nov-2026, review Mazda 3 MPS).
 - ✅ `Informe de oportunidad` (no "exclusivo" + "stock")
 - ✅ `Veredicto JJ Import Motors` (análisis interno, sin prometer nada)
 - ✅ `¿Por qué este coche?` (argumentos de compra)

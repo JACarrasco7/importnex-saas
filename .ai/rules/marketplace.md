@@ -98,6 +98,35 @@ mercado en la barra), `purchase_price` (precio real), `mileage`
 (km reales), `year`, `status` como "Disponible" (no el estado
 interno `Located`).
 
+## Revision ficha publica 20-nov-2026 (Mazda 3 MPS, coches 80/81)
+
+El usuario reviso dos fichas reales y fijo estas reglas:
+
+- **Sin ubicacion ni vendedor**: `city` y `seller` NO estan en el
+  allowlist de `publicCarPayload()` (identifican al vendedor de origen).
+  Tampoco en las tarjetas del listado ni en "Otros coches similares".
+- **Otros coches similares** muestran `estimated_total`
+  (`CostBreakdown::forCar()['total']`), nunca `purchase_price` suelto.
+- **Nada de "verificado"** (badge del hero, "Historial verificado",
+  "Inspeccion 9 puntos", "Historial y kilometraje comprobados") mientras
+  no se haya comprobado: el copy dice "se comprueba antes de la reserva".
+- **`other_fees`** (gestoria + placas de exportacion + seguro del traslado +
+  placas espanolas = `costes.gestoria + costes.otros` del ZIP) es linea
+  propia del desglose y suma al total. `professional_fees` = honorarios.
+- **Comparativa de mercado** (`showMarketComparison`) solo si el total
+  aproximado <= `market_min` (`CostBreakdown::marketComparisonFavoursClient`).
+  Si no favorece, el bloque no se pinta.
+- **Vendedor particular**: `seller_is_private` (booleano, `Car::isFromPrivateSeller()`)
+  muestra "sin garantia del vendedor + posible ITP". Es la unica excepcion
+  a "sin negativos": es informacion legal objetiva, no una contra.
+- **Fecha**: el importador publica `vehiculo.primera_matriculacion` (MM/AAAA)
+  si viene bien formada; si no, `anio` normalizado a 01/AAAA.
+- Tests: `tests/Feature/MarketplaceShowSellerPrivacyTest.php`.
+- Pendiente del lado de la skill (no de Laravel): `balance.a_favor` se
+  publica tal cual como "Lo mejor de esta unidad" — nada de valoraciones
+  del vendedor, ahorros frente a Espana ni cifras internas ahi; y las fotos
+  van con matriculas difuminadas antes del ZIP.
+
 ## Filtro "Muy buen precio" (15-oct-2026)
 
 El filtro es la UNION de 3 senales (cualquiera basta para entrar

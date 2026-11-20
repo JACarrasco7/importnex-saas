@@ -17,7 +17,6 @@ import {
     ArrowUpIcon,
     SparklesIcon,
     DocumentArrowDownIcon,
-    MapPinIcon,
     CalendarDaysIcon,
     BoltIcon,
     XMarkIcon,
@@ -700,12 +699,6 @@ onMounted(() => {
                             <div v-if="car.estimated_saving > 0" class="absolute bottom-3 left-3">
                                 <span class="inline-flex items-center rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-estoril-700 shadow-sm backdrop-blur">
                                     {{ t('marketplace.saving_badge').replace(':amount', currency(car.estimated_saving)) }}
-                                </span>
-                            </div>
-                            <div v-if="car.city" class="absolute bottom-3 right-3">
-                                <span class="inline-flex items-center gap-1 rounded-full bg-black/45 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur">
-                                    <MapPinIcon class="h-3 w-3" />
-                                    {{ car.city }}
                                 </span>
                             </div>
                         </div>

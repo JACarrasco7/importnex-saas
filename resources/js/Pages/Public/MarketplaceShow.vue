@@ -8,7 +8,6 @@ import {
     ChevronRightIcon,
     ShareIcon,
     ClipboardDocumentIcon,
-    MapPinIcon,
     ChatBubbleLeftRightIcon,
     PhoneIcon,
     ShieldCheckIcon,
@@ -31,7 +30,10 @@ const props = defineProps({
     dossierUrl: { type: String, default: null },
     whatsappNumber: { type: String, default: '34675701439' },
     isSharedProfile: { type: Boolean, default: false },
-    costBreakdown: { type: Object, default: () => ({ car_price: 0, transport: 0, processing: 0, iedmt: 0, honorarios: 1000, total: 0, has_data: false }) },
+    costBreakdown: { type: Object, default: () => ({ car_price: 0, transport: 0, processing: 0, paperwork: 0, iedmt: 0, honorarios: 1000, total: 0, has_data: false }) },
+    // El servidor decide si la comparativa favorece al cliente
+    // (CostBreakdown::marketComparisonFavoursClient). Si no, no se pinta.
+    showMarketComparison: { type: Boolean, default: false },
 });
 
 const { t, locale } = useTranslations();
@@ -177,7 +179,8 @@ const marketRange = computed(() => {
     const min = Number(props.car?.market_min);
     const max = Number(props.car?.market_max);
     const avg = Number(props.car?.market_avg);
-    const our = Number(props.derived?.total_cost || props.car?.purchase_price);
+    if (!props.showMarketComparison) return null;
+    const our = Number(props.costBreakdown?.total || props.car?.purchase_price);
     if (!Number.isFinite(min) || !Number.isFinite(max) || max <= min) return null;
     let pos = null;
     if (Number.isFinite(our) && our > 0) {
@@ -287,10 +290,6 @@ const specItems = computed(() => [
                     <div class="grid grid-cols-1 gap-6 p-6 md:grid-cols-5 md:p-8">
                         <div class="md:col-span-2">
                             <div class="flex flex-wrap items-center gap-2">
-                                <span class="inline-flex items-center gap-1 rounded-full bg-estoril-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-estoril-700 ring-1 ring-estoril-200 dark:bg-estoril-900/30 dark:text-estoril-300 dark:ring-estoril-800">
-                                    <ShieldCheckIcon class="h-3.5 w-3.5" />
-                                    {{ t('dossier.badge_verified', { default: 'Verificado' }) }}
-                                </span>
                                 <span class="inline-flex items-center rounded-full bg-amber-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-amber-700 ring-1 ring-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:ring-amber-800">
                                     {{ stateLabel }}
                                 </span>
@@ -396,14 +395,14 @@ const specItems = computed(() => [
                         <ShieldCheckIcon class="h-5 w-5 shrink-0 text-estoril-700 dark:text-estoril-300" />
                         <div>
                             <p class="text-xs font-semibold text-gray-900 dark:text-white">{{ originLabel }}</p>
-                            <p class="text-[11px] text-gray-600 dark:text-gray-400">{{ t('dossier.trust_history', { default: 'Historial verificado' }) }}</p>
+                            <p class="text-[11px] text-gray-600 dark:text-gray-400">{{ t('dossier.trust_history', { default: 'Historial: se comprueba antes de la reserva' }) }}</p>
                         </div>
                     </div>
                     <div class="flex items-start gap-2">
                         <CheckBadgeIcon class="h-5 w-5 shrink-0 text-estoril-700 dark:text-estoril-300" />
                         <div>
-                            <p class="text-xs font-semibold text-gray-900 dark:text-white">{{ t('dossier.trust_inspection', { default: 'Inspeccion 9 puntos' }) }}</p>
-                            <p class="text-[11px] text-gray-600 dark:text-gray-400">{{ t('dossier.trust_inspection_desc', { default: 'Comprobado por nuestro equipo' }) }}</p>
+                            <p class="text-xs font-semibold text-gray-900 dark:text-white">{{ t('dossier.trust_inspection', { default: 'Revision antes de comprar' }) }}</p>
+                            <p class="text-[11px] text-gray-600 dark:text-gray-400">{{ t('dossier.trust_inspection_desc', { default: 'Se hace antes de la reserva' }) }}</p>
                         </div>
                     </div>
                     <div class="flex items-start gap-2">
@@ -443,6 +442,10 @@ const specItems = computed(() => [
                             <span class="text-sm text-gray-700">{{ t('marketplace_show.cost_processing_grouped', { default: 'ITV + COC + DGT' }) }}</span>
                             <span class="font-mono text-sm text-gray-600">~ {{ fmt(costBreakdown.processing) }}</span>
                         </div>
+                        <div v-if="costBreakdown.paperwork > 0" class="flex items-baseline justify-between gap-4 border-b border-dashed border-gray-200 pb-2">
+                            <span class="text-sm text-gray-700">{{ t('marketplace_show.cost_paperwork', { default: 'Gestoria, placas y seguro del traslado' }) }}</span>
+                            <span class="font-mono text-sm text-gray-600">~ {{ fmt(costBreakdown.paperwork) }}</span>
+                        </div>
                         <div v-if="costBreakdown.iedmt > 0" class="flex items-baseline justify-between gap-4 border-b border-dashed border-gray-200 pb-2">
                             <span class="text-sm text-gray-700">{{ t('marketplace_show.cost_iedmt', { default: 'IEDMT (estimado)' }) }}</span>
                             <span class="font-mono text-sm text-gray-600">~ {{ fmt(costBreakdown.iedmt) }}</span>
@@ -462,6 +465,17 @@ const specItems = computed(() => [
                             {{ t('marketplace_show.cost_disclaimer', { default: 'Valoracion aproximada. NO son costes finales: los gastos reales pueden variar segun el vehiculo, el transporte y las tasas vigentes. Confirmamos por escrito antes de la reserva.' }) }}
                         </p>
                     </div>
+                </section>
+
+                <!-- VENDEDOR PARTICULAR: dato objetivo (sin garantia del vendedor
+                     y posible ITP), decision 20-nov-2026. Nunca el nombre. -->
+                <section v-if="car.seller_is_private" class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700">
+                    <p class="text-sm font-semibold text-gray-900 dark:text-white">
+                        {{ t('marketplace_show.seller_private_title', { default: 'Lo vende un particular' }) }}
+                    </p>
+                    <p class="mt-1 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+                        {{ t('marketplace_show.seller_private_body', { default: 'Un particular no da garantia de vendedor. Al comprar a un particular, en Espana puede aplicarse el ITP (impuesto de transmisiones); te confirmamos el importe antes de la reserva.' }) }}
+                    </p>
                 </section>
 
                 <!-- INCLUIDO EN EL PRECIO (no mostramos lo NO incluido, ya se habla con el cliente) -->
@@ -571,14 +585,8 @@ const specItems = computed(() => [
                     </div>
                 </section>
 
-                <!-- UBICACION -->
-                <section v-if="car.city" class="flex items-center gap-2 rounded-2xl bg-white px-6 py-4 shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700">
-                    <MapPinIcon class="h-5 w-5 text-estoril-700 dark:text-estoril-300" />
-                    <p class="text-sm text-gray-700 dark:text-gray-300">
-                        <span class="font-semibold">{{ t('dossier.location_label', { default: 'Localizado en' }) }}</span>
-                        {{ car.city }}
-                    </p>
-                </section>
+                <!-- UBICACION: retirada (decision 20-nov-2026). La ciudad del
+                     anuncio identifica al vendedor de origen y no viaja al cliente. -->
 
                 <!-- COMO FUNCIONA -->
                 <section class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700 sm:p-8">
@@ -625,8 +633,8 @@ const specItems = computed(() => [
                             <div class="p-3">
                                 <p class="truncate text-sm font-semibold text-gray-900 dark:text-white">{{ rcar.brand }} {{ rcar.model }}</p>
                                 <p v-if="rcar.year" class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{{ rcar.year }} · {{ rcar.mileage ? fmtNumber(rcar.mileage) + ' km' : '—' }}</p>
-                                <p v-if="rcar.city" class="truncate text-[11px] text-gray-500 dark:text-gray-400">📍 {{ rcar.city }}</p>
-                                <p class="mt-1 text-sm font-bold text-estoril-700 dark:text-estoril-300">{{ fmt(rcar.purchase_price) }}</p>
+                                <p v-if="rcar.estimated_total" class="mt-1 text-sm font-bold text-estoril-700 dark:text-estoril-300">~ {{ fmt(rcar.estimated_total) }}</p>
+                                <p v-if="rcar.estimated_total" class="text-[11px] text-gray-500 dark:text-gray-400">{{ t('marketplace_show.related_total_note', { default: 'total aproximado puesto en destino' }) }}</p>
                             </div>
                         </Link>
                     </div>

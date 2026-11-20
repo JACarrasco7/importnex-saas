@@ -48,6 +48,7 @@ class UpdateCarRequest extends FormRequest
             'coc_fee' => ['nullable', 'numeric', 'min:0'],
             'dgt_fees' => ['nullable', 'numeric', 'min:0'],
             'professional_fees' => ['nullable', 'numeric', 'min:0'],
+            'other_fees' => ['nullable', 'numeric', 'min:0'],
             'deposit' => ['nullable', 'numeric', 'min:0'],
             'mileage' => ['nullable', 'integer', 'min:0'],
             'cv' => ['nullable', 'integer', 'min:0', 'max:2000'],
