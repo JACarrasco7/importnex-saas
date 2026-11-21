@@ -936,10 +936,10 @@ onMounted(() => {
                         </div>
                         <div class="flex-1">
                             <p class="text-sm font-semibold text-gray-900 dark:text-white">
-                                {{ t('marketplace.newsletter_title', { default: '5 veh\u00edculos verificados al mes en tu inbox' }) }}
+                                {{ t('marketplace.newsletter_title', { default: '5 coches localizados al mes en tu correo' }) }}
                             </p>
                             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                {{ t('marketplace.newsletter_desc', { default: 'Recibe solo los vehículos con veredicto Buy o Buy if price drops. Sin spam, baja cuando quieras.' }) }}
+                                {{ t('marketplace.newsletter_desc', { default: 'Solo los que recomendamos. Sin spam; te das de baja cuando quieras.' }) }}
                             </p>
                             <form v-if="!newsletterSubmitted" @submit.prevent="submitNewsletter" class="mt-3 flex flex-col gap-1">
                                 <div class="flex gap-2">

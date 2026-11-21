@@ -172,7 +172,7 @@ const originLabel = computed(() => {
     if (pais.includes('espa') || pais === 'es') {
         return t('dossier.origin_spain', { default: 'Localizado en Espana' });
     }
-    return t('dossier.origin_verified', { default: 'Origen verificado' });
+    return t('dossier.origin_verified', { default: 'Origen confirmado antes de la reserva' });
 });
 
 // Precio titular: total estimado segun la regla de negocio

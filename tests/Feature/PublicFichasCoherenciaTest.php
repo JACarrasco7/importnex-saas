@@ -294,4 +294,16 @@ class PublicFichasCoherenciaTest extends TestCase
         $this->get('/marketplace/'.$car->id)->assertInertia(fn ($page) => $page
             ->where('car.pros', ['Un solo propietario y de serie']));
     }
+
+    public function test_public_marketplace_copy_has_no_forbidden_claims(): void
+    {
+        $es = (string) file_get_contents(resource_path('js/i18n/es.js'));
+        $inicio = strpos($es, "\n  marketplace: {");
+        $fin = strpos($es, "\n  },", $inicio);
+        $bloque = substr($es, $inicio, $fin - $inicio);
+
+        foreach (['verificad', 'llave en mano', 'Buy if', 'Importnex', 'sin sorpresas'] as $prohibido) {
+            $this->assertStringNotContainsStringIgnoringCase($prohibido, $bloque, "Texto publico del marketplace con «{$prohibido}»");
+        }
+    }
 }
