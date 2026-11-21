@@ -35,7 +35,7 @@
             }
         </style>
 
-        <!-- SEO y previsualización (21-nov-2026: texto honesto, sin "verificación AI") -->
+        <!-- SEO y previsualización (21-nov-2026: texto honesto de la empresa) -->
         @php
             $defaultDescription = $publicName.': buscamos, revisamos e importamos tu coche, con honorarios fijos. No somos concesionario: compras al vendedor y el coche va a tu nombre.';
         @endphp
