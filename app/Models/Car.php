@@ -91,6 +91,15 @@ class Car extends Model
         'In_transit', 'Processing',
     ];
 
+    /**
+     * Coches ya comprados (de la compra a la entrega). "Total invertido" del
+     * panel suma solo estos: antes sumaba los 48 coches localizados y salia
+     * 893.022 EUR "en 1 comprado" (21-nov-2026).
+     */
+    public const PURCHASED_STATUSES = [
+        'Purchased', 'In_transit', 'Processing', 'Pending review', 'Verifying', 'Delivered',
+    ];
+
     public const KANBAN_STATUSES = [
         'Located', 'Valuing', 'Offered', 'Reserved', 'Purchased',
         'In_transit', 'Processing', 'Delivered',

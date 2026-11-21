@@ -84,4 +84,17 @@ class DashboardControllerTest extends TestCase
         $response->assertInertia(fn ($page) => $page->where('recentCars', fn ($cars) => count($cars) <= 5)
         );
     }
+
+    public function test_total_invested_only_counts_purchased_cars(): void
+    {
+        $org = Organization::factory()->create();
+        $user = User::factory()->create(['organization_id' => $org->id, 'role' => 'owner']);
+        Car::factory()->create(['organization_id' => $org->id, 'status' => 'Located', 'purchase_price' => 50000]);
+        Car::factory()->create(['organization_id' => $org->id, 'status' => 'Purchased', 'purchase_price' => 9000]);
+        Car::factory()->create(['organization_id' => $org->id, 'status' => 'Delivered', 'purchase_price' => 11000]);
+
+        $this->actingAs($user)->get('/dashboard')->assertInertia(fn ($page) => $page
+            ->where('stats.cars_purchased', 2)
+            ->where('stats.total_cars_cost', 20000));
+    }
 }

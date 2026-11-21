@@ -27,12 +27,12 @@ class DashboardController extends Controller
                 COUNT(*) as total,
                 SUM(CASE WHEN status IN ('".implode("','", Car::ACTIVE_STATUSES)."') THEN 1 ELSE 0 END) as active,
                 SUM(CASE WHEN status IN ('Located', 'Valuing', 'Offered', 'Reserved') THEN 1 ELSE 0 END) as for_sale,
-                SUM(CASE WHEN status = 'Purchased' THEN 1 ELSE 0 END) as purchased,
+                SUM(CASE WHEN status IN ('".implode("','", Car::PURCHASED_STATUSES)."') THEN 1 ELSE 0 END) as purchased,
                 SUM(CASE WHEN traffic_light = 'green' THEN 1 ELSE 0 END) as green,
                 SUM(CASE WHEN traffic_light = 'amber' THEN 1 ELSE 0 END) as amber,
                 SUM(CASE WHEN traffic_light = 'red' THEN 1 ELSE 0 END) as red,
                 SUM(CASE WHEN traffic_light = 'neutral' THEN 1 ELSE 0 END) as neutral,
-                SUM(purchase_price) as total_cost,
+                SUM(CASE WHEN status IN ('".implode("','", Car::PURCHASED_STATUSES)."') THEN purchase_price ELSE 0 END) as total_cost,
                 SUM(CASE WHEN is_marketplace = 1 THEN marketplace_views ELSE 0 END) as marketplace_views_total
             ")
             ->first();
