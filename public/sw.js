@@ -2,10 +2,14 @@
 // Maneja push notifications (Web Push API) y notifica al usuario.
 // También cachea assets estáticos para mejorar TTI offline.
 
-const CACHE_NAME = 'jj-import-v3';
-const PRECACHE_URLS = ['/', '/offline', '/manifest.json'];
+// v4 (21-nov-2026): las páginas ('/', '/offline') eran cache-first, así que
+// quien ya había entrado veía la portada vieja (con los assets viejos) para
+// siempre tras cada despliegue. Ahora el HTML va a red primero y la caché
+// solo se usa sin conexión; /build/ (con hash) sigue cache-first.
+const CACHE_NAME = 'jj-import-v4';
+const PRECACHE_URLS = ['/offline', '/manifest.json'];
 
-// Install: pre-cachear páginas críticas
+// Install: pre-cachear la página offline
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS)).catch(() => {})
@@ -23,41 +27,58 @@ self.addEventListener('activate', (event) => {
     self.clients.claim();
 });
 
-// Fetch: network-first, cache fallback SOLO para offline-tolerant.
-// - Rutas autenticadas (/cars/*, /billing/*, /admin/*) NUNCA se cachean para evitar 404/503 servidos desde SW.
-// - Assets estáticos (/build/*, /img/*) sí se cachean.
+// Rutas autenticadas: nunca pasan por el SW (evita 404/503 servidos desde caché).
 const NO_CACHE_PREFIXES = ['/cars', '/billing', '/admin', '/subscriptions', '/valuations', '/imports', '/clients', '/settings'];
-const STATIC_PREFIXES = ['/build/', '/img/', '/images/', '/fonts/'];
-const STATIC_EXACT = ['/', '/manifest.json', '/offline'];
+// Assets con hash en el nombre: inmutables, cache-first.
+const HASHED_PREFIXES = ['/build/'];
+// Assets sin hash: se sirven de caché pero se refrescan en segundo plano.
+const STATIC_PREFIXES = ['/img/', '/images/', '/fonts/'];
+// Páginas que se guardan para poder abrirse sin conexión (red primero).
+const PAGE_EXACT = ['/', '/manifest.json', '/offline'];
+
+const offlineFallback = () => caches.match('/offline').then((page) => page || new Response('Offline', { status: 503, headers: { 'Content-Type': 'text/plain' } }));
+
+const putInCache = (request, response) => {
+    if (response && response.ok && response.status === 200) {
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+    }
+    return response;
+};
 
 self.addEventListener('fetch', (event) => {
     if (event.request.method !== 'GET') return;
     const url = new URL(event.request.url);
     if (url.origin !== self.location.origin) return;
 
-    // Rutas autenticadas: pass-through directo, sin SW. Cualquier error 5xx será el real del servidor.
     if (NO_CACHE_PREFIXES.some((p) => url.pathname.startsWith(p))) {
         return;
     }
 
-    // Solo cachear assets estáticos o páginas públicas conocidas.
-    const isStatic = STATIC_PREFIXES.some((p) => url.pathname.startsWith(p)) || STATIC_EXACT.includes(url.pathname);
-    if (!isStatic) {
+    if (HASHED_PREFIXES.some((p) => url.pathname.startsWith(p))) {
+        event.respondWith(
+            caches.match(event.request).then((cached) => cached || fetch(event.request).then((response) => putInCache(event.request, response)))
+        );
         return;
     }
 
-    event.respondWith(
-        caches.match(event.request).then((cached) => {
-            if (cached) return cached;
-            return fetch(event.request).then((response) => {
-                if (response.ok && response.status === 200) {
-                    const clone = response.clone();
-                    caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-                }
-                return response;
-            }).catch(() => caches.match('/offline').then((page) => page || new Response('Offline', { status: 503, headers: { 'Content-Type': 'text/plain' } })));
-        })
-    );
+    if (STATIC_PREFIXES.some((p) => url.pathname.startsWith(p))) {
+        event.respondWith(
+            caches.match(event.request).then((cached) => {
+                const network = fetch(event.request).then((response) => putInCache(event.request, response)).catch(() => cached);
+                return cached || network;
+            })
+        );
+        return;
+    }
+
+    if (PAGE_EXACT.includes(url.pathname)) {
+        event.respondWith(
+            fetch(event.request)
+                .then((response) => putInCache(event.request, response))
+                .catch(() => caches.match(event.request).then((cached) => cached || offlineFallback()))
+        );
+    }
 });
 
 // Push: muestra la notificación nativa (N6)

@@ -62,4 +62,16 @@ class PWATest extends TestCase
         $response->assertOk();
         $this->assertStringStartsWith("\x89PNG", $response->getContent(), 'Should be a valid PNG file');
     }
+
+    public function test_service_worker_does_not_serve_stale_pages(): void
+    {
+        $sw = (string) file_get_contents(public_path('sw.js'));
+
+        // 21-nov-2026: '/' era cache-first y los visitantes recurrentes veían
+        // la portada antigua tras cada despliegue. El HTML va a red primero.
+        $this->assertStringContainsString("const CACHE_NAME = 'jj-import-v4';", $sw);
+        $this->assertStringNotContainsString("const PRECACHE_URLS = ['/',", $sw);
+        $this->assertMatchesRegularExpression('/PAGE_EXACT\.includes[\s\S]*?fetch\(event\.request\)/', $sw);
+    }
 }
+
