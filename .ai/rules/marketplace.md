@@ -158,6 +158,20 @@ La ficha del marketplace (`/marketplace/{id}`, `/p/{token}`) y el dossier
 - WhatsApp desde cualquier boton: coche concreto + enlace.
 - Tests: `tests/Feature/PublicFichasCoherenciaTest.php`.
 
+### Ampliacion 21-nov-2026
+- Listado, comparativa y relacionados usan `estimated_total` (mismo total que
+  la ficha). `estimated_saving` del payload se recalcula (market_min - total)
+  y es `null` si la comparativa no favorece; el filtro "Muy buen precio"
+  sigue usando la columna de BD.
+- `FiltroPublico` tambien quita la nota del vendedor/concesionario
+  ("4,0/5", "valoraciones", "como se describe").
+- Meta por defecto (`app.blade.php`) y `partials/schema-org.blade.php` con
+  texto de JJ: nada de "verificacion AI", "AutoDealer" ni telefono de relleno.
+  Imagen por defecto `public/img/og-image.jpg` (1200x630).
+- Fuera del pie del marketplace el enlace al SaaS (/pricing).
+- Dossier: aviso de vendedor particular (ITP) como en la ficha, honorarios
+  sin "~" (son fijos), titulo con la version.
+
 ## Filtro "Muy buen precio" (15-oct-2026)
 
 El filtro es la UNION de 3 senales (cualquiera basta para entrar

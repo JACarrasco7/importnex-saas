@@ -151,6 +151,8 @@ class FiltroPublicoTest extends TestCase
             'ahorro frente a Espana' => ['Unos 1.600 € por debajo del MPS más barato de España puesto en Huelva con honorarios'],
             'mas barato que los de aqui' => ['MPS de serie, más barato puesto en España que los de aquí.'],
             'valoracion del concesionario' => ['Muy buena valoración del concesionario en mobile.de'],
+            'nota del concesionario' => ['Concesionario con buena valoración (4,0/5, 100 % «como se describe»)'],
+            'nota con estrellas' => ['Vendedor con 41 reseñas en mobile.de'],
         ];
     }
 

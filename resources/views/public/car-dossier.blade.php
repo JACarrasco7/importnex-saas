@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $car->brand }} {{ $car->model }} · JJ Import Motors</title>
+    <title>{{ trim($car->brand.' '.$car->model.' '.($car->version ?? '')) }} · JJ Import Motors</title>
     <meta name="robots" content="noindex, nofollow">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="JJ Import Motors">
     <meta property="og:url" content="{{ url()->current() }}">
-    <meta property="og:title" content="{{ $car->brand }} {{ $car->model }} · JJ Import Motors">
+    <meta property="og:title" content="{{ trim($car->brand.' '.$car->model.' '.($car->version ?? '')) }} · JJ Import Motors">
     {{-- 20-nov-2026: la previsualización de WhatsApp dice lo mismo que la
          ficha (total aproximado puesto en Huelva), no el precio alemán suelto. --}}
     @php
@@ -1331,7 +1331,8 @@
                             @foreach($lineasGastos as $concepto => $valor)
                                 <div class="fila">
                                     <span class="c">{{ $concepto }}</span>
-                                    <span class="i">~ {{ $fmtEurPc($valor) }}</span>
+                                    {{-- Los honorarios son fijos: sin "~" (21-nov-2026). --}}
+                                    <span class="i">{{ str_contains(mb_strtolower((string) $concepto), 'honorarios') ? '' : '~ ' }}{{ $fmtEurPc($valor) }}</span>
                                 </div>
                             @endforeach
                             @if(!empty($pc['total_estimado']))
@@ -1346,6 +1347,10 @@
 
                 @if(!empty($pc['banda_motivo']))
                     <p class="nota-fina">{{ $pc['banda_motivo'] }}</p>
+                @endif
+                {{-- Mismo aviso que la ficha del marketplace (21-nov-2026). --}}
+                @if($car->isFromPrivateSeller())
+                    <p class="nota-fina"><strong>Lo vende un particular:</strong> no da garantía de vendedor y en España puede aplicarse el ITP (impuesto de transmisiones). Te confirmamos el importe antes de la reserva.</p>
                 @endif
                 <p class="nota-fina">{{ $pc['aviso_precio_final'] }}</p>
             </section>

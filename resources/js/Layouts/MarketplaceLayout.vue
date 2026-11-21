@@ -208,9 +208,10 @@ const close = () => { mobileOpen.value = false; };
                     <p>
                         © {{ new Date().getFullYear() }} {{ orgName }}. {{ t('public.footer.rights', 'Todos los derechos reservados.') }}
                     </p>
-                    <Link :href="route('pricing')" class="hover:text-estoril-700 dark:hover:text-estoril-300">
-                        {{ t('marketplace.footer_saas', {}, '¿Eres importador? Conoce la plataforma') }}
-                    </Link>
+                    <!-- 21-nov-2026: fuera el enlace "¿Eres importador? Conoce la plataforma".
+                         Estas paginas las ven los clientes de JJ: vender el SaaS
+                         aqui confunde (parece que JJ vende software). /pricing sigue
+                         accesible y en el sitemap. -->
                 </div>
             </div>
         </footer>

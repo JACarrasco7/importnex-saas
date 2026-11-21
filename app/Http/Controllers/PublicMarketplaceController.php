@@ -286,7 +286,12 @@ class PublicMarketplaceController extends Controller
             ]),
             'visitsCount' => $visitsCount,
             'whatsappNumber' => self::WHATSAPP_NUMBER,
-        ]);
+        ])->withViewData(['meta' => [
+            'title' => 'Coches localizados · JJ Import Motors',
+            'description' => 'Coches localizados en Alemania y España, con el total aproximado puesto en Huelva. Gestionamos la compra por ti, con honorarios fijos.',
+            'image' => url('img/og-image.jpg'),
+            'url' => route('marketplace.index'),
+        ]]);
     }
 
     /**
@@ -320,7 +325,12 @@ class PublicMarketplaceController extends Controller
             'requestedIds' => $ids->all(),
             'requestUrl' => $requestUrl,
             'whatsappNumber' => self::WHATSAPP_NUMBER,
-        ]);
+        ])->withViewData(['meta' => [
+            'title' => 'Comparar coches · JJ Import Motors',
+            'description' => 'Compara los coches localizados con su total aproximado puesto en Huelva.',
+            'image' => url('img/og-image.jpg'),
+            'url' => $request->fullUrl(),
+        ]]);
     }
 
     /**
@@ -426,10 +436,7 @@ class PublicMarketplaceController extends Controller
      */
     private function relatedCarPayload(Car $car): array
     {
-        $payload = $this->publicCarPayload($car);
-        $payload['estimated_total'] = CostBreakdown::forCar($car, (float) $car->calculateIEDMT())['total'];
-
-        return $payload;
+        return $this->publicCarPayload($car);
     }
 
     /**
@@ -623,8 +630,20 @@ class PublicMarketplaceController extends Controller
         // garantia y de que puede haber ITP), nunca su nombre ni su ciudad.
         $attrs['seller_is_private'] = $car->isFromPrivateSeller();
 
+        // Total aproximado puesto en Huelva: lo que ve el cliente en el
+        // listado, la comparativa y "Otros coches similares" (21-nov-2026).
+        // El ahorro se recalcula con ese total y solo si la comparativa le
+        // favorece; el campo de BD (del ZIP) puede venir de otro total.
+        $total = (float) CostBreakdown::forCar($car, (float) $car->calculateIEDMT())['total'];
+        $attrs['estimated_total'] = $total > 0 ? $total : null;
+        $attrs['estimated_saving'] = CostBreakdown::marketComparisonFavoursClient($car, $total)
+            ? round((float) $car->market_min - $total)
+            : null;
+
         // Fotos y org se cargan aparte (necesarios para el render).
-        $attrs['photos'] = $car->photos;
+        $attrs['photos'] = $car->photos
+            ->map(fn ($photo) => $photo->only(['id', 'url', 'sort_order', 'photo_type', 'description']))
+            ->values();
         // Solo lo que pinta la ficha: el modelo completo llevaba el plan,
         // el proveedor de IA, el periodo de prueba y el id de Stripe.
         $attrs['organization'] = $car->organization?->only(['name', 'slug', 'logo']);

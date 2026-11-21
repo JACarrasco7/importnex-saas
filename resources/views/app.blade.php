@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title inertia>{{ $meta['title'] ?? config('app.name', 'Laravel') }}</title>
+        <title inertia>{{ $meta['title'] ?? (config('app.name') === 'Laravel' ? 'JJ Import Motors' : config('app.name')) }}</title>
 
         <!-- Critical CSS inline (above-the-fold styles) — improves FCP/LCP.
              Envuelto en @layer base para que las utilidades de Tailwind v4
@@ -41,24 +41,27 @@
         <meta property="twitter:title" content="{{ $shareMeta['title'] }}">
         <meta property="twitter:description" content="{{ $shareMeta['description'] }}">
         @else
-        <!-- SEO Meta Tags -->
-        <meta name="description" content="JJ Import Motors — Plataforma profesional de importación de vehículos con verificación AI. Ahorra tiempo y evita fraudes en la importación de coches de Alemania.">
-        <meta name="keywords" content="importar coches, importación vehículos, coches de Alemania, verificación AI, dealer importador, marketplace vehículos">
+        <!-- SEO Meta Tags (21-nov-2026: texto de JJ, no el de la plataforma SaaS) -->
+        @php($siteName = config('app.name') === 'Laravel' ? 'JJ Import Motors' : config('app.name', 'JJ Import Motors'))
+        <meta name="description" content="JJ Import Motors (Huelva): buscamos, revisamos e importamos tu coche desde Alemania o dentro de España, con honorarios fijos. No somos concesionario: compras al vendedor y el coche va a tu nombre.">
         <meta name="author" content="JJ Import Motors">
 
         <!-- Open Graph / Facebook -->
         <meta property="og:type" content="website">
-        <meta property="og:url" content="{{ config('app.url') }}">
-        <meta property="og:title" content="{{ config('app.name', 'JJ Import Motors') }}">
-        <meta property="og:description" content="Plataforma profesional de importación de vehículos con verificación AI. Ahorra tiempo y evita fraudes.">
+        <meta property="og:site_name" content="JJ Import Motors">
+        <meta property="og:url" content="{{ url()->current() }}">
+        <meta property="og:title" content="{{ $siteName }} · Importación y gestión de coches">
+        <meta property="og:description" content="Buscamos, revisamos e importamos tu coche, con honorarios fijos. Huelva.">
         <meta property="og:image" content="{{ config('app.url') }}/img/og-image.jpg">
-        <meta property="og:locale" content="{{ str_replace('_', '-', app()->getLocale()) }}">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
+        <meta property="og:locale" content="{{ app()->getLocale() === 'en' ? 'en_GB' : 'es_ES' }}">
 
         <!-- Twitter -->
         <meta property="twitter:card" content="summary_large_image">
-        <meta property="twitter:url" content="{{ config('app.url') }}">
-        <meta property="twitter:title" content="{{ config('app.name', 'JJ Import Motors') }}">
-        <meta property="twitter:description" content="Plataforma profesional de importación de vehículos con verificación AI.">
+        <meta property="twitter:url" content="{{ url()->current() }}">
+        <meta property="twitter:title" content="{{ $siteName }} · Importación y gestión de coches">
+        <meta property="twitter:description" content="Buscamos, revisamos e importamos tu coche, con honorarios fijos. Huelva.">
         <meta property="twitter:image" content="{{ config('app.url') }}/img/og-image.jpg">
 
         @endif
@@ -118,7 +121,7 @@
             </script>
         @endif
 
-        <!-- Schema.org AutoDealer -->
+        <!-- Schema.org: datos de la empresa -->
         @include('partials.schema-org')
     </head>
     <body class="font-sans antialiased">

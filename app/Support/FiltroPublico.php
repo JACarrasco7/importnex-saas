@@ -76,6 +76,12 @@ class FiltroPublico
         '/por\s+debajo\s+del?\s.{0,60}(m(á|a)s\s+barato|mercado|espa(ñ|n)a)/iu',
         '/m(á|a)s\s+barato\b.{0,50}\bque\s+(los|las)\s+de\s+(aqu(í|i)|espa(ñ|n)a)/iu',
         '/valoraci(ó|o)n\s+del\s+(concesionario|vendedor)/iu',
+        // 21-nov-2026 (Mazda blanco): "Concesionario con buena valoracion
+        // (4,0/5, 100 % «como se describe»)". La nota del vendedor es dato
+        // interno y ademas identifica al concesionario.
+        '/(concesionario|vendedor|dealer)\b[^.]{0,40}\b(valoraci(ó|o)n|valoraciones|estrellas|rese(ñ|n)as|opiniones)/iu',
+        '/\b\d[,.]\d\s*\/\s*5\b/u',
+        '/como\s+se\s+describe/iu',
     ];
 
     /** Lenguaje de vendedor o de garantía: prohibido (A31). */

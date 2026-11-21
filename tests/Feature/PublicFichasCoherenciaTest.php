@@ -124,13 +124,40 @@ class PublicFichasCoherenciaTest extends TestCase
         $this->assertStringContainsString('/p/'.$link->token, $html);
     }
 
-    public function test_non_car_pages_keep_the_generic_meta(): void
+    public function test_marketplace_index_has_jj_share_preview(): void
     {
         $this->makeCar();
 
         $html = $this->get('/marketplace')->assertOk()->getContent();
 
-        $this->assertStringContainsString('og:image" content="'.config('app.url').'/img/og-image.jpg', $html);
+        $this->assertStringContainsString('<meta property="og:title" content="Coches localizados · JJ Import Motors">', $html);
+        $this->assertStringContainsString('/img/og-image.jpg', $html);
+        $this->assertFileExists(public_path('img/og-image.jpg'));
+    }
+
+    public function test_site_wide_meta_and_schema_have_no_placeholder_or_saas_copy(): void
+    {
+        $html = $this->get(route('pricing'))->getContent();
+
+        $this->assertStringNotContainsString('verificación AI', $html);
+        $this->assertStringNotContainsString('600 000 000', $html);
+        $this->assertStringNotContainsString('AutoDealer', $html);
+        $this->assertStringContainsString('+34 675 70 14 39', $html);
+    }
+
+    public function test_listing_payload_has_estimated_total_and_honest_saving(): void
+    {
+        $favourable = $this->makeCar();
+        $notFavourable = $this->makeCar(['market_min' => 9000, 'market_avg' => 9500, 'market_max' => 10000, 'estimated_saving' => 1600]);
+        $total = CostBreakdown::forCar($favourable->fresh(), (float) $favourable->fresh()->calculateIEDMT())['total'];
+
+        $this->get('/marketplace/compare?ids='.$favourable->id.','.$notFavourable->id)->assertInertia(function ($page) use ($favourable, $notFavourable, $total) {
+            $cars = collect($page->toArray()['props']['cars'])->keyBy('id');
+            $this->assertEqualsWithDelta($total, $cars[$favourable->id]['estimated_total'], 0.01);
+            $this->assertEqualsWithDelta(round(11990 - $total), $cars[$favourable->id]['estimated_saving'], 0.01);
+            $this->assertNull($cars[$notFavourable->id]['estimated_saving']);
+            $this->assertArrayNotHasKey('organization_id', $cars[$favourable->id]['photos'][0] ?? []);
+        });
     }
 
     public function test_marketplace_payload_has_nothing_internal(): void
@@ -242,5 +269,29 @@ class PublicFichasCoherenciaTest extends TestCase
         $this->assertStringNotContainsString('visitas', $html);
         $this->assertStringContainsString('puesto en Huelva (aprox.)', $html);
         $this->assertStringContainsString(urlencode('Mazda 3 MPS 2.3 DISI Turbo 260 cv'), $html);
+    }
+
+    public function test_dossier_warns_private_seller_and_fixed_fees_have_no_tilde(): void
+    {
+        $car = $this->makeCar(['seller' => 'Privatanbieter']);
+        $link = CarPublicLink::generateFor($car);
+
+        $response = $this->get('/c/'.$link->token);
+
+        $response->assertOk();
+        $response->assertSee('Lo vende un particular', false);
+        $response->assertSee('<span class="i">1.000 €</span>', false);
+        $response->assertSee('<title>Mazda 3 MPS 2.3 DISI Turbo 260 cv · JJ Import Motors</title>', false);
+    }
+
+    public function test_seller_rating_pros_are_not_published(): void
+    {
+        $car = $this->makeCar(['pros' => [
+            'Un solo propietario y de serie',
+            'Concesionario con buena valoración (4,0/5, 100 % «como se describe»)',
+        ]]);
+
+        $this->get('/marketplace/'.$car->id)->assertInertia(fn ($page) => $page
+            ->where('car.pros', ['Un solo propietario y de serie']));
     }
 }

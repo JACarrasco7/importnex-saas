@@ -737,8 +737,10 @@ onMounted(() => {
 
                             <div class="mt-4 flex items-end justify-between gap-3 border-t border-gray-100 pt-4 dark:border-asphalt-700">
                                 <div class="min-w-0">
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ t('marketplace.price_from') }}</p>
-                                    <p class="truncate text-2xl font-extrabold tracking-tight text-estoril-800 transition-colors dark:text-estoril-300">{{ currency(car.purchase_price) }}</p>
+                                    <!-- 21-nov-2026: total aproximado puesto en Huelva (el mismo de la ficha),
+                                         no el precio del anuncio de origen suelto. -->
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ car.estimated_total ? t('marketplace.price_total') : t('marketplace.price_from') }}</p>
+                                    <p class="truncate text-2xl font-extrabold tracking-tight text-estoril-800 transition-colors dark:text-estoril-300">{{ car.estimated_total ? '~ ' + currency(car.estimated_total) : currency(car.purchase_price) }}</p>
                                 </div>
                                 <span class="inline-flex shrink-0 items-center gap-1 rounded-full bg-estoril-700 px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm transition group-hover:bg-estoril-800">
                                     {{ t('marketplace.view_report') }}
