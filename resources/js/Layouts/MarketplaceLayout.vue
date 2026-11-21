@@ -143,7 +143,7 @@ const close = () => { mobileOpen.value = false; };
                             <span class="text-lg font-bold text-gray-900 dark:text-white">{{ orgName }}</span>
                         </div>
                         <p class="mt-3 text-sm text-gray-600 dark:text-gray-400">
-                            {{ t('marketplace.footer_tagline', {}, 'Vehículos verificados importados desde Alemania, listos para ti.') }}
+                            {{ t('marketplace.footer_tagline', {}, 'Coches localizados en Alemania y España, con el total aproximado puesto en Huelva.') }}
                         </p>
                     </div>
                     <div>

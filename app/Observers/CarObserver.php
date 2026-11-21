@@ -20,7 +20,7 @@ class CarObserver
      */
     private const COST_FIELDS = [
         'purchase_price', 'transport', 'itv_fee', 'coc_fee',
-        'dgt_fees', 'professional_fees', 'deposit',
+        'dgt_fees', 'professional_fees', 'other_fees', 'deposit',
         'market_avg', 'co2', 'manual_tax_base', 'new_price', 'boe_confirmed',
     ];
 

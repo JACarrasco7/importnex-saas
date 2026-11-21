@@ -98,6 +98,80 @@ mercado en la barra), `purchase_price` (precio real), `mileage`
 (km reales), `year`, `status` como "Disponible" (no el estado
 interno `Located`).
 
+## Revision ficha publica 20-nov-2026 (Mazda 3 MPS, coches 80/81)
+
+El usuario reviso dos fichas reales y fijo estas reglas:
+
+- **Sin ubicacion ni vendedor**: `city` y `seller` NO estan en el
+  allowlist de `publicCarPayload()` (identifican al vendedor de origen).
+  Tampoco en las tarjetas del listado ni en "Otros coches similares".
+- **Otros coches similares** muestran `estimated_total`
+  (`CostBreakdown::forCar()['total']`), nunca `purchase_price` suelto.
+- **Nada de "verificado"** (badge del hero, "Historial verificado",
+  "Inspeccion 9 puntos", "Historial y kilometraje comprobados") mientras
+  no se haya comprobado: el copy dice "se comprueba antes de la reserva".
+- **`other_fees`** (gestoria + placas de exportacion + seguro del traslado +
+  placas espanolas = `costes.gestoria + costes.otros` del ZIP) es linea
+  propia del desglose y suma al total. `professional_fees` = honorarios.
+- **Comparativa de mercado** (`showMarketComparison`) solo si el total
+  aproximado <= `market_min` (`CostBreakdown::marketComparisonFavoursClient`).
+  Si no favorece, el bloque no se pinta.
+- **Vendedor particular**: `seller_is_private` (booleano, `Car::isFromPrivateSeller()`)
+  muestra "sin garantia del vendedor + posible ITP". Es la unica excepcion
+  a "sin negativos": es informacion legal objetiva, no una contra.
+- **Fecha**: el importador publica `vehiculo.primera_matriculacion` (MM/AAAA)
+  si viene bien formada; si no, `anio` normalizado a 01/AAAA.
+- Tests: `tests/Feature/MarketplaceShowSellerPrivacyTest.php`.
+- Pendiente del lado de la skill (no de Laravel): `balance.a_favor` se
+  publica tal cual como "Lo mejor de esta unidad" — nada de valoraciones
+  del vendedor, ahorros frente a Espana ni cifras internas ahi; y las fotos
+  van con matriculas difuminadas antes del ZIP.
+
+## Dos fichas, un solo coche (20-nov-2026, segunda revision)
+
+La ficha del marketplace (`/marketplace/{id}`, `/p/{token}`) y el dossier
+(`/c/{token}`) se mandan juntas al cliente. Tienen que decir lo mismo:
+
+- **Mismo total**: si el coche tiene `purchase_price`, el dossier usa
+  `PrecioClienteCalculator::desdeDesglose(CostBreakdown::forCar(...))`. Los
+  bloques `[GASTO]` del ZIP solo valen para coches sin costes en BD. Antes el
+  Mazda 81 salia a 10.035 € en una y 10.364 € en la otra.
+- **Misma regla de mercado**: el dossier tambien oculta "Como esta de precio"
+  si `CostBreakdown::marketComparisonFavoursClient()` es false.
+- **Misma investigacion**: `App\Support\FichaPublica` lee el ZIP
+  (`[VALORACION]`, `[POR_QUE]`, `ficha-cliente.json`) para las dos fichas.
+  La del marketplace pinta "Nuestra valoracion" y "Que esta comprobado y que
+  se comprueba antes de reservar". Nunca `car.valuation`/`recommendation`
+  (notas del panel) en la ficha del marketplace.
+- **Filtro frase a frase**: `FiltroPublico::frases()` para parrafos; quita
+  "Pendientes: ...", ahorros frente a Espana escritos como argumento y la
+  valoracion del concesionario. `car.pros` tambien pasa por `FiltroPublico`.
+- **Previsualizacion de WhatsApp**: el controlador pasa `meta` con
+  `withViewData` y `app.blade.php` pinta og:title/description/image del coche.
+  Los robots no ejecutan JS: sin esto el enlace salia como "Laravel" con el
+  texto de la plataforma SaaS y una imagen 404.
+- **Payload minimo**: nada de `derived` (llevaba `comparables_stats` con un
+  minimo distinto al publicado), ni la org completa (solo name/slug/logo), ni
+  `description` del anuncio, ni costes sueltos (van sumados en `costBreakdown`).
+- **Sin contador de visitas** en las fichas publicas (el dato sigue en el
+  payload y en `/cars/{id}` para el equipo).
+- WhatsApp desde cualquier boton: coche concreto + enlace.
+- Tests: `tests/Feature/PublicFichasCoherenciaTest.php`.
+
+### Ampliacion 21-nov-2026
+- Listado, comparativa y relacionados usan `estimated_total` (mismo total que
+  la ficha). `estimated_saving` del payload se recalcula (market_min - total)
+  y es `null` si la comparativa no favorece; el filtro "Muy buen precio"
+  sigue usando la columna de BD.
+- `FiltroPublico` tambien quita la nota del vendedor/concesionario
+  ("4,0/5", "valoraciones", "como se describe").
+- Meta por defecto (`app.blade.php`) y `partials/schema-org.blade.php` con
+  texto de JJ: nada de "verificacion AI", "AutoDealer" ni telefono de relleno.
+  Imagen por defecto `public/img/og-image.jpg` (1200x630).
+- Fuera del pie del marketplace el enlace al SaaS (/pricing).
+- Dossier: aviso de vendedor particular (ITP) como en la ficha, honorarios
+  sin "~" (son fijos), titulo con la version.
+
 ## Filtro "Muy buen precio" (15-oct-2026)
 
 El filtro es la UNION de 3 senales (cualquiera basta para entrar

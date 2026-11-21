@@ -140,4 +140,48 @@ class FiltroPublicoTest extends TestCase
         );
         $this->assertNotEmpty(FiltroPublico::motivos($linea));
     }
+
+    /**
+     * @return array<string, array{0: string}>
+     */
+    public static function fugasRevision20Nov(): array
+    {
+        return [
+            'lista de pendientes' => ['Pendientes: ver facturas, VIN y «sin accidentes» por escrito.'],
+            'ahorro frente a Espana' => ['Unos 1.600 € por debajo del MPS más barato de España puesto en Huelva con honorarios'],
+            'mas barato que los de aqui' => ['MPS de serie, más barato puesto en España que los de aquí.'],
+            'valoracion del concesionario' => ['Muy buena valoración del concesionario en mobile.de'],
+            'nota del concesionario' => ['Concesionario con buena valoración (4,0/5, 100 % «como se describe»)'],
+            'nota con estrellas' => ['Vendedor con 41 reseñas en mobile.de'],
+        ];
+    }
+
+    #[DataProvider('fugasRevision20Nov')]
+    public function test_bloquea_frases_internas_de_la_revision_20_nov(string $linea): void
+    {
+        $this->assertFalse(FiltroPublico::permitida($linea), "No puede publicarse: {$linea}");
+    }
+
+    public function test_no_bloquea_comparaciones_legitimas(): void
+    {
+        $this->assertTrue(FiltroPublico::permitida('Kilometraje por debajo de la media para su año'));
+        $this->assertTrue(FiltroPublico::permitida('Cadena de distribución ya cambiada, con facturas de Mazda'));
+    }
+
+    public function test_frases_quita_solo_la_frase_interna(): void
+    {
+        $texto = 'MPS de serie con la cadena ya cambiada. Pendientes: ver facturas y VIN. Sin óxido en los bajos.';
+
+        $this->assertSame(
+            'MPS de serie con la cadena ya cambiada. Sin óxido en los bajos.',
+            FiltroPublico::frases($texto)
+        );
+    }
+
+    public function test_frases_devuelve_null_si_no_queda_nada(): void
+    {
+        $this->assertNull(FiltroPublico::frases('Pendientes: ver facturas.'));
+        $this->assertNull(FiltroPublico::frases('   '));
+        $this->assertNull(FiltroPublico::frases(null));
+    }
 }

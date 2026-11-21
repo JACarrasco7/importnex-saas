@@ -36,6 +36,7 @@ const form = useForm({
     coc_fee: props.car.coc_fee,
     dgt_fees: props.car.dgt_fees,
     professional_fees: props.car.professional_fees,
+    other_fees: props.car.other_fees,
     deposit: props.car.deposit,
     vin: props.car.vin,
     city: props.car.city,
@@ -54,7 +55,8 @@ const totalCost = computed(() =>
     (Number(form.itv_fee) || 0) +
     (Number(form.coc_fee) || 0) +
     (Number(form.dgt_fees) || 0) +
-    (Number(form.professional_fees) || 0)
+    (Number(form.professional_fees) || 0) +
+    (Number(form.other_fees) || 0)
 );
 
 const submit = () => form.patch(route('cars.update', props.car.id));
@@ -120,6 +122,7 @@ const inputClass = 'block w-full rounded-lg border-gray-300 text-sm shadow-sm fo
                             <FormField :label="t('cars.field_coc_fee')"><input v-model="form.coc_fee" type="number" step="0.01" :class="inputClass" /></FormField>
                             <FormField :label="t('cars.field_dgt_fees')"><input v-model="form.dgt_fees" type="number" step="0.01" :class="inputClass" /></FormField>
                             <FormField :label="t('cars.field_professional_fees')"><input v-model="form.professional_fees" type="number" step="0.01" :class="inputClass" /></FormField>
+                            <FormField :label="t('cars.field_other_fees')"><input v-model="form.other_fees" type="number" step="0.01" :class="inputClass" /></FormField>
                             <FormField :label="t('cars.field_deposit')"><input v-model="form.deposit" type="number" step="0.01" :class="inputClass" /></FormField>
                         </div>
                         <div class="mt-4 flex items-center gap-2 rounded-lg bg-estoril-50 px-4 py-3 text-sm">

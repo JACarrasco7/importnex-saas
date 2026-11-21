@@ -17,7 +17,6 @@ import {
     ArrowUpIcon,
     SparklesIcon,
     DocumentArrowDownIcon,
-    MapPinIcon,
     CalendarDaysIcon,
     BoltIcon,
     XMarkIcon,
@@ -716,12 +715,6 @@ onMounted(() => {
                                     {{ t('marketplace.saving_badge').replace(':amount', currency(car.estimated_saving)) }}
                                 </span>
                             </div>
-                            <div v-if="car.city" class="absolute bottom-3 right-3">
-                                <span class="inline-flex items-center gap-1 rounded-full bg-black/45 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur">
-                                    <MapPinIcon class="h-3 w-3" />
-                                    {{ car.city }}
-                                </span>
-                            </div>
                         </div>
 
                         <!-- Body -->
@@ -758,8 +751,10 @@ onMounted(() => {
 
                             <div class="mt-4 flex items-end justify-between gap-3 border-t border-gray-100 pt-4 dark:border-asphalt-700">
                                 <div class="min-w-0">
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ t('marketplace.price_from') }}</p>
-                                    <p class="truncate text-2xl font-extrabold tracking-tight text-estoril-800 transition-colors dark:text-estoril-300">{{ currency(car.purchase_price) }}</p>
+                                    <!-- 21-nov-2026: total aproximado puesto en Huelva (el mismo de la ficha),
+                                         no el precio del anuncio de origen suelto. -->
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ car.estimated_total ? t('marketplace.price_total') : t('marketplace.price_from') }}</p>
+                                    <p class="truncate text-2xl font-extrabold tracking-tight text-estoril-800 transition-colors dark:text-estoril-300">{{ car.estimated_total ? '~ ' + currency(car.estimated_total) : currency(car.purchase_price) }}</p>
                                 </div>
                                 <span class="inline-flex shrink-0 items-center gap-1 rounded-full bg-estoril-700 px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm transition group-hover:bg-estoril-800">
                                     {{ t('marketplace.view_report') }}
@@ -955,10 +950,10 @@ onMounted(() => {
                         </div>
                         <div class="flex-1">
                             <p class="text-sm font-semibold text-gray-900 dark:text-white">
-                                {{ t('marketplace.newsletter_title', { default: '5 veh\u00edculos verificados al mes en tu inbox' }) }}
+                                {{ t('marketplace.newsletter_title', { default: '5 coches localizados al mes en tu correo' }) }}
                             </p>
                             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                {{ t('marketplace.newsletter_desc', { default: 'Recibe solo los vehículos con veredicto Buy o Buy if price drops. Sin spam, baja cuando quieras.' }) }}
+                                {{ t('marketplace.newsletter_desc', { default: 'Solo los que recomendamos. Sin spam; te das de baja cuando quieras.' }) }}
                             </p>
                             <form v-if="!newsletterSubmitted" @submit.prevent="submitNewsletter" class="mt-3 flex flex-col gap-1">
                                 <div class="flex gap-2">

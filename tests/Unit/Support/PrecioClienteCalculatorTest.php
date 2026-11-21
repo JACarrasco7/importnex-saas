@@ -296,6 +296,42 @@ class PrecioClienteCalculatorTest extends TestCase
         $this->assertStringContainsStringIgnoringCase('emisiones', $r['banda_motivo']);
     }
 
+    public function test_desde_desglose_usa_el_mismo_total_que_la_ficha_del_marketplace(): void
+    {
+        $car = (object) ['co2' => 224, 'co2_confirmado' => true, 'pais_origen' => 'Alemania'];
+        $desglose = [
+            'car_price' => 7499.0, 'transport' => 900.0, 'processing' => 250.0, 'paperwork' => 430.0,
+            'iedmt' => 386.45, 'honorarios' => 1000, 'total' => 10465.45, 'has_data' => true,
+        ];
+
+        $precio = PrecioClienteCalculator::desdeDesglose($car, $desglose);
+
+        $this->assertSame(10465.45, $precio['total_estimado']);
+        $this->assertEqualsWithDelta(10465.45, array_sum($precio['desglose']), 0.01);
+        $this->assertSame([
+            'Precio del coche', 'Transporte hasta España', 'ITV, COC y DGT',
+            'Gestoría, placas y seguro del traslado', 'Impuesto de matriculación (IEDMT)',
+            'Honorarios de gestión',
+        ], array_keys($precio['desglose']));
+        $this->assertSame(10200.0, $precio['total_min']);
+        $this->assertSame(10700.0, $precio['total_max']);
+    }
+
+    public function test_desde_desglose_omite_partidas_a_cero_y_no_baja_del_precio_del_coche(): void
+    {
+        $car = (object) ['co2' => null, 'pais_origen' => 'España'];
+        $desglose = [
+            'car_price' => 9950.0, 'transport' => 250.0, 'processing' => 0.0, 'paperwork' => 0.0,
+            'iedmt' => 0.0, 'honorarios' => 1000, 'total' => 11200.0, 'has_data' => true,
+        ];
+
+        $precio = PrecioClienteCalculator::desdeDesglose($car, $desglose);
+
+        $this->assertSame(['Precio del coche', 'Traslado en España', 'Honorarios de gestión'], array_keys($precio['desglose']));
+        $this->assertGreaterThanOrEqual(9900.0, $precio['total_min']);
+        $this->assertStringContainsString('traslado', $precio['banda_motivo']);
+    }
+
     /**
      * @param  array<string, string>  $bloques
      */

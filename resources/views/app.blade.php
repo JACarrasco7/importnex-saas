@@ -8,10 +8,14 @@
             // APP_NAME=Laravel (valor por defecto) llegaba a la vista previa de
             // WhatsApp: se sustituye por la marca si no está configurado.
             $siteName = (config('app.name') && config('app.name') !== 'Laravel') ? config('app.name') : 'Importnex';
-            $og = $ogMeta ?? null;
+            // $ogMeta: páginas privadas (portal del encargo) → noindex.
+            // $meta: fichas y listados públicos de coches → indexables, con la
+            // previsualización de WhatsApp del coche (20/21-nov-2026).
+            $og = $ogMeta ?? ($meta ?? null);
+            $publicName = \App\Support\Brand::platform()->name();
         @endphp
         <title inertia>{{ $og['title'] ?? $siteName }}</title>
-        @if ($og)
+        @if (isset($ogMeta))
             <meta name="robots" content="noindex,nofollow">
             <meta name="referrer" content="no-referrer">
         @endif
@@ -31,26 +35,32 @@
             }
         </style>
 
-        <!-- SEO Meta Tags -->
-        <meta name="description" content="{{ $siteName }} — Plataforma profesional de importación de vehículos con verificación AI. Ahorra tiempo y evita fraudes en la importación de coches de Alemania.">
-        <meta name="keywords" content="importar coches, importación vehículos, coches de Alemania, verificación AI, dealer importador, marketplace vehículos">
-        <meta name="author" content="{{ $siteName }}">
+        <!-- SEO y previsualización (21-nov-2026: texto honesto, sin "verificación AI") -->
+        @php
+            $defaultDescription = $publicName.': buscamos, revisamos e importamos tu coche, con honorarios fijos. No somos concesionario: compras al vendedor y el coche va a tu nombre.';
+        @endphp
+        <meta name="description" content="{{ $og['description'] ?? $defaultDescription }}">
+        <meta name="author" content="{{ $publicName }}">
 
         <!-- Open Graph / Facebook -->
         <meta property="og:type" content="website">
-        <meta property="og:url" content="{{ $og['url'] ?? config('app.url') }}">
-        <meta property="og:site_name" content="{{ $siteName }}">
-        <meta property="og:title" content="{{ $og['title'] ?? $siteName }}">
-        <meta property="og:description" content="{{ $og['description'] ?? 'Plataforma profesional de importación de vehículos con verificación AI. Ahorra tiempo y evita fraudes.' }}">
+        <meta property="og:url" content="{{ $og['url'] ?? url()->current() }}">
+        <meta property="og:site_name" content="{{ $publicName }}">
+        <meta property="og:title" content="{{ $og['title'] ?? $publicName.' · Importación y gestión de coches' }}">
+        <meta property="og:description" content="{{ $og['description'] ?? $defaultDescription }}">
         <meta property="og:image" content="{{ $og['image'] ?? config('app.url').'/img/og-image.jpg' }}">
-        <meta property="og:locale" content="{{ str_replace('_', '-', app()->getLocale()) }}">
+        @if(empty($og['image']))
+            <meta property="og:image:width" content="1200">
+            <meta property="og:image:height" content="630">
+        @endif
+        <meta property="og:locale" content="{{ app()->getLocale() === 'en' ? 'en_GB' : 'es_ES' }}">
 
         <!-- Twitter -->
         <meta property="twitter:card" content="summary_large_image">
-        <meta property="twitter:url" content="{{ config('app.url') }}">
-        <meta property="twitter:title" content="{{ $og['title'] ?? $siteName }}">
-        <meta property="twitter:description" content="Plataforma profesional de importación de vehículos con verificación AI.">
-        <meta property="twitter:image" content="{{ config('app.url') }}/img/og-image.jpg">
+        <meta property="twitter:url" content="{{ $og['url'] ?? url()->current() }}">
+        <meta property="twitter:title" content="{{ $og['title'] ?? $publicName }}">
+        <meta property="twitter:description" content="{{ $og['description'] ?? $defaultDescription }}">
+        <meta property="twitter:image" content="{{ $og['image'] ?? config('app.url').'/img/og-image.jpg' }}">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
@@ -107,7 +117,7 @@
             </script>
         @endif
 
-        <!-- Schema.org AutoDealer -->
+        <!-- Schema.org: datos de la empresa -->
         @include('partials.schema-org')
     </head>
     <body class="font-sans antialiased">

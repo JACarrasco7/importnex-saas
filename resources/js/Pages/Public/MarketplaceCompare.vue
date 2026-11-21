@@ -32,7 +32,7 @@ const { homeUrl, carUrl } = useSite();
 // marca si el minimo es el ganador (true para precio/km, false para
 // año/potencia/ahorro).
 const rows = computed(() => [
-    { key: 'purchase_price', label: t('marketplace.compare.price'), format: (c) => formatCurrency(c.purchase_price), numeric: true, lowerIsBetter: true },
+    { key: 'estimated_total', label: t('marketplace.compare.price'), format: (c) => (c.estimated_total ? '~ ' + formatCurrency(c.estimated_total) : formatCurrency(c.purchase_price)), numeric: true, lowerIsBetter: true },
     { key: 'market_avg', label: t('marketplace.compare.market_avg'), format: (c) => c.market_avg ? formatCurrency(c.market_avg) : '—', numeric: true, lowerIsBetter: true },
     { key: 'estimated_saving', label: t('marketplace.compare.savings'), format: (c) => c.estimated_saving ? formatCurrency(c.estimated_saving) : '—', numeric: true, lowerIsBetter: false },
     { key: 'year', label: t('marketplace.compare.year'), format: (c) => c.year, numeric: true, lowerIsBetter: false },

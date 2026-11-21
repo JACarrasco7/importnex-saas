@@ -267,6 +267,7 @@ const costItems = [
     { key: 'coc_fee', label: t('cars.cost_items.coc_fee') },
     { key: 'dgt_fees', label: t('cars.cost_items.dgt_fees') },
     { key: 'professional_fees', label: t('cars.cost_items.professional_fees') },
+    { key: 'other_fees', label: t('cars.cost_items.other_fees') },
     { key: 'deposit', label: t('cars.cost_items.deposit') },
 ];
 
