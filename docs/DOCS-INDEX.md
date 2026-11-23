@@ -24,7 +24,7 @@
 | [`AUDITORIA_estudio-mercado_2026-09-12.md`](AUDITORIA_estudio-mercado_2026-09-12.md) | Auditoría de la skill estudio-mercado (v0.4.0) | Activo |
 | [`AUDITORIA_ronda4_2026-09-13.md`](AUDITORIA_ronda4_2026-09-13.md) | Auditoría ronda 4 (2 pasadas externas): race condition encargos.md, multi-tenant en comandos, HSTS, chunk/OOM, `public/hot` | Activo |
 | [`prompts/auditoria-flujo-investigacion.md`](prompts/auditoria-flujo-investigacion.md) | Prompt reutilizable: auditoría de contexto/flujo (Claude Desktop) | Activo |
-| [`prompts/auditoria-skills-2026-10-07.md`](prompts/auditoria-skills-2026-10-07.md) | Prompt reutilizable: auditoría PROFESIONAL 3 skills + Laravel + Drive (**14D**, 8 flujos A/B/C/D/E/M/F-EM/F-GM, modelo **Opus 5.5**) | Activo |
+| [`planes/PLAN_MEJORA_SKILLS_2026-10-07.md`](planes/PLAN_MEJORA_SKILLS_2026-10-07.md) | Plan v4 de skills (fusión en `jj-import-motors`, costes 1.000 € fijos, CATÁLOGO) + 3 auditorías en `planes/auditoria-skills-2026-10-07/`. Sustituye al prompt `prompts/auditoria-skills-2026-10-07.md` (retirado; íntegro en el historial de git) | Activo (en ejecución) |
 | [`SYNC-DRIVE-PLAN.md`](SYNC-DRIVE-PLAN.md) | Plan de sincronización transversal con Google Drive (3 skills + Laravel, 5 fases, DRAFT) | Activo |
 | [`PENDIENTES_v3.9.2_2026-09-12.md`](PENDIENTES_v3.9.2_2026-09-12.md) | Pendientes abiertos de la 3.9.2 | Activo |
 | [`ecommerce.md`](ecommerce.md) | Guía + plan del e-commerce de accesorios/tuning: modelo tramitador puro (sin almacén), agente IA de viabilidad (§14) y skill `ecommerce-tuning` (§15) | Activo |

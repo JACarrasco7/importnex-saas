@@ -6,6 +6,12 @@
 
 ---
 
+## 2026-11-23 13:30 · Copilot-VSCode · APP_NAME en producción + docs de skills v4 a master
+- Hice: `APP_NAME=Laravel` → `Importnex` en el `.env` de Forge por SSH (copia en `/home/forge/env-backups/.env.20261123-132310`) y `config:cache` regenerada; verificado con `php artisan about` y `/`, `/marketplace`, `/pricing`, `/login` → 200. Commiteada la reorganización de `docs/` (plan v4 + 3 auditorías en `docs/planes/auditoria-skills-2026-10-07/`, retirado `prompts/auditoria-skills-2026-10-07.md`, `sync.manifest.json` con la skill `jj-import-motors`). Repo local y `audit/venta` ya en `master`.
+- Trampas: (1) el prompt retirado estaba en disco **truncado** (120 de 669 líneas, guardado a medias): la versión íntegra sigue en `git show <sha>:docs/prompts/auditoria-skills-2026-10-07.md`. (2) `sync.manifest.json` declara `jj-import-motors` con `source_dir` que todavía no existe en el repo; ningún script lee ese campo (el CI empaqueta por carpetas de `.claude/skills/`), así que no rompe el build.
+- ⚠️ PENDIENTE para el otro: actualización de paquetes del servidor (PHP 8.5.5→8.5.13, MySQL 8.4.11→8.4.13, nginx 1.31.3→1.31.9) — el usuario `forge` no tiene sudo sin contraseña, se hace desde la UI de Forge. El enlace «¿Eres importador?» del pie se queda (decisión del usuario).
+---
+
 ## 2026-10-23 10:30 · Claude (Cowork) · auditoría de venta ronda 5 (rama audit/venta)
 - Hice: folleto PDF propio de cada empresa (`/web/{slug}/folleto`, `App\Services\BrochureRenderer`, cache en disco privado por huella de datos); `Brand::feeLabel()` (ya no hereda los 1.500 € de la operadora); `Car::defaultProfessionalFee()` para contrato y encargo; aviso por email de errores 500 (`App\Support\ErrorAlert`, `ERROR_ALERT_EMAIL`); migración `2026_10_23_110000` (borra `testimonials` y columnas de Stripe de `users`; `User` sin `Billable`); borrados Railway/Docker (solo Forge).
 - Trampas: (1) Contrato y encargo para un coche sin honorarios propios usan ahora la escala de la empresa (1.000 € / 1.500 € desde 30.000 € por defecto), antes 1.500 € fijos. (2) El folleto necesita Chrome/Chromium en el servidor (Browsershot). (3) La tabla de IEDMT de la skill genérica hay que verificarla con la normativa vigente.

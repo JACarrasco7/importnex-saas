@@ -56,6 +56,17 @@
       "version": "0.4.0",
       "zip": "skills-estudio-mercado-v0.4.0-20260912.zip",
       "source_dir": ".claude/skills/estudio-mercado"
+    },
+    "jj-import-motors": {
+      "version": "4.0.0",
+      "status": "preparada (pendiente de instalar-skill.bat y piloto)",
+      "source_dir": ".claude/skills/jj-import-motors",
+      "staging": "C:\\Users\\jacar\\Desktop\\JJImportMotors\\_sync-skill\\jj-import-motors",
+      "replaces": [
+        "importacion-vehiculos",
+        "estudio-mercado"
+      ],
+      "remove_old_after": "aprobación del piloto (Fase 6)"
     }
   },
   "masters": {
@@ -65,7 +76,12 @@
         {
           "name": "Claude Desktop (raiz)",
           "path": "C:\\Users\\jacar\\Desktop\\JJImportMotors\\",
-          "files": ["CLAUDE.md", "README.md", "GUIA_INICIO_RAPIDO.md", "INSTRUCCIONES_PROYECTO.md"]
+          "files": [
+            "CLAUDE.md",
+            "README.md",
+            "GUIA_INICIO_RAPIDO.md",
+            "INSTRUCCIONES_PROYECTO.md"
+          ]
         }
       ]
     },
@@ -75,12 +91,21 @@
         {
           "name": "Claude Desktop (.claude/)",
           "path": "C:\\Users\\jacar\\Desktop\\JJImportMotors\\.claude\\",
-          "files": ["MEMORIA.md"]
+          "files": [
+            "MEMORIA.md"
+          ]
         },
         {
           "name": "Claude Desktop (.claude/memoria/)",
           "path": "C:\\Users\\jacar\\Desktop\\JJImportMotors\\.claude\\memoria\\",
-          "files": ["decisiones.md", "errores-pasados.md", "memoria-corto.md", "memoria-larga.md", "preferencias.md", "proyectos-activos.md"]
+          "files": [
+            "decisiones.md",
+            "errores-pasados.md",
+            "memoria-corto.md",
+            "memoria-larga.md",
+            "preferencias.md",
+            "proyectos-activos.md"
+          ]
         }
       ]
     }
@@ -96,9 +121,11 @@
     "dry_run_support": true
   },
   "sync_script": "scripts/sync-desktop.ps1",
-  "rules": [".ai/rules/skills-sync.md", ".ai/rules/doc-sync.md"],
+  "rules": [
+    ".ai/rules/skills-sync.md",
+    ".ai/rules/doc-sync.md"
+  ],
   "history": {
     "2026-09-12": "Creado como single source of truth. Agentes y replication declarados. Tras cada cambio, actualizar este manifest ANTES de commitear."
   }
 }
-

@@ -9,6 +9,7 @@
 |---|---|---|
 | [`STRIPE_LOOKUP_KEYS.md`](STRIPE_LOOKUP_KEYS.md) | Cómo mapear planes ↔ Stripe prices (lookup_keys) al crear un plan nuevo | Referencia vigente |
 | [`PLAN_SPATIE_PERMISOS.md`](PLAN_SPATIE_PERMISOS.md) | Decidir si **implementar o desinstalar** `spatie/laravel-permission`. Incluye las 2 trampas del sistema de roles actual (los dos `isOwner()`, y el `isSuperAdmin()` que no existe) | 🔸 **Aparcado** (13-sep-2026) |
+| [`PLAN_MEJORA_SKILLS_2026-10-07.md`](PLAN_MEJORA_SKILLS_2026-10-07.md) | Plan v4: fusionar las skills en `jj-import-motors`, scripts de cálculo/validación, flujo CATÁLOGO. Auditorías en [`auditoria-skills-2026-10-07/`](auditoria-skills-2026-10-07/) | 🚧 En ejecución (rama `skill-v4`) |
 | [`../PLAN_MARKETPLACE.md`](../PLAN_MARKETPLACE.md) | Roadmap del marketplace B2B | En progreso |
 | [`../PLAN_MARKETING_MULTICANAL_2026-09-06.md`](../PLAN_MARKETING_MULTICANAL_2026-09-06.md) | Flujo M — marketing multicanal (6 canales) | En progreso |
 
