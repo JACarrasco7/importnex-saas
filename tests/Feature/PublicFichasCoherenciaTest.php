@@ -268,7 +268,8 @@ class PublicFichasCoherenciaTest extends TestCase
         $response->assertOk();
         $html = $response->getContent();
         $this->assertStringNotContainsString('Pendientes: ver facturas', $html);
-        $this->assertStringContainsString('<strong>Cadena ya cambiada:</strong>', $html);
+        // El argumento «Cadena ya cambiada» repite la virtud del anuncio y no se duplica.
+        $this->assertStringContainsString('Cadena de distribución ya cambiada, con facturas de Mazda', $html);
         $this->assertStringNotContainsString('**Cadena', $html);
         $this->assertStringContainsString('Equipamiento y extras (4)', $html);
         $this->assertStringNotContainsString('visitas', $html);
@@ -310,5 +311,56 @@ class PublicFichasCoherenciaTest extends TestCase
         foreach (['verificad', 'llave en mano', 'Buy if', 'Importnex', 'sin sorpresas'] as $prohibido) {
             $this->assertStringNotContainsStringIgnoringCase($prohibido, $bloque, "Texto publico del marketplace con «{$prohibido}»");
         }
+    }
+
+    public function test_both_fichas_show_the_same_pros_from_the_ad(): void
+    {
+        $car = $this->makeCar(['pros' => [
+            ['text' => 'Dos llaves y juego de ruedas de invierno', 'weight' => 'medium'],
+            ['text' => 'ITV alemana hasta 11/2028 y libro de mantenimiento al día', 'weight' => 'high'],
+            ['text' => 'Unos 1.600 € por debajo del MPS más barato de España', 'weight' => 'high'],
+        ]]);
+        $this->writeZipContent($car);
+        $link = CarPublicLink::generateFor($car);
+        $esperado = [
+            'ITV alemana hasta 11/2028 y libro de mantenimiento al día',
+            'Dos llaves y juego de ruedas de invierno',
+            '**Cadena ya cambiada:** con facturas de Mazda',
+        ];
+
+        $this->get('/marketplace/'.$car->id)->assertInertia(fn ($page) => $page
+            ->where('car.pros', $esperado));
+
+        $dossier = $this->get('/c/'.$link->token)->assertOk();
+        $this->assertSame($esperado, $dossier->viewData('argumentosPublicos'));
+        $dossier->assertSee('ITV alemana hasta 11/2028 y libro de mantenimiento al día');
+        $dossier->assertSee('<strong>Cadena ya cambiada:</strong>', false);
+        $dossier->assertDontSee('por debajo del MPS');
+    }
+
+    public function test_pros_do_not_repeat_the_same_point(): void
+    {
+        $car = $this->makeCar(['pros' => [
+            ['text' => 'Cadena de distribución ya cambiada, con facturas de Mazda', 'weight' => 'high'],
+            ['text' => 'Dos llaves', 'weight' => 'low'],
+        ]]);
+        $this->writeZipContent($car);
+
+        $this->get('/marketplace/'.$car->id)->assertInertia(fn ($page) => $page
+            ->where('car.pros', ['Cadena de distribución ya cambiada, con facturas de Mazda', 'Dos llaves']));
+    }
+
+    public function test_dossier_shows_highlights_and_honest_check_titles(): void
+    {
+        $car = $this->makeCar(['pros' => [['text' => 'ITV alemana hasta 11/2028', 'weight' => 'high']]]);
+        $this->writeZipContent($car);
+        $link = CarPublicLink::generateFor($car);
+
+        $this->get('/c/'.$link->token)->assertOk()
+            ->assertSee('class="hero-destacados"', false)
+            ->assertSee('Lo que ya sabemos (anuncio y fotos)')
+            ->assertSee('Se comprueba antes de la reserva')
+            ->assertDontSee('Qué está comprobado y qué queda por comprobar')
+            ->assertDontSee('búsqueda, verificación');
     }
 }

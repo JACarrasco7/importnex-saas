@@ -58,14 +58,14 @@ const fmt = (n) => {
     const num = Number(n);
     if (!Number.isFinite(num)) return '\u2014';
     const loc = locale.value === 'en' ? 'en-US' : 'es-ES';
-    return new Intl.NumberFormat(loc, { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(num);
+    return new Intl.NumberFormat(loc, { style: 'currency', currency: 'EUR', maximumFractionDigits: 0, useGrouping: 'always' }).format(num);
 };
 
 const fmtNumber = (n) => {
     const num = Number(n);
     if (!Number.isFinite(num)) return '\u2014';
     const loc = locale.value === 'en' ? 'en-US' : 'es-ES';
-    return new Intl.NumberFormat(loc).format(num);
+    return new Intl.NumberFormat(loc, { useGrouping: 'always' }).format(num);
 };
 
 // Negritas **asi** de los textos del ZIP, escapando antes el HTML.
@@ -75,6 +75,19 @@ const escapeHtml = (text) => String(text ?? '')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 const withBold = (text) => escapeHtml(text).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+
+// Puntos a favor (mismos que el dossier, ya ordenados por peso en el
+// servidor): los 3 primeros van en la cabecera y la lista larga se pliega.
+const PROS_VISIBLES = 8;
+const pros = computed(() => (Array.isArray(props.car?.pros) ? props.car.pros : [])
+    .map((pro) => (typeof pro === 'string' ? pro : pro?.text))
+    .filter((pro) => typeof pro === 'string' && pro.trim() !== ''));
+const showAllPros = ref(false);
+const visiblePros = computed(() => (showAllPros.value ? pros.value : pros.value.slice(0, PROS_VISIBLES)));
+const heroHighlights = computed(() => pros.value.slice(0, 3).map((pro) => {
+    const plano = pro.replace(/\*\*/g, '');
+    return plano.length > 90 ? plano.slice(0, 87).trimEnd() + '…' : plano;
+}));
 
 const checksDone = computed(() => (Array.isArray(props.checks?.verificado) ? props.checks.verificado : []));
 const checksPending = computed(() => (Array.isArray(props.checks?.pendiente) ? props.checks.pendiente : []));
@@ -280,13 +293,17 @@ const specItems = computed(() => [
     { key: 'fuel', label: t('marketplace_show.fuel'), value: fuelLabel.value },
     { key: 'transmission', label: t('marketplace_show.transmission'), value: transmissionLabel.value },
     { key: 'drivetrain', label: t('marketplace_show.drivetrain', { default: 'Tracción' }), value: drivetrainLabel.value },
+    { key: 'power', label: t('marketplace_show.power', { default: 'Potencia' }), value: props.car?.cv ? `${props.car.cv} CV` : null },
+    { key: 'color', label: t('marketplace_show.color', { default: 'Color' }), value: props.car?.color },
+    { key: 'owners', label: t('marketplace_show.owners', { default: 'Propietarios' }), value: props.car?.owners || null },
+    { key: 'euro', label: t('marketplace_show.euro_norm', { default: 'Normativa' }), value: props.car?.euro_norm },
 ]);
 </script>
 
 <template>
     <Head :title="`${car.brand} ${car.model} - ${t('public.marketplace_title')}`" />
 
-    <MarketplaceLayout>
+    <MarketplaceLayout :whatsapp-float="false">
         <div class="min-h-screen bg-gradient-to-br from-platinum-100 via-white to-estoril-50 dark:from-asphalt-900 dark:via-asphalt-900 dark:to-asphalt-800">
 
             <!-- Banner "Perfil publico" de /p/{token} retirado (20-nov-2026):
@@ -313,6 +330,12 @@ const specItems = computed(() => [
                             </h1>
                             <p v-if="car.version" class="mt-1 text-sm font-medium text-gray-500 dark:text-gray-400">{{ car.version }}</p>
                             <p v-if="heroData" class="mt-1 text-sm text-gray-600 dark:text-gray-400">{{ heroData }}</p>
+                            <ul v-if="heroHighlights.length" class="mt-4 space-y-1.5">
+                                <li v-for="(item, i) in heroHighlights" :key="'h' + i" class="flex items-start gap-2 text-sm text-gray-800 dark:text-gray-200">
+                                    <CheckCircleIcon class="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                                    <span>{{ item }}</span>
+                                </li>
+                            </ul>
                             <div v-if="heroPrice" class="mt-5 inline-block rounded-2xl bg-gradient-to-br from-estoril-700 to-estoril-900 px-5 py-3 text-white shadow-lg">
                                 <p class="text-[10px] font-semibold uppercase tracking-widest text-estoril-100">
                                     {{ t('dossier.price_estimated', { default: 'Puesto en :city - aprox.' }) }}
@@ -408,7 +431,7 @@ const specItems = computed(() => [
                 </section>
 
                 <!-- PUNTOS A FAVOR -->
-                <section v-if="car.pros && car.pros.length" class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700 sm:p-8">
+                <section v-if="pros.length" id="puntos-a-favor" class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700 sm:p-8">
                     <p class="text-[11px] font-bold uppercase tracking-widest text-estoril-700 dark:text-estoril-300">
                         {{ t('dossier.section_pros_eyebrow', { default: 'Puntos a favor' }) }}
                     </p>
@@ -416,12 +439,17 @@ const specItems = computed(() => [
                         {{ t('dossier.section_pros_title', { default: 'Lo mejor de esta unidad' }) }}
                     </h2>
                     <ul class="mt-4 space-y-2">
-                        <li v-for="(pro, i) in car.pros" :key="i" class="flex items-start gap-2 rounded-lg border border-estoril-200 bg-estoril-50 p-3 dark:border-estoril-800 dark:bg-asphalt-800">
+                        <li v-for="(pro, i) in visiblePros" :key="i" class="flex items-start gap-2 rounded-lg border border-estoril-200 bg-estoril-50 p-3 dark:border-estoril-800 dark:bg-asphalt-800">
                             <CheckCircleIcon class="mt-0.5 h-5 w-5 shrink-0 text-estoril-700 dark:text-estoril-300" />
                             <!-- eslint-disable-next-line vue/no-v-html -->
-                            <p class="flex-1 text-sm text-gray-900 dark:text-gray-200" v-html="withBold(typeof pro === 'string' ? pro : pro.text)"></p>
+                            <p class="flex-1 text-sm text-gray-900 dark:text-gray-200" v-html="withBold(pro)"></p>
                         </li>
                     </ul>
+                    <button v-if="pros.length > PROS_VISIBLES" type="button" class="mt-3 text-sm font-semibold text-estoril-700 hover:underline dark:text-estoril-300" @click="showAllPros = !showAllPros">
+                        {{ showAllPros
+                            ? t('marketplace_show.pros_less', { default: 'Ver menos' })
+                            : t('marketplace_show.pros_all', { count: pros.length }, `Ver los ${pros.length} puntos`) }}
+                    </button>
                 </section>
 
                 <!-- PRECIO -->

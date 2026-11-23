@@ -236,3 +236,21 @@ de mercado. NO es un veredicto sobre nuestro coche, es el minimo
 observado en nuestro barrido del mercado espanol a fecha de
 `$fechaDatos`. Lo que SI se elimino: el parrafo "Esta unidad queda
 por encima de la media del mercado" que era claramente negativo.
+
+## Puntos a favor: una sola lista para las dos fichas (24-nov-2026)
+
+- `FichaPublica::puntosAFavor($car, FichaPublica::argumentos($car))` es la
+  unica fuente de «Lo mejor de esta unidad» en el marketplace, `/p/{token}`,
+  el listado y el dossier `/c/{token}`. Orden: `cars.pros` (balance.a_favor
+  del ZIP) por peso alto > medio > bajo, despues los argumentos de
+  `ficha-cliente.json` que no repitan un punto (>= 50 % de palabras ya
+  usadas). Todo por `FiltroPublico`.
+- El dossier ya NO enseña solo los argumentos de marketing: el cliente tiene
+  que ver lo bueno del anuncio (ITV, mantenimiento, piezas cambiadas...).
+- Los 3 primeros puntos van en la cabecera de las dos fichas y el primero en
+  la tarjeta del listado: el ZIP debe poner los mas fuertes con peso alto.
+- «Ya comprobado» se llama «Lo que ya sabemos (anuncio y fotos)»: lo que dice
+  el anuncio no se presenta como comprobado por nosotros.
+- Importes con `useGrouping: 'always'` (es-ES no agrupa 4 cifras: «7499 €»).
+- La ficha del coche no lleva la burbuja flotante de WhatsApp
+  (`<MarketplaceLayout :whatsapp-float="false">`): tapaba «Compartir» en movil.

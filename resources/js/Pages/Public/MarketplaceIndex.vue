@@ -280,6 +280,13 @@ onMounted(() => {
     window.addEventListener('scroll', onScroll50, { passive: true });
     setTimeout(() => { if (!scrollTriggered) triggerNewsletter(); }, 30000);
 });
+
+// Primer punto a favor de la unidad, sin negritas, para la tarjeta.
+const cardHighlight = (car) => {
+    const first = Array.isArray(car?.pros) ? car.pros[0] : null;
+    const text = typeof first === 'string' ? first : first?.text;
+    return typeof text === 'string' ? text.replace(/\*\*/g, '').trim() : '';
+};
 </script>
 
 <template>
@@ -748,6 +755,13 @@ onMounted(() => {
                                     <dd class="mt-0.5 truncate text-sm font-semibold text-gray-900 dark:text-white">{{ car.fuel || t('marketplace.not_available') }}</dd>
                                 </div>
                             </dl>
+
+                            <!-- 23-nov-2026: lo mejor de la unidad ya en el listado
+                                 (primer punto a favor, el mismo de la ficha). -->
+                            <p v-if="cardHighlight(car)" class="mt-3 flex items-start gap-1.5 text-xs leading-snug text-gray-700 dark:text-gray-300">
+                                <span class="mt-px text-emerald-600 dark:text-emerald-400">&#10003;</span>
+                                <span class="line-clamp-2">{{ cardHighlight(car) }}</span>
+                            </p>
 
                             <div class="mt-4 flex items-end justify-between gap-3 border-t border-gray-100 pt-4 dark:border-asphalt-700">
                                 <div class="min-w-0">

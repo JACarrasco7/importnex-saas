@@ -138,4 +138,116 @@ class FichaPublica
 
         return array_filter($ficha, fn ($v) => $v !== null && $v !== []);
     }
+
+    /**
+     * Argumentos de la ficha del cliente (A1 + A2 auditoria 09-sep-2026):
+     * primero `ficha-cliente.json` -> argumentos y, si no hay, los
+     * [PUBLICIDAD_ARGUMENTO] del esqueleto. Nunca el bloque A_FAVOR del
+     * esqueleto tecnico, que trae analisis interno.
+     *
+     * @return array<int, string>
+     */
+    public static function argumentos(Car $car): array
+    {
+        $ficha = self::fichaCliente($car);
+        $candidatos = is_array($ficha) && is_array($ficha['argumentos'] ?? null) ? $ficha['argumentos'] : [];
+
+        if ($candidatos === []) {
+            $candidatos = self::esqueleto($car)?->todos('PUBLICIDAD_ARGUMENTO') ?? [];
+        }
+
+        return FiltroPublico::lista(array_values(array_filter(
+            $candidatos,
+            fn ($v) => is_string($v) && trim($v) !== ''
+        )));
+    }
+
+    /**
+     * Puntos a favor que ven las DOS fichas (marketplace y dossier).
+     *
+     * Primero las virtudes de la unidad que trae el ZIP (`balance.a_favor`,
+     * guardadas en `cars.pros`: ITV, mantenimiento, piezas cambiadas,
+     * propietarios...), ordenadas por peso; despues los argumentos de la
+     * ficha del cliente que no repitan ninguna. Todo pasa por FiltroPublico.
+     *
+     * Revision 23-nov-2026: el dossier solo enseñaba los 4 argumentos de
+     * marketing y la ficha del marketplace solo los pros, asi que el cliente
+     * no veia en una de las dos lo bueno que dice el anuncio.
+     *
+     * @param  array<int, string>  $argumentos
+     * @return array<int, string>
+     */
+    public static function puntosAFavor(Car $car, array $argumentos = []): array
+    {
+        $orden = ['high' => 0, 'medium' => 1, 'low' => 2];
+        $pros = [];
+        foreach (is_array($car->pros) ? $car->pros : [] as $i => $pro) {
+            $texto = is_array($pro) ? (string) ($pro['text'] ?? '') : (string) $pro;
+            $peso = is_array($pro) ? (string) ($pro['weight'] ?? 'medium') : 'medium';
+            if (trim($texto) !== '') {
+                $pros[] = ['texto' => trim($texto), 'orden' => $orden[$peso] ?? 1, 'i' => $i];
+            }
+        }
+        usort($pros, fn ($a, $b) => [$a['orden'], $a['i']] <=> [$b['orden'], $b['i']]);
+
+        $puntos = [];
+        $vistos = [];
+        foreach (array_column($pros, 'texto') as $texto) {
+            $palabras = self::palabrasClave($texto);
+            if (in_array($palabras, $vistos, true)) {
+                continue;
+            }
+            $vistos[] = $palabras;
+            $puntos[] = $texto;
+        }
+
+        // Los argumentos de marketing solo entran si cuentan algo nuevo.
+        foreach ($argumentos as $texto) {
+            if (! is_string($texto) || trim($texto) === '') {
+                continue;
+            }
+            $palabras = self::palabrasClave($texto);
+            if ($palabras === [] || self::repetido($palabras, $vistos)) {
+                continue;
+            }
+            $vistos[] = $palabras;
+            $puntos[] = trim($texto);
+        }
+
+        return FiltroPublico::lista($puntos);
+    }
+
+    /**
+     * Palabras con significado (mas de 3 letras) del punto, en minusculas.
+     *
+     * @return array<int, string>
+     */
+    private static function palabrasClave(string $texto): array
+    {
+        $texto = mb_strtolower(str_replace('**', '', $texto));
+        $palabras = preg_split('/[^\p{L}\p{N}]+/u', $texto, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+
+        return array_values(array_unique(array_filter($palabras, fn ($p) => mb_strlen($p) > 3)));
+    }
+
+    /**
+     * Un argumento se considera repetido si al menos la mitad de sus
+     * palabras clave ya estan en un punto incluido: el argumento de marketing
+     * «Cadena ya cambiada: con facturas de Mazda» repite la virtud del
+     * anuncio «Cadena de distribucion ya cambiada, con facturas de Mazda».
+     *
+     * @param  array<int, string>  $palabras
+     * @param  array<int, array<int, string>>  $vistos
+     */
+    private static function repetido(array $palabras, array $vistos): bool
+    {
+        foreach ($vistos as $otras) {
+            $comunes = count(array_intersect($palabras, $otras));
+            if ($comunes / max(1, count($palabras)) >= 0.5) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

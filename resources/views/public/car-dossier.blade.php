@@ -65,6 +65,10 @@
         .lista-ok li::before { content: "✓"; color: var(--green); font-weight: 700; }
         .lista-pend li::before { content: "☐"; color: var(--gold); font-weight: 700; }
         .lista-no li::before { content: "✕"; color: #f87171; font-weight: 700; }
+        .col-titulo { font-size: 13px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: #9fb3e6; margin: 0 0 4px; }
+        .hero-destacados { list-style: none; margin: -18px 0 26px; padding: 0; max-width: 540px; }
+        .hero-destacados li { position: relative; padding: 4px 0 4px 24px; font-size: 15px; color: #e5ecff; line-height: 1.4; }
+        .hero-destacados li::before { content: "✓"; position: absolute; left: 0; top: 4px; color: var(--green); font-weight: 700; }
         .aviso-legal {
             border: 1px solid rgba(244, 197, 66, 0.35); background: rgba(244, 197, 66, 0.06);
             border-radius: 16px; padding: 26px; margin: 26px 0;
@@ -1153,6 +1157,23 @@
                     <p class="claim">Revisión antes de la reserva</p>
                 @endif
 
+                @php
+                    // Lo mejor de la unidad, a la vista nada más abrir el
+                    // enlace (los 3 primeros puntos a favor, sin negritas).
+                    $heroDestacados = array_map(function ($punto) {
+                        $plano = str_replace('**', '', (string) $punto);
+
+                        return mb_strlen($plano) > 90 ? rtrim(mb_substr($plano, 0, 87)).'…' : $plano;
+                    }, array_slice($argumentosPublicos ?? [], 0, 3));
+                @endphp
+                @if(count($heroDestacados) > 0)
+                    <ul class="hero-destacados">
+                        @foreach($heroDestacados as $destacado)
+                            <li>{{ $destacado }}</li>
+                        @endforeach
+                    </ul>
+                @endif
+
                 @if($precioTitular)
                     <div class="price-card">
                         <div class="price-label">Puesto en {{ $brand->get('city') ?: 'España' }} · aprox.</div>
@@ -1555,21 +1576,27 @@
         @if(count($fichaVerificado) > 0 || count($fichaPendiente) > 0)
             <section class="reveal">
                 <div class="section-title">Estado</div>
-                <h2 class="section-h">Qué está comprobado y qué queda por comprobar</h2>
+                <h2 class="section-h">Lo que ya sabemos y lo que se comprueba antes de reservar</h2>
                 <div class="dos-col">
                     @if(count($fichaVerificado) > 0)
+                        <div>
+                        <p class="col-titulo">Lo que ya sabemos (anuncio y fotos)</p>
                         <ul class="lista-limpia lista-ok">
                             @foreach($fichaVerificado as $item)
                                 <li>{{ is_string($item) ? $item : '' }}</li>
                             @endforeach
                         </ul>
+                        </div>
                     @endif
                     @if(count($fichaPendiente) > 0)
+                        <div>
+                        <p class="col-titulo">Se comprueba antes de la reserva</p>
                         <ul class="lista-limpia lista-pend">
                             @foreach($fichaPendiente as $item)
                                 <li>{{ is_string($item) ? $item : '' }}</li>
                             @endforeach
                         </ul>
+                        </div>
                     @endif
                 </div>
             </section>

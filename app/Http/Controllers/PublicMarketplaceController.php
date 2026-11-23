@@ -9,7 +9,6 @@ use App\Models\Organization;
 use App\Support\Brand;
 use App\Support\CostBreakdown;
 use App\Support\FichaPublica;
-use App\Support\FiltroPublico;
 use App\Support\PublicSite;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -706,7 +705,7 @@ class PublicMarketplaceController extends Controller
         $attrs = $car->only([
             'id', 'brand', 'model', 'version', 'year', 'mileage', 'fuel',
             'transmission', 'drivetrain', 'cv', 'displacement',
-            'consumption', 'owners', 'euro_norm',
+            'consumption', 'owners', 'euro_norm', 'color',
             'itv_date', 'pais_origen', 'purchase_price', 'status',
             'equipment', 'pros', 'is_marketplace', 'marketplace_views',
             'market_avg', 'market_min', 'market_max', 'estimated_saving',
@@ -718,10 +717,7 @@ class PublicMarketplaceController extends Controller
         // telefono del vendedor. Ninguno de los dos llega al navegador.
 
         // "Lo mejor de esta unidad" pasa por el mismo filtro que el dossier.
-        $attrs['pros'] = FiltroPublico::lista(array_values(array_map(
-            fn ($pro) => is_array($pro) ? (string) ($pro['text'] ?? '') : (string) $pro,
-            is_array($car->pros) ? $car->pros : []
-        )));
+        $attrs['pros'] = FichaPublica::puntosAFavor($car, FichaPublica::argumentos($car));
 
         // Solo el tipo de vendedor (para avisar de que un particular no da
         // garantia y de que puede haber ITP), nunca su nombre ni su ciudad.

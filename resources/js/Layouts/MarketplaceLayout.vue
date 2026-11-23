@@ -14,6 +14,12 @@ import { useTranslations } from '@/Composables/useTranslations';
 import { useBrand } from '@/Composables/useBrand';
 import { useSite } from '@/Composables/useSite';
 
+defineProps({
+    // La ficha del coche ya tiene sus botones de WhatsApp y una barra fija:
+    // la burbuja flotante tapaba el boton de compartir en el movil.
+    whatsappFloat: { type: Boolean, default: true },
+});
+
 const { t } = useTranslations();
 const { brand, whatsappUrl, waNumber } = useBrand();
 const { site: marketplace, homeUrl, legalUrl } = useSite();
@@ -219,6 +225,6 @@ const close = () => { mobileOpen.value = false; };
             </div>
         </footer>
 
-        <WhatsAppFloat />
+        <WhatsAppFloat v-if="whatsappFloat" />
     </div>
 </template>

@@ -2,7 +2,7 @@
 <section class="cta-final">
     <div class="cta-eyebrow">¿Te encaja?</div>
     <h2>Gestionamos la compra de este coche por ti</h2>
-    <p>Escríbenos por WhatsApp o llama. Te explicamos el proceso completo: búsqueda, verificación, compra, transporte y trámites.</p>
+    <p>Escríbenos por WhatsApp o llama. Te explicamos el proceso completo: búsqueda, revisión, compra, transporte y trámites.</p>
     <div class="cta-buttons">
         @if($brand->whatsappUrl())
         <a href="{{ $brand->whatsappUrl('Hola, me interesa el '.$car->brand.' '.$car->model.'. ¿Podemos hablar sobre el proceso de compra?') }}"

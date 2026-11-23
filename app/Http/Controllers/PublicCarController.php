@@ -86,7 +86,7 @@ class PublicCarController extends Controller
             'car' => $car,
             'esqueleto' => $esqueleto,
             'ficha' => $ficha,
-            'argumentosPublicos' => $this->argumentosPublicos($ficha, $esqueleto),
+            'argumentosPublicos' => FichaPublica::puntosAFavor($car, FichaPublica::argumentos($car)),
             'precioCliente' => $precioCliente,
             'mostrarMercado' => $mostrarMercado,
             'equipamiento' => $this->equipamiento($car, $ficha, $esqueleto),
@@ -140,42 +140,6 @@ class PublicCarController extends Controller
         //    operador debe reimportar el ZIP o actualizar la recomendación
         //    manualmente.
         return false;
-    }
-
-    /**
-     * Argumentos de venta que verá el cliente (A1 + A2 auditoría 09-sep-2026).
-     *
-     * Orden de precedencia:
-     *   1) ficha-cliente.json → argumentos  (escrito para el cliente)
-     *   2) publicidad.argumentos (legacy de la skill, escrito para el cliente)
-     *   3) nada — NUNCA cae al bloque A_FAVOR del esqueleto técnico, porque
-     *      ese bloque trae análisis interno (hueco, vendibilidad, vendedor
-     *      de origen) que no debe filtrarse.
-     *
-     * @return array<int, string>
-     */
-    private function argumentosPublicos(?array $ficha, ?Esqueleto $esqueleto): array
-    {
-        $candidatos = [];
-
-        if (is_array($ficha)) {
-            $argFicha = $ficha['argumentos'] ?? [];
-            if (is_array($argFicha)) {
-                $candidatos = array_merge($candidatos, $argFicha);
-            }
-        }
-
-        if (empty($candidatos) && $esqueleto) {
-            foreach ($esqueleto->todos('PUBLICIDAD_ARGUMENTO') as $arg) {
-                $candidatos[] = $arg;
-            }
-        }
-
-        // Red de seguridad final: A22b.
-        return FiltroPublico::lista(array_values(array_filter(
-            $candidatos,
-            fn ($v) => is_string($v) && trim($v) !== ''
-        )));
     }
 
     /**

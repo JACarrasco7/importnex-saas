@@ -7,6 +7,7 @@ use App\Models\CarPublicLink;
 use App\Models\MarketplaceVisit;
 use App\Models\Organization;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -17,6 +18,14 @@ use Tests\TestCase;
 class MarketplaceShowVisitsTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // La ficha lee el contenido del ZIP de storage: sin esto, los
+        // archivos de otro test con el mismo id de coche se cuelan aqui.
+        Storage::disk('local')->deleteDirectory('cars');
+    }
 
     private function makeCar(array $attrs = []): Car
     {

@@ -61,10 +61,10 @@
             @if($brand->get('address'))<li><strong>Domicilio:</strong> {{ $brand->get('address') }}</li>@endif
             @if($brand->get('email'))<li><strong>Correo de contacto:</strong> <a href="mailto:{{ $brand->get('email') }}">{{ $brand->get('email') }}</a></li>@endif
             @if($brand->telHref())<li><strong>Teléfono / WhatsApp:</strong> <a href="{{ $brand->telHref() }}">{{ $brand->get('phone') }}</a></li>@endif
-            <li><strong>Actividad:</strong> Servicio de búsqueda, verificación e importación de vehículos desde Alemania.</li>
+            <li><strong>Actividad:</strong> Servicio de búsqueda, revisión e importación de vehículos.</li>
         </ul>
         <h3>Naturaleza del servicio</h3>
-        <p>{{ $brand->name() }} actúa como <strong>gestor e intermediario</strong> en la búsqueda, verificación e importación de vehículos. <strong>No somos el vendedor ni el propietario</strong> de los vehículos publicados en el marketplace. Cualquier garantía o responsabilidad sobre el vehículo corresponde al vendedor, según la ley que le sea aplicable. Los honorarios del servicio se acuerdan por escrito antes de la reserva y son independientes del precio del vehículo.</p>
+        <p>{{ $brand->name() }} actúa como <strong>gestor e intermediario</strong> en la búsqueda, revisión e importación de vehículos. <strong>No somos el vendedor ni el propietario</strong> de los vehículos publicados en el marketplace. Cualquier garantía o responsabilidad sobre el vehículo corresponde al vendedor, según la ley que le sea aplicable. Los honorarios del servicio se acuerdan por escrito antes de la reserva y son independientes del precio del vehículo.</p>
     </section>
 
     <section id="privacidad">
