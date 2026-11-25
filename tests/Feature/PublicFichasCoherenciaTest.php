@@ -113,7 +113,7 @@ class PublicFichasCoherenciaTest extends TestCase
         $html = $this->get('/marketplace/'.$car->id)->assertOk()->getContent();
 
         $this->assertStringContainsString('<meta property="og:title" content="Mazda 3 MPS 2.3 DISI Turbo 260 cv · JJ Import Motors">', $html);
-        $this->assertStringContainsString('~ '.number_format($total, 0, ',', '.').' € puesto en Huelva (aprox.)', $html);
+        $this->assertStringContainsString('~ '.number_format($total, 0, ',', '.').' € puesto en España (aprox.)', $html);
         $this->assertStringContainsString('cars/'.$car->id.'/photos/001.jpg', $html);
         $this->assertStringContainsString('<meta property="og:locale" content="es_ES">', $html);
         $this->assertStringNotContainsString('og:description" content="Plataforma profesional', $html);
@@ -273,7 +273,7 @@ class PublicFichasCoherenciaTest extends TestCase
         $this->assertStringNotContainsString('**Cadena', $html);
         $this->assertStringContainsString('Equipamiento y extras (4)', $html);
         $this->assertStringNotContainsString('visitas', $html);
-        $this->assertStringContainsString('puesto en Huelva (aprox.)', $html);
+        $this->assertStringContainsString('puesto en España (aprox.)', $html);
         $this->assertStringContainsString(rawurlencode('Mazda 3 MPS 2.3 DISI Turbo 260 cv'), $html);
     }
 
@@ -362,5 +362,27 @@ class PublicFichasCoherenciaTest extends TestCase
             ->assertSee('Se comprueba antes de la reserva')
             ->assertDontSee('Qué está comprobado y qué queda por comprobar')
             ->assertDontSee('búsqueda, verificación');
+    }
+
+    public function test_price_says_delivered_in_spain_never_the_company_city(): void
+    {
+        $car = $this->makeCar();
+        $this->writeZipContent($car);
+        $link = CarPublicLink::generateFor($car);
+
+        $dossier = $this->get('/c/'.$link->token)->assertOk();
+        $dossier->assertSee('Puesto en España · aprox.')
+            ->assertSee('Cuánto te costaría, puesto en España')
+            ->assertDontSee('puesto en Huelva')
+            ->assertDontSee('Puesto en Huelva')
+            ->assertDontSee('Entrega en Huelva');
+
+        $this->get('/marketplace/'.$car->id)->assertOk()
+            ->assertSee('puesto en España (aprox.)', false)
+            ->assertDontSee('puesto en Huelva', false);
+
+        $es = file_get_contents(resource_path('js/i18n/es.js'));
+        $this->assertStringNotContainsString('puesto en :city', mb_strtolower($es));
+        $this->assertStringNotContainsString('entrega en :city', mb_strtolower($es));
     }
 }

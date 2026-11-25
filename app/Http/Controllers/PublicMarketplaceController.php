@@ -618,9 +618,10 @@ class PublicMarketplaceController extends Controller
             $car->mileage ? number_format((int) $car->mileage, 0, ',', '.').' km' : null,
         ]);
         $total = (float) ($costBreakdown['total'] ?? 0);
-        $destino = $brand->get('city') ?: 'destino';
-
-        $descripcion = ($total > 0 ? '~ '.number_format($total, 0, ',', '.').' € puesto en '.$destino.' (aprox.) · ' : '')
+        // 25-nov-2026: «puesto en España», nunca la ciudad de la empresa:
+        // con «puesto en Huelva» el cliente de otra provincia entendia que
+        // el precio no era para el.
+        $descripcion = ($total > 0 ? '~ '.number_format($total, 0, ',', '.').' € puesto en España (aprox.) · ' : '')
             .($datos ? implode(' · ', $datos).' · ' : '')
             .'Gestionamos la compra por ti';
 
@@ -649,11 +650,10 @@ class PublicMarketplaceController extends Controller
     private function siteMeta(PublicSite $site, string $title, string $description, string $url): array
     {
         $brand = $site->brand();
-        $destino = $brand->get('city');
 
         return [
             'title' => $title.' · '.$brand->name(),
-            'description' => $destino ? str_replace('puesto en destino', 'puesto en '.$destino, $description) : $description,
+            'description' => str_replace('puesto en destino', 'puesto en España', $description),
             'image' => $brand->get('logo_url') && ! $site->isPlatform ? (string) $brand->get('logo_url') : url('img/og-image.jpg'),
             'url' => $url,
         ];

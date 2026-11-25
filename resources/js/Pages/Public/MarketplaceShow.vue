@@ -338,7 +338,7 @@ const specItems = computed(() => [
                             </ul>
                             <div v-if="heroPrice" class="mt-5 inline-block rounded-2xl bg-gradient-to-br from-estoril-700 to-estoril-900 px-5 py-3 text-white shadow-lg">
                                 <p class="text-[10px] font-semibold uppercase tracking-widest text-estoril-100">
-                                    {{ t('dossier.price_estimated', { default: 'Puesto en :city - aprox.' }) }}
+                                    {{ t('dossier.price_estimated', { default: 'Puesto en España - aprox.' }) }}
                                 </p>
                                 <p class="mt-1 text-2xl font-extrabold tracking-tight">{{ heroPrice }}</p>
                             </div>
@@ -455,7 +455,7 @@ const specItems = computed(() => [
                 <!-- PRECIO -->
                 <section v-if="costBreakdown && costBreakdown.has_data" class="rounded-2xl bg-white shadow-sm ring-1 ring-gray-200 dark:bg-asphalt-800 dark:ring-asphalt-700">
                     <div class="flex items-center justify-between gap-3 border-b border-gray-200 px-6 py-4 dark:border-asphalt-700">
-                        <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ t('dossier.section_price_title', { default: 'Cuanto te costaria, puesto en :city' }) }}</h3>
+                        <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ t('dossier.section_price_title', { default: 'Cuanto te costaria, puesto en España' }) }}</h3>
                         <span class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-amber-700 ring-1 ring-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:ring-amber-800">
                             {{ t('marketplace_show.cost_approximate', { default: 'Aproximado' }) }}
                         </span>

@@ -765,7 +765,7 @@ const cardHighlight = (car) => {
 
                             <div class="mt-4 flex items-end justify-between gap-3 border-t border-gray-100 pt-4 dark:border-asphalt-700">
                                 <div class="min-w-0">
-                                    <!-- 21-nov-2026: total aproximado puesto en Huelva (el mismo de la ficha),
+                                    <!-- 21-nov-2026: total aproximado puesto en España (el mismo de la ficha),
                                          no el precio del anuncio de origen suelto. -->
                                     <p class="text-xs text-gray-500 dark:text-gray-400">{{ car.estimated_total ? t('marketplace.price_total') : t('marketplace.price_from') }}</p>
                                     <p class="truncate text-2xl font-extrabold tracking-tight text-estoril-800 transition-colors dark:text-estoril-300">{{ car.estimated_total ? '~ ' + currency(car.estimated_total) : currency(car.purchase_price) }}</p>

@@ -14,7 +14,7 @@
     @php
         $ogTotal = $precioCliente['total_estimado'] ?? null;
         $ogDatos = array_filter([$car->version, $car->year, $car->mileage ? number_format($car->mileage, 0, ',', '.').' km' : null]);
-        $ogDescripcion = ($ogTotal ? '~ '.number_format((float) $ogTotal, 0, ',', '.').' € puesto en '.($brand->get('city') ?: 'destino').' (aprox.) · ' : '')
+        $ogDescripcion = ($ogTotal ? '~ '.number_format((float) $ogTotal, 0, ',', '.').' € puesto en España (aprox.) · ' : '')
             .(count($ogDatos) ? implode(' · ', $ogDatos).' · ' : '')
             .'Gestionamos la compra por ti';
     @endphp
@@ -1100,7 +1100,7 @@
             'Transporte hasta España',
             'ITV de importación, impuestos y matriculación',
             'Comprobación de historial y kilometraje antes de la reserva',
-            'Entrega en '.($brand->get('city') ?: 'España'),
+            'Entrega en España, donde acordemos',
         ];
         $fichaPasos = $ficha['pasos'] ?? [
             ['cuando' => 'Semana 0', 'que' => 'Reserva y bloqueo de la unidad con el vendedor'],
@@ -1176,7 +1176,7 @@
 
                 @if($precioTitular)
                     <div class="price-card">
-                        <div class="price-label">Puesto en {{ $brand->get('city') ?: 'España' }} · aprox.</div>
+                        <div class="price-label">Puesto en España · aprox.</div>
                         <div class="price-value">{{ $precioTitular }}</div>
                         <div class="price-caption">Coche, transporte, impuestos y gestión — desglose más abajo</div>
                     </div>
@@ -1332,7 +1332,7 @@
             @endphp
             <section class="precio-cliente">
                 <div class="section-title">El precio</div>
-                <h2 class="section-h">Cuánto te costaría, puesto en {{ $brand->get('city') ?: 'España' }}</h2>
+                <h2 class="section-h">Cuánto te costaría, puesto en España</h2>
 
                 <div class="precio-horquilla">
                     <div class="etq">{{ $hayHorquilla ? 'Horquilla estimada' : 'Estimación' }}</div>
